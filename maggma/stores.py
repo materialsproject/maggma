@@ -13,7 +13,8 @@ class Store:
 	def collection(self):
 		pass
 
-	@abc.abstractmethod last_updated(self):
+	@abc.abstractmethod
+	last_updated(self):
 		pass
 
 	@classmethod
@@ -29,8 +30,7 @@ class Store:
 		
 
 class MongoStore(Store):
-
-	@TODO: 
+	
 	def __init__(self, collection, lu_field='_lu'):
 		self._collection = collection
 		super(lu_field)
