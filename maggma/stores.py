@@ -3,7 +3,7 @@ import abc
 import mongomock
 
 @six.add_metaclass(abc.ABCMeta)
-class Store:
+class Store(MSONable):
 
 	def __init__(self,lu_field='_lu'):
 		self.lu_field = lu_field
@@ -33,7 +33,7 @@ class MongoStore(Store):
 	
 	def __init__(self, collection, lu_field='_lu'):
 		self._collection = collection
-		super(lu_field)
+		super().__init__(lu_field)
 
 	def collection(self):
 		return _collection
@@ -45,6 +45,7 @@ class MongoStore(Store):
 class JSONStore(MongoStore):
 
 	def __init__(self,path, lu_field='_lu'):
+		self.path = path
 		_collection = mongomock.MongoCient().db.collection
 
 		with open(path) as f:
@@ -52,4 +53,4 @@ class JSONStore(MongoStore):
 			objects = [objects] if not isinstance(objects,list) else objects
 			_collection.insert_many(objects)
 
-		super(_collection,lu_field)
+		super().__init__(_collection,lu_field)
