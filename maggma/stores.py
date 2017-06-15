@@ -45,6 +45,9 @@ class Store(MSONable, metaclass=ABCMeta):
     def __ne__(self, other):
         return not self == other
 
+    def __hash__(self):
+        return hash((self.lu_field,))
+
 
 class MongoStore(Store):
 
