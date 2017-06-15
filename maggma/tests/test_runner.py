@@ -42,9 +42,8 @@ class TestRunner(unittest.TestCase):
     def test_1(self):
         #print(self.db.collection_names())
         rnr = Runner(self.builders)
-        l_d = {0:[], 1: [2]}
-        self.assertDictEqual(rnr.dependencies, l_d)
-        print(rnr.dependencies)
+        ans = {1: [0]}
+        self.assertDictEqual(rnr.dependencies, ans)
 
     def tearDown(self):
         for coll in self.db.collection_names():
