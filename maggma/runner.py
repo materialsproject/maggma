@@ -32,7 +32,7 @@ class Runner(MSONable):
         """
     pass
 
-    #TODO: make it efficient
+    # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)?
     def _get_builder_dependencies(self):
         """
         Determine the builder dependencies based on their sources and targets.

@@ -30,6 +30,10 @@ class CredentialManager:
     roles = ['read', 'write', 'admin']
 
     def __init__(self, filepath):
+        """
+        Args:
+            filepath (str): path to the file
+        """
         with open(filepath) as f:
             self.creds = json.load(f)
             self.filepath = filepath
@@ -37,8 +41,9 @@ class CredentialManager:
     def get_cred(self, spec):
         """Get DB credential dict.
 
-        Args: spec (str): "<role>:<host[:port]>/<database>",
-            where <role> is "read", "write", or "admin".
+        Args:
+            spec (str): "<role>:<host[:port]>/<database>", where <role> is
+                "read", "write", or "admin".
 
         Returns:
             dict: {host,port,database,username,password}
@@ -47,16 +52,26 @@ class CredentialManager:
         pass
 
     def add_cred(self, cred, role):
-        """Add DB credential dict to `self.filepath`."""
+        """
+        Add DB credential dict to `self.filepath`.
+
+        Args:
+            cred
+            role
+        """
         assert role in self.roles
         pass
 
     def ensure_cred(self, spec):
-        """Attempt to ensure credentials as per spec.
+        """
+        Attempt to ensure credentials as per spec.
 
         Generates user/pass if no existing spec match.
         Fails if host requires user/pass and cred file has neither
         an admin cred for the spec database nor a cred for the
         spec host admin db.
+
+        Args:
+            spec
         """
         pass

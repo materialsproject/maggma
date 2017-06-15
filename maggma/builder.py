@@ -4,6 +4,7 @@ from monty.json import MSONable
 
 
 class Builder(MSONable, metaclass=ABCMeta):
+
     def __init__(self, sources, targets, get_chunk_size=1000, process_chunk_size=1):
         """
         Initialize the builder the framework.

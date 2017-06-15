@@ -9,7 +9,12 @@ from monty.json import MSONable
 
 
 class Store(MSONable, metaclass=ABCMeta):
+
     def __init__(self, lu_field='_lu'):
+        """
+        Args:
+            lu_field (str): 'last updated' field name
+        """
         self.lu_field = lu_field
 
     @property
@@ -24,6 +29,9 @@ class Store(MSONable, metaclass=ABCMeta):
     def lu_fiter(self, targets):
         """
         Assuming targets is a list of stores
+
+        Args:
+            targets
         """
         if isinstance(targets, Store):
             targets = [targets]

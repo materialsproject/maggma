@@ -24,6 +24,7 @@ class Bldr(Builder):
 
     def update_targets(self, items):
         pass
+
     def finalize(self):
         pass
 
@@ -40,7 +41,6 @@ class TestRunner(unittest.TestCase):
         self.builders = [builder1, builder2]
 
     def test_1(self):
-        #print(self.db.collection_names())
         rnr = Runner(self.builders)
         ans = {1: [0]}
         self.assertDictEqual(rnr.dependencies, ans)
