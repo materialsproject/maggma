@@ -18,7 +18,7 @@ if __name__ == "__main__":
         packages=find_packages(),
         package_data={},
         zip_safe=False,
-        install_requires=['pymongo>=3.4.0', 'mongomock>=3.8.0'],
+        install_requires=['pymongo>=3.4.0', 'mongomock>=3.8.0', 'monty>=0.9.8'],
         classifiers=["Programming Language :: Python :: 3",
                      "Programming Language :: Python :: 3.6",
                      'Development Status :: 5 - Alpha',
