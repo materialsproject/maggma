@@ -55,6 +55,7 @@ class MongoStore(Store):
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         return doc[self.lu_field] if doc else datetime.datetime.min
 
+    # TODO: better serialization than this - KM
     def as_dict(self):
         return {"collection": self._collection.name, "lu_field": self.lu_field}
 
