@@ -55,6 +55,7 @@ class MongoStore(Store):
         self._collection = collection
         super(MongoStore, self).__init__(lu_field)
 
+    @property
     def collection(self):
         return self._collection
 
@@ -66,18 +67,20 @@ class MongoStore(Store):
     def __hash__(self):
         return hash((self._collection.name, self.lu_field))
 
+class MemoryStore(MongoStore):
+    def __init__(selfs,name,lu_field='_lu'):
+        _collection = mongomock.MongoClient().db[name]
+        super().__init__(_collection,lu_field)
 
-class JSONStore(MongoStore):
+class JSONStore(MemoryStore):
     def __init__(self, path, lu_field='_lu'):
         self.path = path
-        _collection = mongomock.MongoClient().db.collection
+        super().__init__("collection", lu_field)
 
         with open(path) as f:
             objects = list(json.load(f))
             objects = [objects] if not isinstance(objects, list) else objects
-            _collection.insert_many(objects)
-
-        super().__init__(_collection, lu_field)
+            self.collection.insert_many(objects)
 
     def __hash__(self):
         return hash((self.path, self.lu_field))
