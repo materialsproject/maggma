@@ -13,7 +13,7 @@ class Runner(MSONable):
             builders(list): list of builders
         """
         self.builders = builders
-        self.dependencies = self._get_builder_dependencies()
+        self.dependency_graph = self._get_builder_dependency_graph()
 
     def run(self):
         """
@@ -33,7 +33,7 @@ class Runner(MSONable):
     pass
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)?
-    def _get_builder_dependencies(self):
+    def _get_builder_dependency_graph(self):
         """
         Determine the builder dependencies based on their sources and targets.
 
