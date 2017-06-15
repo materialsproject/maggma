@@ -1,7 +1,7 @@
 import json
 from pymongo import MongoClient
 
-def database(cred, **mongo_client_kwargs):
+def get_database(cred, **mongo_client_kwargs):
     """Connect to a database given a credential dict.
 
     Args:
@@ -16,7 +16,6 @@ def database(cred, **mongo_client_kwargs):
     conn = MongoClient(
         cred.get('host', 'localhost'),
         cred.get('port', 27017),
-        connect=False,
         **mc_kwargs)
     db = conn[cred['database']]
     if cred.get('username'):
