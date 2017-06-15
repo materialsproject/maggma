@@ -17,7 +17,7 @@ class Runner(MSONable):
     # 1.) use targets and sources of builders to determine interdependencies
     # 2.) order builders according to interdependencies
     # 3.) For each builder:
-    #   a.) Setup all targets and sources
+    #   a.) Setup all sources and targets
     #   b.) pull get_chunk_size items from get_items
     #   c.) process process_chunk_size items
     #       i) can be via serial, multiprocessing, mpi, or mpi/multiprocessing
