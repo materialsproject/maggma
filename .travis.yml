@@ -1,0 +1,18 @@
+language: python
+services: mongodb
+python:
+  - "3.6"
+install:
+  - pip install -r requirements.txt
+  - pip install -r requirements-optional.txt
+before_script:
+  - python setup.py develop
+script: nosetests -v maggma
+notifications:
+  email:
+    recipients:
+      - kmathew@lbl.gov
+      - dwinston@lbl.gov
+      - shyamd@lbl.gov
+    on_success: change
+    on_failure: always
