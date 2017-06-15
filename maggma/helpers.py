@@ -16,11 +16,10 @@ def database(cred, **mongo_client_kwargs):
     conn = MongoClient(
         cred.get('host', 'localhost'),
         cred.get('port', 27017),
-        connect=False,
         **mc_kwargs)
     db = conn[cred['database']]
     if cred.get('username'):
-        d.authenticate(cred['username'], cred['password'])
+        db.authenticate(cred['username'], cred['password'])
     return db
 
 
