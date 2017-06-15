@@ -1,5 +1,6 @@
 import six
 import abc
+
 from monty.json import MSONable
 
 

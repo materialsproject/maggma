@@ -1,5 +1,7 @@
 import json
+
 from pymongo import MongoClient
+
 
 def get_database(cred, **mongo_client_kwargs):
     """Connect to a database given a credential dict.
@@ -19,15 +21,16 @@ def get_database(cred, **mongo_client_kwargs):
         **mc_kwargs)
     db = conn[cred['database']]
     if cred.get('username'):
-        d.authenticate(cred['username'], cred['password'])
+        db.authenticate(cred['username'], cred['password'])
     return db
 
 
-class CredentialManager():
+class CredentialManager:
+
     roles = ['read', 'write', 'admin']
 
     def __init__(self, filepath):
-        with open(path) as f:
+        with open(filepath) as f:
             self.creds = json.load(f)
             self.filepath = filepath
 
