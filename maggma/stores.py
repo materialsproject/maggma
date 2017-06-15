@@ -1,6 +1,9 @@
-import six
 import abc
+import datetime
+
 import mongomock
+import pymongo
+import six
 
 @six.add_metaclass(abc.ABCMeta)
 class Store(MSONable):
@@ -18,19 +21,19 @@ class Store(MSONable):
 		pass
 
 	@classmethod
-	def lu_fiter(cls,targets):
+	def lu_fiter(cls, targets):
 		"""
 		Assuming targets is a list of stores
 		"""
-		if isinstance(targets,Store) or isinstance(targets,Date):
+		if isinstance(targets, Store):
 			targets = [targets]
 
-		targets = [t.last_updated if isinstance(t,Store) else t]
-		return  {self.lu_field: {"$gte": max(targets)}}
-		
+		lu_list = [t.last_updated for t in targets]
+		return  {self.lu_field: {"$gte": max(lu_list)}}
+
 
 class MongoStore(Store):
-	
+
 	def __init__(self, collection, lu_field='_lu'):
 		self._collection = collection
 		super().__init__(lu_field)
@@ -39,12 +42,14 @@ class MongoStore(Store):
 		return _collection
 
 	def last_updated(self):
-		return next(_collection.find({},{"_id":0,self.lu_field: 1}).sort([(lu_field,pymongo.DESCENDING)]))[lu_field]
+        doc = next(_collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
+            [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
+        return doc[self.lu_field] if doc else datetime.datetime.min
 
 
 class JSONStore(MongoStore):
 
-	def __init__(self,path, lu_field='_lu'):
+	def __init__(self, path, lu_field='_lu'):
 		self.path = path
 		_collection = mongomock.MongoCient().db.collection
 
@@ -54,3 +59,12 @@ class JSONStore(MongoStore):
 			_collection.insert_many(objects)
 
 		super().__init__(_collection,lu_field)
+
+
+class DatetimeStore(MongoStore):
+    """Utility store intended for use with `Store.lu_filter`."""
+    def __init__(self, dt, lu_field='_lu'):
+        self._dt = dt
+        collection = mongomock.MongoClient().db.collection
+        collection.insert_one({lu_field: dt})
+        super().__init__(collection, lu_field)
