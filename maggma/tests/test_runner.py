@@ -32,7 +32,8 @@ class Bldr(Builder):
 class TestRunner(unittest.TestCase):
 
     def setUp(self):
-        creds_dict = json.load(open(os.path.join(db_dir, "db.json"), "r"))
+        with open(os.path.join(db_dir, "db.json"), "r") as f:
+            creds_dict = json.load(f)
         self.db = get_database(creds_dict)
         colls = [self.db[str(i)] for i in range(7)]
         stores = [MongoStore(c) for c in colls]
