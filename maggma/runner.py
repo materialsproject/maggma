@@ -17,9 +17,7 @@ class Runner(MSONable):
 
     def run(self):
         """
-        1.) use targets and sources of builders to determine interdependencies
-        2.) order builders according to interdependencies
-        3.) For each builder:
+        For each builder:
             a.) Setup all sources and targets
             b.) pull get_chunk_size items from get_items
             c.) process process_chunk_size items
@@ -28,18 +26,23 @@ class Runner(MSONable):
             e.) repeat a-c till no remaining items
             f.) finalize
             g.) Close all targets and sources
-        4.) Clean up and exit
+        Clean up and exit
         """
     pass
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)?
     def _get_builder_dependency_graph(self):
         """
-        Determine the builder dependencies based on their sources and targets.
+        Does the following:
+        1.) use targets and sources of builders to determine interdependencies
+        2.) order builders according to interdependencies
 
         Returns:
             dict
         """
+        # key = index of the builder in the self.builders list
+        # value = list of indices of builders that the key depends on i.e these must run before
+        # the builder corresponding to the key.
         links_dict = defaultdict(list)
         for i, bi in enumerate(self.builders):
             for j, bj in enumerate(self.builders):
