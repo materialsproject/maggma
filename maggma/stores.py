@@ -9,6 +9,10 @@ from monty.json import MSONable
 
 
 class Store(MSONable, metaclass=ABCMeta):
+    """
+    Abstract class for a data Store
+    Defines the interface for all data going in and out of a Builder
+    """
 
     def __init__(self, lu_field='_lu'):
         """
@@ -28,8 +32,8 @@ class Store(MSONable, metaclass=ABCMeta):
 
     def lu_fiter(self, targets):
         """
-        Assuming targets is a list of stores
-
+        Creates a filter string that can be applied to the source collection assuming targets is a list of Stores
+        
         Args:
             targets
         """
@@ -50,6 +54,9 @@ class Store(MSONable, metaclass=ABCMeta):
 
 
 class MongoStore(Store):
+    """
+    A Store that connects to any Mongo collection
+    """
 
     def __init__(self, collection, lu_field='_lu'):
         self._collection = collection
@@ -67,20 +74,32 @@ class MongoStore(Store):
     def __hash__(self):
         return hash((self._collection.name, self.lu_field))
 
+
 class MemoryStore(MongoStore):
-    def __init__(selfs,name,lu_field='_lu'):
+    """
+    An in memory Store
+    """
+
+    def __init__(selfs, name, lu_field='_lu'):
         _collection = mongomock.MongoClient().db[name]
-        super().__init__(_collection,lu_field)
+        super().__init__(_collection, lu_field)
+
 
 class JSONStore(MemoryStore):
-    def __init__(self, path, lu_field='_lu'):
-        self.path = path
+    """
+    A Store for access to a single or multiple JSON files
+    """
+
+    def __init__(self, paths, lu_field='_lu'):
+        paths = paths if isinstance(paths, (list, tuple)) else [paths]
+        self.paths = paths
         super().__init__("collection", lu_field)
 
-        with open(path) as f:
-            objects = list(json.load(f))
-            objects = [objects] if not isinstance(objects, list) else objects
-            self.collection.insert_many(objects)
+        for path in paths:
+            with open(path) as f:
+                objects = list(json.load(f))
+                objects = [objects] if not isinstance(objects, list) else objects
+                self.collection.insert_many(objects)
 
     def __hash__(self):
         return hash((self.path, self.lu_field))
