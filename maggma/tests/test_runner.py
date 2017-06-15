@@ -48,5 +48,5 @@ class TestRunner(unittest.TestCase):
 
     def tearDown(self):
         for coll in self.db.collection_names():
-            if coll != "system.indexes":
+            if not coll.startswith("system."):
                 self.db[coll].drop()
