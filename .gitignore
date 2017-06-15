@@ -105,3 +105,5 @@ ENV/
 .pydevproject
 
 *~
+
+.idea
