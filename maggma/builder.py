@@ -1,11 +1,9 @@
-import six
-import abc
+from abc import ABCMeta, abstractmethod
 
 from monty.json import MSONable
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Builder(MSONable):
+class Builder(MSONable, metaclass=ABCMeta):
     def __init__(self, sources, targets, get_chunk_size=1000, process_chunk_size=1):
         """
         Initialize the builder the framework.
@@ -21,7 +19,7 @@ class Builder(MSONable):
         self.process_chunk_size = process_chunk_size
         self.get_chunk_size = get_chunk_size
 
-    @abc.abstractmethod
+    @abstractmethod
     def get_items(self):
         """
         Returns all the items to process.
@@ -31,7 +29,7 @@ class Builder(MSONable):
         """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def process_item(self, item):
         """
         Process an item. Should not expect DB access as this can be run MPI
@@ -44,7 +42,7 @@ class Builder(MSONable):
         """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def update_targets(self, items):
         """
         Takes a dictionary of targets and items from process item and updates them
@@ -58,7 +56,7 @@ class Builder(MSONable):
         """
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def finalize(self):
         """
         Perform any final clean up.

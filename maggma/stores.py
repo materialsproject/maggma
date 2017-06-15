@@ -1,8 +1,6 @@
-import abc
+from abc import ABCMeta, abstractmethod
 import datetime
 import json
-
-import six
 
 import mongomock
 import pymongo
@@ -10,17 +8,16 @@ import pymongo
 from monty.json import MSONable
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Store(MSONable):
+class Store(MSONable, metaclass=ABCMeta):
     def __init__(self, lu_field='_lu'):
         self.lu_field = lu_field
 
     @property
-    @abc.abstractmethod
+    @abstractmethod
     def collection(self):
         pass
 
-    @abc.abstractmethod
+    @abstractmethod
     def last_updated(self):
         pass
 
