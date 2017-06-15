@@ -70,7 +70,7 @@ class MongoStore(Store):
 class JSONStore(MongoStore):
     def __init__(self, path, lu_field='_lu'):
         self.path = path
-        _collection = mongomock.MongoCient().db.collection
+        _collection = mongomock.MongoClient().db.collection
 
         with open(path) as f:
             objects = list(json.load(f))
