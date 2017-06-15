@@ -40,7 +40,7 @@ class Store(MSONable, metaclass=ABCMeta):
         return {self.lu_field: {"$gte": max(lu_list)}}
 
     def __eq__(self, other):
-        return self.as_dict() == other.as_dict()
+        return hash(self) == hash(other)
 
     def __ne__(self, other):
         return not self == other
@@ -60,9 +60,8 @@ class MongoStore(Store):
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         return doc[self.lu_field] if doc else datetime.datetime.min
 
-    # TODO: better serialization than this - KM
-    def as_dict(self):
-        return {"collection": self._collection.name, "lu_field": self.lu_field}
+    def __hash__(self):
+        return hash((self._collection.name, self.lu_field))
 
 
 class JSONStore(MongoStore):
@@ -76,6 +75,9 @@ class JSONStore(MongoStore):
             _collection.insert_many(objects)
 
         super().__init__(_collection, lu_field)
+
+    def __hash__(self):
+        return hash((self.path, self.lu_field))
 
 
 class DatetimeStore(MongoStore):
