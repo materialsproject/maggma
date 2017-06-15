@@ -8,11 +8,13 @@ from monty.json import MSONable
 class Builder(MSONable):
     def __init__(self, sources, targets, get_chunk_size=1000, process_chunk_size=1):
         """
-        Initialize the builder the framework
-        :param sources: list of source stores
-        :param targets: list of target stores
-        :param get_chunk_size: chunk size for get_items
-        :param process_chunk_size: chunk size for process items
+        Initialize the builder the framework.
+
+        Args:
+            sources([Store]): list of source stores
+            targets([Store]): list of target stores
+            get_chunk_size(int): chunk size for get_items
+            process_chunk_size(int): chunk size for process items
         """
         self.sources = sources
         self.targets = targets
@@ -22,8 +24,10 @@ class Builder(MSONable):
     @abc.abstractmethod
     def get_items(self):
         """
-        Returns all the items to process
-        :return: generator or list of items to process
+        Returns all the items to process.
+
+        Returns:
+            generator or list of items to process
         """
         pass
 
@@ -31,25 +35,32 @@ class Builder(MSONable):
     def process_item(self, item):
         """
         Process an item. Should not expect DB access as this can be run MPI
-        :param item: 
-        :return: dict of {target: item to insert}
+
+        Args:
+            item:
+
+        Returns:
+            dict: {target: item to insert}
         """
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def update_targets(self, items):
         """
         Takes a dictionary of targets and items from process item and updates them
         Can also perform other book keeping in the process such as storing gridfs oids, etc.
-        :param items: 
-        :return: 
+
+        Ars:
+            items:
+
+        Returns:
+
         """
         pass
 
     @abc.abstractmethod
     def finalize(self):
         """
-        Perform any final clean up
-        :return: 
+        Perform any final clean up.
         """
         pass

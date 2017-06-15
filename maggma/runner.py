@@ -1,29 +1,48 @@
 from monty.json import MSONable
-from maggma.builder import Builder
+
+from collections import defaultdict
+
 
 class Runner(MSONable):
-
 
     def __init__(self, builders):
         """
         Initialize with a lit of builders
-        :param builders: list of builders
+
+        Args:
+            builders(list): list of builders
         """
         self.builders = builders
-        pass
+        self.dependencies = self._get_builder_dependencies()
 
     def run(self):
-    """
-    # 1.) use targets and sources of builders to determine interdependencies
-    # 2.) order builders according to interdependencies
-    # 3.) For each builder:
-    #   a.) Setup all sources and targets
-    #   b.) pull get_chunk_size items from get_items
-    #   c.) process process_chunk_size items
-    #       i) can be via serial, multiprocessing, mpi, or mpi/multiprocessing
-    #   d.) update_targets
-    #   e.) repeat a-c till no remaining items
-    #   f.) finalize
-    #   g.) Close all targets and sources
-    # 4.) Clean up and exit
-    """
+        """
+        1.) use targets and sources of builders to determine interdependencies
+        2.) order builders according to interdependencies
+        3.) For each builder:
+            a.) Setup all sources and targets
+            b.) pull get_chunk_size items from get_items
+            c.) process process_chunk_size items
+                   i) can be via serial, multiprocessing, mpi, or mpi/multiprocessing
+            d.) update_targets
+            e.) repeat a-c till no remaining items
+            f.) finalize
+            g.) Close all targets and sources
+        4.) Clean up and exit
+        """
+    pass
+
+    def _get_builder_dependencies(self):
+        """
+        Determine the builder dependencies based on their sources and targets.
+
+        Returns:
+            dict
+        """
+        links_dict = defaultdict(list)
+        for i, bi in enumerate(self.builders):
+            for j, bj in enumerate(self.builders):
+                if i != j:
+                    for s in bi.stores:
+                        if s in bj.targets:
+                            links_dict[i].append(j)

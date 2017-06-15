@@ -1,9 +1,10 @@
 import abc
 import datetime
-import mongomock
-import six
 import json
 
+import six
+
+import mongomock
 import pymongo
 
 from monty.json import MSONable

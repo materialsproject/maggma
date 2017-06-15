@@ -1,0 +1,7 @@
+{
+    "aliases": {}, 
+    "collection": "tmp",
+    "database": "maggma_unittests",
+    "host": "localhost", 
+    "port": 27017
+}
