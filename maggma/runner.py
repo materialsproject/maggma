@@ -32,6 +32,7 @@ class Runner(MSONable):
         """
     pass
 
+    #TODO: make it efficient
     def _get_builder_dependencies(self):
         """
         Determine the builder dependencies based on their sources and targets.
@@ -43,6 +44,7 @@ class Runner(MSONable):
         for i, bi in enumerate(self.builders):
             for j, bj in enumerate(self.builders):
                 if i != j:
-                    for s in bi.stores:
+                    for s in bi.sources:
                         if s in bj.targets:
                             links_dict[i].append(j)
+        return links_dict

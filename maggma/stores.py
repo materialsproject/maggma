@@ -42,6 +42,7 @@ class Store(MSONable):
 
 
 class MongoStore(Store):
+
     def __init__(self, collection, lu_field='_lu'):
         self._collection = collection
         super(MongoStore, self).__init__(lu_field)
@@ -53,6 +54,9 @@ class MongoStore(Store):
         doc = next(self._collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         return doc[self.lu_field] if doc else datetime.datetime.min
+
+    def as_dict(self):
+        return {"collection": self._collection.name, "lu_field": self.lu_field}
 
 
 class JSONStore(MongoStore):
