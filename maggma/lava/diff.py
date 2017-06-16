@@ -92,9 +92,10 @@ class Differ(object):
         """
         # Connect.
         _log.info("connect.start")
-        # N.B. python3 change to isinstance(c1, str)
-        coll1 = (self._get_collection(cfg=c1) if isinstance(c1, basestring) else c1)
-        coll2 = (self._get_collection(cfg=c2) if isinstance(c2, basestring) else c2)
+        # N.B. python3: isinstance(c1, str)
+        #      python2: isinstance(c1, basestring)
+        coll1 = (self._get_collection(cfg=c1) if isinstance(c1, str) else c1)
+        coll2 = (self._get_collection(cfg=c2) if isinstance(c2, str) else c2)
         collections = [coll1, coll2]
         _log.info("connect.end")
 
@@ -119,7 +120,6 @@ class Differ(object):
         for i, coll in enumerate(collections):
             _log.debug("collection {:d}".format(i))
             count, missing_props = 0, 0
-#            for rec in coll.query(criteria=self._filter, properties=fields):  # TODO: remove
             for rec in coll.find(filter=self._filter, projection=fields):
                 count += 1
                 # Extract key from record.
