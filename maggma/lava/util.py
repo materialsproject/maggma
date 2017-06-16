@@ -23,7 +23,7 @@ from yaml import load
 import six
 from six.moves import map
 
-TRACE = logging.DEBUG -1
+TRACE = logging.DEBUG - 1
 
 
 class DoesLogging:
@@ -120,7 +120,7 @@ def letter_num(x, letter='A'):
     s, a0 = '', ord(letter) - 1
     while x > 0:
         s = chr(a0 + x % 26) + s
-        x /= 26
+        x = x // 26
     return s
 
 

@@ -92,7 +92,7 @@ def textlist(items):
 
 
 def mapdump(d):
-    return textlist(('{}={}'.format(k, v) for k, v in d.iteritems()))
+    return textlist(('{}={}'.format(k, v) for k, v in d.items()))
 
 
 def nvpstr(s):
@@ -220,7 +220,7 @@ def command_diff(args):
     # Parse numeric change fields, if given
     deltas = {}
     if args.numprops:
-        for field, expr in args.numprops.iteritems():
+        for field, expr in args.numprops.items():
             try:
                 deltas[field] = diff.Delta(expr)
             except ValueError as err:
@@ -254,7 +254,7 @@ def command_diff(args):
             'filter': fltr,
             'db1': _dbinfo(settings_old),
             'db2': _dbinfo(settings_new),
-            'args': {k: v for k, v in vars(args).iteritems()
+            'args': {k: v for k, v in vars(args).items()
                      if not k.startswith("func")}
     }
     meta.update(system_metadata())
@@ -429,7 +429,7 @@ def command_validate(args, formatters):
         validator.set_progress(args.progress)
     elapsed = ElapsedTime()
     with Timing("validate", log=_log, elapsed=elapsed):
-        for coll_name, constraint_spec_cfg in constraints.iteritems():
+        for coll_name, constraint_spec_cfg in constraints.items():
             _log.debug("validate {}".format(coll_name))
             sect_hdr = report.SectionHeader(title='Collection "{}"'.format(coll_name))
             rpt_sect = report.ReportSection(sect_hdr)

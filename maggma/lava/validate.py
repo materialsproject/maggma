@@ -299,7 +299,7 @@ class ConstraintSpecSection(object):
     def __init__(self, fltr, constraints, sample):
         self._filter, self._constraints, self._sampler = fltr, constraints, sample
         # make condition(s) into a tuple
-        if isinstance(fltr, basestring):
+        if isinstance(fltr, str):
             self._key = (fltr,)
         elif fltr is None:
             self._key = None
