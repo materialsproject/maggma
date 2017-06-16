@@ -30,20 +30,18 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod
     def process_item(self, item):
         """
         Process an item. Should not expect DB access as this can be run MPI
-
+        Default behavior is to return the item. 
         Args:
             item:
 
         Returns:
             dict: {target: item to insert}
         """
-        pass
+        return item
 
-    @abstractmethod
     def update_targets(self, items):
         """
         Takes a dictionary of targets and items from process item and updates them
@@ -55,7 +53,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         Returns:
 
         """
-        pass
+        return
 
     @abstractmethod
     def finalize(self):
