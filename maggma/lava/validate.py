@@ -328,24 +328,22 @@ class ConstraintSpecSection(object):
 
 
 class Validator(DoesLogging):
-    """Validate a collection.
-    """
+    """Validate a collection."""
 
     class SectionParts:
-        """Encapsulate the tuple of information for each section of filters, constraints,
+        """
+        Encapsulate the tuple of information for each section of filters, constraints,
          etc. within a collection.
         """
         def __init__(self, cond, body, sampler, report_fields):
-            """Create new initialized set of parts.
+            """
+            Create new initialized set of parts.
 
-            :param cond: Condition to filter records
-            :type cond: MongoQuery
-            :param body: Main set of constraints
-            :type body: MongoQuery
-            :param sampler: Sampling class if any
-            :type sampler: Sampler
-            :param report_fields: Fields to report on
-            :type report_fields: list
+            Args:
+                cond(MongoQuery): Condition to filter records
+                body(MongoQuery): Main set of constraints
+                sampler(Sampler): Sampling class if any
+                report_fields(list): Fields to report on
             """
             self.cond, self.body, self.sampler, self.report_fields = \
                 cond, body, sampler, report_fields
@@ -369,11 +367,11 @@ class Validator(DoesLogging):
         self._aliases = a
 
     def set_progress(self, num):
-        """Report progress every `num` bad records.
+        """
+        Report progress every `num` bad records.
 
-        :param num: Report interval
-        :type num: int
-        :return: None
+        Args:
+            num(int): Report interval
         """
         report_str = 'Progress for {subject}: {count:d} invalid, {:d} db errors, {:d} bytes'
         self._progress = ProgressMeter(num, report_str)
@@ -384,17 +382,18 @@ class Validator(DoesLogging):
         return self._progress._count
 
     def validate(self, coll, constraint_spec, subject='collection'):
-        """Validation of  a collection.
+        """
+        Validation of  a collection.
         This is a generator that yields ConstraintViolationGroups.
 
-        :param coll: Mongo collection
-        :type coll: pymongo.Collection
-        :param constraint_spec: Constraint specification
-        :type constraint_spec: ConstraintSpec
-        :param subject: Name of the thing being validated
-        :type subject: str
-        :return: Sets of constraint violation, one for each constraint_section
-        :rtype: ConstraintViolationGroup
+        Args:
+            coll(pymongo.Collection): Mongo collection
+            constraint_spec(ConstraintSpec): Constraint specification
+            subject(str): Name of the thing being validated
+
+        Returns:
+            ConstraintViolationGroup: Sets of constraint violation, one for each constraint_section
+
         :raises: ValidatorSyntaxError
         """
         self._spec = constraint_spec
@@ -406,16 +405,16 @@ class Validator(DoesLogging):
                 yield cvg
 
     def _validate_section(self, subject, coll, parts):
-        """Validate one section of a spec.
+        """
+        Validate one section of a spec.
 
-        :param subject: Name of subject
-        :type subject: str
-        :param coll: The collection to validate
-        :type coll: pymongo.Collection
-        :param parts: Section parts
-        :type parts: Validator.SectionParts
-        :return: Group of constraint violations, if any, otherwise None
-        :rtype: ConstraintViolationGroup or None
+        Args:
+            subject(str): Name of subject
+            coll(pymongo.Collection): The collection to validate
+            parts(Validator.SectionParts): Section parts
+
+        Returns:
+            ConstraintViolationGroup: Group of constraint violations, if any, otherwise None
         """
         cvgroup = ConstraintViolationGroup()
         cvgroup.subject = subject
@@ -460,14 +459,15 @@ class Validator(DoesLogging):
         return None if nbytes == 0 else cvgroup
 
     def _get_violations(self, query, record):
-        """Reverse-engineer the query to figure out why a record was selected.
+        """
+        Reverse-engineer the query to figure out why a record was selected.
 
-        :param query: MongoDB query
-        :type query: MongQuery
-        :param record: Record in question
-        :type record: dict
-        :return: Reasons why bad
-        :rtype: list(ConstraintViolation)
+        Args:
+            query(MongoQuery): MongoDB query
+            record(dict): Record in question
+
+        Returns:
+            list(ConstraintViolation): Reasons why bad
         """
         # special case, when no constraints are given
         if len(query.all_clauses) == 0:
@@ -507,13 +507,14 @@ class Validator(DoesLogging):
         return reasons
 
     def _build(self, constraint_spec):
-        """Generate queries to execute.
+        """
+        Generate queries to execute.
 
         Sets instance variables so that Mongo query strings, etc. can now
         be extracted from the object.
 
-        :param constraint_spec: Constraint specification
-        :type constraint_spec: ConstraintSpec
+        Args:
+            constraint_spec(ConstraintSpec): Constraint specification
         """
         self._sections = []
 
@@ -561,12 +562,15 @@ class Validator(DoesLogging):
             self._sections.append(result)
 
     def _process_constraint_expressions(self, expr_list, conflict_check=True, rev=True):
-        """Create and return constraints from expressions in expr_list.
+        """
+        Create and return constraints from expressions in expr_list.
 
-        :param expr_list: The expressions
-        :conflict_check: If True, check for conflicting expressions within each field
-        :return: Constraints grouped by field (the key is the field name)
-        :rtype: dict
+        Args:
+            expr_list(list): The expressions
+            conflict_check(bool): If True, check for conflicting expressions within each field
+
+        Returns:
+            dict: Constraints grouped by field (the key is the field name)
         """
         # process expressions, grouping by field
         groups = {}
@@ -591,12 +595,14 @@ class Validator(DoesLogging):
         return groups
 
     def _is_python(self, constraint_list):
-        """Check whether constraint is an import of Python code.
+        """
+        Check whether constraint is an import of Python code.
 
-        :param constraint_list: List of raw constraints from YAML file
-        :type constraint_list: list(str)
-        :return: True if this refers to an import of code, False otherwise
-        :raises: ValidatorSyntaxError
+        Args:
+            constraint_list([str]): List of raw constraints from YAML file
+
+        Returns:
+            ValidatorSyntaxError: True if this refers to an import of code, False otherwise
         """
         if len(constraint_list) == 1 and \
                 PythonMethod.constraint_is_method(constraint_list[0]):
@@ -609,23 +615,28 @@ class Validator(DoesLogging):
         return False
 
     def _process_python(self, expr_list):
-        """Create a wrapper for a call to some external Python code.
+        """
+        Create a wrapper for a call to some external Python code.
 
-        :param expr_list: The expressions
-        :return: Tuple of (query, field-projection)
-        :rtype: (PythonMethod, Projection)
+        Args:
+            expr_list: The expressions
+
+        Returns:
+            (PythonMethod, Projection): Tuple of (query, field-projection)
         """
         return None, None
 
     def set_aliases(self, new_value):
-        "Set aliases and wrap errors in ValueError"
+        """Set aliases and wrap errors in ValueError"""
         try:
             self.aliases = new_value
         except Exception as err:
             raise ValueError("invalid value: {}".format(err))
 
+
 class Sampler(DoesLogging):
-    """Randomly sample a proportion of the full collection.
+    """
+    Randomly sample a proportion of the full collection.
     """
 
     # Random uniform distribution
@@ -673,17 +684,20 @@ class Sampler(DoesLogging):
         return self.p >= random.uniform(0, 1)
 
     def sample(self, cursor):
-        """Extract records randomly from the database.
+        """
+        Extract records randomly from the database.
         Continue until the target proportion of the items have been
         extracted, or until `min_items` if this is larger.
         If `max_items` is non-negative, do not extract more than these.
 
         This function is a generator, yielding items incrementally.
 
-        :param cursor: Cursor to sample
-        :type cursor: pymongo.cursor.Cursor
-        :return: yields each item
-        :rtype: dict
+        Args:
+            cursor(pymongo.cursor.Cursor): Cursor to sample
+
+        Returns:
+            dict: yields each item
+
         :raise: ValueError, if max_items is valid and less than `min_items`
                 or if target collection is empty
         """
