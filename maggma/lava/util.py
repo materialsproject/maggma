@@ -1,17 +1,9 @@
 # coding: utf-8
+#!/usr/bin/env python3
+
 """
 Utility functions and classes for validation.
 """
-__author__ = "Dan Gunter"
-__copyright__ = "Copyright 2012-2013, The Materials Project"
-__version__ = "1.0"
-__maintainer__ = "Dan Gunter"
-__email__ = "dkgunter@lbl.gov"
-__status__ = "Development"
-__date__ = "3/29/13"
-
-#!/usr/bin/env python3
-
 
 from argparse import Action
 from collections import deque
@@ -23,11 +15,20 @@ from yaml import load
 import six
 from six.moves import map
 
+__author__ = "Dan Gunter"
+__copyright__ = "Copyright 2012-2013, The Materials Project"
+__version__ = "1.0"
+__maintainer__ = "Dan Gunter"
+__email__ = "dkgunter@lbl.gov"
+__status__ = "Development"
+__date__ = "3/29/13"
+
 TRACE = logging.DEBUG - 1
 
 
 class DoesLogging:
-    """Mix-in class that creates the attribute 'log', setting its qualified
+    """
+    Mix-in class that creates the attribute 'log', setting its qualified
     name to the name of the module and class.
     """
     def __init__(self, name=None):
@@ -44,7 +45,8 @@ class DoesLogging:
 
 
 def total_size(o, handlers={}, verbose=False, count=False):
-    """Returns the approximate memory footprint an object and all of its contents.
+    """
+    Returns the approximate memory footprint an object and all of its contents.
 
     Automatically finds the contents of the following builtin containers and
     their subclasses:  tuple, list, deque, dict, set and frozenset.
@@ -92,7 +94,8 @@ class ElapsedTime(object):
 
 
 class Timing(object):
-    """Perform and report timings using the 'with' keyword.
+    """
+    Perform and report timings using the 'with' keyword.
 
     For example:
         with Timing('foo', info='bar'):
@@ -125,23 +128,23 @@ def letter_num(x, letter='A'):
 
 
 class JsonWalker(object):
-    """Walk a dict, transforming.
+    """
+    Walk a dict, transforming.
     Used for JSON formatting.
     """
     def __init__(self, value_transform=None, dict_transform=None):
-        """Constructor.
+        """
+        Constructor.
 
-        :param value_transform: Apply this function to each value in a list or dict.
-        :type value_transform: function taking a single arg (the value)
-        :param dict_transform: Apply this function to each dict
-        :type dict_transform: function taking a single arg (the dict)
+        Args:
+            value_transform(function): Apply this function to each value in a list or dict.
+            dict_transform(function): Apply this function to each dict
         """
         self._vx = value_transform
         self._dx = dict_transform
 
     def walk(self, o):
-        """Walk a dict & transform.
-        """
+        """Walk a dict & transform."""
         if isinstance(o, dict):
             d = o if self._dx is None else self._dx(o)
             return {k: self.walk(v) for k, v in six.iteritems(d)}
@@ -152,7 +155,8 @@ class JsonWalker(object):
 
     @staticmethod
     def value_json(o):
-        """Apply as_json() method on object to get value,
+        """
+        Apply as_json() method on object to get value,
         otherwise return object itself as the value.
         """
         if hasattr(o, 'as_json'):
@@ -161,8 +165,8 @@ class JsonWalker(object):
 
     @staticmethod
     def dict_expand(o):
-        """Expand keys in a dict with '.' in them into
-        sub-dictionaries, e.g.
+        """
+        Expand keys in a dict with '.' in them into sub-dictionaries, e.g.
 
         {'a.b.c': 'foo'} ==> {'a': {'b': {'c': 'foo'}}}
         """
@@ -191,7 +195,8 @@ _argparse_is_dumb = True  # because it doesn't report orig. error text
 
 
 class YamlConfig(Action):
-    """Populate arguments with YAML file contents.
+    """
+    Populate arguments with YAML file contents.
 
     Adapted from:
       http://code.activestate.com/recipes/577918-filling-command-line-arguments-with-a-file/
@@ -210,11 +215,15 @@ class YamlConfig(Action):
 
 
 def args_kvp_nodup(s):
-    """Parse argument string as key=value pairs separated by commas.
+    """
+    Parse argument string as key=value pairs separated by commas.
 
-    :param s: Argument string
-    :return: Parsed value
-    :rtype: dict
+    Args:
+        s(str): Argument string
+
+    Returns:
+        dict: Parsed value
+
     :raises: ValueError for format violations or a duplicated key.
     """
     if s is None:
@@ -238,11 +247,14 @@ def args_kvp_nodup(s):
 
 
 def args_list(s):
-    """Parse argument string as list of values separated by commas.
+    """
+    Parse argument string as list of values separated by commas.
 
-    :param s: Argument string
-    :return: Parsed value
-    :rtype: list
+    Args:
+        s(str): Argument string
+
+    Returns:
+        list: Parsed value
     """
     if s is None:
         return []

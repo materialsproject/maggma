@@ -1,19 +1,17 @@
 """
 Diff collections, as sets
 """
-__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
-__date__ = '3/29/13'
 
-# System
 import logging
 import re
 import time
 import six
 import json
 
-# Package
 from maggma.helpers import get_database
 
+__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
+__date__ = '3/29/13'
 
 _log = logging.getLogger("maggma.lava.diff")
 
@@ -28,7 +26,8 @@ class IID(object):
 
 
 class Differ(object):
-    """Calculate difference between two collections, based solely on a
+    """
+    Calculate difference between two collections, based solely on a
     selected key.
 
     As noted in :func:`diff`, this will not work with huge datasets, as it stores
@@ -50,16 +49,17 @@ class Differ(object):
     NO_PROPERTY = "__MISSING__"
 
     def __init__(self, key='_id', props=None, info=None, fltr=None, deltas=None):
-        """Constructor.
+        """
+        Constructor.
 
-        :param key: Field to use for identifying records
-        :param props: List of fields to use for matching records
-        :param info: List of extra fields to retrieve from (and show) for each record.
-        :param fltr: Filter for records, a MongoDB query expression
-        :param deltas: {prop: delta} to check. 'prop' is a string, 'delta' is an instance of :class:`Delta`.
-                       Any key for 'prop' not in parameter 'props' will get added.
-        :type deltas: dict
-        :raise: ValueError if some delta does not parse.
+        Args:
+            key(str): Field to use for identifying records
+            props(list): List of fields to use for matching records
+            info(list): List of extra fields to retrieve from (and show) for each record.
+            fltr(dict): Filter for records, a MongoDB query expression
+            deltas(dict): {prop: delta} to check. 'prop' is a string,
+                'delta' is an instance of :class:`Delta`.
+                Any key for 'prop' not in parameter 'props' will get added.
         """
         self._key_field = key
         self._props = [] if props is None else props
@@ -70,25 +70,27 @@ class Differ(object):
                                    list(self._prop_deltas.keys())))
 
     def diff(self, c1, c2, only_missing=False, only_values=False, allow_dup=False):
-        """Perform a difference between the 2 collections.
+        """
+        Perform a difference between the 2 collections.
         The first collection is treated as the previous one, and the second
         is treated as the new one.
 
         Note: this is not 'big data'-ready; we assume all the records can fit in memory.
 
-        :param c1: Collection (1) config file
-        :type c1: str
-        :param c2: Collection (2) config file
-        :type c2: str
-        :param only_missing: Only find and return self.MISSING; ignore 'new' keys
-        :param only_values: Only find and return self.CHANGED; ignore new or missing keys
-        :param allow_dup: Allow duplicate keys, otherwise fail with ValueError
-        :return: dict with keys self.MISSING, self.NEW (unless only_missing is True), & self.CHANGED,
-                 each a list of records with the key and
-                 any other fields given to the constructor 'info' argument.
-                 The meaning is: 'missing' are keys that are in c1 not found in c2
-                 'new' is keys found in c2 that are not found in c1, and 'changed' are records
-                 with the same key that have different 'props' values.
+        Args:
+            c1(str): Collection (1) config file
+            c2(str): Collection (2) config file
+            only_missing(bool): Only find and return self.MISSING; ignore 'new' keys
+            only_values(bool): Only find and return self.CHANGED; ignore new or missing keys
+            allow_dup(bool): Allow duplicate keys, otherwise fail with ValueError
+
+        Returns:
+        dict: dict with keys self.MISSING, self.NEW (unless only_missing is True),
+            & self.CHANGED,each a list of records with the key and
+            any other fields given to the constructor 'info' argument.
+            The meaning is: 'missing' are keys that are in c1 not found in c2
+            'new' is keys found in c2 that are not found in c1, and 'changed' are records
+            with the same key that have different 'props' values.
         """
         # Connect.
         _log.info("connect.start")
@@ -217,9 +219,12 @@ class Differ(object):
     def _get_collection(self, cfg):
         """
         Returns collection from config file
-        
-        :param cfg: Collection config file
-        :type cfg: str
+
+        Args:
+            cfg(str): Collection config file
+
+        Returns:
+            pymongo.collection
         """
         with open(cfg, "r") as f:
             settings = json.load(f)
@@ -274,11 +279,11 @@ class Delta(object):
                        "(?P<eq>=)?(?P<pct>%)?".format(n=_num))
 
     def __init__(self, s):
-        """Constructor.
+        """
+        Constructor.
 
-        :param s: Expression string
-        :type s: str
-        :raises: ValueError if it doesn't match the syntax
+        Args:
+            s(str): Expression string
         """
         # Match expression.
         m = self._expr.match(s)
@@ -354,18 +359,19 @@ class Delta(object):
         }
 
     def cmp(self, old, new):
-        """Compare numeric values with delta expression.
+        """
+        Compare numeric values with delta expression.
 
         Returns True if delta matches (is as large or larger than) this class' expression.
 
         Delta is computed as (new - old).
 
-        :param old: Old value
-        :type old: float
-        :param new: New value
-        :type new: float
-        :return: True if delta between old and new is large enough, False otherwise
-        :rtype: bool
+        Args:
+            old(float): Old value
+            new(float): New value
+
+        Returns:
+            bool: True if delta between old and new is large enough, False otherwise
         """
         return self._cmp(old, new)
 

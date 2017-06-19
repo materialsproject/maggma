@@ -1,9 +1,6 @@
 """
 Description.
 """
-__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
-__date__ = '2/21/13'
-
 
 from email.mime.text import MIMEText
 import datetime
@@ -11,12 +8,16 @@ import json
 import bson
 from operator import itemgetter
 import smtplib
-#
-from maggma.lava.util import DoesLogging, JsonWalker
-from maggma.lava.diff import Differ, Delta  # for field constants, formatting
+
 import six
 from six.moves import map
 from six.moves import zip
+
+from maggma.lava.util import DoesLogging, JsonWalker
+from maggma.lava.diff import Differ # for field constants, formatting
+
+__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
+__date__ = '2/21/13'
 
 
 # TODO: use bson library (dumps function) instead of MongoJSONEncoder
@@ -31,10 +32,11 @@ class MongoJSONEncoder(json.JSONEncoder):
 
 class Report:
     def __init__(self, header):
-        """Create blank report, with a header.
+        """
+        Create blank report, with a header.
 
-        :param header: Report header
-        :type header: Header
+        Args:
+            header(Header): Report header
         """
         self._hdr = header
         self._sections = []
@@ -65,15 +67,16 @@ class Report:
 
 
 class ReportSection(Report):
-    """Section within a report, with data.
+    """
+    Section within a report, with data.
     """
     def __init__(self, header, body=None):
-        """Create new report section, initialized with header and body.
+        """
+        Create new report section, initialized with header and body.
 
-        :param header: The header for the section
-        :type header: SectionHeader
-        :param body: The body of the section, or None if this is a container for sub-sections
-        :type body: Table
+        Args:
+            header(SectionHeader): The header for the section
+            body(Table): The body of the section, or None if this is a container for sub-sections
         """
         Report.__init__(self, header)
         self._body = body
@@ -175,14 +178,12 @@ class Table:
         return len(self._rows)
 
 
-## Exceptions
-
+# Exceptions
 class ReportBackupError(Exception):
     pass
 
-## Formatting
 
-
+# Formatting
 def css_minify(s):
     #return s.replace('\n', ' ').replace('  ', ' ')
     s = s.replace("{ ", "{")
@@ -364,13 +365,15 @@ class Emailer(DoesLogging):
     """
     def __init__(self, sender='me@localhost', recipients=('you@remote.host',),
                  subject='Report', server='localhost', port=None, **kwargs):
-        """Send reports as email.
+        """
+        Send reports as email.
 
-        :param: sender Sender of the email
-        :param: recipients List of _recipients of the email
-        :param: subject Email _subject line
-        :param: server SMTP server host
-        :param: port SMTP server port (None for default)
+        Args:
+            sender: Sender of the email
+            recipients(list): List of _recipients of the email
+            subject: Email _subject line
+            server: SMTP server host
+            port: SMTP server port (None for default)
         """
         DoesLogging.__init__(self, 'mg.emailer')
         self._sender, self._recipients, self._subject = (sender, recipients,
@@ -387,14 +390,15 @@ class Emailer(DoesLogging):
         self._subject = value
 
     def send(self, text, fmt):
-        """Send the email message.
+        """
+        Send the email message.
 
-        :param text: The text to send
-        :type text: str
-        :param fmt: The name of the format of the text
-        :type fmt: str
-        :return: Number of recipients it was sent to
-        :rtype: int
+        Args:
+            text(str): The text to send
+            fmt(str): The name of the format of the text
+
+        Returns:
+            int: Number of recipients it was sent to
         """
         main_fmt, sub_fmt = fmt.split('/')
         if sub_fmt.lower() == "text":
@@ -427,10 +431,7 @@ class Emailer(DoesLogging):
         return n_recip
 
 
-# ---------------
 # Diff formatting
-# ---------------
-
 class DiffFormatter(object):
     """Base class for formatting a 'diff' report.
     """
@@ -438,33 +439,38 @@ class DiffFormatter(object):
     TITLE = "Materials Project Database Diff Report"
 
     def __init__(self, meta, key=None):
-        """Constructor.
+        """
+        Constructor.
 
-        :param meta: Report metadata, must have the following keys:
+        Args:
+            meta(dict): Report metadata, must have the following keys:
                      - start_time, end_time: string repr of report gen. times
                      - elapsed: float #sec for end_time - start_time
                      - db1, db2: string repr of 2 input database/collections.
-        :type meta: dict
-        :param key: Record key field
-        :type key: str
+            key(str): Record key field
         """
         self.meta = meta
         self.key = key
 
     def format(self, result):
-        """Format a report from a result object.
+        """
+        Format a report from a result object.
 
-        :return: Report body
-        :rtype: str
+        Returns:
+            str: Report body
         """
         raise NotImplementedError()
 
     def result_subsets(self, rs):
-        """Break a result set into subsets with the same keys.
+        """
+        Break a result set into subsets with the same keys.
 
-        :param rs: Result set, rows of a result as a list of dicts
-        :type rs: list of dict
-        :return: A set with distinct keys (tuples), and a dict, by these tuples, of max. widths for each column
+        Args:
+            rs([dict]): Result set, rows of a result as a list of dicts
+
+        Returns:
+            set: A set with distinct keys (tuples), and a dict, by these tuples, of max.
+                widths for each column
         """
         keyset, maxwid = set(), {}
         for r in rs:
@@ -478,7 +484,8 @@ class DiffFormatter(object):
         return keyset, maxwid
 
     def ordered_cols(self, columns, section):
-        """Return ordered list of columns, from given columns and the name of the section
+        """
+        Return ordered list of columns, from given columns and the name of the section
         """
         columns = list(columns)  # might be a tuple
         fixed_cols = [self.key]
@@ -489,11 +496,12 @@ class DiffFormatter(object):
         return fixed_cols + columns
 
     def sort_rows(self, rows, section):
-        """Sort the rows, as appropriate for the section.
+        """
+        Sort the rows, as appropriate for the section.
 
-        :param rows: List of tuples (all same length, same values in each position)
-        :param section: Name of section, should match const in Differ class
-        :return: None; rows are sorted in-place
+        Args:
+         rows(list): List of tuples (all same length, same values in each position)
+            section(str): Name of section, should match const in Differ class
         """
         #print("@@ SORT ROWS:\n{}".format(rows))
         # Section-specific determination of sort key
@@ -696,14 +704,14 @@ class DiffHtmlFormatter(DiffFormatter):
 
 
 class DiffTextFormatter(DiffFormatter):
-    """Format a plain-text diff report.
-    """
+    """Format a plain-text diff report."""
 
     def format(self, result):
-        """Generate plain text report.
+        """
+        Generate plain text report.
 
-        :return: Report body
-        :rtype: str
+        Returns:
+            str: Report body
         """
         m = self.meta
         lines = ['-' * len(self.TITLE),
