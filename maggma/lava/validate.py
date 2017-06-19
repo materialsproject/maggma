@@ -33,7 +33,8 @@ class ValidatorSyntaxError(Exception):
 
 
 class PythonMethod(object):
-    """Encapsulate an external Python method that will be run on our target
+    """
+    Encapsulate an external Python method that will be run on our target
     MongoDB collection to perform arbitrary types of validation.
     """
     _PATTERN = re.compile(r'\s*(@\w+)(\s+\w+)*')
@@ -44,18 +45,22 @@ class PythonMethod(object):
 
     @classmethod
     def constraint_is_method(cls, text):
-        """Check from the text of the constraint whether it is
+        """
+        Check from the text of the constraint whether it is
         a Python method, as opposed to a 'normal' constraint.
 
-        :return: True if it is, False if not
+        Returns:
+            bool: True if it is, False if not
         """
         m = cls._PATTERN.match(text)
         return m is not None
 
     def __init__(self, text):
-        """Create new instance from a raw constraint string.
+        """
+        Create new instance from a raw constraint string.
 
-        :raises: ValidatorSyntaxerror
+        Raises:
+            ValidatorSyntaxerror
         """
         if not self._PATTERN.match(text):
             raise ValidatorSyntaxError(text, self.BAD_CONSTRAINT_ERR)
@@ -75,11 +80,16 @@ def mongo_get(rec, key, default=None):
     >>> assert mongo_get({'a': {'b': 1}, 'x': 2}, 'x') == 2
     >>> assert mongo_get({'a': {'b': 1}, 'x': 2}, 'a.b.c') is None
 
-    :param rec: mongodb document
-    :param key: path to mongo value
-    :param default: default to return if not found
-    :return: value, potentially nested, or default if not found
-    :raise: ValueError, if record is not a dict.
+    Args:
+        rec: mongodb document
+        key: path to mongo value
+        default: default to return if not found
+
+    Returns:
+        value, potentially nested, or default if not found
+
+    Raises:
+        ValueError: if record is not a dict.
     """
     if not rec:
         return default
@@ -105,13 +115,12 @@ class Projection(object):
         self._slices = {}
 
     def add(self, field, op=None, val=None):
-        """Update report fields to include new one, if it doesn't already.
+        """
+        Update report fields to include new one, if it doesn't already.
 
-        :param field: The field to include
-        :type field: Field
-        :param op: Operation
-        :type op: ConstraintOperator
-        :return: None
+        Args:
+            field(Field): The field to include
+            op(ConstraintOperator): Operation
         """
         if field.has_subfield():
             self._fields[field.full_name] = 1
@@ -126,10 +135,11 @@ class Projection(object):
             self._fields[val] = 1
 
     def to_mongo(self):
-        """Translate projection to MongoDB query form.
+        """
+        Translate projection to MongoDB query form.
 
-        :return: Dictionary to put into a MongoDB JSON query
-        :rtype: dict
+        Returns:
+            dict: Dictionary to put into a MongoDB JSON query
         """
         d = copy.copy(self._fields)
         for k, v in six.iteritems(self._slices):
@@ -138,13 +148,15 @@ class Projection(object):
 
 
 class ConstraintViolation(object):
-    """A single constraint violation, with no metadata.
+    """
+    A single constraint violation, with no metadata.
     """
     def __init__(self, constraint, value, expected):
-        """Create new constraint violation
+        """
+        Create new constraint violation
 
-        :param constraint: The constraint that was violated
-        :type constraint: Constraint
+        Args:
+            constraint(Constraint): The constraint that was violated
         """
         self._constraint = constraint
         self._got = value
@@ -173,14 +185,16 @@ class ConstraintViolation(object):
 
 
 class NullConstraintViolation(ConstraintViolation):
-    """Empty constraint violation, for when there are no constraints.
+    """
+    Empty constraint violation, for when there are no constraints.
     """
     def __init__(self):
         ConstraintViolation.__init__(self, Constraint('NA', '=', 'NA'), 'NA', 'NA')
 
 
 class ConstraintViolationGroup(object):
-    """A group of constraint violations with metadata.
+    """
+    A group of constraint violations with metadata.
     """
     def __init__(self):
         """Create an empty object.
@@ -191,13 +205,12 @@ class ConstraintViolationGroup(object):
         self.condition = None
 
     def add_violations(self, violations, record=None):
-        """Add constraint violations and associated record.
+        """
+        Add constraint violations and associated record.
 
-        :param violations: List of violations
-        :type violations: list(ConstraintViolation)
-        :param record: Associated record
-        :type record: dict
-        :rtype: None
+        Args:
+            violations(list(ConstraintViolation)): List of violations
+            record(dict): Associated record
         """
         rec = {} if record is None else record
         for v in violations:
@@ -211,8 +224,7 @@ class ConstraintViolationGroup(object):
 
 
 class ProgressMeter(object):
-    """Simple progress tracker
-    """
+    """Simple progress tracker"""
     def __init__(self, num, fmt):
         self._n = num
         self._subject = '?'
@@ -239,18 +251,20 @@ class ProgressMeter(object):
 
 
 class ConstraintSpec(DoesLogging):
-    """Specification of a set of constraints for a collection.
-    """
+    """Specification of a set of constraints for a collection."""
     FILTER_SECT = 'filter'
     CONSTRAINT_SECT = 'constraints'
     SAMPLE_SECT = 'sample'
 
     def __init__(self, spec):
-        """Create specification from a configuration.
+        """
+        Create specification from a configuration.
 
-        :param spec: Configuration for a single collection
-        :type spec: dict
-        :raise: ValueError if specification is wrong
+        Args:
+            spec(dict): Configuration for a single collection
+
+        Raises:
+            ValueError: if specification is wrong
         """
         DoesLogging.__init__(self, name='mg.ConstraintSpec')
         self._sections, _slist = {}, []
@@ -262,9 +276,11 @@ class ConstraintSpec(DoesLogging):
                 self._add_simple_section(item)
 
     def __iter__(self):
-        """Return a list of all the sections.
+        """
+        Return a list of all the sections.
 
-        :rtype: list(ConstraintSpecSection)
+        Returns:
+            list(ConstraintSpecSection)
         """
         sect = []
         # simple 1-level flatten operation
@@ -274,9 +290,11 @@ class ConstraintSpec(DoesLogging):
         return iter(sect)
 
     def _add_complex_section(self, item):
-        """Add a section that has a filter and set of constraints
+        """
+        Add a section that has a filter and set of constraints
 
-        :raise: ValueError if filter or constraints is missing
+        Raises:
+            ValueError: if filter or constraints is missing
         """
         # extract filter and constraints
         try:
@@ -394,7 +412,8 @@ class Validator(DoesLogging):
         Returns:
             ConstraintViolationGroup: Sets of constraint violation, one for each constraint_section
 
-        :raises: ValidatorSyntaxError
+        Raises:
+            ValidatorSyntaxError
         """
         self._spec = constraint_spec
         self._progress.set_subject(subject)
@@ -508,10 +527,8 @@ class Validator(DoesLogging):
 
     def _build(self, constraint_spec):
         """
-        Generate queries to execute.
-
-        Sets instance variables so that Mongo query strings, etc. can now
-        be extracted from the object.
+        Generate queries to execute. Sets instance variables so that
+        Mongo query strings, etc. can now be extracted from the object.
 
         Args:
             constraint_spec(ConstraintSpec): Constraint specification
@@ -647,14 +664,17 @@ class Sampler(DoesLogging):
     DIST_CODES = {'uniform': DIST_RUNIF}
 
     def __init__(self, min_items=0, max_items=1e9, p=1.0, distrib=DEFAULT_DIST, **kw):
-        """Create new parameterized sampler.
+        """
+        Create new parameterized sampler.
 
-        :param min_items: Minimum number of items in the sample
-        :param max_items: Maximum number of items in the sample
-        :param p: Probability of selecting an item
-        :param distrib: Probability distribution code, one of DIST_<name> in this class
-        :type distrib: str or int
-        :raise: ValueError, if `distrib` is an unknown code or string
+        Args:
+            min_items(int): Minimum number of items in the sample
+            max_items(int): Maximum number of items in the sample
+            p: Probability of selecting an item
+            distrib(str/int): Probability distribution code, one of DIST_<name> in this class
+
+        Raises:
+            ValueError: if `distrib` is an unknown code or string
         """
         DoesLogging.__init__(self, 'mg.sampler')
         # Sanity checks
@@ -698,7 +718,8 @@ class Sampler(DoesLogging):
         Returns:
             dict: yields each item
 
-        :raise: ValueError, if max_items is valid and less than `min_items`
+        Raises:
+        ValueError: if max_items is valid and less than `min_items`
                 or if target collection is empty
         """
         count = cursor.count()

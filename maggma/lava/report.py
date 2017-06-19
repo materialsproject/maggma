@@ -87,8 +87,7 @@ class ReportSection(Report):
 
 
 class Header:
-    """Base header class.
-    """
+    """Base header class."""
     def __init__(self, title=''):
         self._kv = []
         self.title = title
@@ -107,14 +106,12 @@ class Header:
 
 
 class ReportHeader(Header):
-    """Header for entire report.
-    """
+    """Header for entire report."""
     pass
 
 
 class SectionHeader(Header):
-    """Header for one section of a report.
-    """
+    """Header for one section of a report."""
     pass
 
 
@@ -210,8 +207,7 @@ DEFAULT_CSS = [
 
 
 class HTMLFormatter:
-    """Format a report as HTML.
-    """
+    """Format a report as HTML."""
     def __init__(self, line_sep='\n', id_column=0, css=None):
         self._sep = line_sep
         self._idcol = id_column
@@ -277,8 +273,7 @@ class HTMLFormatter:
 
 
 class JSONFormatter:
-    """Format a report as JSON.
-    """
+    """Format a report as JSON."""
     def __init__(self, id_column=0, indent=2):
         self._indent = indent
         self._idcol = id_column
@@ -313,8 +308,7 @@ class ReportJSONEncoder(MongoJSONEncoder):
 
 
 class MarkdownFormatter:
-    """Format a report as markdown
-    """
+    """Format a report as markdown"""
     def __init__(self, id_column=0):
         self._idcol = id_column
 
@@ -361,8 +355,7 @@ class MarkdownFormatter:
 
 
 class Emailer(DoesLogging):
-    """Send a report to an email recipient.
-    """
+    """Send a report to an email recipient."""
     def __init__(self, sender='me@localhost', recipients=('you@remote.host',),
                  subject='Report', server='localhost', port=None, **kwargs):
         """
@@ -603,21 +596,23 @@ class DiffHtmlFormatter(DiffFormatter):
     }
 
     def __init__(self, meta, url=None, email_mode=False, **kwargs):
-        """Constructor.
+        """
+        Constructor.
 
-        :param meta: see superclass
-        :param url: Optional URL to create hyperlink for keys
-        :type url: str
+        Args:
+            meta: see superclass
+            url(str): Optional URL to create hyperlink for keys
         """
         DiffFormatter.__init__(self, meta, **kwargs)
         self._url = url
         self._email = email_mode
 
     def format(self, result):
-        """Generate HTML report.
+        """
+        Generate HTML report.
 
-        :return: Report body
-        :rtype: str
+        Returns:
+            str: Report body
         """
         css = "\n".join(self.css)
         content = "{}{}".format(self._header(), self._body(result))

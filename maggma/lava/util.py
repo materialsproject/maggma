@@ -70,7 +70,9 @@ def total_size(o, handlers={}, verbose=False, count=False):
     default_size = getsizeof(0)       # estimate sizeof object without __sizeof__
 
     def sizeof(o):
-        "Calculate size of `o` and all its children"
+        """
+        Calculate size of `o` and all its children
+        """
         if id(o) in seen:             # do not double count the same object
             return 0
         seen.add(id(o))
@@ -187,8 +189,6 @@ class JsonWalker(object):
         return r
 
 # Argument handling
-# -----------------
-
 _alog = logging.getLogger("mg.args")
 #_alog.setLevel(logging.DEBUG)
 _argparse_is_dumb = True  # because it doesn't report orig. error text
@@ -224,7 +224,8 @@ def args_kvp_nodup(s):
     Returns:
         dict: Parsed value
 
-    :raises: ValueError for format violations or a duplicated key.
+    Raises:
+        ValueError: for format violations or a duplicated key.
     """
     if s is None:
         return {}

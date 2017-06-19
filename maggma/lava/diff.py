@@ -85,12 +85,12 @@ class Differ(object):
             allow_dup(bool): Allow duplicate keys, otherwise fail with ValueError
 
         Returns:
-        dict: dict with keys self.MISSING, self.NEW (unless only_missing is True),
-            & self.CHANGED,each a list of records with the key and
-            any other fields given to the constructor 'info' argument.
-            The meaning is: 'missing' are keys that are in c1 not found in c2
-            'new' is keys found in c2 that are not found in c1, and 'changed' are records
-            with the same key that have different 'props' values.
+            dict: dict with keys self.MISSING, self.NEW (unless only_missing is True),
+                & self.CHANGED,each a list of records with the key and
+                any other fields given to the constructor 'info' argument.
+                The meaning is: 'missing' are keys that are in c1 not found in c2
+                'new' is keys found in c2 that are not found in c1, and 'changed' are records
+                with the same key that have different 'props' values.
         """
         # Connect.
         _log.info("connect.start")

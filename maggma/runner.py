@@ -28,7 +28,7 @@ class Runner(MSONable):
             g.) Close all targets and sources
         Clean up and exit
         """
-    pass
+        pass
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)?
     def _get_builder_dependency_graph(self):
