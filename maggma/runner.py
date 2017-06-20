@@ -28,8 +28,40 @@ class Runner(MSONable):
             g.) Close all targets and sources
         Clean up and exit
         """
-        pass
+        self.has_run = []  # for bookkeeping
+        for i, b in enumerate(self.builders):
+            self._recursive_run(i)
+    
+    def _recursive_run(self, i):
+        """
+        Run the builders by recursively traversing through the dependency graph.
 
+        Args:
+            i (int): builder index
+        """
+        if i in self.has_run:
+            return
+        else:
+            if self.dependency_graph[i]:
+                for j in self.dependency_graph[i]:
+                    self._recursive_run(j)
+            self._run_builder(i)
+            self.has_run.append(i)
+
+    def _run_builder(self, i):
+        """
+        Run the i'th builder i.e. self.builders[i]
+
+        Args:
+            i (int): builder index
+
+        Returns:
+
+        """
+        #builder = self.builders[i]
+        #items = list(builder.get_items())
+        pass
+        
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)?
     def _get_builder_dependency_graph(self):
         """
