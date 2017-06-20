@@ -51,6 +51,7 @@ class Runner(MSONable):
             self._run_builder(i)
             self.has_run.append(i)
 
+    # TODO: cleanup/refactor -KM
     def _run_builder(self, i):
         """
         Run the i'th builder i.e. self.builders[i]
@@ -95,6 +96,8 @@ class Runner(MSONable):
 
         for itm in items_chunk:
             builder.process_item(itm)
+
+        builder.finalize()
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)? - KM
     def _get_builder_dependency_graph(self):
