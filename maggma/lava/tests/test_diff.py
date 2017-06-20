@@ -1,26 +1,21 @@
 """
 Test lava.diff module
 """
-__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 
+import os
 import logging
 import random
 import unittest
-
-from mongomock import MongoClient
+import json
 
 from maggma.lava.diff import Differ, Delta
+from maggma.helpers import get_database
+
+__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 
 
-db_config = {
-    'host': 'localhost',
-    'port': 27017,
-    'database': 'test',
-    'aliases_config': {
-        'aliases': {},
-        'defaults': {}
-    }
-}
+module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+db_dir = os.path.abspath(os.path.join(module_dir, "..", "..", "..", "test_files", "settings_files"))
 
 
 def recname(num):
@@ -37,8 +32,6 @@ def create_record(num):
         'energy': random.random() * 5 - 2.5,
     }
 
-#
-
 
 class MyTestCase(unittest.TestCase):
     NUM_RECORDS = 10
@@ -51,11 +44,12 @@ class MyTestCase(unittest.TestCase):
 
     def setUp(self):
         self.collections_names, self.collections = ['diff1', 'diff2'], []
-        self.colors = [[None, None] for i in range(self.NUM_RECORDS)]
-        self.energies = [[None, None] for i in range(self.NUM_RECORDS)]
+        self.colors = [[None, None] for _ in range(self.NUM_RECORDS)]
+        self.energies = [[None, None] for _ in range(self.NUM_RECORDS)]
+        with open(os.path.join(db_dir, "db.json"), "r") as f:
+            creds_dict = json.load(f)
+        db = get_database(creds_dict)
         for c in self.collections_names:
-            connection = MongoClient(db_config['host'], db_config['port'])
-            db = connection[db_config['database']]
             coll = db[c]
             self.collections.append(coll)
         for ei, coll in enumerate(self.collections):

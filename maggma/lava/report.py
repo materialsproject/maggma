@@ -515,17 +515,15 @@ class DiffJsonFormatter(DiffFormatter):
 #            return walk(son, visit_as_json, None)
 
     def __init__(self, meta, pretty=False, **kwargs):
-        """Constructor.
+        """
+        Constructor.
 
-        :param meta: see superclass
-        :param pretty: Indented format
-        :type pretty: bool
+        Args:
+            meta: see superclass
+            pretty(bool): Indented format
         """
         DiffFormatter.__init__(self, meta, **kwargs)
         self._indent = 4 if pretty else None
-
-    def will_copy(self):
-            return True
 
     def _add_meta(self, result):
         # put metadata into its own section

@@ -6,8 +6,11 @@ import pymongo
 import random
 import sys
 import collections
+import re
+import copy
 
-from smoqe.query import *
+from smoqe.query import MongoClause, MongoQuery, Constraint, ConstraintGroup, \
+    ConstraintOperator, parse_expr, Field
 
 from maggma.lava.util import DoesLogging, total_size
 
@@ -25,7 +28,10 @@ class DBError(Exception):
 
 
 class ValidatorSyntaxError(Exception):
-    "Syntax error in configuration of Validator"
+    """
+    Syntax error in configuration of Validator
+    """
+
     def __init__(self, target, desc):
         msg = 'Invalid syntax: {} -> "{}"'.format(desc, target)
         Exception.__init__(self, msg)
@@ -106,7 +112,8 @@ def mongo_get(rec, key, default=None):
 
 
 class Projection(object):
-    """Fields on which to project the query results.
+    """
+    Fields on which to project the query results.
     """
 
     def __init__(self):
@@ -167,7 +174,6 @@ class ConstraintViolation(object):
 
     @property
     def op(self):
-        #return str(self._constraint.op)
         return self._constraint.op.display_op
 
     @property

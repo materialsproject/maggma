@@ -25,6 +25,23 @@ def get_database(cred, **mongo_client_kwargs):
     return db
 
 
+def get_collection(config):
+    """
+    Returns collection from config file
+
+    Args:
+        config(str): path to the collection config file
+
+    Returns:
+        pymongo.collection
+    """
+    with open(config, "r") as f:
+        settings = json.load(f)
+    settings["aliases_config"] = {"aliases": {}, "defaults": {}}
+    db = get_database(cred=settings)
+    return db[config]
+
+
 class CredentialManager:
 
     roles = ['read', 'write', 'admin']

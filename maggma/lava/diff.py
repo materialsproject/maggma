@@ -5,9 +5,8 @@ Diff collections, as sets
 import logging
 import re
 import time
-import json
 
-from maggma.helpers import get_database
+from maggma.helpers import get_collection
 
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '3/29/13'
@@ -95,8 +94,8 @@ class Differ(object):
         _log.info("connect.start")
         # N.B. python3: isinstance(c1, str)
         #      python2: isinstance(c1, basestring)
-        coll1 = (self._get_collection(cfg=c1) if isinstance(c1, str) else c1)
-        coll2 = (self._get_collection(cfg=c2) if isinstance(c2, str) else c2)
+        coll1 = (get_collection(cfg=c1) if isinstance(c1, str) else c1)
+        coll2 = (get_collection(cfg=c2) if isinstance(c2, str) else c2)
         collections = [coll1, coll2]
         _log.info("connect.end")
 
@@ -171,8 +170,8 @@ class Differ(object):
                 return {}
             # ..but only issue a warning for partially missing properties.
             elif missing_props > 0:
-                _log.warn("Missing one or more properties for {:d}/{:d} records"
-                          .format(missing_props, count))
+                _log.warning("Missing one or more properties for {:d}/{:d} records"
+                             .format(missing_props, count))
         t1 = time.time()
         _log.info("query.end sec={:f}".format(t1 - t0))
 
@@ -215,22 +214,6 @@ class Differ(object):
 
         return result
 
-    def _get_collection(self, cfg):
-        """
-        Returns collection from config file
-
-        Args:
-            cfg(str): Collection config file
-
-        Returns:
-            pymongo.collection
-        """
-        with open(cfg, "r") as f:
-            settings = json.load(f)
-        settings["aliases_config"] = {"aliases": {}, "defaults": {}}
-        db = get_database(cred=settings)
-        return db[cfg]
-
     def _changed_props(self, keys=None, eqprops=None, numprops=None, info=None,
                        has_numprops=False, has_eqprops=False):
         changed = []
@@ -256,7 +239,8 @@ class Differ(object):
 
 
 class Delta(object):
-    """Delta between two properties.
+    """
+    Delta between two properties.
 
     Syntax:
         +-       Change in sign, 0 not included

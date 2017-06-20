@@ -1,13 +1,13 @@
 """
 Test lava.util module
 """
-__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 
 import unittest
-
 from argparse import ArgumentParser
 
 from maggma.lava.util import JsonWalker, YamlConfig
+
+__author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 
 
 class Jsonable(object):
@@ -23,8 +23,7 @@ class MyTestCase(unittest.TestCase):
     def setUp(self):
         self.init_yaml()
 
-    ## JsonWalker
-
+    # JsonWalker
     def test_json_walker(self):
         """JsonWalker class.
         """
@@ -49,8 +48,7 @@ class MyTestCase(unittest.TestCase):
         result = walker.walk(doc)
         self.assertEqual(expected, result)
 
-    ## YamlConfig
-
+    # YamlConfig
     def init_yaml(self):
         self.y_file = 'test.yaml'
         self.y_name = 'spam'

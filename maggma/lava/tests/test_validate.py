@@ -1,6 +1,13 @@
 """
 Unit tests for lava.validate module
 """
+
+import time
+import unittest
+
+import maggma.lava.validate as vv
+import maggma.lava.util as vu
+
 __author__ = "Dan Gunter"
 __copyright__ = "Copyright 2012-2013, The Materials Project"
 __version__ = "1.0"
@@ -8,12 +15,6 @@ __maintainer__ = "Dan Gunter"
 __email__ = "dkgunter@lbl.gov"
 __status__ = "Development"
 __date__ = "1/31/13"
-
-import time
-import unittest
-
-import maggma.lava.validate as vv
-import maggma.lava.util as vu
 
 
 class TestCollectionFilter(unittest.TestCase):
