@@ -12,8 +12,6 @@ import logging
 import time
 from sys import getsizeof
 from yaml import load
-import six
-from six.moves import map
 
 __author__ = "Dan Gunter"
 __copyright__ = "Copyright 2012-2013, The Materials Project"
@@ -115,7 +113,7 @@ class Timing(object):
     def __exit__(self, type, value, tb):
         elapsed = time.time() - self.begin
         if self._log is not None:
-            nvp = ', '.join(['{}={}'.format(k, v) for k, v in six.iteritems(self.kw)])
+            nvp = ', '.join(['{}={}'.format(k, v) for k, v in self.kw.items()])
             self._log.log(self.level, '@{n}={s:f}s {kw}'.format(n=self.name, s=elapsed, kw=nvp))
         if self.elapsed:
             self.elapsed.value = elapsed
@@ -149,7 +147,7 @@ class JsonWalker(object):
         """Walk a dict & transform."""
         if isinstance(o, dict):
             d = o if self._dx is None else self._dx(o)
-            return {k: self.walk(v) for k, v in six.iteritems(d)}
+            return {k: self.walk(v) for k, v in d.items()}
         elif isinstance(o, list):
             return [self.walk(v) for v in o]
         else:

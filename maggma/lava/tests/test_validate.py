@@ -11,10 +11,9 @@ __date__ = "1/31/13"
 
 import time
 import unittest
+
 import maggma.lava.validate as vv
 import maggma.lava.util as vu
-from six.moves import map
-from six.moves import zip
 
 
 class TestCollectionFilter(unittest.TestCase):

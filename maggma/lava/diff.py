@@ -5,7 +5,6 @@ Diff collections, as sets
 import logging
 import re
 import time
-import six
 import json
 
 from maggma.helpers import get_database
@@ -13,7 +12,7 @@ from maggma.helpers import get_database
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '3/29/13'
 
-_log = logging.getLogger("maggma.lava.diff")
+_log = logging.getLogger(__name__)
 
 
 class IID(object):
@@ -137,7 +136,7 @@ class Differ(object):
                 # Extract numeric properties.
                 if has_numprops:
                     pvals = {}
-                    for pkey in six.iterkeys(self._prop_deltas):
+                    for pkey in self._prop_deltas.keys():
                         try:
                             pvals[pkey] = float(rec[pkey])
                         except KeyError:
@@ -347,7 +346,7 @@ class Delta(object):
             return {'delta': {'id': self._json_id}}
         dtype = 'abs' if self._eq else 'pct'
         incl = self._eq
-        self._json_id = six.advance_iterator(IID)
+        self._json_id = next(IID)
         return {
             'delta': {
                 'plus': self._dx,
