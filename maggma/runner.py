@@ -8,14 +8,17 @@ logger = logging.getLogger(__name__)
 
 class Runner(MSONable):
 
-    def __init__(self, builders):
+    def __init__(self, builders, use_mpi=True):
         """
         Initialize with a lit of builders
 
         Args:
             builders(list): list of builders
+            use_mpi (bool): if True its is assumed that the building is done via MPI, else
+                multiprocessing is used.
         """
         self.builders = builders
+        self.use_mpi = use_mpi
         self.dependency_graph = self._get_builder_dependency_graph()
 
     def run(self):
@@ -64,8 +67,16 @@ class Runner(MSONable):
         """
         builder = self.builders[i]
 
-        rank = 0
-        size = 1
+        if self.use_mpi:
+            self._run_builder_in_mpi(builder)
+        else:
+            self._run_builder_in_multiproc(builder)
+
+        # cleanup
+        builder.finalize()
+
+    def _run_builder_in_mpi(self, builder):
+
         try:
             from mpi4py import MPI
 
@@ -73,6 +84,9 @@ class Runner(MSONable):
             rank = comm.Get_rank()
             size = comm.Get_size()
         except ImportError:
+            comm = None
+            rank = 0
+            size = 1
             logger.warning("No MPI")
 
         items = None
@@ -81,7 +95,7 @@ class Runner(MSONable):
         if rank == 0:
             items = list(builder.get_items())
 
-        items = comm.bcast(items, root=0)
+        items = comm.bcast(items, root=0) if comm else items
 
         n = len(items)
         chunk_size = n // size
@@ -97,7 +111,8 @@ class Runner(MSONable):
         for itm in items_chunk:
             builder.process_item(itm)
 
-        builder.finalize()
+    def _run_builder_in_multiproc(self, builder):
+        pass
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)? - KM
     def _get_builder_dependency_graph(self):
