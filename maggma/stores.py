@@ -26,6 +26,13 @@ class Store(MSONable, metaclass=ABCMeta):
     def collection(self):
         pass
 
+    def __call__(self):
+        return self.collection
+
+    @property
+    def meta(self):
+        return self.collection.db["{}.meta".format(self.collection.name)]
+
     @abstractmethod
     def last_updated(self):
         pass
