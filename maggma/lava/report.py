@@ -1,7 +1,3 @@
-"""
-Description.
-"""
-
 from email.mime.text import MIMEText
 import datetime
 import json
@@ -11,6 +7,10 @@ import smtplib
 
 from maggma.lava.util import DoesLogging, JsonWalker
 from maggma.lava.diff import Differ  # for field constants, formatting
+
+"""
+Description.
+"""
 
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '2/21/13'

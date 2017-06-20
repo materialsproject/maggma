@@ -1,17 +1,18 @@
 # coding: utf-8
 #!/usr/bin/env python3
 
-"""
-Utility functions and classes for validation.
-"""
-
 from argparse import Action
 from collections import deque
 from itertools import chain
 import logging
 import time
 from sys import getsizeof
+
 from yaml import load
+
+"""
+Utility functions and classes for validation.
+"""
 
 __author__ = "Dan Gunter"
 __copyright__ = "Copyright 2012-2013, The Materials Project"

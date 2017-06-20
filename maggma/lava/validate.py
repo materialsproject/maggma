@@ -1,7 +1,3 @@
-"""
-Collection validator
-"""
-
 import pymongo
 import random
 import sys
@@ -13,6 +9,10 @@ from smoqe.query import MongoClause, MongoQuery, Constraint, ConstraintGroup, \
     ConstraintOperator, parse_expr, Field
 
 from maggma.lava.util import DoesLogging, total_size
+
+"""
+Collection validator
+"""
 
 __author__ = "Dan Gunter"
 __copyright__ = "Copyright 2012-2013, The Materials Project"

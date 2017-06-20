@@ -1,12 +1,12 @@
-"""
-Diff collections, as sets
-"""
-
 import logging
 import re
 import time
 
 from maggma.helpers import get_collection
+
+"""
+Diff collections, as sets
+"""
 
 __author__ = 'Dan Gunter <dkgunter@lbl.gov>'
 __date__ = '3/29/13'
