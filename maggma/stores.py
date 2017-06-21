@@ -33,8 +33,13 @@ class Store(MSONable, metaclass=ABCMeta):
     def meta(self):
         return self.collection.db["{}.meta".format(self.collection.name)]
 
-    @abstractmethod
     def last_updated(self):
+        doc = next(self.collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
+            [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
+        return doc[self.lu_field] if doc else datetime.datetime.min
+
+    @abstractmethod
+    def connect(self):
         pass
 
     def lu_fiter(self, targets):
@@ -65,31 +70,55 @@ class MongoStore(Store):
     A Store that connects to any Mongo collection
     """
 
-    def __init__(self, collection, lu_field='_lu'):
-        self._collection = collection
+    def __init__(self, database, collection, host="", port=27017, username="", password="", lu_field='_lu'):
+        self.database = database
+        self.collection = collection
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
         super(MongoStore, self).__init__(lu_field)
 
     @property
     def collection(self):
-        return self._collection
+        if hasattr(self, __collection):
+            return self.__collection
+        return None
 
-    def last_updated(self):
-        doc = next(self._collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
-            [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
-        return doc[self.lu_field] if doc else datetime.datetime.min
+    def connect(self):
+        conn = MongoClient(
+            self.host,
+            self.port,
+            **mc_kwargs)
+        db = conn[self.database]
+        if self.username is not "":
+            db.authenticate(self.username, self.password)
+        self.__collection = db[self.collection]
 
     def __hash__(self):
         return hash((self._collection.name, self.lu_field))
 
 
-class MemoryStore(MongoStore):
+class MemoryStore(Store):
     """
     An in memory Store
     """
 
-    def __init__(selfs, name, lu_field='_lu'):
-        _collection = mongomock.MongoClient().db[name]
-        super().__init__(_collection, lu_field)
+    def __init__(self, name, lu_field='_lu'):
+        self.name = name
+        super().__init__(lu_field)
+
+    @property
+    def collection(self):
+        if hasattr(self, __collection):
+            return self.__collection
+        return None
+
+    def connect(self):
+        self.__collection = mongomock.MongoClient().db[self.name]
+
+    def __hash__(self):
+        return hash((self.name, self.lu_field))
 
 
 class JSONStore(MemoryStore):
@@ -112,11 +141,13 @@ class JSONStore(MemoryStore):
         return hash((self.path, self.lu_field))
 
 
-class DatetimeStore(MongoStore):
+class DatetimeStore(MemoryStore):
     """Utility store intended for use with `Store.lu_filter`."""
 
     def __init__(self, dt, lu_field='_lu'):
-        self._dt = dt
-        collection = mongomock.MongoClient().db.collection
-        collection.insert_one({lu_field: dt})
-        super().__init__(collection, lu_field)
+        self.__dt = dt
+        super().__init__("date", lu_field)
+
+    def connect(self):
+        super().connect()
+        self.collection.insert_one({self.lu_field: dt})
