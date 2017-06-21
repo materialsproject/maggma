@@ -1,14 +1,15 @@
-from monty.json import MSONable
-
-from collections import defaultdict
 import logging
+from collections import defaultdict
+
+from monty.json import MSONable
 
 logger = logging.getLogger(__name__)
 
 
+# TODO: add tests
 class Runner(MSONable):
 
-    def __init__(self, builders, use_mpi=True):
+    def __init__(self, builders, use_mpi=True, nprocs=1):
         """
         Initialize with a lit of builders
 
@@ -16,9 +17,11 @@ class Runner(MSONable):
             builders(list): list of builders
             use_mpi (bool): if True its is assumed that the building is done via MPI, else
                 multiprocessing is used.
+            nprocs (int): number of processes. Used only for multiprocessing.
         """
         self.builders = builders
         self.use_mpi = use_mpi
+        self.nprocs = nprocs
         self.dependency_graph = self._get_builder_dependency_graph()
 
     def run(self):
@@ -76,6 +79,14 @@ class Runner(MSONable):
         builder.finalize()
 
     def _run_builder_in_mpi(self, builder):
+        """
+
+        Args:
+            builder:
+
+        Returns:
+
+        """
 
         try:
             from mpi4py import MPI
@@ -112,7 +123,19 @@ class Runner(MSONable):
             builder.process_item(itm)
 
     def _run_builder_in_multiproc(self, builder):
-        pass
+        """
+
+        Args:
+            builder:
+
+        Returns:
+
+        """
+
+        from multiprocessing import Pool
+
+        p = Pool(self.nprocs)
+        p.map(builder.process_item, [itm for itm in builder.get_items()])
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)? - KM
     def _get_builder_dependency_graph(self):
