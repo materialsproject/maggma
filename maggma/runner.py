@@ -78,6 +78,7 @@ class Runner(MSONable):
         # cleanup
         builder.finalize()
 
+    # TODO: replace this piece of horriblness!! -KM
     def _run_builder_in_mpi(self, builder):
         """
 
@@ -122,6 +123,7 @@ class Runner(MSONable):
         for itm in items_chunk:
             builder.process_item(itm)
 
+    # TODO: replace this piece of horriblness!! -KM            
     def _run_builder_in_multiproc(self, builder):
         """
 
