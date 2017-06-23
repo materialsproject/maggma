@@ -93,6 +93,7 @@ class Runner(MSONable):
         if rank == 0:
             # TODO: establish the builder's connection to the db here, before the loop
             # cycle through the workers, there could be less workers than the items to process
+            # Note: master doesnt do any 'work', just distributes the workload.
             worker = cycle(range(1, size))
             # distribute the items to process
             for item in builder.get_items():
