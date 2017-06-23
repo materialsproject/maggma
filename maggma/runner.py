@@ -1,5 +1,6 @@
 import logging
 from collections import defaultdict
+from itertools import cycle
 
 from monty.json import MSONable
 
@@ -78,7 +79,43 @@ class Runner(MSONable):
         # cleanup
         builder.finalize()
 
-    def _run_builder_in_mpi(self, builder, scatter=True):
+    def _run_builder_in_mpi(self, builder):
+        """
+
+        Args:
+            builder:
+        """
+        (comm, rank, size) = get_mpi()
+        # collect error message send by update_target and pass it to finalize to decide
+        # how to proceed with the cleanup
+        build_errors = []
+
+        from mpi4py import MPI
+
+        if rank == 0:
+            # TODO: establish the builder's connection to the db here, before the loop
+            # cycle through the workers, there could be less workers than the items to process
+            worker = cycle(range(1, size))
+            # distribute the items to process
+            for item in builder.get_items():
+                comm.send(item, dest=next(worker))
+                error = comm.recv(source=MPI.ANY_SOURCE)
+                build_errors.append(error)
+            # kill workers
+            for _ in range(size - 1):
+                comm.send(None, dest=next(worker))
+            builder.finalize()
+        else:
+            while True:
+                item = comm.recv(source=0)
+                if item is None:
+                    break
+                processed_item = builder.process_item(item)
+                error = builder.update_targets(processed_item)
+                comm.ssend(error, 0)
+
+    # TODO: this will be removed - KM
+    def _run_builder_in_mpi_collective_comm(self, builder, scatter=True):
         """
         Since all the items to be processed are feteched on the master node, this implementation
         could be problematic if there are large number of items or small number of large items.
@@ -92,17 +129,7 @@ class Runner(MSONable):
                 broadcasted.
         """
 
-        try:
-            from mpi4py import MPI
-
-            comm = MPI.COMM_WORLD
-            rank = comm.Get_rank()
-            size = comm.Get_size()
-        except ImportError:
-            comm = None
-            rank = 0
-            size = 1
-            logger.warning("No MPI")
+        (comm, rank, size) = get_mpi()
 
         items = None
 
@@ -188,3 +215,18 @@ class Runner(MSONable):
                         if s in bj.targets:
                             links_dict[i].append(j)
         return links_dict
+
+def get_mpi():
+    try:
+        from mpi4py import MPI
+
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+    except ImportError:
+        comm = None
+        rank = 0
+        size = 1
+        logger.warning("No MPI")
+
+    return comm, rank, size
