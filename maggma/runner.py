@@ -78,7 +78,6 @@ class Runner(MSONable):
         # cleanup
         builder.finalize()
 
-    # TODO: replace this piece of horriblness!! -KM
     def _run_builder_in_mpi(self, builder):
         """
 
@@ -88,42 +87,8 @@ class Runner(MSONable):
         Returns:
 
         """
+        pass
 
-        try:
-            from mpi4py import MPI
-
-            comm = MPI.COMM_WORLD
-            rank = comm.Get_rank()
-            size = comm.Get_size()
-        except ImportError:
-            comm = None
-            rank = 0
-            size = 1
-            logger.warning("No MPI")
-
-        items = None
-
-        # get the items to process at the master and broadcast it to all slaves
-        if rank == 0:
-            items = list(builder.get_items())
-
-        items = comm.bcast(items, root=0) if comm else items
-
-        n = len(items)
-        chunk_size = n // size
-
-        # adjust chuck size if the data size is not divisible by the
-        # number of processors
-        if rank == 0:
-            if n % size != 0:
-                chunk_size = chunk_size + n % size
-
-        items_chunk = items[rank:rank + chunk_size]
-
-        for itm in items_chunk:
-            builder.process_item(itm)
-
-    # TODO: replace this piece of horriblness!! -KM            
     def _run_builder_in_multiproc(self, builder):
         """
 
@@ -133,11 +98,7 @@ class Runner(MSONable):
         Returns:
 
         """
-
-        from multiprocessing import Pool
-
-        p = Pool(self.nprocs)
-        p.map(builder.process_item, [itm for itm in builder.get_items()])
+        pass
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)? - KM
     def _get_builder_dependency_graph(self):
