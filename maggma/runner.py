@@ -90,8 +90,6 @@ class Runner(MSONable):
         # how to proceed with the cleanup
         build_errors = []
 
-        from mpi4py import MPI
-
         if rank == 0:
             # TODO: establish the builder's connection to the db here, before the loop
             # cycle through the workers, there could be less workers than the items to process
@@ -99,7 +97,7 @@ class Runner(MSONable):
             # distribute the items to process
             for item in builder.get_items():
                 comm.send(item, dest=next(worker))
-                error = comm.recv(source=MPI.ANY_SOURCE)
+                error = comm.recv()
                 build_errors.append(error)
             # kill workers
             for _ in range(size - 1):
@@ -215,6 +213,7 @@ class Runner(MSONable):
                         if s in bj.targets:
                             links_dict[i].append(j)
         return links_dict
+
 
 def get_mpi():
     try:
