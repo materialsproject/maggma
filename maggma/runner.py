@@ -86,32 +86,31 @@ class Runner(MSONable):
             builder:
         """
         (comm, rank, size) = get_mpi()
-        # collect error message send by update_target and pass it to finalize to decide
-        # how to proceed with the cleanup
-        build_errors = []
 
+        # master: doesnt do any 'work', just distributes the workload.
         if rank == 0:
             # TODO: establish the builder's connection to the db here, before the loop
             # cycle through the workers, there could be less workers than the items to process
-            # Note: master doesnt do any 'work', just distributes the workload.
             worker = cycle(range(1, size))
             # distribute the items to process
             for item in builder.get_items():
                 comm.send(item, dest=next(worker))
-                error = comm.recv()
-                build_errors.append(error)
             # kill workers
             for _ in range(size - 1):
                 comm.send(None, dest=next(worker))
+            # TODO: does the finalize require all the workers to finish? If so the processes
+            # mus be blocked until then
             builder.finalize()
+        # workers:
+        #   - process item
+        #   - update target
         else:
             while True:
                 item = comm.recv(source=0)
                 if item is None:
                     break
                 processed_item = builder.process_item(item)
-                error = builder.update_targets(processed_item)
-                comm.ssend(error, 0)
+                builder.update_targets(processed_item)
 
     # TODO: this will be removed - KM
     def _run_builder_in_mpi_collective_comm(self, builder, scatter=True):
