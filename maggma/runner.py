@@ -83,14 +83,13 @@ class Runner(MSONable):
         Since all the items to be processed are feteched on the master node, this implementation
         could be problematic if there are large number of items or small number of large items.
 
-        At the moment it is hard to get around this since only pickleable objects can be passed
+        At the moment it is hard to get around this: only pickleable objects can be passed
         around using MPI and generators/Queues(uses thread locking internally) are not pickleable!!
 
         Args:
             builder (Builder): Any object of class that subclasses Builder
             scatter (bool): if True then the items are scattered from the master to slaves, else
                 broadcasted.
-
         """
 
         try:
