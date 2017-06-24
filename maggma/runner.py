@@ -112,7 +112,7 @@ class Runner(MSONable):
                 processed_item = builder.process_item(item)
                 builder.update_targets(processed_item)
 
-    # TODO: this will be removed - KM
+    # TODO: scrape this? - KM
     def _run_builder_in_mpi_collective_comm(self, builder, scatter=True):
         """
         Since all the items to be processed are fetched on the master node at once, this
@@ -187,11 +187,21 @@ class Runner(MSONable):
         Returns:
 
         """
+        import multiprocessing
 
-        from multiprocessing import Pool
-
-        p = Pool(self.nprocs)
-        p.map(builder.process_item, [itm for itm in builder.get_items()])
+        processes = []
+        for i in range(self._ncores):
+            self._status.running(i)
+            #item = self._queue.get(timeout=2)
+            # proc = multiprocessing.Process(target=worker, args=(item,)) # where worker runs in infinte loop fetching stuff from the que and processing it
+            proc = multiprocessing.Process(target=builder.process_item, args=(item,))
+            proc.start()
+            processes.append(proc)
+        for i in range(self._ncores):
+            processes[i].join()
+            code = processes[i].exitcode
+            self._status.success(i) if 0 == code else self._status.fail(i)
+        _log.debug("run.parallel.multiprocess.end states={}".format(self._status))
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)? - KM
     def _get_builder_dependency_graph(self):
