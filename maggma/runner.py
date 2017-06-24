@@ -99,7 +99,7 @@ class Runner(MSONable):
             for _ in range(size - 1):
                 comm.send(None, dest=next(worker))
             # TODO: does the finalize require all the workers to finish? If so the processes
-            # mus be blocked until then
+            # must be blocked until then - KM
             builder.finalize()
         # workers:
         #   - process item
@@ -115,8 +115,9 @@ class Runner(MSONable):
     # TODO: this will be removed - KM
     def _run_builder_in_mpi_collective_comm(self, builder, scatter=True):
         """
-        Since all the items to be processed are feteched on the master node, this implementation
-        could be problematic if there are large number of items or small number of large items.
+        Since all the items to be processed are fetched on the master node at once, this
+        implementation could be problematic if there are large number of items or small number of
+        large items.
 
         At the moment it is hard to get around this: only pickleable objects can be passed
         around using MPI and generators/Queues(uses thread locking internally) are not pickleable!!
