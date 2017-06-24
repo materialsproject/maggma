@@ -77,26 +77,24 @@ class MongoStore(Store):
         self.port = port
         self.username = username
         self.password = password
+        self.__collection = None
         super(MongoStore, self).__init__(lu_field)
 
     @property
     def collection(self):
-        if hasattr(self, __collection):
-            return self.__collection
-        return None
+        return self.__collection
 
     def connect(self):
         conn = MongoClient(
             self.host,
-            self.port,
-            **mc_kwargs)
+            self.port)
         db = conn[self.database]
         if self.username is not "":
             db.authenticate(self.username, self.password)
         self.__collection = db[self.collection]
 
     def __hash__(self):
-        return hash((self._collection.name, self.lu_field))
+        return hash((self.collection.name, self.lu_field))
 
 
 class MemoryStore(Store):
@@ -106,13 +104,12 @@ class MemoryStore(Store):
 
     def __init__(self, name, lu_field='_lu'):
         self.name = name
+        self.__collection = None
         super().__init__(lu_field)
 
     @property
     def collection(self):
-        if hasattr(self, __collection):
-            return self.__collection
-        return None
+        return self.__collection
 
     def connect(self):
         self.__collection = mongomock.MongoClient().db[self.name]
@@ -131,11 +128,14 @@ class JSONStore(MemoryStore):
         self.paths = paths
         super().__init__("collection", lu_field)
 
-        for path in paths:
+    def connect(self):
+        super().connect()
+        for path in self.paths:
             with open(path) as f:
                 objects = list(json.load(f))
                 objects = [objects] if not isinstance(objects, list) else objects
                 self.collection.insert_many(objects)
+
 
     def __hash__(self):
         return hash((self.path, self.lu_field))
