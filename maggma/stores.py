@@ -1,9 +1,10 @@
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 import datetime
 import json
 
 import mongomock
 import pymongo
+from pymongo import MongoClient
 
 from monty.json import MSONable
 
@@ -26,6 +27,10 @@ class Store(MSONable, metaclass=ABCMeta):
     def collection(self):
         pass
 
+    @abstractmethod
+    def connect(self):
+        pass
+
     def __call__(self):
         return self.collection
 
@@ -38,13 +43,10 @@ class Store(MSONable, metaclass=ABCMeta):
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         return doc[self.lu_field] if doc else datetime.datetime.min
 
-    @abstractmethod
-    def connect(self):
-        pass
-
     def lu_fiter(self, targets):
         """
-        Creates a filter string that can be applied to the source collection assuming targets is a list of Stores
+        Creates a filter string that can be applied to the source collection assuming
+        targets is a list of Stores.
         
         Args:
             targets
@@ -70,9 +72,21 @@ class MongoStore(Store):
     A Store that connects to any Mongo collection
     """
 
-    def __init__(self, database, collection, host="", port=27017, username="", password="", lu_field='_lu'):
+    def __init__(self, database, collection, host="", port=27017, username="", password="",
+                 lu_field='_lu'):
+        """
+
+        Args:
+            database (str): db name
+            collection (str): collection name
+            host (str):
+            port (int):
+            username (str):
+            password (str):
+            lu_field (str): see Store doc
+        """
         self.database = database
-        self.collection = collection
+        self.collection_name = collection
         self.host = host
         self.port = port
         self.username = username
@@ -85,16 +99,14 @@ class MongoStore(Store):
         return self.__collection
 
     def connect(self):
-        conn = MongoClient(
-            self.host,
-            self.port)
+        conn = MongoClient(self.host, self.port)
         db = conn[self.database]
         if self.username is not "":
             db.authenticate(self.username, self.password)
-        self.__collection = db[self.collection]
+        self.__collection = db[self.collection_name]
 
     def __hash__(self):
-        return hash((self.collection.name, self.lu_field))
+        return hash((self.collection_name, self.lu_field))
 
 
 class MemoryStore(Store):
@@ -105,7 +117,7 @@ class MemoryStore(Store):
     def __init__(self, name, lu_field='_lu'):
         self.name = name
         self.__collection = None
-        super().__init__(lu_field)
+        super(MemoryStore, self).__init__(lu_field)
 
     @property
     def collection(self):
@@ -126,16 +138,15 @@ class JSONStore(MemoryStore):
     def __init__(self, paths, lu_field='_lu'):
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
-        super().__init__("collection", lu_field)
+        super(JSONStore, self).__init__("collection", lu_field)
 
     def connect(self):
-        super().connect()
+        super(JSONStore, self).connect()
         for path in self.paths:
             with open(path) as f:
                 objects = list(json.load(f))
                 objects = [objects] if not isinstance(objects, list) else objects
                 self.collection.insert_many(objects)
-
 
     def __hash__(self):
         return hash((self.path, self.lu_field))
@@ -146,8 +157,8 @@ class DatetimeStore(MemoryStore):
 
     def __init__(self, dt, lu_field='_lu'):
         self.__dt = dt
-        super().__init__("date", lu_field)
+        super(DatetimeStore, self).__init__("date", lu_field)
 
     def connect(self):
-        super().connect()
-        self.collection.insert_one({self.lu_field: dt})
+        super(DatetimeStore, self).connect()
+        self.collection.insert_one({self.lu_field: self.__dt})
