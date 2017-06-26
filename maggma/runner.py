@@ -27,6 +27,8 @@ class Runner(MSONable):
         self.num_workers = num_workers
         self._queue = multiprocessing.Queue()
         self.dependency_graph = self._get_builder_dependency_graph()
+        self.status = []
+
 
     def run(self):
         """
@@ -79,8 +81,8 @@ class Runner(MSONable):
         else:
             self._run_builder_in_multiproc(i)
 
-        # cleanup
-        builder.finalize()
+        if all(self.status):
+            builder.finalize()
 
     def _run_builder_in_mpi(self, i):
         """
@@ -96,21 +98,26 @@ class Runner(MSONable):
             # TODO: establish the builder's connection to the db here, before the loop.
             # cycle through the workers, there could be less workers than the items to process
             worker = cycle(range(1, size))
+
             # distribute the items to process
             for item in builder.get_items():
                 comm.send(item, dest=next(worker))
+
+            # get job status from the workers
+            for i in range(1, size):
+                status = comm.recv(source=i)
+                self.status.append(status)
+
             # kill workers
             for _ in range(size - 1):
                 comm.send(None, dest=next(worker))
-            # TODO: does the finalize require all the workers to finish? If so the processes
-            # must be blocked until then - KM
-            builder.finalize()
+
         # workers:
         #   - process item
         #   - update target
         else:
             self.worker(i, comm)
-            
+
     # TODO: scrape this? - KM
     def _run_builder_in_mpi_collective_comm(self, builder, scatter=True):
         """
@@ -186,17 +193,21 @@ class Runner(MSONable):
         processes = []
         builder = self.builders[builder_id]
 
+        # send items to process
         for item in builder.get_items():
             self._queue.put(item)
 
+        # start the workers
         for i in range(self.num_workers):
             proc = multiprocessing.Process(target=self.worker, args=(builder_id,))
             proc.start()
             processes.append(proc)
 
+        # get job status from the workers
         for i in range(self.num_workers):
             processes[i].join()
             code = processes[i].exitcode
+            self.status.append(not bool(code))
 
     def worker(self, builder_id, comm=None):
         if self.use_mpi:
@@ -206,6 +217,7 @@ class Runner(MSONable):
                     break
                 processed_item = self.builders[builder_id].process_item(item)
                 self.builders[builder_id].update_targets(processed_item)
+                comm.ssend(True, 0)
         else:
             while True:
                 try:
