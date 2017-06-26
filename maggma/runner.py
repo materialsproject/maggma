@@ -25,7 +25,7 @@ class Runner(MSONable):
         self.builders = builders
         self.use_mpi = use_mpi
         self.num_workers = num_workers if not use_mpi else 1
-        if not use_mpi and num_workers > 1:
+        if not use_mpi and self.num_workers > 1:
             self._queue = multiprocessing.Queue()
             manager = multiprocessing.Manager()
             self.processed_items = manager.dict()
@@ -103,12 +103,10 @@ class Runner(MSONable):
 
         """
         if self.use_mpi:
+            print("building: ", builder_id)
             self._run_builder_in_mpi(builder_id)
         else:
             self._run_builder_in_multiproc(builder_id)
-
-        if all(self.status):
-            self.builders[builder_id].finalize()
 
     def _run_builder_in_mpi(self, builder_id):
         """
@@ -118,19 +116,21 @@ class Runner(MSONable):
         """
         (comm, rank, size) = get_mpi()
         to_update = {}
+        print("rank, size", rank, size)
 
         # master: doesnt do any 'work', just distributes the workload.
         if rank == 0:
             builder = self.builders[builder_id]
             # establish connection to the sources
-            builder.connect(sources=True)
+            #builder.connect(sources=True)
             # cycle through the workers, there could be less workers than the items to process
-            worker = cycle(range(1, size))
+            worker_id = cycle(range(1, size))
 
             # distribute the items to process
             for item in builder.get_items():
+                print("processing item", item)
                 packet = (builder.process_item, item)
-                comm.send(packet, dest=next(worker))
+                comm.send(packet, dest=next(worker_id))
 
             # get processed item from the workers and send
             for builder_id in range(1, size):
@@ -139,11 +139,14 @@ class Runner(MSONable):
 
             # kill workers
             for _ in range(size - 1):
-                comm.send(None, dest=next(worker))
+                comm.send(None, dest=next(worker_id))
 
             # update the targets
             builder.connect(sources=False)
             builder.update_targets(to_update)
+
+            #if all(self.status):
+            builder.finalize()
 
         # workers:
         #   - process item
@@ -164,33 +167,46 @@ class Runner(MSONable):
         processes = []
         builder = self.builders[builder_id]
 
+        # establish connection to the sources
+        builder.connect(sources=True)
+
         # send items to process
         for item in builder.get_items():
-            self._queue.put(item)
+            packet = (builder.process_item, item)
+            self._queue.put(packet)
 
-        # start the workers
-        for i in range(self.num_workers):
-            proc = multiprocessing.Process(target=self.worker, args=(builder_id,))
-            proc.start()
-            processes.append(proc)
+        if self.num_workers > 1:
+            # start the workers
+            for i in range(self.num_workers):
+                print("starting")
+                proc = multiprocessing.Process(target=self.worker, args=(None,))
+                proc.start()
+                processes.append(proc)
 
-        # get job status from the workers
-        for i in range(self.num_workers):
-            processes[i].join()
-            code = processes[i].exitcode
-            self.status.append(not bool(code))
+            # get job status from the workers
+            for i in range(self.num_workers):
+                processes[i].join()
+                code = processes[i].exitcode
+                self.status.append(not bool(code))
+        else:
+            self.worker()
+            self.status.append(True)
 
         # update the targets
         builder.connect(sources=False)
         builder.update_targets(self.processed_items)
 
+        if all(self.status):
+            self.builders[builder_id].finalize()
+
     def worker(self, comm=None):
 
         if self.use_mpi:
             while True:
-                func, args = comm.recv(source=0)
-                if args is None:
+                packet = comm.recv(source=0)
+                if packet is None:
                     break
+                func, args = packet
                 output = func(args)
                 comm.ssend(output, 0)
                 #processed_item = self.builders[builder_id].process_item(item)
@@ -200,6 +216,7 @@ class Runner(MSONable):
             while True:
                 try:
                     func, args = self._queue.get(timeout=2)
+                    print(type(func))
                     output = func(args)
                     self.processed_items.update(output)
                     #processed_item = self.builders[builder_id].process_item(item)
