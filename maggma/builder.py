@@ -20,6 +20,17 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.process_chunk_size = process_chunk_size
         self.get_chunk_size = get_chunk_size
 
+    def connect(self, sources=True):
+        """
+        Connect to the builder sources or targets.
+
+        Args:
+            sources (bool): if True connect to sources else targets
+        """
+        stores = self.sources if sources else self.targets
+        for s in stores:
+            s.connect()
+
     @abstractmethod
     def get_items(self):
         """
@@ -53,7 +64,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         Returns:
 
         """
-        return
+        pass
 
     @abstractmethod
     def finalize(self):
