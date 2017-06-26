@@ -1,9 +1,9 @@
 import sys
 import logging
-from collections import defaultdict
-from itertools import cycle
 import multiprocessing
 import queue
+from collections import defaultdict
+from itertools import cycle
 
 from monty.json import MSONable
 
@@ -66,16 +66,17 @@ class Runner(MSONable):
 
     def run(self):
         """
-        For each builder:
-            a.) Setup all sources and targets
-            b.) pull get_chunk_size items from get_items
-            c.) process process_chunk_size items
-                   i) can be via serial, multiprocessing, mpi, or mpi/multiprocessing
-            d.) update_targets
-            e.) repeat a-c till no remaining items
-            f.) finalize
-            g.) Close all targets and sources
-        Clean up and exit
+        Does the following:
+            - traverse through the builder dependency graph and does the following to
+              each builder
+                - connect to sources
+                - get items and feed it to the processing pipeline
+                - process each item
+                    - supported options: serial, MPI or the builtin multiprocessing
+                - collect all processed items
+                - connect to the targets
+                - update targets
+                - finalize aka cleanup(close all connections etc)
         """
         for i, b in enumerate(self.builders):
             self._build_dependencies(i)
@@ -96,7 +97,6 @@ class Runner(MSONable):
             self._run_builder(builder_id)
             self.has_run.append(builder_id)
 
-    # TODO: cleanup/refactor -KM
     def _run_builder(self, builder_id):
         """
         Run builder, self.builders[builder_id]
@@ -117,16 +117,15 @@ class Runner(MSONable):
         """
 
         Args:
-            builder:
+            builder_id (int): the index of the builder in the builders list
         """
         (comm, rank, size) = get_mpi()
-        to_update = {}
+        processed_items_dict = {}
 
         # master: doesnt do any 'work', just distributes the workload.
         if rank == 0:
             builder = self.builders[builder_id]
             # establish connection to the sources
-            # This cannot be done as builder object with pymongo.Connection is not pickleable
             builder.connect(sources=True)
 
             # cycle through the workers, there could be less workers than the items to process
@@ -146,7 +145,7 @@ class Runner(MSONable):
                 try:
                     processed_item = comm.recv()
                     self.status.append(True)
-                    to_update.update(processed_item)
+                    processed_items_dict.update(processed_item)
                 except:
                     raise
 
@@ -156,7 +155,7 @@ class Runner(MSONable):
 
             # update the targets
             builder.connect(sources=False)
-            builder.update_targets(to_update)
+            builder.update_targets(processed_items_dict)
 
             if all(self.status):
                 builder.finalize()
@@ -170,18 +169,15 @@ class Runner(MSONable):
 
     def _run_builder_in_multiproc(self, builder_id):
         """
+        Adapted from pymatgen-db
 
         Args:
-            builder:
-
-        Returns:
-
+            builder_id (int): the index of the builder in the builders list
         """
         processes = []
         builder = self.builders[builder_id]
 
         # establish connection to the sources
-        # not pickleable
         builder.connect(sources=True)
 
         # send items to process
@@ -203,8 +199,11 @@ class Runner(MSONable):
                 code = processes[i].exitcode
                 self.status.append(not bool(code))
         else:
-            self.worker()
-            self.status.append(True)
+            try:
+                self.worker()
+                self.status.append(True)
+            except:
+                raise
 
         # update the targets
         builder.connect(sources=False)
@@ -214,6 +213,14 @@ class Runner(MSONable):
             self.builders[builder_id].finalize()
 
     def worker(self, comm=None):
+        """
+        Where shit gets done!
+        Call the builder's process_item method and send back(or put it in the shared dict) the
+        processed item
+
+        Args:
+            comm (MPI.comm): mpi communicator
+        """
 
         if self.use_mpi:
             while True:
@@ -223,9 +230,6 @@ class Runner(MSONable):
                 builder_id, item = packet
                 processed_item = self.builders[builder_id].process_item(item)
                 comm.ssend(processed_item, 0)
-                #processed_item = self.builders[builder_id].process_item(item)
-                #self.builders[builder_id].update_targets(processed_item)
-                #comm.ssend(True, 0)
         else:
             while True:
                 try:
@@ -233,8 +237,6 @@ class Runner(MSONable):
                     builder_id, item = packet
                     processed_item = self.builders[builder_id].process_item(item)
                     self.processed_items.update(processed_item)
-                    #processed_item = self.builders[builder_id].process_item(item)
-                    #self.builders[builder_id].update_targets(processed_item)
                 except queue.Empty:
                     break
 
@@ -313,7 +315,7 @@ def get_mpi():
         comm = None
         rank = 0
         size = 1
-        logger.warning("No MPI")
+        logger.warning("No MPI. Install mpi4py package")
 
     return comm, rank, size
 
