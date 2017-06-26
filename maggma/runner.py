@@ -24,11 +24,34 @@ class Runner(MSONable):
         """
         self.builders = builders
         self.use_mpi = use_mpi
-        self.num_workers = num_workers
+        self.num_workers = num_workers if not use_mpi else 1
         self._queue = multiprocessing.Queue()
         self.dependency_graph = self._get_builder_dependency_graph()
-        self.status = []
+        self.has_run = []  # for bookkeeping builder runs
+        self.status = []  # builder run status
 
+    # TODO: make it efficient, O(N^2) complexity at the moment,
+    # might be ok(not many builders)? - KM
+    def _get_builder_dependency_graph(self):
+        """
+        Does the following:
+        1.) use targets and sources of builders to determine interdependencies
+        2.) order builders according to interdependencies
+
+        Returns:
+            dict
+        """
+        # key = index of the builder in the self.builders list
+        # value = list of indices of builders that the key depends on i.e these must run before
+        # the builder corresponding to the key.
+        links_dict = defaultdict(list)
+        for i, bi in enumerate(self.builders):
+            for j, bj in enumerate(self.builders):
+                if i != j:
+                    for s in bi.sources:
+                        if s in bj.targets:
+                            links_dict[i].append(j)
+        return links_dict
 
     def run(self):
         """
@@ -43,48 +66,45 @@ class Runner(MSONable):
             g.) Close all targets and sources
         Clean up and exit
         """
-        self.has_run = []  # for bookkeeping
         for i, b in enumerate(self.builders):
-            self._recursive_run(i)
+            self._build_dependencies(i)
     
-    def _recursive_run(self, i):
+    def _build_dependencies(self, builder_id):
         """
         Run the builders by recursively traversing through the dependency graph.
 
         Args:
-            i (int): builder index
+            builder_id (int): builder index
         """
-        if i in self.has_run:
+        if builder_id in self.has_run:
             return
         else:
-            if self.dependency_graph[i]:
-                for j in self.dependency_graph[i]:
-                    self._recursive_run(j)
-            self._run_builder(i)
-            self.has_run.append(i)
+            if self.dependency_graph[builder_id]:
+                for j in self.dependency_graph[builder_id]:
+                    self._build_dependencies(j)
+            self._run_builder(builder_id)
+            self.has_run.append(builder_id)
 
     # TODO: cleanup/refactor -KM
-    def _run_builder(self, i):
+    def _run_builder(self, builder_id):
         """
-        Run the i'th builder i.e. self.builders[i]
+        Run builder, self.builders[builder_id]
 
         Args:
-            i (int): builder index
+            builder_id (int): builder index
 
         Returns:
 
         """
-        builder = self.builders[i]
-
         if self.use_mpi:
-            self._run_builder_in_mpi(i)
+            self._run_builder_in_mpi(builder_id)
         else:
-            self._run_builder_in_multiproc(i)
+            self._run_builder_in_multiproc(builder_id)
 
         if all(self.status):
-            builder.finalize()
+            self.builders[builder_id].finalize()
 
-    def _run_builder_in_mpi(self, i):
+    def _run_builder_in_mpi(self, builder_id):
         """
 
         Args:
@@ -94,7 +114,7 @@ class Runner(MSONable):
 
         # master: doesnt do any 'work', just distributes the workload.
         if rank == 0:
-            builder = self.builders[i]
+            builder = self.builders[builder_id]
             # TODO: establish the builder's connection to the db here, before the loop.
             # cycle through the workers, there could be less workers than the items to process
             worker = cycle(range(1, size))
@@ -104,8 +124,8 @@ class Runner(MSONable):
                 comm.send(item, dest=next(worker))
 
             # get job status from the workers
-            for i in range(1, size):
-                status = comm.recv(source=i)
+            for builder_id in range(1, size):
+                status = comm.recv(source=builder_id)
                 self.status.append(status)
 
             # kill workers
@@ -115,8 +135,55 @@ class Runner(MSONable):
         # workers:
         #   - process item
         #   - update target
+        #   - report status
         else:
-            self.worker(i, comm)
+            self.worker(builder_id, comm)
+
+    def _run_builder_in_multiproc(self, builder_id):
+        """
+
+        Args:
+            builder:
+
+        Returns:
+
+        """
+        processes = []
+        builder = self.builders[builder_id]
+
+        # send items to process
+        for item in builder.get_items():
+            self._queue.put(item)
+
+        # start the workers
+        for i in range(self.num_workers):
+            proc = multiprocessing.Process(target=self.worker, args=(builder_id,))
+            proc.start()
+            processes.append(proc)
+
+        # get job status from the workers
+        for i in range(self.num_workers):
+            processes[i].join()
+            code = processes[i].exitcode
+            self.status.append(not bool(code))
+
+    def worker(self, builder_id, comm=None):
+        if self.use_mpi:
+            while True:
+                item = comm.recv(source=0)
+                if item is None:
+                    break
+                processed_item = self.builders[builder_id].process_item(item)
+                self.builders[builder_id].update_targets(processed_item)
+                comm.ssend(True, 0)
+        else:
+            while True:
+                try:
+                    item = self._queue.get(timeout=2)
+                    processed_item = self.builders[builder_id].process_item(item)
+                    self.builders[builder_id].update_targets(processed_item)
+                except queue.Empty:
+                    break
 
     # TODO: scrape this? - KM
     def _run_builder_in_mpi_collective_comm(self, builder, scatter=True):
@@ -180,74 +247,6 @@ class Runner(MSONable):
 
             for itm in items_chunk:
                 builder.process_item(itm)
-
-    def _run_builder_in_multiproc(self, builder_id):
-        """
-
-        Args:
-            builder:
-
-        Returns:
-
-        """
-        processes = []
-        builder = self.builders[builder_id]
-
-        # send items to process
-        for item in builder.get_items():
-            self._queue.put(item)
-
-        # start the workers
-        for i in range(self.num_workers):
-            proc = multiprocessing.Process(target=self.worker, args=(builder_id,))
-            proc.start()
-            processes.append(proc)
-
-        # get job status from the workers
-        for i in range(self.num_workers):
-            processes[i].join()
-            code = processes[i].exitcode
-            self.status.append(not bool(code))
-
-    def worker(self, builder_id, comm=None):
-        if self.use_mpi:
-            while True:
-                item = comm.recv(source=0)
-                if item is None:
-                    break
-                processed_item = self.builders[builder_id].process_item(item)
-                self.builders[builder_id].update_targets(processed_item)
-                comm.ssend(True, 0)
-        else:
-            while True:
-                try:
-                    item = self._queue.get(timeout=2)
-                    processed_item = self.builders[builder_id].process_item(item)
-                    self.builders[builder_id].update_targets(processed_item)
-                except queue.Empty:
-                    break
-
-    # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)? - KM
-    def _get_builder_dependency_graph(self):
-        """
-        Does the following:
-        1.) use targets and sources of builders to determine interdependencies
-        2.) order builders according to interdependencies
-
-        Returns:
-            dict
-        """
-        # key = index of the builder in the self.builders list
-        # value = list of indices of builders that the key depends on i.e these must run before
-        # the builder corresponding to the key.
-        links_dict = defaultdict(list)
-        for i, bi in enumerate(self.builders):
-            for j, bj in enumerate(self.builders):
-                if i != j:
-                    for s in bi.sources:
-                        if s in bj.targets:
-                            links_dict[i].append(j)
-        return links_dict
 
 
 def get_mpi():
