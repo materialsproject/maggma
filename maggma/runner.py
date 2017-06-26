@@ -127,7 +127,7 @@ class Runner(MSONable):
             builder = self.builders[builder_id]
             # establish connection to the sources
             # This cannot be done as builder object with pymongo.Connection is not pickleable
-            #builder.connect(sources=True)
+            builder.connect(sources=True)
 
             # cycle through the workers, there could be less workers than the items to process
             worker_id = cycle(range(1, size))
@@ -135,9 +135,8 @@ class Runner(MSONable):
             n = 0
             # distribute the items to process
             for item in builder.get_items():
-                packet = (builder.process_item, item)
-                wid = next(worker_id)
-                comm.send(packet, dest=wid)
+                packet = (builder_id, item)
+                comm.send(packet, dest=next(worker_id))
                 n = n+1
 
             logger.info("{} items sent for processing".format(n))
@@ -183,15 +182,15 @@ class Runner(MSONable):
 
         # establish connection to the sources
         # not pickleable
-        #builder.connect(sources=True)
+        builder.connect(sources=True)
 
         # send items to process
         for item in builder.get_items():
-            packet = (builder.process_item, item)
+            packet = (builder_id, item)
             self._queue.put(packet)
 
+        # start the workers
         if self.num_workers > 1:
-            # start the workers
             for i in range(self.num_workers):
                 print("starting")
                 proc = multiprocessing.Process(target=self.worker, args=(None,))
@@ -221,18 +220,19 @@ class Runner(MSONable):
                 packet = comm.recv(source=0)
                 if packet is None:
                     break
-                func, args = packet
-                output = func(args)
-                comm.ssend(output, 0)
+                builder_id, item = packet
+                processed_item = self.builders[builder_id].process_item(item)
+                comm.ssend(processed_item, 0)
                 #processed_item = self.builders[builder_id].process_item(item)
                 #self.builders[builder_id].update_targets(processed_item)
                 #comm.ssend(True, 0)
         else:
             while True:
                 try:
-                    func, args = self._queue.get(timeout=2)
-                    output = func(args)
-                    self.processed_items.update(output)
+                    packet = self._queue.get(timeout=2)
+                    builder_id, item = packet
+                    processed_item = self.builders[builder_id].process_item(item)
+                    self.processed_items.update(processed_item)
                     #processed_item = self.builders[builder_id].process_item(item)
                     #self.builders[builder_id].update_targets(processed_item)
                 except queue.Empty:
