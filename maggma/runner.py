@@ -1,3 +1,4 @@
+import sys
 import logging
 from collections import defaultdict
 from itertools import cycle
@@ -7,6 +8,10 @@ import queue
 from monty.json import MSONable
 
 logger = logging.getLogger(__name__)
+sh = logging.StreamHandler(stream=sys.stdout)
+sh.setLevel(logging.DEBUG)
+sh.setFormatter('%(asctime)s %(levelname)s %(message)s')
+logger.addHandler(sh)
 
 
 # TODO: add tests
@@ -103,7 +108,7 @@ class Runner(MSONable):
 
         """
         if self.use_mpi:
-            print("building: ", builder_id)
+            logger.info("building: ", builder_id)
             self._run_builder_in_mpi(builder_id)
         else:
             self._run_builder_in_multiproc(builder_id)
@@ -116,26 +121,35 @@ class Runner(MSONable):
         """
         (comm, rank, size) = get_mpi()
         to_update = {}
-        print("rank, size", rank, size)
 
         # master: doesnt do any 'work', just distributes the workload.
         if rank == 0:
             builder = self.builders[builder_id]
             # establish connection to the sources
+            # This cannot be done as builder object with pymongo.Connection is not pickleable
             #builder.connect(sources=True)
+
             # cycle through the workers, there could be less workers than the items to process
             worker_id = cycle(range(1, size))
 
+            n = 0
             # distribute the items to process
             for item in builder.get_items():
-                print("processing item", item)
                 packet = (builder.process_item, item)
-                comm.send(packet, dest=next(worker_id))
+                wid = next(worker_id)
+                comm.send(packet, dest=wid)
+                n = n+1
 
-            # get processed item from the workers and send
-            for builder_id in range(1, size):
-                processed_item = comm.recv(source=builder_id)
-                to_update.update(processed_item)
+            logger.info("{} items sent for processing".format(n))
+
+            # get processed item from the workers
+            for i in range(n):
+                try:
+                    processed_item = comm.recv()
+                    self.status.append(True)
+                    to_update.update(processed_item)
+                except:
+                    raise
 
             # kill workers
             for _ in range(size - 1):
@@ -145,8 +159,8 @@ class Runner(MSONable):
             builder.connect(sources=False)
             builder.update_targets(to_update)
 
-            #if all(self.status):
-            builder.finalize()
+            if all(self.status):
+                builder.finalize()
 
         # workers:
         #   - process item
@@ -168,7 +182,8 @@ class Runner(MSONable):
         builder = self.builders[builder_id]
 
         # establish connection to the sources
-        builder.connect(sources=True)
+        # not pickleable
+        #builder.connect(sources=True)
 
         # send items to process
         for item in builder.get_items():
@@ -216,7 +231,6 @@ class Runner(MSONable):
             while True:
                 try:
                     func, args = self._queue.get(timeout=2)
-                    print(type(func))
                     output = func(args)
                     self.processed_items.update(output)
                     #processed_item = self.builders[builder_id].process_item(item)
