@@ -1,6 +1,8 @@
 import logging
 from collections import defaultdict
 from itertools import cycle
+import multiprocessing
+import queue
 
 from monty.json import MSONable
 
@@ -10,7 +12,7 @@ logger = logging.getLogger(__name__)
 # TODO: add tests
 class Runner(MSONable):
 
-    def __init__(self, builders, use_mpi=True, nprocs=1):
+    def __init__(self, builders, use_mpi=True, num_workers=1):
         """
         Initialize with a lit of builders
 
@@ -18,11 +20,12 @@ class Runner(MSONable):
             builders(list): list of builders
             use_mpi (bool): if True its is assumed that the building is done via MPI, else
                 multiprocessing is used.
-            nprocs (int): number of processes. Used only for multiprocessing.
+            num_workers (int): number of processes. Used only for multiprocessing.
         """
         self.builders = builders
         self.use_mpi = use_mpi
-        self.nprocs = nprocs
+        self.num_workers = num_workers
+        self._queue = multiprocessing.Queue()
         self.dependency_graph = self._get_builder_dependency_graph()
 
     def run(self):
@@ -72,14 +75,14 @@ class Runner(MSONable):
         builder = self.builders[i]
 
         if self.use_mpi:
-            self._run_builder_in_mpi(builder)
+            self._run_builder_in_mpi(i)
         else:
-            self._run_builder_in_multiproc(builder)
+            self._run_builder_in_multiproc(i)
 
         # cleanup
         builder.finalize()
 
-    def _run_builder_in_mpi(self, builder):
+    def _run_builder_in_mpi(self, i):
         """
 
         Args:
@@ -89,7 +92,8 @@ class Runner(MSONable):
 
         # master: doesnt do any 'work', just distributes the workload.
         if rank == 0:
-            # TODO: establish the builder's connection to the db here, before the loop
+            builder = self.builders[i]
+            # TODO: establish the builder's connection to the db here, before the loop.
             # cycle through the workers, there could be less workers than the items to process
             worker = cycle(range(1, size))
             # distribute the items to process
@@ -105,13 +109,8 @@ class Runner(MSONable):
         #   - process item
         #   - update target
         else:
-            while True:
-                item = comm.recv(source=0)
-                if item is None:
-                    break
-                processed_item = builder.process_item(item)
-                builder.update_targets(processed_item)
-
+            self.worker(i, comm)
+            
     # TODO: scrape this? - KM
     def _run_builder_in_mpi_collective_comm(self, builder, scatter=True):
         """
@@ -175,10 +174,7 @@ class Runner(MSONable):
             for itm in items_chunk:
                 builder.process_item(itm)
 
-    # TODO: replace this piece of horriblness!! -KM
-    # The current implementation in pymatgen-db looks pretty good to me.
-    # Just copy it over? -KM
-    def _run_builder_in_multiproc(self, builder):
+    def _run_builder_in_multiproc(self, builder_id):
         """
 
         Args:
@@ -187,21 +183,37 @@ class Runner(MSONable):
         Returns:
 
         """
-        import multiprocessing
-
         processes = []
-        for i in range(self._ncores):
-            self._status.running(i)
-            #item = self._queue.get(timeout=2)
-            # proc = multiprocessing.Process(target=worker, args=(item,)) # where worker runs in infinte loop fetching stuff from the que and processing it
-            proc = multiprocessing.Process(target=builder.process_item, args=(item,))
+        builder = self.builders[builder_id]
+
+        for item in builder.get_items():
+            self._queue.put(item)
+
+        for i in range(self.num_workers):
+            proc = multiprocessing.Process(target=self.worker, args=(builder_id,))
             proc.start()
             processes.append(proc)
-        for i in range(self._ncores):
+
+        for i in range(self.num_workers):
             processes[i].join()
             code = processes[i].exitcode
-            self._status.success(i) if 0 == code else self._status.fail(i)
-        _log.debug("run.parallel.multiprocess.end states={}".format(self._status))
+
+    def worker(self, builder_id, comm=None):
+        if self.use_mpi:
+            while True:
+                item = comm.recv(source=0)
+                if item is None:
+                    break
+                processed_item = self.builders[builder_id].process_item(item)
+                self.builders[builder_id].update_targets(processed_item)
+        else:
+            while True:
+                try:
+                    item = self._queue.get(timeout=2)
+                    processed_item = self.builders[builder_id].process_item(item)
+                    self.builders[builder_id].update_targets(processed_item)
+                except queue.Empty:
+                    break
 
     # TODO: make it efficient, O(N^2) complexity at the moment, might be ok(not many builders)? - KM
     def _get_builder_dependency_graph(self):
@@ -240,3 +252,4 @@ def get_mpi():
         logger.warning("No MPI")
 
     return comm, rank, size
+
