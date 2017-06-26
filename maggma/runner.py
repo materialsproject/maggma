@@ -25,7 +25,13 @@ class Runner(MSONable):
         self.builders = builders
         self.use_mpi = use_mpi
         self.num_workers = num_workers if not use_mpi else 1
-        self._queue = multiprocessing.Queue()
+        if not use_mpi and num_workers > 1:
+            self._queue = multiprocessing.Queue()
+            manager = multiprocessing.Manager()
+            self.processed_items = manager.dict()
+        else:
+            self._queue = queue.Queue()
+            self.processed_items = dict()
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
         self.status = []  # builder run status
@@ -111,33 +117,40 @@ class Runner(MSONable):
             builder:
         """
         (comm, rank, size) = get_mpi()
+        to_update = {}
 
         # master: doesnt do any 'work', just distributes the workload.
         if rank == 0:
             builder = self.builders[builder_id]
-            # TODO: establish the builder's connection to the db here, before the loop.
+            # establish connection to the sources
+            builder.connect(sources=True)
             # cycle through the workers, there could be less workers than the items to process
             worker = cycle(range(1, size))
 
             # distribute the items to process
             for item in builder.get_items():
-                comm.send(item, dest=next(worker))
+                packet = (builder.process_item, item)
+                comm.send(packet, dest=next(worker))
 
-            # get job status from the workers
+            # get processed item from the workers and send
             for builder_id in range(1, size):
-                status = comm.recv(source=builder_id)
-                self.status.append(status)
+                processed_item = comm.recv(source=builder_id)
+                to_update.update(processed_item)
 
             # kill workers
             for _ in range(size - 1):
                 comm.send(None, dest=next(worker))
+
+            # update the targets
+            builder.connect(sources=False)
+            builder.update_targets(to_update)
 
         # workers:
         #   - process item
         #   - update target
         #   - report status
         else:
-            self.worker(builder_id, comm)
+            self.worker(comm)
 
     def _run_builder_in_multiproc(self, builder_id):
         """
@@ -167,21 +180,30 @@ class Runner(MSONable):
             code = processes[i].exitcode
             self.status.append(not bool(code))
 
-    def worker(self, builder_id, comm=None):
+        # update the targets
+        builder.connect(sources=False)
+        builder.update_targets(self.processed_items)
+
+    def worker(self, comm=None):
+
         if self.use_mpi:
             while True:
-                item = comm.recv(source=0)
-                if item is None:
+                func, args = comm.recv(source=0)
+                if args is None:
                     break
-                processed_item = self.builders[builder_id].process_item(item)
-                self.builders[builder_id].update_targets(processed_item)
-                comm.ssend(True, 0)
+                output = func(args)
+                comm.ssend(output, 0)
+                #processed_item = self.builders[builder_id].process_item(item)
+                #self.builders[builder_id].update_targets(processed_item)
+                #comm.ssend(True, 0)
         else:
             while True:
                 try:
-                    item = self._queue.get(timeout=2)
-                    processed_item = self.builders[builder_id].process_item(item)
-                    self.builders[builder_id].update_targets(processed_item)
+                    func, args = self._queue.get(timeout=2)
+                    output = func(args)
+                    self.processed_items.update(output)
+                    #processed_item = self.builders[builder_id].process_item(item)
+                    #self.builders[builder_id].update_targets(processed_item)
                 except queue.Empty:
                     break
 
