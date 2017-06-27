@@ -20,7 +20,7 @@ class Runner(MSONable):
 
     def __init__(self, builders, num_workers=0):
         """
-        Initialize with a lit of builders
+        Initialize with a list of builders
 
         Args:
             builders(list): list of builders
