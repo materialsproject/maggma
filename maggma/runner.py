@@ -38,7 +38,7 @@ class Runner(MSONable):
         # multiprocessing only if mpi is not used, no mixing
         self.num_workers = num_workers if num_workers > 0 else multiprocessing.cpu_count()-1
         if not self.use_mpi:
-            if self.num_workers > 1:
+            if self.num_workers > 0:
                 print("Building with multiprocessing, {} workers in the pool".format(self.num_workers))
                 self._queue = multiprocessing.Queue()
                 manager = multiprocessing.Manager()
