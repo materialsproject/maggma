@@ -95,6 +95,9 @@ class CredentialManager:
 
 
 def get_mpi():
+    """
+    Helper that returns the mpi communicator, rank and size.
+    """
     from mpi4py import MPI
 
     comm = MPI.COMM_WORLD
