@@ -4,6 +4,7 @@ import queue
 import sys
 from collections import defaultdict
 from itertools import cycle
+import abc
 
 from monty.json import MSONable
 
@@ -16,7 +17,7 @@ sh.setFormatter('%(asctime)s %(levelname)s %(message)s')
 logger.addHandler(sh)
 
 
-class Runner(MSONable):
+class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
 
     def __init__(self, builders, num_workers=0):
         """
@@ -28,109 +29,24 @@ class Runner(MSONable):
                 Will be automatically set to (number of cpus - 1) if set to 0.
         """
         self.builders = builders
+        self.num_workers = num_workers
+        self.status = []
 
-        try:
-            (comm, rank, size) = get_mpi()
-            self.use_mpi = True if size > 1 else False
-        except ImportError:
-            print("either 'mpi4py' is not installed or issue with the installation. "
-                  "Proceeding with mulitprocessing.")
-            self.use_mpi = False
+    @abc.abstractmethod
+    def process(self):
+        pass
 
-        # multiprocessing only if mpi is not used, no mixing
-        self.num_workers = num_workers if num_workers > 0 else multiprocessing.cpu_count()-1
-        if not self.use_mpi:
-            if self.num_workers > 0:
-                print("Building with multiprocessing, {} workers in the pool".format(self.num_workers))
-                self._queue = multiprocessing.Queue()
-                manager = multiprocessing.Manager()
-                self.processed_items = manager.dict()
-            # serial
-            else:
-                print("Building serially")
-                self._queue = queue.Queue()
-                self.processed_items = dict()
-        else:
-            if rank == 0:
-                print("Building with MPI. {} workers in the pool.".format(size-1))
+    @abc.abstractmethod
+    def worker(self, comm=None):
+        pass
 
-        self.dependency_graph = self._get_builder_dependency_graph()
-        self.has_run = []  # for bookkeeping builder runs
-        self.status = []  # builder run status
 
-    # TODO: make it efficient, O(N^2) complexity at the moment,
-    # might be ok(not many builders)? - KM
-    def _get_builder_dependency_graph(self):
-        """
-        Does the following:
-        1.) use targets and sources of builders to determine interdependencies
-        2.) order builders according to interdependencies
+class MPIProcessor(BaseProcessor):
 
-        Returns:
-            dict
-        """
-        # key = index of the builder in the self.builders list
-        # value = list of indices of builders that the key depends on i.e these must run before
-        # the builder corresponding to the key.
-        links_dict = defaultdict(list)
-        for i, bi in enumerate(self.builders):
-            for j, bj in enumerate(self.builders):
-                if i != j:
-                    for s in bi.sources:
-                        if s in bj.targets:
-                            links_dict[i].append(j)
-        return links_dict
+    def __init__(self, builders):
+        super(MPIProcessor, self).__init__(builders)
 
-    def run(self):
-        """
-        Does the following:
-            - traverse through the builder dependency graph and does the following to
-              each builder
-                - connect to sources
-                - get items and feed it to the processing pipeline
-                - process each item
-                    - supported options: serial, MPI or the builtin multiprocessing
-                - collect all processed items
-                - connect to the targets
-                - update targets
-                - finalize aka cleanup(close all connections etc)
-        """
-        for i in range(len(self.builders)):
-            self._build_dependencies(i)
-    
-    def _build_dependencies(self, builder_id):
-        """
-        Run the builders by recursively traversing through the dependency graph.
-
-        Args:
-            builder_id (int): builder index
-        """
-        if builder_id in self.has_run:
-            return
-        else:
-            if self.dependency_graph[builder_id]:
-                for j in self.dependency_graph[builder_id]:
-                    self._build_dependencies(j)
-            self._run_builder(builder_id)
-            self.has_run.append(builder_id)
-
-    def _run_builder(self, builder_id):
-        """
-        Run builder: self.builders[builder_id]
-
-        Args:
-            builder_id (int): builder index
-
-        Returns:
-
-        """
-        if self.use_mpi:
-            logger.info("building: ", builder_id)
-            self._run_builder_in_mpi(builder_id)
-        else:
-            self._run_builder_in_multiproc(builder_id)
-
-    def _run_builder_in_mpi(self, builder_id):
+    def process(self, builder_id):
         """
         Run the builder using MPI protocol.
 
@@ -138,6 +54,8 @@ class Runner(MSONable):
             builder_id (int): the index of the builder in the builders list
         """
         (comm, rank, size) = get_mpi()
+        if rank == 0:
+            print("Building with MPI. {} workers in the pool.".format(size - 1))
         processed_items_dict = {}
 
         # master: doesnt do any 'work', just distributes the workload.
@@ -185,7 +103,43 @@ class Runner(MSONable):
         else:
             self.worker(comm)
 
-    def _run_builder_in_multiproc(self, builder_id):
+    def worker(self, comm):
+        """
+        Where shit gets done!
+        Call the builder's process_item method and send back(or put it in the shared dict if
+        multiprocess) the processed item
+
+        Args:
+            comm (MPI.comm): mpi communicator, must be given when using MPI.
+        """
+        while True:
+            packet = comm.recv(source=0)
+            if packet is None:
+                break
+            builder_id, item = packet
+            processed_item = self.builders[builder_id].process_item(item)
+            comm.ssend(processed_item, 0)
+
+
+class MultiprocProcessor(BaseProcessor):
+
+    def __init__(self, builders, num_workers):
+        # multiprocessing only if mpi is not used, no mixing
+        self.num_workers = num_workers if num_workers > 0 else multiprocessing.cpu_count() - 1
+        if self.num_workers > 0:
+            print("Building with multiprocessing, {} workers in the pool".format(
+                self.num_workers))
+            self._queue = multiprocessing.Queue()
+            manager = multiprocessing.Manager()
+            self.processed_items = manager.dict()
+        # serial
+        else:
+            print("Building serially")
+            self._queue = queue.Queue()
+            self.processed_items = dict()
+        super(MultiprocProcessor, self).__init__(builders, num_workers)
+
+    def process(self, builder_id):
         """
         Run the builder using the builtin multiprocessing.
         Adapted from pymatgen-db
@@ -231,7 +185,7 @@ class Runner(MSONable):
         if all(self.status):
             self.builders[builder_id].finalize()
 
-    def worker(self, comm=None):
+    def worker(self):
         """
         Where shit gets done!
         Call the builder's process_item method and send back(or put it in the shared dict if
@@ -241,18 +195,107 @@ class Runner(MSONable):
             comm (MPI.comm): mpi communicator, must be given when using MPI.
         """
         while True:
-            if self.use_mpi:
-                    packet = comm.recv(source=0)
-                    if packet is None:
-                        break
-                    builder_id, item = packet
-                    processed_item = self.builders[builder_id].process_item(item)
-                    comm.ssend(processed_item, 0)
-            else:
-                    try:
-                        packet = self._queue.get(timeout=2)
-                        builder_id, item = packet
-                        processed_item = self.builders[builder_id].process_item(item)
-                        self.processed_items.update(processed_item)
-                    except queue.Empty:
-                        break
+            try:
+                packet = self._queue.get(timeout=2)
+                builder_id, item = packet
+                processed_item = self.builders[builder_id].process_item(item)
+                self.processed_items.update(processed_item)
+            except queue.Empty:
+                break
+
+
+class Runner(MSONable):
+
+    def __init__(self, builders, num_workers=0):
+        """
+        Initialize with a list of builders
+
+        Args:
+            builders(list): list of builders
+            num_workers (int): number of processes. Used only for multiprocessing.
+                Will be automatically set to (number of cpus - 1) if set to 0.
+        """
+        self.builders = builders
+        self.processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
+        self.dependency_graph = self._get_builder_dependency_graph()
+        self.has_run = []  # for bookkeeping builder runs
+
+    @property
+    def use_mpi(self):
+        try:
+            (comm, rank, size) = get_mpi()
+            use_mpi = True if size > 1 else False
+        except ImportError:
+            print("either 'mpi4py' is not installed or issue with the installation. "
+                  "Proceeding with mulitprocessing.")
+            use_mpi = False
+        return use_mpi
+
+    # TODO: make it efficient, O(N^2) complexity at the moment,
+    # might be ok(not many builders)? - KM
+    def _get_builder_dependency_graph(self):
+        """
+        Does the following:
+        1.) use targets and sources of builders to determine interdependencies
+        2.) order builders according to interdependencies
+
+        Returns:
+            dict
+        """
+        # key = index of the builder in the self.builders list
+        # value = list of indices of builders that the key depends on i.e these must run before
+        # the builder corresponding to the key.
+        links_dict = defaultdict(list)
+        for i, bi in enumerate(self.builders):
+            for j, bj in enumerate(self.builders):
+                if i != j:
+                    for s in bi.sources:
+                        if s in bj.targets:
+                            links_dict[i].append(j)
+        return links_dict
+
+    def run(self):
+        """
+        Does the following:
+            - traverse through the builder dependency graph and does the following to
+              each builder
+                - connect to sources
+                - get items and feed it to the processing pipeline
+                - process each item
+                    - supported options: serial, MPI or the builtin multiprocessing
+                - collect all processed items
+                - connect to the targets
+                - update targets
+                - finalize aka cleanup(close all connections etc)
+        """
+        for i in range(len(self.builders)):
+            self._build_dependencies(i)
+
+    def _build_dependencies(self, builder_id):
+        """
+        Run the builders by recursively traversing through the dependency graph.
+
+        Args:
+            builder_id (int): builder index
+        """
+        if builder_id in self.has_run:
+            return
+        else:
+            if self.dependency_graph[builder_id]:
+                for j in self.dependency_graph[builder_id]:
+                    self._build_dependencies(j)
+            self._run_builder(builder_id)
+            self.has_run.append(builder_id)
+
+    def _run_builder(self, builder_id):
+        """
+        Run builder: self.builders[builder_id]
+
+        Args:
+            builder_id (int): builder index
+
+        Returns:
+
+        """
+        logger.info("building: ", builder_id)
+        self.processor.process(builder_id)
