@@ -206,7 +206,7 @@ class MultiprocProcessor(BaseProcessor):
 
 class Runner(MSONable):
 
-    def __init__(self, builders, num_workers=0):
+    def __init__(self, builders, num_workers=0, processor=None):
         """
         Initialize with a list of builders
 
@@ -214,9 +214,11 @@ class Runner(MSONable):
             builders(list): list of builders
             num_workers (int): number of processes. Used only for multiprocessing.
                 Will be automatically set to (number of cpus - 1) if set to 0.
+            processor(BaseProcessor): set this if custom processor is needed
         """
         self.builders = builders
-        self.processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
+        default_processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
+        self.processor = default_processor if processor is None else processor
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
 
