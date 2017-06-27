@@ -19,7 +19,8 @@ if __name__ == "__main__":
         packages=find_packages(),
         package_data={},
         zip_safe=False,
-        install_requires=['pymongo>=3.4.0', 'mongomock>=3.8.0', 'monty>=0.9.8', 'smoqe==0.1.3', 'PyYAML==3.12'],
+        install_requires=['pymongo>=3.4.0', 'mongomock>=3.8.0', 'monty>=0.9.8',
+                          'smoqe==0.1.3', 'PyYAML==3.12'],
         extras_require={"mpi": ["mpi4py>=2.0.0"]},
         classifiers=["Programming Language :: Python :: 3",
                      "Programming Language :: Python :: 3.6",
@@ -33,5 +34,5 @@ if __name__ == "__main__":
                      'Topic :: Scientific/Engineering'],
         test_suite='nose.collector',
         tests_require=['nose'],
-        #scripts=[os.path.join('scripts', f) for f in os.listdir(os.path.join(module_dir, 'scripts'))]
+        scripts=[os.path.join('scripts', f) for f in os.listdir(os.path.join(module_dir, 'scripts'))]
     )
