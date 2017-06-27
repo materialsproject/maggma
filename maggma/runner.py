@@ -207,7 +207,6 @@ class Runner(MSONable):
         if self.num_workers > 0:
             # start the workers
             for i in range(self.num_workers):
-                print("starting")
                 proc = multiprocessing.Process(target=self.worker, args=(None,))
                 proc.start()
                 processes.append(proc)
