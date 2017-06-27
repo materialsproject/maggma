@@ -92,3 +92,13 @@ class CredentialManager:
             spec
         """
         pass
+
+
+def get_mpi():
+    from mpi4py import MPI
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    return comm, rank, size

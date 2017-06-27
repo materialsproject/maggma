@@ -1,11 +1,13 @@
-import sys
 import logging
 import multiprocessing
 import queue
+import sys
 from collections import defaultdict
 from itertools import cycle
 
 from monty.json import MSONable
+
+from maggma.helpers import get_mpi
 
 logger = logging.getLogger(__name__)
 sh = logging.StreamHandler(stream=sys.stdout)
@@ -93,7 +95,7 @@ class Runner(MSONable):
                 - update targets
                 - finalize aka cleanup(close all connections etc)
         """
-        for i, b in enumerate(self.builders):
+        for i in range(len(self.builders)):
             self._build_dependencies(i)
     
     def _build_dependencies(self, builder_id):
@@ -114,7 +116,7 @@ class Runner(MSONable):
 
     def _run_builder(self, builder_id):
         """
-        Run builder, self.builders[builder_id]
+        Run builder: self.builders[builder_id]
 
         Args:
             builder_id (int): builder index
@@ -130,6 +132,7 @@ class Runner(MSONable):
 
     def _run_builder_in_mpi(self, builder_id):
         """
+        Run the builder using MPI protocol.
 
         Args:
             builder_id (int): the index of the builder in the builders list
@@ -184,6 +187,7 @@ class Runner(MSONable):
 
     def _run_builder_in_multiproc(self, builder_id):
         """
+        Run the builder using the builtin multiprocessing.
         Adapted from pymatgen-db
 
         Args:
@@ -200,8 +204,8 @@ class Runner(MSONable):
             packet = (builder_id, item)
             self._queue.put(packet)
 
-        # start the workers
-        if self.num_workers > 1:
+        if self.num_workers > 0:
+            # start the workers
             for i in range(self.num_workers):
                 print("starting")
                 proc = multiprocessing.Process(target=self.worker, args=(None,))
@@ -213,6 +217,7 @@ class Runner(MSONable):
                 processes[i].join()
                 code = processes[i].exitcode
                 self.status.append(not bool(code))
+        # serial execution
         else:
             try:
                 self.worker()
@@ -230,101 +235,25 @@ class Runner(MSONable):
     def worker(self, comm=None):
         """
         Where shit gets done!
-        Call the builder's process_item method and send back(or put it in the shared dict) the
-        processed item
+        Call the builder's process_item method and send back(or put it in the shared dict if
+        multiprocess) the processed item
 
         Args:
-            comm (MPI.comm): mpi communicator
+            comm (MPI.comm): mpi communicator, must be given when using MPI.
         """
-
-        if self.use_mpi:
-            while True:
-                packet = comm.recv(source=0)
-                if packet is None:
-                    break
-                builder_id, item = packet
-                processed_item = self.builders[builder_id].process_item(item)
-                comm.ssend(processed_item, 0)
-        else:
-            while True:
-                try:
-                    packet = self._queue.get(timeout=2)
+        while True:
+            if self.use_mpi:
+                    packet = comm.recv(source=0)
+                    if packet is None:
+                        break
                     builder_id, item = packet
                     processed_item = self.builders[builder_id].process_item(item)
-                    self.processed_items.update(processed_item)
-                except queue.Empty:
-                    break
-
-    # TODO: scrape this? - KM
-    def _run_builder_in_mpi_collective_comm(self, builder, scatter=True):
-        """
-        Since all the items to be processed are fetched on the master node at once, this
-        implementation could be problematic if there are large number of items or small number of
-        large items.
-
-        At the moment it is hard to get around this: only pickleable objects can be passed
-        around using MPI and generators/Queues(uses thread locking internally) are not pickleable!!
-
-        Args:
-            builder (Builder): Any object of class that subclasses Builder
-            scatter (bool): if True then the items are scattered from the master to slaves, else
-                broadcasted.
-        """
-
-        (comm, rank, size) = get_mpi()
-
-        items = None
-
-        # get all items at the master
-        if rank == 0:
-            items = list(builder.get_items())
-
-        # pad items if necessary and scatter it to the slaves
-        # ==>
-        # large memory consumption(if the number and/or size of the items are large) ONLY at the master
-        if scatter:
-            itm = None
-            if rank == 0:
-                n = len(items)
-                chunk_size, n_chunks = (n//size, size) if size <= n else (1, n)
-                itm = [items[r * chunk_size:(r + 1) * chunk_size] for r in range(n_chunks)]
-                # if there are processes than elements, pad the scattering list
-                itm.extend([[] for _ in range(max(0, size - n))])
-                if 0 < n % size < n:
-                    itm[-1].extend(items[size * chunk_size:])
-                # print("size", size, chunk_size)
-
-            itm = comm.scatter(itm, root=0)
-
-            builder.process_item(itm)
-
-        # broadcast all items from the master to the slaves.
-        # ==>
-        # large memory consumption(if the number and/or size of the items are large) on ALL NODES.
-        else:
-            items = comm.bcast(items, root=0) if comm else items
-
-            n = len(items)
-            chunk_size = n // size
-
-            # adjust chuck size if the data size is not divisible by the
-            # number of processors
-            if rank == 0:
-                if n % size != 0:
-                    chunk_size = chunk_size + n % size
-
-            items_chunk = items[rank:rank + chunk_size]
-
-            for itm in items_chunk:
-                builder.process_item(itm)
-
-
-def get_mpi():
-    from mpi4py import MPI
-
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
-
-    return comm, rank, size
-
+                    comm.ssend(processed_item, 0)
+            else:
+                    try:
+                        packet = self._queue.get(timeout=2)
+                        builder_id, item = packet
+                        processed_item = self.builders[builder_id].process_item(item)
+                        self.processed_items.update(processed_item)
+                    except queue.Empty:
+                        break
