@@ -16,35 +16,42 @@ logger.addHandler(sh)
 
 class Runner(MSONable):
 
-    def __init__(self, builders, use_mpi=True, num_workers=1):
+    def __init__(self, builders, num_workers=0):
         """
         Initialize with a lit of builders
 
         Args:
             builders(list): list of builders
-            use_mpi (bool): if True its is assumed that the building is done via MPI, else
-                multiprocessing is used.
             num_workers (int): number of processes. Used only for multiprocessing.
+                Will be automatically set to (number of cpus - 1) if set to 0.
         """
         self.builders = builders
-        self.use_mpi = use_mpi
-        self.num_workers = num_workers if not use_mpi else 1
+
+        try:
+            (comm, rank, size) = get_mpi()
+            self.use_mpi = True if size > 1 else False
+        except ImportError:
+            print("either 'mpi4py' is not installed or issue with the installation. "
+                  "Proceeding with mulitprocessing.")
+            self.use_mpi = False
+
         # multiprocessing only if mpi is not used, no mixing
-        if not use_mpi:
+        self.num_workers = num_workers if num_workers > 0 else multiprocessing.cpu_count()-1
+        if not self.use_mpi:
             if self.num_workers > 1:
+                print("Building with multiprocessing, {} workers in the pool".format(self.num_workers))
                 self._queue = multiprocessing.Queue()
                 manager = multiprocessing.Manager()
                 self.processed_items = manager.dict()
             # serial
             else:
+                print("Building serially")
                 self._queue = queue.Queue()
                 self.processed_items = dict()
         else:
-            try:
-                from mpi4py import MPI
-            except ImportError:
-                raise ImportError("Trying to use MPI without 'mpi4py' package. Refuse to proceed "
-                                  "with this insanity!")
+            if rank == 0:
+                print("Building with MPI. {} workers in the pool.".format(size-1))
+
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
         self.status = []  # builder run status
@@ -313,17 +320,11 @@ class Runner(MSONable):
 
 
 def get_mpi():
-    try:
-        from mpi4py import MPI
+    from mpi4py import MPI
 
-        comm = MPI.COMM_WORLD
-        rank = comm.Get_rank()
-        size = comm.Get_size()
-    except ImportError:
-        comm = None
-        rank = 0
-        size = 1
-        logger.warning("No MPI. Install mpi4py package")
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
 
     return comm, rank, size
 
