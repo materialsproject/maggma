@@ -14,7 +14,6 @@ sh.setFormatter('%(asctime)s %(levelname)s %(message)s')
 logger.addHandler(sh)
 
 
-# TODO: add tests
 class Runner(MSONable):
 
     def __init__(self, builders, use_mpi=True, num_workers=1):
@@ -30,13 +29,22 @@ class Runner(MSONable):
         self.builders = builders
         self.use_mpi = use_mpi
         self.num_workers = num_workers if not use_mpi else 1
-        if not use_mpi and self.num_workers > 1:
-            self._queue = multiprocessing.Queue()
-            manager = multiprocessing.Manager()
-            self.processed_items = manager.dict()
+        # multiprocessing only if mpi is not used, no mixing
+        if not use_mpi:
+            if self.num_workers > 1:
+                self._queue = multiprocessing.Queue()
+                manager = multiprocessing.Manager()
+                self.processed_items = manager.dict()
+            # serial
+            else:
+                self._queue = queue.Queue()
+                self.processed_items = dict()
         else:
-            self._queue = queue.Queue()
-            self.processed_items = dict()
+            try:
+                from mpi4py import MPI
+            except ImportError:
+                raise ImportError("Trying to use MPI without 'mpi4py' package. Refuse to proceed "
+                                  "with this insanity!")
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
         self.status = []  # builder run status
