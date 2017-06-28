@@ -34,10 +34,17 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
 
     @abc.abstractmethod
     def process(self):
+        """
+        Does the processing. e.g. send work to workers(in MPI) or start the processes in 
+        multiprocessing.
+        """        
         pass
 
     @abc.abstractmethod
     def worker(self, comm=None):
+        """
+        Defines what a worker(slave in MPI or process in multiprocessing) does.
+        """
         pass
 
 
@@ -106,8 +113,7 @@ class MPIProcessor(BaseProcessor):
     def worker(self, comm):
         """
         Where shit gets done!
-        Call the builder's process_item method and send back(or put it in the shared dict if
-        multiprocess) the processed item
+        Call the builder's process_item method and send back the processed item
 
         Args:
             comm (MPI.comm): mpi communicator, must be given when using MPI.
@@ -187,12 +193,7 @@ class MultiprocProcessor(BaseProcessor):
 
     def worker(self):
         """
-        Where shit gets done!
-        Call the builder's process_item method and send back(or put it in the shared dict if
-        multiprocess) the processed item
-
-        Args:
-            comm (MPI.comm): mpi communicator, must be given when using MPI.
+        Call the builder's process_item method and put the processed item in the shared dict.
         """
         while True:
             try:
@@ -214,7 +215,8 @@ class Runner(MSONable):
             builders(list): list of builders
             num_workers (int): number of processes. Used only for multiprocessing.
                 Will be automatically set to (number of cpus - 1) if set to 0.
-            processor(BaseProcessor): set this if custom processor is needed
+            processor(BaseProcessor): set this if custom processor is needed(must 
+                subclass BaseProcessor though)
         """
         self.builders = builders
         default_processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
