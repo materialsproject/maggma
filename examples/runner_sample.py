@@ -7,6 +7,8 @@
 from maggma.stores import MemoryStore
 from maggma.builder import Builder
 from maggma.runner import Runner
+import random
+import time
 
 
 class MyDumbBuilder(Builder):
@@ -17,6 +19,7 @@ class MyDumbBuilder(Builder):
 
     def process_item(self, item):
         print("processing item: {}".format(item))
+        time.sleep(random.randint(0,5))
         return {item: "processed"}
 
     def update_targets(self, items):
