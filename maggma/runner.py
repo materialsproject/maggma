@@ -61,6 +61,7 @@ class MPIProcessor(BaseProcessor):
         Args:
             builder_id (int): the index of the builder in the builders list
         """
+        self.comm.Barrier()
         # master: doesnt do any 'work', just distributes the workload.
         if self.rank == 0:
             self.master(builder_id)
@@ -227,7 +228,7 @@ class Runner(MSONable):
     @property
     def use_mpi(self):
         try:
-            (comm, rank, size) = get_mpi()
+            (_, _, size) = get_mpi()
             use_mpi = True if size > 1 else False
         except ImportError:
             print("either 'mpi4py' is not installed or issue with the installation. "
