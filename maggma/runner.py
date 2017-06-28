@@ -41,7 +41,7 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
         pass
 
     @abc.abstractmethod
-    def worker(self, comm=None):
+    def worker(self):
         """
         Defines what a worker(slave in MPI or process in multiprocessing) does.
         """
@@ -51,6 +51,7 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
 class MPIProcessor(BaseProcessor):
 
     def __init__(self, builders):
+        (self.comm, self.rank, self.size) = get_mpi()        
         super(MPIProcessor, self).__init__(builders)
 
     def process(self, builder_id):
@@ -60,57 +61,56 @@ class MPIProcessor(BaseProcessor):
         Args:
             builder_id (int): the index of the builder in the builders list
         """
-        (comm, rank, size) = get_mpi()
-        if rank == 0:
-            print("Building with MPI. {} workers in the pool.".format(size - 1))
-        processed_items_dict = {}
-
         # master: doesnt do any 'work', just distributes the workload.
-        if rank == 0:
-            builder = self.builders[builder_id]
-            # establish connection to the sources
-            builder.connect(sources=True)
-
-            # cycle through the workers, there could be less workers than the items to process
-            worker_id = cycle(range(1, size))
-
-            n = 0
-            # distribute the items to process
-            for item in builder.get_items():
-                packet = (builder_id, item)
-                comm.send(packet, dest=next(worker_id))
-                n = n+1
-
-            logger.info("{} items sent for processing".format(n))
-
-            # get processed item from the workers
-            for i in range(n):
-                try:
-                    processed_item = comm.recv()
-                    self.status.append(True)
-                    processed_items_dict.update(processed_item)
-                except:
-                    raise
-
-            # kill workers
-            for _ in range(size - 1):
-                comm.send(None, dest=next(worker_id))
-
-            # update the targets
-            builder.connect(sources=False)
-            builder.update_targets(processed_items_dict)
-
-            if all(self.status):
-                builder.finalize()
-
-        # workers:
-        #   - process item
-        #   - update target
-        #   - report status
+        if self.rank == 0:
+            self.master(builder_id)
+        # worker: process item
         else:
-            self.worker(comm)
+            self.worker()
 
-    def worker(self, comm):
+    def master(self, builder_id):
+        print("Building with MPI. {} workers in the pool.".format(self.size - 1))
+        
+        processed_items_dict = {}            
+        builder = self.builders[builder_id]
+        
+        # establish connection to the sources
+        builder.connect(sources=True)
+
+        # cycle through the workers, there could be less workers than the items to process
+        worker_id = cycle(range(1, self.size))
+
+        n = 0
+        # distribute the items to process
+        for item in builder.get_items():
+            packet = (builder_id, item)
+            self.comm.send(packet, dest=next(worker_id))
+            n = n+1
+
+        logger.info("{} items sent for processing".format(n))
+
+        # get processed item from the workers
+        for i in range(n):
+            try:
+                processed_item = self.comm.recv()
+                self.status.append(True)
+                processed_items_dict.update(processed_item)
+            except:
+                raise
+
+        # kill workers
+        for _ in range(self.size - 1):
+            self.comm.send(None, dest=next(worker_id))
+
+        # update the targets
+        builder.connect(sources=False)
+        builder.update_targets(processed_items_dict)
+
+        if all(self.status):
+            builder.finalize()
+
+        
+    def worker(self):
         """
         Where shit gets done!
         Call the builder's process_item method and send back the processed item
@@ -119,12 +119,12 @@ class MPIProcessor(BaseProcessor):
             comm (MPI.comm): mpi communicator, must be given when using MPI.
         """
         while True:
-            packet = comm.recv(source=0)
+            packet = self.comm.recv(source=0)
             if packet is None:
                 break
             builder_id, item = packet
             processed_item = self.builders[builder_id].process_item(item)
-            comm.ssend(processed_item, 0)
+            self.comm.ssend(processed_item, 0)
 
 
 class MultiprocProcessor(BaseProcessor):
