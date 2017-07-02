@@ -38,12 +38,13 @@ class Store(MSONable, metaclass=ABCMeta):
     def meta(self):
         return self.collection.db["{}.meta".format(self.collection.name)]
 
+    @property
     def last_updated(self):
         doc = next(self.collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         return doc[self.lu_field] if doc else datetime.datetime.min
 
-    def lu_fiter(self, targets):
+    def lu_filter(self, targets):
         """
         Creates a filter string that can be applied to the source collection assuming
         targets is a list of Stores.
@@ -72,7 +73,7 @@ class MongoStore(Store):
     A Store that connects to any Mongo collection
     """
 
-    def __init__(self, database, collection, host="", port=27017, username="", password="",
+    def __init__(self, database, collection, host="localhost", port=27017, username="", password="",
                  lu_field='_lu'):
         """
 
