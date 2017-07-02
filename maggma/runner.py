@@ -72,7 +72,7 @@ class MPIProcessor(BaseProcessor):
     def master(self, builder_id):
         print("Building with MPI. {} workers in the pool.".format(self.size - 1))
         
-        processed_items_dict = {}            
+        processed_items = []
         builder = self.builders[builder_id]
         
         # establish connection to the sources
@@ -95,7 +95,7 @@ class MPIProcessor(BaseProcessor):
             try:
                 processed_item = self.comm.recv()
                 self.status.append(True)
-                processed_items_dict.update(processed_item)
+                processed_items.append(processed_item)
             except:
                 raise
 
@@ -105,7 +105,7 @@ class MPIProcessor(BaseProcessor):
 
         # update the targets
         builder.connect(sources=False)
-        builder.update_targets(processed_items_dict)
+        builder.update_targets(processed_items)
 
         if all(self.status):
             builder.finalize()
@@ -138,12 +138,12 @@ class MultiprocProcessor(BaseProcessor):
                 self.num_workers))
             self._queue = multiprocessing.Queue()
             manager = multiprocessing.Manager()
-            self.processed_items = manager.dict()
+            self.processed_items = manager.list()
         # serial
         else:
             print("Building serially")
             self._queue = queue.Queue()
-            self.processed_items = dict()
+            self.processed_items = []
         super(MultiprocProcessor, self).__init__(builders, num_workers)
 
     def process(self, builder_id):
@@ -201,7 +201,7 @@ class MultiprocProcessor(BaseProcessor):
                 packet = self._queue.get(timeout=2)
                 builder_id, item = packet
                 processed_item = self.builders[builder_id].process_item(item)
-                self.processed_items.update(processed_item)
+                self.processed_items.append(processed_item)
             except queue.Empty:
                 break
 

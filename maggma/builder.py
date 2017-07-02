@@ -49,7 +49,7 @@ class Builder(MSONable, metaclass=ABCMeta):
             item:
 
         Returns:
-            dict: {target: item to insert}
+           item: an item to update
         """
         return item
 
