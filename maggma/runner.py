@@ -75,8 +75,9 @@ class MPIProcessor(BaseProcessor):
         processed_items = []
         builder = self.builders[builder_id]
         
-        # establish connection to the sources
+        # establish connection to the sources and targets
         builder.connect(sources=True)
+        builder.connect(sources=False)
 
         # cycle through the workers, there could be less workers than the items to process
         worker_id = cycle(range(1, self.size))
@@ -104,13 +105,11 @@ class MPIProcessor(BaseProcessor):
             self.comm.send(None, dest=next(worker_id))
 
         # update the targets
-        builder.connect(sources=False)
         builder.update_targets(processed_items)
 
         if all(self.status):
             builder.finalize()
 
-        
     def worker(self):
         """
         Where shit gets done!
@@ -157,8 +156,9 @@ class MultiprocProcessor(BaseProcessor):
         processes = []
         builder = self.builders[builder_id]
 
-        # establish connection to the sources
+        # establish connection to the sources and targets
         builder.connect(sources=True)
+        builder.connect(sources=False)
 
         # send items to process
         for item in builder.get_items():
@@ -186,7 +186,6 @@ class MultiprocProcessor(BaseProcessor):
                 raise
 
         # update the targets
-        builder.connect(sources=False)
         builder.update_targets(self.processed_items)
 
         if all(self.status):
