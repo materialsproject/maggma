@@ -76,8 +76,7 @@ class MPIProcessor(BaseProcessor):
         builder = self.builders[builder_id]
         
         # establish connection to the sources and targets
-        builder.connect(sources=True)
-        builder.connect(sources=False)
+        builder.connect()
 
         # cycle through the workers, there could be less workers than the items to process
         worker_id = cycle(range(1, self.size))
@@ -157,8 +156,7 @@ class MultiprocProcessor(BaseProcessor):
         builder = self.builders[builder_id]
 
         # establish connection to the sources and targets
-        builder.connect(sources=True)
-        builder.connect(sources=False)
+        builder.connect()
 
         # send items to process
         for item in builder.get_items():

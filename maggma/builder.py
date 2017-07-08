@@ -20,14 +20,11 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.process_chunk_size = process_chunk_size
         self.get_chunk_size = get_chunk_size
 
-    def connect(self, sources=True):
+    def connect(self):
         """
-        Connect to the builder sources or targets.
-
-        Args:
-            sources (bool): if True connect to sources else targets
+        Connect to the builder sources and targets.
         """
-        stores = self.sources if sources else self.targets
+        stores = self.sources + self.targets
         for s in stores:
             s.connect()
 
