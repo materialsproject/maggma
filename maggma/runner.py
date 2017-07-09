@@ -74,6 +74,7 @@ class MPIProcessor(BaseProcessor):
         
         processed_items = []
         builder = self.builders[builder_id]
+        chunk_size = builder.get_chunk_size
         
         # establish connection to the sources and targets
         builder.connect()
@@ -82,21 +83,30 @@ class MPIProcessor(BaseProcessor):
         worker_id = cycle(range(1, self.size))
 
         n = 0
-        # distribute the items to process
+        workers = []
+        # distribute the items to process (in chunks of size chunk_size)
         for item in builder.get_items():
+            if n % chunk_size == 0:
+                print("processing chunks of size {}".format(chunk_size))
+                processed_chunk, status = self._process_chunk(chunk_size, workers)
+                processed_items.extend(processed_chunk)
+
+                if status:
+                    if not all(status):
+                        raise RuntimeError("processing failed")
+                    workers = []
+
             packet = (builder_id, item)
-            self.comm.send(packet, dest=next(worker_id))
-            n = n+1
+            wid = next(worker_id)
+            workers.append(wid)
+            self.comm.send(packet, dest=wid)
+            n += 1
 
-        logger.info("{} items sent for processing".format(n))
-
-        # get processed item from the workers
-        for i in range(n):
-            try:
-                processed_item = self.comm.recv()
-                self.status.append(True)
-                processed_items.append(processed_item)
-            except:
+        # incase the total number of items is not divisible by chunk_size, process the leftovers.
+        if workers:
+            processed_chunk, status = self._process_chunk(chunk_size, workers)
+            processed_items.extend(processed_chunk)
+            if not all(status):
                 raise
 
         # kill workers
@@ -108,6 +118,33 @@ class MPIProcessor(BaseProcessor):
 
         if all(self.status):
             builder.finalize()
+
+    def _process_chunk(self, chunk_size, workers):
+        """
+        process chunk_size items.
+
+        Args:
+            chunk_size (int):
+            workers (list): lis tpf worker ids
+
+        Returns:
+            (list, list): list of processed items, each process' status list
+        """
+        status = []
+        processed_chunk = []
+        logger.info("{} items sent for processing".format(chunk_size))
+
+        # get processed item from the workers
+        if workers:
+            for _ in workers:
+                try:
+                    processed_item = self.comm.recv()
+                    status.append(True)
+                    processed_chunk.append(processed_item)
+                except:
+                    raise
+
+        return processed_chunk, status
 
     def worker(self):
         """
