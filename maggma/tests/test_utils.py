@@ -27,7 +27,7 @@ class UtilsTests(unittest.TestCase):
         d = {"a": {"b":3}, "c": [4]}
 
         recursive_update(d, {"c": [5]})
-        self.assertEqual(d["c"],[4,5])
+        self.assertEqual(d["c"],[5])
 
         recursive_update(d,{"a":{"b":5}})
         self.assertEqual(d["a"]["b"],5)
@@ -36,4 +36,4 @@ class UtilsTests(unittest.TestCase):
         self.assertEqual(d["a"]["b"], [6])
 
         recursive_update(d, {"a": {"b": [7]}})
-        self.assertEqual(d["a"]["b"], [6,7])
+        self.assertEqual(d["a"]["b"], [7])
