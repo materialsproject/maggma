@@ -4,17 +4,21 @@
 # with mpi(need mpi4py pacakge):
 #    mpiexec -n 5 python runner_sample.py
 
+import random
+import time
+
 from maggma.stores import MemoryStore
 from maggma.builder import Builder
 from maggma.runner import Runner
-import random
-import time
+
+__author__ = "Kiran Mathew"
 
 
 class MyDumbBuilder(Builder):
 
     def __init__(self, N,  sources, targets, get_chunk_size, process_chunk_size=1):
-        super(MyDumbBuilder, self).__init__(sources, targets, get_chunk_size, process_chunk_size)
+        super(MyDumbBuilder, self).__init__(sources, targets, get_chunk_size,
+                                            process_chunk_size)
         self.N = N
     
 
@@ -24,7 +28,7 @@ class MyDumbBuilder(Builder):
 
     def process_item(self, item):
         print("processing item: {}".format(item))
-        #time.sleep(random.randint(0,5))
+        time.sleep(random.randint(0,3))
         return {item: "processed"}
 
     def update_targets(self, items):
@@ -40,10 +44,15 @@ class MyDumbBuilder(Builder):
 if __name__ == '__main__':
     N=10
     get_chunk_size=3
+    
     stores = [MemoryStore(str(i)) for i in range(7)]
     sources = [stores[0], stores[1], stores[3]]
     targets = [stores[3], stores[6]]
+    
     mdb = MyDumbBuilder(N, sources, targets, get_chunk_size=get_chunk_size)
-    builders = [mdb]    
+    
+    builders = [mdb]
+    
     runner = Runner(builders)
+    
     runner.run()

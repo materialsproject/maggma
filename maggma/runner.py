@@ -90,6 +90,7 @@ class MPIProcessor(BaseProcessor):
                 print("processing chunks of size {}".format(chunk_size))
                 processed_chunk, status = self._process_chunk(chunk_size, workers)
                 processed_items.extend(processed_chunk)
+                self.status.extend(status)
 
                 if status:
                     if not all(status):
@@ -102,10 +103,11 @@ class MPIProcessor(BaseProcessor):
             self.comm.send(packet, dest=wid)
             n += 1
 
-        # incase the total number of items is not divisible by chunk_size, process the leftovers.
+        # in case the total number of items is not divisible by chunk_size, process the leftovers.
         if workers:
             processed_chunk, status = self._process_chunk(chunk_size, workers)
             processed_items.extend(processed_chunk)
+            self.status.extend(status)
             if not all(status):
                 raise
 
@@ -116,6 +118,7 @@ class MPIProcessor(BaseProcessor):
         # update the targets
         builder.update_targets(processed_items)
 
+        # finalize
         if all(self.status):
             builder.finalize()
 
@@ -189,16 +192,42 @@ class MultiprocProcessor(BaseProcessor):
         Args:
             builder_id (int): the index of the builder in the builders list
         """
-        processes = []
         builder = self.builders[builder_id]
+        chunk_size = builder.get_chunk_size
 
         # establish connection to the sources and targets
         builder.connect()
 
+        n = 0
         # send items to process
         for item in builder.get_items():
+            if n % chunk_size == 0:
+                print("processing chunks of size {}".format(chunk_size))
+                status = self._process_chunk()
+                self.status.extend(status)
+
+                if status:
+                    if not all(status):
+                        raise RuntimeError("processing failed")
+
             packet = (builder_id, item)
             self._queue.put(packet)
+            n += 1
+
+        # handle the leftovers
+        status = self._process_chunk()
+        self.status.extend(status)
+
+        # update the targets
+        builder.update_targets(self.processed_items)
+
+        # finalize
+        if all(self.status):
+            self.builders[builder_id].finalize()
+
+    def _process_chunk(self):
+        processes = []
+        status = []
 
         if self.num_workers > 0:
             # start the workers
@@ -211,20 +240,15 @@ class MultiprocProcessor(BaseProcessor):
             for i in range(self.num_workers):
                 processes[i].join()
                 code = processes[i].exitcode
-                self.status.append(not bool(code))
+                status.append(not bool(code))
         # serial execution
         else:
             try:
                 self.worker()
-                self.status.append(True)
+                status.append(True)
             except:
                 raise
-
-        # update the targets
-        builder.update_targets(self.processed_items)
-
-        if all(self.status):
-            self.builders[builder_id].finalize()
+        return status
 
     def worker(self):
         """
