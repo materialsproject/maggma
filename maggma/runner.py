@@ -88,15 +88,8 @@ class MPIProcessor(BaseProcessor):
         for item in builder.get_items():
             if n % chunk_size == 0:
                 print("processing chunks of size {}".format(chunk_size))
-                processed_chunk, status = self._process_chunk(chunk_size, workers)
+                processed_chunk = self._process_chunk(chunk_size, workers)
                 processed_items.extend(processed_chunk)
-                self.status.extend(status)
-
-                if status:
-                    if not all(status):
-                        raise RuntimeError("processing failed")
-                    workers = []
-
             packet = (builder_id, item)
             wid = next(worker_id)
             workers.append(wid)
@@ -105,11 +98,8 @@ class MPIProcessor(BaseProcessor):
 
         # in case the total number of items is not divisible by chunk_size, process the leftovers.
         if workers:
-            processed_chunk, status = self._process_chunk(chunk_size, workers)
+            processed_chunk = self._process_chunk(chunk_size, workers)
             processed_items.extend(processed_chunk)
-            self.status.extend(status)
-            if not all(status):
-                raise
 
         # kill workers
         for _ in range(self.size - 1):
@@ -121,6 +111,8 @@ class MPIProcessor(BaseProcessor):
         # finalize
         if all(self.status):
             builder.finalize()
+        else:
+            raise RuntimeError("Building failed!")
 
     def _process_chunk(self, chunk_size, workers):
         """
@@ -131,23 +123,28 @@ class MPIProcessor(BaseProcessor):
             workers (list): lis tpf worker ids
 
         Returns:
-            (list, list): list of processed items, each process' status list
+            list : list of processed items
         """
         status = []
         processed_chunk = []
         logger.info("{} items sent for processing".format(chunk_size))
 
         # get processed item from the workers
-        if workers:
-            for _ in workers:
-                try:
-                    processed_item = self.comm.recv()
-                    status.append(True)
-                    processed_chunk.append(processed_item)
-                except:
-                    raise
+        while workers:
+            try:
+                processed_item = self.comm.recv()
+                status.append(True)
+                processed_chunk.append(processed_item)
+            except:
+                raise
+            workers.pop()
 
-        return processed_chunk, status
+        if status:
+            if not all(status):
+                raise RuntimeError("processing failed")
+            self.status.extend(status)
+
+        return processed_chunk
 
     def worker(self):
         """
@@ -203,20 +200,13 @@ class MultiprocProcessor(BaseProcessor):
         for item in builder.get_items():
             if n % chunk_size == 0:
                 print("processing chunks of size {}".format(chunk_size))
-                status = self._process_chunk()
-                self.status.extend(status)
-
-                if status:
-                    if not all(status):
-                        raise RuntimeError("processing failed")
-
+                self._process_chunk()
             packet = (builder_id, item)
             self._queue.put(packet)
             n += 1
 
         # handle the leftovers
-        status = self._process_chunk()
-        self.status.extend(status)
+        self._process_chunk()
 
         # update the targets
         builder.update_targets(self.processed_items)
@@ -224,8 +214,13 @@ class MultiprocProcessor(BaseProcessor):
         # finalize
         if all(self.status):
             self.builders[builder_id].finalize()
+        else:
+            raise RuntimeError("Building failed!")
 
     def _process_chunk(self):
+        """
+        Process builder.get_chunk_size items.
+        """
         processes = []
         status = []
 
@@ -248,7 +243,11 @@ class MultiprocProcessor(BaseProcessor):
                 status.append(True)
             except:
                 raise
-        return status
+
+        if status:
+            if not all(status):
+                raise RuntimeError("processing failed")
+            self.status.extend(status)
 
     def worker(self):
         """

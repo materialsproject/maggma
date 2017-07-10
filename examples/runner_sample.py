@@ -28,7 +28,7 @@ class MyDumbBuilder(Builder):
 
     def process_item(self, item):
         print("processing item: {}".format(item))
-        time.sleep(random.randint(0,3))
+        #time.sleep(random.randint(0,3))
         return {item: "processed"}
 
     def update_targets(self, items):
