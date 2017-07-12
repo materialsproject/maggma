@@ -9,6 +9,7 @@ import abc
 from monty.json import MSONable
 
 from maggma.helpers import get_mpi
+from maggma.utils import grouper
 
 logger = logging.getLogger(__name__)
 sh = logging.StreamHandler(stream=sys.stdout)
@@ -190,7 +191,8 @@ class MultiprocProcessor(BaseProcessor):
             builder_id (int): the index of the builder in the builders list
         """
         builder = self.builders[builder_id]
-        chunk_size = builder.get_chunk_size
+        get_chunk_size = builder.get_chunk_size
+        process_chunk_size = builder.process_chunk_size
 
         # establish connection to the sources and targets
         builder.connect()
@@ -198,9 +200,16 @@ class MultiprocProcessor(BaseProcessor):
         n = 0
         # send items to process
         for item in builder.get_items():
-            if n % chunk_size == 0:
-                print("processing chunks of size {}".format(chunk_size))
+            if n > 0 and n % get_chunk_size == 0:
+                print("processing batch of {} items".format(get_chunk_size))
                 self._process_chunk()
+                if process_chunk_size > 0:
+                    print("updating targets in batches of {}".format(
+                        process_chunk_size))
+                    for processed_items in grouper(self.processed_items,
+                                                   process_chunk_size):
+                        builder.update_targets(filter(None, processed_items))
+                    del self.processed_items[:]
             packet = (builder_id, item)
             self._queue.put(packet)
             n += 1
