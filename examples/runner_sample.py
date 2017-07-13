@@ -20,7 +20,6 @@ class MyDumbBuilder(Builder):
         super(MyDumbBuilder, self).__init__(sources, targets, get_chunk_size,
                                             process_chunk_size)
         self.N = N
-    
 
     def get_items(self):
         for i in range(self.N):
@@ -28,13 +27,13 @@ class MyDumbBuilder(Builder):
 
     def process_item(self, item):
         print("processing item: {}".format(item))
-        #time.sleep(random.randint(0,3))
+        # time.sleep(random.randint(0,3))
         return {item: "processed"}
 
     def update_targets(self, items):
         print("Updating targets ...")        
-        print("Received {} processed items".format(len(items)))
-        print("Processed items: {}".format(items))
+        # print("Received {} processed items".format(len(items)))
+        print("Updated items: {}".format(list(items)))
 
     def finalize(self):
         print("Finalizing ...")
@@ -42,14 +41,16 @@ class MyDumbBuilder(Builder):
 
         
 if __name__ == '__main__':
-    N=10
-    get_chunk_size=3
+    N = 10
+    get_chunk_size = 3
+    process_chunk_size = 2
     
     stores = [MemoryStore(str(i)) for i in range(7)]
     sources = [stores[0], stores[1], stores[3]]
     targets = [stores[3], stores[6]]
     
-    mdb = MyDumbBuilder(N, sources, targets, get_chunk_size=get_chunk_size)
+    mdb = MyDumbBuilder(N, sources, targets, get_chunk_size=get_chunk_size,
+                        process_chunk_size=process_chunk_size)
     
     builders = [mdb]
     

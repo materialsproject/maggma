@@ -9,6 +9,7 @@ import abc
 from monty.json import MSONable
 
 from maggma.helpers import get_mpi
+from maggma.utils import grouper
 
 logger = logging.getLogger(__name__)
 sh = logging.StreamHandler(stream=sys.stdout)
@@ -33,10 +34,14 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
         self.status = []
 
     @abc.abstractmethod
-    def process(self):
+    def process(self, builder_id):
         """
         Does the processing. e.g. send work to workers(in MPI) or start the processes in 
         multiprocessing.
+
+        Args:
+            builder_id (int): process the builder_id th builder i.e
+                process_item --> update_targets --> finalize
         """        
         pass
 
@@ -46,6 +51,21 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
         Defines what a worker(slave in MPI or process in multiprocessing) does.
         """
         pass
+
+    def update_targets_in_chunks(self, builder_id, processed_items):
+        """
+        Run the builder's update_targets method on the list of processed items in chunks of size
+        'process_chunk_size'.
+
+        Args:
+            builder_id (int):
+            processed_items (list): list of items to be used to update the targets
+        """
+        chunk_size = self.builders[builder_id].process_chunk_size
+        if chunk_size > 0:
+            print("updating targets in batches of {}".format(chunk_size))
+            for pitems in grouper(processed_items, chunk_size):
+                self.builders[builder_id].update_targets(filter(None, pitems))
 
 
 class MPIProcessor(BaseProcessor):
@@ -72,7 +92,6 @@ class MPIProcessor(BaseProcessor):
     def master(self, builder_id):
         print("Building with MPI. {} workers in the pool.".format(self.size - 1))
         
-        processed_items = []
         builder = self.builders[builder_id]
         chunk_size = builder.get_chunk_size
         
@@ -89,7 +108,7 @@ class MPIProcessor(BaseProcessor):
             if n % chunk_size == 0:
                 print("processing chunks of size {}".format(chunk_size))
                 processed_chunk = self._process_chunk(chunk_size, workers)
-                processed_items.extend(processed_chunk)
+                self.update_targets_in_chunks(builder_id, processed_chunk)
             packet = (builder_id, item)
             wid = next(worker_id)
             workers.append(wid)
@@ -99,14 +118,11 @@ class MPIProcessor(BaseProcessor):
         # in case the total number of items is not divisible by chunk_size, process the leftovers.
         if workers:
             processed_chunk = self._process_chunk(chunk_size, workers)
-            processed_items.extend(processed_chunk)
+            self.update_targets_in_chunks(builder_id, processed_chunk)
 
         # kill workers
         for _ in range(self.size - 1):
             self.comm.send(None, dest=next(worker_id))
-
-        # update the targets
-        builder.update_targets(processed_items)
 
         # finalize
         if all(self.status):
@@ -190,7 +206,7 @@ class MultiprocProcessor(BaseProcessor):
             builder_id (int): the index of the builder in the builders list
         """
         builder = self.builders[builder_id]
-        chunk_size = builder.get_chunk_size
+        get_chunk_size = builder.get_chunk_size
 
         # establish connection to the sources and targets
         builder.connect()
@@ -198,18 +214,18 @@ class MultiprocProcessor(BaseProcessor):
         n = 0
         # send items to process
         for item in builder.get_items():
-            if n % chunk_size == 0:
-                print("processing chunks of size {}".format(chunk_size))
+            if n > 0 and n % get_chunk_size == 0:
+                print("processing batch of {} items".format(get_chunk_size))
                 self._process_chunk()
+                self.update_targets_in_chunks(builder_id, self.processed_items)
+                del self.processed_items[:]
             packet = (builder_id, item)
             self._queue.put(packet)
             n += 1
 
         # handle the leftovers
         self._process_chunk()
-
-        # update the targets
-        builder.update_targets(self.processed_items)
+        self.update_targets_in_chunks(builder_id, self.processed_items)
 
         # finalize
         if all(self.status):
