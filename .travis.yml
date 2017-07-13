@@ -12,7 +12,5 @@ notifications:
   email:
     recipients:
       - kmathew@lbl.gov
-      - dwinston@lbl.gov
-      - shyamd@lbl.gov
     on_success: change
     on_failure: always

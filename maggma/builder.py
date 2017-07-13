@@ -20,6 +20,14 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.process_chunk_size = process_chunk_size
         self.get_chunk_size = get_chunk_size
 
+    def connect(self):
+        """
+        Connect to the builder sources and targets.
+        """
+        stores = self.sources + self.targets
+        for s in stores:
+            s.connect()
+
     @abstractmethod
     def get_items(self):
         """
@@ -30,20 +38,18 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod
     def process_item(self, item):
         """
         Process an item. Should not expect DB access as this can be run MPI
-
+        Default behavior is to return the item. 
         Args:
             item:
 
         Returns:
-            dict: {target: item to insert}
+           item: an item to update
         """
-        pass
+        return item
 
-    @abstractmethod
     def update_targets(self, items):
         """
         Takes a dictionary of targets and items from process item and updates them
