@@ -5,6 +5,7 @@ import json
 import mongomock
 import pymongo
 from pymongo import MongoClient
+from pydash import identity
 
 from monty.json import MSONable
 
@@ -44,19 +45,23 @@ class Store(MSONable, metaclass=ABCMeta):
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         return doc[self.lu_field] if doc else datetime.datetime.min
 
-    def lu_filter(self, targets):
-        """
-        Creates a filter string that can be applied to the source collection assuming
-        targets is a list of Stores.
-        
+    def lu_filter(self, targets, dt_key=identity):
+        """Creates a MongoDB filter for new documents.
+
+        By "new", we mean documents in this Store that were last updated later
+        than any document in targets.
+
         Args:
-            targets
+            targets (list): A list of Stores
+            dt_key (function): A key function to map a datetime
+                to the format of this Store's `lu_field`, if necessary.
+
         """
         if isinstance(targets, Store):
             targets = [targets]
 
         lu_list = [t.last_updated for t in targets]
-        return {self.lu_field: {"$gte": max(lu_list)}}
+        return {self.lu_field: {"$gte": dt_key(max(lu_list))}}
 
     def __eq__(self, other):
         return hash(self) == hash(other)
