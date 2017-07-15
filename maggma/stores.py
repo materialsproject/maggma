@@ -16,12 +16,15 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, lu_field='_lu'):
+    def __init__(self, lu_field='_lu', lu_key=identity):
         """
         Args:
             lu_field (str): 'last updated' field name
+            lu_key (function): A key function to map a `datetime`
+                to the format of this Store's `lu_field`, if necessary.
         """
         self.lu_field = lu_field
+        self.lu_key = lu_key
 
     @property
     @abstractmethod
@@ -45,7 +48,7 @@ class Store(MSONable, metaclass=ABCMeta):
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         return doc[self.lu_field] if doc else datetime.datetime.min
 
-    def lu_filter(self, targets, dt_key=identity):
+    def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
 
         By "new", we mean documents in this Store that were last updated later
@@ -53,15 +56,13 @@ class Store(MSONable, metaclass=ABCMeta):
 
         Args:
             targets (list): A list of Stores
-            dt_key (function): A key function to map a datetime
-                to the format of this Store's `lu_field`, if necessary.
 
         """
         if isinstance(targets, Store):
             targets = [targets]
 
         lu_list = [t.last_updated for t in targets]
-        return {self.lu_field: {"$gte": dt_key(max(lu_list))}}
+        return {self.lu_field: {"$gte": self.lu_key(max(lu_list))}}
 
     def __eq__(self, other):
         return hash(self) == hash(other)
