@@ -1,5 +1,7 @@
 # coding: utf-8
 import itertools
+from datetime import datetime
+
 import six
 
 LU_KEY_ISOFORMAT = (lambda s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f"),
