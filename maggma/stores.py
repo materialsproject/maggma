@@ -10,18 +10,19 @@ from pydash import identity
 from monty.json import MSONable
 
 
+
 class Store(MSONable, metaclass=ABCMeta):
     """
     Abstract class for a data Store
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, lu_field='_lu', lu_key=identity):
+    def __init__(self, lu_field='_lu', lu_key=(identity, identity)):
         """
         Args:
             lu_field (str): 'last updated' field name
-            lu_key (function): A key function to map a `datetime`
-                to the format of this Store's `lu_field`, if necessary.
+            lu_key (tuple): A pair of key functions to map
+                self.lu_field to a `datetime` and back, respectively.
         """
         self.lu_field = lu_field
         self.lu_key = lu_key
@@ -46,7 +47,7 @@ class Store(MSONable, metaclass=ABCMeta):
     def last_updated(self):
         doc = next(self.collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
-        return doc[self.lu_field] if doc else datetime.datetime.min
+        return (doc[self.lu_field] if doc else datetime.datetime.min)
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
@@ -62,7 +63,7 @@ class Store(MSONable, metaclass=ABCMeta):
             targets = [targets]
 
         lu_list = [t.last_updated for t in targets]
-        return {self.lu_field: {"$gte": self.lu_key(max(lu_list))}}
+        return {self.lu_field: {"$gte": self.lu_key[1](max(lu_list))}}
 
     def __eq__(self, other):
         return hash(self) == hash(other)
