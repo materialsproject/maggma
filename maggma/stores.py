@@ -80,8 +80,9 @@ class MongoStore(Store):
     A Store that connects to any Mongo collection
     """
 
-    def __init__(self, database, collection, host="localhost", port=27017, username="", password="",
-                 lu_field='_lu'):
+    def __init__(self, database, collection,
+                 host="localhost", port=27017, username="", password="",
+                 **kwargs):
         """
 
         Args:
@@ -100,7 +101,7 @@ class MongoStore(Store):
         self.username = username
         self.password = password
         self.__collection = None
-        super(MongoStore, self).__init__(lu_field)
+        super(MongoStore, self).__init__(**kwargs)
 
     @property
     def collection(self):
@@ -122,10 +123,10 @@ class MemoryStore(Store):
     An in memory Store
     """
 
-    def __init__(self, name, lu_field='_lu'):
+    def __init__(self, name, **kwargs):
         self.name = name
         self.__collection = None
-        super(MemoryStore, self).__init__(lu_field)
+        super(MemoryStore, self).__init__(**kwargs)
 
     @property
     def collection(self):
@@ -143,10 +144,10 @@ class JSONStore(MemoryStore):
     A Store for access to a single or multiple JSON files
     """
 
-    def __init__(self, paths, lu_field='_lu'):
+    def __init__(self, paths, **kwargs):
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
-        super(JSONStore, self).__init__("collection", lu_field)
+        super(JSONStore, self).__init__("collection", **kwargs)
 
     def connect(self):
         super(JSONStore, self).connect()
@@ -163,9 +164,9 @@ class JSONStore(MemoryStore):
 class DatetimeStore(MemoryStore):
     """Utility store intended for use with `Store.lu_filter`."""
 
-    def __init__(self, dt, lu_field='_lu'):
+    def __init__(self, dt, **kwargs):
         self.__dt = dt
-        super(DatetimeStore, self).__init__("date", lu_field)
+        super(DatetimeStore, self).__init__("date", **kwargs)
 
     def connect(self):
         super(DatetimeStore, self).connect()
