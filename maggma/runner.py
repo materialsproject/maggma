@@ -36,13 +36,13 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def process(self, builder_id):
         """
-        Does the processing. e.g. send work to workers(in MPI) or start the processes in 
+        Does the processing. e.g. send work to workers(in MPI) or start the processes in
         multiprocessing.
 
         Args:
             builder_id (int): process the builder_id th builder i.e
                 process_item --> update_targets --> finalize
-        """        
+        """
         pass
 
     @abc.abstractmethod
@@ -71,7 +71,7 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
 class MPIProcessor(BaseProcessor):
 
     def __init__(self, builders):
-        (self.comm, self.rank, self.size) = get_mpi()        
+        (self.comm, self.rank, self.size) = get_mpi()
         super(MPIProcessor, self).__init__(builders)
 
     def process(self, builder_id):
@@ -91,10 +91,10 @@ class MPIProcessor(BaseProcessor):
 
     def master(self, builder_id):
         print("Building with MPI. {} workers in the pool.".format(self.size - 1))
-        
+
         builder = self.builders[builder_id]
         chunk_size = builder.get_chunk_size
-        
+
         # establish connection to the sources and targets
         builder.connect()
 
@@ -104,7 +104,8 @@ class MPIProcessor(BaseProcessor):
         n = 0
         workers = []
         # distribute the items to process (in chunks of size chunk_size)
-        for item in builder.get_items():
+        cursor = builder.get_items()
+        for item in cursor:
             if n % chunk_size == 0:
                 print("processing chunks of size {}".format(chunk_size))
                 processed_chunk = self._process_chunk(chunk_size, workers)
@@ -126,7 +127,7 @@ class MPIProcessor(BaseProcessor):
 
         # finalize
         if all(self.status):
-            builder.finalize()
+            builder.finalize(cursor)
         else:
             raise RuntimeError("Building failed!")
 
@@ -213,7 +214,8 @@ class MultiprocProcessor(BaseProcessor):
 
         n = 0
         # send items to process
-        for item in builder.get_items():
+        cursor = builder.get_items()
+        for item in cursor:
             if n > 0 and n % get_chunk_size == 0:
                 print("processing batch of {} items".format(get_chunk_size))
                 self._process_chunk()
@@ -229,7 +231,7 @@ class MultiprocProcessor(BaseProcessor):
 
         # finalize
         if all(self.status):
-            self.builders[builder_id].finalize()
+            self.builders[builder_id].finalize(cursor)
         else:
             raise RuntimeError("Building failed!")
 
@@ -289,7 +291,7 @@ class Runner(MSONable):
             builders(list): list of builders
             num_workers (int): number of processes. Used only for multiprocessing.
                 Will be automatically set to (number of cpus - 1) if set to 0.
-            processor(BaseProcessor): set this if custom processor is needed(must 
+            processor(BaseProcessor): set this if custom processor is needed(must
                 subclass BaseProcessor though)
         """
         self.builders = builders

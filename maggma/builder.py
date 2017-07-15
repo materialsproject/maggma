@@ -41,7 +41,7 @@ class Builder(MSONable, metaclass=ABCMeta):
     def process_item(self, item):
         """
         Process an item. Should not expect DB access as this can be run MPI
-        Default behavior is to return the item. 
+        Default behavior is to return the item.
         Args:
             item:
 
@@ -50,12 +50,13 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         return item
 
+    @abstractmethod
     def update_targets(self, items):
         """
         Takes a dictionary of targets and items from process item and updates them
         Can also perform other book keeping in the process such as storing gridfs oids, etc.
 
-        Ars:
+        Args:
             items:
 
         Returns:
@@ -63,9 +64,20 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod
-    def finalize(self):
+    def finalize(self, cursor=None):
         """
         Perform any final clean up.
         """
-        pass
+        # Close any Mongo connections.
+        for store in (self.sources + self.targets):
+            try:
+                store.collection.database.client.close()
+            except AttributeError:
+                continue
+        # Runner will pass iterable yielded by `self.get_items` as `cursor`. If
+        # this is a Mongo cursor with `no_cursor_timeout=True` (not the
+        # default), we must be explicitly kill it.
+        try:
+            cursor and cursor.close()
+        except AttributeError:
+            pass
