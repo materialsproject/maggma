@@ -1,4 +1,4 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import datetime
 import json
 
@@ -8,7 +8,6 @@ from pymongo import MongoClient
 from pydash import identity
 
 from monty.json import MSONable
-
 
 
 class Store(MSONable, metaclass=ABCMeta):
@@ -82,9 +81,8 @@ class MongoStore(Store):
     A Store that connects to any Mongo collection
     """
 
-    def __init__(self, database, collection,
-                 host="localhost", port=27017, username="", password="",
-                 **kwargs):
+    def __init__(self, database, collection, host="localhost", port=27017,
+                 username="", password="", **kwargs):
         """
 
         Args:
@@ -160,7 +158,7 @@ class JSONStore(MemoryStore):
                 self.collection.insert_many(objects)
 
     def __hash__(self):
-        return hash((self.path, self.lu_field))
+        return hash((self.paths, self.lu_field))
 
 
 class DatetimeStore(MemoryStore):

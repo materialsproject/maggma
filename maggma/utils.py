@@ -2,10 +2,9 @@
 import itertools
 from datetime import datetime
 
-import six
-
 LU_KEY_ISOFORMAT = (lambda s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f"),
                     lambda dt: dt.isoformat())
+
 
 def get_mongolike(d, key):
     """
@@ -50,9 +49,10 @@ def make_mongolike(d, get_key, put_key):
 def recursive_update(d, u):
     """
     Recursive updates d with values from u
-    :param d: dict to update
-    :param u: updates to propogate
-    :return:
+
+    Args:
+        d (dict): dict to update
+        u (dict): updates to propogate
     """
 
     for k, v in u.items():
@@ -64,8 +64,11 @@ def recursive_update(d, u):
         else:
             d[k] = v
 
+
 def grouper(iterable, n, fillvalue=None):
-    """Collect data into fixed-length chunks or blocks."""
+    """
+    Collect data into fixed-length chunks or blocks.
+    """
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
     args = [iter(iterable)] * n
     return itertools.zip_longest(*args, fillvalue=fillvalue)
