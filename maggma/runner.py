@@ -65,7 +65,7 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
         if chunk_size > 0:
             print("updating targets in batches of {}".format(chunk_size))
             for pitems in grouper(processed_items, chunk_size):
-                self.builders[builder_id].update_targets(filter(None, pitems))
+                self.builders[builder_id].update_targets(list(filter(None, pitems)))
 
 
 class MPIProcessor(BaseProcessor):
