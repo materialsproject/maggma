@@ -1,4 +1,5 @@
 from abc import ABCMeta, abstractmethod
+import logging
 
 from monty.json import MSONable
 
@@ -19,6 +20,9 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.targets = targets
         self.process_chunk_size = process_chunk_size
         self.get_chunk_size = get_chunk_size
+
+        self.__logger = logging.getLogger(type(self).__name__)
+        self.__logger.addHandler(logging.NullHandler())
 
     def connect(self):
         """
