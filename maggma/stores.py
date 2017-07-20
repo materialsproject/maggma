@@ -81,7 +81,7 @@ class MongoStore(Store):
     A Store that connects to any Mongo collection
     """
 
-    def __init__(self, database, collection, host="localhost", port=27017,
+    def __init__(self, database, collection_name, host="localhost", port=27017,
                  username="", password="", **kwargs):
         """
 
@@ -95,12 +95,13 @@ class MongoStore(Store):
             lu_field (str): see Store doc
         """
         self.database = database
-        self.collection_name = collection
+        self.collection_name = collection_name
         self.host = host
         self.port = port
         self.username = username
         self.password = password
         self.__collection = None
+        self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)
 
     @property
@@ -118,6 +119,7 @@ class MongoStore(Store):
         return hash((self.collection_name, self.lu_field))
 
 
+
 class MemoryStore(Store):
     """
     An in memory Store
@@ -126,6 +128,7 @@ class MemoryStore(Store):
     def __init__(self, name, **kwargs):
         self.name = name
         self.__collection = None
+        self.kwargs = kwargs
         super(MemoryStore, self).__init__(**kwargs)
 
     @property
@@ -147,6 +150,7 @@ class JSONStore(MemoryStore):
     def __init__(self, paths, **kwargs):
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
+        self.kwargs = kwargs
         super(JSONStore, self).__init__("collection", **kwargs)
 
     def connect(self):
@@ -166,6 +170,7 @@ class DatetimeStore(MemoryStore):
 
     def __init__(self, dt, **kwargs):
         self.__dt = dt
+        self.kwargs = kwargs
         super(DatetimeStore, self).__init__("date", **kwargs)
 
     def connect(self):
