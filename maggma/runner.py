@@ -60,7 +60,7 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
         """
         chunk_size = self.builders[builder_id].process_chunk_size
         if chunk_size > 0:
-            print("updating targets in batches of {}".format(chunk_size))
+            self.logger.info("updating targets in batches of {}".format(chunk_size))
             for pitems in grouper(processed_items, chunk_size):
                 self.builders[builder_id].update_targets(list(filter(None, pitems)))
 
@@ -87,7 +87,7 @@ class MPIProcessor(BaseProcessor):
             self.worker()
 
     def master(self, builder_id):
-        print("Building with MPI. {} workers in the pool.".format(self.size - 1))
+        self.logger.info("Building with MPI. {} workers in the pool.".format(self.size - 1))
 
         builder = self.builders[builder_id]
         chunk_size = builder.get_chunk_size
@@ -104,7 +104,7 @@ class MPIProcessor(BaseProcessor):
         cursor = builder.get_items()
         for item in cursor:
             if n % chunk_size == 0:
-                print("processing chunks of size {}".format(chunk_size))
+                self.logger.info("processing chunks of size {}".format(chunk_size))
                 processed_chunk = self._process_chunk(chunk_size, workers)
                 self.update_targets_in_chunks(builder_id, processed_chunk)
             packet = (builder_id, item)
@@ -182,18 +182,19 @@ class MultiprocProcessor(BaseProcessor):
     def __init__(self, builders, num_workers):
         # multiprocessing only if mpi is not used, no mixing
         self.num_workers = num_workers if num_workers > 0 else multiprocessing.cpu_count() - 1
+        super(MultiprocProcessor, self).__init__(builders, num_workers)
         if self.num_workers > 0:
-            print("Building with multiprocessing, {} workers in the pool".format(
+            self.logger.info("Building with multiprocessing, {} workers in the pool".format(
                 self.num_workers))
             self._queue = multiprocessing.Queue()
             manager = multiprocessing.Manager()
             self.processed_items = manager.list()
         # serial
         else:
-            print("Building serially")
+            self.logger.info("Building serially")
             self._queue = queue.Queue()
             self.processed_items = []
-        super(MultiprocProcessor, self).__init__(builders, num_workers)
+
 
     def process(self, builder_id):
         """
@@ -214,7 +215,7 @@ class MultiprocProcessor(BaseProcessor):
         cursor = builder.get_items()
         for item in cursor:
             if n > 0 and n % get_chunk_size == 0:
-                print("processing batch of {} items".format(get_chunk_size))
+                self.logger.info("processing batch of {} items".format(get_chunk_size))
                 self._process_chunk()
                 self.update_targets_in_chunks(builder_id, self.processed_items)
                 del self.processed_items[:]
@@ -293,12 +294,13 @@ class Runner(MSONable):
         """
         self.builders = builders
         self.num_workers = num_workers
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
         default_processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
         self.processor = default_processor if processor is None else processor
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
-        self.logger = logging.getLogger(type(self).__name__)
-        self.logger.addHandler(logging.NullHandler())
+
 
     @property
     def use_mpi(self):
@@ -306,7 +308,7 @@ class Runner(MSONable):
             (_, _, size) = get_mpi()
             use_mpi = True if size > 1 else False
         except ImportError:
-            print("either 'mpi4py' is not installed or issue with the installation. "
+            self.logger.warning("either 'mpi4py' is not installed or issue with the installation. "
                   "Proceeding with mulitprocessing.")
             use_mpi = False
         return use_mpi
@@ -377,5 +379,5 @@ class Runner(MSONable):
         Returns:
 
         """
-        self.logger.info("building: ", builder_id)
+        self.logger.info("building: {}".format(builder_id))
         self.processor.process(builder_id)
