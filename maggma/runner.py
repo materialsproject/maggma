@@ -11,12 +11,6 @@ from monty.json import MSONable
 from maggma.helpers import get_mpi
 from maggma.utils import grouper
 
-logger = logging.getLogger(__name__)
-sh = logging.StreamHandler(stream=sys.stdout)
-sh.setLevel(logging.DEBUG)
-sh.setFormatter('%(asctime)s %(levelname)s %(message)s')
-logger.addHandler(sh)
-
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
 
@@ -32,6 +26,9 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
         self.builders = builders
         self.num_workers = num_workers
         self.status = []
+
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     @abc.abstractmethod
     def process(self, builder_id):
@@ -144,7 +141,7 @@ class MPIProcessor(BaseProcessor):
         """
         status = []
         processed_chunk = []
-        logger.info("{} items sent for processing".format(chunk_size))
+        self.logger.info("{} items sent for processing".format(chunk_size))
 
         # get processed item from the workers
         while workers:
@@ -295,10 +292,13 @@ class Runner(MSONable):
                 subclass BaseProcessor though)
         """
         self.builders = builders
+        self.num_workers = num_workers
         default_processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
         self.processor = default_processor if processor is None else processor
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     @property
     def use_mpi(self):
@@ -377,5 +377,5 @@ class Runner(MSONable):
         Returns:
 
         """
-        logger.info("building: ", builder_id)
+        self.logger.info("building: ", builder_id)
         self.processor.process(builder_id)

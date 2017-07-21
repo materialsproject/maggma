@@ -21,8 +21,8 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.process_chunk_size = process_chunk_size
         self.get_chunk_size = get_chunk_size
 
-        self.__logger = logging.getLogger(type(self).__name__)
-        self.__logger.addHandler(logging.NullHandler())
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     def connect(self):
         """
