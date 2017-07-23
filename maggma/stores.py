@@ -162,7 +162,7 @@ class JSONStore(MemoryStore):
                 self.collection.insert_many(objects)
 
     def __hash__(self):
-        return hash((self.paths, self.lu_field))
+        return hash((*self.paths, self.lu_field))
 
 
 class DatetimeStore(MemoryStore):
