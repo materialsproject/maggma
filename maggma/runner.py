@@ -14,18 +14,14 @@ from maggma.utils import grouper
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
 
-    def __init__(self, builders, num_workers=0):
+    def __init__(self, builders0):
         """
         Initialize with a list of builders
 
         Args:
             builders(list): list of builders
-            num_workers (int): number of processes. Used only for multiprocessing.
-                Will be automatically set to (number of cpus - 1) if set to 0.
         """
         self.builders = builders
-        self.num_workers = num_workers
-        self.status = []
 
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
@@ -41,29 +37,6 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
                 process_item --> update_targets --> finalize
         """
         pass
-
-    @abc.abstractmethod
-    def worker(self):
-        """
-        Defines what a worker(slave in MPI or process in multiprocessing) does.
-        """
-        pass
-
-    def update_targets_in_chunks(self, builder_id, processed_items):
-        """
-        Run the builder's update_targets method on the list of processed items in chunks of size
-        'process_chunk_size'.
-
-        Args:
-            builder_id (int):
-            processed_items (list): list of items to be used to update the targets
-        """
-        chunk_size = self.builders[builder_id].process_chunk_size
-        if chunk_size > 0:
-            self.logger.info("updating targets in batches of {}".format(chunk_size))
-            for pitems in grouper(processed_items, chunk_size):
-                self.builders[builder_id].update_targets(list(filter(None, pitems)))
-
 
 class MPIProcessor(BaseProcessor):
 
