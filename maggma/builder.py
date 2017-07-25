@@ -6,20 +6,18 @@ from monty.json import MSONable
 
 class Builder(MSONable, metaclass=ABCMeta):
 
-    def __init__(self, sources, targets, get_chunk_size=1000, process_chunk_size=1):
+    def __init__(self, sources, targets, chunk_size=1000):
         """
         Initialize the builder the framework.
 
         Args:
             sources([Store]): list of source stores
             targets([Store]): list of target stores
-            get_chunk_size(int): chunk size for get_items
-            process_chunk_size(int): chunk size for process items
+            chunk_size(int): chunk size for processing
         """
         self.sources = sources
         self.targets = targets
-        self.process_chunk_size = process_chunk_size
-        self.get_chunk_size = get_chunk_size
+        self.chunk_size = chunk_size
 
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
