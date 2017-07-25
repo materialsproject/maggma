@@ -1,7 +1,7 @@
 import logging
 import multiprocessing
 import queue
-import sys
+import itertools
 from collections import defaultdict
 from itertools import cycle
 import abc
@@ -14,7 +14,7 @@ from maggma.utils import grouper
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
 
-    def __init__(self, builders0):
+    def __init__(self, builders):
         """
         Initialize with a list of builders
 
@@ -37,6 +37,31 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
                 process_item --> update_targets --> finalize
         """
         pass
+
+class SerialProcessor(BaseProcessor):
+    """
+    Simple serial processor. Usefull for debugging or example code
+    """
+
+    def process(self, builder_id):
+        """
+        Run the builder serially
+
+        Args:
+            builder_id (int): the index of the builder in the builders list
+        """
+        builder = self.builders[builder_id]
+        chunk_size = builder.chunk_size
+
+        # establish connection to the sources and targets
+        builder.connect()
+
+        cursor = builder.get_items()
+
+        for chunk in grouper(cursor,chunk_size):
+            self.logger.info("Processing batch of {} items".format(chunk_size))
+            processed_items = [builder.process_item(item) for item in filter(None,chunk)]
+            builder.update_targets(processed_items)
 
 class MPIProcessor(BaseProcessor):
 
@@ -155,7 +180,7 @@ class MultiprocProcessor(BaseProcessor):
     def __init__(self, builders, num_workers):
         # multiprocessing only if mpi is not used, no mixing
         self.num_workers = num_workers if num_workers > 0 else multiprocessing.cpu_count() - 1
-        super(MultiprocProcessor, self).__init__(builders, num_workers)
+        super(MultiprocProcessor, self).__init__(builders)
         if self.num_workers > 0:
             self.logger.info("Building with multiprocessing, {} workers in the pool".format(
                 self.num_workers))
