@@ -1,10 +1,18 @@
 # coding: utf-8
 import itertools
-from datetime import datetime
+from datetime import datetime, timedelta
 
+
+def dt_to_isoformat_ceil_ms(dt):
+    """Helper to account for Mongo storing datetimes with only ms precision."""
+    return (dt + timedelta(milliseconds=1)).isoformat(timespec='milliseconds')
+
+# This lu_key prioritizes not duplicating potentially expensive item
+# processing on incremental rebuilds at the expense of potentially missing a
+# source document updated within 1 ms of a builder get_items call. Ensure
+# appropriate builder validation.
 LU_KEY_ISOFORMAT = (lambda s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f"),
-                    lambda dt: dt.isoformat())
-
+                    dt_to_isoformat_ceil_ms)
 
 def get_mongolike(d, key):
     """
