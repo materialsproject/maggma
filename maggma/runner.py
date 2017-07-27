@@ -208,9 +208,10 @@ class MultiprocProcessor(BaseProcessor):
         processes = self._start_worker_processes()
         # send items to process
         cursor = builder.get_items()
-        self.logger.info("processing batch of {} up to items"
-                         .format(chunk_size))
-        for item in cursor:
+        for n, item in enumerate(cursor):
+            if n == 0:
+                self.logger.info("processing batch of {} up to items"
+                                 .format(chunk_size))
             if len(self.processed_items) == chunk_size:
                 builder.update_targets(self.processed_items)
                 del self.processed_items[:chunk_size]
