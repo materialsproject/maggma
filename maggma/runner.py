@@ -179,19 +179,11 @@ class MultiprocProcessor(BaseProcessor):
 
     def __init__(self, builders, num_workers):
         # multiprocessing only if mpi is not used, no mixing
-        self.num_workers = num_workers if num_workers > 0 else multiprocessing.cpu_count() - 1
+        self.num_workers = (num_workers if num_workers > 0
+                            else multiprocessing.cpu_count() - 1)
         super(MultiprocProcessor, self).__init__(builders)
-        if self.num_workers > 0:
-            self.logger.info("Building with multiprocessing, {} workers in the pool".format(
-                self.num_workers))
-            self._queue = multiprocessing.Queue()
-            manager = multiprocessing.Manager()
-            self.processed_items = manager.list()
-        # serial
-        else:
-            self.logger.info("Building serially")
-            self._queue = queue.Queue()
-            self.processed_items = []
+        self.logger.info("Building with multiprocessing, {} workers in the pool"
+                         .format(self.num_workers))
 
 
     def process(self, builder_id):
@@ -203,65 +195,57 @@ class MultiprocProcessor(BaseProcessor):
             builder_id (int): the index of the builder in the builders list
         """
         builder = self.builders[builder_id]
-        get_chunk_size = builder.get_chunk_size
+        chunk_size = builder.chunk_size
+        # Need <=len(self.builders) queues, etc. iff want Runner to run
+        # builders in parallel. Holding off for now for simplicity.
+        self._queue = multiprocessing.Queue(chunk_size)
+        manager = multiprocessing.Manager()
+        self.processed_items = manager.list()
 
         # establish connection to the sources and targets
         builder.connect()
 
-        n = 0
+        processes = self._start_worker_processes()
         # send items to process
         cursor = builder.get_items()
+        self.logger.info("processing batch of {} up to items"
+                         .format(chunk_size))
         for item in cursor:
-            if n > 0 and n % get_chunk_size == 0:
-                self.logger.info("processing batch of {} items".format(get_chunk_size))
-                self._process_chunk()
-                self.update_targets_in_chunks(builder_id, self.processed_items)
-                del self.processed_items[:]
+            if len(self.processed_items) == chunk_size:
+                builder.update_targets(self.processed_items)
+                del self.processed_items[:chunk_size]
+                self.logger.info("processing batch of {} up to items"
+                                 .format(chunk_size))
             packet = (builder_id, item)
-            self._queue.put(packet)
-            n += 1
+            self._queue.put(packet) # blocks when queue is full
 
         # handle the leftovers
-        self._process_chunk()
-        self.update_targets_in_chunks(builder_id, self.processed_items)
+        status = []
+        for p in processes:
+            p.join()
+            status.append(not bool(p.exitcode))
+        builder.update_targets(self.processed_items)
+        del self.processed_items[:]
 
         # finalize
-        if all(self.status):
-            self.builders[builder_id].finalize(cursor)
-        else:
-            raise RuntimeError("Building failed!")
+        if not all(status):
+            self.logger.error("Some worker processes exited abnormally.")
+        builder.finalize(cursor)
 
-    def _process_chunk(self):
+    def _start_worker_processes(self):
         """
-        Process builder.get_chunk_size items.
+        Start worker pool for processing items.
         """
         processes = []
         status = []
 
-        if self.num_workers > 0:
-            # start the workers
-            for i in range(self.num_workers):
-                proc = multiprocessing.Process(target=self.worker, args=(None,))
-                proc.start()
-                processes.append(proc)
+        # start the workers
+        for i in range(self.num_workers):
+            proc = multiprocessing.Process(target=self.worker)
+            proc.start()
+            processes.append(proc)
 
-            # get job status from the workers
-            for i in range(self.num_workers):
-                processes[i].join()
-                code = processes[i].exitcode
-                status.append(not bool(code))
-        # serial execution
-        else:
-            try:
-                self.worker()
-                status.append(True)
-            except:
-                raise
-
-        if status:
-            if not all(status):
-                raise RuntimeError("processing failed")
-            self.status.extend(status)
+        return processes
 
     def worker(self):
         """
