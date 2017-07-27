@@ -210,13 +210,15 @@ class MultiprocProcessor(BaseProcessor):
         cursor = builder.get_items()
         for n, item in enumerate(cursor):
             if n == 0:
-                self.logger.info("processing batch of {} up to items"
-                                 .format(chunk_size))
-            if len(self.processed_items) == chunk_size:
-                builder.update_targets(self.processed_items)
+                self.logger.info(
+                    "Waiting for {} processed items before updating targets"
+                    .format(chunk_size))
+            if len(self.processed_items) >= chunk_size:
+                builder.update_targets(self.processed_items[:chunk_size])
                 del self.processed_items[:chunk_size]
-                self.logger.info("processing batch of {} up to items"
-                                 .format(chunk_size))
+                self.logger.info(
+                    "Waiting for {} processed items before updating targets"
+                    .format(chunk_size))
             packet = (builder_id, item)
             self._queue.put(packet) # blocks when queue is full
 
@@ -225,8 +227,12 @@ class MultiprocProcessor(BaseProcessor):
         for p in processes:
             p.join()
             status.append(not bool(p.exitcode))
-        builder.update_targets(self.processed_items)
-        del self.processed_items[:]
+        while len(self.processed_items):
+            builder.update_targets(self.processed_items[:chunk_size])
+            del self.processed_items[:chunk_size]
+            self.logger.info(
+                "Waiting for {} processed items before updating targets"
+                .format(chunk_size))
 
         # finalize
         if not all(status):
