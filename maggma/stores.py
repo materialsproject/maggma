@@ -64,7 +64,7 @@ class Store(MSONable, metaclass=ABCMeta):
             targets = [targets]
 
         lu_list = [t.last_updated for t in targets]
-        return {self.lu_field: {"$gte": self.lu_key[1](max(lu_list))}}
+        return {self.lu_field: {"$gt": self.lu_key[1](max(lu_list))}}
 
     def __eq__(self, other):
         return hash(self) == hash(other)
