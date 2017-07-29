@@ -1,7 +1,7 @@
 import logging
 import multiprocessing
 import queue
-import sys
+import itertools
 from collections import defaultdict
 from itertools import cycle
 import abc
@@ -11,67 +11,62 @@ from monty.json import MSONable
 from maggma.helpers import get_mpi
 from maggma.utils import grouper
 
-logger = logging.getLogger(__name__)
-sh = logging.StreamHandler(stream=sys.stdout)
-sh.setLevel(logging.DEBUG)
-sh.setFormatter('%(asctime)s %(levelname)s %(message)s')
-logger.addHandler(sh)
-
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
 
-    def __init__(self, builders, num_workers=0):
+    def __init__(self, builders):
         """
         Initialize with a list of builders
 
         Args:
             builders(list): list of builders
-            num_workers (int): number of processes. Used only for multiprocessing.
-                Will be automatically set to (number of cpus - 1) if set to 0.
         """
         self.builders = builders
-        self.num_workers = num_workers
-        self.status = []
+
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     @abc.abstractmethod
     def process(self, builder_id):
         """
-        Does the processing. e.g. send work to workers(in MPI) or start the processes in 
+        Does the processing. e.g. send work to workers(in MPI) or start the processes in
         multiprocessing.
 
         Args:
             builder_id (int): process the builder_id th builder i.e
                 process_item --> update_targets --> finalize
-        """        
-        pass
-
-    @abc.abstractmethod
-    def worker(self):
-        """
-        Defines what a worker(slave in MPI or process in multiprocessing) does.
         """
         pass
 
-    def update_targets_in_chunks(self, builder_id, processed_items):
+class SerialProcessor(BaseProcessor):
+    """
+    Simple serial processor. Usefull for debugging or example code
+    """
+
+    def process(self, builder_id):
         """
-        Run the builder's update_targets method on the list of processed items in chunks of size
-        'process_chunk_size'.
+        Run the builder serially
 
         Args:
-            builder_id (int):
-            processed_items (list): list of items to be used to update the targets
+            builder_id (int): the index of the builder in the builders list
         """
-        chunk_size = self.builders[builder_id].process_chunk_size
-        if chunk_size > 0:
-            print("updating targets in batches of {}".format(chunk_size))
-            for pitems in grouper(processed_items, chunk_size):
-                self.builders[builder_id].update_targets(filter(None, pitems))
+        builder = self.builders[builder_id]
+        chunk_size = builder.chunk_size
 
+        # establish connection to the sources and targets
+        builder.connect()
+
+        cursor = builder.get_items()
+
+        for chunk in grouper(cursor,chunk_size):
+            self.logger.info("Processing batch of {} items".format(chunk_size))
+            processed_items = [builder.process_item(item) for item in filter(None,chunk)]
+            builder.update_targets(processed_items)
 
 class MPIProcessor(BaseProcessor):
 
     def __init__(self, builders):
-        (self.comm, self.rank, self.size) = get_mpi()        
+        (self.comm, self.rank, self.size) = get_mpi()
         super(MPIProcessor, self).__init__(builders)
 
     def process(self, builder_id):
@@ -90,11 +85,11 @@ class MPIProcessor(BaseProcessor):
             self.worker()
 
     def master(self, builder_id):
-        print("Building with MPI. {} workers in the pool.".format(self.size - 1))
-        
+        self.logger.info("Building with MPI. {} workers in the pool.".format(self.size - 1))
+
         builder = self.builders[builder_id]
         chunk_size = builder.get_chunk_size
-        
+
         # establish connection to the sources and targets
         builder.connect()
 
@@ -104,9 +99,10 @@ class MPIProcessor(BaseProcessor):
         n = 0
         workers = []
         # distribute the items to process (in chunks of size chunk_size)
-        for item in builder.get_items():
+        cursor = builder.get_items()
+        for item in cursor:
             if n % chunk_size == 0:
-                print("processing chunks of size {}".format(chunk_size))
+                self.logger.info("processing chunks of size {}".format(chunk_size))
                 processed_chunk = self._process_chunk(chunk_size, workers)
                 self.update_targets_in_chunks(builder_id, processed_chunk)
             packet = (builder_id, item)
@@ -126,7 +122,7 @@ class MPIProcessor(BaseProcessor):
 
         # finalize
         if all(self.status):
-            builder.finalize()
+            builder.finalize(cursor)
         else:
             raise RuntimeError("Building failed!")
 
@@ -143,7 +139,7 @@ class MPIProcessor(BaseProcessor):
         """
         status = []
         processed_chunk = []
-        logger.info("{} items sent for processing".format(chunk_size))
+        self.logger.info("{} items sent for processing".format(chunk_size))
 
         # get processed item from the workers
         while workers:
@@ -183,19 +179,12 @@ class MultiprocProcessor(BaseProcessor):
 
     def __init__(self, builders, num_workers):
         # multiprocessing only if mpi is not used, no mixing
-        self.num_workers = num_workers if num_workers > 0 else multiprocessing.cpu_count() - 1
-        if self.num_workers > 0:
-            print("Building with multiprocessing, {} workers in the pool".format(
-                self.num_workers))
-            self._queue = multiprocessing.Queue()
-            manager = multiprocessing.Manager()
-            self.processed_items = manager.list()
-        # serial
-        else:
-            print("Building serially")
-            self._queue = queue.Queue()
-            self.processed_items = []
-        super(MultiprocProcessor, self).__init__(builders, num_workers)
+        self.num_workers = (num_workers if num_workers > 0
+                            else multiprocessing.cpu_count() - 1)
+        super(MultiprocProcessor, self).__init__(builders)
+        self.logger.info("Building with multiprocessing, {} workers in the pool"
+                         .format(self.num_workers))
+
 
     def process(self, builder_id):
         """
@@ -206,64 +195,64 @@ class MultiprocProcessor(BaseProcessor):
             builder_id (int): the index of the builder in the builders list
         """
         builder = self.builders[builder_id]
-        get_chunk_size = builder.get_chunk_size
+        chunk_size = builder.chunk_size
+        # Need <=len(self.builders) queues, etc. iff want Runner to run
+        # builders in parallel. Holding off for now for simplicity.
+        self._queue = multiprocessing.Queue(chunk_size)
+        manager = multiprocessing.Manager()
+        self.processed_items = manager.list()
 
         # establish connection to the sources and targets
         builder.connect()
 
-        n = 0
+        processes = self._start_worker_processes()
         # send items to process
-        for item in builder.get_items():
-            if n > 0 and n % get_chunk_size == 0:
-                print("processing batch of {} items".format(get_chunk_size))
-                self._process_chunk()
-                self.update_targets_in_chunks(builder_id, self.processed_items)
-                del self.processed_items[:]
+        cursor = builder.get_items()
+        for n, item in enumerate(cursor):
+            if n == 0:
+                self.logger.info(
+                    "Waiting for {} processed items before updating targets"
+                    .format(chunk_size))
+            if len(self.processed_items) >= chunk_size:
+                builder.update_targets(self.processed_items[:chunk_size])
+                del self.processed_items[:chunk_size]
+                self.logger.info(
+                    "Waiting for {} processed items before updating targets"
+                    .format(chunk_size))
             packet = (builder_id, item)
-            self._queue.put(packet)
-            n += 1
+            self._queue.put(packet) # blocks when queue is full
 
         # handle the leftovers
-        self._process_chunk()
-        self.update_targets_in_chunks(builder_id, self.processed_items)
+        status = []
+        for p in processes:
+            p.join()
+            status.append(not bool(p.exitcode))
+        while len(self.processed_items):
+            builder.update_targets(self.processed_items[:chunk_size])
+            del self.processed_items[:chunk_size]
+            self.logger.info(
+                "Waiting for {} processed items before updating targets"
+                .format(chunk_size))
 
         # finalize
-        if all(self.status):
-            self.builders[builder_id].finalize()
-        else:
-            raise RuntimeError("Building failed!")
+        if not all(status):
+            self.logger.error("Some worker processes exited abnormally.")
+        builder.finalize(cursor)
 
-    def _process_chunk(self):
+    def _start_worker_processes(self):
         """
-        Process builder.get_chunk_size items.
+        Start worker pool for processing items.
         """
         processes = []
         status = []
 
-        if self.num_workers > 0:
-            # start the workers
-            for i in range(self.num_workers):
-                proc = multiprocessing.Process(target=self.worker, args=(None,))
-                proc.start()
-                processes.append(proc)
+        # start the workers
+        for i in range(self.num_workers):
+            proc = multiprocessing.Process(target=self.worker)
+            proc.start()
+            processes.append(proc)
 
-            # get job status from the workers
-            for i in range(self.num_workers):
-                processes[i].join()
-                code = processes[i].exitcode
-                status.append(not bool(code))
-        # serial execution
-        else:
-            try:
-                self.worker()
-                status.append(True)
-            except:
-                raise
-
-        if status:
-            if not all(status):
-                raise RuntimeError("processing failed")
-            self.status.extend(status)
+        return processes
 
     def worker(self):
         """
@@ -289,14 +278,18 @@ class Runner(MSONable):
             builders(list): list of builders
             num_workers (int): number of processes. Used only for multiprocessing.
                 Will be automatically set to (number of cpus - 1) if set to 0.
-            processor(BaseProcessor): set this if custom processor is needed(must 
+            processor(BaseProcessor): set this if custom processor is needed(must
                 subclass BaseProcessor though)
         """
         self.builders = builders
+        self.num_workers = num_workers
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
         default_processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
         self.processor = default_processor if processor is None else processor
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
+
 
     @property
     def use_mpi(self):
@@ -304,7 +297,7 @@ class Runner(MSONable):
             (_, _, size) = get_mpi()
             use_mpi = True if size > 1 else False
         except ImportError:
-            print("either 'mpi4py' is not installed or issue with the installation. "
+            self.logger.warning("either 'mpi4py' is not installed or issue with the installation. "
                   "Proceeding with mulitprocessing.")
             use_mpi = False
         return use_mpi
@@ -375,5 +368,5 @@ class Runner(MSONable):
         Returns:
 
         """
-        logger.info("building: ", builder_id)
+        self.logger.info("building: {}".format(builder_id))
         self.processor.process(builder_id)

@@ -1,10 +1,11 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABCMeta, abstractmethod
 import datetime
 import json
 
 import mongomock
 import pymongo
 from pymongo import MongoClient
+from pydash import identity
 
 from monty.json import MSONable
 
@@ -15,12 +16,15 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, lu_field='_lu'):
+    def __init__(self, lu_field='_lu', lu_key=(identity, identity)):
         """
         Args:
             lu_field (str): 'last updated' field name
+            lu_key (tuple): A pair of key functions to map
+                self.lu_field to a `datetime` and back, respectively.
         """
         self.lu_field = lu_field
+        self.lu_key = lu_key
 
     @property
     @abstractmethod
@@ -42,21 +46,25 @@ class Store(MSONable, metaclass=ABCMeta):
     def last_updated(self):
         doc = next(self.collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
-        return doc[self.lu_field] if doc else datetime.datetime.min
+        # Handle when collection has docs but `NoneType` lu_field.
+        return (doc[self.lu_field] if (doc and doc[self.lu_field])
+                else datetime.datetime.min)
 
     def lu_filter(self, targets):
-        """
-        Creates a filter string that can be applied to the source collection assuming
-        targets is a list of Stores.
-        
+        """Creates a MongoDB filter for new documents.
+
+        By "new", we mean documents in this Store that were last updated later
+        than any document in targets.
+
         Args:
-            targets
+            targets (list): A list of Stores
+
         """
         if isinstance(targets, Store):
             targets = [targets]
 
         lu_list = [t.last_updated for t in targets]
-        return {self.lu_field: {"$gte": max(lu_list)}}
+        return {self.lu_field: {"$gt": self.lu_key[1](max(lu_list))}}
 
     def __eq__(self, other):
         return hash(self) == hash(other)
@@ -73,8 +81,8 @@ class MongoStore(Store):
     A Store that connects to any Mongo collection
     """
 
-    def __init__(self, database, collection, host="localhost", port=27017, username="", password="",
-                 lu_field='_lu'):
+    def __init__(self, database, collection_name, host="localhost", port=27017,
+                 username="", password="", **kwargs):
         """
 
         Args:
@@ -87,13 +95,14 @@ class MongoStore(Store):
             lu_field (str): see Store doc
         """
         self.database = database
-        self.collection_name = collection
+        self.collection_name = collection_name
         self.host = host
         self.port = port
         self.username = username
         self.password = password
         self.__collection = None
-        super(MongoStore, self).__init__(lu_field)
+        self.kwargs = kwargs
+        super(MongoStore, self).__init__(**kwargs)
 
     @property
     def collection(self):
@@ -110,15 +119,17 @@ class MongoStore(Store):
         return hash((self.collection_name, self.lu_field))
 
 
+
 class MemoryStore(Store):
     """
     An in memory Store
     """
 
-    def __init__(self, name, lu_field='_lu'):
+    def __init__(self, name, **kwargs):
         self.name = name
         self.__collection = None
-        super(MemoryStore, self).__init__(lu_field)
+        self.kwargs = kwargs
+        super(MemoryStore, self).__init__(**kwargs)
 
     @property
     def collection(self):
@@ -136,10 +147,11 @@ class JSONStore(MemoryStore):
     A Store for access to a single or multiple JSON files
     """
 
-    def __init__(self, paths, lu_field='_lu'):
+    def __init__(self, paths, **kwargs):
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
-        super(JSONStore, self).__init__("collection", lu_field)
+        self.kwargs = kwargs
+        super(JSONStore, self).__init__("collection", **kwargs)
 
     def connect(self):
         super(JSONStore, self).connect()
@@ -150,15 +162,16 @@ class JSONStore(MemoryStore):
                 self.collection.insert_many(objects)
 
     def __hash__(self):
-        return hash((self.path, self.lu_field))
+        return hash((*self.paths, self.lu_field))
 
 
 class DatetimeStore(MemoryStore):
     """Utility store intended for use with `Store.lu_filter`."""
 
-    def __init__(self, dt, lu_field='_lu'):
+    def __init__(self, dt, **kwargs):
         self.__dt = dt
-        super(DatetimeStore, self).__init__("date", lu_field)
+        self.kwargs = kwargs
+        super(DatetimeStore, self).__init__("date", **kwargs)
 
     def connect(self):
         super(DatetimeStore, self).connect()

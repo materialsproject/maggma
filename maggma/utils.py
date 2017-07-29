@@ -1,14 +1,25 @@
 # coding: utf-8
 import itertools
-import six
+from datetime import datetime, timedelta
 
+
+def dt_to_isoformat_ceil_ms(dt):
+    """Helper to account for Mongo storing datetimes with only ms precision."""
+    return (dt + timedelta(milliseconds=1)).isoformat(timespec='milliseconds')
+
+# This lu_key prioritizes not duplicating potentially expensive item
+# processing on incremental rebuilds at the expense of potentially missing a
+# source document updated within 1 ms of a builder get_items call. Ensure
+# appropriate builder validation.
+LU_KEY_ISOFORMAT = (lambda s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f"),
+                    dt_to_isoformat_ceil_ms)
 
 def get_mongolike(d, key):
     """
     Grab a dict value using dot-notation like "a.b.c" from dict {"a":{"b":{"c": 3}}}
     Args:
         d (dict): the dictionary to search
-        key (str): the key we want to grab with dot notation, e.g., "a.b.c" 
+        key (str): the key we want to grab with dot notation, e.g., "a.b.c"
 
     Returns:
         value from desired dict (whatever is stored at the desired key)
@@ -27,7 +38,7 @@ def get_mongolike(d, key):
 
 
 def make_mongolike(d, get_key, put_key):
-    """ 
+    """
     Builds a dictionary with a value from another dictionary using mongo dot-notation
 
     Args:
@@ -46,9 +57,10 @@ def make_mongolike(d, get_key, put_key):
 def recursive_update(d, u):
     """
     Recursive updates d with values from u
-    :param d: dict to update
-    :param u: updates to propogate
-    :return: 
+
+    Args:
+        d (dict): dict to update
+        u (dict): updates to propogate
     """
 
     for k, v in u.items():
@@ -60,9 +72,11 @@ def recursive_update(d, u):
         else:
             d[k] = v
 
+
 def grouper(iterable, n, fillvalue=None):
-    """Collect data into fixed-length chunks or blocks."""
+    """
+    Collect data into fixed-length chunks or blocks.
+    """
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
     args = [iter(iterable)] * n
     return itertools.zip_longest(*args, fillvalue=fillvalue)
-

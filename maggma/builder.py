@@ -1,24 +1,26 @@
 from abc import ABCMeta, abstractmethod
+import logging
 
 from monty.json import MSONable
 
 
 class Builder(MSONable, metaclass=ABCMeta):
 
-    def __init__(self, sources, targets, get_chunk_size=1000, process_chunk_size=1):
+    def __init__(self, sources, targets, chunk_size=1000):
         """
         Initialize the builder the framework.
 
         Args:
             sources([Store]): list of source stores
             targets([Store]): list of target stores
-            get_chunk_size(int): chunk size for get_items
-            process_chunk_size(int): chunk size for process items
+            chunk_size(int): chunk size for processing
         """
         self.sources = sources
         self.targets = targets
-        self.process_chunk_size = process_chunk_size
-        self.get_chunk_size = get_chunk_size
+        self.chunk_size = chunk_size
+
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     def connect(self):
         """
@@ -41,7 +43,7 @@ class Builder(MSONable, metaclass=ABCMeta):
     def process_item(self, item):
         """
         Process an item. Should not expect DB access as this can be run MPI
-        Default behavior is to return the item. 
+        Default behavior is to return the item.
         Args:
             item:
 
@@ -50,12 +52,13 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         return item
 
+    @abstractmethod
     def update_targets(self, items):
         """
         Takes a dictionary of targets and items from process item and updates them
         Can also perform other book keeping in the process such as storing gridfs oids, etc.
 
-        Ars:
+        Args:
             items:
 
         Returns:
@@ -63,9 +66,20 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         pass
 
-    @abstractmethod
-    def finalize(self):
+    def finalize(self, cursor=None):
         """
         Perform any final clean up.
         """
-        pass
+        # Close any Mongo connections.
+        for store in (self.sources + self.targets):
+            try:
+                store.collection.database.client.close()
+            except AttributeError:
+                continue
+        # Runner will pass iterable yielded by `self.get_items` as `cursor`. If
+        # this is a Mongo cursor with `no_cursor_timeout=True` (not the
+        # default), we must be explicitly kill it.
+        try:
+            cursor and cursor.close()
+        except AttributeError:
+            pass

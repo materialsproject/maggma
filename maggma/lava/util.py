@@ -259,3 +259,16 @@ def args_list(s):
     if s is None:
         return []
     return [item.strip() for item in s.split(',')]
+
+
+def logstreamhandle(runner, level=logging.INFO):
+    loggers = [runner.logger, runner.processor.logger]
+    loggers.extend(b.logger for b in runner.builders)
+    for l in loggers:
+        l.setLevel(level)
+        ch = logging.StreamHandler()
+        ch.setLevel(level)
+        formatter = logging.Formatter(
+            '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        l.addHandler(ch)
