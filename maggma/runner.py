@@ -260,7 +260,7 @@ class MultiprocProcessor(BaseProcessor):
         """
         while True:
             try:
-                packet = self._queue.get(timeout=2)
+                packet = self._queue.get()
                 builder_id, item = packet
                 processed_item = self.builders[builder_id].process_item(item)
                 self.processed_items.append(processed_item)
