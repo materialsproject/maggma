@@ -222,6 +222,9 @@ class MultiprocProcessor(BaseProcessor):
             packet = (builder_id, item)
             self._queue.put(packet) # blocks when queue is full
 
+        for _ in range(self.num_workers):
+            self._queue.put(None)
+
         # handle the leftovers
         status = []
         for p in processes:
@@ -261,6 +264,8 @@ class MultiprocProcessor(BaseProcessor):
         while True:
             try:
                 packet = self._queue.get()
+                if packet is None:
+                    break
                 builder_id, item = packet
                 processed_item = self.builders[builder_id].process_item(item)
                 self.processed_items.append(processed_item)
