@@ -1,7 +1,6 @@
 import logging
 import multiprocessing
 import queue
-import itertools
 from collections import defaultdict
 from itertools import cycle
 import abc
@@ -38,6 +37,7 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
         """
         pass
 
+
 class SerialProcessor(BaseProcessor):
     """
     Simple serial processor. Usefull for debugging or example code
@@ -62,6 +62,7 @@ class SerialProcessor(BaseProcessor):
             self.logger.info("Processing batch of {} items".format(chunk_size))
             processed_items = [builder.process_item(item) for item in filter(None,chunk)]
             builder.update_targets(processed_items)
+
 
 class MPIProcessor(BaseProcessor):
 
@@ -185,7 +186,6 @@ class MultiprocProcessor(BaseProcessor):
         self.logger.info("Building with multiprocessing, {} workers in the pool"
                          .format(self.num_workers))
 
-
     def process(self, builder_id):
         """
         Run the builder using the builtin multiprocessing.
@@ -294,7 +294,6 @@ class Runner(MSONable):
         self.processor = default_processor if processor is None else processor
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
-
 
     @property
     def use_mpi(self):

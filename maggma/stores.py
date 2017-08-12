@@ -119,7 +119,6 @@ class MongoStore(Store):
         return hash((self.collection_name, self.lu_field))
 
 
-
 class MemoryStore(Store):
     """
     An in memory Store
