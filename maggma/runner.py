@@ -89,7 +89,7 @@ class MPIProcessor(BaseProcessor):
         self.logger.info("Building with MPI. {} workers in the pool.".format(self.size - 1))
 
         builder = self.builders[builder_id]
-        chunk_size = builder.get_chunk_size
+        chunk_size = builder.chunk_size
 
         # establish connection to the sources and targets
         builder.connect()
@@ -105,7 +105,7 @@ class MPIProcessor(BaseProcessor):
             if n % chunk_size == 0:
                 self.logger.info("processing chunks of size {}".format(chunk_size))
                 processed_chunk = self._process_chunk(chunk_size, workers)
-                self.update_targets_in_chunks(builder_id, processed_chunk)
+                builder.update_targets(processed_chunk)
             packet = (builder_id, item)
             wid = next(worker_id)
             workers.append(wid)
@@ -115,17 +115,14 @@ class MPIProcessor(BaseProcessor):
         # in case the total number of items is not divisible by chunk_size, process the leftovers.
         if workers:
             processed_chunk = self._process_chunk(chunk_size, workers)
-            self.update_targets_in_chunks(builder_id, processed_chunk)
+            builder.update_targets(processed_chunk)
 
         # kill workers
         for _ in range(self.size - 1):
             self.comm.send(None, dest=next(worker_id))
 
         # finalize
-        if all(self.status):
-            builder.finalize(cursor)
-        else:
-            raise RuntimeError("Building failed!")
+        builder.finalize(cursor)
 
     def _process_chunk(self, chunk_size, workers):
         """
@@ -155,7 +152,6 @@ class MPIProcessor(BaseProcessor):
         if status:
             if not all(status):
                 raise RuntimeError("processing failed")
-            self.status.extend(status)
 
         return processed_chunk
 
@@ -220,7 +216,7 @@ class MultiprocProcessor(BaseProcessor):
                     "Waiting for {} processed items before updating targets"
                     .format(chunk_size))
             packet = (builder_id, item)
-            self._queue.put(packet) # blocks when queue is full
+            self._queue.put(packet)  # blocks when queue is full
 
         for _ in range(self.num_workers):
             self._queue.put(None)
@@ -247,7 +243,6 @@ class MultiprocProcessor(BaseProcessor):
         Start worker pool for processing items.
         """
         processes = []
-        status = []
 
         # start the workers
         for i in range(self.num_workers):
