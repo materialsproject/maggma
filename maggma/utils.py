@@ -14,6 +14,7 @@ def dt_to_isoformat_ceil_ms(dt):
 LU_KEY_ISOFORMAT = (lambda s: datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f"),
                     dt_to_isoformat_ceil_ms)
 
+
 def get_mongolike(d, key):
     """
     Grab a dict value using dot-notation like "a.b.c" from dict {"a":{"b":{"c": 3}}}
@@ -37,6 +38,22 @@ def get_mongolike(d, key):
     return d[lead_key]
 
 
+def put_mongolike(key, value):
+    """
+    Builds a dictionary with a value using mongo dot-notation
+
+    Args:
+        key (str): the key to put into using mongo notation, doesn't support arrays
+        value: object
+    """
+    lead_key = key.split(".", 1)[0]
+
+    if "." in key:
+        remainder = key.split(".", 1)[1]
+        return {lead_key: put_mongolike(remainder, value)}
+    return {lead_key: value}
+
+
 def make_mongolike(d, get_key, put_key):
     """
     Builds a dictionary with a value from another dictionary using mongo dot-notation
@@ -46,12 +63,7 @@ def make_mongolike(d, get_key, put_key):
         get_key (str): the key to grab using mongo notation
         put_key (str): the key to put into using mongo notation, doesn't support arrays
     """
-    lead_key = put_key.split(".", 1)[0]
-
-    if "." in put_key:
-        remainder = put_key.split(".", 1)[1]
-        return {lead_key: make_mongolike(d, get_key, remainder)}
-    return {lead_key: get_mongolike(d, get_key)}
+    return put_mongolike(put_key,get_mongolike(d,get_key))
 
 
 def recursive_update(d, u):

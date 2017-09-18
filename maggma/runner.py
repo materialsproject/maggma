@@ -1,7 +1,6 @@
 import logging
 import multiprocessing
 import queue
-import itertools
 from collections import defaultdict
 from itertools import cycle
 import abc
@@ -38,6 +37,7 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
         """
         pass
 
+
 class SerialProcessor(BaseProcessor):
     """
     Simple serial processor. Usefull for debugging or example code
@@ -62,6 +62,7 @@ class SerialProcessor(BaseProcessor):
             self.logger.info("Processing batch of {} items".format(chunk_size))
             processed_items = [builder.process_item(item) for item in filter(None,chunk)]
             builder.update_targets(processed_items)
+
 
 class MPIProcessor(BaseProcessor):
 
@@ -88,7 +89,7 @@ class MPIProcessor(BaseProcessor):
         self.logger.info("Building with MPI. {} workers in the pool.".format(self.size - 1))
 
         builder = self.builders[builder_id]
-        chunk_size = builder.get_chunk_size
+        chunk_size = builder.chunk_size
 
         # establish connection to the sources and targets
         builder.connect()
@@ -104,7 +105,7 @@ class MPIProcessor(BaseProcessor):
             if n % chunk_size == 0:
                 self.logger.info("processing chunks of size {}".format(chunk_size))
                 processed_chunk = self._process_chunk(chunk_size, workers)
-                self.update_targets_in_chunks(builder_id, processed_chunk)
+                builder.update_targets(processed_chunk)
             packet = (builder_id, item)
             wid = next(worker_id)
             workers.append(wid)
@@ -114,17 +115,14 @@ class MPIProcessor(BaseProcessor):
         # in case the total number of items is not divisible by chunk_size, process the leftovers.
         if workers:
             processed_chunk = self._process_chunk(chunk_size, workers)
-            self.update_targets_in_chunks(builder_id, processed_chunk)
+            builder.update_targets(processed_chunk)
 
         # kill workers
         for _ in range(self.size - 1):
             self.comm.send(None, dest=next(worker_id))
 
         # finalize
-        if all(self.status):
-            builder.finalize(cursor)
-        else:
-            raise RuntimeError("Building failed!")
+        builder.finalize(cursor)
 
     def _process_chunk(self, chunk_size, workers):
         """
@@ -154,7 +152,6 @@ class MPIProcessor(BaseProcessor):
         if status:
             if not all(status):
                 raise RuntimeError("processing failed")
-            self.status.extend(status)
 
         return processed_chunk
 
@@ -184,7 +181,6 @@ class MultiprocProcessor(BaseProcessor):
         super(MultiprocProcessor, self).__init__(builders)
         self.logger.info("Building with multiprocessing, {} workers in the pool"
                          .format(self.num_workers))
-
 
     def process(self, builder_id):
         """
@@ -220,7 +216,10 @@ class MultiprocProcessor(BaseProcessor):
                     "Waiting for {} processed items before updating targets"
                     .format(chunk_size))
             packet = (builder_id, item)
-            self._queue.put(packet) # blocks when queue is full
+            self._queue.put(packet)  # blocks when queue is full
+
+        for _ in range(self.num_workers):
+            self._queue.put(None)
 
         # handle the leftovers
         status = []
@@ -244,7 +243,6 @@ class MultiprocProcessor(BaseProcessor):
         Start worker pool for processing items.
         """
         processes = []
-        status = []
 
         # start the workers
         for i in range(self.num_workers):
@@ -260,7 +258,9 @@ class MultiprocProcessor(BaseProcessor):
         """
         while True:
             try:
-                packet = self._queue.get(timeout=2)
+                packet = self._queue.get()
+                if packet is None:
+                    break
                 builder_id, item = packet
                 processed_item = self.builders[builder_id].process_item(item)
                 self.processed_items.append(processed_item)
@@ -289,7 +289,6 @@ class Runner(MSONable):
         self.processor = default_processor if processor is None else processor
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
-
 
     @property
     def use_mpi(self):
