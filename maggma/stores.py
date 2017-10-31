@@ -53,11 +53,11 @@ class Store(MSONable, metaclass=ABCMeta):
 
     @property
     def last_updated(self):
-        doc = next(self.collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
+        doc = next(self.query(properties=[self.lu_field]).sort(
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         # Handle when collection has docs but `NoneType` lu_field.
         return (doc[self.lu_field] if (doc and doc[self.lu_field])
-                else datetime.datetime.min)
+                else datetime.min)
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
