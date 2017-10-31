@@ -127,6 +127,24 @@ class MongoStore(Store):
     def __hash__(self):
         return hash((self.collection_name, self.lu_field))
 
+    def query(self, properties=None, criteria=None,**kwargs):
+        if properties:
+            properties = {p:1 for p in properties}
+        return self.collection.find(filter=criteria, projection=properties, **kwargs)
+
+    def distinct(self, key, criteria=None, **kwargs):
+        return self.collection.distinct(key,filter=criteria,**kwargs)
+
+    def update(self,key,docs,update_lu=True):
+        bulk = self.collection.initialize_ordered_bulk_op()
+
+        for d in docs:
+            d[self.lu_field] = datetime.utcnow()
+            bulk.find({key: d[key]}).upsert().replace_one(d)
+        bulk.execute()
+
+    def close(self):
+        self.collection.close()
 
 class MemoryStore(Store):
     """
@@ -146,8 +164,28 @@ class MemoryStore(Store):
     def connect(self):
         self.__collection = mongomock.MongoClient().db[self.name]
 
+    def close(self):
+        self.__collection.close()
+
     def __hash__(self):
         return hash((self.name, self.lu_field))
+
+    def query(self, properties=None, criteria=None,**kwargs):
+        if properties:
+            properties = {p:1 for p in properties}
+        return self.collection.find(filter=criteria, projection=properties, **kwargs)
+
+    def distinct(self, key, criteria=None, **kwargs):
+        return self.collection.distinct(key,filter=criteria,**kwargs)
+
+    def update(self,key,docs,update_lu=True):
+        bulk = self.__collection.initialize_ordered_bulk_op()
+
+        for d in docs:
+            d[self.lu_field] = datetime.utcnow()
+            bulk.find(
+                    {key: d[key]}).upsert().replace_one(d)
+        bulk.execute()
 
 
 class JSONStore(MemoryStore):
