@@ -35,8 +35,21 @@ class Store(MSONable, metaclass=ABCMeta):
     def connect(self):
         pass
 
-    def __call__(self):
-        return self.collection
+    @abstractmethod
+    def close(self):
+        pass
+
+    @abstractmethod    
+    def query(self, properties=None, criteria=None,**kwargs):
+        pass
+
+    @abstractmethod
+    def distinct(self, key, criteria=None, **kwargs):
+        pass
+
+    @abstractmethod
+    def update(self,key,docs,update_lu=True):
+        pass
 
     @property
     def last_updated(self):
