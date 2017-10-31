@@ -139,7 +139,8 @@ class MongoStore(Store):
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
-            d[self.lu_field] = datetime.utcnow()
+            if update_lu:
+                d[self.lu_filterld] = datetime.utcnow()
             bulk.find({key: d[key]}).upsert().replace_one(d)
         bulk.execute()
 
