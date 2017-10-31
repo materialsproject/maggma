@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-import datetime
+from datetime import datetime
 import json
 
 import mongomock
