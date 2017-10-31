@@ -140,7 +140,7 @@ class MongoStore(Store):
 
         for d in docs:
             if update_lu:
-                d[self.lu_filterld] = datetime.utcnow()
+                d[self.lu_field] = datetime.utcnow()
             bulk.find({key: d[key]}).upsert().replace_one(d)
         bulk.execute()
 
