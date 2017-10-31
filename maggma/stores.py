@@ -39,10 +39,6 @@ class Store(MSONable, metaclass=ABCMeta):
         return self.collection
 
     @property
-    def meta(self):
-        return self.collection.db["{}.meta".format(self.collection.name)]
-
-    @property
     def last_updated(self):
         doc = next(self.collection.find({}, {"_id": 0, self.lu_field: 1}).sort(
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
