@@ -154,7 +154,7 @@ class MongoStore(Store):
     def ensure_index(self, key, unique=False):
         """Wrapper for pymongo.Collection.ensure_index
         """
-        return self.collection.ensure_index(key, unique=unique, background=True)
+        return self.collection.create_index(key, unique=unique, background=True)
 
     def close(self):
         self.collection.close()
