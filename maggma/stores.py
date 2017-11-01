@@ -51,6 +51,13 @@ class Store(MSONable, metaclass=ABCMeta):
     def update(self,key,docs,update_lu=True):
         pass
 
+    @abstractmethod
+    def ensure_index(self, key, unique=False):
+        """Wrapper for pymongo.Collection.ensure_index
+        """
+        pass
+
+
     @property
     def last_updated(self):
         doc = next(self.query(properties=[self.lu_field]).sort(
@@ -144,6 +151,11 @@ class MongoStore(Store):
             bulk.find({key: d[key]}).upsert().replace_one(d)
         bulk.execute()
 
+    def ensure_index(self, key, unique=False):
+        """Wrapper for pymongo.Collection.ensure_index
+        """
+        return self.collection.ensure_index(key, unique=unique, background=True)
+
     def close(self):
         self.collection.close()
 
@@ -178,6 +190,11 @@ class MemoryStore(Store):
 
     def distinct(self, key, criteria=None, **kwargs):
         return self.collection.distinct(key,filter=criteria,**kwargs)
+
+    def ensure_index(self, key, unique=False):
+        """Wrapper for pymongo.Collection.ensure_index
+        """
+        return self.collection.ensure_index(key, unique=unique, background=True)
 
     def update(self,key,docs,update_lu=True):
         bulk = self.__collection.initialize_ordered_bulk_op()
