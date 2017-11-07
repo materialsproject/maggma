@@ -8,6 +8,7 @@ from pymongo import MongoClient
 from pydash import identity
 
 from monty.json import MSONable
+from monty.io import zopen
 
 
 class Store(MSONable, metaclass=ABCMeta):
@@ -39,8 +40,8 @@ class Store(MSONable, metaclass=ABCMeta):
     def close(self):
         pass
 
-    @abstractmethod    
-    def query(self, properties=None, criteria=None,**kwargs):
+    @abstractmethod
+    def query(self, properties=None, criteria=None, **kwargs):
         pass
 
     @abstractmethod
@@ -48,7 +49,7 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def update(self,key,docs,update_lu=True):
+    def update(self, key, docs, update_lu=True):
         pass
 
     @abstractmethod
@@ -56,7 +57,6 @@ class Store(MSONable, metaclass=ABCMeta):
         """Wrapper for pymongo.Collection.ensure_index
         """
         pass
-
 
     @property
     def last_updated(self):
@@ -134,15 +134,15 @@ class MongoStore(Store):
     def __hash__(self):
         return hash((self.collection_name, self.lu_field))
 
-    def query(self, properties=None, criteria=None,**kwargs):
+    def query(self, properties=None, criteria=None, **kwargs):
         if properties:
-            properties = {p:1 for p in properties}
+            properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
     def distinct(self, key, criteria=None, **kwargs):
-        return self.collection.distinct(key,filter=criteria,**kwargs)
+        return self.collection.distinct(key, filter=criteria, **kwargs)
 
-    def update(self,key,docs,update_lu=True):
+    def update(self, key, docs, update_lu=True):
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
@@ -158,6 +158,7 @@ class MongoStore(Store):
 
     def close(self):
         self.collection.close()
+
 
 class MemoryStore(Store):
     """
@@ -183,26 +184,26 @@ class MemoryStore(Store):
     def __hash__(self):
         return hash((self.name, self.lu_field))
 
-    def query(self, properties=None, criteria=None,**kwargs):
+    def query(self, properties=None, criteria=None, **kwargs):
         if properties:
-            properties = {p:1 for p in properties}
+            properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
     def distinct(self, key, criteria=None, **kwargs):
-        return self.collection.distinct(key,filter=criteria,**kwargs)
+        return self.collection.distinct(key, filter=criteria, **kwargs)
 
     def ensure_index(self, key, unique=False):
         """Wrapper for pymongo.Collection.ensure_index
         """
         return self.collection.ensure_index(key, unique=unique, background=True)
 
-    def update(self,key,docs,update_lu=True):
+    def update(self, key, docs, update_lu=True):
         bulk = self.__collection.initialize_ordered_bulk_op()
 
         for d in docs:
             d[self.lu_field] = datetime.utcnow()
             bulk.find(
-                    {key: d[key]}).upsert().replace_one(d)
+                {key: d[key]}).upsert().replace_one(d)
         bulk.execute()
 
 
@@ -220,9 +221,10 @@ class JSONStore(MemoryStore):
     def connect(self):
         super(JSONStore, self).connect()
         for path in self.paths:
-            with open(path) as f:
+            with zopen(path) as f:
                 objects = list(json.load(f))
-                objects = [objects] if not isinstance(objects, list) else objects
+                objects = [objects] if not isinstance(
+                    objects, list) else objects
                 self.collection.insert_many(objects)
 
     def __hash__(self):
