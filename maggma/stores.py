@@ -222,7 +222,9 @@ class JSONStore(MemoryStore):
         super(JSONStore, self).connect()
         for path in self.paths:
             with zopen(path) as f:
-                objects = list(json.load(f))
+                data = f.read()
+                data = data if not isinstance(data,bytes) else str(data,'utf-8')
+                objects = json.loads(data)
                 objects = [objects] if not isinstance(
                     objects, list) else objects
                 self.collection.insert_many(objects)
