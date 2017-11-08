@@ -135,7 +135,7 @@ class MongoStore(Store):
         return hash((self.collection_name, self.lu_field))
 
     def query(self, properties=None, criteria=None, **kwargs):
-        if properties:
+        if isinstance(properties,list):
             properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
