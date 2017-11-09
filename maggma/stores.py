@@ -18,7 +18,7 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, lu_field='_lu', lu_key=(identity, identity)):
+    def __init__(self, lu_field='last_updated', lu_key=(identity, identity)):
         """
         Args:
             lu_field (str): 'last updated' field name
