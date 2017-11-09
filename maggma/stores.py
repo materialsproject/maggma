@@ -9,6 +9,7 @@ from pydash import identity
 
 from monty.json import MSONable
 from monty.io import zopen
+from monty.serialization import loadfn
 
 
 class Store(MSONable, metaclass=ABCMeta):
@@ -158,6 +159,15 @@ class MongoStore(Store):
 
     def close(self):
         self.collection.close()
+
+    @classmethod
+    def from_db_file(cls, filename):
+        kwargs = loadfn(filename)
+        if "collection" in kwargs:
+            kwargs["collection_name"] = kwargs.pop("collection")
+        # Get rid of aliases from traditional query engine db docs
+        kwargs.pop("aliases")
+        return cls(**kwargs)
 
 
 class MemoryStore(Store):
