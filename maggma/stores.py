@@ -162,6 +162,9 @@ class MongoStore(Store):
 
     @classmethod
     def from_db_file(cls, filename):
+        """
+        Convenience method to construct MongoStore from db_file
+        """
         kwargs = loadfn(filename)
         if "collection" in kwargs:
             kwargs["collection_name"] = kwargs.pop("collection")
