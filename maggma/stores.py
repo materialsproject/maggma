@@ -169,7 +169,7 @@ class MongoStore(Store):
         if "collection" in kwargs:
             kwargs["collection_name"] = kwargs.pop("collection")
         # Get rid of aliases from traditional query engine db docs
-        kwargs.pop("aliases")
+        kwargs.pop("aliases", None)
         return cls(**kwargs)
 
 
