@@ -9,7 +9,7 @@ class AliasingStore(Store):
     Special Store that aliases for the primary accessors
     """
 
-    def __init__(self, store, aliases):
+    def __init__(self, store, aliases,**kwargs):
         """
         store (Store): the store to wrap around
         aliases (dict): dict of aliases of the form external key: internal key
@@ -17,6 +17,7 @@ class AliasingStore(Store):
         self.store = store
         self.aliases = aliases
         self.reverse_aliases = {v: k for k, v in aliases.items()}
+        super(AliasingStore, self).__init__(store.lu_field,store.lu_key)
 
     def query(self, properties=None, criteria=None, **kwargs):
 
