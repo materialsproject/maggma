@@ -9,6 +9,7 @@ from pydash import identity
 
 from monty.json import MSONable
 from monty.io import zopen
+from monty.serialization import loadfn
 
 
 class Store(MSONable, metaclass=ABCMeta):
@@ -17,7 +18,7 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='_lu', lu_key=(identity, identity)):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_key=(identity, identity)):
         """
         Args:
             lu_field (str): 'last updated' field name
@@ -136,7 +137,7 @@ class MongoStore(Store):
         return hash((self.collection_name, self.lu_field))
 
     def query(self, properties=None, criteria=None, **kwargs):
-        if isinstance(properties,list):
+        if isinstance(properties, list):
             properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
@@ -159,6 +160,18 @@ class MongoStore(Store):
 
     def close(self):
         self.collection.close()
+
+    @classmethod
+    def from_db_file(cls, filename):
+        """
+        Convenience method to construct MongoStore from db_file
+        """
+        kwargs = loadfn(filename)
+        if "collection" in kwargs:
+            kwargs["collection_name"] = kwargs.pop("collection")
+        # Get rid of aliases from traditional query engine db docs
+        kwargs.pop("aliases", None)
+        return cls(**kwargs)
 
 
 class MemoryStore(Store):
@@ -186,7 +199,7 @@ class MemoryStore(Store):
         return hash((self.name, self.lu_field))
 
     def query(self, properties=None, criteria=None, **kwargs):
-        if isinstance(properties,list):
+        if isinstance(properties, list):
             properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
@@ -224,7 +237,7 @@ class JSONStore(MemoryStore):
         for path in self.paths:
             with zopen(path) as f:
                 data = f.read()
-                data = data.decode() if isinstance(data,bytes) else data
+                data = data.decode() if isinstance(data, bytes) else data
                 objects = json.loads(data)
                 objects = [objects] if not isinstance(
                     objects, list) else objects

@@ -37,8 +37,12 @@ class TestMongoStore(unittest.TestCase):
         self.assertEqual(self.mongostore.query(
             criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
 
+    def test_from_db_file(self):
+        ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))
+
     def tearDown(self):
-        self.mongostore.collection.drop()
+        if self.mongostore.collection:
+            self.mongostore.collection.drop()
 
 
 class TestMemoryStore(unittest.TestCase):
