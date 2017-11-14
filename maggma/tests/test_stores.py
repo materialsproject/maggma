@@ -33,7 +33,7 @@ class TestMongoStore(unittest.TestCase):
         self.mongostore.collection.insert({"a": 4, "d": 5, "e": 6})
         self.assertEqual(self.mongostore.distinct("a"), [1, 4])
 
-        self.mongostore.update("e", [{"e": 6, "d": 4}])
+        self.mongostore.update([{"e": 6, "d": 4}],key="e")
         self.assertEqual(self.mongostore.query(
             criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
 

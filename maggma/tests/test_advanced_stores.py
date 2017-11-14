@@ -36,9 +36,7 @@ class TestAliasingStore(unittest.TestCase):
 
     def test_update(self):
 
-        self.aliasingstore.update("task_id", [{"task_id": "mp-3", "a": 4},
-                                         {"task_id": "mp-4", "c": {"d": 5}},
-                                         {"task_id": "mp-5", "f": 6}])
+        self.aliasingstore.update([{"task_id": "mp-3", "a": 4},{"task_id": "mp-4", "c": {"d": 5}},{"task_id": "mp-5", "f": 6}])
         self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-3" }))[0]["a"],4)
         self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-4" }))[0]["c"]["d"],5)
         self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-5" }))[0]["f"],6)
