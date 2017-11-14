@@ -17,13 +17,14 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, lu_field='_lu', lu_key=(identity, identity)):
+    def __init__(self, key="task_id", lu_field='_lu', lu_key=(identity, identity)):
         """
         Args:
             lu_field (str): 'last updated' field name
             lu_key (tuple): A pair of key functions to map
                 self.lu_field to a `datetime` and back, respectively.
         """
+        self.key = key
         self.lu_field = lu_field
         self.lu_key = lu_key
 
@@ -49,7 +50,7 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def update(self, key, docs, update_lu=True):
+    def update(self, docs, update_lu=True):
         pass
 
     @abstractmethod
@@ -142,13 +143,13 @@ class MongoStore(Store):
     def distinct(self, key, criteria=None, **kwargs):
         return self.collection.distinct(key, filter=criteria, **kwargs)
 
-    def update(self, key, docs, update_lu=True):
+    def update(self, docs, update_lu=True):
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
             if update_lu:
                 d[self.lu_field] = datetime.utcnow()
-            bulk.find({key: d[key]}).upsert().replace_one(d)
+            bulk.find({self.key: d[self.key]}).upsert().replace_one(d)
         bulk.execute()
 
     def ensure_index(self, key, unique=False):
@@ -197,13 +198,13 @@ class MemoryStore(Store):
         """
         return self.collection.ensure_index(key, unique=unique, background=True)
 
-    def update(self, key, docs, update_lu=True):
+    def update(self, docs, update_lu=True):
         bulk = self.__collection.initialize_ordered_bulk_op()
 
         for d in docs:
             d[self.lu_field] = datetime.utcnow()
             bulk.find(
-                {key: d[key]}).upsert().replace_one(d)
+                {self.key: d[self.key]}).upsert().replace_one(d)
         bulk.execute()
 
 
@@ -223,7 +224,7 @@ class JSONStore(MemoryStore):
         for path in self.paths:
             with zopen(path) as f:
                 data = f.read()
-                data = data if not isinstance(data,bytes) else str(data,'utf-8')
+                data = data if not isinstance(data,bytes) else str(data)
                 objects = json.loads(data)
                 objects = [objects] if not isinstance(
                     objects, list) else objects
