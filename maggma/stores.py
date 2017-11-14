@@ -224,7 +224,7 @@ class JSONStore(MemoryStore):
         for path in self.paths:
             with zopen(path) as f:
                 data = f.read()
-                data = data if not isinstance(data,bytes) else str(data)
+                data = data.decode() if isinstance(data,bytes) else data
                 objects = json.loads(data)
                 objects = [objects] if not isinstance(
                     objects, list) else objects
