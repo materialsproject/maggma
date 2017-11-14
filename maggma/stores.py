@@ -51,7 +51,7 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def update(self, docs, update_lu=True):
+    def update(self, docs, update_lu=True,key=None):
         pass
 
     @abstractmethod
@@ -144,13 +144,16 @@ class MongoStore(Store):
     def distinct(self, key, criteria=None, **kwargs):
         return self.collection.distinct(key, filter=criteria, **kwargs)
 
-    def update(self, docs, update_lu=True):
+    def update(self, docs, update_lu=True,key=None):
+
+        key = key if key else self.key
+
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
             if update_lu:
                 d[self.lu_field] = datetime.utcnow()
-            bulk.find({self.key: d[self.key]}).upsert().replace_one(d)
+            bulk.find({key: d[key]}).upsert().replace_one(d)
         bulk.execute()
 
     def ensure_index(self, key, unique=False):
@@ -211,13 +214,14 @@ class MemoryStore(Store):
         """
         return self.collection.ensure_index(key, unique=unique, background=True)
 
-    def update(self, docs, update_lu=True):
+    def update(self, docs, update_lu=True, key=None):
+        key = key if key else self.key
         bulk = self.__collection.initialize_ordered_bulk_op()
 
         for d in docs:
             d[self.lu_field] = datetime.utcnow()
             bulk.find(
-                {self.key: d[self.key]}).upsert().replace_one(d)
+                {key: d[key]}).upsert().replace_one(d)
         bulk.execute()
 
 

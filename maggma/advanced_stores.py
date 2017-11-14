@@ -9,7 +9,7 @@ class AliasingStore(Store):
     Special Store that aliases for the primary accessors
     """
 
-    def __init__(self, store, aliases,**kwargs):
+    def __init__(self, store, aliases, **kwargs):
         """
         store (Store): the store to wrap around
         aliases (dict): dict of aliases of the form external key: internal key
@@ -18,7 +18,7 @@ class AliasingStore(Store):
         self.aliases = aliases
         self.reverse_aliases = {v: k for k, v in aliases.items()}
         super(AliasingStore, self).__init__(lu_field=store.lu_field,
-            lu_key=store.lu_key)
+                                            lu_key=store.lu_key)
 
     def query(self, properties=None, criteria=None, **kwargs):
 
@@ -39,14 +39,16 @@ class AliasingStore(Store):
         lazy_substitute(criteria, self.aliases)
         return self.store.distinct(key, criteria, **kwargs)
 
-    def update(self, key, docs, update_lu=True):
+    def update(self, docs, update_lu=True, key=None):
+        key = key if key else self.key
+
         for d in docs:
             substitute(d, self.reverse_aliases)
 
         if key in self.aliases:
             key = self.aliases[key]
 
-        self.store.update(key, docs, update_lu)
+        self.store.update(docs, update_lu=update_lu, key=key)
 
     def ensure_index(self, key, unique=False):
         if key in self.aliases:
@@ -77,9 +79,10 @@ def substitute(d, aliases):
             set_(d, alias, get(d, key))
             unset(d, key)
 
-def unset(d,key):
-	pydash.objects.unset(d,key)
-	path = to_path(key)
-	for i in reversed(range(1,len(path))):
-		if len(get(d,path[:i])) == 0:
-			unset(d,path[:i])
+
+def unset(d, key):
+    pydash.objects.unset(d, key)
+    path = to_path(key)
+    for i in reversed(range(1, len(path))):
+        if len(get(d, path[:i])) == 0:
+            unset(d, path[:i])
