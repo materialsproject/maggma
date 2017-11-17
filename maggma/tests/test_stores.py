@@ -32,6 +32,13 @@ class TestMongoStore(unittest.TestCase):
 
         self.mongostore.collection.insert({"a": 4, "d": 5, "e": 6})
         self.assertEqual(self.mongostore.distinct("a"), [1, 4])
+        # Test list distinct functionality
+        self.mongostore.collection.insert({"a": 4, "d": 6, "e": 7})
+        self.mongostore.collection.insert({"a": 4, "d": 6})
+        ad_distinct = self.mongostore.distinct(["a", "d"])
+        self.assertTrue(len(ad_distinct), 3)
+        self.assertTrue({"a": 4, "d": 6} in ad_distinct)
+        self.assertTrue({"a": 1} in ad_distinct)
 
         self.mongostore.update([{"e": 6, "d": 4}],key="e")
         self.assertEqual(self.mongostore.query(
