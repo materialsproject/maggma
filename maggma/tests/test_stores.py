@@ -39,6 +39,7 @@ class TestMongoStore(unittest.TestCase):
         self.assertTrue(len(ad_distinct), 3)
         self.assertTrue({"a": 4, "d": 6} in ad_distinct)
         self.assertTrue({"a": 1} in ad_distinct)
+        self.assertEqual(len(self.mongostore.distinct(["a", "f"])), 2)
 
         self.mongostore.update([{"e": 6, "d": 4}],key="e")
         self.assertEqual(self.mongostore.query(

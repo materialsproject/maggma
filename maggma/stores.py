@@ -163,11 +163,21 @@ class MongoStore(Store):
         """
         if isinstance(key, list):
             agg_pipeline = [{"$match": criteria}] if criteria else []
-            agg_pipeline.append({"$group": {"_id": {k: "${}".format(k) for k in key}}})
-            results = self.collection.aggregate(agg_pipeline)
+
+            # use string ints as keys and replace later to avoid bug where periods
+            # can't be in group keys, then reconstruct after
+            group_op = {"$group": {"_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
+            agg_pipeline.append(group_op)
+            results = [r['_id'] for r in self.collection.aggregate(agg_pipeline)]
+            for result in results:
+                for n in list(result.keys()):
+                    result[key[int(n)]] = result.pop(n)
+
             # Return as document as partial matches are included
-            return [r['_id'] for r in results]
-        return self.collection.distinct(key, filter=criteria, **kwargs)
+            return results
+
+        else:
+            return self.collection.distinct(key, filter=criteria, **kwargs)
 
     def update(self, docs, update_lu=True, key=None):
         """
@@ -217,6 +227,8 @@ class MemoryStore(Store):
     """
     An in memory Store
     """
+    # TODO: Isn't this exactly the same thing as a MongoStore,
+    #           except for connect?
 
     def __init__(self, name, **kwargs):
         self.name = name
@@ -243,7 +255,23 @@ class MemoryStore(Store):
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
     def distinct(self, key, criteria=None, **kwargs):
-        return self.collection.distinct(key, filter=criteria, **kwargs)
+        if isinstance(key, list):
+            agg_pipeline = [{"$match": criteria}] if criteria else []
+
+            # use string ints as keys and replace later to avoid bug where periods
+            # can't be in group keys, then reconstruct after
+            group_op = {"$group": {"_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
+            agg_pipeline.append(group_op)
+            results = self.collection.aggregate(agg_pipeline)
+            results = [r['_id'] for r in results]
+            for result in results:
+                for n in result.keys():
+                    result[key[int(n)]] = result.pop(n)
+
+            # Return as document as partial matches are included
+            return results
+        else:
+            return self.collection.distinct(key, filter=criteria, **kwargs)
 
     def ensure_index(self, key, unique=False):
         """Wrapper for pymongo.Collection.ensure_index
