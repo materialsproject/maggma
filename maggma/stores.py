@@ -104,13 +104,13 @@ class MongoStore(Store):
         """
 
         Args:
-            database (str): db name
+            database (str): database name
             collection (str): collection name
-            host (str):
-            port (int):
-            username (str):
-            password (str):
-            lu_field (str): see Store doc
+            host (str): hostname for mongo db
+            port (int): tcp port for mongo db
+            username (str): username for mongo db
+            password (str): password for mongo db
+            lu_field (str): 'last updated' field name
         """
         self.database = database
         self.collection_name = collection_name
@@ -137,14 +137,50 @@ class MongoStore(Store):
         return hash((self.collection_name, self.lu_field))
 
     def query(self, properties=None, criteria=None, **kwargs):
+        """
+        Function that gets data from MongoStore with property focus.
+
+        Args:
+            properties (list or dict): list of properties to return
+                or dictionary with {"property": 1} type structure
+                from standard mongo Collection.find syntax
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
+            **kwargs (kwargs): further kwargs to Collection.find
+        """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
     def distinct(self, key, criteria=None, **kwargs):
+        """
+        Function get to get
+        Args:
+            key (mongolike key or list of mongolike keys): key or keys
+                for which to find distinct values or sets of values.
+            criteria (filter criteria): criteria for filter 
+            **kwargs (kwargs): kwargs corresponding to collection.distinct
+        """
+        if isinstance(key, list):
+            agg_pipeline = [{"$match": criteria}] if criteria else []
+            agg_pipeline.append({"$group": {"_id": {k: "${}".format(k) for k in key}}})
+            results = self.collection.aggregate(agg_pipeline)
+            # Return as document as partial matches are included
+            return [r['_id'] for r in results]
         return self.collection.distinct(key, filter=criteria, **kwargs)
 
-    def update(self, docs, update_lu=True,key=None):
+    def update(self, docs, update_lu=True, key=None):
+        """
+        Function to update associated MongoStore collection.
+
+        Args:
+            docs: list of documents
+        """
+        # TODO: @montoyjh
+        # - replaces docs rather than updates, maybe insert/update
+        #       functionality should be separate?
+        # - upsert maybe should be optional
+        # - still a bit slow, not sure it takes full advantages of parallel
 
         key = key if key else self.key
 
