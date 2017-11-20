@@ -47,7 +47,8 @@ class TestMongoStore(unittest.TestCase):
         self.assertTrue({"a": 1} in ad_distinct)
         self.assertEqual(len(self.mongostore.distinct(["a", "f"])), 3)
         self.assertEqual(len(self.mongostore.distinct(["d", "e"], {"a": 4})), 2)
-
+        all_exist = self.mongostore.distinct(["a", "b"], all_exist=True)
+        self.assertEqual(len(all_exist), 1)
 
     def test_from_db_file(self):
         ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))

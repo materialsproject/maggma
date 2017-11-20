@@ -118,18 +118,23 @@ class Mongolike(object):
         return self.collection.find(filter=criteria, projection=properties,
                                     **kwargs)
 
-    def distinct(self, key, criteria=None, **kwargs):
+    def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
-        Function get to get
+        Function get to get all distinct values of a certain key in
+        a mongolike store.  May take a single key or a list of keys
+
         Args:
             key (mongolike key or list of mongolike keys): key or keys
                 for which to find distinct values or sets of values.
-            criteria (filter criteria): criteria for filter 
+            criteria (filter criteria): criteria for filter
+            all_exist (bool): whether to ensure all keys in list exist
+                in each document
             **kwargs (kwargs): kwargs corresponding to collection.distinct
         """
         if isinstance(key, list):
             agg_pipeline = [{"$match": criteria}] if criteria else []
-
+            if all_exist:
+                agg_pipeline=[{"$match": {k: {"$exists": True} for k in key}}]
             # use string ints as keys and replace later to avoid bug where periods
             # can't be in group keys, then reconstruct after
             group_op = {"$group": {"_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
