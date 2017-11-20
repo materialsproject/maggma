@@ -56,8 +56,6 @@ class Store(MSONable, metaclass=ABCMeta):
 
     @abstractmethod
     def ensure_index(self, key, unique=False):
-        """Wrapper for pymongo.Collection.ensure_index
-        """
         pass
 
     @property
@@ -94,47 +92,14 @@ class Store(MSONable, metaclass=ABCMeta):
         return hash((self.lu_field,))
 
 
-class MongoStore(Store):
+class Mongolike(object):
     """
-    A Store that connects to any Mongo collection
+    Mixin class that allows for basic mongo functionality
     """
-
-    def __init__(self, database, collection_name, host="localhost", port=27017,
-                 username="", password="", **kwargs):
-        """
-
-        Args:
-            database (str): database name
-            collection (str): collection name
-            host (str): hostname for mongo db
-            port (int): tcp port for mongo db
-            username (str): username for mongo db
-            password (str): password for mongo db
-            lu_field (str): 'last updated' field name
-        """
-        self.database = database
-        self.collection_name = collection_name
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
-        self.__collection = None
-        self.kwargs = kwargs
-        super(MongoStore, self).__init__(**kwargs)
 
     @property
     def collection(self):
-        return self.__collection
-
-    def connect(self):
-        conn = MongoClient(self.host, self.port)
-        db = conn[self.database]
-        if self.username is not "":
-            db.authenticate(self.username, self.password)
-        self.__collection = db[self.collection_name]
-
-    def __hash__(self):
-        return hash((self.collection_name, self.lu_field))
+        return self._collection
 
     def query(self, properties=None, criteria=None, **kwargs):
         """
@@ -150,7 +115,8 @@ class MongoStore(Store):
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
-        return self.collection.find(filter=criteria, projection=properties, **kwargs)
+        return self.collection.find(filter=criteria, projection=properties,
+                                    **kwargs)
 
     def distinct(self, key, criteria=None, **kwargs):
         """
@@ -179,6 +145,12 @@ class MongoStore(Store):
         else:
             return self.collection.distinct(key, filter=criteria, **kwargs)
 
+    def ensure_index(self, key, unique=False):
+        """
+        Wrapper for pymongo.Collection.ensure_index
+        """
+        return self.collection.create_index(key, unique=unique, background=True)
+
     def update(self, docs, update_lu=True, key=None):
         """
         Function to update associated MongoStore collection.
@@ -186,11 +158,6 @@ class MongoStore(Store):
         Args:
             docs: list of documents
         """
-        # TODO: @montoyjh
-        # - replaces docs rather than updates, maybe insert/update
-        #       functionality should be separate?
-        # - upsert maybe should be optional
-        # - still a bit slow, not sure it takes full advantages of parallel
 
         key = key if key else self.key
 
@@ -202,13 +169,46 @@ class MongoStore(Store):
             bulk.find({key: d[key]}).upsert().replace_one(d)
         bulk.execute()
 
-    def ensure_index(self, key, unique=False):
-        """Wrapper for pymongo.Collection.ensure_index
-        """
-        return self.collection.create_index(key, unique=unique, background=True)
-
     def close(self):
         self.collection.close()
+
+
+class MongoStore(Mongolike, Store):
+    """
+    A Store that connects to a Mongo collection
+    """
+
+    def __init__(self, database, collection_name, host="localhost", port=27017,
+                 username="", password="", **kwargs):
+        """
+        Args:
+            database (str): database name
+            collection (str): collection name
+            host (str): hostname for mongo db
+            port (int): tcp port for mongo db
+            username (str): username for mongo db
+            password (str): password for mongo db
+            lu_field (str): 'last updated' field name
+        """
+        self.database = database
+        self.collection_name = collection_name
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self._collection = None
+        self.kwargs = kwargs
+        super(MongoStore, self).__init__(**kwargs)
+
+    def connect(self):
+        conn = MongoClient(self.host, self.port)
+        db = conn[self.database]
+        if self.username is not "":
+            db.authenticate(self.username, self.password)
+        self._collection = db[self.collection_name]
+
+    def __hash__(self):
+        return hash((self.collection_name, self.lu_field))
 
     @classmethod
     def from_db_file(cls, filename):
@@ -223,70 +223,23 @@ class MongoStore(Store):
         return cls(**kwargs)
 
 
-class MemoryStore(Store):
+class MemoryStore(Mongolike, Store):
     """
-    An in memory Store
+    An in-memory Store that functions similarly
+    to a MongoStore
     """
-    # TODO: Isn't this exactly the same thing as a MongoStore,
-    #           except for connect?
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name="memory_db", **kwargs):
         self.name = name
-        self.__collection = None
+        self._collection = None
         self.kwargs = kwargs
         super(MemoryStore, self).__init__(**kwargs)
 
-    @property
-    def collection(self):
-        return self.__collection
-
     def connect(self):
-        self.__collection = mongomock.MongoClient().db[self.name]
-
-    def close(self):
-        self.__collection.close()
+        self._collection = mongomock.MongoClient().db[self.name]
 
     def __hash__(self):
         return hash((self.name, self.lu_field))
-
-    def query(self, properties=None, criteria=None, **kwargs):
-        if isinstance(properties, list):
-            properties = {p: 1 for p in properties}
-        return self.collection.find(filter=criteria, projection=properties, **kwargs)
-
-    def distinct(self, key, criteria=None, **kwargs):
-        if isinstance(key, list):
-            agg_pipeline = [{"$match": criteria}] if criteria else []
-
-            # use string ints as keys and replace later to avoid bug where periods
-            # can't be in group keys, then reconstruct after
-            group_op = {"$group": {"_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
-            agg_pipeline.append(group_op)
-            results = self.collection.aggregate(agg_pipeline)
-            results = [r['_id'] for r in results]
-            for result in results:
-                for n in result.keys():
-                    result[key[int(n)]] = result.pop(n)
-
-            # Return as document as partial matches are included
-            return results
-        else:
-            return self.collection.distinct(key, filter=criteria, **kwargs)
-
-    def ensure_index(self, key, unique=False):
-        """Wrapper for pymongo.Collection.ensure_index
-        """
-        return self.collection.ensure_index(key, unique=unique, background=True)
-
-    def update(self, docs, update_lu=True, key=None):
-        key = key if key else self.key
-        bulk = self.__collection.initialize_ordered_bulk_op()
-
-        for d in docs:
-            d[self.lu_field] = datetime.utcnow()
-            bulk.find(
-                {key: d[key]}).upsert().replace_one(d)
-        bulk.execute()
 
 
 class JSONStore(MemoryStore):
