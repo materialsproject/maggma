@@ -24,6 +24,7 @@ class TestMongoStore(unittest.TestCase):
         self.mongostore.connect()
         self.assertIsInstance(self.mongostore.collection,
                               pymongo.collection.Collection)
+        self.mongostore.collection.drop()
 
         self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
         self.assertEqual(self.mongostore.query(properties=["a"])[0]['a'], 1)
@@ -33,9 +34,21 @@ class TestMongoStore(unittest.TestCase):
         self.mongostore.collection.insert({"a": 4, "d": 5, "e": 6})
         self.assertEqual(self.mongostore.distinct("a"), [1, 4])
 
-        self.mongostore.update([{"e": 6, "d": 4}],key="e")
+        self.mongostore.update([{"e": 6, "d": 4}], key="e")
         self.assertEqual(self.mongostore.query(
             criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
+
+        # Test list distinct functionality
+        self.mongostore.collection.insert({"a": 4, "d": 6, "e": 7})
+        self.mongostore.collection.insert({"a": 4, "d": 6})
+        ad_distinct = self.mongostore.distinct(["a", "d"])
+        self.assertTrue(len(ad_distinct), 3)
+        self.assertTrue({"a": 4, "d": 6} in ad_distinct)
+        self.assertTrue({"a": 1} in ad_distinct)
+        self.assertEqual(len(self.mongostore.distinct(["a", "f"])), 3)
+        self.assertEqual(len(self.mongostore.distinct(["d", "e"], {"a": 4})), 2)
+        all_exist = self.mongostore.distinct(["a", "b"], all_exist=True)
+        self.assertEqual(len(all_exist), 1)
 
     def test_from_db_file(self):
         ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))
@@ -48,7 +61,7 @@ class TestMongoStore(unittest.TestCase):
 class TestMemoryStore(unittest.TestCase):
 
     def setUp(self):
-        self.memstore = MemoryStore("collection")
+        self.memstore = MemoryStore()
 
     def test(self):
         self.assertEqual(self.memstore.collection, None)

@@ -56,8 +56,6 @@ class Store(MSONable, metaclass=ABCMeta):
 
     @abstractmethod
     def ensure_index(self, key, unique=False):
-        """Wrapper for pymongo.Collection.ensure_index
-        """
         pass
 
     @property
@@ -94,57 +92,77 @@ class Store(MSONable, metaclass=ABCMeta):
         return hash((self.lu_field,))
 
 
-class MongoStore(Store):
+class Mongolike(object):
     """
-    A Store that connects to any Mongo collection
+    Mixin class that allows for basic mongo functionality
     """
-
-    def __init__(self, database, collection_name, host="localhost", port=27017,
-                 username="", password="", **kwargs):
-        """
-
-        Args:
-            database (str): db name
-            collection (str): collection name
-            host (str):
-            port (int):
-            username (str):
-            password (str):
-            lu_field (str): see Store doc
-        """
-        self.database = database
-        self.collection_name = collection_name
-        self.host = host
-        self.port = port
-        self.username = username
-        self.password = password
-        self.__collection = None
-        self.kwargs = kwargs
-        super(MongoStore, self).__init__(**kwargs)
 
     @property
     def collection(self):
-        return self.__collection
-
-    def connect(self):
-        conn = MongoClient(self.host, self.port)
-        db = conn[self.database]
-        if self.username is not "":
-            db.authenticate(self.username, self.password)
-        self.__collection = db[self.collection_name]
-
-    def __hash__(self):
-        return hash((self.collection_name, self.lu_field))
+        return self._collection
 
     def query(self, properties=None, criteria=None, **kwargs):
+        """
+        Function that gets data from MongoStore with property focus.
+
+        Args:
+            properties (list or dict): list of properties to return
+                or dictionary with {"property": 1} type structure
+                from standard mongo Collection.find syntax
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
+            **kwargs (kwargs): further kwargs to Collection.find
+        """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
-        return self.collection.find(filter=criteria, projection=properties, **kwargs)
+        return self.collection.find(filter=criteria, projection=properties,
+                                    **kwargs)
 
-    def distinct(self, key, criteria=None, **kwargs):
-        return self.collection.distinct(key, filter=criteria, **kwargs)
+    def distinct(self, key, criteria=None, all_exist=False, **kwargs):
+        """
+        Function get to get all distinct values of a certain key in
+        a mongolike store.  May take a single key or a list of keys
 
-    def update(self, docs, update_lu=True,key=None):
+        Args:
+            key (mongolike key or list of mongolike keys): key or keys
+                for which to find distinct values or sets of values.
+            criteria (filter criteria): criteria for filter
+            all_exist (bool): whether to ensure all keys in list exist
+                in each document
+            **kwargs (kwargs): kwargs corresponding to collection.distinct
+        """
+        if isinstance(key, list):
+            agg_pipeline = [{"$match": criteria}] if criteria else []
+            if all_exist:
+                agg_pipeline=[{"$match": {k: {"$exists": True} for k in key}}]
+            # use string ints as keys and replace later to avoid bug where periods
+            # can't be in group keys, then reconstruct after
+            group_op = {"$group": {"_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
+            agg_pipeline.append(group_op)
+            results = [r['_id'] for r in self.collection.aggregate(agg_pipeline)]
+            for result in results:
+                for n in list(result.keys()):
+                    result[key[int(n)]] = result.pop(n)
+
+            # Return as document as partial matches are included
+            return results
+
+        else:
+            return self.collection.distinct(key, filter=criteria, **kwargs)
+
+    def ensure_index(self, key, unique=False):
+        """
+        Wrapper for pymongo.Collection.ensure_index
+        """
+        return self.collection.create_index(key, unique=unique, background=True)
+
+    def update(self, docs, update_lu=True, key=None):
+        """
+        Function to update associated MongoStore collection.
+
+        Args:
+            docs: list of documents
+        """
 
         key = key if key else self.key
 
@@ -156,13 +174,46 @@ class MongoStore(Store):
             bulk.find({key: d[key]}).upsert().replace_one(d)
         bulk.execute()
 
-    def ensure_index(self, key, unique=False):
-        """Wrapper for pymongo.Collection.ensure_index
-        """
-        return self.collection.create_index(key, unique=unique, background=True)
-
     def close(self):
         self.collection.close()
+
+
+class MongoStore(Mongolike, Store):
+    """
+    A Store that connects to a Mongo collection
+    """
+
+    def __init__(self, database, collection_name, host="localhost", port=27017,
+                 username="", password="", **kwargs):
+        """
+        Args:
+            database (str): database name
+            collection (str): collection name
+            host (str): hostname for mongo db
+            port (int): tcp port for mongo db
+            username (str): username for mongo db
+            password (str): password for mongo db
+            lu_field (str): 'last updated' field name
+        """
+        self.database = database
+        self.collection_name = collection_name
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self._collection = None
+        self.kwargs = kwargs
+        super(MongoStore, self).__init__(**kwargs)
+
+    def connect(self):
+        conn = MongoClient(self.host, self.port)
+        db = conn[self.database]
+        if self.username is not "":
+            db.authenticate(self.username, self.password)
+        self._collection = db[self.collection_name]
+
+    def __hash__(self):
+        return hash((self.collection_name, self.lu_field))
 
     @classmethod
     def from_db_file(cls, filename):
@@ -177,52 +228,23 @@ class MongoStore(Store):
         return cls(**kwargs)
 
 
-class MemoryStore(Store):
+class MemoryStore(Mongolike, Store):
     """
-    An in memory Store
+    An in-memory Store that functions similarly
+    to a MongoStore
     """
 
-    def __init__(self, name, **kwargs):
+    def __init__(self, name="memory_db", **kwargs):
         self.name = name
-        self.__collection = None
+        self._collection = None
         self.kwargs = kwargs
         super(MemoryStore, self).__init__(**kwargs)
 
-    @property
-    def collection(self):
-        return self.__collection
-
     def connect(self):
-        self.__collection = mongomock.MongoClient().db[self.name]
-
-    def close(self):
-        self.__collection.close()
+        self._collection = mongomock.MongoClient().db[self.name]
 
     def __hash__(self):
         return hash((self.name, self.lu_field))
-
-    def query(self, properties=None, criteria=None, **kwargs):
-        if isinstance(properties, list):
-            properties = {p: 1 for p in properties}
-        return self.collection.find(filter=criteria, projection=properties, **kwargs)
-
-    def distinct(self, key, criteria=None, **kwargs):
-        return self.collection.distinct(key, filter=criteria, **kwargs)
-
-    def ensure_index(self, key, unique=False):
-        """Wrapper for pymongo.Collection.ensure_index
-        """
-        return self.collection.ensure_index(key, unique=unique, background=True)
-
-    def update(self, docs, update_lu=True, key=None):
-        key = key if key else self.key
-        bulk = self.__collection.initialize_ordered_bulk_op()
-
-        for d in docs:
-            d[self.lu_field] = datetime.utcnow()
-            bulk.find(
-                {key: d[key]}).upsert().replace_one(d)
-        bulk.execute()
 
 
 class JSONStore(MemoryStore):
