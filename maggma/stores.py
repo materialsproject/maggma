@@ -128,13 +128,13 @@ class Mongolike(object):
                 for which to find distinct values or sets of values.
             criteria (filter criteria): criteria for filter
             all_exist (bool): whether to ensure all keys in list exist
-                in each document
+                in each document, defaults to False
             **kwargs (kwargs): kwargs corresponding to collection.distinct
         """
         if isinstance(key, list):
             agg_pipeline = [{"$match": criteria}] if criteria else []
             if all_exist:
-                agg_pipeline=[{"$match": {k: {"$exists": True} for k in key}}]
+                agg_pipeline.append({"$match": {k: {"$exists": True} for k in key}})
             # use string ints as keys and replace later to avoid bug where periods
             # can't be in group keys, then reconstruct after
             group_op = {"$group": {"_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
