@@ -27,6 +27,7 @@ class TestMongoStore(unittest.TestCase):
         self.mongostore.collection.drop()
 
         self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
+        self.assertEqual(self.mongostore.query_one(properties=["a"])["a"],1)
         self.assertEqual(self.mongostore.query(properties=["a"])[0]['a'], 1)
         self.assertEqual(self.mongostore.query(properties=["b"])[0]['b'], 2)
         self.assertEqual(self.mongostore.query(properties=["c"])[0]['c'], 3)
