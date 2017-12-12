@@ -32,6 +32,13 @@ if __name__ == "__main__":
                      'Topic :: Other/Nonlisted Topic',
                      'Topic :: Database :: Front-Ends',
                      'Topic :: Scientific/Engineering'],
+
+
+        entry_points={
+            'console_scripts': [
+                'mrun = maggma.cli.mrun:main'
+                ]
+            },
         test_suite='nose.collector',
         tests_require=['nose'],
         scripts=[os.path.join('scripts', f) for f in os.listdir(os.path.join(module_dir, 'scripts'))]
