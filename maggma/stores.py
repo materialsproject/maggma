@@ -47,7 +47,7 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def query_one(self,properties=None,criteria=None):
+    def query_one(self, properties=None, criteria=None):
         pass
 
     @abstractmethod
@@ -55,7 +55,7 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def update(self, docs, update_lu=True,key=None):
+    def update(self, docs, update_lu=True, key=None):
         pass
 
     @abstractmethod
@@ -122,7 +122,7 @@ class Mongolike(object):
         return self.collection.find(filter=criteria, projection=properties,
                                     **kwargs)
 
-    def query_one(self,properties=None,criteria=None,**kwargs):
+    def query_one(self, properties=None, criteria=None, **kwargs):
         """
         Function that gets a single from MongoStore with property focus.
         Returns None if nothing matches
@@ -138,8 +138,7 @@ class Mongolike(object):
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
         return self.collection.find_one(filter=criteria, projection=properties,
-                                    **kwargs)
-
+                                        **kwargs)
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
@@ -157,12 +156,15 @@ class Mongolike(object):
         if isinstance(key, list):
             agg_pipeline = [{"$match": criteria}] if criteria else []
             if all_exist:
-                agg_pipeline.append({"$match": {k: {"$exists": True} for k in key}})
+                agg_pipeline.append(
+                    {"$match": {k: {"$exists": True} for k in key}})
             # use string ints as keys and replace later to avoid bug where periods
             # can't be in group keys, then reconstruct after
-            group_op = {"$group": {"_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
+            group_op = {"$group": {
+                "_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
             agg_pipeline.append(group_op)
-            results = [r['_id'] for r in self.collection.aggregate(agg_pipeline)]
+            results = [r['_id']
+                       for r in self.collection.aggregate(agg_pipeline)]
             for result in results:
                 for n in list(result.keys()):
                     result[key[int(n)]] = result.pop(n)
