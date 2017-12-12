@@ -11,6 +11,7 @@ script: nosetests -v maggma
 notifications:
   email:
     recipients:
+      - montoyjh@lbl.gov
       - kmathew@lbl.gov
     on_success: change
     on_failure: always
