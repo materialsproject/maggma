@@ -17,8 +17,10 @@ class AliasingStore(Store):
         self.store = store
         self.aliases = aliases
         self.reverse_aliases = {v: k for k, v in aliases.items()}
-        super(AliasingStore, self).__init__(lu_field=store.lu_field,
-                                            lu_key=store.lu_key)
+        self.kwargs = kwargs
+
+        kwargs.update({"lu_field": store.lu_field, "lu_key": store.lu_key})
+        super(AliasingStore, self).__init__(**kwargs)
 
     def query(self, properties=None, criteria=None, **kwargs):
 
