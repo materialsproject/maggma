@@ -43,11 +43,11 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, properties=None, criteria=None):
         pass
 
     @abstractmethod
-    def distinct(self, key, criteria=None, **kwargs):
+    def distinct(self, key, criteria=None):
         pass
 
     @abstractmethod
