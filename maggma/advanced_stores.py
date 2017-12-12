@@ -34,6 +34,18 @@ class AliasingStore(Store):
             substitute(d, self.aliases)
             yield d
 
+    def query_one(self, properties=None, criteria=None, **kwargs):
+
+        if isinstance(properties, list):
+            properties = {p: 1 for p in properties}
+
+        criteria = criteria if criteria else {}
+        substitute(properties, self.reverse_aliases)
+        lazy_substitute(criteria, self.reverse_aliases)
+        d = self.store.query_one(properties, criteria, **kwargs)
+        substitute(d, self.aliases)
+        return d
+
     def distinct(self, key, criteria=None, **kwargs):
         if key in self.aliases:
             key = self.aliases[key]

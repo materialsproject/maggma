@@ -47,6 +47,10 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
+    def query_one(self,properties=None,criteria=None):
+        pass
+
+    @abstractmethod
     def distinct(self, key, criteria=None):
         pass
 
@@ -117,6 +121,25 @@ class Mongolike(object):
             properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties,
                                     **kwargs)
+
+    def query_one(self,properties=None,criteria=None,**kwargs):
+        """
+        Function that gets a single from MongoStore with property focus.
+        Returns None if nothing matches
+
+        Args:
+            properties (list or dict): list of properties to return
+                or dictionary with {"property": 1} type structure
+                from standard mongo Collection.find syntax
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
+            **kwargs (kwargs): further kwargs to Collection.find_one
+        """
+        if isinstance(properties, list):
+            properties = {p: 1 for p in properties}
+        return self.collection.find_one(filter=criteria, projection=properties,
+                                    **kwargs)
+
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
