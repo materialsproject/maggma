@@ -175,7 +175,7 @@ class Mongolike(object):
         bulk.execute()
 
     def close(self):
-        self.collection.close()
+        self.collection.database.client.close()
 
 
 class MongoStore(Mongolike, Store):
