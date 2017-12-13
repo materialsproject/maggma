@@ -4,6 +4,8 @@ import queue
 from collections import defaultdict
 from itertools import cycle
 import abc
+import traceback
+
 
 from monty.json import MSONable
 
@@ -270,8 +272,8 @@ class MultiprocProcessor(BaseProcessor):
                 try:
                     processed_item = self.builders[builder_id].process_item(item)
                     self.processed_items.append(processed_item)
-                except Exception as e:
-                    self.logger.info("Caught exception while building: {}".format(e))
+                except Exception:
+                    self.logger.info("Caught exception while building: {}".format(traceback.format_exc()))
 
             except queue.Empty:
                 break
