@@ -267,8 +267,12 @@ class MultiprocProcessor(BaseProcessor):
                 if packet is None:
                     break
                 builder_id, item = packet
-                processed_item = self.builders[builder_id].process_item(item)
-                self.processed_items.append(processed_item)
+                try:
+                    processed_item = self.builders[builder_id].process_item(item)
+                    self.processed_items.append(processed_item)
+                except Exception as e:
+                    self.logger.info("Caught exception while building: {}".format(e))
+
             except queue.Empty:
                 break
 
