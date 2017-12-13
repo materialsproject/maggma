@@ -199,8 +199,8 @@ class MultiprocProcessor(BaseProcessor):
         chunk_size = builder.chunk_size
         # Need <=len(self.builders) queues, etc. iff want Runner to run
         # builders in parallel. Holding off for now for simplicity.
-        self._queue = multiprocessing.Queue(chunk_size)
         manager = multiprocessing.Manager()
+        self._queue = manager.Queue(chunk_size + 1)
         self.processed_items = manager.list()
 
         # establish connection to the sources and targets
