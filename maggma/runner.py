@@ -261,7 +261,7 @@ class MultiprocProcessor(BaseProcessor):
 
     def worker(self):
         """
-        Call the builder's process_item method and put the processed item in the shared dict.
+        Call and store result of builder's process_item method.
         """
         while True:
             try:
@@ -273,7 +273,9 @@ class MultiprocProcessor(BaseProcessor):
                     processed_item = self.builders[builder_id].process_item(item)
                     self.processed_items.append(processed_item)
                 except Exception:
-                    self.logger.info("Caught exception while building: {}".format(traceback.format_exc()))
+                    self.logger.error(
+                        "Caught exception while building: {}".format(
+                            traceback.format_exc()))
 
             except queue.Empty:
                 break
