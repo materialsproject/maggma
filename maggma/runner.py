@@ -7,7 +7,7 @@ import abc
 import traceback
 
 
-from monty.json import MSONable
+from monty.json import MSONable, MontyDecoder
 
 from maggma.helpers import get_mpi
 from maggma.utils import grouper
@@ -381,3 +381,30 @@ class Runner(MSONable):
         """
         self.logger.info("building: {}".format(builder_id))
         self.processor.process(builder_id)
+
+    def as_dict(self):
+        """
+        Json-serializable dict representation of Runner
+        """
+        proc = self.processor.as_dict()
+        if "builders" in proc:
+            del proc["builders"]
+
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__,
+             "builders": [b.as_dict() for b in self.builders],
+             "num_workers": self.num_workers,
+             "processor" : proc
+             }
+
+        return d
+
+    @classmethod
+    def from_dict(cls,d):
+        decoder = MontyDecoder()    
+        builders = decoder.process_decoded(d["builders"])
+        processor = None
+        if "processor" in d:    
+            d["processor"]["builders"] = builders
+            processor = decoder.process_decoded(d["processor"])
+        return cls(builders,d.get("num_workers",0),processor)
