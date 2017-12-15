@@ -10,7 +10,7 @@ from pydash import identity
 from monty.json import MSONable
 from monty.io import zopen
 from monty.serialization import loadfn
-
+from maggma.utils import LU_KEY_ISOFORMAT
 
 class Store(MSONable, metaclass=ABCMeta):
     """
@@ -18,16 +18,16 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_key=(identity, identity)):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime"):
         """
         Args:
             lu_field (str): 'last updated' field name
-            lu_key (tuple): A pair of key functions to map
-                self.lu_field to a `datetime` and back, respectively.
+            lu_type (tuple): the date/time format for the lu_field
         """
         self.key = key
         self.lu_field = lu_field
-        self.lu_key = lu_key
+        self.lu_type = lu_type
+        self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity,identity)
 
     @property
     @abstractmethod
@@ -84,7 +84,7 @@ class Store(MSONable, metaclass=ABCMeta):
             targets = [targets]
 
         lu_list = [t.last_updated for t in targets]
-        return {self.lu_field: {"$gt": self.lu_key[1](max(lu_list))}}
+        return {self.lu_field: {"$gt": self.lu_func[1](max(lu_list))}}
 
     def __eq__(self, other):
         return hash(self) == hash(other)
