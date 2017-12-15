@@ -67,7 +67,7 @@ class Store(MSONable, metaclass=ABCMeta):
         doc = next(self.query(properties=[self.lu_field]).sort(
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         # Handle when collection has docs but `NoneType` lu_field.
-        return (doc[self.lu_field] if (doc and doc[self.lu_field])
+        return (self.lu_func[0](doc[self.lu_field]) if (doc and doc[self.lu_field])
                 else datetime.min)
 
     def lu_filter(self, targets):
