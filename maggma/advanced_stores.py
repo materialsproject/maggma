@@ -19,7 +19,7 @@ class AliasingStore(Store):
         self.reverse_aliases = {v: k for k, v in aliases.items()}
         self.kwargs = kwargs
 
-        kwargs.update({"lu_field": store.lu_field, "lu_key": store.lu_key})
+        kwargs.update({"lu_field": store.lu_field, "lu_type": store.lu_type})
         super(AliasingStore, self).__init__(**kwargs)
 
     def query(self, properties=None, criteria=None, **kwargs):
