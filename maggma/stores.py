@@ -238,7 +238,7 @@ class MongoStore(Mongolike, Store):
         self._collection = db[self.collection_name]
 
     def __hash__(self):
-        return hash((self.collection_name, self.lu_field))
+        return hash((self.database,self.collection_name, self.lu_field))
 
     @classmethod
     def from_db_file(cls, filename):
