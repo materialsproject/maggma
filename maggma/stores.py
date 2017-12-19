@@ -189,14 +189,19 @@ class Mongolike(object):
             docs: list of documents
         """
 
-        key = key if key else self.key
-
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
+            search_doc = {}
+            if isinstance(key,list):
+                search_doc = {k:d[k] for k in key}
+            elif key:
+                search_doc={key: d[key]}
+            else:
+                search_doc = {self.key: d[self.key]}
             if update_lu:
                 d[self.lu_field] = datetime.utcnow()
-            bulk.find({key: d[key]}).upsert().replace_one(d)
+            bulk.find(search_doc).upsert().replace_one(d)
         bulk.execute()
 
     def close(self):
