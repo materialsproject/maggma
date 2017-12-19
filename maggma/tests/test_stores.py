@@ -18,26 +18,26 @@ class TestMongoStore(unittest.TestCase):
 
     def setUp(self):
         self.mongostore = MongoStore("maggma_test", "test")
-
-    def test(self):
-        self.assertEqual(self.mongostore.collection, None)
         self.mongostore.connect()
-        self.assertIsInstance(self.mongostore.collection,
-                              pymongo.collection.Collection)
-        self.mongostore.collection.drop()
 
+    def test_connect(self):
+        mongostore = MongoStore("maggma_test", "test")
+        self.assertEqual(mongostore.collection, None)
+        mongostore.connect()
+        self.assertIsInstance(mongostore.collection,
+                              pymongo.collection.Collection)
+
+    def test_query(self):
         self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
         self.assertEqual(self.mongostore.query_one(properties=["a"])["a"],1)
         self.assertEqual(self.mongostore.query(properties=["a"])[0]['a'], 1)
         self.assertEqual(self.mongostore.query(properties=["b"])[0]['b'], 2)
         self.assertEqual(self.mongostore.query(properties=["c"])[0]['c'], 3)
 
+    def test_distinct(self):
+        self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
         self.mongostore.collection.insert({"a": 4, "d": 5, "e": 6})
         self.assertEqual(self.mongostore.distinct("a"), [1, 4])
-
-        self.mongostore.update([{"e": 6, "d": 4}], key="e")
-        self.assertEqual(self.mongostore.query(
-            criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
 
         # Test list distinct functionality
         self.mongostore.collection.insert({"a": 4, "d": 6, "e": 7})
@@ -46,8 +46,7 @@ class TestMongoStore(unittest.TestCase):
         self.assertTrue(len(ad_distinct), 3)
         self.assertTrue({"a": 4, "d": 6} in ad_distinct)
         self.assertTrue({"a": 1} in ad_distinct)
-        self.assertEqual(len(self.mongostore.distinct(["a", "f"])), 3)
-        self.assertEqual(len(self.mongostore.distinct(["d", "e"], {"a": 4})), 2)
+        self.assertEqual(len(self.mongostore.distinct(["d", "e"], {"a": 4})), 3)
         all_exist = self.mongostore.distinct(["a", "b"], all_exist=True)
         self.assertEqual(len(all_exist), 1)
         all_exist2 = self.mongostore.distinct(
