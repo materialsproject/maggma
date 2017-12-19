@@ -54,6 +54,17 @@ class TestMongoStore(unittest.TestCase):
             ["a", "e"], all_exist=True, criteria={"d": 6})
         self.assertEqual(len(all_exist2), 1)
 
+    def test_update(self):
+        self.mongostore.update([{"e": 6, "d": 4}], key="e")
+        self.assertEqual(self.mongostore.query(
+            criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)   
+
+        self.mongostore.update([{"e": 7, "d": 8, "f": 9}], key=["d","f"])
+        self.assertEqual(self.mongostore.query_one(
+            criteria={"d": 8, "f": 9}, properties=["e"])["e"], 7) 
+        self.mongostore.update([{"e": 11, "d": 8, "f": 9}], key=["d","f"])
+        self.assertEqual(self.mongostore.query_one(
+            criteria={"d": 8, "f": 9}, properties=["e"])["e"], 11) 
     def test_from_db_file(self):
         ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))
 
