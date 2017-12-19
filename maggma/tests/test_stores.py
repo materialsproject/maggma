@@ -30,9 +30,9 @@ class TestMongoStore(unittest.TestCase):
     def test_query(self):
         self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
         self.assertEqual(self.mongostore.query_one(properties=["a"])["a"],1)
-        self.assertEqual(self.mongostore.query(properties=["a"])[0]['a'], 1)
-        self.assertEqual(self.mongostore.query(properties=["b"])[0]['b'], 2)
-        self.assertEqual(self.mongostore.query(properties=["c"])[0]['c'], 3)
+        self.assertEqual(self.mongostore.query_one(properties=["a"])['a'], 1)
+        self.assertEqual(self.mongostore.query_one(properties=["b"])['b'], 2)
+        self.assertEqual(self.mongostore.query_one(properties=["c"])['c'], 3)
 
     def test_distinct(self):
         self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
