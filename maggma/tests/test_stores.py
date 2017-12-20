@@ -1,10 +1,10 @@
 import os
 import glob
 import unittest
-
+import numpy as np
 import mongomock.collection
 import pymongo.collection
-
+import numpy.testing.utils as nptu
 from maggma.stores import *
 
 module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
@@ -98,6 +98,48 @@ class TestJsonStore(unittest.TestCase):
         jsonstore = JSONStore(os.path.join(test_dir, "c.json.gz"))
         jsonstore.connect()
         self.assertEqual(len(list(jsonstore.query())), 20)
+
+
+class TestGridFSStore(unittest.TestCase):
+
+
+    def setUp(self):
+        self.gStore = GridFSStore("maggma_test", "test")
+        self.gStore.connect()
+
+    def test_update(self):
+        data1 = np.random.rand(256)
+        self.gStore.update([{"task_id": "mp-1", "data": data1}])
+        self.assertTrue(self.gStore._files_collection.find_one({"task_id": "mp-1"}))
+
+    def test_query(self):
+        data1 = np.random.rand(256)
+        data2 = np.random.rand(256)
+        self.gStore.update([{"task_id": "mp-1", "data": data1}])
+        self.gStore.update([{"task_id": "mp-2", "data": data2}])
+
+        doc = self.gStore.query_one(criteria={"task_id": "mp-1"})
+        nptu.assert_almost_equal(doc["data"],data1, 7)
+
+        doc = self.gStore.query_one(criteria={"task_id": "mp-2"})
+        nptu.assert_almost_equal(doc["data"],data2, 7)
+
+        self.assertEqual(self.gStore.query_one(criteria={"task_id": "mp-3"}),None)
+
+    def test_distinct(self):
+        data1 = np.random.rand(256)
+        data2 = np.random.rand(256)
+        self.gStore.update([{"task_id": "mp-1", "data": "Something"}])
+        self.gStore.update([{"task_id": "mp-2", "data":"Something"}])
+        self.gStore.update([{"task_id": "mp-3", "data":"Something"}])
+        self.gStore.update([{"task_id": "mp-4","material_id": "mvc-1", "data":"Something"}])
+        self.gStore.update([{"task_id": "mp-5","material_id": "mvc-1", "data":"Something"}])
+
+    def tearDown(self):
+        if self.gStore.collection:
+            self.gStore._files_collection.drop()
+            self.gStore._chunks_collection.drop()
+
 
 
 if __name__ == "__main__":
