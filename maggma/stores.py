@@ -23,6 +23,7 @@ class Store(MSONable, metaclass=ABCMeta):
     def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime"):
         """
         Args:
+            key (str): master key to index on
             lu_field (str): 'last updated' field name
             lu_type (tuple): the date/time format for the lu_field
         """
@@ -225,7 +226,6 @@ class MongoStore(Mongolike, Store):
             port (int): tcp port for mongo db
             username (str): username for mongo db
             password (str): password for mongo db
-            lu_field (str): 'last updated' field name
         """
         self.database = database
         self.collection_name = collection_name
@@ -285,6 +285,11 @@ class JSONStore(MemoryStore):
     """
 
     def __init__(self, paths, **kwargs):
+        """
+        Args:
+            paths (str or list): paths for json files to
+                turn into a Store
+        """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
         self.kwargs = kwargs
@@ -309,6 +314,10 @@ class DatetimeStore(MemoryStore):
     """Utility store intended for use with `Store.lu_filter`."""
 
     def __init__(self, dt, **kwargs):
+        """
+        Args:
+            dt (Datetime): Datetime to set
+        """
         self.__dt = dt
         self.kwargs = kwargs
         super(DatetimeStore, self).__init__("date", **kwargs)
