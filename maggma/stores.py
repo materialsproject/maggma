@@ -25,7 +25,7 @@ class Store(MSONable, metaclass=ABCMeta):
         Args:
             key (str): master key to index on
             lu_field (str): 'last updated' field name
-            lu_type (tuple): the date/time format for the lu_field
+            lu_type (tuple): the date/time format for the lu_field. Can be "datetime" or "isoformat"
         """
         self.key = key
         self.lu_field = lu_field
