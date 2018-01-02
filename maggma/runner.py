@@ -298,9 +298,7 @@ class Runner(MSONable):
         self.num_workers = num_workers
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
-        default_processor = MPIProcessor(
-            builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
-        self.processor = default_processor if processor is None else processor
+        self.processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
 
@@ -383,30 +381,3 @@ class Runner(MSONable):
         """
         self.logger.info("building: {}".format(builder_id))
         self.processor.process(builder_id)
-
-    def as_dict(self):
-        """
-        Json-serializable dict representation of Runner
-        """
-        proc = self.processor.as_dict()
-        if "builders" in proc:
-            del proc["builders"]
-
-        d = {"@module": self.__class__.__module__,
-             "@class": self.__class__.__name__,
-             "builders": [b.as_dict() for b in self.builders],
-             "num_workers": self.num_workers,
-             "processor" : proc
-             }
-
-        return d
-
-    @classmethod
-    def from_dict(cls,d):
-        decoder = MontyDecoder()    
-        builders = decoder.process_decoded(d["builders"])
-        processor = None
-        if "processor" in d:    
-            d["processor"]["builders"] = builders
-            processor = decoder.process_decoded(d["processor"])
-        return cls(builders,d.get("num_workers",0),processor)
