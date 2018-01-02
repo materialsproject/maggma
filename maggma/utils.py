@@ -63,7 +63,7 @@ def make_mongolike(d, get_key, put_key):
         get_key (str): the key to grab using mongo notation
         put_key (str): the key to put into using mongo notation, doesn't support arrays
     """
-    return put_mongolike(put_key,get_mongolike(d,get_key))
+    return put_mongolike(put_key, get_mongolike(d, get_key))
 
 
 def recursive_update(d, u):

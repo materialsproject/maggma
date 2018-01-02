@@ -61,5 +61,9 @@ class TestAliasingStore(unittest.TestCase):
         substitute(d, aliases)
         self.assertTrue("f" in d)
 
+        d = None
+        substitute(d,aliases)
+        self.assertTrue(d is None)
+
 if __name__ == "__main__":
     unittest.main()

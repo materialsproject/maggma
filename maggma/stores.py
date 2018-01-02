@@ -2,15 +2,17 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import json
 
+
 import mongomock
 import pymongo
+import gridfs
 from pymongo import MongoClient
 from pydash import identity
 
-from monty.json import MSONable
+from monty.json import MSONable, jsanitize
 from monty.io import zopen
 from monty.serialization import loadfn
-
+from maggma.utils import LU_KEY_ISOFORMAT
 
 class Store(MSONable, metaclass=ABCMeta):
     """
@@ -18,16 +20,17 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_key=(identity, identity)):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime"):
         """
         Args:
+            key (str): master key to index on
             lu_field (str): 'last updated' field name
-            lu_key (tuple): A pair of key functions to map
-                self.lu_field to a `datetime` and back, respectively.
+            lu_type (tuple): the date/time format for the lu_field. Can be "datetime" or "isoformat"
         """
         self.key = key
         self.lu_field = lu_field
-        self.lu_key = lu_key
+        self.lu_type = lu_type
+        self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity,identity)
 
     @property
     @abstractmethod
@@ -43,15 +46,19 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, properties=None, criteria=None):
         pass
 
     @abstractmethod
-    def distinct(self, key, criteria=None, **kwargs):
+    def query_one(self, properties=None, criteria=None):
         pass
 
     @abstractmethod
-    def update(self, docs, update_lu=True,key=None):
+    def distinct(self, key, criteria=None):
+        pass
+
+    @abstractmethod
+    def update(self, docs, update_lu=True, key=None):
         pass
 
     @abstractmethod
@@ -63,7 +70,7 @@ class Store(MSONable, metaclass=ABCMeta):
         doc = next(self.query(properties=[self.lu_field]).sort(
             [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         # Handle when collection has docs but `NoneType` lu_field.
-        return (doc[self.lu_field] if (doc and doc[self.lu_field])
+        return (self.lu_func[0](doc[self.lu_field]) if (doc and doc[self.lu_field])
                 else datetime.min)
 
     def lu_filter(self, targets):
@@ -80,7 +87,7 @@ class Store(MSONable, metaclass=ABCMeta):
             targets = [targets]
 
         lu_list = [t.last_updated for t in targets]
-        return {self.lu_field: {"$gt": self.lu_key[1](max(lu_list))}}
+        return {self.lu_field: {"$gt": self.lu_func[1](max(lu_list))}}
 
     def __eq__(self, other):
         return hash(self) == hash(other)
@@ -118,6 +125,24 @@ class Mongolike(object):
         return self.collection.find(filter=criteria, projection=properties,
                                     **kwargs)
 
+    def query_one(self, properties=None, criteria=None, **kwargs):
+        """
+        Function that gets a single from MongoStore with property focus.
+        Returns None if nothing matches
+
+        Args:
+            properties (list or dict): list of properties to return
+                or dictionary with {"property": 1} type structure
+                from standard mongo Collection.find syntax
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
+            **kwargs (kwargs): further kwargs to Collection.find_one
+        """
+        if isinstance(properties, list):
+            properties = {p: 1 for p in properties}
+        return self.collection.find_one(filter=criteria, projection=properties,
+                                        **kwargs)
+
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
         Function get to get all distinct values of a certain key in
@@ -134,12 +159,15 @@ class Mongolike(object):
         if isinstance(key, list):
             agg_pipeline = [{"$match": criteria}] if criteria else []
             if all_exist:
-                agg_pipeline.append({"$match": {k: {"$exists": True} for k in key}})
+                agg_pipeline.append(
+                    {"$match": {k: {"$exists": True} for k in key}})
             # use string ints as keys and replace later to avoid bug where periods
             # can't be in group keys, then reconstruct after
-            group_op = {"$group": {"_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
+            group_op = {"$group": {
+                "_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
             agg_pipeline.append(group_op)
-            results = [r['_id'] for r in self.collection.aggregate(agg_pipeline)]
+            results = [r['_id']
+                       for r in self.collection.aggregate(agg_pipeline)]
             for result in results:
                 for n in list(result.keys()):
                     result[key[int(n)]] = result.pop(n)
@@ -164,14 +192,19 @@ class Mongolike(object):
             docs: list of documents
         """
 
-        key = key if key else self.key
-
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
+            search_doc = {}
+            if isinstance(key,list):
+                search_doc = {k:d[k] for k in key}
+            elif key:
+                search_doc={key: d[key]}
+            else:
+                search_doc = {self.key: d[self.key]}
             if update_lu:
                 d[self.lu_field] = datetime.utcnow()
-            bulk.find({key: d[key]}).upsert().replace_one(d)
+            bulk.find(search_doc).upsert().replace_one(d)
         bulk.execute()
 
     def close(self):
@@ -193,7 +226,6 @@ class MongoStore(Mongolike, Store):
             port (int): tcp port for mongo db
             username (str): username for mongo db
             password (str): password for mongo db
-            lu_field (str): 'last updated' field name
         """
         self.database = database
         self.collection_name = collection_name
@@ -213,7 +245,7 @@ class MongoStore(Mongolike, Store):
         self._collection = db[self.collection_name]
 
     def __hash__(self):
-        return hash((self.collection_name, self.lu_field))
+        return hash((self.database,self.collection_name, self.lu_field))
 
     @classmethod
     def from_db_file(cls, filename):
@@ -253,6 +285,11 @@ class JSONStore(MemoryStore):
     """
 
     def __init__(self, paths, **kwargs):
+        """
+        Args:
+            paths (str or list): paths for json files to
+                turn into a Store
+        """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
         self.kwargs = kwargs
@@ -277,6 +314,10 @@ class DatetimeStore(MemoryStore):
     """Utility store intended for use with `Store.lu_filter`."""
 
     def __init__(self, dt, **kwargs):
+        """
+        Args:
+            dt (Datetime): Datetime to set
+        """
         self.__dt = dt
         self.kwargs = kwargs
         super(DatetimeStore, self).__init__("date", **kwargs)
@@ -284,3 +325,122 @@ class DatetimeStore(MemoryStore):
     def connect(self):
         super(DatetimeStore, self).connect()
         self.collection.insert_one({self.lu_field: self.__dt})
+
+
+class GridFSStore(MongoStore):
+    """
+    A Store for GrdiFS backend. Provides a common access method consistent with other stores
+    """
+
+    def connect(self):
+        conn = MongoClient(self.host, self.port)
+        db = conn[self.database]
+        if self.username is not "":
+            db.authenticate(self.username, self.password)
+
+        self._collection = gridfs.GridFS(db,self.collection_name)
+        self._files_collection = db["{}.files".format(self.collection_name)]
+        self._chunks_collection = db["{}.chunks".format(self.collection_name)]
+
+    @property
+    def collection(self):
+        # TODO: Should this return the real MongoCollection or the GridFS
+        return self._collection
+
+    def query(self, properties=None, criteria=None, **kwargs):
+        """
+        Function that gets data from GridFS. This store ignores all 
+        property projections as its designed for whole document access
+
+        Args:
+            properties (list or dict): This will be ignored by the GridFS
+                Store
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
+            **kwargs (kwargs): further kwargs to Collection.find
+        """
+        for f in self.collection.find(filter=criteria,**kwargs):
+            yield json.loads(f.read())
+
+    def query_one(self, properties=None, criteria=None, **kwargs):
+        """
+        Function that gets a single document from GridFS. This store
+        ignores all property projections as its designed for whole 
+        document access
+
+        Args:
+            properties (list or dict): This will be ignored by the GridFS
+                Store
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
+            **kwargs (kwargs): further kwargs to Collection.find
+        """
+        f = self.collection.find_one(filter=criteria, **kwargs)
+        if f:
+            return json.loads(f.read())
+        else:
+            return None
+        
+    def distinct(self, key, criteria=None, all_exist=False, **kwargs):
+        """
+        Function get to get all distinct values of a certain key in the
+        GridFS Store. This searches the .files collection for this data
+
+        Args:
+            key (mongolike key or list of mongolike keys): key or keys
+                for which to find distinct values or sets of values.
+            criteria (filter criteria): criteria for filter
+            all_exist (bool): whether to ensure all keys in list exist
+                in each document, defaults to False
+            **kwargs (kwargs): kwargs corresponding to collection.distinct
+        """
+        if isinstance(key, list):
+            agg_pipeline = [{"$match": criteria}] if criteria else []
+            if all_exist:
+                agg_pipeline.append(
+                    {"$match": {k: {"$exists": True} for k in key}})
+            # use string ints as keys and replace later to avoid bug where periods
+            # can't be in group keys, then reconstruct after
+            group_op = {"$group": {
+                "_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
+            agg_pipeline.append(group_op)
+            results = [r['_id']
+                       for r in self._files_collection.aggregate(agg_pipeline)]
+            for result in results:
+                for n in list(result.keys()):
+                    result[key[int(n)]] = result.pop(n)
+
+            # Return as document as partial matches are included
+            return results
+
+        else:
+            return self._files_collection.distinct(key, filter=criteria, **kwargs)
+
+    def ensure_index(self, key, unique=False):
+        """
+        Wrapper for pymongo.Collection.ensure_index for the files collection
+        """
+        return self._files_collection.create_index(key, unique=unique, background=True)
+
+    def update(self, docs, update_lu=True, key=None):
+        """
+        Function to update associated MongoStore collection.
+
+        Args:
+            docs: list of documents
+        """
+
+        for d in docs:
+            search_doc = {}
+            if isinstance(key,list):
+                search_doc = {k:d[k] for k in key}
+            elif key:
+                search_doc={key: d[key]}
+            else:
+                search_doc = {self.key: d[self.key]}
+
+            data = json.dumps(jsanitize(d)).encode("UTF-8")
+            self.collection.put(data,**search_doc)
+
+    def close(self):
+        self.collection.database.client.close()

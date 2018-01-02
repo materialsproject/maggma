@@ -4,8 +4,10 @@ import queue
 from collections import defaultdict
 from itertools import cycle
 import abc
+import traceback
 
-from monty.json import MSONable
+
+from monty.json import MSONable, MontyDecoder
 
 from maggma.helpers import get_mpi
 from maggma.utils import grouper
@@ -58,9 +60,10 @@ class SerialProcessor(BaseProcessor):
 
         cursor = builder.get_items()
 
-        for chunk in grouper(cursor,chunk_size):
+        for chunk in grouper(cursor, chunk_size):
             self.logger.info("Processing batch of {} items".format(chunk_size))
-            processed_items = [builder.process_item(item) for item in filter(None,chunk)]
+            processed_items = [builder.process_item(
+                item) for item in filter(None, chunk)]
             builder.update_targets(processed_items)
 
 
@@ -86,7 +89,8 @@ class MPIProcessor(BaseProcessor):
             self.worker()
 
     def master(self, builder_id):
-        self.logger.info("Building with MPI. {} workers in the pool.".format(self.size - 1))
+        self.logger.info(
+            "Building with MPI. {} workers in the pool.".format(self.size - 1))
 
         builder = self.builders[builder_id]
         chunk_size = builder.chunk_size
@@ -94,7 +98,8 @@ class MPIProcessor(BaseProcessor):
         # establish connection to the sources and targets
         builder.connect()
 
-        # cycle through the workers, there could be less workers than the items to process
+        # cycle through the workers, there could be less workers than the items
+        # to process
         worker_id = cycle(range(1, self.size))
 
         n = 0
@@ -103,7 +108,8 @@ class MPIProcessor(BaseProcessor):
         cursor = builder.get_items()
         for item in cursor:
             if n % chunk_size == 0:
-                self.logger.info("processing chunks of size {}".format(chunk_size))
+                self.logger.info(
+                    "processing chunks of size {}".format(chunk_size))
                 processed_chunk = self._process_chunk(chunk_size, workers)
                 builder.update_targets(processed_chunk)
             packet = (builder_id, item)
@@ -112,7 +118,8 @@ class MPIProcessor(BaseProcessor):
             self.comm.send(packet, dest=wid)
             n += 1
 
-        # in case the total number of items is not divisible by chunk_size, process the leftovers.
+        # in case the total number of items is not divisible by chunk_size,
+        # process the leftovers.
         if workers:
             processed_chunk = self._process_chunk(chunk_size, workers)
             builder.update_targets(processed_chunk)
@@ -194,8 +201,8 @@ class MultiprocProcessor(BaseProcessor):
         chunk_size = builder.chunk_size
         # Need <=len(self.builders) queues, etc. iff want Runner to run
         # builders in parallel. Holding off for now for simplicity.
-        self._queue = multiprocessing.Queue(chunk_size)
         manager = multiprocessing.Manager()
+        self._queue = manager.Queue(chunk_size + 1)
         self.processed_items = manager.list()
 
         # establish connection to the sources and targets
@@ -254,7 +261,7 @@ class MultiprocProcessor(BaseProcessor):
 
     def worker(self):
         """
-        Call the builder's process_item method and put the processed item in the shared dict.
+        Call and store result of builder's process_item method.
         """
         while True:
             try:
@@ -262,8 +269,14 @@ class MultiprocProcessor(BaseProcessor):
                 if packet is None:
                     break
                 builder_id, item = packet
-                processed_item = self.builders[builder_id].process_item(item)
-                self.processed_items.append(processed_item)
+                try:
+                    processed_item = self.builders[builder_id].process_item(item)
+                    self.processed_items.append(processed_item)
+                except Exception:
+                    self.logger.error(
+                        "Caught exception while building: {}".format(
+                            traceback.format_exc()))
+
             except queue.Empty:
                 break
 
@@ -285,7 +298,8 @@ class Runner(MSONable):
         self.num_workers = num_workers
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
-        default_processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
+        default_processor = MPIProcessor(
+            builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
         self.processor = default_processor if processor is None else processor
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
@@ -297,7 +311,7 @@ class Runner(MSONable):
             use_mpi = True if size > 1 else False
         except ImportError:
             self.logger.warning("either 'mpi4py' is not installed or issue with the installation. "
-                  "Proceeding with mulitprocessing.")
+                                "Proceeding with mulitprocessing.")
             use_mpi = False
         return use_mpi
 
@@ -369,3 +383,30 @@ class Runner(MSONable):
         """
         self.logger.info("building: {}".format(builder_id))
         self.processor.process(builder_id)
+
+    def as_dict(self):
+        """
+        Json-serializable dict representation of Runner
+        """
+        proc = self.processor.as_dict()
+        if "builders" in proc:
+            del proc["builders"]
+
+        d = {"@module": self.__class__.__module__,
+             "@class": self.__class__.__name__,
+             "builders": [b.as_dict() for b in self.builders],
+             "num_workers": self.num_workers,
+             "processor" : proc
+             }
+
+        return d
+
+    @classmethod
+    def from_dict(cls,d):
+        decoder = MontyDecoder()    
+        builders = decoder.process_decoded(d["builders"])
+        processor = None
+        if "processor" in d:    
+            d["processor"]["builders"] = builders
+            processor = decoder.process_decoded(d["processor"])
+        return cls(builders,d.get("num_workers",0),processor)
