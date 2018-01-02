@@ -283,7 +283,7 @@ class MultiprocProcessor(BaseProcessor):
 
 class Runner(MSONable):
 
-    def __init__(self, builders, num_workers=0, processor=None):
+    def __init__(self, builders, num_workers=0):
         """
         Initialize with a list of builders
 
