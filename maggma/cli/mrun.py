@@ -40,10 +40,8 @@ def main():
         runner = Runner(objects, num_workers=args.num_workers)
     elif isinstance(objects, Runner):
         # This is a runner:
-        runner = objects
-        runner.num_workers = args.num_workers
-        if isinstance(runner.processor,MultiprocProcessor):
-            runner.processor.num_workers = args.num_workers
+        root.info("Changing number of workers from default in input file")
+        runner = Runner(objects.builders,args.num_workers)
     else:
         root.error("Couldn't properly read the builder file.")
 
