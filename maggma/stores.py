@@ -207,6 +207,44 @@ class Mongolike(object):
             bulk.find(search_doc).upsert().replace_one(d)
         bulk.execute()
 
+    def groupby(self, keys, properties=None, criteria=None,
+                allow_disk_use=True):
+        """
+        Simple grouping function that will group documents
+        by keys.
+        
+        Args:
+            keys (list or string): fields to group documents
+            properties (list): properties to return in grouped documents
+            criteria (dict): filter for documents to group
+            allow_disk_use (bool): whether to allow disk use in aggregation
+
+        Returns:
+            command cursor corresponding to grouped documents
+            
+            elements of the command cursor have the structure:
+            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
+             'docs': [list_of_documents corresponding to key values]}
+             
+        """
+        pipeline = []
+        if criteria is not None:
+            pipeline.append({"$match": criteria})
+
+        if properties is not None:
+            pipeline.append({"$project": {p: 1 for p in properties}})
+
+        if isinstance(keys, str):
+            keys = [keys]
+
+        group_id = {key: "${}".format(key) for key in keys}
+        pipeline.append({"$group": {"_id": group_id,
+                                    "docs": {"$push": "$$ROOT"}
+                                    }
+                         })
+
+        return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
+
     def close(self):
         self.collection.database.client.close()
 
@@ -399,8 +437,8 @@ class GridFSStore(MongoStore):
             if all_exist:
                 agg_pipeline.append(
                     {"$match": {k: {"$exists": True} for k in key}})
-            # use string ints as keys and replace later to avoid bug where periods
-            # can't be in group keys, then reconstruct after
+            # use string ints as keys and replace later to avoid bug
+            # where periods can't be in group keys, then reconstruct after
             group_op = {"$group": {
                 "_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
             agg_pipeline.append(group_op)
