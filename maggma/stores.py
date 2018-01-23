@@ -161,8 +161,8 @@ class Mongolike(object):
             if all_exist:
                 agg_pipeline.append(
                     {"$match": {k: {"$exists": True} for k in key}})
-            # use string ints as keys and replace later to avoid bug where periods
-            # can't be in group keys, then reconstruct after
+            # use string ints as keys and replace later to avoid bug
+            # where periods can't be in group keys, then reconstruct after
             group_op = {"$group": {
                 "_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
             agg_pipeline.append(group_op)
