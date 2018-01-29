@@ -63,7 +63,24 @@ class TestMongoStore(unittest.TestCase):
             criteria={"d": 8, "f": 9}, properties=["e"])["e"], 7) 
         self.mongostore.update([{"e": 11, "d": 8, "f": 9}], key=["d","f"])
         self.assertEqual(self.mongostore.query_one(
-            criteria={"d": 8, "f": 9}, properties=["e"])["e"], 11) 
+            criteria={"d": 8, "f": 9}, properties=["e"])["e"], 11)
+
+    def test_groupby(self):
+        self.mongostore.collection.drop()
+        self.mongostore.update([{"e": 7, "d": 9, "f": 9},
+                                {"e": 7, "d": 9, "f": 10},
+                                {"e": 8, "d": 9, "f": 11},
+                                {"e": 9, "d": 10, "f": 12}], key="f")
+        data = list(self.mongostore.groupby("d"))
+        self.assertEqual(len(data), 2)
+        grouped_by_9 = [g['docs'] for g in data if g['_id']['d'] == 9][0]
+        self.assertEqual(len(grouped_by_9), 3)
+        grouped_by_10 = [g['docs'] for g in data if g['_id']['d'] == 10][0]
+        self.assertEqual(len(grouped_by_10), 1)
+
+        data = list(self.mongostore.groupby(["e", "d"]))
+        self.assertEqual(len(data), 3)
+
     def test_from_db_file(self):
         ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))
 
