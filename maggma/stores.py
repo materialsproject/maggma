@@ -20,17 +20,21 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime"):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime",
+                 schema=None):
         """
         Args:
             key (str): master key to index on
             lu_field (str): 'last updated' field name
             lu_type (tuple): the date/time format for the lu_field. Can be "datetime" or "isoformat"
+            schema (DocumentSchema): if supplied, any doc provided to the update() that does not
+                pass schema.validate_doc() will not be inserted, and a logger error will be generated
         """
         self.key = key
         self.lu_field = lu_field
         self.lu_type = lu_type
         self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity,identity)
+        self.schema = schema
 
     @property
     @abstractmethod
@@ -195,16 +199,28 @@ class Mongolike(object):
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
-            search_doc = {}
-            if isinstance(key,list):
-                search_doc = {k:d[k] for k in key}
-            elif key:
-                search_doc={key: d[key]}
-            else:
-                search_doc = {self.key: d[self.key]}
-            if update_lu:
-                d[self.lu_field] = datetime.utcnow()
-            bulk.find(search_doc).upsert().replace_one(d)
+
+            d = jsanitize(d, allow_bson=True)
+
+            # document-level validation is optional
+            validates = True
+            if self.schema:
+                validates = self.schema.validate_doc(d)
+                if not validates and self.schema.strict:
+                    raise ValueError('Document failed to validate: {}'.format(d))
+
+            if validates:
+                search_doc = {}
+                if isinstance(key,list):
+                    search_doc = {k:d[k] for k in key}
+                elif key:
+                    search_doc={key: d[key]}
+                else:
+                    search_doc = {self.key: d[self.key]}
+                if update_lu:
+                    d[self.lu_field] = datetime.utcnow()
+                bulk.find(search_doc).upsert().replace_one(d)
+
         bulk.execute()
 
     def groupby(self, keys, properties=None, criteria=None,
