@@ -28,7 +28,7 @@ class SchemaTests(unittest.TestCase):
 
         schema = SampleSchema()
 
-        lattice = Lattice.cubic(5)
+        lattice = LatticeMock(5)
 
         valid_doc = {
             'task_id': 'mp-test',
