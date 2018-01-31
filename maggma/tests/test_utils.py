@@ -3,6 +3,7 @@ from maggma.utils import get_mongolike, make_mongolike, put_mongolike, recursive
 
 
 class UtilsTests(unittest.TestCase):
+
     def test_get_mongolike(self):
         d = {"a": [{"b": 1}, {"c": {"d": 2}}], "e": {"f": {"g": 3}}, "g": 4, "h": [5, 6]}
 

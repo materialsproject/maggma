@@ -6,13 +6,14 @@ import json
 import mongomock
 import pymongo
 import gridfs
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from pydash import identity
 
-from monty.json import MSONable, jsanitize
+from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
 from monty.serialization import loadfn
 from maggma.utils import LU_KEY_ISOFORMAT
+
 
 class Store(MSONable, metaclass=ABCMeta):
     """
@@ -30,7 +31,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.key = key
         self.lu_field = lu_field
         self.lu_type = lu_type
-        self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity,identity)
+        self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
 
     @property
     @abstractmethod
@@ -46,15 +47,15 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def query(self, properties=None, criteria=None):
+    def query(self, properties=None, criteria=None, **kwargs):
         pass
 
     @abstractmethod
-    def query_one(self, properties=None, criteria=None):
+    def query_one(self, properties=None, criteria=None, **kwargs):
         pass
 
     @abstractmethod
-    def distinct(self, key, criteria=None):
+    def distinct(self, key, criteria=None, **kwargs):
         pass
 
     @abstractmethod
@@ -97,6 +98,16 @@ class Store(MSONable, metaclass=ABCMeta):
 
     def __hash__(self):
         return hash((self.lu_field,))
+
+    def __getstate__(self):
+        return self.as_dict()
+
+    def __setstate__(self, d):
+        del d["@class"]
+        del d["@module"]
+        md = MontyDecoder()
+        d = md.process_decoded(d)
+        self.__init__(**d)
 
 
 class Mongolike(object):
@@ -196,10 +207,10 @@ class Mongolike(object):
 
         for d in docs:
             search_doc = {}
-            if isinstance(key,list):
-                search_doc = {k:d[k] for k in key}
+            if isinstance(key, list):
+                search_doc = {k: d[k] for k in key}
             elif key:
-                search_doc={key: d[key]}
+                search_doc = {key: d[key]}
             else:
                 search_doc = {self.key: d[self.key]}
             if update_lu:
@@ -212,7 +223,7 @@ class Mongolike(object):
         """
         Simple grouping function that will group documents
         by keys.
-        
+
         Args:
             keys (list or string): fields to group documents
             properties (list): properties to return in grouped documents
@@ -221,11 +232,11 @@ class Mongolike(object):
 
         Returns:
             command cursor corresponding to grouped documents
-            
+
             elements of the command cursor have the structure:
             {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
              'docs': [list_of_documents corresponding to key values]}
-             
+
         """
         pipeline = []
         if criteria is not None:
@@ -283,7 +294,7 @@ class MongoStore(Mongolike, Store):
         self._collection = db[self.collection_name]
 
     def __hash__(self):
-        return hash((self.database,self.collection_name, self.lu_field))
+        return hash((self.database, self.collection_name, self.lu_field))
 
     @classmethod
     def from_db_file(cls, filename):
@@ -365,10 +376,27 @@ class DatetimeStore(MemoryStore):
         self.collection.insert_one({self.lu_field: self.__dt})
 
 
-class GridFSStore(MongoStore):
+class GridFSStore(Store):
     """
     A Store for GrdiFS backend. Provides a common access method consistent with other stores
     """
+
+    def __init__(self, database, collection_name, host="localhost", port=27017,
+                 username="", password="", **kwargs):
+
+        self.database = database
+        self.collection_name = collection_name
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self._collection = None
+        self.kwargs = kwargs
+
+        if "key" not in kwargs:
+            kwargs["key"] = "_oid"
+
+        super(GridFSStore, self).__init__(**kwargs)
 
     def connect(self):
         conn = MongoClient(self.host, self.port)
@@ -376,7 +404,7 @@ class GridFSStore(MongoStore):
         if self.username is not "":
             db.authenticate(self.username, self.password)
 
-        self._collection = gridfs.GridFS(db,self.collection_name)
+        self._collection = gridfs.GridFS(db, self.collection_name)
         self._files_collection = db["{}.files".format(self.collection_name)]
         self._chunks_collection = db["{}.chunks".format(self.collection_name)]
 
@@ -397,10 +425,10 @@ class GridFSStore(MongoStore):
                 against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
-        for f in self.collection.find(filter=criteria,**kwargs):
+        for f in self.collection.find(filter=criteria, **kwargs).sort('uploadDate', pymongo.DESCENDING):
             yield json.loads(f.read())
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, properties=None, criteria=None, sort=[('uploadDate', pymongo.DESCENDING)], **kwargs):
         """
         Function that gets a single document from GridFS. This store
         ignores all property projections as its designed for whole 
@@ -418,7 +446,7 @@ class GridFSStore(MongoStore):
             return json.loads(f.read())
         else:
             return None
-        
+
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
         Function get to get all distinct values of a certain key in the
@@ -470,15 +498,17 @@ class GridFSStore(MongoStore):
 
         for d in docs:
             search_doc = {}
-            if isinstance(key,list):
-                search_doc = {k:d[k] for k in key}
+            if isinstance(key, list):
+                search_doc = {k: d[k] for k in key}
             elif key:
-                search_doc={key: d[key]}
+                search_doc = {key: d[key]}
+            elif self.key is "_oid":
+                pass
             else:
                 search_doc = {self.key: d[self.key]}
 
             data = json.dumps(jsanitize(d)).encode("UTF-8")
-            self.collection.put(data,**search_doc)
+            self.collection.put(data, **search_doc)
 
     def close(self):
         self.collection.database.client.close()

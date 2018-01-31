@@ -1,13 +1,8 @@
 import os
-import glob
 import unittest
 from unittest.mock import patch
 
-import mongomock.collection
-import pymongo.collection
-
 from maggma.stores import MemoryStore, MongoStore
-
 from maggma.advanced_stores import *
 
 module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
@@ -110,17 +105,17 @@ class TestAliasingStore(unittest.TestCase):
         self.assertTrue("f" in list(self.aliasingstore.query(
             criteria={"f": {"$exists": 1}}))[0])
 
-
     def test_update(self):
 
-        self.aliasingstore.update([{"task_id": "mp-3", "a": 4},{"task_id": "mp-4", "c": {"d": 5}},{"task_id": "mp-5", "f": 6}])
-        self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-3" }))[0]["a"],4)
-        self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-4" }))[0]["c"]["d"],5)
-        self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-5" }))[0]["f"],6)
+        self.aliasingstore.update([{"task_id": "mp-3", "a": 4}, {"task_id": "mp-4",
+                                                                 "c": {"d": 5}}, {"task_id": "mp-5", "f": 6}])
+        self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-3"}))[0]["a"], 4)
+        self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-4"}))[0]["c"]["d"], 5)
+        self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-5"}))[0]["f"], 6)
 
-        self.assertEqual(list(self.aliasingstore.store.query(criteria={"task_id": "mp-3" }))[0]["b"],4)
-        self.assertEqual(list(self.aliasingstore.store.query(criteria={"task_id": "mp-4" }))[0]["e"],5)
-        self.assertEqual(list(self.aliasingstore.store.query(criteria={"task_id": "mp-5" }))[0]["g"]["h"],6)
+        self.assertEqual(list(self.aliasingstore.store.query(criteria={"task_id": "mp-3"}))[0]["b"], 4)
+        self.assertEqual(list(self.aliasingstore.store.query(criteria={"task_id": "mp-4"}))[0]["e"], 5)
+        self.assertEqual(list(self.aliasingstore.store.query(criteria={"task_id": "mp-5"}))[0]["g"]["h"], 6)
 
     def test_substitute(self):
         aliases = {"a": "b", "c.d": "e", "f": "g.h"}
@@ -139,7 +134,7 @@ class TestAliasingStore(unittest.TestCase):
         self.assertTrue("f" in d)
 
         d = None
-        substitute(d,aliases)
+        substitute(d, aliases)
         self.assertTrue(d is None)
 
 if __name__ == "__main__":
