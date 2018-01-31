@@ -32,6 +32,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.lu_field = lu_field
         self.lu_type = lu_type
         self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
+        self.schema = None
 
     @property
     @abstractmethod
@@ -206,16 +207,31 @@ class Mongolike(object):
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
-            search_doc = {}
-            if isinstance(key, list):
-                search_doc = {k: d[k] for k in key}
-            elif key:
-                search_doc = {key: d[key]}
-            else:
-                search_doc = {self.key: d[self.key]}
-            if update_lu:
-                d[self.lu_field] = datetime.utcnow()
-            bulk.find(search_doc).upsert().replace_one(d)
+
+            d = jsanitize(d, allow_bson=True)
+
+            # document-level validation is optional
+            validates = True
+            if self.schema:
+                validates = self.schema.is_valid(d)
+                if not validates:
+                    if self.schema.strict:
+                        raise ValueError('Document failed to validate: {}'.format(d))
+                    else:
+                        self.logger.error('Document failed to validate: {}'.format(d))
+
+            if validates:
+                search_doc = {}
+                if isinstance(key,list):
+                    search_doc = {k: d[k] for k in key}
+                elif key:
+                    search_doc={key: d[key]}
+                else:
+                    search_doc = {self.key: d[self.key]}
+                if update_lu:
+                    d[self.lu_field] = datetime.utcnow()
+                bulk.find(search_doc).upsert().replace_one(d)
+
         bulk.execute()
 
     def groupby(self, keys, properties=None, criteria=None,
