@@ -5,7 +5,6 @@ from collections import defaultdict
 from itertools import cycle
 import abc
 import traceback
-import dill
 
 from multiprocessing import Pool
 from monty.json import MSONable, MontyDecoder
