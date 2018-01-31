@@ -2,21 +2,31 @@ from maggma.stores import Store, MongoStore
 from pydash.objects import set_, get, has
 from pydash.utilities import to_path
 import pydash.objects
-from hvac import Client
+import hvac
 import json
 import os
 
 
 class VaultStore(MongoStore):
-
+    """
+    Extends MongoStore to read credentials out of Vault server
+    and uses these values to initialize MongoStore instance
+    """
     def __init__(self, collection_name, vault_secret_path):
+        """
+        collection (string): name of mongo collection
+        vault_secret_path (string): path on vault server with mongo creds object
 
+        Environment (must be set prior to invocation):
+        VAULT_ADDR - URL of vault server (eg. https://matgen8.lbl.gov:8200)
+        VAULT_TOKEN or GITHUB_TOKEN - token used to authenticate to vault 
+        """
         vault_addr = os.getenv("VAULT_ADDR")
 
         if not vault_addr:
-            raise Exception("VAULT_ADDR not set")
+            raise RuntimeError("VAULT_ADDR not set")
 
-        client = Client(vault_addr)
+        client = hvac.Client(vault_addr)
 
         # If we have a vault token use this
         token = os.getenv("VAULT_TOKEN")
@@ -28,12 +38,13 @@ class VaultStore(MongoStore):
             if github_token:
                 client.auth_github(github_token)
             else:
-                raise Exception("VAULT_TOKEN or GITHUB_TOKEN not set")
+                raise RuntimeError("VAULT_TOKEN or GITHUB_TOKEN not set")
         else:
             client.token = token
             if not client.is_authenticated():
-                raise Exception("Bad token")
+                raise RuntimeError("Bad token")
 
+        # Read the vault secret
         json_db_creds = client.read(vault_secret_path)
         db_creds = json.loads(json_db_creds['data']['value'])
 
