@@ -24,7 +24,7 @@ class SchemaTests(unittest.TestCase):
                 }
             @property
             def msonable_keypaths(self):
-                return {"lattice": Lattice}
+                return {"lattice": LatticeMock}
 
         schema = SampleSchema()
 
