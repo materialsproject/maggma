@@ -1,8 +1,6 @@
 import os
 import unittest
-import json
 
-from maggma.helpers import get_database
 from maggma.stores import MemoryStore
 from maggma.builder import Builder
 from maggma.runner import Runner
@@ -41,4 +39,3 @@ class TestRunner(unittest.TestCase):
         rnr = Runner(self.builders)
         ans = {1: [0]}
         self.assertDictEqual(rnr.dependency_graph, ans)
-

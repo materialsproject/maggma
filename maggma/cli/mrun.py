@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from maggma.runner import Runner, MultiprocProcessor
+from maggma.runner import Runner
 from monty.serialization import loadfn
 import argparse
 import logging

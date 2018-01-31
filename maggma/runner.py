@@ -1,13 +1,11 @@
 import logging
 import multiprocessing
-import queue
 from collections import defaultdict
 from itertools import cycle
 import abc
-import traceback
 
 from multiprocessing import Pool
-from monty.json import MSONable, MontyDecoder
+from monty.json import MSONable
 from maggma.helpers import get_mpi
 from maggma.utils import grouper, reload_msonable_object
 
