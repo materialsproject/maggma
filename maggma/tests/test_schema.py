@@ -1,13 +1,16 @@
 import unittest
 from maggma.schema import StandardSchema
-from pymatgen import Lattice
+from monty.json import MSONable
 
 class SchemaTests(unittest.TestCase):
 
     def test_standardschema(self):
 
-        class SampleSchema(StandardSchema):
+        class LatticeMock(MSONable):
+            def __init__(self, a):
+                self.a = a
 
+        class SampleSchema(StandardSchema):
             @property
             def schema(self):
                 return {
@@ -19,7 +22,6 @@ class SchemaTests(unittest.TestCase):
                         },
                     "required": ["task_id", "successful"]
                 }
-
             @property
             def msonable_keypaths(self):
                 return {"lattice": Lattice}
