@@ -2,6 +2,11 @@ from abc import ABC, abstractmethod
 from jsonschema import validate, ValidationError
 import pydash
 
+"""
+Schema class for document-level validation on Stores. Attach an instance
+of a Schema subclass to a Store .schema variable to enable validation on
+that Store.
+"""
 
 class Schema(ABC):
     """
