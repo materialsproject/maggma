@@ -27,8 +27,6 @@ class Store(MSONable, metaclass=ABCMeta):
             key (str): master key to index on
             lu_field (str): 'last updated' field name
             lu_type (tuple): the date/time format for the lu_field. Can be "datetime" or "isoformat"
-            schema (DocumentSchema): if supplied, any doc provided to the update() that does not
-                pass schema.validate_doc() will not be inserted, and a logger error will be generated
         """
         self.key = key
         self.lu_field = lu_field
@@ -101,15 +99,6 @@ class Store(MSONable, metaclass=ABCMeta):
 
     def __hash__(self):
         return hash((self.lu_field,))
-
-    def attach_schema(self, schema):
-        """
-        Attach a Schema to a Store.
-
-        Args:
-            schema: a subclass of maggma.schema.Schema
-        """
-        self.schema = schema
 
     def __getstate__(self):
         return self.as_dict()
