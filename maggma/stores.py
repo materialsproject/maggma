@@ -216,6 +216,8 @@ class Mongolike(object):
                 validates = self.schema.is_valid(d)
                 if not validates and self.schema.strict:
                     raise ValueError('Document failed to validate: {}'.format(d))
+                else:
+                    self.logger.error('Document failed to validate: {}'.format(d))
 
             if validates:
                 search_doc = {}
