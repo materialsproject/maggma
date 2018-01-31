@@ -13,10 +13,7 @@ class TestVaultStore(unittest.TestCase):
     Test VaultStore class
     """
 
-    def test_vault_init(self):
-        os.environ['VAULT_ADDR'] = "https://fake:8200/"
-        os.environ['VAULT_TOKEN'] = "dummy"
-        # Use mock for hvac connection to vault
+    def _create_vault_store(self):
         with patch('hvac.Client') as mock:
 
             instance = mock.return_value
@@ -32,54 +29,44 @@ class TestVaultStore(unittest.TestCase):
                 'lease_duration': 2764800, 'lease_id': ''
             }
             v = VaultStore("test_coll", "secret/matgen/maggma")
-            # Just test that we successfully instantiated
-            assert isinstance(v, MongoStore)
+
+        return v
+
+    def test_vault_init(self):
+        """
+        Test initing a vault store using a mock hvac client
+        """
+        os.environ['VAULT_ADDR'] = "https://fake:8200/"
+        os.environ['VAULT_TOKEN'] = "dummy"
+
+        v = self._create_vault_store()
+        # Just test that we successfully instantiated
+        assert isinstance(v, MongoStore)
 
     def test_vault_github_token(self):
+        """
+        Test using VaultStore with GITHUB_TOKEN and mock hvac
+        """
         # Save token in env
         os.environ['VAULT_ADDR'] = "https://fake:8200/"
         os.environ['GITHUB_TOKEN'] = "dummy"
-        with patch('hvac.Client') as mock:
 
-            instance = mock.return_value
-            instance.auth_github.return_value = True
-            instance.is_authenticated.return_value = True
-            instance.read.return_value = {
-                'wrap_info': None,
-                'request_id': '2c72c063-2452-d1cd-19a2-91163c7395f7',
-                'data': {'value': '{"db": "mg_core_prod", "host": "matgen2.lbl.gov", "username": "test", "password": "pass"}'},
-                'auth': None,
-                'warnings': None,
-                'renewable': False,
-                'lease_duration': 2764800, 'lease_id': ''
-            }
-            v = VaultStore("test_coll", "secret/matgen/maggma")
-            # Just test that we successfully instantiated
-            assert isinstance(v, MongoStore)
+        v = self._create_vault_store()
+        # Just test that we successfully instantiated
+        assert isinstance(v, MongoStore)
 
     def test_vault_missing_env(self):
+        """
+        Test VaultStore should raise an error if environment is not set
+        """
         del os.environ['VAULT_TOKEN']
         del os.environ['VAULT_ADDR']
         del os.environ['GITHUB_TOKEN']
 
-        with patch('hvac.Client') as mock:
+        # Create should raise an error
+        with self.assertRaises(RuntimeError):
+            self._create_vault_store()
 
-            instance = mock.return_value
-            instance.auth_github.return_value = True
-            instance.is_authenticated.return_value = True
-            instance.read.return_value = {
-                'wrap_info': None,
-                'request_id': '2c72c063-2452-d1cd-19a2-91163c7395f7',
-                'data': {'value': '{"db": "mg_core_prod", "host": "matgen2.lbl.gov", "username": "test", "password": "pass"}'},
-                'auth': None,
-                'warnings': None,
-                'renewable': False,
-                'lease_duration': 2764800, 'lease_id': ''
-            }
-
-            with self.assertRaises(RuntimeError):
-                # Just test that we successfully instantiated
-                v = VaultStore("test_coll", "secret/matgen/maggma")
 
 
 
