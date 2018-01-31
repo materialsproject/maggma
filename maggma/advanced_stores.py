@@ -1,7 +1,55 @@
 from maggma.stores import Store
+from stores import MongoStore
 from pydash.objects import set_, get, has
 from pydash.utilities import to_path
 import pydash.objects
+from hvac import Client
+import json
+import os
+
+
+class VaultStore(MongoStore):
+
+    def __init__(self, collection_name, vault_secret_path):
+
+        vault_addr = os.getenv("VAULT_ADDR")
+
+        if not vault_addr:
+            raise Exception("VAULT_ADDR not set")
+
+        client = Client(vault_addr)
+
+        # If we have a vault token use this
+        token = os.getenv("VAULT_TOKEN")
+
+        # Look for a github token instead
+        if not token:
+            github_token = os.getenv("GITHUB_TOKEN")
+
+            if github_token:
+                token = client.auth_github(github_token)
+            else:
+                raise Exception("VAULT_TOKEN or GITHUB_TOKEN not set")
+        else:
+            client.token = token
+            if not client.is_authenticated():
+                raise Exception("Bad token")
+
+        json_db_creds = client.read(vault_secret_path)
+        db_creds = json.loads(json_db_creds['data']['value'])
+
+        database = db_creds.get("db")
+        host = db_creds.get("host", "localhost")
+        port = db_creds.get("port", 27017)
+        username = db_creds.get("username", "")
+        password = db_creds.get("password", "")
+
+        super.__init__(database,
+                       collection_name,
+                       host,
+                       port,
+                       username,
+                       password)
 
 
 class AliasingStore(Store):
