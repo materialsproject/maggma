@@ -5,12 +5,12 @@ from collections import defaultdict
 from itertools import cycle
 import abc
 import traceback
+import dill
 
-
+from multiprocessing import Pool
 from monty.json import MSONable, MontyDecoder
-
 from maggma.helpers import get_mpi
-from maggma.utils import grouper
+from maggma.utils import grouper, reload_msonable_object
 
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
@@ -199,87 +199,15 @@ class MultiprocProcessor(BaseProcessor):
         """
         builder = self.builders[builder_id]
         chunk_size = builder.chunk_size
-        # Need <=len(self.builders) queues, etc. iff want Runner to run
-        # builders in parallel. Holding off for now for simplicity.
-        manager = multiprocessing.Manager()
-        self._queue = manager.Queue(chunk_size + 1)
-        self.processed_items = manager.list()
+        processing_builder = reload_msonable_object(builder)
 
-        # establish connection to the sources and targets
-        builder.connect()
-
-        processes = self._start_worker_processes()
-        # send items to process
+        process_pool = Pool(self.num_workers, maxtasksperchild=chunk_size)
         cursor = builder.get_items()
-        for n, item in enumerate(cursor):
-            if n == 0:
-                self.logger.info(
-                    "Waiting for {} processed items before updating targets"
-                    .format(chunk_size))
-            if len(self.processed_items) >= chunk_size:
-                builder.update_targets(self.processed_items[:chunk_size])
-                del self.processed_items[:chunk_size]
-                self.logger.info(
-                    "Waiting for {} processed items before updating targets"
-                    .format(chunk_size))
-            packet = (builder_id, item)
-            self._queue.put(packet)  # blocks when queue is full
+        for items in grouper(process_pool.imap(processing_builder.process_item,cursor),chunk_size):
+            self.logger.info("Completed {} items".format(chunk_size))
+            builder.update_targets(items)
 
-        for _ in range(self.num_workers):
-            self._queue.put(None)
-
-        # handle the leftovers
-        status = []
-        for p in processes:
-            p.join()
-            status.append(not bool(p.exitcode))
-        while len(self.processed_items):
-            builder.update_targets(self.processed_items[:chunk_size])
-            del self.processed_items[:chunk_size]
-            self.logger.info(
-                "Waiting for {} processed items before updating targets"
-                .format(chunk_size))
-
-        # finalize
-        if not all(status):
-            self.logger.error("Some worker processes exited abnormally.")
         builder.finalize(cursor)
-
-    def _start_worker_processes(self):
-        """
-        Start worker pool for processing items.
-        """
-        processes = []
-
-        # start the workers
-        for i in range(self.num_workers):
-            proc = multiprocessing.Process(target=self.worker)
-            proc.start()
-            processes.append(proc)
-
-        return processes
-
-    def worker(self):
-        """
-        Call and store result of builder's process_item method.
-        """
-        while True:
-            try:
-                packet = self._queue.get()
-                if packet is None:
-                    break
-                builder_id, item = packet
-                try:
-                    processed_item = self.builders[builder_id].process_item(item)
-                    self.processed_items.append(processed_item)
-                except Exception:
-                    self.logger.error(
-                        "Caught exception while building: {}".format(
-                            traceback.format_exc()))
-
-            except queue.Empty:
-                break
-
 
 class Runner(MSONable):
 
