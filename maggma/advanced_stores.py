@@ -1,5 +1,4 @@
-from maggma.stores import Store
-from stores import MongoStore
+from maggma.stores import Store, MongoStore
 from pydash.objects import set_, get, has
 from pydash.utilities import to_path
 import pydash.objects
@@ -27,7 +26,7 @@ class VaultStore(MongoStore):
             github_token = os.getenv("GITHUB_TOKEN")
 
             if github_token:
-                token = client.auth_github(github_token)
+                client.auth_github(github_token)
             else:
                 raise Exception("VAULT_TOKEN or GITHUB_TOKEN not set")
         else:
@@ -44,12 +43,12 @@ class VaultStore(MongoStore):
         username = db_creds.get("username", "")
         password = db_creds.get("password", "")
 
-        super.__init__(database,
-                       collection_name,
-                       host,
-                       port,
-                       username,
-                       password)
+        super(VaultStore, self).__init__(database,
+                                         collection_name,
+                                         host,
+                                         port,
+                                         username,
+                                         password)
 
 
 class AliasingStore(Store):
