@@ -87,13 +87,13 @@ class StandardSchema(Schema):
             Otherwise will return False.
             """
 
-            for keypath, object in self.msonable_keypaths.items():
+            for keypath, obj in self.msonable_keypaths.items():
 
                 dict_to_check = pydash.get(doc, keypath, None)
 
                 if dict_to_check:
                     try:
-                        obj = object.from_dict(dict_to_check)
+                        obj.from_dict(dict_to_check)
                     except:
                         return False
 
