@@ -121,7 +121,7 @@ class TestGridFSStore(unittest.TestCase):
 
 
     def setUp(self):
-        self.gStore = GridFSStore("maggma_test", "test")
+        self.gStore = GridFSStore("maggma_test", "test",key="task_id")
         self.gStore.connect()
 
     def test_update(self):
