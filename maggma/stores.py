@@ -20,8 +20,7 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime",
-                 schema=None):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime"):
         """
         Args:
             key (str): master key to index on
@@ -34,7 +33,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.lu_field = lu_field
         self.lu_type = lu_type
         self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity,identity)
-        self.schema = schema
+        self.schema = None
 
     @property
     @abstractmethod
@@ -101,6 +100,15 @@ class Store(MSONable, metaclass=ABCMeta):
 
     def __hash__(self):
         return hash((self.lu_field,))
+
+    def attach_schema(self, schema):
+        """
+        Attach a Schema to a Store.
+
+        Args:
+            schema: a subclass of maggma.schema.Schema
+        """
+        self.schema = schema
 
 
 class Mongolike(object):
