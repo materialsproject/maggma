@@ -1,7 +1,8 @@
 from abc import ABCMeta, abstractmethod
 import logging
 
-from monty.json import MSONable
+from monty.json import MSONable, MontyDecoder
+
 
 
 class Builder(MSONable, metaclass=ABCMeta):
@@ -83,3 +84,14 @@ class Builder(MSONable, metaclass=ABCMeta):
             cursor and cursor.close()
         except AttributeError:
             pass
+
+
+    def __getstate__(self):
+        return self.as_dict()
+
+    def __setstate__(self,d):
+        del d["@class"]
+        del d["@module"]
+        md = MontyDecoder()
+        d = md.process_decoded(d)
+        self.__init__(**d)

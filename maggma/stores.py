@@ -6,10 +6,10 @@ import json
 import mongomock
 import pymongo
 import gridfs
-from pymongo import MongoClient
+from pymongo import MongoClient, DESCENDING
 from pydash import identity
 
-from monty.json import MSONable, jsanitize
+from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
 from monty.serialization import loadfn
 from maggma.utils import LU_KEY_ISOFORMAT
@@ -97,6 +97,16 @@ class Store(MSONable, metaclass=ABCMeta):
 
     def __hash__(self):
         return hash((self.lu_field,))
+
+    def __getstate__(self):
+        return self.as_dict()
+
+    def __setstate__(self,d):
+        del d["@class"]
+        del d["@module"]
+        md = MontyDecoder()
+        d = md.process_decoded(d)
+        self.__init__(**d)
 
 
 class Mongolike(object):
