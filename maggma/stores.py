@@ -365,10 +365,27 @@ class DatetimeStore(MemoryStore):
         self.collection.insert_one({self.lu_field: self.__dt})
 
 
-class GridFSStore(MongoStore):
+class GridFSStore(Store):
     """
     A Store for GrdiFS backend. Provides a common access method consistent with other stores
     """
+
+    def __init__(self, database, collection_name, host="localhost", port=27017,
+                 username="", password="", **kwargs):
+
+        self.database = database
+        self.collection_name = collection_name
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self._collection = None
+        self.kwargs = kwargs
+        
+        if "key" not in kwargs:
+            kwargs["key"] = "_oid"
+
+        super(GridFSStore, self).__init__(**kwargs)
 
     def connect(self):
         conn = MongoClient(self.host, self.port)
