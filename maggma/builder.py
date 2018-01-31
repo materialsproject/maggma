@@ -4,7 +4,6 @@ import logging
 from monty.json import MSONable, MontyDecoder
 
 
-
 class Builder(MSONable, metaclass=ABCMeta):
 
     def __init__(self, sources, targets, chunk_size=1000):
@@ -85,11 +84,10 @@ class Builder(MSONable, metaclass=ABCMeta):
         except AttributeError:
             pass
 
-
     def __getstate__(self):
         return self.as_dict()
 
-    def __setstate__(self,d):
+    def __setstate__(self, d):
         del d["@class"]
         del d["@module"]
         md = MontyDecoder()

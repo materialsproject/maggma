@@ -203,11 +203,12 @@ class MultiprocProcessor(BaseProcessor):
 
         process_pool = Pool(self.num_workers, maxtasksperchild=chunk_size)
         cursor = builder.get_items()
-        for items in grouper(process_pool.imap(processing_builder.process_item,cursor),chunk_size):
+        for items in grouper(process_pool.imap(processing_builder.process_item, cursor), chunk_size):
             self.logger.info("Completed {} items".format(chunk_size))
             builder.update_targets(items)
 
         builder.finalize(cursor)
+
 
 class Runner(MSONable):
 

@@ -93,6 +93,7 @@ def grouper(iterable, n, fillvalue=None):
     args = [iter(iterable)] * n
     return itertools.zip_longest(*args, fillvalue=fillvalue)
 
+
 def reload_msonable_object(obj):
     """
     Reload an MSONable object using as_dict and from_dict
