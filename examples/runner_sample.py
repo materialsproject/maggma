@@ -4,8 +4,6 @@
 # with mpi(need mpi4py pacakge):
 #    mpiexec -n 5 python runner_sample.py
 
-import random
-import time
 
 from maggma.stores import MemoryStore
 from maggma.builder import Builder

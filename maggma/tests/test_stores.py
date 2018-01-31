@@ -29,7 +29,7 @@ class TestMongoStore(unittest.TestCase):
 
     def test_query(self):
         self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
-        self.assertEqual(self.mongostore.query_one(properties=["a"])["a"],1)
+        self.assertEqual(self.mongostore.query_one(properties=["a"])["a"], 1)
         self.assertEqual(self.mongostore.query_one(properties=["a"])['a'], 1)
         self.assertEqual(self.mongostore.query_one(properties=["b"])['b'], 2)
         self.assertEqual(self.mongostore.query_one(properties=["c"])['c'], 3)
@@ -56,12 +56,12 @@ class TestMongoStore(unittest.TestCase):
     def test_update(self):
         self.mongostore.update([{"e": 6, "d": 4}], key="e")
         self.assertEqual(self.mongostore.query(
-            criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)   
+            criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
 
-        self.mongostore.update([{"e": 7, "d": 8, "f": 9}], key=["d","f"])
+        self.mongostore.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
         self.assertEqual(self.mongostore.query_one(
-            criteria={"d": 8, "f": 9}, properties=["e"])["e"], 7) 
-        self.mongostore.update([{"e": 11, "d": 8, "f": 9}], key=["d","f"])
+            criteria={"d": 8, "f": 9}, properties=["e"])["e"], 7)
+        self.mongostore.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
         self.assertEqual(self.mongostore.query_one(
             criteria={"d": 8, "f": 9}, properties=["e"])["e"], 11)
 
@@ -83,6 +83,7 @@ class TestMongoStore(unittest.TestCase):
 
     def test_from_db_file(self):
         ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))
+        self.assertEqual(ms.collection_name,"tmp")
 
     def tearDown(self):
         if self.mongostore.collection:
@@ -119,9 +120,8 @@ class TestJsonStore(unittest.TestCase):
 
 class TestGridFSStore(unittest.TestCase):
 
-
     def setUp(self):
-        self.gStore = GridFSStore("maggma_test", "test")
+        self.gStore = GridFSStore("maggma_test", "test", key="task_id")
         self.gStore.connect()
 
     def test_update(self):
@@ -136,27 +136,24 @@ class TestGridFSStore(unittest.TestCase):
         self.gStore.update([{"task_id": "mp-2", "data": data2}])
 
         doc = self.gStore.query_one(criteria={"task_id": "mp-1"})
-        nptu.assert_almost_equal(doc["data"],data1, 7)
+        nptu.assert_almost_equal(doc["data"], data1, 7)
 
         doc = self.gStore.query_one(criteria={"task_id": "mp-2"})
-        nptu.assert_almost_equal(doc["data"],data2, 7)
+        nptu.assert_almost_equal(doc["data"], data2, 7)
 
-        self.assertEqual(self.gStore.query_one(criteria={"task_id": "mp-3"}),None)
+        self.assertEqual(self.gStore.query_one(criteria={"task_id": "mp-3"}), None)
 
     def test_distinct(self):
-        data1 = np.random.rand(256)
-        data2 = np.random.rand(256)
         self.gStore.update([{"task_id": "mp-1", "data": "Something"}])
-        self.gStore.update([{"task_id": "mp-2", "data":"Something"}])
-        self.gStore.update([{"task_id": "mp-3", "data":"Something"}])
-        self.gStore.update([{"task_id": "mp-4","material_id": "mvc-1", "data":"Something"}])
-        self.gStore.update([{"task_id": "mp-5","material_id": "mvc-1", "data":"Something"}])
+        self.gStore.update([{"task_id": "mp-2", "data": "Something"}])
+        self.gStore.update([{"task_id": "mp-3", "data": "Something"}])
+        self.gStore.update([{"task_id": "mp-4", "material_id": "mvc-1", "data": "Something"}])
+        self.gStore.update([{"task_id": "mp-5", "material_id": "mvc-1", "data": "Something"}])
 
     def tearDown(self):
         if self.gStore.collection:
             self.gStore._files_collection.drop()
             self.gStore._chunks_collection.drop()
-
 
 
 if __name__ == "__main__":

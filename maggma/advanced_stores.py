@@ -1,7 +1,65 @@
-from maggma.stores import Store
+from maggma.stores import Store, MongoStore
 from pydash.objects import set_, get, has
 from pydash.utilities import to_path
 import pydash.objects
+import hvac
+import json
+import os
+
+
+class VaultStore(MongoStore):
+    """
+    Extends MongoStore to read credentials out of Vault server
+    and uses these values to initialize MongoStore instance
+    """
+    def __init__(self, collection_name, vault_secret_path):
+        """
+        collection (string): name of mongo collection
+        vault_secret_path (string): path on vault server with mongo creds object
+
+        Environment (must be set prior to invocation):
+        VAULT_ADDR - URL of vault server (eg. https://matgen8.lbl.gov:8200)
+        VAULT_TOKEN or GITHUB_TOKEN - token used to authenticate to vault
+        """
+        vault_addr = os.getenv("VAULT_ADDR")
+
+        if not vault_addr:
+            raise RuntimeError("VAULT_ADDR not set")
+
+        client = hvac.Client(vault_addr)
+
+        # If we have a vault token use this
+        token = os.getenv("VAULT_TOKEN")
+
+        # Look for a github token instead
+        if not token:
+            github_token = os.getenv("GITHUB_TOKEN")
+
+            if github_token:
+                client.auth_github(github_token)
+            else:
+                raise RuntimeError("VAULT_TOKEN or GITHUB_TOKEN not set")
+        else:
+            client.token = token
+            if not client.is_authenticated():
+                raise RuntimeError("Bad token")
+
+        # Read the vault secret
+        json_db_creds = client.read(vault_secret_path)
+        db_creds = json.loads(json_db_creds['data']['value'])
+
+        database = db_creds.get("db")
+        host = db_creds.get("host", "localhost")
+        port = db_creds.get("port", 27017)
+        username = db_creds.get("username", "")
+        password = db_creds.get("password", "")
+
+        super(VaultStore, self).__init__(database,
+                                         collection_name,
+                                         host,
+                                         port,
+                                         username,
+                                         password)
 
 
 class AliasingStore(Store):
