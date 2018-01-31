@@ -213,7 +213,7 @@ class Mongolike(object):
             # document-level validation is optional
             validates = True
             if self.schema:
-                validates = self.schema.validate_doc(d)
+                validates = self.schema.is_valid(d)
                 if not validates and self.schema.strict:
                     raise ValueError('Document failed to validate: {}'.format(d))
 
