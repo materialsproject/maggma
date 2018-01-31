@@ -491,6 +491,8 @@ class GridFSStore(Store):
                 search_doc = {k:d[k] for k in key}
             elif key:
                 search_doc={key: d[key]}
+            elif self.key is "_oid":
+                pass
             else:
                 search_doc = {self.key: d[self.key]}
 
