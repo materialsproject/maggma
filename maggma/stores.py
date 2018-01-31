@@ -414,10 +414,10 @@ class GridFSStore(Store):
                 against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
-        for f in self.collection.find(filter=criteria,**kwargs):
+        for f in self.collection.find(filter=criteria,**kwargs).sort('uploadDate',pymongo.DESCENDING):
             yield json.loads(f.read())
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, properties=None, criteria=None, sort=[('uploadDate',pymongo.DESCENDING)], **kwargs):
         """
         Function that gets a single document from GridFS. This store
         ignores all property projections as its designed for whole 
