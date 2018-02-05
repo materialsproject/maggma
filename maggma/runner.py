@@ -196,6 +196,7 @@ class MultiprocProcessor(BaseProcessor):
         """
         builder = self.builders[builder_id]
         chunk_size = builder.chunk_size
+        builder.connect()
         processing_builder = reload_msonable_object(builder)
 
         process_pool = Pool(self.num_workers, maxtasksperchild=chunk_size)
