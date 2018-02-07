@@ -1,10 +1,10 @@
 import unittest
-from maggma.schema import StandardSchema
+from maggma.validator import StandardValidator
 from monty.json import MSONable
 
-class SchemaTests(unittest.TestCase):
+class ValidatorTests(unittest.TestCase):
 
-    def test_standardschema(self):
+    def test_standardvalidator(self):
 
         class LatticeMock(MSONable):
             def __init__(self, a):

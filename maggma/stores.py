@@ -32,7 +32,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.lu_field = lu_field
         self.lu_type = lu_type
         self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
-        self.schema = None
+        self.validator = None
 
     @property
     @abstractmethod
