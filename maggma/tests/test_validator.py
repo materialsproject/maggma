@@ -10,7 +10,7 @@ class ValidatorTests(unittest.TestCase):
             def __init__(self, a):
                 self.a = a
 
-        class SampleSchema(StandardSchema):
+        class SampleValidator(StandardValidator):
             @property
             def schema(self):
                 return {
@@ -26,7 +26,7 @@ class ValidatorTests(unittest.TestCase):
             def msonable_keypaths(self):
                 return {"lattice": LatticeMock}
 
-        schema = SampleSchema()
+        schema = SampleValidator()
 
         lattice = LatticeMock(5)
 
