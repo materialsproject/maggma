@@ -11,6 +11,7 @@ class ValidatorTests(unittest.TestCase):
                 self.a = a
 
         class SampleValidator(StandardValidator):
+
             @property
             def schema(self):
                 return {
@@ -22,11 +23,12 @@ class ValidatorTests(unittest.TestCase):
                         },
                     "required": ["task_id", "successful"]
                 }
+
             @property
             def msonable_keypaths(self):
                 return {"lattice": LatticeMock}
 
-        schema = SampleValidator()
+        validator = SampleValidator()
 
         lattice = LatticeMock(5)
 
@@ -53,7 +55,7 @@ class ValidatorTests(unittest.TestCase):
             'lattice': lattice.as_dict()
         }
 
-        self.assertTrue(schema.is_valid(valid_doc))
-        self.assertFalse(schema.is_valid(invalid_doc_msonable))
-        self.assertFalse(schema.is_valid(invalid_doc_missing_key))
-        self.assertFalse(schema.is_valid(invalid_doc_wrong_type))
+        self.assertTrue(validator.is_valid(valid_doc))
+        self.assertFalse(validator.is_valid(invalid_doc_msonable))
+        self.assertFalse(validator.is_valid(invalid_doc_missing_key))
+        self.assertFalse(validator.is_valid(invalid_doc_wrong_type))
