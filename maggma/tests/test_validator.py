@@ -3,14 +3,26 @@ from maggma.validator import StandardValidator
 from monty.json import MSONable
 
 class ValidatorTests(unittest.TestCase):
+    """
+    Tests for Validators.
+    """
 
     def test_standardvalidator(self):
+        """
+        Test the StandardValidator class.
+        """
 
         class LatticeMock(MSONable):
+            """
+            A sample MSONable object, just for testing.
+            """
             def __init__(self, a):
                 self.a = a
 
         class SampleValidator(StandardValidator):
+            """
+            A sample validator, just for testing.
+            """
 
             @property
             def schema(self):
