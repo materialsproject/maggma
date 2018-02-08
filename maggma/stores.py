@@ -206,6 +206,9 @@ class Mongolike(object):
 
         bulk = self.collection.initialize_ordered_bulk_op()
 
+        # filter out None values
+        docs = [doc for doc in docs if doc]
+
         for d in docs:
 
             d = jsanitize(d, allow_bson=True)
