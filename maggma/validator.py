@@ -1,24 +1,24 @@
+"""
+Validator class for document-level validation on Stores. Attach an instance
+of a Validator subclass to a Store .schema variable to enable validation on
+that Store.
+"""
+
 from abc import ABC, abstractmethod
 from jsonschema import validate, ValidationError
 import pydash
 
-"""
-Schema class for document-level validation on Stores. Attach an instance
-of a Schema subclass to a Store .schema variable to enable validation on
-that Store.
-"""
-
-class Schema(ABC):
+class Validator(ABC):
     """
     A generic class to perform document-level validation on Stores.
-    Attach a Schema to a Store during initialization, any all documents
+    Attach a Validator to a Store during initialization, any all documents
     added to the Store will call .validate_doc() before being added.
     """
 
     def init(self, strict=False):
         """
         Args:
-            strict (bool): Informs Store how to treat Schema: if
+            strict (bool): Informs Store how to treat Validator: if
             True, will cause build to fail if invalid document
             is found and raise a ValueError, if False will continue
             build but log an error message. In both cases, invalid
@@ -35,10 +35,10 @@ class Schema(ABC):
         return NotImplementedError
 
 
-class StandardSchema(Schema):
+class StandardValidator(Validator):
     """
-    A standard Schema, which allows document validation against a
-    JSON schema, and also can check that specified keys, if present,
+    A standard Validator, which allows document validation against a
+    provided JSON schema, and also can check that specified keys, if present,
     are MSONable (that is, a Python object can be reconstructed).
 
     To use, subclass StandardSchema and with your own `schema`

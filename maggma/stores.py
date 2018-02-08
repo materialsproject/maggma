@@ -32,7 +32,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.lu_field = lu_field
         self.lu_type = lu_type
         self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
-        self.schema = None
+        self.validator = None
 
     @property
     @abstractmethod
@@ -212,10 +212,10 @@ class Mongolike(object):
 
             # document-level validation is optional
             validates = True
-            if self.schema:
-                validates = self.schema.is_valid(d)
+            if self.validator:
+                validates = self.validator.is_valid(d)
                 if not validates:
-                    if self.schema.strict:
+                    if self.validator.strict:
                         raise ValueError('Document failed to validate: {}'.format(d))
                     else:
                         self.logger.error('Document failed to validate: {}'.format(d))
