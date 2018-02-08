@@ -346,6 +346,12 @@ class MemoryStore(Mongolike, Store):
 
     def groupby(self, keys, properties=None, criteria=None,
                 allow_disk_use=True):
+        """
+        This is a placeholder for groupby for memorystores,
+        current version of mongomock do not allow for standard
+        aggregation methods, so this method currently raises
+        a NotImplementedError
+        """
         raise NotImplementedError("groupby not available for {}"
                                   "due to mongomock incompatibility".format(
             self.__class__))
