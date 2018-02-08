@@ -234,44 +234,6 @@ class Mongolike(object):
 
         bulk.execute()
 
-    def groupby(self, keys, properties=None, criteria=None,
-                allow_disk_use=True):
-        """
-        Simple grouping function that will group documents
-        by keys.
-
-        Args:
-            keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
-            criteria (dict): filter for documents to group
-            allow_disk_use (bool): whether to allow disk use in aggregation
-
-        Returns:
-            command cursor corresponding to grouped documents
-
-            elements of the command cursor have the structure:
-            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
-             'docs': [list_of_documents corresponding to key values]}
-
-        """
-        pipeline = []
-        if criteria is not None:
-            pipeline.append({"$match": criteria})
-
-        if properties is not None:
-            pipeline.append({"$project": {p: 1 for p in properties}})
-
-        if isinstance(keys, str):
-            keys = [keys]
-
-        group_id = {key: "${}".format(key) for key in keys}
-        pipeline.append({"$group": {"_id": group_id,
-                                    "docs": {"$push": "$$ROOT"}
-                                    }
-                         })
-
-        return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
-
     def close(self):
         self.collection.database.client.close()
 
@@ -324,6 +286,45 @@ class MongoStore(Mongolike, Store):
         kwargs.pop("aliases", None)
         return cls(**kwargs)
 
+    def groupby(self, keys, properties=None, criteria=None,
+                allow_disk_use=True):
+        """
+        Simple grouping function that will group documents
+        by keys.
+
+        Args:
+            keys (list or string): fields to group documents
+            properties (list): properties to return in grouped documents
+            criteria (dict): filter for documents to group
+            allow_disk_use (bool): whether to allow disk use in aggregation
+
+        Returns:
+            command cursor corresponding to grouped documents
+
+            elements of the command cursor have the structure:
+            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
+             'docs': [list_of_documents corresponding to key values]}
+
+        """
+        pipeline = []
+        if criteria is not None:
+            pipeline.append({"$match": criteria})
+
+        if properties is not None:
+            pipeline.append({"$project": {p: 1 for p in properties}})
+
+        if isinstance(keys, str):
+            keys = [keys]
+
+        group_id = {key: "${}".format(key) for key in keys}
+        pipeline.append({"$group": {"_id": group_id,
+                                    "docs": {"$push": "$$ROOT"}
+                                    }
+                         })
+
+        return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
+
+
 
 class MemoryStore(Mongolike, Store):
     """
@@ -342,6 +343,12 @@ class MemoryStore(Mongolike, Store):
 
     def __hash__(self):
         return hash((self.name, self.lu_field))
+
+    def groupby(self, keys, properties=None, criteria=None,
+                allow_disk_use=True):
+        raise NotImplementedError("groupby not available for {}"
+                                  "due to mongomock incompatibility".format(
+            self.__class__))
 
 
 class JSONStore(MemoryStore):
@@ -431,7 +438,7 @@ class GridFSStore(Store):
 
     def query(self, properties=None, criteria=None, **kwargs):
         """
-        Function that gets data from GridFS. This store ignores all 
+        Function that gets data from GridFS. This store ignores all
         property projections as its designed for whole document access
 
         Args:
@@ -447,7 +454,7 @@ class GridFSStore(Store):
     def query_one(self, properties=None, criteria=None, sort=(('uploadDate', pymongo.DESCENDING),), **kwargs):
         """
         Function that gets a single document from GridFS. This store
-        ignores all property projections as its designed for whole 
+        ignores all property projections as its designed for whole
         document access
 
         Args:

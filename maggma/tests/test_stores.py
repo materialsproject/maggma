@@ -101,6 +101,9 @@ class TestMemoryStore(unittest.TestCase):
         self.assertIsInstance(self.memstore.collection,
                               mongomock.collection.Collection)
 
+    def test_groupby(self):
+        self.assertRaises( NotImplementedError, self.memstore.groupby, "a")
+
 
 class TestJsonStore(unittest.TestCase):
 
