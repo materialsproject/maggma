@@ -1,12 +1,12 @@
-from abc import ABC, abstractmethod
-from jsonschema import validate, ValidationError
-import pydash
-
 """
 Validator class for document-level validation on Stores. Attach an instance
 of a Validator subclass to a Store .schema variable to enable validation on
 that Store.
 """
+
+from abc import ABC, abstractmethod
+from jsonschema import validate, ValidationError
+import pydash
 
 class Validator(ABC):
     """
