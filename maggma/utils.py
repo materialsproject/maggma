@@ -100,3 +100,16 @@ def reload_msonable_object(obj):
     """
     obj_class = obj.__class__
     return obj_class.from_dict(obj.as_dict())
+
+def get_mpi():
+    """
+    Helper that returns the mpi communicator, rank and size.
+    """
+    from mpi4py import MPI
+
+    comm = MPI.COMM_WORLD
+    rank = comm.Get_rank()
+    size = comm.Get_size()
+
+    return comm, rank, size
+

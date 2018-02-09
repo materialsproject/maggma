@@ -92,16 +92,3 @@ class CredentialManager:
             spec
         """
         pass
-
-
-def get_mpi():
-    """
-    Helper that returns the mpi communicator, rank and size.
-    """
-    from mpi4py import MPI
-
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
-
-    return comm, rank, size
