@@ -33,7 +33,7 @@ class MyDumbBuilder(Builder):
         self.logger.info("Received {} processed items".format(len(items)))
         self.logger.info("Updated items: {}".format(list(items)))
 
-    def finalize(self, cursor):
+    def finalize(self, cursor=None):
         self.logger.info("Finalizing ...")
         self.logger.info("DONE!")
 

@@ -1,6 +1,5 @@
 import abc
 import logging
-import multiprocessing
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
 import concurrent.futures
@@ -10,6 +9,9 @@ from maggma.utils import grouper, reload_msonable_object
 
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
+    """
+    Base processor class for multiprocessing paradigms
+    """
     def __init__(self, builders):
         """
         Initialize with a list of builders
@@ -60,8 +62,10 @@ class SerialProcessor(BaseProcessor):
             processed_items = [builder.process_item(item) for item in filter(None, chunk)]
             builder.update_targets(processed_items)
 
-
 class MPIProcessor(BaseProcessor):
+    """
+    Processor to distribute work using MPI
+    """
     def __init__(self, builders):
         (self.comm, self.rank, self.size) = get_mpi()
         self.comm.barrier()

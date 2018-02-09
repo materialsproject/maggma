@@ -5,7 +5,9 @@ from monty.json import MSONable, MontyDecoder
 
 
 class Builder(MSONable, metaclass=ABCMeta):
-
+    """
+    Base Builder class 
+    """
     def __init__(self, sources, targets, chunk_size=1000):
         """
         Initialize the builder the framework.
