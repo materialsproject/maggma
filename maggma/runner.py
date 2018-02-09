@@ -177,40 +177,103 @@ class MPIProcessor(BaseProcessor):
 
 
 class MultiprocProcessor(BaseProcessor):
-
-    def __init__(self, builders, num_workers):
+    def __init__(self, builders, num_workers=None):
         # multiprocessing only if mpi is not used, no mixing
-        self.num_workers = (num_workers if num_workers > 0
-                            else multiprocessing.cpu_count() - 1)
+        self.num_workers = num_workers
         super(MultiprocProcessor, self).__init__(builders)
-        self.logger.info("Building with multiprocessing, {} workers in the pool"
-                         .format(self.num_workers))
+        self.logger.info("Building with multiprocessing, {} workers in the pool".format(self.num_workers))
 
     def process(self, builder_id):
         """
         Run the builder using the builtin multiprocessing.
-        Adapted from pymatgen-db
 
         Args:
             builder_id (int): the index of the builder in the builders list
         """
-        builder = self.builders[builder_id]
-        chunk_size = builder.chunk_size
-        builder.connect()
-        processing_builder = reload_msonable_object(builder)
+        self.builder = self.builders[builder_id]
+        self.builder.connect()
 
-        process_pool = Pool(self.num_workers, maxtasksperchild=chunk_size)
-        cursor = builder.get_items()
-        for items in grouper(process_pool.imap(processing_builder.process_item, cursor), chunk_size):
-            self.logger.info("Completed {} items".format(chunk_size))
-            builder.update_targets(items)
+        processing_builder = reload_msonable_object(self.builder)
+        cursor = self.builder.get_items()
 
-        builder.finalize(cursor)
+        self.setup_multithreading()
+        self.put_tasks(cursor, processing_builder)
+        self.clean_up_data()
+        self.builder.finalize(cursor)
+
+    def setup_multithreading(self):
+        """
+        Sets up objects necessary to store and synchronize data in multiprocessing
+        """
+        self.data = deque()
+        self.task_count = BoundedSemaphore(self.builder.chunk_size)
+        self.update_data_condition = Condition()
+
+        self.update_targets_thread = Thread(target=self.update_targets)
+        self.update_targets_thread.start()
+
+    def put_tasks(self, cursor, processing_builder):
+        """
+        Processes all items from builder using a pool of processes
+        """
+        #1.) setup a process pool
+        with concurrent.futures.ProcessPoolExecutor(self.num_workers) as executor:
+            # 2.) Ensure we can get data
+            while cursor:
+                # 3.) Limit total number of queues tasks using a semaphore
+                self.task_count.acquire()
+                try:
+                    # 4.) Submit a task to processing pool
+                    f = executor.submit(processing_builder.process_item, next(cursor))
+                    # 5.) Add call back to update our data list
+                    f.add_done_callback(self.update_data_callback)
+                except StopIteration as e:
+                    # 6.) No more data so stop itterating
+                    cursor = None
+
+    def clean_up_data(self):
+        """
+        Updates targets with remaining data and then cleans up the data collection
+        """
+        try:
+            # 1.)
+            with self.update_data_condition:
+                self.builder.update_targets(self.data)
+                self.data.clear()
+                self.data = None
+                self.update_data_condition.notify_all()
+        except Exception as e:
+            self.logger.debug("Problem in updating targets at end of builder run: ", e)
+
+        self.update_targets_thread.join()
+
+    def update_data_callback(self, future):
+        """
+        Call back to add data into a list in thread safe manner and signal other threads to add more tasks or update_targets
+        """
+
+        with self.update_data_condition:
+            self.data.append(future.result())
+            self.update_data_condition.notify_all()
+
+        self.task_count.release()
+
+    def update_targets(self):
+        """
+        Thread to update targets periodically
+        """
+        while self.data:
+            with self.update_data_condition:
+                self.update_data_condition.wait_for(lambda: len(self.data) > self.builder.chunk_size)
+                try:
+                    self.builder.update_targets(data)
+                    self.data.clear()
+                except Exception as e:
+                    self.logger.debug("Problem in updating targets in builder run: {}".format(e))
 
 
 class Runner(MSONable):
-
-    def __init__(self, builders, num_workers=0):
+    def __init__(self, builders, num_workers=None):
         """
         Initialize with a list of builders
 
@@ -225,20 +288,15 @@ class Runner(MSONable):
         self.num_workers = num_workers
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
-        self.processor = MPIProcessor(builders) if self.use_mpi else MultiprocProcessor(builders, num_workers)
+        (_, mpi_rank, mpi_size) = get_mpi()
+        if mpi_size > 1:
+            self.logger.info("Running with MPI Rank: {}".format(mpi_rank))
+            self.processor = MPIProcessor(builders)
+        else:
+            self.logger.info("Running with Multiprocessing")
+            self.processor = MultiprocProcessor(builders, num_workers)
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
-
-    @property
-    def use_mpi(self):
-        try:
-            (_, _, size) = get_mpi()
-            use_mpi = True if size > 1 else False
-        except ImportError:
-            self.logger.warning("either 'mpi4py' is not installed or issue with the installation. "
-                                "Proceeding with mulitprocessing.")
-            use_mpi = False
-        return use_mpi
 
     # TODO: make it efficient, O(N^2) complexity at the moment,
     # might be ok(not many builders)? - KM
@@ -306,5 +364,5 @@ class Runner(MSONable):
         Returns:
 
         """
-        self.logger.info("building: {}".format(builder_id))
+        self.logger.debug("Building: {}".format(builder_id))
         self.processor.process(builder_id)
