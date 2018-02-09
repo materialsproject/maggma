@@ -105,11 +105,16 @@ def get_mpi():
     """
     Helper that returns the mpi communicator, rank and size.
     """
-    from mpi4py import MPI
+    try:
+        from mpi4py import MPI
 
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+    except:
+        comm = None
+        rank = -1
+        size = 0
 
     return comm, rank, size
 
