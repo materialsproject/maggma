@@ -274,7 +274,7 @@ class MultiprocProcessor(BaseProcessor):
                 self.data = None
                 self.update_data_condition.notify_all()
         except Exception as e:
-            self.logger.debug("Problem in updating targets at end of builder run: ", e)
+            self.logger.debug("Problem in updating targets at end of builder run: {}".format(e))
 
         self.update_targets_thread.join()
 
