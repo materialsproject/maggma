@@ -4,7 +4,6 @@ import multiprocessing
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
 import concurrent.futures
-from mpi4py.futures import MPICommExecutor
 from monty.json import MSONable
 from maggma.helpers import get_mpi
 from maggma.utils import grouper, reload_msonable_object
