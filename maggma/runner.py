@@ -2,7 +2,7 @@ import abc
 import logging
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
-import concurrent.futures
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from monty.json import MSONable
 from maggma.utils import get_mpi, grouper, reload_msonable_object
 
@@ -11,6 +11,7 @@ class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
     """
     Base processor class for multiprocessing paradigms
     """
+
     def __init__(self, builders):
         """
         Initialize with a list of builders
@@ -61,10 +62,12 @@ class SerialProcessor(BaseProcessor):
             processed_items = [builder.process_item(item) for item in chunk if chunk is not None]
             builder.update_targets(processed_items)
 
+
 class MPIProcessor(BaseProcessor):
     """
     Processor to distribute work using MPI
     """
+
     def __init__(self, builders):
         (self.comm, self.rank, self.size) = get_mpi()
         self.comm.barrier()
@@ -95,7 +98,7 @@ class MPIProcessor(BaseProcessor):
         self.update_targets_thread = Thread(target=self.update_targets)
         self.update_targets_thread.start()
 
-    def process_master(self,builder_id):
+    def process_master(self, builder_id):
         """
         Master process for MPI processing
         Handles Data IO to Stores and to MPI Workers
@@ -130,12 +133,11 @@ class MPIProcessor(BaseProcessor):
             elif packet["type"] == "shutdown":
                 is_valid = False
 
-
     def put_tasks(self, cursor, builder_id):
         """
         Submit tasks from cursor to MPI workers
         """
-        with concurrent.futures.ThreadPoolExecutor(max_workers=self.size - 1) as executor:
+        with ThreadPoolExecutor(max_workers=self.size - 1) as executor:
             while cursor:
                 self.task_count.acquire()
                 try:
@@ -160,7 +162,8 @@ class MPIProcessor(BaseProcessor):
             if packet["type"] == "return":
                 result = packet["return"]
             elif packet["type"] == "error":
-                self.logger.error("MPI Rank {} Errored on Builder ID {}:\n{}".format(mpi_rank,builder_id,packet["error"]))
+                self.logger.error("MPI Rank {} Errored on Builder ID {}:\n{}".format(
+                    mpi_rank, builder_id, packet["error"]))
             else:
                 return  # don't know what happened here, just quit
         # 6.) Save data
@@ -224,11 +227,10 @@ class MultiprocProcessor(BaseProcessor):
         self.builder = self.builders[builder_id]
         self.builder.connect()
 
-        processing_builder = reload_msonable_object(self.builder)
         cursor = self.builder.get_items()
 
         self.setup_multithreading()
-        self.put_tasks(cursor, processing_builder)
+        self.put_tasks(cursor, self.builder)
         self.clean_up_data()
         self.builder.finalize(cursor)
 
@@ -243,19 +245,19 @@ class MultiprocProcessor(BaseProcessor):
         self.update_targets_thread = Thread(target=self.update_targets)
         self.update_targets_thread.start()
 
-    def put_tasks(self, cursor, processing_builder):
+    def put_tasks(self, cursor):
         """
         Processes all items from builder using a pool of processes
         """
         #1.) setup a process pool
-        with concurrent.futures.ProcessPoolExecutor(self.num_workers) as executor:
+        with ProcessPoolExecutor(self.num_workers) as executor:
             # 2.) Ensure we can get data
             while cursor:
                 # 3.) Limit total number of queues tasks using a semaphore
                 self.task_count.acquire()
                 try:
                     # 4.) Submit a task to processing pool
-                    f = executor.submit(processing_builder.process_item, next(cursor))
+                    f = executor.submit(self.builder.process_item, next(cursor))
                     # 5.) Add call back to update our data list
                     f.add_done_callback(self.update_data_callback)
                 except StopIteration as e:
@@ -267,7 +269,6 @@ class MultiprocProcessor(BaseProcessor):
         Updates targets with remaining data and then cleans up the data collection
         """
         try:
-            # 1.)
             with self.update_data_condition:
                 self.builder.update_targets(self.data)
                 self.data.clear()
@@ -297,7 +298,7 @@ class MultiprocProcessor(BaseProcessor):
             with self.update_data_condition:
                 self.update_data_condition.wait_for(lambda: len(self.data) > self.builder.chunk_size)
                 try:
-                    self.builder.update_targets(data)
+                    self.builder.update_targets(self.data)
                     self.data.clear()
                 except Exception as e:
                     self.logger.debug("Problem in updating targets in builder run: {}".format(e))
