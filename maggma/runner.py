@@ -58,7 +58,7 @@ class SerialProcessor(BaseProcessor):
 
         for chunk in grouper(cursor, chunk_size):
             self.logger.info("Processing batch of {} items".format(chunk_size))
-            processed_items = [builder.process_item(item) for item in filter(None, chunk)]
+            processed_items = [builder.process_item(item) for item in chunk if chunk is not None]
             builder.update_targets(processed_items)
 
 class MPIProcessor(BaseProcessor):
