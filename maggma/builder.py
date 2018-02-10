@@ -87,9 +87,17 @@ class Builder(MSONable, metaclass=ABCMeta):
             pass
 
     def __getstate__(self):
+        """
+        Double underscore method used by pickle to serialize this object
+        This uses MSONable serialization instead
+        """
         return self.as_dict()
 
     def __setstate__(self, d):
+        """
+        Double underscore method used by pickle to deserialize this object
+        This uses MSONable deerialization instead
+        """
         del d["@class"]
         del d["@module"]
         md = MontyDecoder()
