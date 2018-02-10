@@ -1,3 +1,4 @@
+# coding: utf-8
 import unittest
 from maggma.utils import get_mongolike, make_mongolike, put_mongolike, recursive_update
 

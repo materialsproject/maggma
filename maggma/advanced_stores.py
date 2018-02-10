@@ -1,3 +1,4 @@
+# coding: utf-8
 from maggma.stores import Store, MongoStore
 from pydash.objects import set_, get, has
 from pydash.utilities import to_path

@@ -1,3 +1,4 @@
+# coding: utf-8
 import unittest
 from maggma.validator import StandardValidator
 from monty.json import MSONable
