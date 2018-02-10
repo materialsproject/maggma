@@ -1,7 +1,5 @@
 # coding: utf-8
-import os
 import unittest
-import time
 from unittest.mock import patch, MagicMock
 
 from maggma.runner import Runner, SerialProcessor, MultiprocProcessor

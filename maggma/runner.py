@@ -5,7 +5,7 @@ from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from monty.json import MSONable
-from maggma.utils import get_mpi, grouper, reload_msonable_object
+from maggma.utils import get_mpi, grouper
 
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):

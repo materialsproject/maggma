@@ -94,13 +94,6 @@ def grouper(iterable, n, fillvalue=None):
     return itertools.zip_longest(*args, fillvalue=fillvalue)
 
 
-def reload_msonable_object(obj):
-    """
-    Reload an MSONable object using as_dict and from_dict
-    """
-    obj_class = obj.__class__
-    return obj_class.from_dict(obj.as_dict())
-
 def get_mpi():
     """
     Helper that returns the mpi communicator, rank and size.
