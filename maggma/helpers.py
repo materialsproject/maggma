@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+More utilities for maggma. Do we need this still?
+"""
 import json
 
 from pymongo import MongoClient

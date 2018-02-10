@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+Base Builder class to define how builders need to be defined
+"""
 from abc import ABCMeta, abstractmethod
 import logging
 
@@ -9,6 +12,7 @@ class Builder(MSONable, metaclass=ABCMeta):
     """
     Base Builder class 
     """
+
     def __init__(self, sources, targets, chunk_size=1000):
         """
         Initialize the builder the framework.

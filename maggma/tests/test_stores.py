@@ -84,7 +84,7 @@ class TestMongoStore(unittest.TestCase):
 
     def test_from_db_file(self):
         ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))
-        self.assertEqual(ms.collection_name,"tmp")
+        self.assertEqual(ms.collection_name, "tmp")
 
     def tearDown(self):
         if self.mongostore.collection:
@@ -103,7 +103,7 @@ class TestMemoryStore(unittest.TestCase):
                               mongomock.collection.Collection)
 
     def test_groupby(self):
-        self.assertRaises( NotImplementedError, self.memstore.groupby, "a")
+        self.assertRaises(NotImplementedError, self.memstore.groupby, "a")
 
 
 class TestJsonStore(unittest.TestCase):

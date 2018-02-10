@@ -1,4 +1,9 @@
 # coding: utf-8
+"""
+Module containing various definitions of Stores.
+Stores are a default access pattern to data and provide
+various utillities 
+"""
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import json
@@ -223,10 +228,10 @@ class Mongolike(object):
 
             if validates:
                 search_doc = {}
-                if isinstance(key,list):
+                if isinstance(key, list):
                     search_doc = {k: d[k] for k in key}
                 elif key:
-                    search_doc={key: d[key]}
+                    search_doc = {key: d[key]}
                 else:
                     search_doc = {self.key: d[self.key]}
                 if update_lu:
@@ -326,7 +331,6 @@ class MongoStore(Mongolike, Store):
         return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
 
 
-
 class MemoryStore(Mongolike, Store):
     """
     An in-memory Store that functions similarly
@@ -355,7 +359,7 @@ class MemoryStore(Mongolike, Store):
         """
         raise NotImplementedError("groupby not available for {}"
                                   "due to mongomock incompatibility".format(
-            self.__class__))
+                                      self.__class__))
 
 
 class JSONStore(MemoryStore):

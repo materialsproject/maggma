@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+Utilities to help with maggma functions
+"""
 import itertools
 from datetime import datetime, timedelta
 
@@ -110,4 +113,3 @@ def get_mpi():
         size = 0
 
     return comm, rank, size
-

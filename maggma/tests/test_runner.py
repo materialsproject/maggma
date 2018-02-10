@@ -9,6 +9,7 @@ __email__ = 'shyamd@lbl.gov'
 
 
 class TestRunner(unittest.TestCase):
+
     def test_1(self):
         builder1 = MagicMock()
         builder2 = MagicMock()
@@ -22,6 +23,7 @@ class TestRunner(unittest.TestCase):
 
 
 class TestSerialProcessor(unittest.TestCase):
+
     def test_process(self):
 
         builder = MagicMock()
@@ -39,6 +41,7 @@ class TestSerialProcessor(unittest.TestCase):
 
 
 class TestMultiprocProcessor(unittest.TestCase):
+
     def setUp(self):
         builder = MagicMock()
         builder.configure_mock(chunk_size=10)

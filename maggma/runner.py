@@ -1,4 +1,10 @@
 # coding: utf-8
+"""
+Module defining objects to run builders in various modes
+including serial processing, multiprocessing on a single computer,
+and processing via MPI
+"""
+
 import abc
 import logging
 from collections import defaultdict, deque
@@ -231,7 +237,7 @@ class MultiprocProcessor(BaseProcessor):
         cursor = self.builder.get_items()
 
         self.setup_multithreading()
-        self.put_tasks(cursor, self.builder)
+        self.put_tasks(cursor)
         self.clean_up_data()
         self.builder.finalize(cursor)
 
@@ -250,7 +256,7 @@ class MultiprocProcessor(BaseProcessor):
         """
         Processes all items from builder using a pool of processes
         """
-        #1.) setup a process pool
+        # 1.) setup a process pool
         with ProcessPoolExecutor(self.num_workers) as executor:
             # 2.) Ensure we can get data
             while cursor:
