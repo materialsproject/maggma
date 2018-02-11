@@ -2,7 +2,7 @@
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
-various utillities 
+various utillities
 """
 from abc import ABCMeta, abstractmethod
 from datetime import datetime

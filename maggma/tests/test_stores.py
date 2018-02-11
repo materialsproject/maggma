@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+Tests for the base Stores
+"""
 import os
 import glob
 import unittest

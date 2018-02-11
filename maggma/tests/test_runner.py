@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+Tests for the Runner class
+"""
 import unittest
 from unittest.mock import patch, MagicMock
 

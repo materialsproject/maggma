@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+Tests for advanced stores
+"""
 import os
 import unittest
 from unittest.mock import patch

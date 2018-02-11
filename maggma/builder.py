@@ -10,7 +10,13 @@ from monty.json import MSONable, MontyDecoder
 
 class Builder(MSONable, metaclass=ABCMeta):
     """
-    Base Builder class 
+    Base Builder class
+    At minimum this class should implement:
+    get_items - Get items from the sources
+    update_targets - Updates the sources with results
+
+    Multiprocessing and MPI processing can be used if all
+    the data processing is  limited to process_items
     """
 
     def __init__(self, sources, targets, chunk_size=1000):
