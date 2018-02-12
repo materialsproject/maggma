@@ -1,3 +1,7 @@
+# coding: utf-8
+"""
+Base Builder class to define how builders need to be defined
+"""
 from abc import ABCMeta, abstractmethod
 import logging
 
@@ -5,6 +9,15 @@ from monty.json import MSONable, MontyDecoder
 
 
 class Builder(MSONable, metaclass=ABCMeta):
+    """
+    Base Builder class
+    At minimum this class should implement:
+    get_items - Get items from the sources
+    update_targets - Updates the sources with results
+
+    Multiprocessing and MPI processing can be used if all
+    the data processing is  limited to process_items
+    """
 
     def __init__(self, sources, targets, chunk_size=1000):
         """
@@ -85,9 +98,17 @@ class Builder(MSONable, metaclass=ABCMeta):
             pass
 
     def __getstate__(self):
+        """
+        Double underscore method used by pickle to serialize this object
+        This uses MSONable serialization instead
+        """
         return self.as_dict()
 
     def __setstate__(self, d):
+        """
+        Double underscore method used by pickle to deserialize this object
+        This uses MSONable deerialization instead
+        """
         del d["@class"]
         del d["@module"]
         md = MontyDecoder()

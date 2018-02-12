@@ -1,3 +1,7 @@
+# coding: utf-8
+"""
+Advanced Stores for behavior outside normal access patterns
+"""
 from maggma.stores import Store, MongoStore
 from pydash.objects import set_, get, has
 from pydash.utilities import to_path
@@ -139,6 +143,9 @@ class AliasingStore(Store):
 
 
 def lazy_substitute(d, aliases):
+    """
+    Simple top level substitute that doesn't dive into mongo like strings
+    """
     for alias, key in aliases.items():
         if key in d:
             d[alias] = d[key]
@@ -146,6 +153,10 @@ def lazy_substitute(d, aliases):
 
 
 def substitute(d, aliases):
+    """
+    Substitutes keys in dictionary
+    Accepts multilevel mongo like keys
+    """
     for alias, key in aliases.items():
         if has(d, key):
             set_(d, alias, get(d, key))
@@ -153,6 +164,9 @@ def substitute(d, aliases):
 
 
 def unset(d, key):
+    """
+    Unsets a key
+    """
     pydash.objects.unset(d, key)
     path = to_path(key)
     for i in reversed(range(1, len(path))):

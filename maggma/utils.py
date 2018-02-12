@@ -1,4 +1,7 @@
 # coding: utf-8
+"""
+Utilities to help with maggma functions
+"""
 import itertools
 from datetime import datetime, timedelta
 
@@ -94,9 +97,19 @@ def grouper(iterable, n, fillvalue=None):
     return itertools.zip_longest(*args, fillvalue=fillvalue)
 
 
-def reload_msonable_object(obj):
+def get_mpi():
     """
-    Reload an MSONable object using as_dict and from_dict
+    Helper that returns the mpi communicator, rank and size.
     """
-    obj_class = obj.__class__
-    return obj_class.from_dict(obj.as_dict())
+    try:
+        from mpi4py import MPI
+
+        comm = MPI.COMM_WORLD
+        rank = comm.Get_rank()
+        size = comm.Get_size()
+    except:
+        comm = None
+        rank = -1
+        size = 0
+
+    return comm, rank, size

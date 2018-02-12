@@ -1,13 +1,17 @@
 language: python
 services: mongodb
+sudo: required
 python:
   - "3.6"
 install:
+  - ./install-mpi.sh openmpi
   - pip install -r requirements.txt
   - pip install -r requirements-optional.txt
 before_script:
   - python setup.py develop
-script: nosetests -v maggma
+script: 
+  - nosetests -v maggma
+  - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
 notifications:
   email:
     recipients:

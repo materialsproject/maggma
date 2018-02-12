@@ -4,7 +4,6 @@
 # with mpi(need mpi4py pacakge):
 #    mpiexec -n 5 python runner_sample.py
 
-
 from maggma.stores import MemoryStore
 from maggma.builder import Builder
 from maggma.runner import Runner
@@ -14,8 +13,7 @@ __author__ = "Kiran Mathew"
 
 
 class MyDumbBuilder(Builder):
-
-    def __init__(self, N,  sources, targets, chunk_size=1):
+    def __init__(self, N, sources, targets, chunk_size=1):
         super(MyDumbBuilder, self).__init__(sources, targets, chunk_size)
         self.N = N
 
@@ -33,7 +31,7 @@ class MyDumbBuilder(Builder):
         self.logger.info("Received {} processed items".format(len(items)))
         self.logger.info("Updated items: {}".format(list(items)))
 
-    def finalize(self, cursor):
+    def finalize(self, cursor=None):
         self.logger.info("Finalizing ...")
         self.logger.info("DONE!")
 
