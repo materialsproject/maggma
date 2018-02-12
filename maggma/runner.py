@@ -154,7 +154,7 @@ class MPIProcessor(BaseProcessor):
 
     def submit_item(self, builder_id, data):
         """
-        Thread to submit an item to MPI Workers and get data/logging information back
+        Thread to submit an item to MPI Workers and get data back
 
         """
 
@@ -211,7 +211,7 @@ class MPIProcessor(BaseProcessor):
             with self.update_data_condition:
                 self.update_data_condition.wait_for(lambda: len(self.data) > self.builder.chunk_size)
                 try:
-                    self.builder.update_targets(data)
+                    self.builder.update_targets(self.data)
                     self.data.clear()
                 except Exception as e:
                     self.logger.debug("Problem in updating targets in builder run: {}".format(e))
