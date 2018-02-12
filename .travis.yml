@@ -7,7 +7,11 @@ install:
   - pip install -r requirements-optional.txt
 before_script:
   - python setup.py develop
-script: nosetests -v maggma
+  - ./install-mpi.sh openmpi
+  - python pip install mpi4py
+script: 
+  - nosetests -v maggma
+  - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
 notifications:
   email:
     recipients:
