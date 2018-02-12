@@ -77,6 +77,9 @@ class MPIProcessor(BaseProcessor):
 
     def __init__(self, builders):
         (self.comm, self.rank, self.size) = get_mpi()
+        if not self.comm:
+            raise Exception(
+                "MPI not working properly, check your mpi4py installation and ensure this is running under mpi")
         self.comm.barrier()
         super(MPIProcessor, self).__init__(builders)
 
@@ -168,10 +171,14 @@ class MPIProcessor(BaseProcessor):
             packet = self.comm.recv(source=mpi_rank)
             if packet["type"] == "return":
                 result = packet["return"]
+                self.task_count.release()
             elif packet["type"] == "error":
                 self.logger.error("MPI Rank {} Errored on Builder ID {}:\n{}".format(
                     mpi_rank, builder_id, packet["error"]))
+                self.task_count.release()
+                return
             else:
+                self.task_count.release()
                 return  # don't know what happened here, just quit
         # 6.) Save data
         with self.update_data_condition:
