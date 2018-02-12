@@ -197,6 +197,7 @@ class TestMPIProcessor(unittest.TestCase):
         proc.ranks = MagicMock()
         proc.update_data_condition = MagicMock()
         proc.data = MagicMock()
+        proc.task_count = MagicMock()
         self.comm.recv.return_value = {"type": "return", "return": "data"}
 
         proc.submit_item(0, {})
