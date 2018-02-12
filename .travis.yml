@@ -1,5 +1,6 @@
 language: python
 services: mongodb
+sudo: required
 python:
   - "3.6"
 install:
@@ -8,7 +9,6 @@ install:
 before_script:
   - python setup.py develop
   - ./install-mpi.sh openmpi
-  - python pip install mpi4py
 script: 
   - nosetests -v maggma
   - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
