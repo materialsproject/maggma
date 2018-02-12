@@ -4,10 +4,10 @@ sudo: required
 python:
   - "3.6"
 install:
+  - ./install-mpi.sh openmpi
   - pip install -r requirements.txt
   - pip install -r requirements-optional.txt
 before_script:
-  - ./install-mpi.sh openmpi
   - python setup.py develop
 script: 
   - nosetests -v maggma
