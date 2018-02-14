@@ -7,6 +7,7 @@ and processing via MPI
 
 import abc
 import logging
+import time
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
@@ -105,6 +106,7 @@ class MPIProcessor(BaseProcessor):
         self.task_count = BoundedSemaphore(self.builder.chunk_size)
         self.update_data_condition = Condition()
 
+        self.run_update_targets = True
         self.update_targets_thread = Thread(target=self.update_targets)
         self.update_targets_thread.start()
 
@@ -120,8 +122,8 @@ class MPIProcessor(BaseProcessor):
 
         self.setup_multithreading()
         self.put_tasks(cursor, builder_id)
-        self.clean_up_data()
         self.clean_up_workers()
+        self.clean_up_data()
         self.builder.finalize(cursor)
 
     def process_worker(self):
@@ -201,9 +203,7 @@ class MPIProcessor(BaseProcessor):
         self.logger.debug("Cleaning up data queue")
         try:
             with self.update_data_condition:
-                self.builder.update_targets(self.data)
-                self.data.clear()
-                self.data = None
+                self.run_update_targets = False
                 self.update_data_condition.notify_all()
         except Exception as e:
             self.logger.debug("Problem in updating targets at end of builder run: {}".format(e))
@@ -214,9 +214,9 @@ class MPIProcessor(BaseProcessor):
         """
         Thread to update targets periodically
         """
-        while self.data:
+        while self.run_update_targets:
             with self.update_data_condition:
-                self.update_data_condition.wait_for(lambda: len(self.data) > self.builder.chunk_size)
+                self.update_data_condition.wait_for(lambda: not self.run_update_targets or len(self.data) > self.builder.chunk_size)
                 try:
                     self.builder.update_targets(self.data)
                     self.data.clear()
@@ -256,6 +256,7 @@ class MultiprocProcessor(BaseProcessor):
         self.task_count = BoundedSemaphore(self.builder.chunk_size)
         self.update_data_condition = Condition()
 
+        self.run_update_targets = True
         self.update_targets_thread = Thread(target=self.update_targets)
         self.update_targets_thread.start()
 
@@ -284,9 +285,7 @@ class MultiprocProcessor(BaseProcessor):
         """
         try:
             with self.update_data_condition:
-                self.builder.update_targets(self.data)
-                self.data.clear()
-                self.data = None
+                self.run_update_targets = False
                 self.update_data_condition.notify_all()
         except Exception as e:
             self.logger.debug("Problem in updating targets at end of builder run: {}".format(e))
@@ -308,12 +307,13 @@ class MultiprocProcessor(BaseProcessor):
         """
         Thread to update targets periodically
         """
-        while self.data:
+        while self.run_update_targets:
             with self.update_data_condition:
-                self.update_data_condition.wait_for(lambda: len(self.data) > self.builder.chunk_size)
+                self.update_data_condition.wait_for(lambda: not self.run_update_targets or len(self.data) > self.builder.chunk_size)
                 try:
-                    self.builder.update_targets(self.data)
-                    self.data.clear()
+                    if self.data is not None:
+                        self.builder.update_targets(self.data)
+                        self.data.clear()
                 except Exception as e:
                     self.logger.debug("Problem in updating targets in builder run: {}".format(e))
 

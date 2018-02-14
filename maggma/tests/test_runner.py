@@ -70,10 +70,11 @@ class TestMultiprocProcessor(unittest.TestCase):
         proc.builder = self.builder
         proc.update_data_condition = MagicMock()
         proc.data = MagicMock()
-        proc.data.__bool__.side_effect = [True, True, True, False]
+        proc.run_update_targets = MagicMock()
+        proc.run_update_targets.__bool__.side_effect = [True,True,True,False]
 
         proc.update_targets()
-        proc.data.__bool__.assert_called()
+        proc.run_update_targets.__bool__.assert_called()
         proc.data.clear.assert_called()
         proc.update_data_condition.wait_for.assert_called()
         proc.builder.update_targets.assert_called()
@@ -106,8 +107,6 @@ class TestMultiprocProcessor(unittest.TestCase):
 
         proc.update_data_condition.notify_all.assert_called()
         proc.update_targets_thread.join.assert_called()
-        proc.builder.update_targets.assert_called()
-        self.assertEqual(proc.data, None)
 
     def test_put_tasks(self):
 
@@ -160,10 +159,11 @@ class TestMPIProcessor(unittest.TestCase):
         proc.builder = self.builder
         proc.update_data_condition = MagicMock()
         proc.data = MagicMock()
-        proc.data.__bool__.side_effect = [True, True, True, False]
+        proc.run_update_targets = MagicMock()
+        proc.run_update_targets.__bool__.side_effect = [True,True,True,False]
 
         proc.update_targets()
-        proc.data.__bool__.assert_called()
+        proc.run_update_targets.__bool__.assert_called()
         proc.data.clear.assert_called()
         proc.update_data_condition.wait_for.assert_called()
         proc.builder.update_targets.assert_called()
@@ -181,8 +181,6 @@ class TestMPIProcessor(unittest.TestCase):
 
         proc.update_data_condition.notify_all.assert_called()
         proc.update_targets_thread.join.assert_called()
-        proc.builder.update_targets.assert_called()
-        self.assertEqual(proc.data, None)
 
     def test_clean_up_workers(self):
         proc = MPIProcessor([self.builder])
