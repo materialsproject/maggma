@@ -536,10 +536,11 @@ class GridFSStore(Store):
                 search_doc = {k: d[k] for k in key}
             elif key:
                 search_doc = {key: d[key]}
-            elif self.key is "_oid":
-                pass
             else:
                 search_doc = {self.key: d[self.key]}
+
+            if "_id" in search_doc:
+                del search_doc["_id"]
 
             data = json.dumps(jsanitize(d)).encode("UTF-8")
             self.collection.put(data, **search_doc)
