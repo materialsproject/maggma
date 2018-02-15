@@ -460,7 +460,12 @@ class GridFSStore(Store):
             **kwargs (kwargs): further kwargs to Collection.find
         """
         for f in self.collection.find(filter=criteria, **kwargs).sort('uploadDate', pymongo.DESCENDING):
-            yield json.loads(f.read())
+            data = f.read()
+            try:
+                json_dict = json.loads(data)
+                yield json_dict
+            except:
+                yield data
 
     def query_one(self, properties=None, criteria=None, sort=(('uploadDate', pymongo.DESCENDING),), **kwargs):
         """
@@ -477,7 +482,12 @@ class GridFSStore(Store):
         """
         f = self.collection.find_one(filter=criteria, **kwargs)
         if f:
-            return json.loads(f.read())
+            data = f.read()
+            try:
+                json_dict = json.loads(data)
+                return json_dict
+            except:
+                return data
         else:
             return None
 
