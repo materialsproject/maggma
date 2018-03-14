@@ -344,7 +344,9 @@ class MemoryStore(Mongolike, Store):
         super(MemoryStore, self).__init__(**kwargs)
 
     def connect(self):
-        self._collection = mongomock.MongoClient().db[self.name]
+        # Ensure we only connect once
+        if not self._collection:
+            self._collection = mongomock.MongoClient().db[self.name]
 
     def __hash__(self):
         return hash((self.name, self.lu_field))
