@@ -331,6 +331,20 @@ class MongoStore(Mongolike, Store):
 
         return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
 
+    @classmethod
+    def from_collection(cls, collection, **kwargs):
+        """
+        Generates a MongoStore from a pymongo collection object
+        This is not a fully safe operation as it gives dummy information to the MongoStore
+        As a result, this will not serialize and can not reset its connection
+        """
+        # TODO: How do we make this safer? 
+        coll_name = collection.name
+        db_name = collection.database.name
+
+        store = cls(db_name,coll_name,**kwargs)
+        store._collection = collection
+        return store
 
 class MemoryStore(Mongolike, Store):
     """
