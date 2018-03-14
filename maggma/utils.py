@@ -4,7 +4,9 @@ Utilities to help with maggma functions
 """
 import itertools
 from datetime import datetime, timedelta
-
+from pydash.utilities import to_path
+from pydash.objects import set_, get, has
+from pydash.objects import unset as _unset
 
 def dt_to_isoformat_ceil_ms(dt):
     """Helper to account for Mongo storing datetimes with only ms precision."""
@@ -113,3 +115,34 @@ def get_mpi():
         size = 0
 
     return comm, rank, size
+
+def lazy_substitute(d, aliases):
+    """
+    Simple top level substitute that doesn't dive into mongo like strings
+    """
+    for alias, key in aliases.items():
+        if key in d:
+            d[alias] = d[key]
+            del d[key]
+
+
+def substitute(d, aliases):
+    """
+    Substitutes keys in dictionary
+    Accepts multilevel mongo like keys
+    """
+    for alias, key in aliases.items():
+        if has(d, key):
+            set_(d, alias, get(d, key))
+            unset(d, key)
+
+
+def unset(d, key):
+    """
+    Unsets a key
+    """
+    _unset(d, key)
+    path = to_path(key)
+    for i in reversed(range(1, len(path))):
+        if len(get(d, path[:i])) == 0:
+            unset(d, path[:i])
