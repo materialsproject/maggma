@@ -46,7 +46,7 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def connect(self):
+    def connect(self, force_reset=False):
         pass
 
     @abstractmethod
@@ -270,12 +270,13 @@ class MongoStore(Mongolike, Store):
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)
 
-    def connect(self):
-        conn = MongoClient(self.host, self.port)
-        db = conn[self.database]
-        if self.username is not "":
-            db.authenticate(self.username, self.password)
-        self._collection = db[self.collection_name]
+    def connect(self, force_reset=False):
+        if not self._collection or force_reset:
+            conn = MongoClient(self.host, self.port)
+            db = conn[self.database]
+            if self.username is not "":
+                db.authenticate(self.username, self.password)
+            self._collection = db[self.collection_name]
 
     def __hash__(self):
         return hash((self.database, self.collection_name, self.lu_field))
@@ -343,9 +344,8 @@ class MemoryStore(Mongolike, Store):
         self.kwargs = kwargs
         super(MemoryStore, self).__init__(**kwargs)
 
-    def connect(self):
-        # Ensure we only connect once
-        if not self._collection:
+    def connect(self, force_reset=False):
+        if not self._collection or force_reset:
             self._collection = mongomock.MongoClient().db[self.name]
 
     def __hash__(self):
@@ -380,8 +380,8 @@ class JSONStore(MemoryStore):
         self.kwargs = kwargs
         super(JSONStore, self).__init__("collection", **kwargs)
 
-    def connect(self):
-        super(JSONStore, self).connect()
+    def connect(self, force_reset=False):
+        super(JSONStore, self).connect(force_reset=force_reset)
         for path in self.paths:
             with zopen(path) as f:
                 data = f.read()
@@ -407,8 +407,8 @@ class DatetimeStore(MemoryStore):
         self.kwargs = kwargs
         super(DatetimeStore, self).__init__("date", **kwargs)
 
-    def connect(self):
-        super(DatetimeStore, self).connect()
+    def connect(self, force_reset=False):
+        super(DatetimeStore, self).connect(force_reset)
         self.collection.insert_one({self.lu_field: self.__dt})
 
 
@@ -434,15 +434,16 @@ class GridFSStore(Store):
 
         super(GridFSStore, self).__init__(**kwargs)
 
-    def connect(self):
+    def connect(self, force_reset=False):
         conn = MongoClient(self.host, self.port)
-        db = conn[self.database]
-        if self.username is not "":
-            db.authenticate(self.username, self.password)
+        if not self._collection or force_reset:
+            db = conn[self.database]
+            if self.username is not "":
+                db.authenticate(self.username, self.password)
 
-        self._collection = gridfs.GridFS(db, self.collection_name)
-        self._files_collection = db["{}.files".format(self.collection_name)]
-        self._chunks_collection = db["{}.chunks".format(self.collection_name)]
+            self._collection = gridfs.GridFS(db, self.collection_name)
+            self._files_collection = db["{}.files".format(self.collection_name)]
+            self._chunks_collection = db["{}.chunks".format(self.collection_name)]
 
     @property
     def collection(self):

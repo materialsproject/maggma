@@ -138,8 +138,8 @@ class AliasingStore(Store):
     def collection(self):
         return self.store.collection
 
-    def connect(self):
-        self.store.connect()
+    def connect(self, force_reset=False):
+        self.store.connect(force_reset=force_reset)
 
 
 def lazy_substitute(d, aliases):
