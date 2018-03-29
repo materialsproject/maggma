@@ -10,7 +10,6 @@ import botocore
 from datetime import datetime
 from maggma.stores import Store, MongoStore
 from maggma.utils import lazy_substitute, substitute, unset
-from pymongo import DESCENDING
 
 
 class VaultStore(MongoStore):
@@ -161,10 +160,6 @@ class AmazonS3Store(Store):
         kwargs["key"] = index.key
         super(AmazonS3Store, self).__init__(**kwargs)
 
-    @property
-    def collection(self):
-        return self.index
-
     def connect(self, force_reset=False):
         self.index.connect(force_reset=force_reset)
         if not self.s3:
@@ -309,7 +304,7 @@ class AmazonS3Store(Store):
 
     @property
     def last_updated(self):
-        self.index.last_updated
+        return self.index.last_updated
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
@@ -321,7 +316,7 @@ class AmazonS3Store(Store):
             targets (list): A list of Stores
 
         """
-        self.index.last_updated(targets)
+        self.index.lu_filter(targets)
 
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
