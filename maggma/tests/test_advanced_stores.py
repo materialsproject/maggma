@@ -4,10 +4,11 @@ Tests for advanced stores
 """
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 from maggma.stores import MemoryStore, MongoStore
 from maggma.advanced_stores import *
+import zlib
 
 module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
@@ -72,6 +73,46 @@ class TestVaultStore(unittest.TestCase):
             self._create_vault_store()
 
 
+class TestS3Store(unittest.TestCase):
+
+    def setUp(self):
+        self.index = MemoryStore("index'")
+        with patch("boto3.resource") as mock_resource:
+            mock_resource.return_value = MagicMock()
+            mock_resource("s3").list_buckets.return_value = ["bucket1","bucket2"]
+            self.s3store = AmazonS3Store(self.index,"bucket1")
+            self.s3store.connect()
+
+    def test_qeuery_one(self):
+        self.s3store.s3_bucket.Object.return_value = MagicMock()
+        self.s3store.s3_bucket.Object().get.return_value = '{"task_id": "mp-1", "data": "asd"}'
+        self.index.update([{"task_id":"mp-1"}])
+        self.assertEqual(self.s3store.query_one(criteria={"task_id": "mp-2"}),None)
+        self.assertEqual(self.s3store.query_one(criteria={"task_id": "mp-1"})["data"],"asd")
+
+        self.s3store.s3_bucket.Object().get.return_value = zlib.compress('{"task_id": "mp-3", "data": "sdf"}'.encode())
+        self.index.update([{"task_id":"mp-3", "compression": "zlib"}])
+        self.assertEqual(self.s3store.query_one(criteria={"task_id": "mp-3"})["data"],"sdf")
+
+    def test_update(self):
+        
+        self.s3store.update([{"task_id": "mp-1", "data": "asd"}])
+        self.assertEqual(self.s3store.s3_bucket.put_object.call_count,1)
+        called_kwargs = self.s3store.s3_bucket.put_object.call_args[1]
+        self.assertEqual(self.s3store.s3_bucket.put_object.call_count,1)
+        self.assertEqual(called_kwargs["Key"], "mp-1")
+        self.assertTrue(len(called_kwargs["Body"]) > 0)
+        self.assertEqual(called_kwargs["Metadata"]["task_id"], "mp-1")
+
+    def test_update_compression(self):
+        self.s3store.update([{"task_id": "mp-1", "data": "asd"}],compress=True)
+        self.assertEqual(self.s3store.s3_bucket.put_object.call_count,1)
+        called_kwargs = self.s3store.s3_bucket.put_object.call_args[1]
+        self.assertEqual(self.s3store.s3_bucket.put_object.call_count,1)
+        self.assertEqual(called_kwargs["Key"], "mp-1")
+        self.assertTrue(len(called_kwargs["Body"]) > 0)
+        self.assertEqual(called_kwargs["Metadata"]["task_id"], "mp-1")
+        self.assertEqual(called_kwargs["Metadata"]["compression"], "zlib")
 
 
 class TestAliasingStore(unittest.TestCase):

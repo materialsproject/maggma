@@ -7,9 +7,11 @@ import hvac
 import json
 import boto3
 import botocore
+import zlib
 from datetime import datetime
 from maggma.stores import Store, MongoStore
-from maggma.utils import lazy_substitute, substitute, unset
+from maggma.utils import lazy_substitute, substitute
+from monty.json import jsanitize
 
 
 class VaultStore(MongoStore):
@@ -167,7 +169,7 @@ class AmazonS3Store(Store):
             # TODO: Provide configuration variable to create bucket if not present
             if self.bucket not in self.s3.list_buckets():
                 raise Exception("Bucket not present on AWS: {}".format(self.bucket))
-            self.s3_bucket = s3.Bucket(self.bucket)
+            self.s3_bucket = self.s3.Bucket(self.bucket)
 
     def close(self):
         self.index.close()
@@ -189,7 +191,7 @@ class AmazonS3Store(Store):
                 against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
-        for f in self.index.find(filter=criteria, **kwargs):
+        for f in self.index.query(criteria=criteria, **kwargs):
             try:
                 data = self.s3_bucket.Object(f[self.key]).get()
             except botocore.exceptions.ClientError as e:
@@ -218,7 +220,7 @@ class AmazonS3Store(Store):
                 against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
-        f = self.index.find_one(filter=criteria, **kwargs)
+        f = self.index.query_one(criteria=criteria, **kwargs)
         if f:
             try:
                 data = self.s3_bucket.Object(f[self.key]).get()
@@ -271,14 +273,15 @@ class AmazonS3Store(Store):
         now = datetime.now()
         search_docs = []
         for d in docs:
-            search_doc = {}
             if isinstance(key, list):
                 search_doc = {k: d[k] for k in key}
             elif key:
                 search_doc = {key: d[key]}
+            else:
+                search_doc = {}
 
             # Always include our main key
-            search_doc = {self.key: d[self.key]}
+            search_doc[self.key] = d[self.key]
 
             # Remove MongoDB _id from search
             if "_id" in search_doc:
@@ -286,8 +289,8 @@ class AmazonS3Store(Store):
 
             # Add a timestamp
             if update_lu:
-                search_doc[self.lu_key] = now
-                d[self.lu_key] = now
+                search_doc[self.lu_field] = now
+                d[self.lu_field] = now
 
             data = json.dumps(jsanitize(d)).encode()
 
