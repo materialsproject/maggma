@@ -76,7 +76,9 @@ class AliasingStore(Store):
         aliases (dict): dict of aliases of the form external key: internal key
         """
         self.store = store
+        # Given an external key tells what the internal key is
         self.aliases = aliases
+        # Given the internal key tells us what the external key is
         self.reverse_aliases = {v: k for k, v in aliases.items()}
         self.kwargs = kwargs
 
@@ -108,11 +110,36 @@ class AliasingStore(Store):
         return d
 
     def distinct(self, key, criteria=None, **kwargs):
-        if key in self.aliases:
-            key = self.aliases[key]
+        if isinstance(key, list):
+            criteria = criteria if criteria else {}
+            # Update to ensure keys are there
+            if all_exist:
+                criteria.update({k: {"$exists": True} for k in key if k not in criteria})
+
+            results = []
+            for d in self.groupby(key, properties=key, criteria=criteria):
+                results.append(d["_id"])
+            return results
+
+        else:
+            criteria = criteria if criteria else {}
+            lazy_substitute(criteria, self.reverse_aliases)
+            key = self.aliases[key] if key in self.aliases else key
+            return self.collection.distinct(key, filter=criteria, **kwargs)
+
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        # Convert to a list
+        keys = keys if isinstance(keys, list) else [keys]
+
+        # Make the aliasing transformations on keys
+        keys = [self.aliases[k] if k in self.aliases else k for k in keys]
+
+        # Update criteria and properties based on aliases
         criteria = criteria if criteria else {}
-        lazy_substitute(criteria, self.aliases)
-        return self.store.distinct(key, criteria, **kwargs)
+        substitute(properties, self.reverse_aliases)
+        lazy_substitute(criteria, self.reverse_aliases)
+
+        return self.store.groupby(keys=keys, properties=properties, criteria=criteria, **kwargs)
 
     def update(self, docs, update_lu=True, key=None):
         key = key if key else self.key
@@ -242,7 +269,7 @@ class AmazonS3Store(Store):
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
         Function get to get all distinct values of a certain key in the
-        GridFS Store. This searches the .files collection for this data
+        AmazonS3 Store. This searches the index collection for this data
 
         Args:
             key (mongolike key or list of mongolike keys): key or keys
@@ -254,6 +281,27 @@ class AmazonS3Store(Store):
         """
         # Index is a store so it should have its own distinct function
         return self.index.distinct(key, filter=criteria, **kwargs)
+
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        """
+        Simple grouping function that will group documents
+        by keys. Only searches the index collection
+
+        Args:
+            keys (list or string): fields to group documents
+            properties (list): properties to return in grouped documents
+            criteria (dict): filter for documents to group
+            allow_disk_use (bool): whether to allow disk use in aggregation
+
+        Returns:
+            command cursor corresponding to grouped documents
+
+            elements of the command cursor have the structure:
+            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
+             'docs': [list_of_documents corresponding to key values]}
+
+        """
+        self.index.groupby(keys, properties, criteria, **kwargs)
 
     def ensure_index(self, key, unique=False):
         """
