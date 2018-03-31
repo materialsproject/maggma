@@ -7,7 +7,6 @@ and processing via MPI
 
 import abc
 import logging
-import time
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
@@ -225,6 +224,9 @@ class MPIProcessor(BaseProcessor):
 
 
 class MultiprocProcessor(BaseProcessor):
+    """
+    Processor to run builders using python multiprocessing
+    """
     def __init__(self, builders, num_workers=None):
         # multiprocessing only if mpi is not used, no mixing
         self.num_workers = num_workers

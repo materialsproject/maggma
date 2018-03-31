@@ -12,14 +12,11 @@ import numpy.testing.utils as nptu
 from maggma.stores import *
 
 module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
-db_dir = os.path.abspath(os.path.join(
-    module_dir, "..", "..", "test_files", "settings_files"))
-test_dir = os.path.abspath(os.path.join(
-    module_dir, "..", "..", "test_files", "test_set"))
+db_dir = os.path.abspath(os.path.join(module_dir, "..", "..", "test_files", "settings_files"))
+test_dir = os.path.abspath(os.path.join(module_dir, "..", "..", "test_files", "test_set"))
 
 
 class TestMongoStore(unittest.TestCase):
-
     def setUp(self):
         self.mongostore = MongoStore("maggma_test", "test")
         self.mongostore.connect()
@@ -28,8 +25,7 @@ class TestMongoStore(unittest.TestCase):
         mongostore = MongoStore("maggma_test", "test")
         self.assertEqual(mongostore.collection, None)
         mongostore.connect()
-        self.assertIsInstance(mongostore.collection,
-                              pymongo.collection.Collection)
+        self.assertIsInstance(mongostore.collection, pymongo.collection.Collection)
 
     def test_query(self):
         self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
@@ -53,28 +49,39 @@ class TestMongoStore(unittest.TestCase):
         self.assertEqual(len(self.mongostore.distinct(["d", "e"], {"a": 4})), 3)
         all_exist = self.mongostore.distinct(["a", "b"], all_exist=True)
         self.assertEqual(len(all_exist), 1)
-        all_exist2 = self.mongostore.distinct(
-            ["a", "e"], all_exist=True, criteria={"d": 6})
+        all_exist2 = self.mongostore.distinct(["a", "e"], all_exist=True, criteria={"d": 6})
         self.assertEqual(len(all_exist2), 1)
 
     def test_update(self):
         self.mongostore.update([{"e": 6, "d": 4}], key="e")
-        self.assertEqual(self.mongostore.query(
-            criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
+        self.assertEqual(self.mongostore.query(criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
 
         self.mongostore.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
-        self.assertEqual(self.mongostore.query_one(
-            criteria={"d": 8, "f": 9}, properties=["e"])["e"], 7)
+        self.assertEqual(self.mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"], 7)
         self.mongostore.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
-        self.assertEqual(self.mongostore.query_one(
-            criteria={"d": 8, "f": 9}, properties=["e"])["e"], 11)
+        self.assertEqual(self.mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"], 11)
 
     def test_groupby(self):
         self.mongostore.collection.drop()
-        self.mongostore.update([{"e": 7, "d": 9, "f": 9},
-                                {"e": 7, "d": 9, "f": 10},
-                                {"e": 8, "d": 9, "f": 11},
-                                {"e": 9, "d": 10, "f": 12}], key="f")
+        self.mongostore.update(
+            [{
+                "e": 7,
+                "d": 9,
+                "f": 9
+            }, {
+                "e": 7,
+                "d": 9,
+                "f": 10
+            }, {
+                "e": 8,
+                "d": 9,
+                "f": 11
+            }, {
+                "e": 9,
+                "d": 10,
+                "f": 12
+            }],
+            key="f")
         data = list(self.mongostore.groupby("d"))
         self.assertEqual(len(data), 2)
         grouped_by_9 = [g['docs'] for g in data if g['_id']['d'] == 9][0]
@@ -89,28 +96,62 @@ class TestMongoStore(unittest.TestCase):
         ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))
         self.assertEqual(ms.collection_name, "tmp")
 
+    def test_from_collection(self):
+        ms = MongoStore.from_db_file(os.path.join(db_dir, "db.json"))
+        ms.connect()
+
+        other_ms = MongoStore.from_collection(ms._collection)
+        self.assertEqual(ms.collection_name, other_ms.collection_name)
+        self.assertEqual(ms.database, other_ms.database)
+
     def tearDown(self):
         if self.mongostore.collection:
             self.mongostore.collection.drop()
 
 
 class TestMemoryStore(unittest.TestCase):
-
     def setUp(self):
         self.memstore = MemoryStore()
+
 
     def test(self):
         self.assertEqual(self.memstore.collection, None)
         self.memstore.connect()
-        self.assertIsInstance(self.memstore.collection,
-                              mongomock.collection.Collection)
+        self.assertIsInstance(self.memstore.collection, mongomock.collection.Collection)
 
     def test_groupby(self):
-        self.assertRaises(NotImplementedError, self.memstore.groupby, "a")
+        self.memstore.connect()
+        self.memstore.update(
+            [{
+                "e": 7,
+                "d": 9,
+                "f": 9
+            }, {
+                "e": 7,
+                "d": 9,
+                "f": 10
+            }, {
+                "e": 8,
+                "d": 9,
+                "f": 11
+            }, {
+                "e": 9,
+                "d": 10,
+                "f": 12
+            }],
+            key="f")
+        data = list(self.memstore.groupby("d"))
+        self.assertEqual(len(data), 2)
+        grouped_by_9 = [g['docs'] for g in data if g['_id']['d'] == 9][0]
+        self.assertEqual(len(grouped_by_9), 3)
+        grouped_by_10 = [g['docs'] for g in data if g['_id']['d'] == 10][0]
+        self.assertEqual(len(grouped_by_10), 1)
+
+        data = list(self.memstore.groupby(["e", "d"]))
+        self.assertEqual(len(data), 3)
 
 
 class TestJsonStore(unittest.TestCase):
-
     def test(self):
         files = []
         for f in ["a.json", "b.json"]:
@@ -126,7 +167,6 @@ class TestJsonStore(unittest.TestCase):
 
 
 class TestGridFSStore(unittest.TestCase):
-
     def setUp(self):
         self.gStore = GridFSStore("maggma_test", "test", key="task_id")
         self.gStore.connect()
