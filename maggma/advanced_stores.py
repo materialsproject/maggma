@@ -152,10 +152,10 @@ class AliasingStore(Store):
 
         self.store.update(docs, update_lu=update_lu, key=key)
 
-    def ensure_index(self, key, unique=False):
+    def ensure_index(self, key, unique=False, **kwargs):
         if key in self.aliases:
             key = self.aliases
-        return self.store.ensure_index(key, unique)
+        return self.store.ensure_index(key, unique, **kwargs)
 
     def close(self):
         self.store.close()
