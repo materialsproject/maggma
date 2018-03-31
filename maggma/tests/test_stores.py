@@ -113,13 +113,42 @@ class TestMemoryStore(unittest.TestCase):
     def setUp(self):
         self.memstore = MemoryStore()
 
+
     def test(self):
         self.assertEqual(self.memstore.collection, None)
         self.memstore.connect()
         self.assertIsInstance(self.memstore.collection, mongomock.collection.Collection)
 
     def test_groupby(self):
-        self.assertRaises(NotImplementedError, self.memstore.groupby, "a")
+        self.memstore.connect()
+        self.memstore.update(
+            [{
+                "e": 7,
+                "d": 9,
+                "f": 9
+            }, {
+                "e": 7,
+                "d": 9,
+                "f": 10
+            }, {
+                "e": 8,
+                "d": 9,
+                "f": 11
+            }, {
+                "e": 9,
+                "d": 10,
+                "f": 12
+            }],
+            key="f")
+        data = list(self.memstore.groupby("d"))
+        self.assertEqual(len(data), 2)
+        grouped_by_9 = [g['docs'] for g in data if g['_id']['d'] == 9][0]
+        self.assertEqual(len(grouped_by_9), 3)
+        grouped_by_10 = [g['docs'] for g in data if g['_id']['d'] == 10][0]
+        self.assertEqual(len(grouped_by_10), 1)
+
+        data = list(self.memstore.groupby(["e", "d"]))
+        self.assertEqual(len(data), 3)
 
 
 class TestJsonStore(unittest.TestCase):

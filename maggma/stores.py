@@ -8,10 +8,11 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 import json
 
-
 import mongomock
 import pymongo
 import gridfs
+from itertools import groupby
+from operator import itemgetter
 from pymongo import MongoClient, DESCENDING
 from pydash import identity
 
@@ -43,43 +44,87 @@ class Store(MSONable, metaclass=ABCMeta):
     @property
     @abstractmethod
     def collection(self):
+        """
+        Returns a handle to the pymongo collection object
+        Not guaranteed to exist in the future
+        """
         pass
 
     @abstractmethod
     def connect(self, force_reset=False):
+        """
+        Connect to the source data
+        """
         pass
 
     @abstractmethod
     def close(self):
+        """
+        Closes any connections
+        """
         pass
 
     @abstractmethod
     def query(self, properties=None, criteria=None, **kwargs):
+        """
+        Queries the Store for a set of properties
+        """
         pass
 
     @abstractmethod
     def query_one(self, properties=None, criteria=None, **kwargs):
+        """
+        Get one property from the store
+        """
         pass
 
     @abstractmethod
     def distinct(self, key, criteria=None, **kwargs):
+        """
+        Get all distinct values for a key
+        """
         pass
 
     @abstractmethod
-    def update(self, docs, update_lu=True, key=None):
+    def update(self, docs, update_lu=True, key=None, **kwargs):
+        """
+        Update docs into the store
+        """
         pass
 
     @abstractmethod
-    def ensure_index(self, key, unique=False):
+    def ensure_index(self, key, unique=False, **kwargs):
+        """
+        Ensure index gets assigned
+        """
+        pass
+
+    @abstractmethod
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        """
+        Simple grouping function that will group documents
+        by keys.
+
+        Args:
+            keys (list or string): fields to group documents
+            properties (list): properties to return in grouped documents
+            criteria (dict): filter for documents to group
+
+        Returns:
+            command cursor corresponding to grouped documents
+
+            elements of the command cursor have the structure:
+            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
+             'docs': [list_of_documents corresponding to key values]}
+
+        """
         pass
 
     @property
     def last_updated(self):
-        doc = next(self.query(properties=[self.lu_field]).sort(
-            [(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
+        doc = next(self.query(properties=[self.lu_field]).sort([(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
         # Handle when collection has docs but `NoneType` lu_field.
-        return (self.lu_func[0](doc[self.lu_field]) if (doc and doc[self.lu_field])
-                else datetime.min)
+        return (self.lu_func[0](doc[self.lu_field]) if (doc and doc[self.lu_field]) else datetime.min)
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
@@ -104,7 +149,7 @@ class Store(MSONable, metaclass=ABCMeta):
         return not self == other
 
     def __hash__(self):
-        return hash((self.lu_field,))
+        return hash((self.lu_field, ))
 
     def __getstate__(self):
         return self.as_dict()
@@ -140,8 +185,7 @@ class Mongolike(object):
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
-        return self.collection.find(filter=criteria, projection=properties,
-                                    **kwargs)
+        return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
     def query_one(self, properties=None, criteria=None, **kwargs):
         """
@@ -158,51 +202,17 @@ class Mongolike(object):
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
-        return self.collection.find_one(filter=criteria, projection=properties,
-                                        **kwargs)
+        return self.collection.find_one(filter=criteria, projection=properties, **kwargs)
 
-    def distinct(self, key, criteria=None, all_exist=False, **kwargs):
-        """
-        Function get to get all distinct values of a certain key in
-        a mongolike store.  May take a single key or a list of keys
-
-        Args:
-            key (mongolike key or list of mongolike keys): key or keys
-                for which to find distinct values or sets of values.
-            criteria (filter criteria): criteria for filter
-            all_exist (bool): whether to ensure all keys in list exist
-                in each document, defaults to False
-            **kwargs (kwargs): kwargs corresponding to collection.distinct
-        """
-        if isinstance(key, list):
-            agg_pipeline = [{"$match": criteria}] if criteria else []
-            if all_exist:
-                agg_pipeline.append(
-                    {"$match": {k: {"$exists": True} for k in key}})
-            # use string ints as keys and replace later to avoid bug
-            # where periods can't be in group keys, then reconstruct after
-            group_op = {"$group": {
-                "_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
-            agg_pipeline.append(group_op)
-            results = [r['_id']
-                       for r in self.collection.aggregate(agg_pipeline)]
-            for result in results:
-                for n in list(result.keys()):
-                    result[key[int(n)]] = result.pop(n)
-
-            # Return as document as partial matches are included
-            return results
-
-        else:
-            return self.collection.distinct(key, filter=criteria, **kwargs)
-
-    def ensure_index(self, key, unique=False):
+    def ensure_index(self, key, unique=False, **kwargs):
         """
         Wrapper for pymongo.Collection.ensure_index
         """
-        return self.collection.create_index(key, unique=unique, background=True)
+        if "background" not in kwargs:
+            kwargs["background"] = True
+        return self.collection.create_index(key, unique=unique, **kwargs)
 
-    def update(self, docs, update_lu=True, key=None):
+    def update(self, docs, update_lu=True, key=None, **kwargs):
         """
         Function to update associated MongoStore collection.
 
@@ -227,7 +237,6 @@ class Mongolike(object):
                         self.logger.error('Document failed to validate: {}'.format(d))
 
             if validates:
-                search_doc = {}
                 if isinstance(key, list):
                     search_doc = {k: d[k] for k in key}
                 elif key:
@@ -240,6 +249,33 @@ class Mongolike(object):
 
         bulk.execute()
 
+    def distinct(self, key, criteria=None, all_exist=False, **kwargs):
+        """
+        Function get to get all distinct values of a certain key in
+        a mongolike store.  May take a single key or a list of keys
+
+        Args:
+            key (mongolike key or list of mongolike keys): key or keys
+                for which to find distinct values or sets of values.
+            criteria (filter criteria): criteria for filter
+            all_exist (bool): whether to ensure all keys in list exist
+                in each document, defaults to False
+            **kwargs (kwargs): kwargs corresponding to collection.distinct
+        """
+        if isinstance(key, list):
+            criteria = criteria if criteria else {}
+            # Update to ensure keys are there
+            if all_exist:
+                criteria.update({k: {"$exists": True} for k in key if k not in criteria})
+
+            results = []
+            for d in self.groupby(key, properties=key, criteria=criteria):
+                results.append(d["_id"])
+            return results
+
+        else:
+            return self.collection.distinct(key, filter=criteria, **kwargs)
+
     def close(self):
         self.collection.database.client.close()
 
@@ -249,8 +285,7 @@ class MongoStore(Mongolike, Store):
     A Store that connects to a Mongo collection
     """
 
-    def __init__(self, database, collection_name, host="localhost", port=27017,
-                 username="", password="", **kwargs):
+    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", **kwargs):
         """
         Args:
             database (str): database name
@@ -293,8 +328,7 @@ class MongoStore(Mongolike, Store):
         kwargs.pop("aliases", None)
         return cls(**kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None,
-                allow_disk_use=True):
+    def groupby(self, keys, properties=None, criteria=None, allow_disk_use=True, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
@@ -324,10 +358,7 @@ class MongoStore(Mongolike, Store):
             keys = [keys]
 
         group_id = {key: "${}".format(key) for key in keys}
-        pipeline.append({"$group": {"_id": group_id,
-                                    "docs": {"$push": "$$ROOT"}
-                                    }
-                         })
+        pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
         return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
 
@@ -338,13 +369,14 @@ class MongoStore(Mongolike, Store):
         This is not a fully safe operation as it gives dummy information to the MongoStore
         As a result, this will not serialize and can not reset its connection
         """
-        # TODO: How do we make this safer? 
+        # TODO: How do we make this safer?
         coll_name = collection.name
         db_name = collection.database.name
 
-        store = cls(db_name,coll_name,**kwargs)
+        store = cls(db_name, coll_name, **kwargs)
         store._collection = collection
         return store
+
 
 class MemoryStore(Mongolike, Store):
     """
@@ -365,17 +397,72 @@ class MemoryStore(Mongolike, Store):
     def __hash__(self):
         return hash((self.name, self.lu_field))
 
-    def groupby(self, keys, properties=None, criteria=None,
-                allow_disk_use=True):
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
         """
-        This is a placeholder for groupby for memorystores,
-        current version of mongomock do not allow for standard
-        aggregation methods, so this method currently raises
-        a NotImplementedError
+        Simple grouping function that will group documents
+        by keys.
+
+        Args:
+            keys (list or string): fields to group documents
+            properties (list): properties to return in grouped documents
+            criteria (dict): filter for documents to group
+            allow_disk_use (bool): whether to allow disk use in aggregation
+
+        Returns:
+            command cursor corresponding to grouped documents
+
+            elements of the command cursor have the structure:
+            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
+             'docs': [list_of_documents corresponding to key values]}
+
         """
-        raise NotImplementedError("groupby not available for {}"
-                                  "due to mongomock incompatibility".format(
-                                      self.__class__))
+        keys = keys if isinstance(keys, list) else [keys]
+
+        input_data = list(self.query(properties=keys, criteria=criteria))
+
+        if len(keys) > 1:
+            grouper = itemgetter(*keys)
+            for key, grp in groupby(sorted(input_data, key=grouper), grouper):
+                temp_dict = {"_id": zip(keys, key), "docs": list(grp)}
+                yield temp_dict
+        else:
+            grouper = itemgetter(*keys)
+            for key, grp in groupby(sorted(input_data, key=grouper), grouper):
+                temp_dict = {"_id": {keys[0]: key}, "docs": list(grp)}
+                yield temp_dict
+
+    def update(self, docs, update_lu=True, key=None, **kwargs):
+        """
+        Function to update associated MongoStore collection.
+
+        Args:
+            docs: list of documents
+        """
+
+        for d in docs:
+
+            d = jsanitize(d, allow_bson=True)
+
+            # document-level validation is optional
+            validates = True
+            if self.validator:
+                validates = self.validator.is_valid(d)
+                if not validates:
+                    if self.validator.strict:
+                        raise ValueError('Document failed to validate: {}'.format(d))
+                    else:
+                        self.logger.error('Document failed to validate: {}'.format(d))
+
+            if validates:
+                if isinstance(key, list):
+                    search_doc = {k: d[k] for k in key}
+                elif key:
+                    search_doc = {key: d[key]}
+                else:
+                    search_doc = {self.key: d[self.key]}
+                if update_lu:
+                    d[self.lu_field] = datetime.utcnow()
+                self.collection.insert_one(d)
 
 
 class JSONStore(MemoryStore):
@@ -401,8 +488,7 @@ class JSONStore(MemoryStore):
                 data = f.read()
                 data = data.decode() if isinstance(data, bytes) else data
                 objects = json.loads(data)
-                objects = [objects] if not isinstance(
-                    objects, list) else objects
+                objects = [objects] if not isinstance(objects, list) else objects
                 self.collection.insert_many(objects)
 
     def __hash__(self):
@@ -431,8 +517,7 @@ class GridFSStore(Store):
     A Store for GrdiFS backend. Provides a common access method consistent with other stores
     """
 
-    def __init__(self, database, collection_name, host="localhost", port=27017,
-                 username="", password="", **kwargs):
+    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", **kwargs):
 
         self.database = database
         self.collection_name = collection_name
@@ -510,8 +595,8 @@ class GridFSStore(Store):
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
-        Function get to get all distinct values of a certain key in the
-        GridFS Store. This searches the .files collection for this data
+        Function get to get all distinct values of a certain key in
+        a mongolike store.  May take a single key or a list of keys
 
         Args:
             key (mongolike key or list of mongolike keys): key or keys
@@ -522,26 +607,52 @@ class GridFSStore(Store):
             **kwargs (kwargs): kwargs corresponding to collection.distinct
         """
         if isinstance(key, list):
-            agg_pipeline = [{"$match": criteria}] if criteria else []
+            criteria = criteria if criteria else {}
+            # Update to ensure keys are there
             if all_exist:
-                agg_pipeline.append(
-                    {"$match": {k: {"$exists": True} for k in key}})
-            # use string ints as keys and replace later to avoid bug
-            # where periods can't be in group keys, then reconstruct after
-            group_op = {"$group": {
-                "_id": {str(n): "${}".format(k) for n, k in enumerate(key)}}}
-            agg_pipeline.append(group_op)
-            results = [r['_id']
-                       for r in self._files_collection.aggregate(agg_pipeline)]
-            for result in results:
-                for n in list(result.keys()):
-                    result[key[int(n)]] = result.pop(n)
+                criteria.update({k: {"$exists": True} for k in key if k not in criteria})
 
-            # Return as document as partial matches are included
+            results = []
+            for d in self.groupby(key, properties=key, criteria=criteria):
+                results.append(d["_id"])
             return results
 
         else:
             return self._files_collection.distinct(key, filter=criteria, **kwargs)
+
+    def groupby(self, keys, properties=None, criteria=None, allow_disk_use=True, **kwargs):
+        """
+        Simple grouping function that will group documents
+        by keys.
+
+        Args:
+            keys (list or string): fields to group documents
+            properties (list): properties to return in grouped documents
+            criteria (dict): filter for documents to group
+            allow_disk_use (bool): whether to allow disk use in aggregation
+
+        Returns:
+            command cursor corresponding to grouped documents
+
+            elements of the command cursor have the structure:
+            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
+             'docs': [list_of_documents corresponding to key values]}
+
+        """
+        pipeline = []
+        if criteria is not None:
+            pipeline.append({"$match": criteria})
+
+        if properties is not None:
+            pipeline.append({"$project": {p: 1 for p in properties}})
+
+        if isinstance(keys, str):
+            keys = [keys]
+
+        group_id = {key: "${}".format(key) for key in keys}
+        pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
+
+        return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
 
     def ensure_index(self, key, unique=False):
         """
@@ -556,7 +667,6 @@ class GridFSStore(Store):
         Args:
             docs: list of documents
         """
-
         for d in docs:
             search_doc = {}
             if isinstance(key, list):
