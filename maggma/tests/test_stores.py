@@ -17,6 +17,7 @@ test_dir = os.path.abspath(os.path.join(module_dir, "..", "..", "test_files", "t
 
 
 class TestMongoStore(unittest.TestCase):
+
     def setUp(self):
         self.mongostore = MongoStore("maggma_test", "test")
         self.mongostore.connect()
@@ -110,9 +111,9 @@ class TestMongoStore(unittest.TestCase):
 
 
 class TestMemoryStore(unittest.TestCase):
+
     def setUp(self):
         self.memstore = MemoryStore()
-
 
     def test(self):
         self.assertEqual(self.memstore.collection, None)
@@ -152,6 +153,7 @@ class TestMemoryStore(unittest.TestCase):
 
 
 class TestJsonStore(unittest.TestCase):
+
     def test(self):
         files = []
         for f in ["a.json", "b.json"]:
@@ -167,6 +169,7 @@ class TestJsonStore(unittest.TestCase):
 
 
 class TestGridFSStore(unittest.TestCase):
+
     def setUp(self):
         self.gStore = GridFSStore("maggma_test", "test", key="task_id")
         self.gStore.connect()

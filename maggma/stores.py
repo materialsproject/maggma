@@ -28,7 +28,7 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime"):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime", validator = None):
         """
         Args:
             key (str): master key to index on
@@ -39,7 +39,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.lu_field = lu_field
         self.lu_type = lu_type
         self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
-        self.validator = None
+        self.validator = validator
 
     @property
     @abstractmethod
