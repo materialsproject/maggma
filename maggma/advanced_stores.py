@@ -217,7 +217,7 @@ class SandboxStore(Store):
     def update(self, docs, update_lu=True, key=None):
         for d in docs:
             if "sbxn" in d:
-                d["sbxn"] = list(set(d["sbxn"]) | set(self.sandbox))
+                d["sbxn"] = list(set(d["sbxn"] + [self.sandbox]))
             else:
                 d["sbxn"] = [self.sandbox]
 

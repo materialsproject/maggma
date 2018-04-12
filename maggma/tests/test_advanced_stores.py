@@ -211,6 +211,9 @@ class TestSandboxStore(unittest.TestCase):
         self.sandboxstore.update([{"e": 6, "d": 4}], key="e")
         self.assertEqual(self.sandboxstore.query(criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
         self.assertEqual(self.sandboxstore.collection.find_one({"e": 6})["sbxn"], ["test"])
+        self.sandboxstore.update([{"e": 7, "sbxn": ["core"]}], key="e")
+        self.assertEqual(set(self.sandboxstore.query_one(
+            criteria={"e": 7})["sbxn"]), {"test", "core"})
 
     def tearDown(self):
         if self.sandboxstore.collection:
