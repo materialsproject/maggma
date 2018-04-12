@@ -192,7 +192,7 @@ class SandboxStore(Store):
     @lru_cache(maxsize=1)
     def sbx_criteria(self):
         if self.exclusive:
-            return {"sbxn": {"$in": [self.sandbox]}}
+            return {"sbxn": self.sandbox}
         else:
             return {"$or": [{"sbxn": {"$in": [self.sandbox]}},
                             {"sbxn": {"$exists": False}}]}
