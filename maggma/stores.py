@@ -5,6 +5,7 @@ Stores are a default access pattern to data and provide
 various utillities
 """
 from abc import ABCMeta, abstractmethod
+import copy
 from datetime import datetime
 import json
 
@@ -517,6 +518,13 @@ class GridFSStore(Store):
     A Store for GrdiFS backend. Provides a common access method consistent with other stores
     """
 
+    # https://github.com/mongodb/specifications/
+    #   blob/master/source/gridfs/gridfs-spec.rst#terms
+    #   (Under "Files collection document")
+    files_collection_fields = (
+        "_id", "length", "chunkSize", "uploadDate", "md5", "filename",
+        "contentType", "aliases", "metadata")
+
     def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", **kwargs):
 
         self.database = database
@@ -561,13 +569,20 @@ class GridFSStore(Store):
                 against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
+        if isinstance(criteria, dict):
+            for field in criteria:
+                if (field not in self.files_collection_fields
+                        and not field.startswith('metadata.')):
+                    criteria['metadata.'+field] = copy.copy(criteria[field])
+                    del criteria[field]
         for f in self.collection.find(filter=criteria, **kwargs):
             data = f.read()
+            metadata = f.metadata
             try:
-                json_dict = json.loads(data)
-                yield json_dict
+                data = json.loads(data)
             except:
-                yield data
+                pass
+            yield dict(data=data, metadata=metadata)
 
     def query_one(self, properties=None, criteria=None, **kwargs):
         """
@@ -582,16 +597,7 @@ class GridFSStore(Store):
                 against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
-        f = self.collection.find_one(filter=criteria, **kwargs)
-        if f:
-            data = f.read()
-            try:
-                json_dict = json.loads(data)
-                return json_dict
-            except:
-                return data
-        else:
-            return None
+        return next(self.query(criteria=criteria, **kwargs), None)
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
@@ -668,7 +674,6 @@ class GridFSStore(Store):
             docs: list of documents
         """
         for d in docs:
-            search_doc = {}
             if isinstance(key, list):
                 search_doc = {k: d[k] for k in key}
             elif key:
@@ -679,8 +684,13 @@ class GridFSStore(Store):
             if "_id" in search_doc:
                 del search_doc["_id"]
 
-            data = json.dumps(jsanitize(d)).encode("UTF-8")
-            self.collection.put(data, **search_doc)
+            if update_lu:
+                d[self.lu_field] = datetime.utcnow()
+
+            data = json.dumps(jsanitize(d["data"])).encode("UTF-8")
+            metadata = {self.lu_field: d[self.lu_field]}
+            metadata.update(search_doc)
+            self.collection.put(data, metadata=metadata)
 
     def close(self):
         self.collection.database.client.close()
