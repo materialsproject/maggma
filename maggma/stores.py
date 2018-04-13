@@ -557,6 +557,14 @@ class GridFSStore(Store):
         # TODO: Should this return the real MongoCollection or the GridFS
         return self._collection
 
+    @classmethod
+    def transform_criteria(cls, criteria):
+        for field in criteria:
+            if (field not in cls.files_collection_fields
+                    and not field.startswith('metadata.')):
+                criteria['metadata.' + field] = copy.copy(criteria[field])
+                del criteria[field]
+
     def query(self, properties=None, criteria=None, **kwargs):
         """
         Function that gets data from GridFS. This store ignores all
@@ -570,11 +578,7 @@ class GridFSStore(Store):
             **kwargs (kwargs): further kwargs to Collection.find
         """
         if isinstance(criteria, dict):
-            for field in criteria:
-                if (field not in self.files_collection_fields
-                        and not field.startswith('metadata.')):
-                    criteria['metadata.'+field] = copy.copy(criteria[field])
-                    del criteria[field]
+            self.transform_criteria(criteria)
         for f in self.collection.find(filter=criteria, **kwargs):
             data = f.read()
             metadata = f.metadata
@@ -691,6 +695,10 @@ class GridFSStore(Store):
             metadata = {self.lu_field: d[self.lu_field]}
             metadata.update(search_doc)
             self.collection.put(data, metadata=metadata)
+            self.transform_criteria(search_doc)
+            for fdoc in (self._files_collection.find(search_doc, ["_id"])
+                    .sort("uploadDate", -1).skip(1)):
+                self.collection.delete(fdoc["_id"])
 
     def close(self):
         self.collection.database.client.close()

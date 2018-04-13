@@ -176,11 +176,16 @@ class TestGridFSStore(unittest.TestCase):
 
     def test_update(self):
         data1 = np.random.rand(256)
+        data2 = np.random.rand(256)
         self.gStore.update([{"task_id": "mp-1", "data": data1}])
         self.assertTrue(self.gStore._files_collection.find_one(
             {"metadata.task_id": "mp-1"}))
         self.assertTrue(self.gStore.lu_field
                         in self.gStore.query_one()["metadata"])
+        self.gStore.update([{"task_id": "mp-1", "data": data2}])
+        self.assertEqual(len(list(self.gStore.query({"task_id": "mp-1"}))), 1)
+        nptu.assert_almost_equal(
+            self.gStore.query_one({"task_id": "mp-1"})["data"], data2, 7)
 
     def test_query(self):
         data1 = np.random.rand(256)
