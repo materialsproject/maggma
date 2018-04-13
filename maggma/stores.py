@@ -559,6 +559,11 @@ class GridFSStore(Store):
 
     @classmethod
     def transform_criteria(cls, criteria):
+        """
+        Allow client to not need to prepend 'metadata.' to query fields.
+        Args:
+            criteria (dict): Query criteria
+        """
         for field in criteria:
             if (field not in cls.files_collection_fields
                     and not field.startswith('metadata.')):
