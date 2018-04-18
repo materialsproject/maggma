@@ -586,12 +586,16 @@ class GridFSStore(Store):
             self.transform_criteria(criteria)
         for f in self.collection.find(filter=criteria, **kwargs):
             data = f.read()
-            metadata = f.metadata
+            
+            metadata = f.metadata 
+            if metadata.get("compression","") == "zlib":
+                data = zlib.decompress(data).decode("UTF-8")
+
             try:
                 data = json.loads(data)
             except:
                 pass
-            yield dict(data=data, metadata=metadata)
+            yield data
 
     def query_one(self, properties=None, criteria=None, **kwargs):
         """
