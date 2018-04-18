@@ -8,6 +8,7 @@ from abc import ABCMeta, abstractmethod
 import copy
 from datetime import datetime
 import json
+import zlib
 
 import mongomock
 import pymongo
@@ -696,32 +697,40 @@ class GridFSStore(Store):
             self.meta_keys |= key
             return self._files_collection.create_index("metadata.{}".format(key), unique=unique, background=True)
 
-    def update(self, docs, update_lu=True, key=None):
+    def update(self, docs, update_lu=True, key=None, compression=False):
         """
         Function to update associated MongoStore collection.
 
         Args:
-            docs: list of documents
+            docs ([dict]): list of documents
+            update_lu (bool) : Updat the last_updated field or not
+            key (list or str): list or str of important parameters  
         """
+        if isinstance(key,str):
+            key = [key]
+        elif not key:
+            key = [self.key]
+
+        key = list(set(key) | self.meta_keys - set(self.files_collection_fields))
+
         for d in docs:
-            if isinstance(key, list):
-                search_doc = {k: d[k] for k in key}
-            elif key:
-                search_doc = {key: d[key]}
-            else:
-                search_doc = {self.key: d[self.key]}
 
-            if "_id" in search_doc:
-                del search_doc["_id"]
-
+            search_doc = {k: d[k] for k in key}
             if update_lu:
                 d[self.lu_field] = datetime.utcnow()
 
-            data = json.dumps(jsanitize(d["data"])).encode("UTF-8")
             metadata = {self.lu_field: d[self.lu_field]}
             metadata.update(search_doc)
+
+            data = json.dumps(jsanitize(d)).encode("UTF-8")
+            if compression:
+                data = zlib.compress(data)
+                metadata["compression"] = "zlib"
+
             self.collection.put(data, metadata=metadata)
             self.transform_criteria(search_doc)
+
+            # Cleans up old gridfs entries
             for fdoc in (self._files_collection.find(search_doc, ["_id"])
                     .sort("uploadDate", -1).skip(1)):
                 self.collection.delete(fdoc["_id"])
