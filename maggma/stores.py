@@ -535,6 +535,7 @@ class GridFSStore(Store):
         self.password = password
         self._collection = None
         self.kwargs = kwargs
+        self.meta_keys = set()
 
         if "key" not in kwargs:
             kwargs["key"] = "_oid"
@@ -677,7 +678,12 @@ class GridFSStore(Store):
         """
         Wrapper for pymongo.Collection.ensure_index for the files collection
         """
-        return self._files_collection.create_index(key, unique=unique, background=True)
+        if key in self.files_collection_fields:
+            return self._files_collection.create_index(key, unique=unique, background=True)
+        else:
+            # Store this key to put into metadata collection
+            self.meta_keys |= key
+            return self._files_collection.create_index("metadata.{}".format(key), unique=unique, background=True)
 
     def update(self, docs, update_lu=True, key=None):
         """
