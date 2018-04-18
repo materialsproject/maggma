@@ -17,6 +17,7 @@ test_dir = os.path.abspath(os.path.join(module_dir, "..", "..", "test_files", "t
 
 
 class TestMongoStore(unittest.TestCase):
+
     def setUp(self):
         self.mongostore = MongoStore("maggma_test", "test")
         self.mongostore.connect()
@@ -110,6 +111,7 @@ class TestMongoStore(unittest.TestCase):
 
 
 class TestMemoryStore(unittest.TestCase):
+
     def setUp(self):
         self.memstore = MemoryStore()
 
@@ -151,6 +153,7 @@ class TestMemoryStore(unittest.TestCase):
 
 
 class TestJsonStore(unittest.TestCase):
+
     def test(self):
         files = []
         for f in ["a.json", "b.json"]:
@@ -166,6 +169,7 @@ class TestJsonStore(unittest.TestCase):
 
 
 class TestGridFSStore(unittest.TestCase):
+
     def setUp(self):
         self.gStore = GridFSStore("maggma_test", "test", key="task_id")
         self.gStore.connect()
@@ -184,7 +188,7 @@ class TestGridFSStore(unittest.TestCase):
         nptu.assert_almost_equal(self.gStore.query_one({"task_id": "mp-1"})["data"], data2, 7)
 
         # Test storing compressed data
-        self.gStore = GridFSStore("maggma_test", "test", key="task_id",compression=True)
+        self.gStore = GridFSStore("maggma_test", "test", key="task_id", compression=True)
         self.gStore.connect()
         self.gStore.update([{"task_id": "mp-1", "data": data1}])
         self.assertTrue(self.gStore._files_collection.find_one({"metadata.compression": "zlib"}))

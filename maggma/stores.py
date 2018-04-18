@@ -30,7 +30,7 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime", validator = None):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime", validator=None):
         """
         Args:
             key (str): master key to index on
@@ -526,7 +526,7 @@ class GridFSStore(Store):
         "_id", "length", "chunkSize", "uploadDate", "md5", "filename",
         "contentType", "aliases", "metadata")
 
-    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="",compression=False,**kwargs):
+    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", compression=False, **kwargs):
 
         self.database = database
         self.collection_name = collection_name
@@ -538,7 +538,6 @@ class GridFSStore(Store):
         self.compression = compression
         self.kwargs = kwargs
         self.meta_keys = set()
-
 
         if "key" not in kwargs:
             kwargs["key"] = "_oid"
@@ -590,9 +589,9 @@ class GridFSStore(Store):
             self.transform_criteria(criteria)
         for f in self.collection.find(filter=criteria, **kwargs):
             data = f.read()
-            
-            metadata = f.metadata 
-            if metadata.get("compression","") == "zlib":
+
+            metadata = f.metadata
+            if metadata.get("compression", "") == "zlib":
                 data = zlib.decompress(data).decode("UTF-8")
 
             try:
@@ -708,7 +707,7 @@ class GridFSStore(Store):
             update_lu (bool) : Updat the last_updated field or not
             key (list or str): list or str of important parameters  
         """
-        if isinstance(key,str):
+        if isinstance(key, str):
             key = [key]
         elif not key:
             key = [self.key]
@@ -734,7 +733,7 @@ class GridFSStore(Store):
 
             # Cleans up old gridfs entries
             for fdoc in (self._files_collection.find(search_doc, ["_id"])
-                    .sort("uploadDate", -1).skip(1)):
+                         .sort("uploadDate", -1).skip(1)):
                 self.collection.delete(fdoc["_id"])
 
     def close(self):
