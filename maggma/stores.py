@@ -526,7 +526,7 @@ class GridFSStore(Store):
         "_id", "length", "chunkSize", "uploadDate", "md5", "filename",
         "contentType", "aliases", "metadata")
 
-    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", **kwargs):
+    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="",compression=False,**kwargs):
 
         self.database = database
         self.collection_name = collection_name
@@ -535,8 +535,10 @@ class GridFSStore(Store):
         self.username = username
         self.password = password
         self._collection = None
+        self.compression = compression
         self.kwargs = kwargs
         self.meta_keys = set()
+
 
         if "key" not in kwargs:
             kwargs["key"] = "_oid"
@@ -697,7 +699,7 @@ class GridFSStore(Store):
             self.meta_keys |= key
             return self._files_collection.create_index("metadata.{}".format(key), unique=unique, background=True)
 
-    def update(self, docs, update_lu=True, key=None, compression=False):
+    def update(self, docs, update_lu=True, key=None):
         """
         Function to update associated MongoStore collection.
 
@@ -723,7 +725,7 @@ class GridFSStore(Store):
             metadata.update(search_doc)
 
             data = json.dumps(jsanitize(d)).encode("UTF-8")
-            if compression:
+            if self.compression:
                 data = zlib.compress(data)
                 metadata["compression"] = "zlib"
 

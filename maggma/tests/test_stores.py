@@ -184,7 +184,9 @@ class TestGridFSStore(unittest.TestCase):
         nptu.assert_almost_equal(self.gStore.query_one({"task_id": "mp-1"})["data"], data2, 7)
 
         # Test storing compressed data
-        self.gStore.update([{"task_id": "mp-1", "data": data1}], compression=True)
+        self.gStore = GridFSStore("maggma_test", "test", key="task_id",compression=True)
+        self.gStore.connect()
+        self.gStore.update([{"task_id": "mp-1", "data": data1}])
         self.assertTrue(self.gStore._files_collection.find_one({"metadata.compression": "zlib"}))
         nptu.assert_almost_equal(self.gStore.query_one({"task_id": "mp-1"})["data"], data1, 7)
 
