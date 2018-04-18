@@ -638,6 +638,12 @@ class GridFSStore(Store):
             return results
 
         else:
+            if criteria:
+                self.transform_criteria(criteria)
+            # Transfor to metadata subfield if not supposed to be in gridfs main fields
+            if key not in self.files_collection_fields:
+                key = "metadata.{}".format(key)
+
             return self._files_collection.distinct(key, filter=criteria, **kwargs)
 
     def groupby(self, keys, properties=None, criteria=None, allow_disk_use=True, **kwargs):
@@ -661,13 +667,18 @@ class GridFSStore(Store):
         """
         pipeline = []
         if criteria is not None:
+            self.transform_criteria(criteria)
             pipeline.append({"$match": criteria})
 
         if properties is not None:
+            properties = [p if p in self.files_collection_fields else "metadata.{}".format(p) for p in properties]
             pipeline.append({"$project": {p: 1 for p in properties}})
 
         if isinstance(keys, str):
             keys = [keys]
+
+        # ensure propper naming for keys in and outside of metadata
+        keys = [k if k in self.files_collection_fields else "metadata.{}".format(k) for k in key]
 
         group_id = {key: "${}".format(key) for key in keys}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
