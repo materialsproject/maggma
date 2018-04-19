@@ -705,7 +705,7 @@ class GridFSStore(Store):
         Args:
             docs ([dict]): list of documents
             update_lu (bool) : Updat the last_updated field or not
-            key (list or str): list or str of important parameters  
+            key (list or str): list or str of important parameters
         """
         if isinstance(key, str):
             key = [key]
