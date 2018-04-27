@@ -7,6 +7,24 @@ from datetime import datetime, timedelta
 from pydash.utilities import to_path
 from pydash.objects import set_, get, has
 from pydash.objects import unset as _unset
+import logging
+import tqdm
+
+class TqdmLoggingHandler (logging.Handler):
+    def __init__ (self, level = logging.NOTSET):
+        super (self.__class__, self).__init__ (level)
+
+    def emit (self, record):
+        try:
+            msg = self.format (record)
+            tqdm.tqdm.write (msg)
+            self.flush ()
+        except (KeyboardInterrupt, SystemExit):
+            raise
+        except:
+            self.handleError(record)     
+
+
 
 def dt_to_isoformat_ceil_ms(dt):
     """Helper to account for Mongo storing datetimes with only ms precision."""

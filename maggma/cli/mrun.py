@@ -6,7 +6,7 @@ from monty.serialization import loadfn
 import argparse
 import logging
 import sys
-
+from maggma.utils import TqdmLoggingHandler
 
 def main():
     parser = argparse.ArgumentParser(
@@ -27,7 +27,7 @@ def main():
                    ]  # capped to number of levels
     root = logging.getLogger()
     root.setLevel(level)
-    ch = logging.StreamHandler(sys.stdout)
+    ch = TqdmLoggingHandler()
     formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     ch.setFormatter(formatter)

@@ -12,6 +12,7 @@ from threading import Thread, Condition, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from monty.json import MSONable
 from maggma.utils import get_mpi, grouper
+from tqdm import tqdm
 
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
@@ -151,7 +152,7 @@ class MPIProcessor(BaseProcessor):
         with ThreadPoolExecutor(max_workers=self.size - 1) as executor:
             for item in cursor:
                 self.task_count.acquire()
-                f = executor.submit(self.submit_item, builder_id, next(cursor))
+                f = executor.submit(self.submit_item, builder_id, item)
 
     def submit_item(self, builder_id, data):
         """
@@ -242,10 +243,29 @@ class MultiprocProcessor(BaseProcessor):
 
         cursor = self.builder.get_items()
 
+        self.setup_pbars(cursor)
+
         self.setup_multithreading()
         self.put_tasks(cursor)
         self.clean_up_data()
         self.builder.finalize(cursor)
+
+    def setup_pbars(self,cursor):
+        """
+        Sets up progress bars 
+        """
+        total = None
+        if hasattr(cursor,"__len__"):
+            total = len(cursor)
+        elif hasattr(cursor,"count"):
+            total = cursor.count()
+        elif hasattr(self.builder,"total"):
+            total = self.builder.total
+
+        self.get_pbar = tqdm(cursor,desc="Get Items",total=total)
+        self.process_bar = tqdm(desc="Processing Item",total=total)
+        self.update_pbar = tqdm(desc="Updating Targets",total=total)
+
 
     def setup_multithreading(self):
         """
@@ -266,13 +286,15 @@ class MultiprocProcessor(BaseProcessor):
         # 1.) setup a process pool
         with ProcessPoolExecutor(self.num_workers) as executor:
             # 2.) Ensure we can get data
-            for item in cursor:
+            for item in self.get_pbar:
                 # 3.) Limit total number of queues tasks using a semaphore
                 self.task_count.acquire()    
                 # 4.) Submit a task to processing pool
                 f = executor.submit(self.builder.process_item, item)
                 # 5.) Add call back to update our data list
                 f.add_done_callback(self.update_data_callback)
+                # Reset TQDM timer to reflect get_items timing
+                pbar.unpause()
                 
     def clean_up_data(self):
         """
@@ -291,8 +313,8 @@ class MultiprocProcessor(BaseProcessor):
         """
         Call back to add data into a list in thread safe manner and signal other threads to add more tasks or update_targets
         """
-
         with self.update_data_condition:
+            self.update_pbar.update(1)
             self.data.append(future.result())
             self.update_data_condition.notify_all()
 
@@ -302,12 +324,15 @@ class MultiprocProcessor(BaseProcessor):
         """
         Thread to update targets periodically
         """
+        
         while self.run_update_targets:
             with self.update_data_condition:
                 self.update_data_condition.wait_for(lambda: not self.run_update_targets or len(self.data) > self.builder.chunk_size)
                 try:
                     if self.data is not None:
+                        self.update_pbar.unpause()
                         self.builder.update_targets(self.data)
+                        self.update_pbar.update(len(self.data))
                         self.data.clear()
                 except Exception as e:
                     self.logger.debug("Problem in updating targets in builder run: {}".format(e))
