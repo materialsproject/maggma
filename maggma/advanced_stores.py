@@ -10,6 +10,7 @@ from datetime import datetime
 
 from maggma.stores import Store, MongoStore
 from maggma.utils import lazy_substitute, substitute
+from pydash import get, set_
 from monty.json import jsanitize
 from monty.functools import lru_cache
 from pymongo import MongoClient
@@ -518,28 +519,17 @@ class JointStore(Store):
     def _get_store_by_name(self, name):
         return MongoStore.from_collection(self.collection.database[name])
 
-    def distinct(self, key, criteria=None, **kwargs):
-        # TODO: implement multi-key distinct, I think this can be implemented
-        #       similarly as standard multi-key distinct
-        # TODO: actually, this this needs to be implemented with an agg pipeline
-        #       to work for criteria filtering on sub-collections
+    def distinct(self, key, criteria=None, all_exist=True, **kwargs):
+        g_key = key if isinstance(key, list) else [key]
+        if all_exist:
+            criteria = criteria or {}
+            criteria.update({k: {"$exists": True} for k in g_key
+                             if k not in criteria})
+        cursor = self.groupby(g_key, criteria=criteria, **kwargs)
         if isinstance(key, list):
-            raise NotImplementedError("list-key distinct not implemented for "
-                                      "JointStore")
-        skey = key.split('.', 1)
-        if skey[0] in self.nonmaster_names:
-            return self._get_store_by_name(skey[0]).distinct(skey[1], **kwargs)
+            return [d['_id'] for d in cursor]
         else:
-            return self.collection.distinct(key, **kwargs)
-
-        if not isinstance(key, list):
-            key = [key]
-
-        pipeline = self._get_pipeline(key, criteria)
-        group_id = {k: 1 for k in key}
-        pipeline.append({"$group": {"_id": group_id}})
-        self.collection.aggregate(pipeline)
-        import nose; nose.tools.set_trace()
+            return [get(d['_id'], key) for d in cursor]
 
     def ensure_index(self):
         pass
@@ -578,6 +568,18 @@ class JointStore(Store):
         if properties:
             pipeline.append({"$project": properties})
         return pipeline
+
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        pipeline = self._get_pipeline(properties, criteria)
+        if not isinstance(keys, list):
+            keys = [keys]
+        group_id = {}
+        for key in keys:
+            set_(group_id, key, "${}".format(key))
+        pipeline.append({"$group": {"_id": group_id,
+                                    "docs": {"$push": "$$ROOT"}}})
+
+        return self.collection.aggregate(pipeline, **kwargs)
 
     def query_one(self, properties=None, criteria=None, **kwargs):
         """
