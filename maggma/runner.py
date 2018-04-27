@@ -149,12 +149,9 @@ class MPIProcessor(BaseProcessor):
         Submit tasks from cursor to MPI workers
         """
         with ThreadPoolExecutor(max_workers=self.size - 1) as executor:
-            while cursor:
+            for item in cursor:
                 self.task_count.acquire()
-                try:
-                    f = executor.submit(self.submit_item, builder_id, next(cursor))
-                except StopIteration as e:  # no more data
-                    cursor = None
+                f = executor.submit(self.submit_item, builder_id, next(cursor))
 
     def submit_item(self, builder_id, data):
         """
@@ -269,18 +266,14 @@ class MultiprocProcessor(BaseProcessor):
         # 1.) setup a process pool
         with ProcessPoolExecutor(self.num_workers) as executor:
             # 2.) Ensure we can get data
-            while cursor:
+            for item in cursor:
                 # 3.) Limit total number of queues tasks using a semaphore
-                self.task_count.acquire()
-                try:
-                    # 4.) Submit a task to processing pool
-                    f = executor.submit(self.builder.process_item, next(cursor))
-                    # 5.) Add call back to update our data list
-                    f.add_done_callback(self.update_data_callback)
-                except StopIteration as e:
-                    # 6.) No more data so stop itterating
-                    cursor = None
-
+                self.task_count.acquire()    
+                # 4.) Submit a task to processing pool
+                f = executor.submit(self.builder.process_item, item)
+                # 5.) Add call back to update our data list
+                f.add_done_callback(self.update_data_callback)
+                
     def clean_up_data(self):
         """
         Updates targets with remaining data and then cleans up the data collection
