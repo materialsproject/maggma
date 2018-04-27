@@ -1,8 +1,10 @@
-# Usage:
-# with multiprocessing:
-#    python runner_sample.py
-# with mpi(need mpi4py pacakge):
-#    mpiexec -n 5 python runner_sample.py
+"""
+ Usage:
+ with multiprocessing:
+    python runner_sample.py
+ with mpi(need mpi4py pacakge):
+    mpiexec -n 5 python runner_sample.py
+"""
 
 from maggma.stores import MemoryStore
 from maggma.builder import Builder

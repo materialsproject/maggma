@@ -6,12 +6,13 @@ import os
 import hvac
 import json
 import zlib
-
 from datetime import datetime
+
 from maggma.stores import Store, MongoStore
-from maggma.utils import lazy_substitute, substitute, unset
-from pymongo import DESCENDING, MongoClient
+from maggma.utils import lazy_substitute, substitute
 from monty.json import jsanitize
+from monty.functools import lru_cache
+from pymongo import MongoClient
 
 try:
     import boto3
@@ -19,7 +20,6 @@ try:
     boto_import = True
 except:
     boto_import = False
-
 
 
 class VaultStore(MongoStore):
@@ -84,7 +84,9 @@ class AliasingStore(Store):
         aliases (dict): dict of aliases of the form external key: internal key
         """
         self.store = store
+        # Given an external key tells what the internal key is
         self.aliases = aliases
+        # Given the internal key tells us what the external key is
         self.reverse_aliases = {v: k for k, v in aliases.items()}
         self.kwargs = kwargs
 
@@ -115,12 +117,37 @@ class AliasingStore(Store):
         substitute(d, self.aliases)
         return d
 
-    def distinct(self, key, criteria=None, **kwargs):
-        if key in self.aliases:
-            key = self.aliases[key]
+    def distinct(self, key, criteria=None, all_exist=True, **kwargs):
+        if isinstance(key, list):
+            criteria = criteria if criteria else {}
+            # Update to ensure keys are there
+            if all_exist:
+                criteria.update({k: {"$exists": True} for k in key if k not in criteria})
+
+            results = []
+            for d in self.groupby(key, properties=key, criteria=criteria):
+                results.append(d["_id"])
+            return results
+
+        else:
+            criteria = criteria if criteria else {}
+            lazy_substitute(criteria, self.reverse_aliases)
+            key = self.aliases[key] if key in self.aliases else key
+            return self.collection.distinct(key, filter=criteria, **kwargs)
+
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        # Convert to a list
+        keys = keys if isinstance(keys, list) else [keys]
+
+        # Make the aliasing transformations on keys
+        keys = [self.aliases[k] if k in self.aliases else k for k in keys]
+
+        # Update criteria and properties based on aliases
         criteria = criteria if criteria else {}
-        lazy_substitute(criteria, self.aliases)
-        return self.store.distinct(key, criteria, **kwargs)
+        substitute(properties, self.reverse_aliases)
+        lazy_substitute(criteria, self.reverse_aliases)
+
+        return self.store.groupby(keys=keys, properties=properties, criteria=criteria, **kwargs)
 
     def update(self, docs, update_lu=True, key=None):
         key = key if key else self.key
@@ -133,10 +160,78 @@ class AliasingStore(Store):
 
         self.store.update(docs, update_lu=update_lu, key=key)
 
-    def ensure_index(self, key, unique=False):
+    def ensure_index(self, key, unique=False, **kwargs):
         if key in self.aliases:
             key = self.aliases
-        return self.store.ensure_index(key, unique)
+        return self.store.ensure_index(key, unique, **kwargs)
+
+    def close(self):
+        self.store.close()
+
+    @property
+    def collection(self):
+        return self.store.collection
+
+    def connect(self, force_reset=False):
+        self.store.connect(force_reset=force_reset)
+
+
+class SandboxStore(Store):
+    """
+    Provides a sandboxed view to another store
+    """
+
+    def __init__(self, store, sandbox, exclusive=False):
+        """
+        store (Store): store to wrap sandboxing around
+        sandbox (string): the corresponding sandbox
+        exclusive (bool): whether to be exclusively in this sandbox or include global items
+        """
+        self.store = store
+        self.sandbox = sandbox
+        self.exclusive = exclusive
+        super().__init__(key=self.store.key,
+                         lu_field=self.store.lu_field,
+                         lu_type=self.store.lu_type,
+                         validator=self.store.validator)
+
+    @property
+    @lru_cache(maxsize=1)
+    def sbx_criteria(self):
+        if self.exclusive:
+            return {"sbxn": self.sandbox}
+        else:
+            return {"$or": [{"sbxn": {"$in": [self.sandbox]}},
+                            {"sbxn": {"$exists": False}}]}
+
+    def query(self, properties=None, criteria=None, **kwargs):
+        criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        return self.store.query(properties=properties, criteria=criteria, **kwargs)
+
+    def query_one(self, properties=None, criteria=None, **kwargs):
+        criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        return self.store.query_one(properties=properties, criteria=criteria, **kwargs)
+
+    def distinct(self, key, criteria=None, **kwargs):
+        criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        return self.store.distinct(key=key, criteria=criteria, **kwargs)
+
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+
+        return self.store.groupby(keys=keys, properties=properties, criteria=criteria, **kwargs)
+
+    def update(self, docs, update_lu=True, key=None):
+        for d in docs:
+            if "sbxn" in d:
+                d["sbxn"] = list(set(d["sbxn"] + [self.sandbox]))
+            else:
+                d["sbxn"] = [self.sandbox]
+
+        self.store.update(docs, update_lu=update_lu, key=key)
+
+    def ensure_index(self, key, unique=False, **kwargs):
+        return self.store.ensure_index(key, unique, **kwargs)
 
     def close(self):
         self.store.close()
@@ -202,7 +297,7 @@ class AmazonS3Store(Store):
                 against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
-        for f in self.index.find(filter=criteria, **kwargs):
+        for f in self.index.query(criteria=criteria, **kwargs):
             try:
                 data = self.s3_bucket.Object(f[self.key]).get()
             except botocore.exceptions.ClientError as e:
@@ -231,7 +326,7 @@ class AmazonS3Store(Store):
                 against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
-        f = self.index.find_one(filter=criteria, **kwargs)
+        f = self.index.query_one(criteria=criteria, **kwargs)
         if f:
             try:
                 data = self.s3_bucket.Object(f[self.key]).get()
@@ -253,7 +348,7 @@ class AmazonS3Store(Store):
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
         Function get to get all distinct values of a certain key in the
-        GridFS Store. This searches the .files collection for this data
+        AmazonS3 Store. This searches the index collection for this data
 
         Args:
             key (mongolike key or list of mongolike keys): key or keys
@@ -265,6 +360,27 @@ class AmazonS3Store(Store):
         """
         # Index is a store so it should have its own distinct function
         return self.index.distinct(key, filter=criteria, **kwargs)
+
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        """
+        Simple grouping function that will group documents
+        by keys. Only searches the index collection
+
+        Args:
+            keys (list or string): fields to group documents
+            properties (list): properties to return in grouped documents
+            criteria (dict): filter for documents to group
+            allow_disk_use (bool): whether to allow disk use in aggregation
+
+        Returns:
+            command cursor corresponding to grouped documents
+
+            elements of the command cursor have the structure:
+            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
+             'docs': [list_of_documents corresponding to key values]}
+
+        """
+        self.index.groupby(keys, properties, criteria, **kwargs)
 
     def ensure_index(self, key, unique=False):
         """
@@ -284,14 +400,15 @@ class AmazonS3Store(Store):
         now = datetime.now()
         search_docs = []
         for d in docs:
-            search_doc = {}
             if isinstance(key, list):
                 search_doc = {k: d[k] for k in key}
             elif key:
                 search_doc = {key: d[key]}
+            else:
+                search_doc = {}
 
             # Always include our main key
-            search_doc = {self.key: d[self.key]}
+            search_doc[self.key] = d[self.key]
 
             # Remove MongoDB _id from search
             if "_id" in search_doc:
@@ -299,8 +416,8 @@ class AmazonS3Store(Store):
 
             # Add a timestamp
             if update_lu:
-                search_doc[self.lu_key] = now
-                d[self.lu_key] = now
+                search_doc[self.lu_field] = now
+                d[self.lu_field] = now
 
             data = json.dumps(jsanitize(d)).encode()
 
@@ -317,7 +434,7 @@ class AmazonS3Store(Store):
 
     @property
     def last_updated(self):
-        self.index.last_updated
+        return self.index.last_updated
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
@@ -329,7 +446,7 @@ class AmazonS3Store(Store):
             targets (list): A list of Stores
 
         """
-        self.index.last_updated(targets)
+        self.index.lu_filter(targets)
 
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
@@ -381,27 +498,8 @@ class JointStore(Store):
         return list(set(self.collection_names) - {self.master})
 
     def query(self, properties=None, criteria=None, **kwargs):
-        pipeline = []
-        for cname in self.nonmaster_names:
-            pipeline.append({
-                "$lookup": {"from": cname, "localField": self.key,
-                            "foreignField": self.key, "as": cname}})
-            pipeline.append({
-                "$unwind": {"path": "${}".format(cname),
-                            "preserveNullAndEmptyArrays": True}})
-
-        # Do projection for max last_updated
-        lu_proj = {self.lu_field: {"$max": ["${}.{}".format(cname, self.lu_field)
-                                            for cname in self.collection_names]}}
-        pipeline.append({"$addFields": lu_proj})
-
-        if criteria:
-            pipeline.append({"$match": criteria})
-        if isinstance(properties, list):
-            properties = {k: 1 for k in properties}
-        if properties:
-            pipeline.append({"$project": properties})
-        return self.collection.aggregate(pipeline)
+        pipeline = self._get_pipeline(properties, criteria)
+        return self.collection.aggregate(pipeline, **kwargs)
 
     @property
     def last_updated(self):
@@ -434,9 +532,19 @@ class JointStore(Store):
         else:
             return self.collection.distinct(key, **kwargs)
 
+        if not isinstance(key, list):
+            key = [key]
+
+        pipeline = self._get_pipeline(key, criteria)
+        group_id = {k: 1 for k in key}
+        pipeline.append({"$group": {"_id": group_id}})
+        self.collection.aggregate(pipeline)
+        import nose; nose.tools.set_trace()
+
     def ensure_index(self):
         pass
 
+    # TODO: probably delete this, unless $limit is better
     def _get_pipeline(self, properties=None, criteria=None):
         """
         Gets the aggregation pipeline for query and query_one

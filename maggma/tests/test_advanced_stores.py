@@ -4,10 +4,12 @@ Tests for advanced stores
 """
 import os
 import unittest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+import mongomock.collection
 
 from maggma.stores import MemoryStore, MongoStore
 from maggma.advanced_stores import *
+import zlib
 
 module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
 
@@ -72,6 +74,46 @@ class TestVaultStore(unittest.TestCase):
             self._create_vault_store()
 
 
+class TestS3Store(unittest.TestCase):
+
+    def setUp(self):
+        self.index = MemoryStore("index'")
+        with patch("boto3.resource") as mock_resource:
+            mock_resource.return_value = MagicMock()
+            mock_resource("s3").list_buckets.return_value = ["bucket1", "bucket2"]
+            self.s3store = AmazonS3Store(self.index, "bucket1")
+            self.s3store.connect()
+
+    def test_qeuery_one(self):
+        self.s3store.s3_bucket.Object.return_value = MagicMock()
+        self.s3store.s3_bucket.Object().get.return_value = '{"task_id": "mp-1", "data": "asd"}'
+        self.index.update([{"task_id": "mp-1"}])
+        self.assertEqual(self.s3store.query_one(criteria={"task_id": "mp-2"}), None)
+        self.assertEqual(self.s3store.query_one(criteria={"task_id": "mp-1"})["data"], "asd")
+
+        self.s3store.s3_bucket.Object().get.return_value = zlib.compress('{"task_id": "mp-3", "data": "sdf"}'.encode())
+        self.index.update([{"task_id": "mp-3", "compression": "zlib"}])
+        self.assertEqual(self.s3store.query_one(criteria={"task_id": "mp-3"})["data"], "sdf")
+
+    def test_update(self):
+
+        self.s3store.update([{"task_id": "mp-1", "data": "asd"}])
+        self.assertEqual(self.s3store.s3_bucket.put_object.call_count, 1)
+        called_kwargs = self.s3store.s3_bucket.put_object.call_args[1]
+        self.assertEqual(self.s3store.s3_bucket.put_object.call_count, 1)
+        self.assertEqual(called_kwargs["Key"], "mp-1")
+        self.assertTrue(len(called_kwargs["Body"]) > 0)
+        self.assertEqual(called_kwargs["Metadata"]["task_id"], "mp-1")
+
+    def test_update_compression(self):
+        self.s3store.update([{"task_id": "mp-1", "data": "asd"}], compress=True)
+        self.assertEqual(self.s3store.s3_bucket.put_object.call_count, 1)
+        called_kwargs = self.s3store.s3_bucket.put_object.call_args[1]
+        self.assertEqual(self.s3store.s3_bucket.put_object.call_count, 1)
+        self.assertEqual(called_kwargs["Key"], "mp-1")
+        self.assertTrue(len(called_kwargs["Body"]) > 0)
+        self.assertEqual(called_kwargs["Metadata"]["task_id"], "mp-1")
+        self.assertEqual(called_kwargs["Metadata"]["compression"], "zlib")
 
 
 class TestAliasingStore(unittest.TestCase):
@@ -129,6 +171,55 @@ class TestAliasingStore(unittest.TestCase):
         self.assertTrue(d is None)
 
 
+class TestSandboxStore(unittest.TestCase):
+
+    def setUp(self):
+        self.store = MemoryStore()
+        self.sandboxstore = SandboxStore(self.store, sandbox="test")
+
+    def test_connect(self):
+        self.assertEqual(self.sandboxstore.collection, None)
+        self.sandboxstore.connect()
+        self.assertIsInstance(self.sandboxstore.collection, mongomock.collection.Collection)
+
+    def test_query(self):
+        self.sandboxstore.connect()
+        self.sandboxstore.collection.insert_one({"a": 1, "b": 2, "c": 3})
+        self.assertEqual(self.sandboxstore.query_one(properties=["a"])['a'], 1)
+
+        self.sandboxstore.collection.insert_one({"a": 2, "b": 2, "sbxn": ["test"]})
+        self.assertEqual(self.sandboxstore.query_one(properties=["b"],
+                                                     criteria={"a": 2})['b'], 2)
+
+        self.sandboxstore.collection.insert_one({"a": 3, "b": 2, "sbxn": ["not_test"]})
+        self.assertEqual(self.sandboxstore.query_one(properties=["c"],
+                                                   criteria={"a": 3}), None)
+
+    def test_distinct(self):
+        self.sandboxstore.connect()
+        self.sandboxstore.collection.insert_one({"a": 1, "b": 2, "c": 3})
+        self.assertEqual(self.sandboxstore.distinct("a"), [1])
+
+        self.sandboxstore.collection.insert_one({"a": 4, "d": 5, "e": 6, "sbxn": ["test"]})
+        self.assertEqual(self.sandboxstore.distinct("a"), [1, 4])
+
+        self.sandboxstore.collection.insert_one({"a": 7, "d": 8, "e": 9, "sbxn": ["not_test"]})
+        self.assertEqual(self.sandboxstore.distinct("a"), [1, 4])
+
+    def test_update(self):
+        self.sandboxstore.connect()
+        self.sandboxstore.update([{"e": 6, "d": 4}], key="e")
+        self.assertEqual(self.sandboxstore.query(criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
+        self.assertEqual(self.sandboxstore.collection.find_one({"e": 6})["sbxn"], ["test"])
+        self.sandboxstore.update([{"e": 7, "sbxn": ["core"]}], key="e")
+        self.assertEqual(set(self.sandboxstore.query_one(
+            criteria={"e": 7})["sbxn"]), {"test", "core"})
+
+    def tearDown(self):
+        if self.sandboxstore.collection:
+            self.sandboxstore.collection.drop()
+
+
 class JointStoreTest(unittest.TestCase):
     def setUp(self):
         self.jointstore = JointStore("maggma_test", ["test1", "test2"])
@@ -177,6 +268,7 @@ class JointStoreTest(unittest.TestCase):
     def test_last_updated(self):
         # TODO: test for last_updated
         pass
+
 
 if __name__ == "__main__":
     unittest.main()
