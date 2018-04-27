@@ -3,7 +3,6 @@
 Tests for the base Stores
 """
 import os
-import glob
 import unittest
 import numpy as np
 import mongomock.collection
