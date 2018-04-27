@@ -258,15 +258,19 @@ class JointStoreTest(unittest.TestCase):
     def test_distinct(self):
         # TODO: test for distinct
         dyour_prop = self.jointstore.distinct("test2.your_prop")
-        self.assertArrayEqual(sorted(dyour_prop), [k + 3 for k in range(5)])
+        self.assertEqual(set(dyour_prop), {k + 3 for k in range(5)})
         dmy_prop = self.jointstore.distinct("my_prop")
-        self.assertArrayEqual(sorted(dmy_prop), [k + 1 for k in range(10)])
+        self.assertEqual(set(dmy_prop), {k + 1 for k in range(10)})
         # TODO: this test should eventually work
-        # dmy_prop_cond = self.jointstore.distinct("my_prop", {"test2.your_prop": {"$gte": 5}})
-        # self.assertArrayEqual(dmy_prop_cond, [7, 8, 9])
+        dmy_prop_cond = self.jointstore.distinct("my_prop", {"test2.your_prop": {"$gte": 5}})
+        self.assertEqual(set(dmy_prop_cond), {5, 7, 9})
 
     def test_last_updated(self):
         # TODO: test for last_updated
+        pass
+
+    def test_groupby(self):
+        #TODO: test for groupby
         pass
 
 
