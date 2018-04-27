@@ -345,3 +345,150 @@ class AmazonS3Store(Store):
             index_docs.append(file.metadata)
 
         self.index.update(index_docs)
+
+
+class JointStore(Store):
+    """Store corresponding to multiple collections, uses lookup to join"""
+    def __init__(self, database, collection_names, host="localhost",
+                 port=27017, username="", password="", master=None, **kwargs):
+        self.database = database
+        self.collection_names = collection_names
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self._collection = None
+        self.master = master or collection_names[0]
+        self.kwargs = kwargs
+        super(JointStore, self).__init__(**kwargs)
+
+    def connect(self, force_reset=False):
+        conn = MongoClient(self.host, self.port)
+        db = conn[self.database]
+        if self.username is not "":
+            db.authenticate(self.username, self.password)
+        self._collection = db[self.master]
+
+    def close(self):
+        self.collection.database.client.close()
+
+    @property
+    def collection(self):
+        return self._collection
+
+    @property
+    def nonmaster_names(self):
+        return list(set(self.collection_names) - {self.master})
+
+    def query(self, properties=None, criteria=None, **kwargs):
+        pipeline = []
+        for cname in self.nonmaster_names:
+            pipeline.append({
+                "$lookup": {"from": cname, "localField": self.key,
+                            "foreignField": self.key, "as": cname}})
+            pipeline.append({
+                "$unwind": {"path": "${}".format(cname),
+                            "preserveNullAndEmptyArrays": True}})
+
+        # Do projection for max last_updated
+        lu_proj = {self.lu_field: {"$max": ["${}.{}".format(cname, self.lu_field)
+                                            for cname in self.collection_names]}}
+        pipeline.append({"$addFields": lu_proj})
+
+        if criteria:
+            pipeline.append({"$match": criteria})
+        if isinstance(properties, list):
+            properties = {k: 1 for k in properties}
+        if properties:
+            pipeline.append({"$project": properties})
+        return self.collection.aggregate(pipeline)
+
+    @property
+    def last_updated(self):
+        lus = []
+        for cname in self.collection_names:
+            lu = MongoStore.from_collection(
+                self.collection.database[cname],
+                lu_field=self.lu_field).last_updated
+            lus.append(lu)
+        return max(lus)
+
+    def update(self, docs, update_lu=True, key=None):
+        # TODO: implement update?
+        raise NotImplementedError("No update method for JointStore")
+
+    def _get_store_by_name(self, name):
+        return MongoStore.from_collection(self.collection.database[name])
+
+    def distinct(self, key, criteria=None, **kwargs):
+        # TODO: implement multi-key distinct, I think this can be implemented
+        #       similarly as standard multi-key distinct
+        # TODO: actually, this this needs to be implemented with an agg pipeline
+        #       to work for criteria filtering on sub-collections
+        if isinstance(key, list):
+            raise NotImplementedError("list-key distinct not implemented for "
+                                      "JointStore")
+        skey = key.split('.', 1)
+        if skey[0] in self.nonmaster_names:
+            return self._get_store_by_name(skey[0]).distinct(skey[1], **kwargs)
+        else:
+            return self.collection.distinct(key, **kwargs)
+
+    def ensure_index(self):
+        pass
+
+    def _get_pipeline(self, properties=None, criteria=None):
+        """
+        Gets the aggregation pipeline for query and query_one
+
+        Args:
+            properties: properties to be returned
+            criteria: criteria to filter by
+
+        Returns:
+            list of aggregation operators
+        """
+        pipeline = []
+        for cname in self.collection_names:
+            if cname is not self.master:
+                pipeline.append({
+                    "$lookup": {"from": cname, "localField": self.key,
+                                "foreignField": self.key, "as": cname}})
+                pipeline.append({
+                    "$unwind": {"path": "${}".format(cname),
+                                "preserveNullAndEmptyArrays": True}})
+
+        # Do projection for max last_updated
+        lu_proj = {self.lu_field: {"$max": ["${}.{}".format(cname, self.lu_field)
+                                            for cname in self.collection_names]}}
+        pipeline.append({"$addFields": lu_proj})
+
+        if criteria:
+            pipeline.append({"$match": criteria})
+        if isinstance(properties, list):
+            properties = {k: 1 for k in properties}
+        if properties:
+            pipeline.append({"$project": properties})
+        return pipeline
+
+    def query_one(self, properties=None, criteria=None, **kwargs):
+        """
+        Get one document
+
+        Args:
+            properties([str] or {}): properties to return in query
+            criteria ({}): filter for matching
+            **kwargs: kwargs for collection.aggregate
+
+        Returns:
+            single document
+        """
+        # TODO: maybe adding explicit limit in agg pipeline is better as below?
+        # pipeline = self._get_pipeline(properties, criteria)
+        # pipeline.append({"$limit": 1})
+        query = self.query(properties, criteria, **kwargs)
+        try:
+            doc = query.next()
+            return doc
+        except StopIteration:
+            return None
