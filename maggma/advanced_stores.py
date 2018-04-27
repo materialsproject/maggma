@@ -5,12 +5,21 @@ Advanced Stores for behavior outside normal access patterns
 import os
 import hvac
 import json
-import boto3
-import botocore
+import zlib
+
 from datetime import datetime
 from maggma.stores import Store, MongoStore
 from maggma.utils import lazy_substitute, substitute, unset
-from pymongo import DESCENDING
+from pymongo import DESCENDING, MongoClient
+from monty.json import jsanitize
+
+try:
+    import boto3
+    import botocore
+    boto_import = True
+except:
+    boto_import = False
+
 
 
 class VaultStore(MongoStore):
@@ -153,6 +162,9 @@ class AmazonS3Store(Store):
             index (Store): a store to use to index the S3 Bucket
             bucket (str) : name of the bucket
         """
+        if not boto_import:
+            raise ValueError("boto not available, please install boto3 to "
+                             "use AmazonS3Store")
         self.index = index
         self.bucket = bucket
         self.s3 = None
@@ -161,10 +173,6 @@ class AmazonS3Store(Store):
         kwargs["key"] = index.key
         super(AmazonS3Store, self).__init__(**kwargs)
 
-    @property
-    def collection(self):
-        return self.index
-
     def connect(self, force_reset=False):
         self.index.connect(force_reset=force_reset)
         if not self.s3:
@@ -172,7 +180,7 @@ class AmazonS3Store(Store):
             # TODO: Provide configuration variable to create bucket if not present
             if self.bucket not in self.s3.list_buckets():
                 raise Exception("Bucket not present on AWS: {}".format(self.bucket))
-            self.s3_bucket = s3.Bucket(self.bucket)
+            self.s3_bucket = self.s3.Bucket(self.bucket)
 
     def close(self):
         self.index.close()
