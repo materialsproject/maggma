@@ -128,5 +128,55 @@ class TestAliasingStore(unittest.TestCase):
         substitute(d, aliases)
         self.assertTrue(d is None)
 
+
+class JointStoreTest(unittest.TestCase):
+    def setUp(self):
+        self.jointstore = JointStore("maggma_test", ["test1", "test2"])
+        self.jointstore.connect()
+        self.jointstore.collection.drop()
+        self.jointstore.collection.insert_many([{"task_id": k, "my_prop": k+1}
+                                                for k in range(10)])
+        self.jointstore.collection.database["test2"].drop()
+        self.jointstore.collection.database["test2"].insert_many(
+            [{"task_id": 2*k, "your_prop": k+3} for k in range(5)])
+
+    def test_query(self):
+        # Test query all
+        docs = list(self.jointstore.query())
+        self.assertEqual(len(docs), 10)
+        docs_w_field = [d for d in docs if d.get("test2")]
+        self.assertEqual(len(docs_w_field), 5)
+        docs_w_field = sorted(docs_w_field, key=lambda x: x['task_id'])
+        self.assertEqual(docs_w_field[0]['test2']['your_prop'], 3)
+        self.assertEqual(docs_w_field[0]['task_id'], 0)
+        self.assertEqual(docs_w_field[0]['my_prop'], 1)
+
+    def test_query_one(self):
+        doc = self.jointstore.query_one()
+        self.assertEqual(doc['my_prop'], doc['task_id'] + 1)
+        # Test limit properties
+        doc = self.jointstore.query_one(['test2', 'task_id'])
+        self.assertEqual(doc['test2']['your_prop'], doc['task_id'] + 3)
+        self.assertIsNone(doc.get("my_prop"))
+        # Test criteria
+        doc = self.jointstore.query_one(criteria={"task_id": {"$gte": 10}})
+        self.assertIsNone(doc)
+        doc = self.jointstore.query_one(criteria={"test2.your_prop": {"$gt": 6}})
+        self.assertEqual(doc['task_id'], 8)
+
+    def test_distinct(self):
+        # TODO: test for distinct
+        dyour_prop = self.jointstore.distinct("test2.your_prop")
+        self.assertArrayEqual(sorted(dyour_prop), [k + 3 for k in range(5)])
+        dmy_prop = self.jointstore.distinct("my_prop")
+        self.assertArrayEqual(sorted(dmy_prop), [k + 1 for k in range(10)])
+        # TODO: this test should eventually work
+        # dmy_prop_cond = self.jointstore.distinct("my_prop", {"test2.your_prop": {"$gte": 5}})
+        # self.assertArrayEqual(dmy_prop_cond, [7, 8, 9])
+
+    def test_last_updated(self):
+        # TODO: test for last_updated
+        pass
+
 if __name__ == "__main__":
     unittest.main()
