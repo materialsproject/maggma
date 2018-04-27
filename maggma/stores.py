@@ -13,13 +13,13 @@ import pymongo
 import gridfs
 from itertools import groupby
 from operator import itemgetter
-from pymongo import MongoClient, DESCENDING
+from pymongo import MongoClient
 from pydash import identity
 
 from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
 from monty.serialization import loadfn
-from maggma.utils import LU_KEY_ISOFORMAT
+from maggma.utils import LU_KEY_ISOFORMAT, put_mongolike
 
 
 class Store(MSONable, metaclass=ABCMeta):
@@ -357,7 +357,9 @@ class MongoStore(Mongolike, Store):
         if isinstance(keys, str):
             keys = [keys]
 
-        group_id = {key: "${}".format(key) for key in keys}
+        group_id = {}
+        for key in keys:
+            group_id.update(put_mongolike(key, "${}".format(key)))
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
         return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
