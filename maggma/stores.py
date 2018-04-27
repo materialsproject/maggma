@@ -14,7 +14,7 @@ import gridfs
 from itertools import groupby
 from operator import itemgetter
 from pymongo import MongoClient
-from pydash import identity
+from pydash import identity, set_
 
 from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
@@ -359,7 +359,7 @@ class MongoStore(Mongolike, Store):
 
         group_id = {}
         for key in keys:
-            group_id.update(put_mongolike(key, "${}".format(key)))
+            set_(group_id, key, "${}".format(key))
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
         return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
