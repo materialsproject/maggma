@@ -213,7 +213,8 @@ class MPIProcessor(BaseProcessor):
         """
         while self.run_update_targets:
             with self.update_data_condition:
-                self.update_data_condition.wait_for(lambda: not self.run_update_targets or len(self.data) > self.builder.chunk_size)
+                self.update_data_condition.wait_for(
+                    lambda: not self.run_update_targets or len(self.data) > self.builder.chunk_size)
                 try:
                     self.builder.update_targets(self.data)
                     self.data.clear()
@@ -225,6 +226,7 @@ class MultiprocProcessor(BaseProcessor):
     """
     Processor to run builders using python multiprocessing
     """
+
     def __init__(self, builders, num_workers=None):
         # multiprocessing only if mpi is not used, no mixing
         self.num_workers = num_workers
@@ -251,27 +253,26 @@ class MultiprocProcessor(BaseProcessor):
         self.builder.finalize(cursor)
         self.cleanup_pbars()
 
-    def setup_pbars(self,cursor):
+    def setup_pbars(self, cursor):
         """
         Sets up progress bars 
         """
         total = None
-        if hasattr(cursor,"__len__"):
+        if hasattr(cursor, "__len__"):
             total = len(cursor)
-        elif hasattr(cursor,"count"):
+        elif hasattr(cursor, "count"):
             total = cursor.count()
-        elif hasattr(self.builder,"total"):
+        elif hasattr(self.builder, "total"):
             total = self.builder.total
 
-        self.get_pbar = tqdm(cursor,desc="Get Items",total=total)
-        self.process_pbar = tqdm(desc="Processing Item",total=total)
-        self.update_pbar = tqdm(desc="Updating Targets",total=total)
+        self.get_pbar = tqdm(cursor, desc="Get Items", total=total)
+        self.process_pbar = tqdm(desc="Processing Item", total=total)
+        self.update_pbar = tqdm(desc="Updating Targets", total=total)
 
     def cleanup_pbars(self):
         self.get_pbar.close()
         self.process_pbar.close()
         self.update_pbar.close()
-
 
     def setup_multithreading(self):
         """
@@ -294,12 +295,12 @@ class MultiprocProcessor(BaseProcessor):
             # 2.) Loop over every item wrapped in a tqdm bar
             for item in self.get_pbar:
                 # 3.) Limit total number of queues tasks using a semaphore
-                self.task_count.acquire()    
+                self.task_count.acquire()
                 # 4.) Submit a task to processing pool
                 f = executor.submit(self.builder.process_item, item)
                 # 5.) Add call back to update our data list
                 f.add_done_callback(self.update_data_callback)
-                
+
     def clean_up_data(self):
         """
         Updates targets with remaining data and then cleans up the data collection
@@ -328,10 +329,11 @@ class MultiprocProcessor(BaseProcessor):
         """
         Thread to update targets periodically
         """
-        
+
         while self.run_update_targets:
             with self.update_data_condition:
-                self.update_data_condition.wait_for(lambda: not self.run_update_targets or len(self.data) > self.builder.chunk_size)
+                self.update_data_condition.wait_for(
+                    lambda: not self.run_update_targets or len(self.data) > self.builder.chunk_size)
                 try:
                     if self.data is not None:
                         self.update_pbar.unpause()
@@ -343,6 +345,7 @@ class MultiprocProcessor(BaseProcessor):
 
 
 class Runner(MSONable):
+
     def __init__(self, builders, num_workers=None):
         """
         Initialize with a list of builders
