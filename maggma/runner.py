@@ -249,6 +249,7 @@ class MultiprocProcessor(BaseProcessor):
         self.put_tasks(cursor)
         self.clean_up_data()
         self.builder.finalize(cursor)
+        self.cleanup_pbars()
 
     def setup_pbars(self,cursor):
         """
@@ -263,8 +264,13 @@ class MultiprocProcessor(BaseProcessor):
             total = self.builder.total
 
         self.get_pbar = tqdm(cursor,desc="Get Items",total=total)
-        self.process_bar = tqdm(desc="Processing Item",total=total)
+        self.process_pbar = tqdm(desc="Processing Item",total=total)
         self.update_pbar = tqdm(desc="Updating Targets",total=total)
+
+    def cleanup_pbars(self):
+        self.get_pbar.close()
+        self.process_pbar.close()
+        self.update_pbar.close()
 
 
     def setup_multithreading(self):
@@ -285,7 +291,7 @@ class MultiprocProcessor(BaseProcessor):
         """
         # 1.) setup a process pool
         with ProcessPoolExecutor(self.num_workers) as executor:
-            # 2.) Ensure we can get data
+            # 2.) Loop over every item wrapped in a tqdm bar
             for item in self.get_pbar:
                 # 3.) Limit total number of queues tasks using a semaphore
                 self.task_count.acquire()    
@@ -293,8 +299,6 @@ class MultiprocProcessor(BaseProcessor):
                 f = executor.submit(self.builder.process_item, item)
                 # 5.) Add call back to update our data list
                 f.add_done_callback(self.update_data_callback)
-                # Reset TQDM timer to reflect get_items timing
-                pbar.unpause()
                 
     def clean_up_data(self):
         """
@@ -314,7 +318,7 @@ class MultiprocProcessor(BaseProcessor):
         Call back to add data into a list in thread safe manner and signal other threads to add more tasks or update_targets
         """
         with self.update_data_condition:
-            self.update_pbar.update(1)
+            self.process_pbar.update(1)
             self.data.append(future.result())
             self.update_data_condition.notify_all()
 
