@@ -70,6 +70,7 @@ class TestMultiprocProcessor(unittest.TestCase):
         proc.builder = self.builder
         proc.update_data_condition = MagicMock()
         proc.data = MagicMock()
+        proc.update_pbar = MagicMock()
         proc.run_update_targets = MagicMock()
         proc.run_update_targets.__bool__.side_effect = [True,True,True,False]
 
@@ -87,7 +88,7 @@ class TestMultiprocProcessor(unittest.TestCase):
         proc.data = MagicMock()
         proc.task_count = MagicMock()
         proc.update_data_condition = MagicMock()
-
+        proc.process_pbar = MagicMock()
         proc.update_data_callback(future)
 
         future.result.assert_called()
@@ -117,8 +118,8 @@ class TestMultiprocProcessor(unittest.TestCase):
             proc.builder = MagicMock()
             proc.task_count = MagicMock()
             cursor = [True,True,True,False]
-
-            proc.put_tasks(cursor)
+            proc.get_pbar = cursor
+            proc.put_tasks()
             proc.task_count.acquire.assert_called()
 
 

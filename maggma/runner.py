@@ -255,7 +255,7 @@ class MultiprocProcessor(BaseProcessor):
 
     def setup_pbars(self, cursor):
         """
-        Sets up progress bars 
+        Sets up progress bars
         """
         total = None
         if hasattr(cursor, "__len__"):
@@ -270,6 +270,9 @@ class MultiprocProcessor(BaseProcessor):
         self.update_pbar = tqdm(desc="Updating Targets", total=total)
 
     def cleanup_pbars(self):
+        """
+        Cleans up the TQDM bars
+        """
         self.get_pbar.close()
         self.process_pbar.close()
         self.update_pbar.close()
@@ -286,7 +289,7 @@ class MultiprocProcessor(BaseProcessor):
         self.update_targets_thread = Thread(target=self.update_targets)
         self.update_targets_thread.start()
 
-    def put_tasks(self, cursor):
+    def put_tasks(self):
         """
         Processes all items from builder using a pool of processes
         """

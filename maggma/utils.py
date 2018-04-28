@@ -12,9 +12,11 @@ import tqdm
 
 
 class TqdmLoggingHandler(logging.Handler):
-
+    """
+    Helper to enable routing tqdm progress around logging
+    """
     def __init__(self, level=logging.NOTSET):
-        super(self.__class__, self).__init__(level)
+        super().__init__(level)
 
     def emit(self, record):
         try:
