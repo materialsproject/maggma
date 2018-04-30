@@ -56,7 +56,7 @@ class TestMultiprocProcessor(unittest.TestCase):
         self.assertEqual(proc.num_workers, 3)
 
     def test_setup_multithreading(self):
-
+        
         with patch("maggma.runner.Thread") as mock_thread:
             proc = MultiprocProcessor([self.builder], num_workers=3)
             proc.builder = proc.builders[0]
@@ -130,6 +130,7 @@ class TestMPIProcessor(unittest.TestCase):
         builder.get_items.return_value = iter(range(10))
         builder.process_item.side_effect = range(10, 20)
         builder.from_dict.return_value = {}
+        builder.setup_pbars([])
 
         self.builder = builder
         self.get_mpi_patcher = patch("maggma.runner.get_mpi")
@@ -161,6 +162,7 @@ class TestMPIProcessor(unittest.TestCase):
         proc.data = MagicMock()
         proc.run_update_targets = MagicMock()
         proc.run_update_targets.__bool__.side_effect = [True,True,True,False]
+        proc.setup_pbars([])
 
         proc.update_targets()
         proc.run_update_targets.__bool__.assert_called()
@@ -196,6 +198,7 @@ class TestMPIProcessor(unittest.TestCase):
         proc.update_data_condition = MagicMock()
         proc.data = MagicMock()
         proc.task_count = MagicMock()
+        proc.setup_pbars([])
         self.comm.recv.return_value = {"type": "return", "return": "data"}
 
         proc.submit_item(0, {})
@@ -215,7 +218,8 @@ class TestMPIProcessor(unittest.TestCase):
             cursor = [True,True,True,False]
 
 
-            proc.put_tasks(cursor, 0)
+            proc.setup_pbars(cursor)
+            proc.put_tasks(0)
             proc.task_count.acquire.assert_called()
             mock_executor.return_value.__enter__.assert_called()
             proc.task_count.acquire.assert_called()

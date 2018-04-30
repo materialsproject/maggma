@@ -120,11 +120,13 @@ class MPIProcessor(BaseProcessor):
 
         cursor = self.builder.get_items()
 
+        self.setup_pbars(cursor)
         self.setup_multithreading()
-        self.put_tasks(cursor, builder_id)
+        self.put_tasks(builder_id)
         self.clean_up_workers()
         self.clean_up_data()
         self.builder.finalize(cursor)
+        self.cleanup_pbars()
 
     def process_worker(self):
         """
@@ -145,13 +147,41 @@ class MPIProcessor(BaseProcessor):
             elif packet["type"] == "shutdown":
                 is_valid = False
 
-    def put_tasks(self, cursor, builder_id):
+    def setup_pbars(self, cursor):
+        """
+        Sets up progress bars
+        """
+        total = None
+        if hasattr(cursor, "__len__"):
+            total = len(cursor)
+        elif hasattr(cursor, "count"):
+            total = cursor.count()
+        elif hasattr(self.builder, "total"):
+            total = self.builder.total
+
+        self.get_pbar = tqdm(cursor, desc="Get Items", total=total)
+        self.process_pbar = tqdm(desc="Processing Item", total=total)
+        self.update_pbar = tqdm(desc="Updating Targets", total=total)
+
+    def cleanup_pbars(self):
+        """
+        Cleans up the TQDM bars
+        """
+        self.get_pbar.close()
+        self.process_pbar.close()
+        self.update_pbar.close()
+
+    def put_tasks(self, builder_id):
         """
         Submit tasks from cursor to MPI workers
         """
+        # 1.) Setup thread pool
         with ThreadPoolExecutor(max_workers=self.size - 1) as executor:
-            for item in cursor:
+            # 2.) Loop over every item wrapped in a tqdm bar
+            for item in self.get_pbar:
+                # 3.) Limit total number of queued tasks using a semaphore
                 self.task_count.acquire()
+                # 4.) Submit the item to a worker
                 f = executor.submit(self.submit_item, builder_id, item)
 
     def submit_item(self, builder_id, data):
@@ -179,11 +209,15 @@ class MPIProcessor(BaseProcessor):
             else:
                 self.task_count.release()
                 return  # don't know what happened here, just quit
-        # 6.) Save data
+
+        # 6.) Update process progress bar
+        self.process_pbar.update(1)
+
+        # 7.) Save data
         with self.update_data_condition:
             self.data.append(result)
             self.update_data_condition.notify_all()
-        # 7.) Return rank
+        # 8.) Return rank
         self.ranks.append(mpi_rank)
 
     def clean_up_workers(self):
@@ -217,6 +251,7 @@ class MPIProcessor(BaseProcessor):
                     lambda: not self.run_update_targets or len(self.data) > self.builder.chunk_size)
                 try:
                     self.builder.update_targets(self.data)
+                    self.update_pbar.update(len(self.data))
                     self.data.clear()
                 except Exception as e:
                     self.logger.debug("Problem in updating targets in builder run: {}".format(e))
@@ -248,7 +283,7 @@ class MultiprocProcessor(BaseProcessor):
         self.setup_pbars(cursor)
 
         self.setup_multithreading()
-        self.put_tasks(cursor)
+        self.put_tasks()
         self.clean_up_data()
         self.builder.finalize(cursor)
         self.cleanup_pbars()
