@@ -21,7 +21,7 @@ from pydash import identity
 from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
 from monty.serialization import loadfn
-from maggma.utils import LU_KEY_ISOFORMAT
+from maggma.utils import LU_KEY_ISOFORMAT, confirm_field_index
 
 
 class Store(MSONable, metaclass=ABCMeta):
@@ -97,7 +97,13 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def ensure_index(self, key, unique=False, **kwargs):
         """
-        Ensure index gets assigned
+        Tries to create and index
+        Args:
+            key (string): single key to index
+            unique (bool): Whether or not this index contains only unique keys
+
+        Returns:
+            bool indicating if the index exists/was created
         """
         pass
 
@@ -212,7 +218,11 @@ class Mongolike(object):
         """
         if "background" not in kwargs:
             kwargs["background"] = True
-        return self.collection.create_index(key, unique=unique, **kwargs)
+
+        if confirm_field_index(self.collection,key):
+            return True
+        else:
+            return self.collection.create_index(key, unique=unique, **kwargs)
 
     def update(self, docs, update_lu=True, key=None, **kwargs):
         """

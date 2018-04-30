@@ -15,6 +15,7 @@ class TqdmLoggingHandler(logging.Handler):
     """
     Helper to enable routing tqdm progress around logging
     """
+
     def __init__(self, level=logging.NOTSET):
         super().__init__(level)
 
@@ -27,6 +28,29 @@ class TqdmLoggingHandler(logging.Handler):
             raise
         except:
             self.handleError(record)
+
+
+def confirm_field_index(store, fields):
+    """Confirm index on store for at least one of fields
+
+    One can't simply ensure an index exists via
+    `store.collection.create_index` because a Builder must assume
+    read-only access to source Stores. The MongoDB `read` built-in role
+    does not include the `createIndex` action.
+
+    Returns:
+        True if an index exists for a given field
+        False if not
+
+    """
+    if not isinstance(fields, list):
+        fields = [fields]
+    info = store.collection.index_information().values()
+    for spec in (index['key'] for index in info):
+        for field in fields:
+            if spec[0][0] == field:
+                return True
+    return False
 
 
 def dt_to_isoformat_ceil_ms(dt):
