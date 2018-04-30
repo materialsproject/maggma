@@ -70,6 +70,7 @@ class TestMultiprocProcessor(unittest.TestCase):
         proc.builder = self.builder
         proc.update_data_condition = MagicMock()
         proc.data = MagicMock()
+        proc.update_pbar = MagicMock()
         proc.run_update_targets = MagicMock()
         proc.run_update_targets.__bool__.side_effect = [True,True,True,False]
 
@@ -87,7 +88,7 @@ class TestMultiprocProcessor(unittest.TestCase):
         proc.data = MagicMock()
         proc.task_count = MagicMock()
         proc.update_data_condition = MagicMock()
-
+        proc.process_pbar = MagicMock()
         proc.update_data_callback(future)
 
         future.result.assert_called()
@@ -116,10 +117,9 @@ class TestMultiprocProcessor(unittest.TestCase):
             proc = MultiprocProcessor([self.builder], num_workers=3)
             proc.builder = MagicMock()
             proc.task_count = MagicMock()
-            cursor = MagicMock()
-            cursor.__bool__.side_effect = [True, True, True, False]
-
-            proc.put_tasks(cursor)
+            cursor = [True,True,True,False]
+            proc.get_pbar = cursor
+            proc.put_tasks()
             proc.task_count.acquire.assert_called()
 
 
@@ -212,12 +212,11 @@ class TestMPIProcessor(unittest.TestCase):
             proc = MPIProcessor([self.builder])
             proc.builder = MagicMock()
             proc.task_count = MagicMock()
-            cursor = MagicMock()
-            cursor.__bool__.side_effect = [True, True, True, False]
+            cursor = [True,True,True,False]
+
 
             proc.put_tasks(cursor, 0)
             proc.task_count.acquire.assert_called()
-            cursor.__next__.assert_called()
             mock_executor.return_value.__enter__.assert_called()
             proc.task_count.acquire.assert_called()
             mock_executor.return_value.__enter__.return_value.submit.assert_called()

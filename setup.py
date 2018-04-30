@@ -9,7 +9,7 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name='maggma',
-        version='0.5.0',
+        version='0.6.0',
         description='MongoDB aggregation machine',
         long_description=open(os.path.join(module_dir, 'README.md')).read(),
         url='https://github.com/materialsproject/maggma',
@@ -20,7 +20,7 @@ if __name__ == "__main__":
         package_data={},
         zip_safe=False,
         install_requires=['pymongo>=3.4.0', 'mongomock>=3.8.0', 'monty>=0.9.8',
-                          'smoqe==0.1.3', 'PyYAML==3.12', 'pydash==4.1.0'],
+                          'smoqe==0.1.3', 'PyYAML==3.12', 'pydash==4.1.0', 'tqdm==4.19.6'],
         extras_require={"mpi": ["mpi4py>=2.0.0"]},
         classifiers=["Programming Language :: Python :: 3",
                      "Programming Language :: Python :: 3.6",
