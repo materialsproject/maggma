@@ -7,6 +7,7 @@ and processing via MPI
 
 import abc
 import logging
+import types
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
@@ -297,8 +298,10 @@ class MultiprocProcessor(BaseProcessor):
             total = len(cursor)
         elif hasattr(cursor, "count"):
             total = cursor.count()
-        elif hasattr(self.builder, "total"):
-            total = self.builder.total
+        elif isinstance(cursor,types.GeneratorType):
+            cursor.send(None)
+            if hasattr(self.builder, "total"):
+                total = self.builder.total
 
         self.get_pbar = tqdm(cursor, desc="Get Items", total=total)
         self.process_pbar = tqdm(desc="Processing Item", total=total)
