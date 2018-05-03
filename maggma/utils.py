@@ -11,6 +11,18 @@ import logging
 import tqdm
 
 
+def primed(iterable):
+    """Preprimes an iterator so the first value is calculated immediately
+       but not returned until the first iteration
+    """
+    itr = iter(iterable)
+    try:
+        first = next(itr)  # itr.next() in Python 2
+    except StopIteration:
+        return itr
+    return itertools.chain([first], itr)
+
+
 class TqdmLoggingHandler(logging.Handler):
     """
     Helper to enable routing tqdm progress around logging

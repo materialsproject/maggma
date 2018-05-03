@@ -12,7 +12,7 @@ from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from monty.json import MSONable
-from maggma.utils import get_mpi, grouper
+from maggma.utils import get_mpi, grouper, primed
 from tqdm import tqdm
 
 
@@ -153,12 +153,14 @@ class MPIProcessor(BaseProcessor):
         Sets up progress bars
         """
         total = None
-        if hasattr(cursor, "__len__"):
+        if isinstance(cursor, types.GeneratorType):
+            cursor = primed(cursor)
+            if hasattr(self.builder, "total"):
+                total = self.builder.total
+        elif hasattr(cursor, "__len__"):
             total = len(cursor)
         elif hasattr(cursor, "count"):
             total = cursor.count()
-        elif hasattr(self.builder, "total"):
-            total = self.builder.total
 
         self.get_pbar = tqdm(cursor, desc="Get Items", total=total)
         self.process_pbar = tqdm(desc="Processing Item", total=total)
@@ -294,14 +296,19 @@ class MultiprocProcessor(BaseProcessor):
         Sets up progress bars
         """
         total = None
-        if hasattr(cursor, "__len__"):
+
+        if isinstance(cursor, types.GeneratorType):
+            try:
+                cursor = primed(cursor)
+                if hasattr(self.builder, "total"):
+                    total = self.builder.total
+            except StopIteration:
+                self.logger.debug("Get items returned empty iterator")
+
+        elif hasattr(cursor, "__len__"):
             total = len(cursor)
         elif hasattr(cursor, "count"):
             total = cursor.count()
-        elif isinstance(cursor,types.GeneratorType):
-            cursor.send(None)
-            if hasattr(self.builder, "total"):
-                total = self.builder.total
 
         self.get_pbar = tqdm(cursor, desc="Get Items", total=total)
         self.process_pbar = tqdm(desc="Processing Item", total=total)
