@@ -1,3 +1,7 @@
+# coding: utf-8
+"""
+More utilities for maggma. Do we need this still?
+"""
 import json
 
 from pymongo import MongoClient
@@ -92,16 +96,3 @@ class CredentialManager:
             spec
         """
         pass
-
-
-def get_mpi():
-    """
-    Helper that returns the mpi communicator, rank and size.
-    """
-    from mpi4py import MPI
-
-    comm = MPI.COMM_WORLD
-    rank = comm.Get_rank()
-    size = comm.Get_size()
-
-    return comm, rank, size
