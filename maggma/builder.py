@@ -42,6 +42,8 @@ class Builder(MSONable, metaclass=ABCMeta):
         stores = self.sources + self.targets
         for s in stores:
             s.connect()
+        for s in self.sources:
+            s.read_only = True
 
     @abstractmethod
     def get_items(self):
