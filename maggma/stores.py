@@ -9,6 +9,7 @@ import copy
 from datetime import datetime
 import json
 import zlib
+import logging
 
 import mongomock
 import pymongo
@@ -30,18 +31,26 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime", validator=None):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime",
+                 validator=None, read_only=False):
         """
         Args:
             key (str): master key to index on
             lu_field (str): 'last updated' field name
             lu_type (tuple): the date/time format for the lu_field. Can be "datetime" or "isoformat"
+            validator: an instance of a :class: maggma.validator.Validator, which can be
+            used to validate documents prior to insertion
+            read_only (bool): if True, calling update() should raise a PermissionError
         """
         self.key = key
         self.lu_field = lu_field
         self.lu_type = lu_type
         self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
         self.validator = validator
+        self.read_only = read_only
+
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     @property
     @abstractmethod
@@ -90,7 +99,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def update(self, docs, update_lu=True, key=None, **kwargs):
         """
-        Update docs into the store
+        Update docs into the store, respecting self.read_only flag
         """
         pass
 
@@ -232,6 +241,10 @@ class Mongolike(object):
             docs: list of documents
         """
 
+        if self.read_only:
+            self.logger.error("Trying to write to a read-only store.")
+            raise PermissionError("Trying to write to a read-only store.")
+
         bulk = self.collection.initialize_ordered_bulk_op()
 
         for d in docs:
@@ -245,8 +258,7 @@ class Mongolike(object):
                 if not validates:
                     if self.validator.strict:
                         raise ValueError('Document failed to validate: {}'.format(d))
-                    else:
-                        self.logger.error('Document failed to validate: {}'.format(d))
+                    self.logger.error('Document failed to validate: {}'.format(d))
 
             if validates:
                 if isinstance(key, list):
@@ -451,6 +463,10 @@ class MemoryStore(Mongolike, Store):
             docs: list of documents
         """
 
+        if self.read_only:
+            self.logger.error("Trying to write to a read-only store.")
+            raise PermissionError("Trying to write to a read-only store.")
+
         for d in docs:
 
             d = jsanitize(d, allow_bson=True)
@@ -462,8 +478,7 @@ class MemoryStore(Mongolike, Store):
                 if not validates:
                     if self.validator.strict:
                         raise ValueError('Document failed to validate: {}'.format(d))
-                    else:
-                        self.logger.error('Document failed to validate: {}'.format(d))
+                    self.logger.error('Document failed to validate: {}'.format(d))
 
             if validates:
                 if isinstance(key, list):
@@ -717,6 +732,11 @@ class GridFSStore(Store):
             update_lu (bool) : Updat the last_updated field or not
             key (list or str): list or str of important parameters
         """
+
+        if self.read_only:
+            self.logger.error("Trying to write to a read-only store.")
+            raise PermissionError("Trying to write to a read-only store.")
+
         if isinstance(key, str):
             key = [key]
         elif not key:
