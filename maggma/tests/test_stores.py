@@ -61,6 +61,16 @@ class TestMongoStore(unittest.TestCase):
         self.assertEqual(self.mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"], 7)
         self.mongostore.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
         self.assertEqual(self.mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"], 11)
+        
+    def test_read_only(self):
+        
+        # set read_only flag
+        self.mongostore.read_only = True
+        
+        self.assertRaises(PermissionError, self.mongostore.update, [{"e": 9, "d": 10}], key="e")
+        
+        # unset read_only flag
+        self.mongostore.read_only = False
 
     def test_groupby(self):
         self.mongostore.collection.drop()
