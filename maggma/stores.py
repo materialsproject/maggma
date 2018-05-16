@@ -106,7 +106,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def ensure_index(self, key, unique=False, **kwargs):
         """
-        Tries to create and index
+        Tries to create and index, respecting self.read_only flag
         Args:
             key (string): single key to index
             unique (bool): Whether or not this index contains only unique keys
@@ -225,6 +225,11 @@ class Mongolike(object):
         """
         Wrapper for pymongo.Collection.ensure_index
         """
+        
+        if self.read_only:
+            self.logger.error("Trying to write to a read-only store.")
+            raise PermissionError("Trying to write to a read-only store.")
+        
         if "background" not in kwargs:
             kwargs["background"] = True
 
@@ -716,6 +721,11 @@ class GridFSStore(Store):
         """
         Wrapper for pymongo.Collection.ensure_index for the files collection
         """
+
+        if self.read_only:
+            self.logger.error("Trying to write to a read-only store.")
+            raise PermissionError("Trying to write to a read-only store.")
+        
         if key in self.files_collection_fields:
             return self._files_collection.create_index(key, unique=unique, background=True)
         else:
