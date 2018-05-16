@@ -225,7 +225,7 @@ class Mongolike(object):
         """
         Wrapper for pymongo.Collection.ensure_index
         """
-        
+
         if self.read_only:
             self.logger.error("Trying to write to a read-only store.")
             raise PermissionError("Trying to write to a read-only store.")
