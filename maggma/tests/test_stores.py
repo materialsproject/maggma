@@ -105,6 +105,14 @@ class TestMongoStore(unittest.TestCase):
         self.assertEqual(ms.collection_name, other_ms.collection_name)
         self.assertEqual(ms.database, other_ms.database)
 
+    def test_last_updated(self):
+        self.assertEqual(self.mongostore.last_updated, datetime.min)
+        tic = datetime.now()
+        self.mongostore.collection.insert_one({self.mongostore.key: 1, "a": 1})
+        self.assertRaises(StoreError, lambda: self.mongostore.last_updated)
+        self.mongostore.update([{self.mongostore.key: 1, "a": 1}])
+        self.assertGreaterEqual(self.mongostore.last_updated, tic)
+
     def tearDown(self):
         if self.mongostore.collection:
             self.mongostore.collection.drop()
