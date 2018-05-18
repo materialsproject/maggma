@@ -759,4 +759,5 @@ class GridFSStore(Store):
 
 
 class StoreError(Exception):
+    """General Store-related error."""
     pass
