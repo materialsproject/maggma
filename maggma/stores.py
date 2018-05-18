@@ -137,7 +137,7 @@ class Store(MSONable, metaclass=ABCMeta):
             raise StoreError(
                 "No field '{}' in store document. Please ensure Store.lu_field "
                 "is a datetime field in your store that represents the time of "
-                "last update to each document.")
+                "last update to each document.".format(self.lu_field))
         # Handle when collection has docs but `NoneType` lu_field.
         return (self.lu_func[0](doc[self.lu_field])
                 if (doc and doc[self.lu_field]) else datetime.min)
