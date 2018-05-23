@@ -130,9 +130,17 @@ class Store(MSONable, metaclass=ABCMeta):
 
     @property
     def last_updated(self):
-        doc = next(self.query(properties=[self.lu_field]).sort([(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
+        doc = next(self.query(properties=[self.lu_field])
+                   .sort([(self.lu_field, pymongo.DESCENDING)])
+                   .limit(1), None)
+        if doc and self.lu_field not in doc:
+            raise StoreError(
+                "No field '{}' in store document. Please ensure Store.lu_field "
+                "is a datetime field in your store that represents the time of "
+                "last update to each document.".format(self.lu_field))
         # Handle when collection has docs but `NoneType` lu_field.
-        return (self.lu_func[0](doc[self.lu_field]) if (doc and doc[self.lu_field]) else datetime.min)
+        return (self.lu_func[0](doc[self.lu_field])
+                if (doc and doc[self.lu_field]) else datetime.min)
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
@@ -748,3 +756,8 @@ class GridFSStore(Store):
 
     def close(self):
         self.collection.database.client.close()
+
+
+class StoreError(Exception):
+    """General Store-related error."""
+    pass
