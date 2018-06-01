@@ -230,7 +230,11 @@ class Mongolike(object):
         if confirm_field_index(self.collection,key):
             return True
         else:
-            return self.collection.create_index(key, unique=unique, **kwargs)
+            try:
+                self.collection.create_index(key, unique=unique, **kwargs)
+                return True
+            except:
+                return False
 
     def update(self, docs, update_lu=True, key=None, **kwargs):
         """
