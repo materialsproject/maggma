@@ -558,7 +558,7 @@ class GridFSStore(Store):
         self.meta_keys = set()
 
         if "key" not in kwargs:
-            kwargs["key"] = "_oid"
+            kwargs["key"] = "_id"
 
         super(GridFSStore, self).__init__(**kwargs)
 
@@ -713,7 +713,7 @@ class GridFSStore(Store):
             return self._files_collection.create_index(key, unique=unique, background=True)
         else:
             # Store this key to put into metadata collection
-            self.meta_keys |= key
+            self.meta_keys |= set([key])
             return self._files_collection.create_index("metadata.{}".format(key), unique=unique, background=True)
 
     def update(self, docs, update_lu=True, key=None):
