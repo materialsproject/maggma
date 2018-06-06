@@ -12,7 +12,7 @@ before_install:
   - mkdir -p mongodb
   - cp -R -n mongodb-linux-x86_64-3.6.5/ mongodb
   - mkdir -p mongodb/data
-  - touch -p mongodb/log
+  - touch mongodb/log
   - cd -
 install:
   - ./install-mpi.sh openmpi
