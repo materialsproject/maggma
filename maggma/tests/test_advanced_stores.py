@@ -46,6 +46,7 @@ class TestMongograntStore(unittest.TestCase):
             cls.mongod_process = subprocess.Popen(
                 basecmd + " --auth", shell=True, start_new_session=True)
         cls.dbname = "test_" + uuid4().hex
+        raise Exception(subprocess.check_output("lsof -t -i:27020", shell=True))
         cls.db = MongoClient(
             "mongodb://mongoadmin:mongoadminpass@localhost:{}/admin".format(
                 cls.mdport))[cls.dbname]
