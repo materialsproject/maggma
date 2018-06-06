@@ -2,6 +2,8 @@
 """
 Tests for advanced stores
 """
+import time
+
 import os
 import shutil
 import signal
@@ -34,6 +36,9 @@ class TestMongograntStore(unittest.TestCase):
                    .format(cls.mdport, cls.mdpath, cls.mdlogpath))
         mongod_process = subprocess.Popen(
             basecmd, shell=True, start_new_session=True)
+        # https://docs.travis-ci.com/user/database-setup/
+        # #MongoDB-does-not-immediately-accept-connections
+        time.sleep(15)
         client = MongoClient(port=cls.mdport)
         client.admin.command(
             "createUser", "mongoadmin", pwd="mongoadminpass", roles=["root"])
@@ -42,6 +47,7 @@ class TestMongograntStore(unittest.TestCase):
         os.waitpid(mongod_process.pid, 0)
         cls.mongod_process = subprocess.Popen(
             basecmd + " --auth", shell=True, start_new_session=True)
+        time.sleep(15)
         cls.dbname = "test_" + uuid4().hex
         cls.db = MongoClient(
             "mongodb://mongoadmin:mongoadminpass@localhost:{}/admin".format(
