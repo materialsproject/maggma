@@ -31,9 +31,13 @@ class TestMongograntStore(unittest.TestCase):
         _, cls.mdlogpath = tempfile.mkstemp()
         cls.mdpath = tempfile.mkdtemp()
         cls.mdport = 27020
-        basecmd = ("mongod --port {} --dbpath {} "
+        if os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS"):
+            mongod = os.path.join(os.environ["HOME"], os.environ["TEST_MONGOD"])
+        else:
+            mongod = "mongod"
+        basecmd = ("{} --port {} --dbpath {} --quiet --logpath {} "
                    "--bind_ip_all"
-                   .format(cls.mdport, cls.mdpath))
+                   .format(mongod, cls.mdport, cls.mdpath, cls.mdlogpath))
         mongod_process = subprocess.Popen(
             basecmd, shell=True, start_new_session=True)
         # https://docs.travis-ci.com/user/database-setup/

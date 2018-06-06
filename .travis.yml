@@ -3,6 +3,14 @@ services: mongodb
 sudo: required
 python:
   - "3.6"
+env:
+  - TEST_MONGOD="mongodb/bin/mongod"
+before_install:
+  - cd $HOME
+  - curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.5.tgz
+  - tar -zxvf mongodb-linux-x86_64-3.6.5.tgz
+  - mkdir -p mongodb
+  - cp -R -n mongodb-linux-x86_64-3.6.5/ mongodb
 install:
   - ./install-mpi.sh openmpi
   - pip install -r requirements.txt
