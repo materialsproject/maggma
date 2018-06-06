@@ -33,20 +33,15 @@ class TestMongograntStore(unittest.TestCase):
         cls.mdport = 27020
         if not (os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS")):
             basecmd = ("mongod --port {} --dbpath {} --quiet --logpath {} "
-                       "--bind_ip_all"
+                       "--bind_ip_all --auth"
                        .format(cls.mdport, cls.mdpath, cls.mdlogpath))
-            mongod_process = subprocess.Popen(
+            cls.mongod_process = subprocess.Popen(
                 basecmd, shell=True, start_new_session=True)
             time.sleep(5)
             client = MongoClient(port=cls.mdport)
             client.admin.command("createUser", "mongoadmin",
                                  pwd="mongoadminpass", roles=["root"])
             client.close()
-            os.killpg(os.getpgid(mongod_process.pid), signal.SIGTERM)
-            os.waitpid(mongod_process.pid, 0)
-            cls.mongod_process = subprocess.Popen(
-                basecmd + " --auth", shell=True, start_new_session=True)
-            time.sleep(5)
         cls.dbname = "test_" + uuid4().hex
         cls.db = MongoClient(
             "mongodb://mongoadmin:mongoadminpass@127.0.0.1:{}/admin".format(

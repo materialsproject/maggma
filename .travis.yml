@@ -18,18 +18,10 @@ before_script:
   - |
     mongodb-linux-x86_64-3.6.5/bin/mongod \
     --port 27020 --dbpath mongodbdata --logpath mongodblog \
-    --bind_ip_all --fork
-  - sleep 15
+    --auth --bind_ip_all --fork
   - |
      mongodb-linux-x86_64-3.6.5/bin/mongo 127.0.0.1:27020/admin --eval \
      'db.createUser({user:"mongoadmin",pwd:"mongoadminpass",roles:["root"]});'
-  - kill -9 $(lsof -t -i:27020)
-  - |
-    mongodb-linux-x86_64-3.6.5/bin/mongod \
-    --auth \
-    --port 27020 --dbpath mongodbdata --logpath mongodblog \
-    --bind_ip_all --fork
-  - sleep 15
   - cd -
 script:
   - nosetests -v maggma
