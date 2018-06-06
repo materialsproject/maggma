@@ -53,7 +53,6 @@ class MongograntStore(Mongolike, Store):
                              "arguments. Use `mongogrant_spec`.")
         self.kwargs = kwargs
         super().__init__(**kwargs)
-        self.groupby = MongoStore.groupby
 
     def connect(self, force_reset=False):
         if not self._collection or force_reset:
@@ -67,6 +66,10 @@ class MongograntStore(Mongolike, Store):
 
     def __hash__(self):
         return hash((self.mongogrant_spec, self.collection_name, self.lu_field))
+
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        return MongoStore.groupby(
+            self, keys, properties=None, criteria=None, **kwargs)
 
 
 class VaultStore(MongoStore):
