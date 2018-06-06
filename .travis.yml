@@ -11,6 +11,8 @@ before_install:
   - tar -zxvf mongodb-linux-x86_64-3.6.5.tgz
   - mkdir -p mongodb
   - cp -R -n mongodb-linux-x86_64-3.6.5/ mongodb
+  - mkdir -p mongodb/data
+  - touch -p mongodb/log
   - cd -
 install:
   - ./install-mpi.sh openmpi
@@ -18,6 +20,21 @@ install:
   - pip install -r requirements-optional.txt
 before_script:
   - python setup.py develop
+  - |
+    $HOME/mongodb/bin/mongod \
+    --port 27020 --dbpath $HOME/mongodb/data --logpath $HOME/mongodb/log \
+    --bind_ip_all --fork
+  - sleep 15
+  - |
+     $HOME/mongodb/bin/mongo admin --eval \
+     'db.createUser({user:"mongoadmin",pwd:"mongoadminpass",roles:["root"]});'
+  - kill -9 $(lsof -t -i:27020)
+  - |
+    $HOME/mongodb/bin/mongod \
+    --auth \
+    --port 27020 --dbpath $HOME/mongodb/data --logpath $HOME/mongodb/log \
+    --bind_ip_all --fork
+  - sleep 15
 script:
   - nosetests -v maggma
   - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py

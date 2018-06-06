@@ -31,27 +31,20 @@ class TestMongograntStore(unittest.TestCase):
         _, cls.mdlogpath = tempfile.mkstemp()
         cls.mdpath = tempfile.mkdtemp()
         cls.mdport = 27020
-        if os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS"):
-            mongod = os.path.join(os.environ["HOME"], os.environ["TEST_MONGOD"])
-        else:
-            mongod = "mongod"
-        basecmd = ("{} --port {} --dbpath {} --quiet --logpath {} "
-                   "--bind_ip_all"
-                   .format(mongod, cls.mdport, cls.mdpath, cls.mdlogpath))
-        mongod_process = subprocess.Popen(
-            basecmd, shell=True, start_new_session=True)
-        # https://docs.travis-ci.com/user/database-setup/
-        # #MongoDB-does-not-immediately-accept-connections
-        time.sleep(15)
-        client = MongoClient(port=cls.mdport)
-        client.admin.command(
-            "createUser", "mongoadmin", pwd="mongoadminpass", roles=["root"])
-        client.close()
-        os.killpg(os.getpgid(mongod_process.pid), signal.SIGTERM)
-        os.waitpid(mongod_process.pid, 0)
-        cls.mongod_process = subprocess.Popen(
-            basecmd + " --auth", shell=True, start_new_session=True)
-        time.sleep(15)
+        if not (os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS")):
+            basecmd = ("mongod --port {} --dbpath {} --quiet --logpath {} "
+                       "--bind_ip_all"
+                       .format(cls.mdport, cls.mdpath, cls.mdlogpath))
+            mongod_process = subprocess.Popen(
+                basecmd, shell=True, start_new_session=True)
+            client = MongoClient(port=cls.mdport)
+            client.admin.command("createUser", "mongoadmin",
+                                 pwd="mongoadminpass", roles=["root"])
+            client.close()
+            os.killpg(os.getpgid(mongod_process.pid), signal.SIGTERM)
+            os.waitpid(mongod_process.pid, 0)
+            cls.mongod_process = subprocess.Popen(
+                basecmd + " --auth", shell=True, start_new_session=True)
         cls.dbname = "test_" + uuid4().hex
         cls.db = MongoClient(
             "mongodb://mongoadmin:mongoadminpass@localhost:{}/admin".format(
@@ -64,8 +57,9 @@ class TestMongograntStore(unittest.TestCase):
     @classmethod
     def tearDownClass(cls):
         os.remove(cls.config_path)
-        os.killpg(os.getpgid(cls.mongod_process.pid), signal.SIGTERM)
-        os.waitpid(cls.mongod_process.pid, 0)
+        if not (os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS")):
+            os.killpg(os.getpgid(cls.mongod_process.pid), signal.SIGTERM)
+            os.waitpid(cls.mongod_process.pid, 0)
         shutil.rmtree(cls.mdpath)
         os.remove(cls.mdlogpath)
 
