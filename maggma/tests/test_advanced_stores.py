@@ -31,9 +31,9 @@ class TestMongograntStore(unittest.TestCase):
         _, cls.mdlogpath = tempfile.mkstemp()
         cls.mdpath = tempfile.mkdtemp()
         cls.mdport = 27020
-        basecmd = ("mongod --port {} --dbpath {} --quiet --logpath {} "
+        basecmd = ("mongod --port {} --dbpath {} "
                    "--bind_ip_all"
-                   .format(cls.mdport, cls.mdpath, cls.mdlogpath))
+                   .format(cls.mdport, cls.mdpath))
         mongod_process = subprocess.Popen(
             basecmd, shell=True, start_new_session=True)
         # https://docs.travis-ci.com/user/database-setup/
