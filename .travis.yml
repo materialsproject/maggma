@@ -24,8 +24,6 @@ script:
 notifications:
   email:
     recipients:
-      - montoyjh@lbl.gov
-      - shyamd@lbl.gov
       - dwinston@lbl.gov
     on_success: change
     on_failure: always
