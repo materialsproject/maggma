@@ -37,6 +37,7 @@ class TestMongograntStore(unittest.TestCase):
                        .format(cls.mdport, cls.mdpath, cls.mdlogpath))
             mongod_process = subprocess.Popen(
                 basecmd, shell=True, start_new_session=True)
+            time.sleep(5)
             client = MongoClient(port=cls.mdport)
             client.admin.command("createUser", "mongoadmin",
                                  pwd="mongoadminpass", roles=["root"])
@@ -45,10 +46,10 @@ class TestMongograntStore(unittest.TestCase):
             os.waitpid(mongod_process.pid, 0)
             cls.mongod_process = subprocess.Popen(
                 basecmd + " --auth", shell=True, start_new_session=True)
+            time.sleep(5)
         cls.dbname = "test_" + uuid4().hex
-        raise Exception(subprocess.check_output("lsof -i:27020", shell=True))
         cls.db = MongoClient(
-            "mongodb://mongoadmin:mongoadminpass@localhost:{}/admin".format(
+            "mongodb://mongoadmin:mongoadminpass@127.0.0.1:{}/admin".format(
                 cls.mdport))[cls.dbname]
         cls.db.command("createUser", "reader", pwd="readerpass", roles=["read"])
         cls.db.command("createUser", "writer",
