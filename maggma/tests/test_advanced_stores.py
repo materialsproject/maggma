@@ -3,15 +3,98 @@
 Tests for advanced stores
 """
 import os
+import shutil
+import signal
+import subprocess
+import tempfile
 import unittest
+from mongogrant.client import seed
+from pymongo import MongoClient
+from pymongo.collection import Collection
 from unittest.mock import patch, MagicMock
 import mongomock.collection
+from uuid import uuid4
 
 from maggma.stores import MemoryStore, MongoStore
 from maggma.advanced_stores import *
 import zlib
 
 module_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
+
+
+class TestMongograntStore(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        _, cls.config_path = tempfile.mkstemp()
+        _, cls.mdlogpath = tempfile.mkstemp()
+        cls.mdpath = tempfile.mkdtemp()
+        cls.mdport = 27020
+        basecmd = ("mongod --port {} --dbpath {} --quiet --logpath {}"
+                   .format(cls.mdport, cls.mdpath, cls.mdlogpath))
+        mongod_process = subprocess.Popen(
+            basecmd, shell=True, start_new_session=True)
+        client = MongoClient(port=cls.mdport)
+        client.admin.command(
+            "createUser", "mongoadmin", pwd="mongoadminpass", roles=["root"])
+        client.close()
+        os.killpg(os.getpgid(mongod_process.pid), signal.SIGTERM)
+        os.waitpid(mongod_process.pid, 0)
+        cls.mongod_process = subprocess.Popen(
+            basecmd + " --auth", shell=True, start_new_session=True)
+        cls.dbname = "test_" + uuid4().hex
+        cls.db = MongoClient(
+            "mongodb://mongoadmin:mongoadminpass@localhost:{}/admin".format(
+                cls.mdport))[cls.dbname]
+        cls.db.command("createUser", "reader", pwd="readerpass", roles=["read"])
+        cls.db.command("createUser", "writer",
+                       pwd="writerpass", roles=["readWrite"])
+        cls.db.client.close()
+
+    @classmethod
+    def tearDownClass(cls):
+        os.remove(cls.config_path)
+        os.killpg(os.getpgid(cls.mongod_process.pid), signal.SIGTERM)
+        os.waitpid(cls.mongod_process.pid, 0)
+        shutil.rmtree(cls.mdpath)
+        os.remove(cls.mdlogpath)
+
+    def setUp(self):
+        config = Config(check=check, path=self.config_path, seed=seed())
+        self.client = Client(config)
+        self.client.set_auth(
+            host="localhost:{}".format(self.mdport),
+            db=self.dbname,
+            role="read",
+            username="reader",
+            password="readerpass",
+        )
+        self.client.set_auth(
+            host="localhost:{}".format(self.mdport),
+            db=self.dbname,
+            role="readWrite",
+            username="writer",
+            password="writerpass",
+        )
+        self.client.set_alias(
+            "testhost", "localhost:{}".format(self.mdport), which="host")
+        self.client.set_alias("testdb", self.dbname, which="db")
+
+    @staticmethod
+    def connected_user(store):
+        return store.collection.database.command(
+            "connectionStatus")['authInfo']['authenticatedUsers'][0]['user']
+
+    def test_connect(self):
+        store = MongograntStore("ro:testhost/testdb", "tasks",
+                                mgclient_config_path=self.config_path)
+        store.connect()
+        self.assertIsInstance(store.collection, Collection)
+        self.assertEqual(self.connected_user(store), "reader")
+        store = MongograntStore("rw:testhost/testdb", "tasks",
+                                mgclient_config_path=self.config_path)
+        store.connect()
+        self.assertIsInstance(store.collection, Collection)
+        self.assertEqual(self.connected_user(store), "writer")
 
 
 class TestVaultStore(unittest.TestCase):
