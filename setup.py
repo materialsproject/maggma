@@ -43,5 +43,6 @@ if __name__ == "__main__":
                 ]
             },
         test_suite="nose.collector",
-        tests_require=["nose"]
+        tests_require=["nose"],
+        python_requires='>=3.6',
     )
