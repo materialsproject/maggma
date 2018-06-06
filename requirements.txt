@@ -7,4 +7,4 @@ pydash==4.1.0
 jsonschema==2.6.0
 hvac==0.3.0
 tqdm==4.23.1
-mongogrant==0.1.8
+mongogrant==0.1.10
