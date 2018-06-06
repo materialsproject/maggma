@@ -20,7 +20,7 @@ if __name__ == "__main__":
         package_data={},
         zip_safe=False,
         install_requires=[
-            "pymongo>=3.6", "mongomock>=3.8.0", "monty=1.0.1",
+            "pymongo>=3.6", "mongomock>=3.8.0", "monty>=1.0.1",
             "smoqe==0.1.3", "PyYAML==3.12", "pydash==4.1.0", "tqdm>=4.19.6",
             "mongogrant>=0.1.8",
         ],
