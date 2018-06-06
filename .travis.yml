@@ -13,23 +13,21 @@ before_script:
   - cd $HOME
   - curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.5.tgz
   - tar -zxvf mongodb-linux-x86_64-3.6.5.tgz
-  - mkdir -p mongodb
-  - cp -R -n mongodb-linux-x86_64-3.6.5/ mongodb
-  - mkdir -p mongodb/data
-  - touch mongodb/log
+  - mkdir -p mongodbdata
+  - touch mongodblog
   - |
-    mongodb/bin/mongod \
-    --port 27020 --dbpath $HOME/mongodb/data --logpath $HOME/mongodb/log \
+    mongodb-linux-x86_64-3.6.5/bin/mongod \
+    --port 27020 --dbpath mongodbdata --logpath mongodblog \
     --bind_ip_all --fork
   - sleep 15
   - |
-     mongodb/bin/mongo admin --eval \
+     mongodb-linux-x86_64-3.6.5/bin/mongo admin --eval \
      'db.createUser({user:"mongoadmin",pwd:"mongoadminpass",roles:["root"]});'
   - kill -9 $(lsof -t -i:27020)
   - |
-    mongodb/bin/mongod \
+    mongodb-linux-x86_64-3.6.5/bin/mongod \
     --auth \
-    --port 27020 --dbpath $HOME/mongodb/data --logpath $HOME/mongodb/log \
+    --port 27020 --dbpath mongodbdata --logpath mongodblog \
     --bind_ip_all --fork
   - sleep 15
   - cd -
