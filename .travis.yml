@@ -21,7 +21,7 @@ before_script:
     --bind_ip_all --fork
   - sleep 15
   - |
-     mongodb-linux-x86_64-3.6.5/bin/mongo admin --eval \
+     mongodb-linux-x86_64-3.6.5/bin/mongo 127.0.0.1:27020/admin --eval \
      'db.createUser({user:"mongoadmin",pwd:"mongoadminpass",roles:["root"]});'
   - kill -9 $(lsof -t -i:27020)
   - |
