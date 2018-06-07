@@ -1,4 +1,5 @@
 language: python
+cache: pip
 services: mongodb
 sudo: required
 python:
@@ -9,6 +10,19 @@ install:
   - pip install -r requirements-optional.txt
 before_script:
   - python setup.py develop
+  - cd $HOME
+  - curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.5.tgz
+  - tar -zxvf mongodb-linux-x86_64-3.6.5.tgz
+  - mkdir -p mongodbdata
+  - touch mongodblog
+  - |
+    mongodb-linux-x86_64-3.6.5/bin/mongod \
+    --port 27020 --dbpath mongodbdata --logpath mongodblog \
+    --auth --bind_ip_all --fork
+  - |
+     mongodb-linux-x86_64-3.6.5/bin/mongo 127.0.0.1:27020/admin --eval \
+     'db.createUser({user:"mongoadmin",pwd:"mongoadminpass",roles:["root"]});'
+  - cd -
 script:
   - nosetests -v maggma
   - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py

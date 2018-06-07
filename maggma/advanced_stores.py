@@ -9,10 +9,67 @@ import boto3
 import botocore
 import zlib
 from datetime import datetime
-from maggma.stores import Store, MongoStore
+
+from maggma.stores import Store, MongoStore, StoreError, Mongolike
 from maggma.utils import lazy_substitute, substitute
+from mongogrant import Client
+from mongogrant.client import check
+from mongogrant.config import Config
 from monty.json import jsanitize
 from monty.functools import lru_cache
+
+
+class MongograntStore(Mongolike, Store):
+    """Initialize a Store with a mongogrant "<role>:<host>/<db>." spec.
+
+    This class does not subclass MongoStore, though it aims to reproduce
+    relevant functionality through method delegation, e.g. groupby.
+
+    It does not subclass MongoStore because some class methods of
+    MongoStore, e.g. from_db_file and from_collection, are not supported.
+
+    mongogrant documentation: https://github.com/materialsproject/mongogrant
+    """
+    def __init__(self, mongogrant_spec, collection_name,
+                 mgclient_config_path=None, **kwargs):
+        """
+
+        Args:
+            mongogrant_spec (str): of the form <role>:<host>/<db>, where
+                role is one of {"read", "readWrite"} or aliases {"ro", "rw"};
+                host is a db host (w/ optional port) or alias; and db is a db
+                on that host, or alias. See mongogrant documentation.
+            collection_name (str): name of mongo collection
+            mgclient_config_path (str): Path to mongogrant client config file,
+               or None if default path (`mongogrant.client.path`).
+        """
+        self.mongogrant_spec = mongogrant_spec
+        self.collection_name = collection_name
+        self.mgclient_config_path = mgclient_config_path
+        self._collection = None
+        if set(("username", "password","database", "host")) & set(kwargs):
+            raise StoreError("MongograntStore does not accept "
+                             "username, password, database, or host "
+                             "arguments. Use `mongogrant_spec`.")
+        self.kwargs = kwargs
+        super().__init__(**kwargs)
+
+    def connect(self, force_reset=False):
+        if not self._collection or force_reset:
+            if self.mgclient_config_path:
+                config = Config(check=check, path=self.mgclient_config_path)
+                client = Client(config)
+            else:
+                client = Client()
+            db = client.db(self.mongogrant_spec)
+            self._collection = db[self.collection_name]
+
+    def __hash__(self):
+        return hash((self.mongogrant_spec, self.collection_name, self.lu_field))
+
+    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+        return MongoStore.groupby(
+            self, keys, properties=None, criteria=None, **kwargs)
 
 
 class VaultStore(MongoStore):
