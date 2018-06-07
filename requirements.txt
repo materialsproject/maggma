@@ -8,3 +8,4 @@ jsonschema==2.6.0
 hvac==0.3.0
 tqdm==4.23.1
 mongogrant==0.1.10
+boto3==1.6.9
