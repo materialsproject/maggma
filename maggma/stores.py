@@ -18,6 +18,8 @@ from operator import itemgetter
 from pymongo import MongoClient, DESCENDING
 from pydash import identity
 
+from pymongo import ReplaceOne
+
 from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
 from monty.serialization import loadfn
@@ -236,7 +238,7 @@ class Mongolike(object):
             except:
                 return False
 
-    def update(self, docs, update_lu=True, key=None, **kwargs):
+    def update(self, docs, update_lu=True, key=None, ordered=True, **kwargs):
         """
         Function to update associated MongoStore collection.
 
@@ -244,7 +246,7 @@ class Mongolike(object):
             docs: list of documents
         """
 
-        bulk = self.collection.initialize_ordered_bulk_op()
+        requests = []
 
         for d in docs:
 
@@ -269,9 +271,10 @@ class Mongolike(object):
                     search_doc = {self.key: d[self.key]}
                 if update_lu:
                     d[self.lu_field] = datetime.utcnow()
-                bulk.find(search_doc).upsert().replace_one(d)
 
-        bulk.execute()
+                requests.append(ReplaceOne(search_doc,d,upsert=True))
+
+        self.collection.bulk_write(requests,ordered=ordered)
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
