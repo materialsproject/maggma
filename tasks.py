@@ -8,7 +8,8 @@ from maggma import __version__
 @task
 def setver(c, patch=False, new_ver=''):
     if (not patch and not new_ver) or (patch and new_ver):
-        raise Exception("Either use --patch or specify e.g. --full='x.y.z.")
+        raise Exception("Either use --patch or specify "
+                        "e.g. --new-ver=\"x.y.z\".")
     if patch:
         v = [int(x) for x in __version__.split(".")]
         v[2] += 1
