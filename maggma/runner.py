@@ -393,8 +393,7 @@ class MultiprocProcessor(BaseProcessor):
 
 
 class Runner(MSONable):
-
-    def __init__(self, builders, num_workers=None):
+    def __init__(self, builders, num_workers=1):
         """
         Initialize with a list of builders
 
@@ -409,13 +408,7 @@ class Runner(MSONable):
         self.num_workers = num_workers
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
-        (_, mpi_rank, mpi_size) = get_mpi()
-        if mpi_size > 1:
-            self.logger.info("Running with MPI Rank: {}".format(mpi_rank))
-            self.processor = MPIProcessor(builders)
-        else:
-            self.logger.info("Running with Multiprocessing")
-            self.processor = MultiprocProcessor(builders, num_workers)
+
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
 
@@ -442,8 +435,11 @@ class Runner(MSONable):
                             links_dict[i].append(j)
         return links_dict
 
-    def run(self):
+    def run(self, mpi=False):
         """
+        Args:
+            mpi (bool): Run with MPI instead of multiprocessing
+
         Does the following:
             - traverse through the builder dependency graph and does the following to
               each builder
@@ -456,6 +452,16 @@ class Runner(MSONable):
                 - update targets
                 - finalize aka cleanup(close all connections etc)
         """
+        if mpi:
+            self.logger.info("Running with MPI Rank: {}".format(mpi_rank))
+            self.processor = MPIProcessor(self.builders)
+        elif self.num_workers > 1:
+            self.logger.info("Running with Multiprocessing")
+            self.processor = MultiprocProcessor(self.builders, self.num_workers)
+        else:
+            self.logger.info("Running with SerialProcessor")
+            self.processor = SerialProcessor(self.builders)
+
         for i in range(len(self.builders)):
             self._build_dependencies(i)
 
