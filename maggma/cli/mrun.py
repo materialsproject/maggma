@@ -22,10 +22,11 @@ def main():
         help="Number of worker processes. Defaults to use as many as available.")
     parser.add_argument('-v', '--verbose', action='count', default=0, help="Controls logging level per number of v's")
     parser.add_argument(
-        "--dry_run",
+        "--dry-run",
         action="store_true",
         default=False,
         help="Dry run loading the builder file. Does not run the builders")
+    parser.add_argument("--mpi", action="store_true", default=False, help="Running under MPI")
     args = parser.parse_args()
 
     # Set Logging
@@ -51,7 +52,7 @@ def main():
         root.error("Couldn't properly read the builder file.")
 
     if not args.dry_run:
-        runner.run()
+        runner.run(mpi=args.mpi)
 
 
 if __name__ == "__main__":

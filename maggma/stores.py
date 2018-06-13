@@ -18,6 +18,8 @@ from operator import itemgetter
 from pymongo import MongoClient, DESCENDING
 from pydash import identity
 
+from pymongo import ReplaceOne
+
 from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
 from monty.serialization import loadfn
@@ -130,9 +132,17 @@ class Store(MSONable, metaclass=ABCMeta):
 
     @property
     def last_updated(self):
-        doc = next(self.query(properties=[self.lu_field]).sort([(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
+        doc = next(self.query(properties=[self.lu_field])
+                   .sort([(self.lu_field, pymongo.DESCENDING)])
+                   .limit(1), None)
+        if doc and self.lu_field not in doc:
+            raise StoreError(
+                "No field '{}' in store document. Please ensure Store.lu_field "
+                "is a datetime field in your store that represents the time of "
+                "last update to each document.".format(self.lu_field))
         # Handle when collection has docs but `NoneType` lu_field.
-        return (self.lu_func[0](doc[self.lu_field]) if (doc and doc[self.lu_field]) else datetime.min)
+        return (self.lu_func[0](doc[self.lu_field])
+                if (doc and doc[self.lu_field]) else datetime.min)
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
@@ -222,9 +232,13 @@ class Mongolike(object):
         if confirm_field_index(self.collection,key):
             return True
         else:
-            return self.collection.create_index(key, unique=unique, **kwargs)
+            try:
+                self.collection.create_index(key, unique=unique, **kwargs)
+                return True
+            except:
+                return False
 
-    def update(self, docs, update_lu=True, key=None, **kwargs):
+    def update(self, docs, update_lu=True, key=None, ordered=True, **kwargs):
         """
         Function to update associated MongoStore collection.
 
@@ -232,7 +246,7 @@ class Mongolike(object):
             docs: list of documents
         """
 
-        bulk = self.collection.initialize_ordered_bulk_op()
+        requests = []
 
         for d in docs:
 
@@ -257,9 +271,10 @@ class Mongolike(object):
                     search_doc = {self.key: d[self.key]}
                 if update_lu:
                     d[self.lu_field] = datetime.utcnow()
-                bulk.find(search_doc).upsert().replace_one(d)
 
-        bulk.execute()
+                requests.append(ReplaceOne(search_doc,d,upsert=True))
+
+        self.collection.bulk_write(requests,ordered=ordered)
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
@@ -550,7 +565,7 @@ class GridFSStore(Store):
         self.meta_keys = set()
 
         if "key" not in kwargs:
-            kwargs["key"] = "_oid"
+            kwargs["key"] = "_id"
 
         super(GridFSStore, self).__init__(**kwargs)
 
@@ -705,7 +720,7 @@ class GridFSStore(Store):
             return self._files_collection.create_index(key, unique=unique, background=True)
         else:
             # Store this key to put into metadata collection
-            self.meta_keys |= key
+            self.meta_keys |= set([key])
             return self._files_collection.create_index("metadata.{}".format(key), unique=unique, background=True)
 
     def update(self, docs, update_lu=True, key=None):
@@ -748,3 +763,8 @@ class GridFSStore(Store):
 
     def close(self):
         self.collection.database.client.close()
+
+
+class StoreError(Exception):
+    """General Store-related error."""
+    pass
