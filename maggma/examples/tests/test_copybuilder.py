@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from maggma.stores import MongoStore
 from maggma.runner import Runner
-from examples.copybuilder import CopyBuilder
+from maggma.examples.builders import CopyBuilder
 
 
 class TestCopyBuilder(TestCase):

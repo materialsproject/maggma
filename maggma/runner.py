@@ -7,6 +7,8 @@ and processing via MPI
 
 import abc
 import logging
+import multiprocessing
+import os
 import types
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
@@ -265,11 +267,13 @@ class MultiprocProcessor(BaseProcessor):
     Processor to run builders using python multiprocessing
     """
 
-    def __init__(self, builders, num_workers=None):
-        # multiprocessing only if mpi is not used, no mixing
-        self.num_workers = num_workers
+    def __init__(self, builders, max_workers=None):
+        self.max_workers = max_workers
         super(MultiprocProcessor, self).__init__(builders)
-        self.logger.info("Building with multiprocessing, {} workers in the pool".format(self.num_workers))
+        self.logger.info(
+            "Building with multiprocessing, {} workers in the pool".format(
+                "{} max".format(multiprocessing.cpu_count())
+                if self.max_workers is None else self.max_workers))
 
     def process(self, builder_id):
         """
@@ -339,7 +343,7 @@ class MultiprocProcessor(BaseProcessor):
         Processes all items from builder using a pool of processes
         """
         # 1.) setup a process pool
-        with ProcessPoolExecutor(self.num_workers) as executor:
+        with ProcessPoolExecutor(self.max_workers) as executor:
             # 2.) Loop over every item wrapped in a tqdm bar
             for item in self.get_pbar:
                 # 3.) Limit total number of queues tasks using a semaphore
@@ -393,24 +397,32 @@ class MultiprocProcessor(BaseProcessor):
 
 
 class Runner(MSONable):
-    def __init__(self, builders, num_workers=1):
+    def __init__(self, builders, num_workers=1, mpi=False):
         """
         Initialize with a list of builders
 
         Args:
             builders(list): list of builders
-            num_workers (int): number of processes. Used only for multiprocessing.
-                Will be automatically set to (number of cpus - 1) if set to 0.
-            processor(BaseProcessor): set this if custom processor is needed(must
-                subclass BaseProcessor though)
+            num_workers (int): number of processes. Used only for
+                multiprocessing. Will use max available if set to 0.
+            mpi (bool): Run with MPI
         """
         self.builders = builders
         self.num_workers = num_workers
+        self.mpi = mpi
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
 
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
+        if self.mpi:
+            self.processor = MPIProcessor(self.builders)
+        elif self.num_workers == 1:
+            self.processor = SerialProcessor(self.builders)
+        else:
+            max_workers = None if self.num_workers == 0 else self.num_workers
+            self.processor = MultiprocProcessor(self.builders, max_workers)
+
 
     # TODO: make it efficient, O(N^2) complexity at the moment,
     # might be ok(not many builders)? - KM
@@ -435,11 +447,8 @@ class Runner(MSONable):
                             links_dict[i].append(j)
         return links_dict
 
-    def run(self, mpi=False):
+    def run(self):
         """
-        Args:
-            mpi (bool): Run with MPI instead of multiprocessing
-
         Does the following:
             - traverse through the builder dependency graph and does the following to
               each builder
@@ -452,15 +461,18 @@ class Runner(MSONable):
                 - update targets
                 - finalize aka cleanup(close all connections etc)
         """
-        if mpi:
-            self.logger.info("Running with MPI Rank: {}".format(mpi_rank))
-            self.processor = MPIProcessor(self.builders)
-        elif self.num_workers > 1:
-            self.logger.info("Running with Multiprocessing")
-            self.processor = MultiprocProcessor(self.builders, self.num_workers)
+        if isinstance(self.processor, MPIProcessor):
+            self.logger.info(
+                "Running with MPI Rank {} (Size: {})".format(
+                    self.processor.rank, self.processor.size))
+        elif isinstance(self.processor, MultiprocProcessor):
+            self.logger.info(
+                "Running with Multiprocessing (up to {} workers)".format(
+                    multiprocessing.cpu_count()
+                    if self.num_workers == 0 else self.num_workers))
         else:
-            self.logger.info("Running with SerialProcessor")
-            self.processor = SerialProcessor(self.builders)
+            self.logger.info("Running with {}".format(
+                str(self.processor.__class__.__name__)))
 
         for i in range(len(self.builders)):
             self._build_dependencies(i)
