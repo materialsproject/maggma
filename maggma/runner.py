@@ -8,7 +8,6 @@ and processing via MPI
 import abc
 import logging
 import multiprocessing
-import os
 import types
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore

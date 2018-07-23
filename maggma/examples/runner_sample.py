@@ -21,6 +21,7 @@ __author__ = "Kiran Mathew, Donny Winston"
 
 
 class MyDumbBuilder(Builder):
+    """This builder builds."""
     def __init__(self, N, sources, targets, chunk_size=1):
         super().__init__(sources, targets, chunk_size)
         self.N = N
@@ -43,12 +44,22 @@ class MyDumbBuilder(Builder):
         self.logger.info("DONE!")
 
 
-def logstreamhandle(runner, level=logging.INFO):
+def logstreamhandle(runner, level=logging.INFO, stream=None):
+    """
+    Log output of runner and its processors and builders to stream at level.
+
+    Defaults: output to sys.stderr at INFO level.
+
+    Args:
+        runner (Runner): the runner.
+        level (int): logging level. DEBUG, INFO, WARNING, ERROR, or CRITICAL.
+        stream: any stream (sys.stdout, sys.stderr, etc.) or file-like object.
+    """
     loggers = [runner.logger, runner.processor.logger]
     loggers.extend(b.logger for b in runner.builders)
     for l in loggers:
         l.setLevel(level)
-        ch = logging.StreamHandler()
+        ch = logging.StreamHandler(stream=stream)
         ch.setLevel(level)
         formatter = logging.Formatter(
             '%(asctime)s - %(name)s - %(levelname)s - %(message)s')

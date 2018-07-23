@@ -1,3 +1,7 @@
+"""
+Example builders for testing and general use.
+"""
+
 from datetime import datetime
 
 from maggma.builder import Builder
@@ -6,9 +10,10 @@ from maggma.utils import confirm_field_index
 
 def source_keys_updated(source, target):
     """
-    Get a list of keys for source documents that have been updated.
+    Utility for incremental building. Gets a list of source.key values.
 
-    Requires [(lu_field, -1),(key, 1)] compound index on both source and target.
+    Get source.key values for documents that have been updated on target.
+    Ensure [(lu_field, -1),(key, 1)] compound index on both source and target.
     """
     keys_updated = []
     cursor_source = source.query(
@@ -33,7 +38,15 @@ def source_keys_updated(source, target):
 
 
 class MapBuilder(Builder):
-    def __init__(self, source, target, process_item=None,
+    """
+    Apply a unary function to yield a target document for each source document.
+
+    Supports incremental building, where a source document gets built only if it
+    has newer (by lu_field) data than the corresponding (by key) target
+    document.
+
+    """
+    def __init__(self, source, target, ufn_as_dict=None,
                  query=None, incremental=True, **kwargs):
         """
         Apply a `process_item` function to each source document.
@@ -41,41 +54,60 @@ class MapBuilder(Builder):
         Args:
             source (Store): source store
             target (Store): target store
-            process_item (dict): {@module,@name} of unary function for import
+            ufn_as_dict (dict): {@module,@name} of unary function for import
             query (dict): optional query to filter source store
             incremental (bool): whether to use lu_field of source and target
                 to get only new/updated documents.
         """
         self.source = source
         self.target = target
-        self.process_item = process_item
+        self.ufn_as_dict = ufn_as_dict
         self.incremental = incremental
         self.query = query
         super().__init__(sources=[source], targets=[target], **kwargs)
 
-        modname, fname = process_item["@module"], process_item["@name"]
+        modname, fname = ufn_as_dict["@module"], ufn_as_dict["@name"]
         mod = __import__(modname, globals(), locals(), [fname], 0)
         self.ufn = getattr(mod, fname)
 
-        checks = [confirm_field_index(target, target.key)]
+    def get_items(self):
+        source, target = self.source, self.target
+
+        index_checks = [confirm_field_index(target, target.key)]
         if self.incremental:
             # Ensure [(lu_field, -1), (key, 1)] index on both source and target
             for store in (source, target):
                 info = store.collection.index_information().values()
-                checks.append(
-                    any(spec == [('last_updated', -1), ('task_id', 1)]
+                index_checks.append(
+                    any(spec == [(store.lu_field, -1), (store.key, 1)]
                         for spec in (index['key'] for index in info)))
-        if not all(checks):
-            raise Exception("Missing required index on store(s).")
+        if not all(index_checks):
+            index_warning = (
+                "Missing one or more important indices on stores. "
+                "Performance for large stores may be severely degraded. "
+                "Ensure indices on target.key and "
+                "[(store.lu_field, -1), (store.key, 1)] "
+                "for each of source and target."
+            )
+            self.logger.warning(index_warning)
 
-    def get_items(self):
-        source, target = self.source, self.target
         criteria = {}
         if self.query:
             criteria.update(self.query)
         if self.incremental:
             keys_updated = source_keys_updated(source, target)
-            criteria.update({source.key: {"$in": keys_updated}})
+            # Merge existing criteria and {source.key: {"$in": keys_updated}}.
+            if "$and" in criteria:
+                criteria["$and"].append({source.key: {"$in": keys_updated}})
+            elif source.key in criteria:
+                # XXX could go deeper and check for $in, but this is fine.
+                criteria["$and"] = [
+                    {source.key: criteria[source.key].copy()},
+                    {source.key: {"$in": keys_updated}},
+                ]
+                del criteria[source.key]
+            else:
+                criteria.update({source.key: {"$in": keys_updated}})
         return source.query(criteria=criteria)
 
     def process_item(self, item):
@@ -94,13 +126,9 @@ class MapBuilder(Builder):
 
 
 class CopyBuilder(MapBuilder):
+    """Sync a source store with a target store."""
     def __init__(self, source, target, query=None, incremental=True, **kwargs):
-        """Sync a source with a target."""
-        self.source = source
-        self.target = target
-        self.incremental = incremental
-        self.query = query if query else {}
-        process_item = {"@module": "pydash", "@name": "identity"}
+        ufn_as_dict = {"@module": "pydash", "@name": "identity"}
         super().__init__(
-            source=source, target=target, process_item=process_item,
+            source=source, target=target, ufn_as_dict=ufn_as_dict,
             query=query, incremental=incremental, **kwargs)

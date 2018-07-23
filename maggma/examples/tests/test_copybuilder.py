@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime, timedelta
 from unittest import TestCase
 from uuid import uuid4
@@ -32,10 +33,12 @@ class TestCopyBuilder(TestCase):
         self.target = MongoStore(self.dbname, "target", **kwargs)
         self.builder = CopyBuilder(self.source, self.target)
         self.source.connect()
-        self.source.collection.create_index("lu")
+        self.source.collection.create_index(
+            [(self.source.lu_field, -1), (self.source.key, 1)])
         self.target.connect()
-        self.target.collection.create_index("lu")
-        self.target.collection.create_index("k")
+        self.target.collection.create_index(
+            [(self.target.lu_field, -1), (self.target.key, 1)])
+        self.target.collection.create_index(self.target.key)
 
     def tearDown(self):
         self.source.collection.drop()
@@ -65,12 +68,12 @@ class TestCopyBuilder(TestCase):
         self.assertEqual(self.target.query_one(criteria={"k": 0})["v"], "new")
         self.assertEqual(self.target.query_one(criteria={"k": 10})["v"], "old")
 
-    def test_confirm_lu_field_index(self):
-        self.source.collection.drop_index("lu_1")
-        with self.assertRaises(Exception) as cm:
+    def test_index_warning(self):
+        self.source.collection.drop_index("lu_-1_k_1")
+        with self.assertLogs(level=logging.WARNING) as cm:
             self.builder.get_items()
-        self.assertTrue(cm.exception.args[0].startswith("Need index"))
-        self.source.collection.create_index("lu")
+        self.assertIn("Ensure indices", "\n".join(cm.output))
+        self.source.collection.create_index("lu_-1_k_1")
 
     def test_runner(self):
         self.source.collection.insert_many(self.old_docs)
