@@ -21,7 +21,7 @@ class TestMRun(TestCase):
         for store in cls.stores:
             store.connect()
             store.ensure_index(store.key)
-            store.ensure_index(store.lu_field)
+            store.ensure_index([(store.lu_field, -1), (store.key, 1)])
         cls.client = cls.stores[0].collection.database.client
 
     @classmethod
