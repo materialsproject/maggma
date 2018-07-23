@@ -39,7 +39,7 @@ class TestMRun(TestCase):
         runner = Runner([builder])
         dumpfn(runner, self.runner_filename)
         p = subprocess.run("python -m maggma.cli.mrun {}".format(
-            self.runner_filename), shell=True, timeout=15)
+            self.runner_filename).split(), timeout=15)
         self.assertEqual(p.returncode, 0)
 
 
