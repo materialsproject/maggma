@@ -1,3 +1,5 @@
+"""Test maggma.examples.builders.CopyBuilder."""
+
 import logging
 from datetime import datetime, timedelta
 from unittest import TestCase
@@ -69,6 +71,7 @@ class TestCopyBuilder(TestCase):
         self.assertEqual(self.target.query_one(criteria={"k": 10})["v"], "old")
 
     def test_index_warning(self):
+        """Should log warning when recommended store indexes are not present."""
         self.source.collection.drop_index("lu_-1_k_1")
         with self.assertLogs(level=logging.WARNING) as cm:
             self.builder.get_items()
