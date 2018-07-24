@@ -468,7 +468,7 @@ class Runner(MSONable):
             self.logger.info(
                 "Running with Multiprocessing (up to {} workers)".format(
                     multiprocessing.cpu_count()
-                    if self.num_workers == 0 else self.num_workers))
+                    if self.max_workers == 0 else self.max_workers))
         else:
             self.logger.info("Running with {}".format(
                 str(self.processor.__class__.__name__)))
