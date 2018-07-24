@@ -396,18 +396,18 @@ class MultiprocProcessor(BaseProcessor):
 
 
 class Runner(MSONable):
-    def __init__(self, builders, num_workers=1, mpi=False):
+    def __init__(self, builders, max_workers=1, mpi=False):
         """
         Initialize with a list of builders
 
         Args:
             builders(list): list of builders
-            num_workers (int): number of processes. Used only for
-                multiprocessing. Will use max available if set to 0.
+            max_workers (int): number of processes. Ignored if mpi is True.
+                Uses multiprocessing if not set to 1. Set to 0 for no maximum.
             mpi (bool): Run with MPI
         """
         self.builders = builders
-        self.num_workers = num_workers
+        self.max_workers = max_workers
         self.mpi = mpi
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
@@ -416,10 +416,10 @@ class Runner(MSONable):
         self.has_run = []  # for bookkeeping builder runs
         if self.mpi:
             self.processor = MPIProcessor(self.builders)
-        elif self.num_workers == 1:
+        elif self.max_workers == 1:
             self.processor = SerialProcessor(self.builders)
         else:
-            max_workers = None if self.num_workers == 0 else self.num_workers
+            max_workers = None if self.max_workers == 0 else self.max_workers
             self.processor = MultiprocProcessor(self.builders, max_workers)
 
 
