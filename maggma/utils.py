@@ -3,7 +3,10 @@
 Utilities to help with maggma functions
 """
 import itertools
+from collections import deque
 from datetime import datetime, timedelta
+from sys import getsizeof, stderr
+
 from pydash.utilities import to_path
 from pydash.objects import set_, get, has
 from pydash.objects import unset as _unset
@@ -212,3 +215,53 @@ def unset(d, key):
     for i in reversed(range(1, len(path))):
         if len(get(d, path[:i])) == 0:
             unset(d, path[:i])
+
+
+def total_size(o, handlers={}, verbose=False):
+    """
+    Returns the approximate memory footprint of an object and its contents.
+
+    Automatically finds the contents of the following builtin containers and
+    their subclasses:  tuple, list, deque, dict, set and frozenset.
+
+    To search other containers, add handlers to iterate over their contents:
+
+        handlers = {SomeContainerClass: iter,
+                    OtherContainerClass: OtherContainerClass.get_elements}
+
+    Example usage:
+    >>> d = dict(a=1, b=2, c=3, d=[4,5,6,7], e='a string of chars')
+    >>> print(total_size(d, verbose=True))
+
+    Source: https://github.com/ActiveState/code/blob
+    /73b09edc1b9850c557a79296655f140ce5e853db
+    /recipes/Python/577504_Compute_Memory_footprint_object_its/recipe-577504.py
+    """
+    all_handlers = {
+        tuple: iter,
+        list: iter,
+        deque: iter,
+        dict: (lambda d: itertools.chain.from_iterable(d.items())),
+        set: iter,
+        frozenset: iter,
+    }
+    all_handlers.update(handlers)  # user handlers take precedence
+    seen = set()  # track which object id's have already been seen
+    default_size = getsizeof(0)  # estimate sizeof object without __sizeof__
+
+    def sizeof(o):
+        if id(o) in seen:  # do not double count the same object
+            return 0
+        seen.add(id(o))
+        s = getsizeof(o, default_size)
+
+        if verbose:
+            print(s, type(o), repr(o), file=stderr)
+
+        for typ, handler in all_handlers.items():
+            if isinstance(o, typ):
+                s += sum(map(sizeof, handler(o)))
+                break
+        return s
+
+    return sizeof(o)
