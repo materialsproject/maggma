@@ -4,6 +4,8 @@ Example builders for testing and general use.
 
 from datetime import datetime
 
+from pydash import identity
+
 from maggma.builder import Builder
 from maggma.utils import confirm_field_index, total_size
 
@@ -152,8 +154,6 @@ class MapBuilder(Builder):
 
 class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
-    def __init__(self, source, target, query=None, incremental=True, **kwargs):
-        ufn_as_dict = {"@module": "pydash", "@name": "identity"}
-        super().__init__(
-            source=source, target=target, ufn_as_dict=ufn_as_dict,
-            query=query, incremental=incremental, **kwargs)
+    def __init__(self, source, target, **kwargs):
+        self.ufn = identity
+        super().__init__(source=source, target=target, **kwargs)
