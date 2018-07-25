@@ -133,7 +133,10 @@ class MapBuilder(Builder):
         return source.query(criteria=criteria)
 
     def process_item(self, item):
-        processed = self.ufn.__call__(item)
+        try:
+            processed = self.ufn.__call__(item)
+        except Exception as e:
+            processed = {"error": str(e)}
         key, lu_field = self.source.key, self.source.lu_field
         out = {key: item[key], lu_field: item[lu_field]}
         out.update(processed)
