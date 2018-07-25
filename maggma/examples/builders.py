@@ -5,7 +5,7 @@ Example builders for testing and general use.
 from datetime import datetime
 
 from maggma.builder import Builder
-from maggma.utils import confirm_field_index
+from maggma.utils import confirm_field_index, total_size
 
 
 def source_keys_updated(source, target):
@@ -49,12 +49,14 @@ class MapBuilder(Builder):
     def __init__(self, source, target, ufn_as_dict=None,
                  query=None, incremental=True, **kwargs):
         """
-        Apply a `process_item` function to each source document.
+        Apply a unary function to each source document.
 
         Args:
             source (Store): source store
             target (Store): target store
-            ufn_as_dict (dict): {@module,@name} of unary function for import
+            ufn_as_dict (dict): {@module,@name} of unary function for import, or
+                None if subclassing MapBuilder and setting attribute before
+                calling super().__init__.
             query (dict): optional query to filter source store
             incremental (bool): whether to use lu_field of source and target
                 to get only new/updated documents.
@@ -65,10 +67,15 @@ class MapBuilder(Builder):
         self.incremental = incremental
         self.query = query
         super().__init__(sources=[source], targets=[target], **kwargs)
-
-        modname, fname = ufn_as_dict["@module"], ufn_as_dict["@name"]
-        mod = __import__(modname, globals(), locals(), [fname], 0)
-        self.ufn = getattr(mod, fname)
+        self.kwargs = kwargs.copy()
+        self.kwargs.update(
+            ufn_as_dict=ufn_as_dict, query=query, incremental=incremental)
+        if not hasattr(self, "ufn"):
+            self.ufn = None
+        if self.ufn_as_dict:
+            modname, fname = ufn_as_dict["@module"], ufn_as_dict["@name"]
+            mod = __import__(modname, globals(), locals(), [fname], 0)
+            self.ufn = getattr(mod, fname)
 
     def get_items(self):
         source, target = self.source, self.target
@@ -95,6 +102,8 @@ class MapBuilder(Builder):
         if self.query:
             criteria.update(self.query)
         if self.incremental:
+            self.logger.info(
+                "incremental mode: finding new/updated source keys")
             keys_updated = source_keys_updated(source, target)
             # Merge existing criteria and {source.key: {"$in": keys_updated}}.
             if "$and" in criteria:
@@ -108,10 +117,25 @@ class MapBuilder(Builder):
                 del criteria[source.key]
             else:
                 criteria.update({source.key: {"$in": keys_updated}})
+        # Check ratio of criteria size to 16 MB MongoDB document size limit.
+        # Overestimates ratio via 1000 * 1000 instead of 1024 * 1024.
+        # If criteria is > 16MB, even cursor.count() will fail with a
+        # "DocumentTooLarge: "command document too large" error.
+        if (total_size(criteria) / (16 * 1000 * 1000)) >= 1:
+            raise RuntimeError(
+                "`get_items` query criteria too large. This can happen if "
+                "trying to run incremental=True for the initial build of a "
+                "very large source store, or if `query` is too large. You "
+                "can use maggma.utils.total_size to ensure `query` is smaller "
+                "than 16,000,000 bytes.")
         return source.query(criteria=criteria)
 
     def process_item(self, item):
-        return self.ufn.__call__(item)
+        processed = self.ufn.__call__(item)
+        key, lu_field = self.source.key, self.source.lu_field
+        out = {key: item[key], lu_field: item[lu_field]}
+        out.update(processed)
+        return out
 
     def update_targets(self, items):
         source, target = self.source, self.target
@@ -121,7 +145,8 @@ class MapBuilder(Builder):
             if source.lu_field != target.lu_field:
                 del item[source.lu_field]
             item["_bt"] = datetime.utcnow()
-            del item["_id"]
+            if "_id" in item:
+                del item["_id"]
         target.update(items, update_lu=False)
 
 
