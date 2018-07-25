@@ -217,9 +217,9 @@ def unset(d, key):
             unset(d, path[:i])
 
 
-def total_size(o, handlers={}, verbose=False):
+def total_size(o, handlers=None, verbose=False):
     """
-    Returns the approximate memory footprint of an object and its contents.
+    Returns the approximate memory footprint (in bytes) of an object.
 
     Automatically finds the contents of the following builtin containers and
     their subclasses:  tuple, list, deque, dict, set and frozenset.
@@ -233,7 +233,7 @@ def total_size(o, handlers={}, verbose=False):
     >>> d = dict(a=1, b=2, c=3, d=[4,5,6,7], e='a string of chars')
     >>> print(total_size(d, verbose=True))
 
-    Source: https://github.com/ActiveState/code/blob
+    Based on: https://github.com/ActiveState/code/blob
     /73b09edc1b9850c557a79296655f140ce5e853db
     /recipes/Python/577504_Compute_Memory_footprint_object_its/recipe-577504.py
     """
@@ -245,11 +245,13 @@ def total_size(o, handlers={}, verbose=False):
         set: iter,
         frozenset: iter,
     }
-    all_handlers.update(handlers)  # user handlers take precedence
+    if handlers:
+        all_handlers.update(handlers)  # user handlers take precedence
     seen = set()  # track which object id's have already been seen
     default_size = getsizeof(0)  # estimate sizeof object without __sizeof__
 
     def sizeof(o):
+        """Recursively determine size (in bytes) of object."""
         if id(o) in seen:  # do not double count the same object
             return 0
         seen.add(id(o))
