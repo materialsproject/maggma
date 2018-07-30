@@ -1,6 +1,7 @@
 """
 Example builders for testing and general use.
 """
+import traceback
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
@@ -151,6 +152,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         try:
             processed = self.ufn.__call__(item)
         except Exception as e:
+            self.logger.error(traceback.format_exc())
             processed = {"error": str(e)}
         key, lu_field = self.source.key, self.source.lu_field
         out = {key: item[key], lu_field: item[lu_field]}
@@ -199,8 +201,8 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         criteria = get_criteria(
             self.source, self.target, query=self.query,
             incremental=self.incremental, logger=self.logger)
-        if all(isinstance(entry, str) for entry in self.grouping_properties):
-            properties = {entry: 1 for entry in self.grouping_properties}
+        if all(isinstance(entry, str) for entry in self.grouping_properties()):
+            properties = {entry: 1 for entry in self.grouping_properties()}
             if "_id" not in properties:
                 properties.update({"_id": 0})
         else:
@@ -224,13 +226,13 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
                 queries in docs_to_groups.
         """
 
+    @staticmethod
     @abstractmethod
-    def docs_to_groups(self, docs):
+    def docs_to_groups(docs):
         """
         Yield groups from (minimally-projected) documents.
 
-        This method should *not* do the work of fetching data needed for
-        process_item: that job should be left to group_to_items.
+        This could be as simple as returning a set of unique document keys.
 
         Args:
             docs (pymongo.cursor.Cursor): documents with minimal projections
@@ -245,7 +247,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         """
         Given a group, yield items for this builder's process_item method.
 
-        This method should do the work of fetching data needed for processing.
+        This method does the work of fetching data needed for processing.
 
         Args:
             group (dict): sufficient as or to produce a source filter
