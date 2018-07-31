@@ -62,7 +62,8 @@ def get_criteria(source, target, query=None, incremental=True, logger=None):
             "[(store.lu_field, -1), (store.key, 1)] "
             "for each of source and target."
         )
-        logger.warning(index_warning)
+        if logger:
+            logger.warning(index_warning)
 
     criteria = {}
     if query:
