@@ -196,6 +196,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         """
         super().__init__(
             source, target, query=query, incremental=incremental, **kwargs)
+        self.total = None
 
     def get_items(self):
         criteria = get_criteria(
@@ -207,8 +208,14 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
                 properties.update({"_id": 0})
         else:
             properties = {entry: include for entry, include in self.projection}
-        for group in self.docs_to_groups(self.source.query(
-                criteria=criteria, properties=properties)):
+        groups = self.docs_to_groups(
+            self.source.query(criteria=criteria, properties=properties))
+        self.total = len(groups)
+        if hasattr(self, "n_items_per_group"):
+            n = self.n_items_per_group
+            if isinstance(n, int) and n >= 1:
+                self.total *= n
+        for group in groups:
             for item in self.group_to_items(group):
                 yield item
 
