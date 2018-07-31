@@ -207,7 +207,8 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
             if "_id" not in properties:
                 properties.update({"_id": 0})
         else:
-            properties = {entry: include for entry, include in self.projection}
+            properties = {entry: include
+                          for entry, include in self.grouping_properties()}
         groups = self.docs_to_groups(
             self.source.query(criteria=criteria, properties=properties))
         self.total = len(groups)
