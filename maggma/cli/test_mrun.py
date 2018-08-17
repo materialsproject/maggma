@@ -7,7 +7,7 @@ import unittest
 from unittest import TestCase
 from uuid import uuid4
 
-from examples.copybuilder import CopyBuilder
+from maggma.examples.builders import CopyBuilder
 from maggma.stores import MongoStore
 
 
@@ -21,7 +21,7 @@ class TestMRun(TestCase):
         for store in cls.stores:
             store.connect()
             store.ensure_index(store.key)
-            store.ensure_index(store.lu_field)
+            store.ensure_index([(store.lu_field, -1), (store.key, 1)])
         cls.client = cls.stores[0].collection.database.client
 
     @classmethod
@@ -38,7 +38,8 @@ class TestMRun(TestCase):
         builder = CopyBuilder(self.source, self.target)
         runner = Runner([builder])
         dumpfn(runner, self.runner_filename)
-        p = subprocess.run("python -m maggma.cli.mrun {}".format(self.runner_filename), shell=True, timeout=15)
+        p = subprocess.run("python -m maggma.cli.mrun {}".format(
+            self.runner_filename).split(), timeout=15)
         self.assertEqual(p.returncode, 0)
 
 

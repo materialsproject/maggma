@@ -263,12 +263,11 @@ class Mongolike(object):
                         self.logger.error('Document failed to validate: {}'.format(d))
 
             if validates:
+                key = key if key else self.key
                 if isinstance(key, list):
                     search_doc = {k: d[k] for k in key}
-                elif key:
-                    search_doc = {key: d[key]}
                 else:
-                    search_doc = {self.key: d[self.key]}
+                    search_doc = {key: d[key]}
                 if update_lu:
                     d[self.lu_field] = datetime.utcnow()
 
