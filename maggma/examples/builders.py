@@ -5,8 +5,6 @@ import traceback
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
-from pydash import identity
-
 from maggma.builder import Builder
 from maggma.utils import confirm_field_index, total_size
 
@@ -69,8 +67,8 @@ def get_criteria(source, target, query=None, incremental=True, logger=None):
     if query:
         criteria.update(query)
     if incremental:
-        logger.info(
-            "incremental mode: finding new/updated source keys")
+        if logger:
+            logger.info("incremental mode: finding new/updated source keys")
         keys_updated = source_keys_updated(source, target)
         # Merge existing criteria and {source.key: {"$in": keys_updated}}.
         if "$and" in criteria:
