@@ -43,7 +43,7 @@ def main():
 
     if isinstance(objects, list):
         # If this is a list of builders
-        runner = Runner(objects, num_workers=args.num_workers, mpi=args.mpi)
+        runner = Runner(objects, max_workers=args.num_workers, mpi=args.mpi)
     elif isinstance(objects, Runner):
         # This is a runner:
         root.info("Changing number of workers from default in input file")

@@ -87,7 +87,7 @@ if __name__ == '__main__':
     parser.set_defaults(mpi=False)
 
     args = parser.parse_args()
-    runner = Runner(builders, num_workers=args.nworkers, mpi=args.mpi)
+    runner = Runner(builders, max_workers=args.nworkers, mpi=args.mpi)
 
     logstreamhandle(runner)
     runner.run()
