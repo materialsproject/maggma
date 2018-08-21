@@ -258,7 +258,7 @@ class MPIProcessor(BaseProcessor):
                     self.update_pbar.update(len(self.data))
                     self.data.clear()
                 except Exception as e:
-                    self.logger.debug("Problem in updating targets in builder run: {}".format(e))
+                    self.logger.exception("Problem in updating targets in builder run: {}".format(e))
 
 
 class MultiprocProcessor(BaseProcessor):
