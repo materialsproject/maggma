@@ -14,8 +14,16 @@ from threading import Thread, Condition, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from monty.json import MSONable
 from maggma.utils import get_mpi, grouper, primed
-from tqdm import tqdm
 
+# import tqdm Jupyter widget if running inside Jupyter
+try:
+    # noinspection PyUnresolvedReferences
+    if type(get_ipython().__name__) == 'ZMQInteractiveShell':
+        from tqdm import tqdm_notebook as tqdm
+    else: # likely 'TerminalInteractiveShell'
+        from tqdm import tqdm
+except NameError:
+    from tqdm import tqdm
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
     """

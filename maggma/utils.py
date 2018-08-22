@@ -11,8 +11,16 @@ from pydash.utilities import to_path
 from pydash.objects import set_, get, has
 from pydash.objects import unset as _unset
 import logging
-import tqdm
 
+# import tqdm Jupyter widget if running inside Jupyter
+try:
+    # noinspection PyUnresolvedReferences
+    if type(get_ipython().__name__) == 'ZMQInteractiveShell':
+        from tqdm import tqdm_notebook as tqdm
+    else: # likely 'TerminalInteractiveShell'
+        from tqdm import tqdm
+except NameError:
+    from tqdm import tqdm
 
 def primed(iterable):
     """Preprimes an iterator so the first value is calculated immediately
@@ -37,7 +45,7 @@ class TqdmLoggingHandler(logging.Handler):
     def emit(self, record):
         try:
             msg = self.format(record)
-            tqdm.tqdm.write(msg)
+            tqdm.write(msg)
             self.flush()
         except (KeyboardInterrupt, SystemExit):
             raise
