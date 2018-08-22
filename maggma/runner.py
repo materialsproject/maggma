@@ -17,7 +17,7 @@ from maggma.utils import get_mpi, grouper, primed
 
 # check to see if running inside Jupyter
 try:
-    in_jupyter = True if 'IPyKernelApp' in get_ipython().config else False
+    in_jupyter = True if 'IPKernelApp' in get_ipython().config else False
 except:
     in_jupyter = False
 
