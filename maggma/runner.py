@@ -15,16 +15,14 @@ from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from monty.json import MSONable
 from maggma.utils import get_mpi, grouper, primed
 
-# check to see if running inside Jupyter
-try:
-    in_jupyter = True if 'IPKernelApp' in get_ipython().config else False
-except:
-    in_jupyter = False
-
 # import tqdm Jupyter widget if running inside Jupyter
-if in_jupyter:
-    from tqdm import tqdm_notebook as tqdm
-else:
+try:
+    # noinspection PyUnresolvedReferences
+    if type(get_ipython().__name__) == 'ZMQInteractiveShell':
+        from tqdm import tqdm_notebook as tqdm
+    else: # likely 'TerminalInteractiveShell'
+        from tqdm import tqdm
+except NameError:
     from tqdm import tqdm
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
