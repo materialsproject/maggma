@@ -11,8 +11,18 @@ from pydash.utilities import to_path
 from pydash.objects import set_, get, has
 from pydash.objects import unset as _unset
 import logging
-import tqdm
 
+# check to see if running inside Jupyter
+try:
+    in_jupyter = True if 'IPyKernelApp' in get_ipython().config else False
+except:
+    in_jupyter = False
+
+# import tqdm Jupyter widget if running inside Jupyter
+if in_jupyter:
+    from tqdm import tqdm_notebook as tqdm
+else:
+    from tqdm import tqdm
 
 def primed(iterable):
     """Preprimes an iterator so the first value is calculated immediately
@@ -37,7 +47,7 @@ class TqdmLoggingHandler(logging.Handler):
     def emit(self, record):
         try:
             msg = self.format(record)
-            tqdm.tqdm.write(msg)
+            tqdm.write(msg)
             self.flush()
         except (KeyboardInterrupt, SystemExit):
             raise
