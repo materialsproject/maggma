@@ -15,7 +15,7 @@ import logging
 # import tqdm Jupyter widget if running inside Jupyter
 try:
     # noinspection PyUnresolvedReferences
-    if type(get_ipython().__name__) == 'ZMQInteractiveShell':
+    if get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
         from tqdm import tqdm_notebook as tqdm
     else: # likely 'TerminalInteractiveShell'
         from tqdm import tqdm
