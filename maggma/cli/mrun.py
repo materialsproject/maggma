@@ -22,10 +22,11 @@ def main():
         help="Number of worker processes. Defaults to use as many as available.")
     parser.add_argument('-v', '--verbose', action='count', default=0, help="Controls logging level per number of v's")
     parser.add_argument(
-        "--dry_run",
+        "--dry-run",
         action="store_true",
         default=False,
         help="Dry run loading the builder file. Does not run the builders")
+    parser.add_argument("--mpi", action="store_true", default=False, help="Running under MPI")
     args = parser.parse_args()
 
     # Set Logging
@@ -42,11 +43,11 @@ def main():
 
     if isinstance(objects, list):
         # If this is a list of builders
-        runner = Runner(objects, num_workers=args.num_workers)
+        runner = Runner(objects, max_workers=args.num_workers, mpi=args.mpi)
     elif isinstance(objects, Runner):
         # This is a runner:
         root.info("Changing number of workers from default in input file")
-        runner = Runner(objects.builders, args.num_workers)
+        runner = Runner(objects.builders, args.num_workers, mpi=args.mpi)
     else:
         root.error("Couldn't properly read the builder file.")
 

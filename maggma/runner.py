@@ -7,14 +7,23 @@ and processing via MPI
 
 import abc
 import logging
+import multiprocessing
 import types
 from collections import defaultdict, deque
 from threading import Thread, Condition, BoundedSemaphore
 from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 from monty.json import MSONable
 from maggma.utils import get_mpi, grouper, primed
-from tqdm import tqdm
 
+# import tqdm Jupyter widget if running inside Jupyter
+try:
+    # noinspection PyUnresolvedReferences
+    if get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
+        from tqdm import tqdm_notebook as tqdm
+    else: # likely 'TerminalInteractiveShell'
+        from tqdm import tqdm
+except NameError:
+    from tqdm import tqdm
 
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
     """
@@ -257,7 +266,7 @@ class MPIProcessor(BaseProcessor):
                     self.update_pbar.update(len(self.data))
                     self.data.clear()
                 except Exception as e:
-                    self.logger.debug("Problem in updating targets in builder run: {}".format(e))
+                    self.logger.exception("Problem in updating targets in builder run: {}".format(e))
 
 
 class MultiprocProcessor(BaseProcessor):
@@ -265,11 +274,13 @@ class MultiprocProcessor(BaseProcessor):
     Processor to run builders using python multiprocessing
     """
 
-    def __init__(self, builders, num_workers=None):
-        # multiprocessing only if mpi is not used, no mixing
-        self.num_workers = num_workers
+    def __init__(self, builders, max_workers=None):
+        self.max_workers = max_workers
         super(MultiprocProcessor, self).__init__(builders)
-        self.logger.info("Building with multiprocessing, {} workers in the pool".format(self.num_workers))
+        self.logger.info(
+            "Building with multiprocessing, {} workers in the pool".format(
+                "{} max".format(multiprocessing.cpu_count())
+                if self.max_workers is None else self.max_workers))
 
     def process(self, builder_id):
         """
@@ -339,7 +350,7 @@ class MultiprocProcessor(BaseProcessor):
         Processes all items from builder using a pool of processes
         """
         # 1.) setup a process pool
-        with ProcessPoolExecutor(self.num_workers) as executor:
+        with ProcessPoolExecutor(self.max_workers) as executor:
             # 2.) Loop over every item wrapped in a tqdm bar
             for item in self.get_pbar:
                 # 3.) Limit total number of queues tasks using a semaphore
@@ -389,35 +400,36 @@ class MultiprocProcessor(BaseProcessor):
                         self.update_pbar.update(len(self.data))
                         self.data.clear()
                 except Exception as e:
-                    self.logger.debug("Problem in updating targets in builder run: {}".format(e))
+                    self.logger.exception("Problem in updating targets in builder run: {}".format(e))
 
 
 class Runner(MSONable):
-
-    def __init__(self, builders, num_workers=None):
+    def __init__(self, builders, max_workers=1, mpi=False):
         """
         Initialize with a list of builders
 
         Args:
             builders(list): list of builders
-            num_workers (int): number of processes. Used only for multiprocessing.
-                Will be automatically set to (number of cpus - 1) if set to 0.
-            processor(BaseProcessor): set this if custom processor is needed(must
-                subclass BaseProcessor though)
+            max_workers (int): number of processes. Ignored if mpi is True.
+                Uses multiprocessing if not set to 1. Set to 0 for no maximum.
+            mpi (bool): Run with MPI
         """
         self.builders = builders
-        self.num_workers = num_workers
+        self.max_workers = max_workers
+        self.mpi = mpi
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
-        (_, mpi_rank, mpi_size) = get_mpi()
-        if mpi_size > 1:
-            self.logger.info("Running with MPI Rank: {}".format(mpi_rank))
-            self.processor = MPIProcessor(builders)
-        else:
-            self.logger.info("Running with Multiprocessing")
-            self.processor = MultiprocProcessor(builders, num_workers)
+
         self.dependency_graph = self._get_builder_dependency_graph()
         self.has_run = []  # for bookkeeping builder runs
+        if self.mpi:
+            self.processor = MPIProcessor(self.builders)
+        elif self.max_workers == 1:
+            self.processor = SerialProcessor(self.builders)
+        else:
+            max_workers = None if self.max_workers == 0 else self.max_workers
+            self.processor = MultiprocProcessor(self.builders, max_workers)
+
 
     # TODO: make it efficient, O(N^2) complexity at the moment,
     # might be ok(not many builders)? - KM
@@ -456,6 +468,19 @@ class Runner(MSONable):
                 - update targets
                 - finalize aka cleanup(close all connections etc)
         """
+        if isinstance(self.processor, MPIProcessor):
+            self.logger.info(
+                "Running with MPI Rank {} (Size: {})".format(
+                    self.processor.rank, self.processor.size))
+        elif isinstance(self.processor, MultiprocProcessor):
+            self.logger.info(
+                "Running with Multiprocessing (up to {} workers)".format(
+                    multiprocessing.cpu_count()
+                    if self.max_workers == 0 else self.max_workers))
+        else:
+            self.logger.info("Running with {}".format(
+                str(self.processor.__class__.__name__)))
+
         for i in range(len(self.builders)):
             self._build_dependencies(i)
 

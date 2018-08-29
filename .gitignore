@@ -63,6 +63,8 @@ instance/
 
 # Sphinx documentation
 docs/_build/
+source/apidoc/maggma.*
+source/apidoc/modules.rst
 
 # PyBuilder
 target/
@@ -107,3 +109,4 @@ ENV/
 *~
 
 .idea
+.DS_Store
