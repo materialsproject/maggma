@@ -105,7 +105,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     document.
 
     """
-    def __init__(self, source, target, query=None, incremental=True, **kwargs):
+    def __init__(self, source, target, query=None, incremental=True, projection=None, **kwargs):
         """
         Apply a unary function to each source document.
 
@@ -115,11 +115,14 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             query (dict): optional query to filter source store
             incremental (bool): whether to use lu_field of source and target
                 to get only new/updated documents.
+            projection (list): list of keys to project from the source for processing.
+                This can be used to limit the data to improve efficiency
         """
         self.source = source
         self.target = target
         self.incremental = incremental
         self.query = query
+        self.projection = projection
         super().__init__(sources=[source], targets=[target], **kwargs)
         self.kwargs = kwargs.copy()
         self.kwargs.update(query=query, incremental=incremental)
@@ -145,7 +148,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         criteria = get_criteria(
             self.source, self.target, query=self.query,
             incremental=self.incremental, logger=self.logger)
-        return self.source.query(criteria=criteria)
+        return self.source.query(criteria=criteria,properties=self.projection)
 
     def process_item(self, item):
         try:
