@@ -122,7 +122,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.target = target
         self.incremental = incremental
         self.query = query
-        self.projection = projection
+        self.projection = projection if projection else []
         super().__init__(sources=[source], targets=[target], **kwargs)
         self.kwargs = kwargs.copy()
         self.kwargs.update(query=query, incremental=incremental)
@@ -148,7 +148,12 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         criteria = get_criteria(
             self.source, self.target, query=self.query,
             incremental=self.incremental, logger=self.logger)
-        return self.source.query(criteria=criteria,properties=self.projection)
+        if self.projection:
+            projection = list(set(self.projection + [self.source.key, self.source.lu_field]))
+        else:
+            projection = None
+            
+        return self.source.query(criteria=criteria,properties=projection)
 
     def process_item(self, item):
         try:
