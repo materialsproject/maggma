@@ -22,11 +22,9 @@ def source_keys_updated(source, target):
     """
     keys_updated = set()  # Handle non-unique keys, e.g. for GroupBuilder.
     cursor_source = source.query(
-        properties=[source.key, source.lu_field],
-        sort=[(source.lu_field, -1), (source.key, 1)])
+        properties=[source.key, source.lu_field], sort=[(source.lu_field, -1), (source.key, 1)])
     cursor_target = target.query(
-        properties=[target.key, target.lu_field],
-        sort=[(target.lu_field, -1), (target.key, 1)])
+        properties=[target.key, target.lu_field], sort=[(target.lu_field, -1), (target.key, 1)])
     tdoc = next(cursor_target, None)
     for sdoc in cursor_source:
         if tdoc is None:
@@ -50,16 +48,13 @@ def get_criteria(source, target, query=None, incremental=True, logger=None):
         for store in (source, target):
             info = store.collection.index_information().values()
             index_checks.append(
-                any(spec == [(store.lu_field, -1), (store.key, 1)]
-                    for spec in (index['key'] for index in info)))
+                any(spec == [(store.lu_field, -1), (store.key, 1)] for spec in (index['key'] for index in info)))
     if not all(index_checks):
-        index_warning = (
-            "Missing one or more important indices on stores. "
-            "Performance for large stores may be severely degraded. "
-            "Ensure indices on target.key and "
-            "[(store.lu_field, -1), (store.key, 1)] "
-            "for each of source and target."
-        )
+        index_warning = ("Missing one or more important indices on stores. "
+                         "Performance for large stores may be severely degraded. "
+                         "Ensure indices on target.key and "
+                         "[(store.lu_field, -1), (store.key, 1)] "
+                         "for each of source and target.")
         if logger:
             logger.warning(index_warning)
 
@@ -76,8 +71,14 @@ def get_criteria(source, target, query=None, incremental=True, logger=None):
         elif source.key in criteria:
             # XXX could go deeper and check for $in, but this is fine.
             criteria["$and"] = [
-                {source.key: criteria[source.key].copy()},
-                {source.key: {"$in": keys_updated}},
+                {
+                    source.key: criteria[source.key].copy()
+                },
+                {
+                    source.key: {
+                        "$in": keys_updated
+                    }
+                },
             ]
             del criteria[source.key]
         else:
@@ -87,12 +88,11 @@ def get_criteria(source, target, query=None, incremental=True, logger=None):
     # If criteria is > 16MB, even cursor.count() will fail with a
     # "DocumentTooLarge: "command document too large" error.
     if (total_size(criteria) / (16 * 1000 * 1000)) >= 1:
-        raise RuntimeError(
-            "`get_items` query criteria too large. This can happen if "
-            "trying to run incremental=True for the initial build of a "
-            "very large source store, or if `query` is too large. You "
-            "can use maggma.utils.total_size to ensure `query` is smaller "
-            "than 16,000,000 bytes.")
+        raise RuntimeError("`get_items` query criteria too large. This can happen if "
+                           "trying to run incremental=True for the initial build of a "
+                           "very large source store, or if `query` is too large. You "
+                           "can use maggma.utils.total_size to ensure `query` is smaller "
+                           "than 16,000,000 bytes.")
     return criteria
 
 
@@ -105,6 +105,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     document.
 
     """
+
     def __init__(self, source, target, ufn, query=None, incremental=True, projection=None, **kwargs):
         """
         Apply a unary function to each source document.
@@ -136,14 +137,13 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def get_items(self):
         criteria = get_criteria(
-            self.source, self.target, query=self.query,
-            incremental=self.incremental, logger=self.logger)
+            self.source, self.target, query=self.query, incremental=self.incremental, logger=self.logger)
         if self.projection:
             projection = list(set(self.projection + [self.source.key, self.source.lu_field]))
         else:
             projection = None
 
-        return self.source.query(criteria=criteria,properties=projection)
+        return self.source.query(criteria=criteria, properties=projection)
 
     def process_item(self, item):
         try:
@@ -152,8 +152,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             self.logger.error(traceback.format_exc())
             processed = {"error": str(e)}
         key, lu_field = self.source.key, self.source.lu_field
-        out = {self.target.key: item[key],
-               self.target.lu_field: item[lu_field]}
+        out = {self.target.key: item[key], self.target.lu_field: item[lu_field]}
         out.update(processed)
         return out
 
@@ -177,6 +176,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     Supports incremental building, where a source group gets (re)built only if
     it has a newer (by lu_field) doc than the corresponding (by key) target doc.
     """
+
     def __init__(self, source, target, query=None, incremental=True, **kwargs):
         """
 
@@ -192,23 +192,19 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
             incremental (bool): whether to use lu_field of source and target
                 to get only new/updated documents.
         """
-        super().__init__(
-            source, target, query=query, incremental=incremental, **kwargs)
+        super().__init__(source, target, query=query, incremental=incremental, **kwargs)
         self.total = None
 
     def get_items(self):
         criteria = get_criteria(
-            self.source, self.target, query=self.query,
-            incremental=self.incremental, logger=self.logger)
+            self.source, self.target, query=self.query, incremental=self.incremental, logger=self.logger)
         if all(isinstance(entry, str) for entry in self.grouping_properties()):
             properties = {entry: 1 for entry in self.grouping_properties()}
             if "_id" not in properties:
                 properties.update({"_id": 0})
         else:
-            properties = {entry: include
-                          for entry, include in self.grouping_properties()}
-        groups = self.docs_to_groups(
-            self.source.query(criteria=criteria, properties=properties))
+            properties = {entry: include for entry, include in self.grouping_properties()}
+        groups = self.docs_to_groups(self.source.query(criteria=criteria, properties=properties))
         self.total = len(groups)
         if hasattr(self, "n_items_per_group"):
             n = self.n_items_per_group
@@ -265,6 +261,6 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
 class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
+
     def __init__(self, source, target, **kwargs):
-        super().__init__(source=source, target=target,
-        ufn=lambda x: x, **kwargs)
+        super().__init__(source=source, target=target, ufn=lambda x: x, **kwargs)
