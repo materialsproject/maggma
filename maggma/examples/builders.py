@@ -105,13 +105,19 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     document.
 
     """
-    def __init__(self, source, target, query=None, incremental=True, projection=None, **kwargs):
+    def __init__(self, source, target, ufn, query=None, incremental=True, projection=None, **kwargs):
         """
         Apply a unary function to each source document.
 
         Args:
             source (Store): source store
             target (Store): target store
+            ufn (function): Unary function to process item
+                            You do not need to provide values for
+                            source.key and source.lu_field in the output.
+                            Any uncaught exceptions will be caught by 
+                            process_item and logged to the "error" field 
+                            in the target document.
             query (dict): optional query to filter source store
             incremental (bool): whether to use lu_field of source and target
                 to get only new/updated documents.
@@ -122,27 +128,11 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.target = target
         self.incremental = incremental
         self.query = query
+        self.ufn = ufn
         self.projection = projection if projection else []
         super().__init__(sources=[source], targets=[target], **kwargs)
         self.kwargs = kwargs.copy()
         self.kwargs.update(query=query, incremental=incremental)
-
-    @staticmethod
-    @abstractmethod
-    def ufn(item):
-        """
-        Unary function to process item. You do not need to provide values for
-        source.key and source.lu_field in the output. Any uncaught exceptions
-        will be caught by process_item and logged to the "error" field in the
-        target document.
-
-        Args:
-            item: item to process
-
-        Returns:
-            dict: a dict that will extend a dict pre-populated with
-                {self.source.key, self.course.lu_field} fields.
-        """
 
     def get_items(self):
         criteria = get_criteria(
