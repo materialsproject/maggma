@@ -142,7 +142,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             projection = list(set(self.projection + [self.source.key, self.source.lu_field]))
         else:
             projection = None
-            
+
         return self.source.query(criteria=criteria,properties=projection)
 
     def process_item(self, item):
@@ -152,7 +152,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             self.logger.error(traceback.format_exc())
             processed = {"error": str(e)}
         key, lu_field = self.source.key, self.source.lu_field
-        out = {key: item[key], lu_field: item[lu_field]}
+        out = {self.target.key: item[key],
+               self.target.lu_field: item[lu_field]}
         out.update(processed)
         return out
 
@@ -265,8 +266,5 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
     def __init__(self, source, target, **kwargs):
-        super().__init__(source=source, target=target, **kwargs)
-
-    @staticmethod
-    def ufn(item):
-        return item
+        super().__init__(source=source, target=target,
+        ufn=lambda x: x, **kwargs)
