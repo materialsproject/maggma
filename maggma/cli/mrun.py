@@ -43,16 +43,16 @@ def main():
 
     if isinstance(objects, list):
         # If this is a list of builders
-        runner = Runner(objects, num_workers=args.num_workers)
+        runner = Runner(objects, max_workers=args.num_workers, mpi=args.mpi)
     elif isinstance(objects, Runner):
         # This is a runner:
         root.info("Changing number of workers from default in input file")
-        runner = Runner(objects.builders, args.num_workers)
+        runner = Runner(objects.builders, args.num_workers, mpi=args.mpi)
     else:
         root.error("Couldn't properly read the builder file.")
 
     if not args.dry_run:
-        runner.run(mpi=args.mpi)
+        runner.run()
 
 
 if __name__ == "__main__":

@@ -69,14 +69,14 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Queries the Store for a set of properties
         """
         pass
 
     @abstractmethod
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Get one property from the store
         """
@@ -110,15 +110,15 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
 
         Returns:
             command cursor corresponding to grouped documents
@@ -189,33 +189,33 @@ class Mongolike(object):
     def collection(self):
         return self._collection
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets data from MongoStore with property focus.
 
         Args:
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
             properties (list or dict): list of properties to return
                 or dictionary with {"property": 1} type structure
                 from standard mongo Collection.find syntax
-            criteria (dict): filter for query, matches documents
-                against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets a single from MongoStore with property focus.
         Returns None if nothing matches
 
         Args:
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
             properties (list or dict): list of properties to return
                 or dictionary with {"property": 1} type structure
                 from standard mongo Collection.find syntax
-            criteria (dict): filter for query, matches documents
-                against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find_one
         """
         if isinstance(properties, list):
@@ -263,12 +263,11 @@ class Mongolike(object):
                         self.logger.error('Document failed to validate: {}'.format(d))
 
             if validates:
+                key = key if key else self.key
                 if isinstance(key, list):
                     search_doc = {k: d[k] for k in key}
-                elif key:
-                    search_doc = {key: d[key]}
                 else:
-                    search_doc = {self.key: d[self.key]}
+                    search_doc = {key: d[key]}
                 if update_lu:
                     d[self.lu_field] = datetime.utcnow()
 
@@ -355,15 +354,15 @@ class MongoStore(Mongolike, Store):
         kwargs.pop("aliases", None)
         return cls(**kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, allow_disk_use=True, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:
@@ -424,15 +423,15 @@ class MemoryStore(Mongolike, Store):
     def __hash__(self):
         return hash((self.name, self.lu_field))
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:
@@ -598,16 +597,16 @@ class GridFSStore(Store):
                 criteria['metadata.' + field] = copy.copy(criteria[field])
                 del criteria[field]
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets data from GridFS. This store ignores all
         property projections as its designed for whole document access
 
         Args:
-            properties (list or dict): This will be ignored by the GridFS
-                Store
             criteria (dict): filter for query, matches documents
                 against key-value pairs
+            properties (list or dict): This will be ignored by the GridFS
+                Store
             **kwargs (kwargs): further kwargs to Collection.find
         """
         if isinstance(criteria, dict):
@@ -625,17 +624,17 @@ class GridFSStore(Store):
                 pass
             yield data
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets a single document from GridFS. This store
         ignores all property projections as its designed for whole
         document access
 
         Args:
-            properties (list or dict): This will be ignored by the GridFS
-                Store
             criteria (dict): filter for query, matches documents
                 against key-value pairs
+            properties (list or dict): This will be ignored by the GridFS
+                Store
             **kwargs (kwargs): further kwargs to Collection.find
         """
         return next(self.query(criteria=criteria, **kwargs), None)
@@ -673,15 +672,15 @@ class GridFSStore(Store):
 
             return self._files_collection.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, allow_disk_use=True, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:

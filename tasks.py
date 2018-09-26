@@ -1,6 +1,7 @@
 import re
 
 from invoke import task
+from monty.os import cd
 
 from maggma import __version__
 
@@ -36,3 +37,27 @@ def publish(c):
     c.run("rm dist/*.*", warn=True)
     c.run("python setup.py sdist bdist_wheel")
     c.run("twine upload dist/*")
+
+
+@task
+def makedoc(c, preview=False, port=8000):
+    c.run("sphinx-apidoc --separate -d 6 -o build -f maggma")
+    c.run("make html")
+    if preview:
+        with cd("build/html"):
+            print("Serving docs preview at http://localhost:{}".format(port))
+            c.run("python -m http.server {}".format(port))
+
+
+@task
+def publish_doc(c):
+    c.run("git checkout master")
+    c.run("git stash")
+    c.run("git checkout gh-pages")
+    c.run("cp -r build/html/* .")
+    c.run("rm -r _sources")
+    c.run("git add .")
+    c.run("git commit -am 'Publish docs'")
+    c.run("git push origin gh-pages")
+    c.run("git checkout master")
+    c.run("git stash pop")

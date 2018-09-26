@@ -53,19 +53,19 @@ class TestMultiprocProcessor(unittest.TestCase):
 
     def test_init(self):
         proc = MultiprocProcessor([], 3)
-        self.assertEqual(proc.num_workers, 3)
+        self.assertEqual(proc.max_workers, 3)
 
     def test_setup_multithreading(self):
         
         with patch("maggma.runner.Thread") as mock_thread:
-            proc = MultiprocProcessor([self.builder], num_workers=3)
+            proc = MultiprocProcessor([self.builder], max_workers=3)
             proc.builder = proc.builders[0]
             proc.setup_multithreading()
             mock_thread.assert_called()
 
     def test_update_targets(self):
 
-        proc = MultiprocProcessor([self.builder], num_workers=3)
+        proc = MultiprocProcessor([self.builder], max_workers=3)
 
         proc.builder = self.builder
         proc.update_data_condition = MagicMock()
@@ -82,7 +82,7 @@ class TestMultiprocProcessor(unittest.TestCase):
 
     def test_update_data_callback(self):
 
-        proc = MultiprocProcessor([self.builder], num_workers=3)
+        proc = MultiprocProcessor([self.builder], max_workers=3)
 
         future = MagicMock()
         proc.data = MagicMock()
@@ -97,7 +97,7 @@ class TestMultiprocProcessor(unittest.TestCase):
 
     def test_clean_up_data(self):
 
-        proc = MultiprocProcessor([self.builder], num_workers=3)
+        proc = MultiprocProcessor([self.builder], max_workers=3)
 
         proc.data = MagicMock()
         proc.update_data_condition = MagicMock()
@@ -114,7 +114,7 @@ class TestMultiprocProcessor(unittest.TestCase):
         with patch("maggma.runner.ProcessPoolExecutor") as mock_executor:
 
             mock_exec_obj = mock_executor()
-            proc = MultiprocProcessor([self.builder], num_workers=3)
+            proc = MultiprocProcessor([self.builder], max_workers=3)
             proc.builder = MagicMock()
             proc.task_count = MagicMock()
             cursor = [True,True,True,False]

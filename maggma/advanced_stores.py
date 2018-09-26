@@ -67,9 +67,9 @@ class MongograntStore(Mongolike, Store):
     def __hash__(self):
         return hash((self.mongogrant_spec, self.collection_name, self.lu_field))
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         return MongoStore.groupby(
-            self, keys, properties=None, criteria=None, **kwargs)
+            self, keys, criteria=None, properties=None, **kwargs)
 
 
 class VaultStore(MongoStore):
@@ -143,7 +143,7 @@ class AliasingStore(Store):
         kwargs.update({"lu_field": store.lu_field, "lu_type": store.lu_type})
         super(AliasingStore, self).__init__(**kwargs)
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
 
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
@@ -151,11 +151,11 @@ class AliasingStore(Store):
         criteria = criteria if criteria else {}
         substitute(properties, self.reverse_aliases)
         lazy_substitute(criteria, self.reverse_aliases)
-        for d in self.store.query(properties, criteria, **kwargs):
+        for d in self.store.query(properties=properties, criteria=criteria, **kwargs):
             substitute(d, self.aliases)
             yield d
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
 
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
@@ -163,7 +163,7 @@ class AliasingStore(Store):
         criteria = criteria if criteria else {}
         substitute(properties, self.reverse_aliases)
         lazy_substitute(criteria, self.reverse_aliases)
-        d = self.store.query_one(properties, criteria, **kwargs)
+        d = self.store.query_one(properties=properties, criteria=criteria, **kwargs)
         substitute(d, self.aliases)
         return d
 
@@ -185,7 +185,7 @@ class AliasingStore(Store):
             key = self.aliases[key] if key in self.aliases else key
             return self.collection.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         # Convert to a list
         keys = keys if isinstance(keys, list) else [keys]
 
@@ -254,11 +254,11 @@ class SandboxStore(Store):
             return {"$or": [{"sbxn": {"$in": [self.sandbox]}},
                             {"sbxn": {"$exists": False}}]}
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.query(properties=properties, criteria=criteria, **kwargs)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.query_one(properties=properties, criteria=criteria, **kwargs)
 
@@ -266,7 +266,7 @@ class SandboxStore(Store):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.distinct(key=key, criteria=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
 
         return self.store.groupby(keys=keys, properties=properties, criteria=criteria, **kwargs)
@@ -332,7 +332,7 @@ class AmazonS3Store(Store):
         # For now returns the index collection since that is what we would "search" on
         return self.index
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets data from Amazon S3. This store ignores all
         property projections as its designed for whole document access
@@ -360,7 +360,7 @@ class AmazonS3Store(Store):
 
             yield json.loads(data)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets a single document from Amazon S3. This store
         ignores all property projections as its designed for whole
@@ -408,15 +408,15 @@ class AmazonS3Store(Store):
         # Index is a store so it should have its own distinct function
         return self.index.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         """
         Simple grouping function that will group documents
         by keys. Only searches the index collection
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:
