@@ -555,7 +555,7 @@ class JointStore(Store):
         return list(set(self.collection_names) - {self.master})
 
     def query(self, criteria=None, properties=None, **kwargs):
-        pipeline = self._get_pipeline(properties, criteria)
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties)
         return self.collection.aggregate(pipeline, **kwargs)
 
     @property
@@ -612,8 +612,10 @@ class JointStore(Store):
                                 "preserveNullAndEmptyArrays": True}})
 
         # Do projection for max last_updated
-        lu_proj = {self.lu_field: {"$max": ["${}.{}".format(cname, self.lu_field)
-                                            for cname in self.collection_names]}}
+        lu_max_fields = ["${}".format(self.lu_field)]
+        lu_max_fields.extend(["${}.{}".format(cname, self.lu_field)
+                              for cname in self.collection_names])
+        lu_proj = {self.lu_field: {"$max": lu_max_fields}}
         pipeline.append({"$addFields": lu_proj})
 
         if criteria:
@@ -636,7 +638,7 @@ class JointStore(Store):
 
         return self.collection.aggregate(pipeline, **kwargs)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Get one document
 
@@ -651,7 +653,7 @@ class JointStore(Store):
         # TODO: maybe adding explicit limit in agg pipeline is better as below?
         # pipeline = self._get_pipeline(properties, criteria)
         # pipeline.append({"$limit": 1})
-        query = self.query(properties, criteria, **kwargs)
+        query = self.query(criteria=criteria, properties=properties, **kwargs)
         try:
             doc = query.next()
             return doc
