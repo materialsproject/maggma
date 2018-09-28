@@ -5,8 +5,10 @@ Stores are a default access pattern to data and provide
 various utillities
 """
 from abc import ABCMeta, abstractmethod
+import copy
 from datetime import datetime
 import json
+import zlib
 
 import mongomock
 import pymongo
@@ -16,10 +18,12 @@ from operator import itemgetter
 from pymongo import MongoClient
 from pydash import identity, set_
 
+from pymongo import ReplaceOne
+
 from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
 from monty.serialization import loadfn
-from maggma.utils import LU_KEY_ISOFORMAT, put_mongolike
+from maggma.utils import LU_KEY_ISOFORMAT, confirm_field_index
 
 
 class Store(MSONable, metaclass=ABCMeta):
@@ -28,7 +32,7 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime", validator = None):
+    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime", validator=None):
         """
         Args:
             key (str): master key to index on
@@ -65,14 +69,14 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Queries the Store for a set of properties
         """
         pass
 
     @abstractmethod
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Get one property from the store
         """
@@ -95,20 +99,26 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def ensure_index(self, key, unique=False, **kwargs):
         """
-        Ensure index gets assigned
+        Tries to create and index
+        Args:
+            key (string): single key to index
+            unique (bool): Whether or not this index contains only unique keys
+
+        Returns:
+            bool indicating if the index exists/was created
         """
         pass
 
     @abstractmethod
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
 
         Returns:
             command cursor corresponding to grouped documents
@@ -122,9 +132,17 @@ class Store(MSONable, metaclass=ABCMeta):
 
     @property
     def last_updated(self):
-        doc = next(self.query(properties=[self.lu_field]).sort([(self.lu_field, pymongo.DESCENDING)]).limit(1), None)
+        doc = next(self.query(properties=[self.lu_field])
+                   .sort([(self.lu_field, pymongo.DESCENDING)])
+                   .limit(1), None)
+        if doc and self.lu_field not in doc:
+            raise StoreError(
+                "No field '{}' in store document. Please ensure Store.lu_field "
+                "is a datetime field in your store that represents the time of "
+                "last update to each document.".format(self.lu_field))
         # Handle when collection has docs but `NoneType` lu_field.
-        return (self.lu_func[0](doc[self.lu_field]) if (doc and doc[self.lu_field]) else datetime.min)
+        return (self.lu_func[0](doc[self.lu_field])
+                if (doc and doc[self.lu_field]) else datetime.min)
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
@@ -171,33 +189,33 @@ class Mongolike(object):
     def collection(self):
         return self._collection
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets data from MongoStore with property focus.
 
         Args:
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
             properties (list or dict): list of properties to return
                 or dictionary with {"property": 1} type structure
                 from standard mongo Collection.find syntax
-            criteria (dict): filter for query, matches documents
-                against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
         return self.collection.find(filter=criteria, projection=properties, **kwargs)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets a single from MongoStore with property focus.
         Returns None if nothing matches
 
         Args:
+            criteria (dict): filter for query, matches documents
+                against key-value pairs
             properties (list or dict): list of properties to return
                 or dictionary with {"property": 1} type structure
                 from standard mongo Collection.find syntax
-            criteria (dict): filter for query, matches documents
-                against key-value pairs
             **kwargs (kwargs): further kwargs to Collection.find_one
         """
         if isinstance(properties, list):
@@ -210,9 +228,17 @@ class Mongolike(object):
         """
         if "background" not in kwargs:
             kwargs["background"] = True
-        return self.collection.create_index(key, unique=unique, **kwargs)
 
-    def update(self, docs, update_lu=True, key=None, **kwargs):
+        if confirm_field_index(self.collection,key):
+            return True
+        else:
+            try:
+                self.collection.create_index(key, unique=unique, **kwargs)
+                return True
+            except:
+                return False
+
+    def update(self, docs, update_lu=True, key=None, ordered=True, **kwargs):
         """
         Function to update associated MongoStore collection.
 
@@ -220,7 +246,7 @@ class Mongolike(object):
             docs: list of documents
         """
 
-        bulk = self.collection.initialize_ordered_bulk_op()
+        requests = []
 
         for d in docs:
 
@@ -237,17 +263,17 @@ class Mongolike(object):
                         self.logger.error('Document failed to validate: {}'.format(d))
 
             if validates:
+                key = key if key else self.key
                 if isinstance(key, list):
                     search_doc = {k: d[k] for k in key}
-                elif key:
-                    search_doc = {key: d[key]}
                 else:
-                    search_doc = {self.key: d[self.key]}
+                    search_doc = {key: d[key]}
                 if update_lu:
                     d[self.lu_field] = datetime.utcnow()
-                bulk.find(search_doc).upsert().replace_one(d)
 
-        bulk.execute()
+                requests.append(ReplaceOne(search_doc,d,upsert=True))
+
+        self.collection.bulk_write(requests,ordered=ordered)
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
@@ -328,15 +354,15 @@ class MongoStore(Mongolike, Store):
         kwargs.pop("aliases", None)
         return cls(**kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, allow_disk_use=True, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:
@@ -399,15 +425,15 @@ class MemoryStore(Mongolike, Store):
     def __hash__(self):
         return hash((self.name, self.lu_field))
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:
@@ -519,7 +545,14 @@ class GridFSStore(Store):
     A Store for GrdiFS backend. Provides a common access method consistent with other stores
     """
 
-    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", **kwargs):
+    # https://github.com/mongodb/specifications/
+    #   blob/master/source/gridfs/gridfs-spec.rst#terms
+    #   (Under "Files collection document")
+    files_collection_fields = (
+        "_id", "length", "chunkSize", "uploadDate", "md5", "filename",
+        "contentType", "aliases", "metadata")
+
+    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", compression=False, **kwargs):
 
         self.database = database
         self.collection_name = collection_name
@@ -528,10 +561,12 @@ class GridFSStore(Store):
         self.username = username
         self.password = password
         self._collection = None
+        self.compression = compression
         self.kwargs = kwargs
+        self.meta_keys = set()
 
         if "key" not in kwargs:
-            kwargs["key"] = "_oid"
+            kwargs["key"] = "_id"
 
         super(GridFSStore, self).__init__(**kwargs)
 
@@ -551,49 +586,60 @@ class GridFSStore(Store):
         # TODO: Should this return the real MongoCollection or the GridFS
         return self._collection
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    @classmethod
+    def transform_criteria(cls, criteria):
+        """
+        Allow client to not need to prepend 'metadata.' to query fields.
+        Args:
+            criteria (dict): Query criteria
+        """
+        for field in criteria:
+            if (field not in cls.files_collection_fields
+                    and not field.startswith('metadata.')):
+                criteria['metadata.' + field] = copy.copy(criteria[field])
+                del criteria[field]
+
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets data from GridFS. This store ignores all
         property projections as its designed for whole document access
 
         Args:
-            properties (list or dict): This will be ignored by the GridFS
-                Store
             criteria (dict): filter for query, matches documents
                 against key-value pairs
+            properties (list or dict): This will be ignored by the GridFS
+                Store
             **kwargs (kwargs): further kwargs to Collection.find
         """
+        if isinstance(criteria, dict):
+            self.transform_criteria(criteria)
         for f in self.collection.find(filter=criteria, **kwargs):
             data = f.read()
-            try:
-                json_dict = json.loads(data)
-                yield json_dict
-            except:
-                yield data
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+            metadata = f.metadata
+            if metadata.get("compression", "") == "zlib":
+                data = zlib.decompress(data).decode("UTF-8")
+
+            try:
+                data = json.loads(data)
+            except:
+                pass
+            yield data
+
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets a single document from GridFS. This store
         ignores all property projections as its designed for whole
         document access
 
         Args:
-            properties (list or dict): This will be ignored by the GridFS
-                Store
             criteria (dict): filter for query, matches documents
                 against key-value pairs
+            properties (list or dict): This will be ignored by the GridFS
+                Store
             **kwargs (kwargs): further kwargs to Collection.find
         """
-        f = self.collection.find_one(filter=criteria, **kwargs)
-        if f:
-            data = f.read()
-            try:
-                json_dict = json.loads(data)
-                return json_dict
-            except:
-                return data
-        else:
-            return None
+        return next(self.query(criteria=criteria, **kwargs), None)
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
@@ -620,17 +666,23 @@ class GridFSStore(Store):
             return results
 
         else:
+            if criteria:
+                self.transform_criteria(criteria)
+            # Transfor to metadata subfield if not supposed to be in gridfs main fields
+            if key not in self.files_collection_fields:
+                key = "metadata.{}".format(key)
+
             return self._files_collection.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, allow_disk_use=True, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs):
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:
@@ -643,13 +695,18 @@ class GridFSStore(Store):
         """
         pipeline = []
         if criteria is not None:
+            self.transform_criteria(criteria)
             pipeline.append({"$match": criteria})
 
         if properties is not None:
+            properties = [p if p in self.files_collection_fields else "metadata.{}".format(p) for p in properties]
             pipeline.append({"$project": {p: 1 for p in properties}})
 
         if isinstance(keys, str):
             keys = [keys]
+
+        # ensure propper naming for keys in and outside of metadata
+        keys = [k if k in self.files_collection_fields else "metadata.{}".format(k) for k in key]
 
         group_id = {key: "${}".format(key) for key in keys}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
@@ -660,29 +717,55 @@ class GridFSStore(Store):
         """
         Wrapper for pymongo.Collection.ensure_index for the files collection
         """
-        return self._files_collection.create_index(key, unique=unique, background=True)
+        if key in self.files_collection_fields:
+            return self._files_collection.create_index(key, unique=unique, background=True)
+        else:
+            # Store this key to put into metadata collection
+            self.meta_keys |= set([key])
+            return self._files_collection.create_index("metadata.{}".format(key), unique=unique, background=True)
 
     def update(self, docs, update_lu=True, key=None):
         """
         Function to update associated MongoStore collection.
 
         Args:
-            docs: list of documents
+            docs ([dict]): list of documents
+            update_lu (bool) : Updat the last_updated field or not
+            key (list or str): list or str of important parameters
         """
-        for d in docs:
-            search_doc = {}
-            if isinstance(key, list):
-                search_doc = {k: d[k] for k in key}
-            elif key:
-                search_doc = {key: d[key]}
-            else:
-                search_doc = {self.key: d[self.key]}
+        if isinstance(key, str):
+            key = [key]
+        elif not key:
+            key = [self.key]
 
-            if "_id" in search_doc:
-                del search_doc["_id"]
+        key = list(set(key) | self.meta_keys - set(self.files_collection_fields))
+
+        for d in docs:
+
+            search_doc = {k: d[k] for k in key}
+            if update_lu:
+                d[self.lu_field] = datetime.utcnow()
+
+            metadata = {self.lu_field: d[self.lu_field]}
+            metadata.update(search_doc)
 
             data = json.dumps(jsanitize(d)).encode("UTF-8")
-            self.collection.put(data, **search_doc)
+            if self.compression:
+                data = zlib.compress(data)
+                metadata["compression"] = "zlib"
+
+            self.collection.put(data, metadata=metadata)
+            self.transform_criteria(search_doc)
+
+            # Cleans up old gridfs entries
+            for fdoc in (self._files_collection.find(search_doc, ["_id"])
+                         .sort("uploadDate", -1).skip(1)):
+                self.collection.delete(fdoc["_id"])
 
     def close(self):
         self.collection.database.client.close()
+
+
+class StoreError(Exception):
+    """General Store-related error."""
+    pass

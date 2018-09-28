@@ -8,9 +8,12 @@ import json
 import zlib
 from datetime import datetime
 
-from maggma.stores import Store, MongoStore
-from maggma.utils import lazy_substitute, substitute
 from pydash import get, set_
+from maggma.stores import Store, MongoStore, StoreError, Mongolike
+from maggma.utils import lazy_substitute, substitute
+from mongogrant import Client
+from mongogrant.client import check
+from mongogrant.config import Config
 from monty.json import jsanitize
 from monty.functools import lru_cache
 from pymongo import MongoClient
@@ -21,6 +24,59 @@ try:
     boto_import = True
 except:
     boto_import = False
+
+
+class MongograntStore(Mongolike, Store):
+    """Initialize a Store with a mongogrant "<role>:<host>/<db>." spec.
+
+    This class does not subclass MongoStore, though it aims to reproduce
+    relevant functionality through method delegation, e.g. groupby.
+
+    It does not subclass MongoStore because some class methods of
+    MongoStore, e.g. from_db_file and from_collection, are not supported.
+
+    mongogrant documentation: https://github.com/materialsproject/mongogrant
+    """
+    def __init__(self, mongogrant_spec, collection_name,
+                 mgclient_config_path=None, **kwargs):
+        """
+
+        Args:
+            mongogrant_spec (str): of the form <role>:<host>/<db>, where
+                role is one of {"read", "readWrite"} or aliases {"ro", "rw"};
+                host is a db host (w/ optional port) or alias; and db is a db
+                on that host, or alias. See mongogrant documentation.
+            collection_name (str): name of mongo collection
+            mgclient_config_path (str): Path to mongogrant client config file,
+               or None if default path (`mongogrant.client.path`).
+        """
+        self.mongogrant_spec = mongogrant_spec
+        self.collection_name = collection_name
+        self.mgclient_config_path = mgclient_config_path
+        self._collection = None
+        if set(("username", "password","database", "host")) & set(kwargs):
+            raise StoreError("MongograntStore does not accept "
+                             "username, password, database, or host "
+                             "arguments. Use `mongogrant_spec`.")
+        self.kwargs = kwargs
+        super().__init__(**kwargs)
+
+    def connect(self, force_reset=False):
+        if not self._collection or force_reset:
+            if self.mgclient_config_path:
+                config = Config(check=check, path=self.mgclient_config_path)
+                client = Client(config)
+            else:
+                client = Client()
+            db = client.db(self.mongogrant_spec)
+            self._collection = db[self.collection_name]
+
+    def __hash__(self):
+        return hash((self.mongogrant_spec, self.collection_name, self.lu_field))
+
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
+        return MongoStore.groupby(
+            self, keys, criteria=None, properties=None, **kwargs)
 
 
 class VaultStore(MongoStore):
@@ -94,7 +150,7 @@ class AliasingStore(Store):
         kwargs.update({"lu_field": store.lu_field, "lu_type": store.lu_type})
         super(AliasingStore, self).__init__(**kwargs)
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
 
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
@@ -102,11 +158,11 @@ class AliasingStore(Store):
         criteria = criteria if criteria else {}
         substitute(properties, self.reverse_aliases)
         lazy_substitute(criteria, self.reverse_aliases)
-        for d in self.store.query(properties, criteria, **kwargs):
+        for d in self.store.query(properties=properties, criteria=criteria, **kwargs):
             substitute(d, self.aliases)
             yield d
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
 
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
@@ -114,7 +170,7 @@ class AliasingStore(Store):
         criteria = criteria if criteria else {}
         substitute(properties, self.reverse_aliases)
         lazy_substitute(criteria, self.reverse_aliases)
-        d = self.store.query_one(properties, criteria, **kwargs)
+        d = self.store.query_one(properties=properties, criteria=criteria, **kwargs)
         substitute(d, self.aliases)
         return d
 
@@ -136,7 +192,7 @@ class AliasingStore(Store):
             key = self.aliases[key] if key in self.aliases else key
             return self.collection.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         # Convert to a list
         keys = keys if isinstance(keys, list) else [keys]
 
@@ -205,11 +261,11 @@ class SandboxStore(Store):
             return {"$or": [{"sbxn": {"$in": [self.sandbox]}},
                             {"sbxn": {"$exists": False}}]}
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.query(properties=properties, criteria=criteria, **kwargs)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.query_one(properties=properties, criteria=criteria, **kwargs)
 
@@ -217,7 +273,7 @@ class SandboxStore(Store):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.distinct(key=key, criteria=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
 
         return self.store.groupby(keys=keys, properties=properties, criteria=criteria, **kwargs)
@@ -286,7 +342,7 @@ class AmazonS3Store(Store):
         # For now returns the index collection since that is what we would "search" on
         return self.index
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets data from Amazon S3. This store ignores all
         property projections as its designed for whole document access
@@ -314,7 +370,7 @@ class AmazonS3Store(Store):
 
             yield json.loads(data)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets a single document from Amazon S3. This store
         ignores all property projections as its designed for whole
@@ -362,15 +418,15 @@ class AmazonS3Store(Store):
         # Index is a store so it should have its own distinct function
         return self.index.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         """
         Simple grouping function that will group documents
         by keys. Only searches the index collection
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:
@@ -532,7 +588,7 @@ class JointStore(Store):
             return [get(d['_id'], key) for d in cursor]
 
     def ensure_index(self):
-        raise NotImplementedError("No update method for JointStore")
+        raise NotImplementedError("No ensure_index method for JointStore")
 
     def _get_pipeline(self, criteria=None, properties=None):
         """

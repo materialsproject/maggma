@@ -53,23 +53,24 @@ class TestMultiprocProcessor(unittest.TestCase):
 
     def test_init(self):
         proc = MultiprocProcessor([], 3)
-        self.assertEqual(proc.num_workers, 3)
+        self.assertEqual(proc.max_workers, 3)
 
     def test_setup_multithreading(self):
-
+        
         with patch("maggma.runner.Thread") as mock_thread:
-            proc = MultiprocProcessor([self.builder], num_workers=3)
+            proc = MultiprocProcessor([self.builder], max_workers=3)
             proc.builder = proc.builders[0]
             proc.setup_multithreading()
             mock_thread.assert_called()
 
     def test_update_targets(self):
 
-        proc = MultiprocProcessor([self.builder], num_workers=3)
+        proc = MultiprocProcessor([self.builder], max_workers=3)
 
         proc.builder = self.builder
         proc.update_data_condition = MagicMock()
         proc.data = MagicMock()
+        proc.update_pbar = MagicMock()
         proc.run_update_targets = MagicMock()
         proc.run_update_targets.__bool__.side_effect = [True,True,True,False]
 
@@ -81,13 +82,13 @@ class TestMultiprocProcessor(unittest.TestCase):
 
     def test_update_data_callback(self):
 
-        proc = MultiprocProcessor([self.builder], num_workers=3)
+        proc = MultiprocProcessor([self.builder], max_workers=3)
 
         future = MagicMock()
         proc.data = MagicMock()
         proc.task_count = MagicMock()
         proc.update_data_condition = MagicMock()
-
+        proc.process_pbar = MagicMock()
         proc.update_data_callback(future)
 
         future.result.assert_called()
@@ -96,7 +97,7 @@ class TestMultiprocProcessor(unittest.TestCase):
 
     def test_clean_up_data(self):
 
-        proc = MultiprocProcessor([self.builder], num_workers=3)
+        proc = MultiprocProcessor([self.builder], max_workers=3)
 
         proc.data = MagicMock()
         proc.update_data_condition = MagicMock()
@@ -113,13 +114,12 @@ class TestMultiprocProcessor(unittest.TestCase):
         with patch("maggma.runner.ProcessPoolExecutor") as mock_executor:
 
             mock_exec_obj = mock_executor()
-            proc = MultiprocProcessor([self.builder], num_workers=3)
+            proc = MultiprocProcessor([self.builder], max_workers=3)
             proc.builder = MagicMock()
             proc.task_count = MagicMock()
-            cursor = MagicMock()
-            cursor.__bool__.side_effect = [True, True, True, False]
-
-            proc.put_tasks(cursor)
+            cursor = [True,True,True,False]
+            proc.get_pbar = cursor
+            proc.put_tasks()
             proc.task_count.acquire.assert_called()
 
 
@@ -130,6 +130,7 @@ class TestMPIProcessor(unittest.TestCase):
         builder.get_items.return_value = iter(range(10))
         builder.process_item.side_effect = range(10, 20)
         builder.from_dict.return_value = {}
+        builder.setup_pbars([])
 
         self.builder = builder
         self.get_mpi_patcher = patch("maggma.runner.get_mpi")
@@ -161,6 +162,7 @@ class TestMPIProcessor(unittest.TestCase):
         proc.data = MagicMock()
         proc.run_update_targets = MagicMock()
         proc.run_update_targets.__bool__.side_effect = [True,True,True,False]
+        proc.setup_pbars([])
 
         proc.update_targets()
         proc.run_update_targets.__bool__.assert_called()
@@ -196,6 +198,7 @@ class TestMPIProcessor(unittest.TestCase):
         proc.update_data_condition = MagicMock()
         proc.data = MagicMock()
         proc.task_count = MagicMock()
+        proc.setup_pbars([])
         self.comm.recv.return_value = {"type": "return", "return": "data"}
 
         proc.submit_item(0, {})
@@ -212,12 +215,12 @@ class TestMPIProcessor(unittest.TestCase):
             proc = MPIProcessor([self.builder])
             proc.builder = MagicMock()
             proc.task_count = MagicMock()
-            cursor = MagicMock()
-            cursor.__bool__.side_effect = [True, True, True, False]
+            cursor = [True,True,True,False]
 
-            proc.put_tasks(cursor, 0)
+
+            proc.setup_pbars(cursor)
+            proc.put_tasks(0)
             proc.task_count.acquire.assert_called()
-            cursor.__next__.assert_called()
             mock_executor.return_value.__enter__.assert_called()
             proc.task_count.acquire.assert_called()
             mock_executor.return_value.__enter__.return_value.submit.assert_called()
