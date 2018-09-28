@@ -225,11 +225,15 @@ class JointStoreTest(unittest.TestCase):
         self.jointstore = JointStore("maggma_test", ["test1", "test2"])
         self.jointstore.connect()
         self.jointstore.collection.drop()
-        self.jointstore.collection.insert_many([{"task_id": k, "my_prop": k+1}
+        self.jointstore.collection.insert_many([{"task_id": k, "my_prop": k+1,
+                                                 "last_updated": datetime.utcnow()}
                                                 for k in range(10)])
         self.jointstore.collection.database["test2"].drop()
         self.jointstore.collection.database["test2"].insert_many(
-            [{"task_id": 2*k, "your_prop": k+3} for k in range(5)])
+            [{"task_id": 2*k, "your_prop": k+3, "last_updated": datetime.utcnow()}
+             for k in range(5)])
+        self.test1 = MongoStore("maggma_test", "test1")
+        self.test2 = MongoStore("maggma_test", "test2")
 
     def test_query(self):
         # Test query all
@@ -256,18 +260,30 @@ class JointStoreTest(unittest.TestCase):
         self.assertEqual(doc['task_id'], 8)
 
     def test_distinct(self):
-        # TODO: test for distinct
         dyour_prop = self.jointstore.distinct("test2.your_prop")
         self.assertEqual(set(dyour_prop), {k + 3 for k in range(5)})
         dmy_prop = self.jointstore.distinct("my_prop")
         self.assertEqual(set(dmy_prop), {k + 1 for k in range(10)})
-        # TODO: this test should eventually work
         dmy_prop_cond = self.jointstore.distinct("my_prop", {"test2.your_prop": {"$gte": 5}})
         self.assertEqual(set(dmy_prop_cond), {5, 7, 9})
 
     def test_last_updated(self):
-        # TODO: test for last_updated
-        pass
+        doc = self.jointstore.query_one({"task_id": 1})
+        test1doc = self.test1.query_one({"task_id": 1})
+        test2doc = self.test2.query_one({"task_id": 1})
+        self.assertEqual(test1doc['last_updated'], doc['last_updated'])
+        self.assertNotEqual(test2doc['last_updated'], doc['last_updated'])
+        # Swap the two
+        test2date = test2doc['last_updated']
+        test2doc['last_updated'] = test1doc['last_updated']
+        test1doc['last_updated'] = test2date
+        self.test1.update(test1doc)
+        self.test2.update(test2doc)
+        doc = self.jointstore.query_one({"task_id": 1})
+        test1doc = self.test1.query_one({"task_id": 1})
+        test2doc = self.test2.query_one({"task_id": 1})
+        self.assertEqual(test2doc['last_updated'], doc['last_updated'])
+        self.assertNotEqual(test1doc['last_updated'], doc['last_updated'])
 
     def test_groupby(self):
         #TODO: test for groupby
