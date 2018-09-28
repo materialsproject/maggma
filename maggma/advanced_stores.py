@@ -22,7 +22,7 @@ try:
     import boto3
     import botocore
     boto_import = True
-except:
+except ImportError:
     boto_import = False
 
 
@@ -587,7 +587,7 @@ class JointStore(Store):
         else:
             return [get(d['_id'], key) for d in cursor]
 
-    def ensure_index(self):
+    def ensure_index(self, key, unique=False, **kwargs):
         raise NotImplementedError("No ensure_index method for JointStore")
 
     def _get_pipeline(self, criteria=None, properties=None):
