@@ -498,7 +498,7 @@ class JointStore(Store):
     def nonmaster_names(self):
         return list(set(self.collection_names) - {self.master})
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         pipeline = self._get_pipeline(properties, criteria)
         return self.collection.aggregate(pipeline, **kwargs)
 
@@ -512,8 +512,8 @@ class JointStore(Store):
             lus.append(lu)
         return max(lus)
 
-    def update(self, docs, update_lu=True, key=None):
-        # TODO: implement update?
+    # TODO: implement update?
+    def update(self, docs, update_lu=True, key=None, **kwargs):
         raise NotImplementedError("No update method for JointStore")
 
     def _get_store_by_name(self, name):
@@ -532,10 +532,9 @@ class JointStore(Store):
             return [get(d['_id'], key) for d in cursor]
 
     def ensure_index(self):
-        pass
+        raise NotImplementedError("No update method for JointStore")
 
-    # TODO: probably delete this, unless $limit is better
-    def _get_pipeline(self, properties=None, criteria=None):
+    def _get_pipeline(self, criteria=None, properties=None):
         """
         Gets the aggregation pipeline for query and query_one
 
@@ -569,8 +568,8 @@ class JointStore(Store):
             pipeline.append({"$project": properties})
         return pipeline
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
-        pipeline = self._get_pipeline(properties, criteria)
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties)
         if not isinstance(keys, list):
             keys = [keys]
         group_id = {}
