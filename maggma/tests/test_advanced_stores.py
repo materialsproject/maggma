@@ -310,13 +310,13 @@ class JointStoreTest(unittest.TestCase):
         self.jointstore = JointStore("maggma_test", ["test1", "test2"])
         self.jointstore.connect()
         self.jointstore.collection.drop()
-        self.jointstore.collection.insert_many([{"task_id": k, "my_prop": k+1,
-                                                 "last_updated": datetime.utcnow()}
-                                                for k in range(10)])
+        self.jointstore.collection.insert_many(
+            [{"task_id": k, "my_prop": k+1, "last_updated": datetime.utcnow(),
+              "category": k // 5} for k in range(10)])
         self.jointstore.collection.database["test2"].drop()
         self.jointstore.collection.database["test2"].insert_many(
-            [{"task_id": 2*k, "your_prop": k+3, "last_updated": datetime.utcnow()}
-             for k in range(5)])
+            [{"task_id": 2*k, "your_prop": k+3, "last_updated": datetime.utcnow(),
+              "category2": k // 3} for k in range(5)])
         self.test1 = MongoStore("maggma_test", "test1")
         self.test1.connect()
         self.test2 = MongoStore("maggma_test", "test2")
@@ -376,8 +376,14 @@ class JointStoreTest(unittest.TestCase):
         self.assertIsNotNone(doc['last_updated'])
 
     def test_groupby(self):
-        #TODO: test for groupby
-        pass
+        docs = list(self.jointstore.groupby("category"))
+        self.assertEqual(len(docs[0]['docs']), 5)
+        self.assertEqual(len(docs[1]['docs']), 5)
+        docs = list(self.jointstore.groupby("test2.category2"))
+        docs_by_id = {get(d, '_id.test2.category2'): d['docs'] for d in docs}
+        self.assertEqual(len(docs_by_id[None]), 5)
+        self.assertEqual(len(docs_by_id[0]), 3)
+        self.assertEqual(len(docs_by_id[1]), 2)
 
 
 if __name__ == "__main__":
