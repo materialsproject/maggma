@@ -29,11 +29,12 @@ class Validator(ABC):
 class JSONSchemaValidator(Validator):
     """
     A validator that allows document validation against a
-    provided JSON schema, and also can check that specified keys, if present,
-    are MSONable (that is, a Python object can be reconstructed).
+    provided JSON schema.
 
-    To use, initialize a StandardValidator and with your own `schema`
-    and `msonable_keypaths` keys.
+    For convenience, the helper method in this module
+    `msonable_schema` can be used to create a schema for a
+    specific MSONable object, which can be embedded in your
+    JSON schema. See the tests for an example of this.
     """
 
     def __init__(self, schema, strict=False):
