@@ -257,10 +257,7 @@ class Mongolike(object):
             if self.validator:
                 validates = self.validator.is_valid(d)
                 if not validates:
-                    if self.validator.strict:
-                        raise ValueError('Document failed to validate: {}'.format(d))
-                    else:
-                        self.logger.error('Document failed to validate: {}'.format(d))
+                    self.logger.error('Document failed to validate:\n{}'.format(d))
 
             if validates:
                 key = key if key else self.key
@@ -271,9 +268,9 @@ class Mongolike(object):
                 if update_lu:
                     d[self.lu_field] = datetime.utcnow()
 
-                requests.append(ReplaceOne(search_doc,d,upsert=True))
+                requests.append(ReplaceOne(search_doc, d, upsert=True))
 
-        self.collection.bulk_write(requests,ordered=ordered)
+        self.collection.bulk_write(requests, ordered=ordered)
 
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
