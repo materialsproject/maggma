@@ -15,8 +15,8 @@ import pymongo
 import gridfs
 from itertools import groupby
 from operator import itemgetter
-from pymongo import MongoClient, DESCENDING
-from pydash import identity
+from pymongo import MongoClient
+from pydash import identity, set_
 
 from pymongo import ReplaceOne
 
@@ -380,7 +380,9 @@ class MongoStore(Mongolike, Store):
         if isinstance(keys, str):
             keys = [keys]
 
-        group_id = {key: "${}".format(key) for key in keys}
+        group_id = {}
+        for key in keys:
+            set_(group_id, key, "${}".format(key))
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
         return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)

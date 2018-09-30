@@ -3,7 +3,6 @@
 Tests for the base Stores
 """
 import os
-import glob
 import unittest
 import numpy as np
 import mongomock.collection
@@ -37,12 +36,12 @@ class TestMongoStore(unittest.TestCase):
 
     def test_distinct(self):
         self.mongostore.collection.insert({"a": 1, "b": 2, "c": 3})
-        self.mongostore.collection.insert({"a": 4, "d": 5, "e": 6})
+        self.mongostore.collection.insert({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
         self.assertEqual(self.mongostore.distinct("a"), [1, 4])
 
         # Test list distinct functionality
         self.mongostore.collection.insert({"a": 4, "d": 6, "e": 7})
-        self.mongostore.collection.insert({"a": 4, "d": 6})
+        self.mongostore.collection.insert({"a": 4, "d": 6, "g": {"h": 2}})
         ad_distinct = self.mongostore.distinct(["a", "d"])
         self.assertTrue(len(ad_distinct), 3)
         self.assertTrue({"a": 4, "d": 6} in ad_distinct)
@@ -52,6 +51,13 @@ class TestMongoStore(unittest.TestCase):
         self.assertEqual(len(all_exist), 1)
         all_exist2 = self.mongostore.distinct(["a", "e"], all_exist=True, criteria={"d": 6})
         self.assertEqual(len(all_exist2), 1)
+
+        # Test distinct subdocument functionality
+        ghs = self.mongostore.distinct("g.h")
+        self.assertEqual(set(ghs), {1, 2})
+        ghs_ds = self.mongostore.distinct(["d", "g.h"], all_exist=True)
+        self.assertEqual({s['g']['h'] for s in ghs_ds}, {1, 2})
+        self.assertEqual({s['d'] for s in ghs_ds}, {5, 6})
 
     def test_update(self):
         self.mongostore.update([{"e": 6, "d": 4}], key="e")

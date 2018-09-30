@@ -305,5 +305,86 @@ class TestSandboxStore(unittest.TestCase):
             self.sandboxstore.collection.drop()
 
 
+class JointStoreTest(unittest.TestCase):
+    def setUp(self):
+        self.jointstore = JointStore("maggma_test", ["test1", "test2"])
+        self.jointstore.connect()
+        self.jointstore.collection.drop()
+        self.jointstore.collection.insert_many(
+            [{"task_id": k, "my_prop": k+1, "last_updated": datetime.utcnow(),
+              "category": k // 5} for k in range(10)])
+        self.jointstore.collection.database["test2"].drop()
+        self.jointstore.collection.database["test2"].insert_many(
+            [{"task_id": 2*k, "your_prop": k+3, "last_updated": datetime.utcnow(),
+              "category2": k // 3} for k in range(5)])
+        self.test1 = MongoStore("maggma_test", "test1")
+        self.test1.connect()
+        self.test2 = MongoStore("maggma_test", "test2")
+        self.test2.connect()
+
+    def test_query(self):
+        # Test query all
+        docs = list(self.jointstore.query())
+        self.assertEqual(len(docs), 10)
+        docs_w_field = [d for d in docs if d.get("test2")]
+        self.assertEqual(len(docs_w_field), 5)
+        docs_w_field = sorted(docs_w_field, key=lambda x: x['task_id'])
+        self.assertEqual(docs_w_field[0]['test2']['your_prop'], 3)
+        self.assertEqual(docs_w_field[0]['task_id'], 0)
+        self.assertEqual(docs_w_field[0]['my_prop'], 1)
+
+    def test_query_one(self):
+        doc = self.jointstore.query_one()
+        self.assertEqual(doc['my_prop'], doc['task_id'] + 1)
+        # Test limit properties
+        doc = self.jointstore.query_one(properties=['test2', 'task_id'])
+        self.assertEqual(doc['test2']['your_prop'], doc['task_id'] + 3)
+        self.assertIsNone(doc.get("my_prop"))
+        # Test criteria
+        doc = self.jointstore.query_one(criteria={"task_id": {"$gte": 10}})
+        self.assertIsNone(doc)
+        doc = self.jointstore.query_one(criteria={"test2.your_prop": {"$gt": 6}})
+        self.assertEqual(doc['task_id'], 8)
+
+    def test_distinct(self):
+        dyour_prop = self.jointstore.distinct("test2.your_prop")
+        self.assertEqual(set(dyour_prop), {k + 3 for k in range(5)})
+        dmy_prop = self.jointstore.distinct("my_prop")
+        self.assertEqual(set(dmy_prop), {k + 1 for k in range(10)})
+        dmy_prop_cond = self.jointstore.distinct("my_prop", {"test2.your_prop": {"$gte": 5}})
+        self.assertEqual(set(dmy_prop_cond), {5, 7, 9})
+
+    def test_last_updated(self):
+        doc = self.jointstore.query_one({"task_id": 0})
+        test1doc = self.test1.query_one({"task_id": 0})
+        test2doc = self.test2.query_one({"task_id": 0})
+        self.assertEqual(test2doc['last_updated'], doc['last_updated'])
+        self.assertNotEqual(test1doc['last_updated'], doc['last_updated'])
+        # Swap the two
+        test2date = test2doc['last_updated']
+        test2doc['last_updated'] = test1doc['last_updated']
+        test1doc['last_updated'] = test2date
+        self.test1.update([test1doc], update_lu=False)
+        self.test2.update([test2doc], update_lu=False)
+        doc = self.jointstore.query_one({"task_id": 0})
+        test1doc = self.test1.query_one({"task_id": 0})
+        test2doc = self.test2.query_one({"task_id": 0})
+        self.assertEqual(test1doc['last_updated'], doc['last_updated'])
+        self.assertNotEqual(test2doc['last_updated'], doc['last_updated'])
+        # Check also that still has a field if no task2 doc
+        doc = self.jointstore.query_one({"task_id": 1})
+        self.assertIsNotNone(doc['last_updated'])
+
+    def test_groupby(self):
+        docs = list(self.jointstore.groupby("category"))
+        self.assertEqual(len(docs[0]['docs']), 5)
+        self.assertEqual(len(docs[1]['docs']), 5)
+        docs = list(self.jointstore.groupby("test2.category2"))
+        docs_by_id = {get(d, '_id.test2.category2'): d['docs'] for d in docs}
+        self.assertEqual(len(docs_by_id[None]), 5)
+        self.assertEqual(len(docs_by_id[0]), 3)
+        self.assertEqual(len(docs_by_id[1]), 2)
+
+
 if __name__ == "__main__":
     unittest.main()
