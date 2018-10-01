@@ -3,7 +3,7 @@
 Tests the validators
 """
 import unittest
-from maggma.validator import StandardValidator
+from maggma.validator import JSONSchemaValidator, msonable_schema
 from monty.json import MSONable
 
 class ValidatorTests(unittest.TestCase):
@@ -11,9 +11,9 @@ class ValidatorTests(unittest.TestCase):
     Tests for Validators.
     """
 
-    def test_standardvalidator(self):
+    def test_jsonschemevalidator(self):
         """
-        Test the StandardValidator class.
+        Test the JSONSchemaValidator class.
         """
 
         class LatticeMock(MSONable):
@@ -23,28 +23,18 @@ class ValidatorTests(unittest.TestCase):
             def __init__(self, a):
                 self.a = a
 
-        class SampleValidator(StandardValidator):
-            """
-            A sample validator, just for testing.
-            """
+        test_schema = {
+            "type": "object",
+            "properties":
+                {
+                    "task_id": {"type": "string"},
+                    "successful": {"type": "boolean"},
+                    "lattice": msonable_schema(LatticeMock)
+                },
+            "required": ["task_id", "successful"]
+        }
 
-            @property
-            def schema(self):
-                return {
-                    "type": "object",
-                    "properties":
-                        {
-                            "task_id": {"type": "string"},
-                            "successful": {"type": "boolean"}
-                        },
-                    "required": ["task_id", "successful"]
-                }
-
-            @property
-            def msonable_keypaths(self):
-                return {"lattice": LatticeMock}
-
-        validator = SampleValidator()
+        validator = JSONSchemaValidator(schema=test_schema)
 
         lattice = LatticeMock(5)
 

@@ -9,23 +9,13 @@ from abc import ABC, abstractmethod
 from jsonschema import validate, ValidationError
 import pydash
 
+
 class Validator(ABC):
     """
     A generic class to perform document-level validation on Stores.
     Attach a Validator to a Store during initialization, any all documents
     added to the Store will call .validate_doc() before being added.
     """
-
-    def init(self, strict=False):
-        """
-        Args:
-            strict (bool): Informs Store how to treat Validator: if
-            True, will cause build to fail if invalid document
-            is found and raise a ValueError, if False will continue
-            build but log an error message. In both cases, invalid
-            documents will not be stored.
-        """
-        self.strict = strict
 
     @abstractmethod
     def is_valid(self, doc):
@@ -36,18 +26,40 @@ class Validator(ABC):
         return NotImplementedError
 
 
-class StandardValidator(Validator):
+class JSONSchemaValidator(Validator):
     """
-    A standard Validator, which allows document validation against a
-    provided JSON schema, and also can check that specified keys, if present,
-    are MSONable (that is, a Python object can be reconstructed).
+    A validator that allows document validation against a
+    provided JSON schema.
 
-    To use, subclass StandardSchema and with your own `schema`
-    and `msonable_keypaths` keys.
+    For convenience, the helper method in this module
+    `msonable_schema` can be used to create a schema for a
+    specific MSONable object, which can be embedded in your
+    JSON schema. See the tests for an example of this.
     """
+
+    def __init__(self, schema, strict=False):
+        """
+        Args:
+            strict (bool): Informs Store how to treat Validator: if
+            True, will cause build to fail if invalid document
+            is found and raise a ValueError, if False will continue
+            build but log an error message. In both cases, invalid
+            documents will not be stored.
+            schema (dict): A Python dict representation of a JSON
+        """
+        self._schema = schema
+        self._strict = strict
 
     @property
-    @abstractmethod
+    def strict(self):
+        """
+        Whether is_valid() should raise a ValidationError or
+        simply return False if a document fails validation.
+        :return (bool):
+        """
+        return self._strict
+
+    @property
     def schema(self):
         """
         Defines a JSON schema for your document,
@@ -61,51 +73,36 @@ class StandardValidator(Validator):
 
         Returns (dict): a JSON schema as a Python dict
         """
-        return {}
-
-    @property
-    @abstractmethod
-    def msonable_keypaths(self):
-        """
-        Optional. Used by the default `validate_doc()` method. Define a
-        list of keypaths
-
-        Returns (dict): keys should be the keypath to the relevant value
-        in your document, and values should be the relevant class
-        """
-        return {}
+        return self._schema
 
     def is_valid(self, doc):
+        """
+        Returns True or False if validator initialized with
+        strict=False, or returns True or raises ValidationError
+        if strict=True.
 
-        # JSON validation
+        :param doc (dict): a single document
+        :return: True, False or ValidationError
+        """
         try:
             validate(doc, schema=self.schema)
-            valid_schema = True
-        except ValidationError:
-            valid_schema = False
-
-        # MSONable validation
-        def _validate_doc_msonable(doc):
-            """
-            For every keypath, will return True if either
-            keypath does not exist, or keypath does exist
-            and a Python object can be reconstructed.
-            Otherwise will return False.
-            """
-
-            for keypath, obj in self.msonable_keypaths.items():
-
-                dict_to_check = pydash.get(doc, keypath, None)
-
-                if dict_to_check:
-                    try:
-                        obj.from_dict(dict_to_check)
-                    except:
-                        return False
-
             return True
+        except ValidationError:
+            if self.strict:
+                raise
+            else:
+                return False
 
-        valid_msonable = _validate_doc_msonable(doc)
 
-        return valid_schema and valid_msonable
-
+def msonable_schema(cls):
+    """
+    Convenience function to return a JSON Schema for any MSONable class.
+    """
+    return {
+        "type": "object",
+        "required": ["@class", "@module"],
+        "properties": {
+            "@class": {"const": cls.__name__},
+            "@module": {"const": cls.__module__}
+        }
+    }

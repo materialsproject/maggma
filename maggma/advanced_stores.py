@@ -5,11 +5,10 @@ Advanced Stores for behavior outside normal access patterns
 import os
 import hvac
 import json
-import boto3
-import botocore
 import zlib
 from datetime import datetime
 
+from pydash import get, set_
 from maggma.stores import Store, MongoStore, StoreError, Mongolike
 from maggma.utils import lazy_substitute, substitute
 from mongogrant import Client
@@ -17,6 +16,14 @@ from mongogrant.client import check
 from mongogrant.config import Config
 from monty.json import jsanitize
 from monty.functools import lru_cache
+from pymongo import MongoClient
+
+try:
+    import boto3
+    import botocore
+    boto_import = True
+except ImportError:
+    boto_import = False
 
 
 class MongograntStore(Mongolike, Store):
@@ -67,9 +74,9 @@ class MongograntStore(Mongolike, Store):
     def __hash__(self):
         return hash((self.mongogrant_spec, self.collection_name, self.lu_field))
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         return MongoStore.groupby(
-            self, keys, properties=None, criteria=None, **kwargs)
+            self, keys, criteria=None, properties=None, **kwargs)
 
 
 class VaultStore(MongoStore):
@@ -143,7 +150,7 @@ class AliasingStore(Store):
         kwargs.update({"lu_field": store.lu_field, "lu_type": store.lu_type})
         super(AliasingStore, self).__init__(**kwargs)
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
 
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
@@ -151,11 +158,11 @@ class AliasingStore(Store):
         criteria = criteria if criteria else {}
         substitute(properties, self.reverse_aliases)
         lazy_substitute(criteria, self.reverse_aliases)
-        for d in self.store.query(properties, criteria, **kwargs):
+        for d in self.store.query(properties=properties, criteria=criteria, **kwargs):
             substitute(d, self.aliases)
             yield d
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
 
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
@@ -163,11 +170,11 @@ class AliasingStore(Store):
         criteria = criteria if criteria else {}
         substitute(properties, self.reverse_aliases)
         lazy_substitute(criteria, self.reverse_aliases)
-        d = self.store.query_one(properties, criteria, **kwargs)
+        d = self.store.query_one(properties=properties, criteria=criteria, **kwargs)
         substitute(d, self.aliases)
         return d
 
-    def distinct(self, key, criteria=None, **kwargs):
+    def distinct(self, key, criteria=None, all_exist=True, **kwargs):
         if isinstance(key, list):
             criteria = criteria if criteria else {}
             # Update to ensure keys are there
@@ -185,7 +192,7 @@ class AliasingStore(Store):
             key = self.aliases[key] if key in self.aliases else key
             return self.collection.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         # Convert to a list
         keys = keys if isinstance(keys, list) else [keys]
 
@@ -254,11 +261,11 @@ class SandboxStore(Store):
             return {"$or": [{"sbxn": {"$in": [self.sandbox]}},
                             {"sbxn": {"$exists": False}}]}
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.query(properties=properties, criteria=criteria, **kwargs)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.query_one(properties=properties, criteria=criteria, **kwargs)
 
@@ -266,7 +273,7 @@ class SandboxStore(Store):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         return self.store.distinct(key=key, criteria=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
 
         return self.store.groupby(keys=keys, properties=properties, criteria=criteria, **kwargs)
@@ -307,6 +314,9 @@ class AmazonS3Store(Store):
             index (Store): a store to use to index the S3 Bucket
             bucket (str) : name of the bucket
         """
+        if not boto_import:
+            raise ValueError("boto not available, please install boto3 to "
+                             "use AmazonS3Store")
         self.index = index
         self.bucket = bucket
         self.s3 = None
@@ -332,7 +342,7 @@ class AmazonS3Store(Store):
         # For now returns the index collection since that is what we would "search" on
         return self.index
 
-    def query(self, properties=None, criteria=None, **kwargs):
+    def query(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets data from Amazon S3. This store ignores all
         property projections as its designed for whole document access
@@ -360,7 +370,7 @@ class AmazonS3Store(Store):
 
             yield json.loads(data)
 
-    def query_one(self, properties=None, criteria=None, **kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Function that gets a single document from Amazon S3. This store
         ignores all property projections as its designed for whole
@@ -408,15 +418,15 @@ class AmazonS3Store(Store):
         # Index is a store so it should have its own distinct function
         return self.index.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, properties=None, criteria=None, **kwargs):
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
         """
         Simple grouping function that will group documents
         by keys. Only searches the index collection
 
         Args:
             keys (list or string): fields to group documents
-            properties (list): properties to return in grouped documents
             criteria (dict): filter for documents to group
+            properties (list): properties to return in grouped documents
             allow_disk_use (bool): whether to allow disk use in aggregation
 
         Returns:
@@ -509,3 +519,143 @@ class AmazonS3Store(Store):
             index_docs.append(file.metadata)
 
         self.index.update(index_docs)
+
+
+class JointStore(Store):
+    """Store corresponding to multiple collections, uses lookup to join"""
+    def __init__(self, database, collection_names, host="localhost",
+                 port=27017, username="", password="", master=None, **kwargs):
+        self.database = database
+        self.collection_names = collection_names
+        self.host = host
+        self.port = port
+        self.username = username
+        self.password = password
+        self._collection = None
+        self.master = master or collection_names[0]
+        self.kwargs = kwargs
+        super(JointStore, self).__init__(**kwargs)
+
+    def connect(self, force_reset=False):
+        conn = MongoClient(self.host, self.port)
+        db = conn[self.database]
+        if self.username is not "":
+            db.authenticate(self.username, self.password)
+        self._collection = db[self.master]
+
+    def close(self):
+        self.collection.database.client.close()
+
+    @property
+    def collection(self):
+        return self._collection
+
+    @property
+    def nonmaster_names(self):
+        return list(set(self.collection_names) - {self.master})
+
+    def query(self, criteria=None, properties=None, **kwargs):
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties)
+        return self.collection.aggregate(pipeline, **kwargs)
+
+    @property
+    def last_updated(self):
+        lus = []
+        for cname in self.collection_names:
+            lu = MongoStore.from_collection(
+                self.collection.database[cname],
+                lu_field=self.lu_field).last_updated
+            lus.append(lu)
+        return max(lus)
+
+    # TODO: implement update?
+    def update(self, docs, update_lu=True, key=None, **kwargs):
+        raise NotImplementedError("No update method for JointStore")
+
+    def _get_store_by_name(self, name):
+        return MongoStore.from_collection(self.collection.database[name])
+
+    def distinct(self, key, criteria=None, all_exist=True, **kwargs):
+        g_key = key if isinstance(key, list) else [key]
+        if all_exist:
+            criteria = criteria or {}
+            criteria.update({k: {"$exists": True} for k in g_key
+                             if k not in criteria})
+        cursor = self.groupby(g_key, criteria=criteria, **kwargs)
+        if isinstance(key, list):
+            return [d['_id'] for d in cursor]
+        else:
+            return [get(d['_id'], key) for d in cursor]
+
+    def ensure_index(self, key, unique=False, **kwargs):
+        raise NotImplementedError("No ensure_index method for JointStore")
+
+    def _get_pipeline(self, criteria=None, properties=None):
+        """
+        Gets the aggregation pipeline for query and query_one
+
+        Args:
+            properties: properties to be returned
+            criteria: criteria to filter by
+
+        Returns:
+            list of aggregation operators
+        """
+        pipeline = []
+        for cname in self.collection_names:
+            if cname is not self.master:
+                pipeline.append({
+                    "$lookup": {"from": cname, "localField": self.key,
+                                "foreignField": self.key, "as": cname}})
+                pipeline.append({
+                    "$unwind": {"path": "${}".format(cname),
+                                "preserveNullAndEmptyArrays": True}})
+
+        # Do projection for max last_updated
+        lu_max_fields = ["${}".format(self.lu_field)]
+        lu_max_fields.extend(["${}.{}".format(cname, self.lu_field)
+                              for cname in self.collection_names])
+        lu_proj = {self.lu_field: {"$max": lu_max_fields}}
+        pipeline.append({"$addFields": lu_proj})
+
+        if criteria:
+            pipeline.append({"$match": criteria})
+        if isinstance(properties, list):
+            properties = {k: 1 for k in properties}
+        if properties:
+            pipeline.append({"$project": properties})
+        return pipeline
+
+    def groupby(self, keys, criteria=None, properties=None, **kwargs):
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties)
+        if not isinstance(keys, list):
+            keys = [keys]
+        group_id = {}
+        for key in keys:
+            set_(group_id, key, "${}".format(key))
+        pipeline.append({"$group": {"_id": group_id,
+                                    "docs": {"$push": "$$ROOT"}}})
+
+        return self.collection.aggregate(pipeline, **kwargs)
+
+    def query_one(self, criteria=None, properties=None, **kwargs):
+        """
+        Get one document
+
+        Args:
+            properties([str] or {}): properties to return in query
+            criteria ({}): filter for matching
+            **kwargs: kwargs for collection.aggregate
+
+        Returns:
+            single document
+        """
+        # TODO: maybe adding explicit limit in agg pipeline is better as below?
+        # pipeline = self._get_pipeline(properties, criteria)
+        # pipeline.append({"$limit": 1})
+        query = self.query(criteria=criteria, properties=properties, **kwargs)
+        try:
+            doc = query.next()
+            return doc
+        except StopIteration:
+            return None
