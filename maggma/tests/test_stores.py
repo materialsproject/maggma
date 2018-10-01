@@ -23,7 +23,8 @@ class TestMongoStore(unittest.TestCase):
 
     def test_connect(self):
         mongostore = MongoStore("maggma_test", "test")
-        self.assertEqual(mongostore.collection, None)
+        with self.assertRaises(Exception):
+            mongostore.collection
         mongostore.connect()
         self.assertIsInstance(mongostore.collection, pymongo.collection.Collection)
 
@@ -122,8 +123,10 @@ class TestMongoStore(unittest.TestCase):
         self.assertGreaterEqual(self.mongostore.last_updated, tic)
 
     def tearDown(self):
-        if self.mongostore.collection:
+        try:
             self.mongostore.collection.drop()
+        except:
+            pass
 
 
 class TestMemoryStore(unittest.TestCase):
@@ -132,7 +135,8 @@ class TestMemoryStore(unittest.TestCase):
         self.memstore = MemoryStore()
 
     def test(self):
-        self.assertEqual(self.memstore.collection, None)
+        with self.assertRaises(Exception):
+            self.memstore.collection
         self.memstore.connect()
         self.assertIsInstance(self.memstore.collection, mongomock.collection.Collection)
 

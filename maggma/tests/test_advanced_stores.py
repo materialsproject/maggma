@@ -263,7 +263,9 @@ class TestSandboxStore(unittest.TestCase):
         self.sandboxstore = SandboxStore(self.store, sandbox="test")
 
     def test_connect(self):
-        self.assertEqual(self.sandboxstore.collection, None)
+        with self.assertRaises(Exception):
+            self.sandboxstore.collection
+            
         self.sandboxstore.connect()
         self.assertIsInstance(self.sandboxstore.collection, mongomock.collection.Collection)
 
@@ -301,8 +303,10 @@ class TestSandboxStore(unittest.TestCase):
             criteria={"e": 7})["sbxn"]), {"test", "core"})
 
     def tearDown(self):
-        if self.sandboxstore.collection:
+        try:
             self.sandboxstore.collection.drop()
+        except:
+            pass
 
 
 class JointStoreTest(unittest.TestCase):
