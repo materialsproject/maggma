@@ -187,6 +187,8 @@ class Mongolike(object):
 
     @property
     def collection(self):
+        if self._collection is None:
+            raise Exception("Must connect Mongo-like store before attemping to use it")
         return self._collection
 
     def query(self, criteria=None, properties=None, **kwargs):
