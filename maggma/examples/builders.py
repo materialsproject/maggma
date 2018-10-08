@@ -9,7 +9,7 @@ from maggma.builder import Builder
 from maggma.utils import confirm_field_index, total_size
 
 
-def source_keys_updated(source, target):
+def source_keys_updated(source, target, query=None):
     """
     Utility for incremental building. Gets a list of source.key values.
 
@@ -21,7 +21,7 @@ def source_keys_updated(source, target):
 
     """
     keys_updated = set()  # Handle non-unique keys, e.g. for GroupBuilder.
-    cursor_source = source.query(
+    cursor_source = source.query(criteria=query,
         properties=[source.key, source.lu_field], sort=[(source.lu_field, -1), (source.key, 1)])
     cursor_target = target.query(
         properties=[target.key, target.lu_field], sort=[(target.lu_field, -1), (target.key, 1)])
