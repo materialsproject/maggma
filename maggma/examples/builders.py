@@ -98,18 +98,24 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.projection = projection if projection else []
         self.kwargs = kwargs
         super().__init__(sources=[source], targets=[target], **kwargs)
-
+    
     def get_items(self):
-        criteria = get_criteria(
-            self.source, self.target, query=self.query, incremental=self.incremental, logger=self.logger)
 
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
+        keys = get_criteria(
+            self.source, self.target, query=self.query, logger=self.logger)
+        
+        self.logger.info("Processing {} items".format(len(keys)))
+
         if self.projection:
             projection = list(set(self.projection + [self.source.key, self.source.lu_field]))
         else:
             projection = None
 
-        return self.source.query(criteria=criteria, properties=projection)
+        self.total = len(keys)
+
+        for key in keys:
+            yield self.source.query_one(criteria={self.source.key: key}, properties=projection)
 
     def process_item(self, item):
 
