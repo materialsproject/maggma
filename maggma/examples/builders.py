@@ -138,6 +138,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     def get_items(self):
         criteria = get_criteria(
             self.source, self.target, query=self.query, incremental=self.incremental, logger=self.logger)
+
+        self.logger.info("Starting {} Builder".format(self.__class__.__name__))
         if self.projection:
             projection = list(set(self.projection + [self.source.key, self.source.lu_field]))
         else:
@@ -146,6 +148,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         return self.source.query(criteria=criteria, properties=projection)
 
     def process_item(self, item):
+
+        self.logger.debug("Processing: {}".format(item[self.source.key]))
+
         try:
             processed = self.ufn.__call__(item)
         except Exception as e:
