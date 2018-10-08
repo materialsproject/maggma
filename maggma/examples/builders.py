@@ -6,7 +6,7 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
 from maggma.builder import Builder
-from maggma.utils import confirm_field_index, total_size
+from maggma.utils import confirm_field_index, grouper
 
 
 def source_keys_updated(source, target, query=None):
@@ -21,8 +21,8 @@ def source_keys_updated(source, target, query=None):
 
     """
     keys_updated = set()  # Handle non-unique keys, e.g. for GroupBuilder.
-    cursor_source = source.query(criteria=query,
-        properties=[source.key, source.lu_field], sort=[(source.lu_field, -1), (source.key, 1)])
+    cursor_source = source.query(
+        criteria=query, properties=[source.key, source.lu_field], sort=[(source.lu_field, -1), (source.key, 1)])
     cursor_target = target.query(
         properties=[target.key, target.lu_field], sort=[(target.lu_field, -1), (target.key, 1)])
     tdoc = next(cursor_target, None)
@@ -56,7 +56,7 @@ def get_criteria(source, target, query=None, incremental=True, logger=None):
         if logger:
             logger.warning(index_warning)
 
-    keys_updated = source_keys_updated(source, target,query)
+    keys_updated = source_keys_updated(source, target, query)
 
     return keys_updated
 
@@ -98,13 +98,12 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.projection = projection if projection else []
         self.kwargs = kwargs
         super().__init__(sources=[source], targets=[target], **kwargs)
-    
+
     def get_items(self):
 
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
-        keys = get_criteria(
-            self.source, self.target, query=self.query, logger=self.logger)
-        
+        keys = get_criteria(self.source, self.target, query=self.query, logger=self.logger)
+
         self.logger.info("Processing {} items".format(len(keys)))
 
         if self.projection:
@@ -114,8 +113,12 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         self.total = len(keys)
 
-        for key in keys:
-            yield self.source.query_one(criteria={self.source.key: key}, properties=projection)
+        for chunked_keys in grouper(keys,self.chunk_size,None):
+
+            yield self.source.query_one(
+                criteria={self.source.key: {
+                    "$in": list(filter(None, chunked_keys))
+                }}, properties=projection)
 
     def process_item(self, item):
 
@@ -128,7 +131,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             processed = {"error": str(e)}
         key, lu_field = self.source.key, self.source.lu_field
         out = {self.target.key: item[key]}
-        out[self.target.lu_field] =  self.source.lu_func[0](item[self.source.lu_field])
+        out[self.target.lu_field] = self.source.lu_func[0](item[self.source.lu_field])
         out.update(processed)
         return out
 
