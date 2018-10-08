@@ -131,9 +131,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.query = query
         self.ufn = ufn
         self.projection = projection if projection else []
+        self.kwargs = kwargs
         super().__init__(sources=[source], targets=[target], **kwargs)
-        self.kwargs = kwargs.copy()
-        self.kwargs.update(query=query, incremental=incremental)
 
     def get_items(self):
         criteria = get_criteria(
