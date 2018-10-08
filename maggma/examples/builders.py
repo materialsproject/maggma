@@ -167,7 +167,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             item["_bt"] = datetime.utcnow()
             if "_id" in item:
                 del item["_id"]
-        target.update(items, update_lu=False)
+
+        if len(items) > 0:
+            target.update(items, update_lu=False)
 
 
 class GroupBuilder(MapBuilder, metaclass=ABCMeta):
