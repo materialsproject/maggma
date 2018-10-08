@@ -29,10 +29,8 @@ def source_keys_updated(source, target, query=None):
     for sdoc in cursor_source:
         if tdoc is None:
             keys_updated.add(sdoc[source.key])
-            continue
-
-        if tdoc[target.key] == sdoc[source.key]:
-            if tdoc[target.lu_field] < source.lu_func[0](sdoc[source.lu_field]):
+        elif tdoc[target.key] == sdoc[source.key]:
+            if target.lu_func[0](tdoc[target.lu_field]) < source.lu_func[0](sdoc[source.lu_field]):
                 keys_updated.add(sdoc[source.key])
             tdoc = next(cursor_target, None)
         else:
