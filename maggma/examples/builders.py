@@ -58,42 +58,9 @@ def get_criteria(source, target, query=None, incremental=True, logger=None):
         if logger:
             logger.warning(index_warning)
 
-    criteria = {}
-    if query:
-        criteria.update(query)
-    if incremental:
-        if logger:
-            logger.info("incremental mode: finding new/updated source keys")
-        keys_updated = source_keys_updated(source, target)
-        # Merge existing criteria and {source.key: {"$in": keys_updated}}.
-        if "$and" in criteria:
-            criteria["$and"].append({source.key: {"$in": keys_updated}})
-        elif source.key in criteria:
-            # XXX could go deeper and check for $in, but this is fine.
-            criteria["$and"] = [
-                {
-                    source.key: criteria[source.key].copy()
-                },
-                {
-                    source.key: {
-                        "$in": keys_updated
-                    }
-                },
-            ]
-            del criteria[source.key]
-        else:
-            criteria.update({source.key: {"$in": keys_updated}})
-    # Check ratio of criteria size to 16 MB MongoDB document size limit.
-    # Overestimates ratio via 1000 * 1000 instead of 1024 * 1024.
-    # If criteria is > 16MB, even cursor.count() will fail with a
-    # "DocumentTooLarge: "command document too large" error.
-    if (total_size(criteria) / (16 * 1000 * 1000)) >= 1:
-        raise RuntimeError("`get_items` query criteria too large. This can happen if "
-                           "trying to run incremental=True for the initial build of a "
-                           "very large source store, or if `query` is too large. You "
-                           "can use maggma.utils.total_size to ensure `query` is smaller "
-                           "than 16,000,000 bytes.")
-    return criteria
+    keys_updated = source_keys_updated(source, target,query)
+
+    return keys_updated
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
