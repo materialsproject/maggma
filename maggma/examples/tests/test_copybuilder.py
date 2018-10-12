@@ -74,9 +74,8 @@ class TestCopyBuilder(TestCase):
         """Should log warning when recommended store indexes are not present."""
         self.source.collection.drop_index("lu_-1_k_1")
         with self.assertLogs(level=logging.WARNING) as cm:
-            self.builder.get_items()
+            list(self.builder.get_items())
         self.assertIn("Ensure indices", "\n".join(cm.output))
-        self.source.collection.create_index("lu_-1_k_1")
 
     def test_runner(self):
         self.source.collection.insert_many(self.old_docs)
