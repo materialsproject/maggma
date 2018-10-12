@@ -1,6 +1,7 @@
 """Test maggma.examples.builders.CopyBuilder."""
 
 import logging
+import unittest
 from datetime import datetime, timedelta
 from unittest import TestCase
 from uuid import uuid4
@@ -95,3 +96,7 @@ class TestCopyBuilder(TestCase):
         all_docs = list(self.target.query(criteria={}))
         self.assertEqual(len(all_docs), 14)
         self.assertTrue(min([d['k'] for d in all_docs]), 6)
+
+
+if __name__ == "__main__":
+    unittest.main()
