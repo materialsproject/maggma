@@ -112,13 +112,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             projection = None
 
         self.total = len(keys)
-
-        for chunked_keys in grouper(keys,self.chunk_size,None):
-
-            yield self.source.query_one(
-                criteria={self.source.key: {
-                    "$in": list(filter(None, chunked_keys))
-                }}, properties=projection)
+        for chunked_keys in grouper(keys, self.chunk_size, None):
+            chunked_keys = list(filter(None.__ne__, chunked_keys))
+            for doc in self.source.query(criteria={self.source.key: {"$in": chunked_keys}}, properties=projection):
+                yield doc
 
     def process_item(self, item):
 
