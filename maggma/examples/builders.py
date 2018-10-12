@@ -102,7 +102,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     def get_items(self):
 
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
-        keys = get_criteria(self.source, self.target, query=self.query, logger=self.logger)
+        keys = get_criteria(source=self.source, target=self.target, query=self.query, logger=self.logger)
 
         self.logger.info("Processing {} items".format(len(keys)))
 
