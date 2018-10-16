@@ -550,6 +550,7 @@ class JointStore(Store):
         if self.username is not "":
             db.authenticate(self.username, self.password)
         self._collection = db[self.master]
+        self._has_merge_objects = self._collection.database.client.server_info()["version"] < "3.6"
 
     def close(self):
         self.collection.database.client.close()
@@ -561,10 +562,6 @@ class JointStore(Store):
     @property
     def nonmaster_names(self):
         return list(set(self.collection_names) - {self.master})
-
-    def query(self, criteria=None, properties=None, **kwargs):
-        pipeline = self._get_pipeline(criteria=criteria, properties=properties)
-        return self.collection.aggregate(pipeline, **kwargs)
 
     @property
     def last_updated(self):
@@ -619,6 +616,10 @@ class JointStore(Store):
                 })
                 pipeline.append({"$unwind": {"path": "${}".format(cname), "preserveNullAndEmptyArrays": True}})
                 if self.merge_at_root:
+                    if not self._has_merge_objects:
+                        raise Exception(
+                            "MongoDB server version too low to use $mergeObjects. Merging objects on client side")
+
                     pipeline.append({
                         "$replaceRoot": {
                             "newRoot": {
@@ -641,7 +642,13 @@ class JointStore(Store):
             properties = {k: 1 for k in properties}
         if properties:
             pipeline.append({"$project": properties})
+
         return pipeline
+
+    def query(self, criteria=None, properties=None, **kwargs):
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties)
+        agg = self.collection.aggregate(pipeline, **kwargs)
+        return agg
 
     def groupby(self, keys, criteria=None, properties=None, **kwargs):
         pipeline = self._get_pipeline(criteria=criteria, properties=properties)
@@ -652,7 +659,9 @@ class JointStore(Store):
             set_(group_id, key, "${}".format(key))
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
-        return self.collection.aggregate(pipeline, **kwargs)
+        agg = self.collection.aggregate(pipeline, **kwargs)
+
+        return agg
 
     def query_one(self, criteria=None, properties=None, **kwargs):
         """
@@ -671,7 +680,7 @@ class JointStore(Store):
         # pipeline.append({"$limit": 1})
         query = self.query(criteria=criteria, properties=properties, **kwargs)
         try:
-            doc = query.next()
+            doc = next(query)
             return doc
         except StopIteration:
             return None
