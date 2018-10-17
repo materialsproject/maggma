@@ -614,7 +614,7 @@ class JointStore(Store):
                         "as": cname
                     }
                 })
-                pipeline.append({"$unwind": {"path": "${}".format(cname), "preserveNullAndEmptyArrays": True}})
+                
                 if self.merge_at_root:
                     if not self._has_merge_objects:
                         raise Exception(
@@ -629,6 +629,8 @@ class JointStore(Store):
                             }
                         }
                     })
+                else:
+                    pipeline.append({"$unwind": {"path": "${}".format(cname), "preserveNullAndEmptyArrays": True}})    
 
         # Do projection for max last_updated
         lu_max_fields = ["${}".format(self.lu_field)]
