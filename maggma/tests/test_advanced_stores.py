@@ -349,6 +349,19 @@ class JointStoreTest(unittest.TestCase):
         self.assertIsNone(doc)
         doc = self.jointstore.query_one(criteria={"test2.your_prop": {"$gt": 6}})
         self.assertEqual(doc['task_id'], 8)
+        
+        # Test merge_at_root
+        self.jointstore.merge_at_root = True
+
+        # Test merging is working properly
+        doc = self.jointstore.query_one(criteria={"task_id": 2})
+        self.assertEqual(doc['my_prop'], 3)
+        self.assertEqual(doc['your_prop'], 4)
+
+        # Test merging is allowing for subsequent match
+        doc = self.jointstore.query_one(criteria={"your_prop": {"$gt": 6}})
+        self.assertEqual(doc['task_id'], 8)
+
 
     def test_distinct(self):
         dyour_prop = self.jointstore.distinct("test2.your_prop")
