@@ -329,8 +329,8 @@ class JointStoreTest(unittest.TestCase):
     def test_query(self):
         # Test query all
         docs = list(self.jointstore.query())
-        self.assertEqual(len(docs), 10)
-        docs_w_field = [d for d in docs if d.get("test2")]
+        self.assertEqual(len(docs), 10)  
+        docs_w_field = [d for d in docs if "test2" in d]
         self.assertEqual(len(docs_w_field), 5)
         docs_w_field = sorted(docs_w_field, key=lambda x: x['task_id'])
         self.assertEqual(docs_w_field[0]['test2']['your_prop'], 3)
