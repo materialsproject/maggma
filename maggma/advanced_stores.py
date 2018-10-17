@@ -550,7 +550,7 @@ class JointStore(Store):
         if self.username is not "":
             db.authenticate(self.username, self.password)
         self._collection = db[self.master]
-        self._has_merge_objects = self._collection.database.client.server_info()["version"] < "3.6"
+        self._has_merge_objects = self._collection.database.client.server_info()["version"] > "3.6"
 
     def close(self):
         self.collection.database.client.close()
