@@ -38,8 +38,8 @@ def source_keys_updated(source, target, query=None):
     return list(keys_updated)
 
 
-def get_criteria(source, target, query=None, incremental=True, logger=None):
-    """Return criteria to pass to `source.query` to get items."""
+def get_keys(source, target, query=None, incremental=True, logger=None):
+    """Return keys to pass to `source.query` to get items."""
     index_checks = [confirm_field_index(target, target.key)]
     if incremental:
         # Ensure [(lu_field, -1), (key, 1)] index on both source and target
@@ -102,7 +102,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     def get_items(self):
 
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
-        keys = get_criteria(source=self.source, target=self.target, query=self.query, logger=self.logger)
+        keys = get_keys(source=self.source, target=self.target, query=self.query, logger=self.logger)
 
         self.logger.info("Processing {} items".format(len(keys)))
 
@@ -174,7 +174,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         self.total = None
 
     def get_items(self):
-        criteria = get_criteria(
+        criteria = get_keys(
             self.source, self.target, query=self.query, incremental=self.incremental, logger=self.logger)
         if all(isinstance(entry, str) for entry in self.grouping_properties()):
             properties = {entry: 1 for entry in self.grouping_properties()}
