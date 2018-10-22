@@ -618,7 +618,7 @@ class JointStore(Store):
                 if self.merge_at_root:
                     if not self._has_merge_objects:
                         raise Exception(
-                            "MongoDB server version too low to use $mergeObjects. Merging objects on client side")
+                            "MongoDB server version too low to use $mergeObjects.")
 
                     pipeline.append({
                         "$replaceRoot": {
