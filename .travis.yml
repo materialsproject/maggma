@@ -2,6 +2,14 @@ language: python
 cache: pip
 services: mongodb
 sudo: required
+addons:
+  apt:
+    sources:
+      - mongodb-upstart
+      - mongodb-3.0-precise
+    packages:
+      - mongodb-org-server
+      - mongodb-org-shell
 python:
   - "3.6"
 install:
