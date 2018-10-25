@@ -1,6 +1,5 @@
 language: python
 cache: pip
-services: mongodb
 sudo: required
 addons:
   apt:
