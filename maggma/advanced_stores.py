@@ -617,6 +617,7 @@ class JointStore(Store):
 
                 if self.merge_at_root:
                     if not self._has_merge_objects:
+                        print("MongoDB Version: {}".format(self._collection.database.client.server_info()["version"]))
                         raise Exception(
                             "MongoDB server version too low to use $mergeObjects.")
 
