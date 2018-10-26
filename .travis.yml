@@ -22,13 +22,13 @@ before_script:
   - |
      mongodb-linux-x86_64-3.6.8/bin/mongo 127.0.0.1:27020/admin --eval \
      'db.createUser({user:"mongoadmin",pwd:"mongoadminpass",roles:["root"]});'
-  - cd -
   - mkdir -p localdbdata
   - touch localdblog
   - |
     mongodb-linux-x86_64-3.6.8/bin/mongod \
     --port 27010 --dbpath localdbdata --logpath localdblog \
     --auth --bind_ip_all --fork
+  - cd -
 script:
   - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
   - nosetests --nocapture --with-coverage --cover-package=maggma
