@@ -1,14 +1,5 @@
 language: python
 cache: pip
-sudo: required
-addons:
-  apt:
-    sources:
-      - mongodb-upstart
-      - mongodb-3.0-precise
-    packages:
-      - mongodb-org-server
-      - mongodb-org-shell
 python:
   - "3.6"
 install:
@@ -18,7 +9,6 @@ install:
   - pip install coverage
   - pip install python-coveralls
 before_script:
-  - mongod
   - python setup.py develop
   - cd $HOME
   - curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.8.tgz
@@ -33,6 +23,12 @@ before_script:
      mongodb-linux-x86_64-3.6.8/bin/mongo 127.0.0.1:27020/admin --eval \
      'db.createUser({user:"mongoadmin",pwd:"mongoadminpass",roles:["root"]});'
   - cd -
+  - mkdir -p localdbdata
+  - touch localdblog
+  - |
+    mongodb-linux-x86_64-3.6.8/bin/mongod \
+    --port 27010 --dbpath localdbdata --logpath localdblog \
+    --auth --bind_ip_all --fork
 script:
   - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
   - nosetests --nocapture --with-coverage --cover-package=maggma
