@@ -26,7 +26,7 @@ before_script:
   - touch localdblog
   - |
     mongodb-linux-x86_64-3.6.8/bin/mongod \
-    --port 27010 --dbpath localdbdata --logpath localdblog \
+    --port 27017 --dbpath localdbdata --logpath localdblog \
     --auth --bind_ip_all --fork
   - cd -
 script:
