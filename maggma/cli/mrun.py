@@ -48,7 +48,8 @@ def main():
         # This is a runner:
         root.info("Changing number of workers from default in input file")
         runner = Runner(objects.builders, args.num_workers, mpi=args.mpi)
-    else:
+    elif isinstance(objects, Builder):
+        runner = Runner([objects], args.num_workers, mpi=args.mpi)
         root.error("Couldn't properly read the builder file.")
 
     if not args.dry_run:

@@ -9,6 +9,7 @@ import copy
 from datetime import datetime
 import json
 import zlib
+import logging
 
 import mongomock
 import pymongo
@@ -44,6 +45,8 @@ class Store(MSONable, metaclass=ABCMeta):
         self.lu_type = lu_type
         self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
         self.validator = validator
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
 
     @property
     @abstractmethod

@@ -6,10 +6,10 @@ from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
 from maggma.builder import Builder
-from maggma.utils import confirm_field_index, total_size
+from maggma.utils import confirm_field_index, grouper
 
 
-def source_keys_updated(source, target):
+def source_keys_updated(source, target, query=None):
     """
     Utility for incremental building. Gets a list of source.key values.
 
@@ -22,17 +22,15 @@ def source_keys_updated(source, target):
     """
     keys_updated = set()  # Handle non-unique keys, e.g. for GroupBuilder.
     cursor_source = source.query(
-        properties=[source.key, source.lu_field], sort=[(source.lu_field, -1), (source.key, 1)])
+        criteria=query, properties=[source.key, source.lu_field], sort=[(source.lu_field, -1), (source.key, 1)])
     cursor_target = target.query(
         properties=[target.key, target.lu_field], sort=[(target.lu_field, -1), (target.key, 1)])
     tdoc = next(cursor_target, None)
     for sdoc in cursor_source:
         if tdoc is None:
             keys_updated.add(sdoc[source.key])
-            continue
-
-        if tdoc[target.key] == sdoc[source.key]:
-            if tdoc[target.lu_field] < source.lu_func[0](sdoc[source.lu_field]):
+        elif tdoc[target.key] == sdoc[source.key]:
+            if target.lu_func[0](tdoc[target.lu_field]) < source.lu_func[0](sdoc[source.lu_field]):
                 keys_updated.add(sdoc[source.key])
             tdoc = next(cursor_target, None)
         else:
@@ -40,8 +38,8 @@ def source_keys_updated(source, target):
     return list(keys_updated)
 
 
-def get_criteria(source, target, query=None, incremental=True, logger=None):
-    """Return criteria to pass to `source.query` to get items."""
+def get_keys(source, target, query=None, incremental=True, logger=None):
+    """Return keys to pass to `source.query` to get items."""
     index_checks = [confirm_field_index(target, target.key)]
     if incremental:
         # Ensure [(lu_field, -1), (key, 1)] index on both source and target
@@ -58,42 +56,9 @@ def get_criteria(source, target, query=None, incremental=True, logger=None):
         if logger:
             logger.warning(index_warning)
 
-    criteria = {}
-    if query:
-        criteria.update(query)
-    if incremental:
-        if logger:
-            logger.info("incremental mode: finding new/updated source keys")
-        keys_updated = source_keys_updated(source, target)
-        # Merge existing criteria and {source.key: {"$in": keys_updated}}.
-        if "$and" in criteria:
-            criteria["$and"].append({source.key: {"$in": keys_updated}})
-        elif source.key in criteria:
-            # XXX could go deeper and check for $in, but this is fine.
-            criteria["$and"] = [
-                {
-                    source.key: criteria[source.key].copy()
-                },
-                {
-                    source.key: {
-                        "$in": keys_updated
-                    }
-                },
-            ]
-            del criteria[source.key]
-        else:
-            criteria.update({source.key: {"$in": keys_updated}})
-    # Check ratio of criteria size to 16 MB MongoDB document size limit.
-    # Overestimates ratio via 1000 * 1000 instead of 1024 * 1024.
-    # If criteria is > 16MB, even cursor.count() will fail with a
-    # "DocumentTooLarge: "command document too large" error.
-    if (total_size(criteria) / (16 * 1000 * 1000)) >= 1:
-        raise RuntimeError("`get_items` query criteria too large. This can happen if "
-                           "trying to run incremental=True for the initial build of a "
-                           "very large source store, or if `query` is too large. You "
-                           "can use maggma.utils.total_size to ensure `query` is smaller "
-                           "than 16,000,000 bytes.")
-    return criteria
+    keys_updated = source_keys_updated(source, target, query)
+
+    return keys_updated
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -131,21 +96,31 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.query = query
         self.ufn = ufn
         self.projection = projection if projection else []
+        self.kwargs = kwargs
         super().__init__(sources=[source], targets=[target], **kwargs)
-        self.kwargs = kwargs.copy()
-        self.kwargs.update(query=query, incremental=incremental)
 
     def get_items(self):
-        criteria = get_criteria(
-            self.source, self.target, query=self.query, incremental=self.incremental, logger=self.logger)
+
+        self.logger.info("Starting {} Builder".format(self.__class__.__name__))
+        keys = get_keys(source=self.source, target=self.target, query=self.query, logger=self.logger)
+
+        self.logger.info("Processing {} items".format(len(keys)))
+
         if self.projection:
             projection = list(set(self.projection + [self.source.key, self.source.lu_field]))
         else:
             projection = None
 
-        return self.source.query(criteria=criteria, properties=projection)
+        self.total = len(keys)
+        for chunked_keys in grouper(keys, self.chunk_size, None):
+            chunked_keys = list(filter(None.__ne__, chunked_keys))
+            for doc in list(self.source.query(criteria={self.source.key: {"$in": chunked_keys}}, properties=projection)):
+                yield doc
 
     def process_item(self, item):
+
+        self.logger.debug("Processing: {}".format(item[self.source.key]))
+
         try:
             processed = self.ufn.__call__(item)
         except Exception as e:
@@ -153,7 +128,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             processed = {"error": str(e)}
         key, lu_field = self.source.key, self.source.lu_field
         out = {self.target.key: item[key]}
-        out[self.target.lu_field] =  self.source.lu_func[0](item[self.source.lu_field])
+        out[self.target.lu_field] = self.source.lu_func[0](item[self.source.lu_field])
         out.update(processed)
         return out
 
@@ -167,7 +142,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             item["_bt"] = datetime.utcnow()
             if "_id" in item:
                 del item["_id"]
-        target.update(items, update_lu=False)
+
+        if len(items) > 0:
+            target.update(items, update_lu=False)
 
 
 class GroupBuilder(MapBuilder, metaclass=ABCMeta):
@@ -197,7 +174,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         self.total = None
 
     def get_items(self):
-        criteria = get_criteria(
+        criteria = get_keys(
             self.source, self.target, query=self.query, incremental=self.incremental, logger=self.logger)
         if all(isinstance(entry, str) for entry in self.grouping_properties()):
             properties = {entry: 1 for entry in self.grouping_properties()}

@@ -1,7 +1,5 @@
 language: python
 cache: pip
-services: mongodb
-sudo: required
 python:
   - "3.6"
 install:
@@ -13,17 +11,23 @@ install:
 before_script:
   - python setup.py develop
   - cd $HOME
-  - curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.5.tgz
-  - tar -zxvf mongodb-linux-x86_64-3.6.5.tgz
+  - curl -O https://fastdl.mongodb.org/linux/mongodb-linux-x86_64-3.6.8.tgz
+  - tar -zxvf mongodb-linux-x86_64-3.6.8.tgz
   - mkdir -p mongodbdata
   - touch mongodblog
   - |
-    mongodb-linux-x86_64-3.6.5/bin/mongod \
+    mongodb-linux-x86_64-3.6.8/bin/mongod \
     --port 27020 --dbpath mongodbdata --logpath mongodblog \
     --auth --bind_ip_all --fork
   - |
-     mongodb-linux-x86_64-3.6.5/bin/mongo 127.0.0.1:27020/admin --eval \
+     mongodb-linux-x86_64-3.6.8/bin/mongo 127.0.0.1:27020/admin --eval \
      'db.createUser({user:"mongoadmin",pwd:"mongoadminpass",roles:["root"]});'
+  - mkdir -p localdbdata
+  - touch localdblog
+  - |
+    mongodb-linux-x86_64-3.6.8/bin/mongod \
+    --port 27017 --dbpath localdbdata --logpath localdblog \
+    --noauth --bind_ip_all --fork
   - cd -
 script:
   - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py

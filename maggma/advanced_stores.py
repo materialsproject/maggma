@@ -37,8 +37,8 @@ class MongograntStore(Mongolike, Store):
 
     mongogrant documentation: https://github.com/materialsproject/mongogrant
     """
-    def __init__(self, mongogrant_spec, collection_name,
-                 mgclient_config_path=None, **kwargs):
+
+    def __init__(self, mongogrant_spec, collection_name, mgclient_config_path=None, **kwargs):
         """
 
         Args:
@@ -54,7 +54,7 @@ class MongograntStore(Mongolike, Store):
         self.collection_name = collection_name
         self.mgclient_config_path = mgclient_config_path
         self._collection = None
-        if set(("username", "password","database", "host")) & set(kwargs):
+        if set(("username", "password", "database", "host")) & set(kwargs):
             raise StoreError("MongograntStore does not accept "
                              "username, password, database, or host "
                              "arguments. Use `mongogrant_spec`.")
@@ -75,8 +75,7 @@ class MongograntStore(Mongolike, Store):
         return hash((self.mongogrant_spec, self.collection_name, self.lu_field))
 
     def groupby(self, keys, criteria=None, properties=None, **kwargs):
-        return MongoStore.groupby(
-            self, keys, criteria=None, properties=None, **kwargs)
+        return MongoStore.groupby(self, keys, criteria=None, properties=None, **kwargs)
 
 
 class VaultStore(MongoStore):
@@ -247,10 +246,11 @@ class SandboxStore(Store):
         self.store = store
         self.sandbox = sandbox
         self.exclusive = exclusive
-        super().__init__(key=self.store.key,
-                         lu_field=self.store.lu_field,
-                         lu_type=self.store.lu_type,
-                         validator=self.store.validator)
+        super().__init__(
+            key=self.store.key,
+            lu_field=self.store.lu_field,
+            lu_type=self.store.lu_type,
+            validator=self.store.validator)
 
     @property
     @lru_cache(maxsize=1)
@@ -258,8 +258,7 @@ class SandboxStore(Store):
         if self.exclusive:
             return {"sbxn": self.sandbox}
         else:
-            return {"$or": [{"sbxn": {"$in": [self.sandbox]}},
-                            {"sbxn": {"$exists": False}}]}
+            return {"$or": [{"sbxn": {"$in": [self.sandbox]}}, {"sbxn": {"$exists": False}}]}
 
     def query(self, criteria=None, properties=None, **kwargs):
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
@@ -315,8 +314,7 @@ class AmazonS3Store(Store):
             bucket (str) : name of the bucket
         """
         if not boto_import:
-            raise ValueError("boto not available, please install boto3 to "
-                             "use AmazonS3Store")
+            raise ValueError("boto not available, please install boto3 to " "use AmazonS3Store")
         self.index = index
         self.bucket = bucket
         self.s3 = None
@@ -523,8 +521,17 @@ class AmazonS3Store(Store):
 
 class JointStore(Store):
     """Store corresponding to multiple collections, uses lookup to join"""
-    def __init__(self, database, collection_names, host="localhost",
-                 port=27017, username="", password="", master=None, **kwargs):
+
+    def __init__(self,
+                 database,
+                 collection_names,
+                 host="localhost",
+                 port=27017,
+                 username="",
+                 password="",
+                 master=None,
+                 merge_at_root=False,
+                 **kwargs):
         self.database = database
         self.collection_names = collection_names
         self.host = host
@@ -533,6 +540,7 @@ class JointStore(Store):
         self.password = password
         self._collection = None
         self.master = master or collection_names[0]
+        self.merge_at_root = merge_at_root
         self.kwargs = kwargs
         super(JointStore, self).__init__(**kwargs)
 
@@ -542,6 +550,7 @@ class JointStore(Store):
         if self.username is not "":
             db.authenticate(self.username, self.password)
         self._collection = db[self.master]
+        self._has_merge_objects = self._collection.database.client.server_info()["version"] > "3.6"
 
     def close(self):
         self.collection.database.client.close()
@@ -554,17 +563,11 @@ class JointStore(Store):
     def nonmaster_names(self):
         return list(set(self.collection_names) - {self.master})
 
-    def query(self, criteria=None, properties=None, **kwargs):
-        pipeline = self._get_pipeline(criteria=criteria, properties=properties)
-        return self.collection.aggregate(pipeline, **kwargs)
-
     @property
     def last_updated(self):
         lus = []
         for cname in self.collection_names:
-            lu = MongoStore.from_collection(
-                self.collection.database[cname],
-                lu_field=self.lu_field).last_updated
+            lu = MongoStore.from_collection(self.collection.database[cname], lu_field=self.lu_field).last_updated
             lus.append(lu)
         return max(lus)
 
@@ -579,8 +582,7 @@ class JointStore(Store):
         g_key = key if isinstance(key, list) else [key]
         if all_exist:
             criteria = criteria or {}
-            criteria.update({k: {"$exists": True} for k in g_key
-                             if k not in criteria})
+            criteria.update({k: {"$exists": True} for k in g_key if k not in criteria})
         cursor = self.groupby(g_key, criteria=criteria, **kwargs)
         if isinstance(key, list):
             return [d['_id'] for d in cursor]
@@ -605,16 +607,34 @@ class JointStore(Store):
         for cname in self.collection_names:
             if cname is not self.master:
                 pipeline.append({
-                    "$lookup": {"from": cname, "localField": self.key,
-                                "foreignField": self.key, "as": cname}})
-                pipeline.append({
-                    "$unwind": {"path": "${}".format(cname),
-                                "preserveNullAndEmptyArrays": True}})
+                    "$lookup": {
+                        "from": cname,
+                        "localField": self.key,
+                        "foreignField": self.key,
+                        "as": cname
+                    }
+                })
+
+                if self.merge_at_root:
+                    if not self._has_merge_objects:
+                        raise Exception(
+                            "MongoDB server version too low to use $mergeObjects.")
+
+                    pipeline.append({
+                        "$replaceRoot": {
+                            "newRoot": {
+                                "$mergeObjects": [{
+                                    "$arrayElemAt": ["${}".format(cname), 0]
+                                }, "$$ROOT"]
+                            }
+                        }
+                    })
+                else:
+                    pipeline.append({"$unwind": {"path": "${}".format(cname), "preserveNullAndEmptyArrays": True}})
 
         # Do projection for max last_updated
         lu_max_fields = ["${}".format(self.lu_field)]
-        lu_max_fields.extend(["${}.{}".format(cname, self.lu_field)
-                              for cname in self.collection_names])
+        lu_max_fields.extend(["${}.{}".format(cname, self.lu_field) for cname in self.collection_names])
         lu_proj = {self.lu_field: {"$max": lu_max_fields}}
         pipeline.append({"$addFields": lu_proj})
 
@@ -624,7 +644,13 @@ class JointStore(Store):
             properties = {k: 1 for k in properties}
         if properties:
             pipeline.append({"$project": properties})
+
         return pipeline
+
+    def query(self, criteria=None, properties=None, **kwargs):
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties)
+        agg = self.collection.aggregate(pipeline, **kwargs)
+        return agg
 
     def groupby(self, keys, criteria=None, properties=None, **kwargs):
         pipeline = self._get_pipeline(criteria=criteria, properties=properties)
@@ -633,10 +659,11 @@ class JointStore(Store):
         group_id = {}
         for key in keys:
             set_(group_id, key, "${}".format(key))
-        pipeline.append({"$group": {"_id": group_id,
-                                    "docs": {"$push": "$$ROOT"}}})
+        pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
-        return self.collection.aggregate(pipeline, **kwargs)
+        agg = self.collection.aggregate(pipeline, **kwargs)
+
+        return agg
 
     def query_one(self, criteria=None, properties=None, **kwargs):
         """
@@ -655,7 +682,7 @@ class JointStore(Store):
         # pipeline.append({"$limit": 1})
         query = self.query(criteria=criteria, properties=properties, **kwargs)
         try:
-            doc = query.next()
+            doc = next(query)
             return doc
         except StopIteration:
             return None

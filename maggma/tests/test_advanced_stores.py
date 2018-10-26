@@ -33,22 +33,16 @@ class TestMongograntStore(unittest.TestCase):
         cls.mdport = 27020
         if not (os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS")):
             basecmd = ("mongod --port {} --dbpath {} --quiet --logpath {} "
-                       "--bind_ip_all --auth"
-                       .format(cls.mdport, cls.mdpath, cls.mdlogpath))
-            cls.mongod_process = subprocess.Popen(
-                basecmd, shell=True, start_new_session=True)
+                       "--bind_ip_all --auth".format(cls.mdport, cls.mdpath, cls.mdlogpath))
+            cls.mongod_process = subprocess.Popen(basecmd, shell=True, start_new_session=True)
             time.sleep(5)
             client = MongoClient(port=cls.mdport)
-            client.admin.command("createUser", "mongoadmin",
-                                 pwd="mongoadminpass", roles=["root"])
+            client.admin.command("createUser", "mongoadmin", pwd="mongoadminpass", roles=["root"])
             client.close()
         cls.dbname = "test_" + uuid4().hex
-        cls.db = MongoClient(
-            "mongodb://mongoadmin:mongoadminpass@127.0.0.1:{}/admin".format(
-                cls.mdport))[cls.dbname]
+        cls.db = MongoClient("mongodb://mongoadmin:mongoadminpass@127.0.0.1:{}/admin".format(cls.mdport))[cls.dbname]
         cls.db.command("createUser", "reader", pwd="readerpass", roles=["read"])
-        cls.db.command("createUser", "writer",
-                       pwd="writerpass", roles=["readWrite"])
+        cls.db.command("createUser", "writer", pwd="writerpass", roles=["readWrite"])
         cls.db.client.close()
 
     @classmethod
@@ -77,23 +71,19 @@ class TestMongograntStore(unittest.TestCase):
             username="writer",
             password="writerpass",
         )
-        self.client.set_alias(
-            "testhost", "localhost:{}".format(self.mdport), which="host")
+        self.client.set_alias("testhost", "localhost:{}".format(self.mdport), which="host")
         self.client.set_alias("testdb", self.dbname, which="db")
 
     @staticmethod
     def connected_user(store):
-        return store.collection.database.command(
-            "connectionStatus")['authInfo']['authenticatedUsers'][0]['user']
+        return store.collection.database.command("connectionStatus")['authInfo']['authenticatedUsers'][0]['user']
 
     def test_connect(self):
-        store = MongograntStore("ro:testhost/testdb", "tasks",
-                                mgclient_config_path=self.config_path)
+        store = MongograntStore("ro:testhost/testdb", "tasks", mgclient_config_path=self.config_path)
         store.connect()
         self.assertIsInstance(store.collection, Collection)
         self.assertEqual(self.connected_user(store), "reader")
-        store = MongograntStore("rw:testhost/testdb", "tasks",
-                                mgclient_config_path=self.config_path)
+        store = MongograntStore("rw:testhost/testdb", "tasks", mgclient_config_path=self.config_path)
         store.connect()
         self.assertIsInstance(store.collection, Collection)
         self.assertEqual(self.connected_user(store), "writer")
@@ -113,11 +103,14 @@ class TestVaultStore(unittest.TestCase):
             instance.read.return_value = {
                 'wrap_info': None,
                 'request_id': '2c72c063-2452-d1cd-19a2-91163c7395f7',
-                'data': {'value': '{"db": "mg_core_prod", "host": "matgen2.lbl.gov", "username": "test", "password": "pass"}'},
+                'data': {
+                    'value': '{"db": "mg_core_prod", "host": "matgen2.lbl.gov", "username": "test", "password": "pass"}'
+                },
                 'auth': None,
                 'warnings': None,
                 'renewable': False,
-                'lease_duration': 2764800, 'lease_id': ''
+                'lease_duration': 2764800,
+                'lease_id': ''
             }
             v = VaultStore("test_coll", "secret/matgen/maggma")
 
@@ -160,7 +153,6 @@ class TestVaultStore(unittest.TestCase):
 
 
 class TestS3Store(unittest.TestCase):
-
     def setUp(self):
         self.index = MemoryStore("index'")
         with patch("boto3.resource") as mock_resource:
@@ -202,31 +194,35 @@ class TestS3Store(unittest.TestCase):
 
 
 class TestAliasingStore(unittest.TestCase):
-
     def setUp(self):
         self.memorystore = MemoryStore("test")
         self.memorystore.connect()
-        self.aliasingstore = AliasingStore(
-            self.memorystore, {"a": "b", "c.d": "e", "f": "g.h"})
+        self.aliasingstore = AliasingStore(self.memorystore, {"a": "b", "c.d": "e", "f": "g.h"})
 
     def test_query(self):
 
         d = [{"b": 1}, {"e": 2}, {"g": {"h": 3}}]
         self.memorystore.collection.insert_many(d)
 
-        self.assertTrue("a" in list(self.aliasingstore.query(
-            criteria={"a": {"$exists": 1}}))[0])
-        self.assertTrue("c" in list(self.aliasingstore.query(
-            criteria={"c.d": {"$exists": 1}}))[0])
-        self.assertTrue("d" in list(self.aliasingstore.query(
-            criteria={"c.d": {"$exists": 1}}))[0].get("c", {}))
-        self.assertTrue("f" in list(self.aliasingstore.query(
-            criteria={"f": {"$exists": 1}}))[0])
+        self.assertTrue("a" in list(self.aliasingstore.query(criteria={"a": {"$exists": 1}}))[0])
+        self.assertTrue("c" in list(self.aliasingstore.query(criteria={"c.d": {"$exists": 1}}))[0])
+        self.assertTrue("d" in list(self.aliasingstore.query(criteria={"c.d": {"$exists": 1}}))[0].get("c", {}))
+        self.assertTrue("f" in list(self.aliasingstore.query(criteria={"f": {"$exists": 1}}))[0])
 
     def test_update(self):
 
-        self.aliasingstore.update([{"task_id": "mp-3", "a": 4}, {"task_id": "mp-4",
-                                                                 "c": {"d": 5}}, {"task_id": "mp-5", "f": 6}])
+        self.aliasingstore.update([{
+            "task_id": "mp-3",
+            "a": 4
+        }, {
+            "task_id": "mp-4",
+            "c": {
+                "d": 5
+            }
+        }, {
+            "task_id": "mp-5",
+            "f": 6
+        }])
         self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-3"}))[0]["a"], 4)
         self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-4"}))[0]["c"]["d"], 5)
         self.assertEqual(list(self.aliasingstore.query(criteria={"task_id": "mp-5"}))[0]["f"], 6)
@@ -257,7 +253,6 @@ class TestAliasingStore(unittest.TestCase):
 
 
 class TestSandboxStore(unittest.TestCase):
-
     def setUp(self):
         self.store = MemoryStore()
         self.sandboxstore = SandboxStore(self.store, sandbox="test")
@@ -265,7 +260,7 @@ class TestSandboxStore(unittest.TestCase):
     def test_connect(self):
         with self.assertRaises(Exception):
             self.sandboxstore.collection
-            
+
         self.sandboxstore.connect()
         self.assertIsInstance(self.sandboxstore.collection, mongomock.collection.Collection)
 
@@ -275,12 +270,10 @@ class TestSandboxStore(unittest.TestCase):
         self.assertEqual(self.sandboxstore.query_one(properties=["a"])['a'], 1)
 
         self.sandboxstore.collection.insert_one({"a": 2, "b": 2, "sbxn": ["test"]})
-        self.assertEqual(self.sandboxstore.query_one(properties=["b"],
-                                                     criteria={"a": 2})['b'], 2)
+        self.assertEqual(self.sandboxstore.query_one(properties=["b"], criteria={"a": 2})['b'], 2)
 
         self.sandboxstore.collection.insert_one({"a": 3, "b": 2, "sbxn": ["not_test"]})
-        self.assertEqual(self.sandboxstore.query_one(properties=["c"],
-                                                   criteria={"a": 3}), None)
+        self.assertEqual(self.sandboxstore.query_one(properties=["c"], criteria={"a": 3}), None)
 
     def test_distinct(self):
         self.sandboxstore.connect()
@@ -299,8 +292,7 @@ class TestSandboxStore(unittest.TestCase):
         self.assertEqual(self.sandboxstore.query(criteria={"d": {"$exists": 1}}, properties=["d"])[0]["d"], 4)
         self.assertEqual(self.sandboxstore.collection.find_one({"e": 6})["sbxn"], ["test"])
         self.sandboxstore.update([{"e": 7, "sbxn": ["core"]}], key="e")
-        self.assertEqual(set(self.sandboxstore.query_one(
-            criteria={"e": 7})["sbxn"]), {"test", "core"})
+        self.assertEqual(set(self.sandboxstore.query_one(criteria={"e": 7})["sbxn"]), {"test", "core"})
 
     def tearDown(self):
         try:
@@ -314,13 +306,19 @@ class JointStoreTest(unittest.TestCase):
         self.jointstore = JointStore("maggma_test", ["test1", "test2"])
         self.jointstore.connect()
         self.jointstore.collection.drop()
-        self.jointstore.collection.insert_many(
-            [{"task_id": k, "my_prop": k+1, "last_updated": datetime.utcnow(),
-              "category": k // 5} for k in range(10)])
+        self.jointstore.collection.insert_many([{
+            "task_id": k,
+            "my_prop": k + 1,
+            "last_updated": datetime.utcnow(),
+            "category": k // 5
+        } for k in range(10)])
         self.jointstore.collection.database["test2"].drop()
-        self.jointstore.collection.database["test2"].insert_many(
-            [{"task_id": 2*k, "your_prop": k+3, "last_updated": datetime.utcnow(),
-              "category2": k // 3} for k in range(5)])
+        self.jointstore.collection.database["test2"].insert_many([{
+            "task_id": 2 * k,
+            "your_prop": k + 3,
+            "last_updated": datetime.utcnow(),
+            "category2": k // 3
+        } for k in range(5)])
         self.test1 = MongoStore("maggma_test", "test1")
         self.test1.connect()
         self.test2 = MongoStore("maggma_test", "test2")
@@ -330,7 +328,7 @@ class JointStoreTest(unittest.TestCase):
         # Test query all
         docs = list(self.jointstore.query())
         self.assertEqual(len(docs), 10)
-        docs_w_field = [d for d in docs if d.get("test2")]
+        docs_w_field = [d for d in docs if "test2" in d]
         self.assertEqual(len(docs_w_field), 5)
         docs_w_field = sorted(docs_w_field, key=lambda x: x['task_id'])
         self.assertEqual(docs_w_field[0]['test2']['your_prop'], 3)
@@ -348,6 +346,18 @@ class JointStoreTest(unittest.TestCase):
         doc = self.jointstore.query_one(criteria={"task_id": {"$gte": 10}})
         self.assertIsNone(doc)
         doc = self.jointstore.query_one(criteria={"test2.your_prop": {"$gt": 6}})
+        self.assertEqual(doc['task_id'], 8)
+
+        # Test merge_at_root
+        self.jointstore.merge_at_root = True
+
+        # Test merging is working properly
+        doc = self.jointstore.query_one(criteria={"task_id": 2})
+        self.assertEqual(doc['my_prop'], 3)
+        self.assertEqual(doc['your_prop'], 4)
+
+        # Test merging is allowing for subsequent match
+        doc = self.jointstore.query_one(criteria={"your_prop": {"$gt": 6}})
         self.assertEqual(doc['task_id'], 8)
 
     def test_distinct(self):
