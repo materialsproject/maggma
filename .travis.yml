@@ -27,7 +27,7 @@ before_script:
   - |
     mongodb-linux-x86_64-3.6.8/bin/mongod \
     --port 27017 --dbpath localdbdata --logpath localdblog \
-    --auth --bind_ip_all --fork
+    --noauth --bind_ip_all --fork
   - cd -
 script:
   - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
