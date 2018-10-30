@@ -257,7 +257,10 @@ class Mongolike(object):
             if self.validator:
                 validates = self.validator.is_valid(d)
                 if not validates:
-                    self.logger.error('Document failed to validate:\n{}'.format(d))
+                    if self.validator.strict:
+                        raise ValueError(self.validator.validation_errors(d))
+                    else:
+                        self.logger.error(self.validator.validation_errors(d))
 
             if validates:
                 key = key if key else self.key
@@ -472,9 +475,9 @@ class MemoryStore(Mongolike, Store):
                 validates = self.validator.is_valid(d)
                 if not validates:
                     if self.validator.strict:
-                        raise ValueError('Document failed to validate: {}'.format(d))
+                        raise ValueError(self.validator.validation_errors(d))
                     else:
-                        self.logger.error('Document failed to validate: {}'.format(d))
+                        self.logger.error(self.validator.validation_errors(d))
 
             if validates:
                 if isinstance(key, list):
