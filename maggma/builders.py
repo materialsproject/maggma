@@ -4,6 +4,7 @@ Base Builder class to define how builders need to be defined
 """
 from abc import ABCMeta, abstractmethod
 import logging
+import traceback
 from datetime import datetime
 from monty.json import MSONable, MontyDecoder
 from maggma.utils import source_keys_updated, grouper
