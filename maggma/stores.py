@@ -722,12 +722,21 @@ class GridFSStore(Store):
         """
         Wrapper for pymongo.Collection.ensure_index for the files collection
         """
-        if key in self.files_collection_fields:
-            return self._files_collection.create_index(key, unique=unique, background=True)
+        # Transform key for gridfs first
+        if key not in self.files_collection_fields:
+            key = "metadata.{}".format(key)
+
+        if "background" not in kwargs:
+            kwargs["background"] = True
+
+        if confirm_field_index(self.collection,key):
+            return True
         else:
-            # Store this key to put into metadata collection
-            self.meta_keys |= set([key])
-            return self._files_collection.create_index("metadata.{}".format(key), unique=unique, background=True)
+            try:
+                self.collection.create_index(key, unique=unique, **kwargs)
+                return True
+            except:
+                return False
 
     def update(self, docs, update_lu=True, key=None):
         """
