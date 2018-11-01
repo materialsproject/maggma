@@ -7,7 +7,7 @@ import unittest
 from unittest import TestCase
 from uuid import uuid4
 
-from maggma.examples.builders import CopyBuilder
+from maggma.builders import CopyBuilder
 from maggma.stores import MongoStore
 
 

@@ -17,10 +17,11 @@ try:
     # noinspection PyUnresolvedReferences
     if get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
         from tqdm import tqdm_notebook as tqdm
-    else: # likely 'TerminalInteractiveShell'
+    else:  # likely 'TerminalInteractiveShell'
         from tqdm import tqdm
 except NameError:
     from tqdm import tqdm
+
 
 def primed(iterable):
     """Preprimes an iterator so the first value is calculated immediately
