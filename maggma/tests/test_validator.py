@@ -65,3 +65,12 @@ class ValidatorTests(unittest.TestCase):
         self.assertFalse(validator.is_valid(invalid_doc_msonable))
         self.assertFalse(validator.is_valid(invalid_doc_missing_key))
         self.assertFalse(validator.is_valid(invalid_doc_wrong_type))
+
+        self.assertListEqual(validator.validation_errors(invalid_doc_msonable),
+                             ["lattice: ['I am not a lattice!'] is not of type 'object'"])
+
+        self.assertListEqual(validator.validation_errors(invalid_doc_missing_key),
+                             [": 'successful' is a required property"])
+
+        self.assertListEqual(validator.validation_errors(invalid_doc_wrong_type),
+                             ["successful: 'true' is not of type 'boolean'"])
