@@ -80,6 +80,8 @@ class SerialProcessor(BaseProcessor):
             processed_items = [builder.process_item(item) for item in chunk if item is not None]
             builder.update_targets(processed_items)
 
+        builder.finalize(cursor)
+
 
 class MPIProcessor(BaseProcessor):
     """
