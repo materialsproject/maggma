@@ -9,33 +9,7 @@ from maggma.builders import Builder
 from maggma.utils import confirm_field_index, grouper
 
 
-def source_keys_updated(source, target, query=None):
-    """
-    Utility for incremental building. Gets a list of source.key values.
 
-    Get key values for source documents that have been updated with respect to
-    corresponding target documents.
-
-    Called should ensure [(lu_field, -1),(key, 1)] compound index on both source
-    and target.
-
-    """
-    keys_updated = set()  # Handle non-unique keys, e.g. for GroupBuilder.
-    cursor_source = source.query(
-        criteria=query, properties=[source.key, source.lu_field], sort=[(source.lu_field, -1), (source.key, 1)])
-    cursor_target = target.query(
-        properties=[target.key, target.lu_field], sort=[(target.lu_field, -1), (target.key, 1)])
-    tdoc = next(cursor_target, None)
-    for sdoc in cursor_source:
-        if tdoc is None:
-            keys_updated.add(sdoc[source.key])
-        elif tdoc[target.key] == sdoc[source.key]:
-            if target.lu_func[0](tdoc[target.lu_field]) < source.lu_func[0](sdoc[source.lu_field]):
-                keys_updated.add(sdoc[source.key])
-            tdoc = next(cursor_target, None)
-        else:
-            keys_updated.add(sdoc[source.key])
-    return list(keys_updated)
 
 
 def get_keys(source, target, query=None, incremental=True, logger=None):
@@ -71,10 +45,15 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     """
 
-    def __init__(self, source, target, ufn,
-                 query=None, incremental=True, projection=None,
-                 delete_orphans=False, **kwargs):
-
+    def __init__(self,
+                 source,
+                 target,
+                 ufn,
+                 query=None,
+                 incremental=True,
+                 projection=None,
+                 delete_orphans=False,
+                 **kwargs):
         """
         Apply a unary function to each source document.
 
@@ -121,7 +100,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.total = len(keys)
         for chunked_keys in grouper(keys, self.chunk_size, None):
             chunked_keys = list(filter(None.__ne__, chunked_keys))
-            for doc in list(self.source.query(criteria={self.source.key: {"$in": chunked_keys}}, properties=projection)):
+            for doc in list(
+                    self.source.query(criteria={self.source.key: {
+                        "$in": chunked_keys
+                    }}, properties=projection)):
                 yield doc
 
     def process_item(self, item):
@@ -156,18 +138,15 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     def finalize(self, cursor=None):
         if self.delete_orphans:
             if not hasattr(self.target, "collection"):
-                self.logger.warning(
-                    "delete_orphans parameter is only supported for "
-                    "Mongolike target stores at this time.")
+                self.logger.warning("delete_orphans parameter is only supported for "
+                                    "Mongolike target stores at this time.")
             else:
                 source_keyvals = set(self.source.distinct(self.source.key))
                 target_keyvals = set(self.target.distinct(self.target.key))
                 to_delete = list(target_keyvals - source_keyvals)
                 if len(to_delete):
-                    self.logger.info("Finalize: Deleting {} orphans.".format(
-                        len(to_delete)))
-                self.target.collection.delete_many(
-                    {self.target.key: {"$in": to_delete}})
+                    self.logger.info("Finalize: Deleting {} orphans.".format(len(to_delete)))
+                self.target.collection.delete_many({self.target.key: {"$in": to_delete}})
         super().finalize(cursor)
 
 
