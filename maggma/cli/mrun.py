@@ -2,6 +2,7 @@
 # coding utf-8
 
 from maggma.runner import Runner
+from maggma.builders import Builder
 from monty.serialization import loadfn
 import argparse
 import logging

@@ -5,7 +5,7 @@ MPI Tests for MPI Processor
 import sys
 import logging
 import numpy as np
-from maggma.builder import Builder
+from maggma.builders import Builder
 from maggma.stores import MemoryStore
 from maggma.runner import MPIProcessor
 

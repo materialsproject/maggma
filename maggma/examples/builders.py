@@ -5,7 +5,7 @@ import traceback
 from abc import ABCMeta, abstractmethod
 from datetime import datetime
 
-from maggma.builder import Builder
+from maggma.builders import Builder
 from maggma.utils import confirm_field_index, grouper
 
 

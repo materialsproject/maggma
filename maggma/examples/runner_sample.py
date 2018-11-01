@@ -14,7 +14,7 @@ import argparse
 import logging
 
 from maggma.stores import MemoryStore
-from maggma.builder import Builder
+from maggma.builders import Builder
 from maggma.runner import Runner
 
 __author__ = "Kiran Mathew, Donny Winston"
