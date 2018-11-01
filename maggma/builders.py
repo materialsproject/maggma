@@ -168,9 +168,19 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.kwargs = kwargs
         super().__init__(sources=[source], targets=[target], **kwargs)
 
+    def ensure_indicies(self):
+
+        self.source.ensure_index(source.key)
+        self.source.ensure_index(source.lu_field)
+        self.target.ensure_index(target.key)
+        self.target.ensure_index(target.lu_field)
+
     def get_items(self):
 
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
+
+        self.ensure_indicies()
+
         keys = source_keys_updated(source=self.source, target=self.target, query=self.query)
 
         self.logger.info("Processing {} items".format(len(keys)))
