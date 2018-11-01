@@ -97,6 +97,26 @@ class TestCopyBuilder(TestCase):
         self.assertEqual(len(all_docs), 14)
         self.assertTrue(min([d['k'] for d in all_docs]), 6)
 
+    def test_delete_orphans(self):
+        self.builder = CopyBuilder(
+            self.source, self.target, delete_orphans=True)
+        self.source.collection.insert_many(self.old_docs)
+        self.source.update(self.new_docs, update_lu=False)
+        self.target.collection.insert_many(self.old_docs)
+
+        deletion_criteria = {"k": {"$in": list(range(5))}}
+        self.source.collection.delete_many(deletion_criteria)
+        print(self.source.collection.distinct("k"))
+        runner = Runner([self.builder])
+        runner.run()
+        print(self.source.collection.distinct("k"))
+        print(self.target.collection.distinct("k"))
+
+        self.assertEqual(
+            self.target.collection.count_documents(deletion_criteria), 0)
+        self.assertEqual(self.target.query_one(criteria={"k": 5})["v"], "new")
+        self.assertEqual(self.target.query_one(criteria={"k": 10})["v"], "old")
+
 
 if __name__ == "__main__":
     unittest.main()

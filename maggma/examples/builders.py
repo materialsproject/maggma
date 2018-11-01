@@ -71,7 +71,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     """
 
-    def __init__(self, source, target, ufn, query=None, incremental=True, projection=None, **kwargs):
+    def __init__(self, source, target, ufn,
+                 query=None, incremental=True, projection=None,
+                 delete_orphans=False, **kwargs):
+
         """
         Apply a unary function to each source document.
 
@@ -87,8 +90,11 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             query (dict): optional query to filter source store
             incremental (bool): whether to use lu_field of source and target
                 to get only new/updated documents.
-            projection (list): list of keys to project from the source for processing.
-                This can be used to limit the data to improve efficiency
+            projection (list): list of keys to project from the source for
+                processing. Limits data transfer to improve efficiency.
+            delete_orphans (bool): Whether to delete documents on target store
+                with key values not present in source store. Deletion happens
+                after all updates, during Builder.finalize.
         """
         self.source = source
         self.target = target
@@ -96,6 +102,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.query = query
         self.ufn = ufn
         self.projection = projection if projection else []
+        self.delete_orphans = delete_orphans
         self.kwargs = kwargs
         super().__init__(sources=[source], targets=[target], **kwargs)
 
@@ -145,6 +152,23 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         if len(items) > 0:
             target.update(items, update_lu=False)
+
+    def finalize(self, cursor=None):
+        if self.delete_orphans:
+            if not hasattr(self.target, "collection"):
+                self.logger.warning(
+                    "delete_orphans parameter is only supported for "
+                    "Mongolike target stores at this time.")
+            else:
+                source_keyvals = set(self.source.distinct(self.source.key))
+                target_keyvals = set(self.target.distinct(self.target.key))
+                to_delete = list(target_keyvals - source_keyvals)
+                if len(to_delete):
+                    self.logger.info("Finalize: Deleting {} orphans.".format(
+                        len(to_delete)))
+                self.target.collection.delete_many(
+                    {self.target.key: {"$in": to_delete}})
+        super().finalize(cursor)
 
 
 class GroupBuilder(MapBuilder, metaclass=ABCMeta):
