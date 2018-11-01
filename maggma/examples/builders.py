@@ -8,4 +8,5 @@ from datetime import datetime
 from maggma.builders import MapBuilder,CopyBuilder
 from monty.dev import deprecated
 
-@deprecated(message="MapBuilder and CopyBuilder have been moved to the main builders module")
+
+print("WARNING: maggma.examples.builder is now deprecated. MapBuilder and CopyBuilder have been moved to the main builders module")
