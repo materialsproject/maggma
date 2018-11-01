@@ -237,7 +237,6 @@ def source_keys_updated(source, target, query=None):
 
     keys_updated = set()  # Handle non-unique keys, e.g. for GroupBuilder.
 
-
     target_dates = {
         d[target.key]: target.lu_func[0](d[target.lu_field])
         for d in target.query(properties=[target.key, source.lu_field])
@@ -245,7 +244,10 @@ def source_keys_updated(source, target, query=None):
 
     cursor_source = source.query(criteria=query, properties=[source.key, source.lu_field])
     for sdoc in cursor_source:
-        key,lu = sdoc[source.key], source.lu_func[0](sdoc[source.lu_field])
-        if key in target_dates and lu > target_dates[key]:
+        key, lu = sdoc[source.key], source.lu_func[0](sdoc[source.lu_field])
+        if key not in target_dates:
             keys_updated.add(sdoc[source.key])
+        elif lu > target_dates[key]:
+            keys_updated.add(sdoc[source.key])
+
     return list(keys_updated)

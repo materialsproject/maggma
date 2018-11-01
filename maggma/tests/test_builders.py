@@ -99,11 +99,8 @@ class TestCopyBuilder(TestCase):
 
         deletion_criteria = {"k": {"$in": list(range(5))}}
         self.source.collection.delete_many(deletion_criteria)
-        print(self.source.collection.distinct("k"))
         runner = Runner([self.builder])
         runner.run()
-        print(self.source.collection.distinct("k"))
-        print(self.target.collection.distinct("k"))
 
         self.assertEqual(self.target.collection.count_documents(deletion_criteria), 0)
         self.assertEqual(self.target.query_one(criteria={"k": 5})["v"], "new")
