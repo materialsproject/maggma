@@ -128,14 +128,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     """
 
-    def __init__(self,
-                 source,
-                 target,
-                 ufn,
-                 query=None,
-                 projection=None,
-                 delete_orphans=False,
-                 **kwargs):
+    def __init__(self, source, target, ufn, query=None, projection=None, delete_orphans=False, **kwargs):
         """
         Apply a unary function to each source document.
 
@@ -157,7 +150,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         """
         self.source = source
         self.target = target
-        self.incremental = incremental
         self.query = query
         self.ufn = ufn
         self.projection = projection if projection else []
@@ -167,10 +159,19 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def ensure_indicies(self):
 
-        self.source.ensure_index(source.key)
-        self.source.ensure_index(source.lu_field)
-        self.target.ensure_index(target.key)
-        self.target.ensure_index(target.lu_field)
+        index_checks = [
+            self.source.ensure_index(self.source.key),
+            self.source.ensure_index(self.source.lu_field),
+            self.target.ensure_index(self.target.key),
+            self.target.ensure_index(self.target.lu_field)
+        ]
+
+        if not all(index_checks):
+            self.logger.warning("Missing one or more important indices on stores. "
+                                "Performance for large stores may be severely degraded. "
+                                "Ensure indices on target.key and "
+                                "[(store.lu_field, -1), (store.key, 1)] "
+                                "for each of source and target.")
 
     def get_items(self):
 
@@ -248,7 +249,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     it has a newer (by lu_field) doc than the corresponding (by key) target doc.
     """
 
-    def __init__(self, source, target, query=None, incremental=True, **kwargs):
+    def __init__(self, source, target, query=None, **kwargs):
         """
 
         Given criteria, get docs with needed grouping properties. With these
@@ -260,10 +261,8 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
             source (Store): source store
             target (Store): target store
             query (dict): optional query to filter source store
-            incremental (bool): whether to use lu_field of source and target
-                to get only new/updated documents.
         """
-        super().__init__(source, target, query=query, incremental=incremental, **kwargs)
+        super().__init__(source, target, query=query, **kwargs)
         self.total = None
 
     def get_items(self):
