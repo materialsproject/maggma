@@ -133,7 +133,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                  target,
                  ufn,
                  query=None,
-                 incremental=True,
                  projection=None,
                  delete_orphans=False,
                  **kwargs):
@@ -150,8 +149,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                             process_item and logged to the "error" field 
                             in the target document.
             query (dict): optional query to filter source store
-            incremental (bool): whether to use lu_field of source and target
-                to get only new/updated documents.
             projection (list): list of keys to project from the source for
                 processing. Limits data transfer to improve efficiency.
             delete_orphans (bool): Whether to delete documents on target store
