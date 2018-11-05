@@ -110,6 +110,21 @@ class TestCopyBuilder(TestCase):
         self.assertEqual(self.target.query_one(criteria={"k": 5})["v"], "new")
         self.assertEqual(self.target.query_one(criteria={"k": 10})["v"], "old")
 
+    def test_incremental_false(self):
+        tic = datetime.now()
+        toc = tic + timedelta(seconds=1)
+        keys = list(range(20))
+        earlier = [{"lu": tic, "k": k, "v": "val"} for k in keys]
+        later = [{"lu": toc, "k": k, "v": "val"} for k in keys]
+        self.source.collection.insert_many(earlier)
+        self.target.collection.insert_many(later)
+        query = {"k": {"$gt": 5}}
+        self.builder = CopyBuilder(self.source, self.target, incremental=False, query=query)
+        Runner([self.builder]).run()
+        docs = sorted(self.target.query(), key=lambda d: d["k"])
+        self.assertTrue(all(d["lu"] == tic) for d in docs[5:])
+        self.assertTrue(all(d["lu"] == toc) for d in docs[:5])
+
 
 if __name__ == "__main__":
     unittest.main()

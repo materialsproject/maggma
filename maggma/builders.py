@@ -128,7 +128,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     """
 
-    def __init__(self, source, target, ufn, query=None, projection=None, delete_orphans=False, **kwargs):
+    def __init__(self, source, target, ufn, query=None, incremental=True, projection=None, delete_orphans=False,
+                 **kwargs):
         """
         Apply a unary function to each source document.
 
@@ -142,6 +143,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                             process_item and logged to the "error" field 
                             in the target document.
             query (dict): optional query to filter source store
+            incremental (bool): Whether to limit query to filter for only updated source documents.
             projection (list): list of keys to project from the source for
                 processing. Limits data transfer to improve efficiency.
             delete_orphans (bool): Whether to delete documents on target store
@@ -151,6 +153,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.source = source
         self.target = target
         self.query = query
+        self.incremental = incremental
         self.ufn = ufn
         self.projection = projection if projection else []
         self.delete_orphans = delete_orphans
@@ -158,7 +161,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.total = None
         super().__init__(sources=[source], targets=[target], **kwargs)
 
-    def ensure_indicies(self):
+    def ensure_indexes(self):
 
         index_checks = [
             self.source.ensure_index(self.source.key),
@@ -178,9 +181,12 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
 
-        self.ensure_indicies()
+        self.ensure_indexes()
 
-        keys = source_keys_updated(source=self.source, target=self.target, query=self.query)
+        if self.incremental:
+            keys = source_keys_updated(source=self.source, target=self.target, query=self.query)
+        else:
+            keys = self.source.distinct(self.source.key, self.query)
 
         self.logger.info("Processing {} items".format(len(keys)))
 
