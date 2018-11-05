@@ -155,6 +155,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.projection = projection if projection else []
         self.delete_orphans = delete_orphans
         self.kwargs = kwargs
+        self.total = None
         super().__init__(sources=[source], targets=[target], **kwargs)
 
     def ensure_indicies(self):
@@ -207,8 +208,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             self.logger.error(traceback.format_exc())
             processed = {"error": str(e)}
         key, lu_field = self.source.key, self.source.lu_field
-        out = {self.target.key: item[key]}
-        out[self.target.lu_field] = self.source.lu_func[0](item[self.source.lu_field])
+        out = {
+            self.target.key: item[key],
+            self.target.lu_field: self.source.lu_func[0](item[self.source.lu_field])
+        }
         out.update(processed)
         return out
 
