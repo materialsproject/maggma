@@ -178,7 +178,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.ensure_index(self.key)
         self.ensure_index(self.lu_field)
 
-        return source_keys_updated(self,target,query=criteria)
+        return source_keys_updated(target,self,query=criteria)
 
     def __eq__(self, other):
         return hash(self) == hash(other)

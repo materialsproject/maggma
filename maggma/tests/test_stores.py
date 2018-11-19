@@ -122,6 +122,31 @@ class TestMongoStore(unittest.TestCase):
         self.mongostore.update([{self.mongostore.key: 1, "a": 1}])
         self.assertGreaterEqual(self.mongostore.last_updated, tic)
 
+    def test_updated_keys(self):
+        target = MongoStore("maggma_test", "test_target")
+        target.connect()
+
+        docs = []
+        for i in range(10):
+            docs.append({self.mongostore.key: i})
+
+        # Insert docs in source
+        self.mongostore.update(docs)
+        # Make copy in target
+        update_docs = list(self.mongostore.query())
+        for d in update_docs:
+            del d["_id"]
+        target.update(update_docs, update_lu=False)
+
+        # Update docs in source
+        self.mongostore.collection.drop()
+        self.mongostore.update(docs)
+
+        self.assertEqual(len(target.updated_keys(self.mongostore)), 10)
+        self.assertEqual(len(self.mongostore.updated_keys(target)), 0)
+
+        target.collection.drop()
+
     def tearDown(self):
         try:
             self.mongostore.collection.drop()
