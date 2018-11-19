@@ -16,7 +16,6 @@ test_dir = os.path.abspath(os.path.join(module_dir, "..", "..", "test_files", "t
 
 
 class TestMongoStore(unittest.TestCase):
-
     def setUp(self):
         self.mongostore = MongoStore("maggma_test", "test")
         self.mongostore.connect()
@@ -71,25 +70,24 @@ class TestMongoStore(unittest.TestCase):
 
     def test_groupby(self):
         self.mongostore.collection.drop()
-        self.mongostore.update(
-            [{
-                "e": 7,
-                "d": 9,
-                "f": 9
-            }, {
-                "e": 7,
-                "d": 9,
-                "f": 10
-            }, {
-                "e": 8,
-                "d": 9,
-                "f": 11
-            }, {
-                "e": 9,
-                "d": 10,
-                "f": 12
-            }],
-            key="f")
+        self.mongostore.update([{
+            "e": 7,
+            "d": 9,
+            "f": 9
+        }, {
+            "e": 7,
+            "d": 9,
+            "f": 10
+        }, {
+            "e": 8,
+            "d": 9,
+            "f": 11
+        }, {
+            "e": 9,
+            "d": 10,
+            "f": 12
+        }],
+                               key="f")
         data = list(self.mongostore.groupby("d"))
         self.assertEqual(len(data), 2)
         grouped_by_9 = [g['docs'] for g in data if g['_id']['d'] == 9][0]
@@ -155,7 +153,6 @@ class TestMongoStore(unittest.TestCase):
 
 
 class TestMemoryStore(unittest.TestCase):
-
     def setUp(self):
         self.memstore = MemoryStore()
 
@@ -167,25 +164,24 @@ class TestMemoryStore(unittest.TestCase):
 
     def test_groupby(self):
         self.memstore.connect()
-        self.memstore.update(
-            [{
-                "e": 7,
-                "d": 9,
-                "f": 9
-            }, {
-                "e": 7,
-                "d": 9,
-                "f": 10
-            }, {
-                "e": 8,
-                "d": 9,
-                "f": 11
-            }, {
-                "e": 9,
-                "d": 10,
-                "f": 12
-            }],
-            key="f")
+        self.memstore.update([{
+            "e": 7,
+            "d": 9,
+            "f": 9
+        }, {
+            "e": 7,
+            "d": 9,
+            "f": 10
+        }, {
+            "e": 8,
+            "d": 9,
+            "f": 11
+        }, {
+            "e": 9,
+            "d": 10,
+            "f": 12
+        }],
+                             key="f")
         data = list(self.memstore.groupby("d"))
         self.assertEqual(len(data), 2)
         grouped_by_9 = [g['docs'] for g in data if g['_id']['d'] == 9][0]
@@ -198,7 +194,6 @@ class TestMemoryStore(unittest.TestCase):
 
 
 class TestJsonStore(unittest.TestCase):
-
     def test(self):
         files = []
         for f in ["a.json", "b.json"]:
@@ -214,7 +209,6 @@ class TestJsonStore(unittest.TestCase):
 
 
 class TestGridFSStore(unittest.TestCase):
-
     def setUp(self):
         self.gStore = GridFSStore("maggma_test", "test", key="task_id")
         self.gStore.connect()
