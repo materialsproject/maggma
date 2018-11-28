@@ -10,6 +10,8 @@ import signal
 import subprocess
 import tempfile
 import unittest
+
+from itertools import chain
 from mongogrant.client import seed
 from pymongo import MongoClient
 from pymongo.collection import Collection
@@ -104,7 +106,8 @@ class TestVaultStore(unittest.TestCase):
                 'wrap_info': None,
                 'request_id': '2c72c063-2452-d1cd-19a2-91163c7395f7',
                 'data': {
-                    'value': '{"db": "mg_core_prod", "host": "matgen2.lbl.gov", "username": "test", "password": "pass"}'
+                    'value':
+                    '{"db": "mg_core_prod", "host": "matgen2.lbl.gov", "username": "test", "password": "pass"}'
                 },
                 'auth': None,
                 'warnings': None,
@@ -398,6 +401,46 @@ class JointStoreTest(unittest.TestCase):
         self.assertEqual(len(docs_by_id[None]), 5)
         self.assertEqual(len(docs_by_id[0]), 3)
         self.assertEqual(len(docs_by_id[1]), 2)
+
+
+class ConcatStoreTest(unittest.TestCase):
+    def setUp(self):
+        self.mem_stores = [MemoryStore(str(i)) for i in range(4)]
+        self.store = ConcatStore(*self.mem_stores)
+        self.store.connect()
+
+        index = 0
+
+        props = {i: str(i) for i in range(10)}
+        for store in self.mem_stores:
+            docs = [{"task_id": i, "prop": props[i - index], "index": index} for i in range(index, index + 10)]
+            index = index + 10
+            store.update(docs)
+
+    def test_distinct(self):
+        docs = list(self.store.distinct("task_id"))
+        actual_docs = list(chain.from_iterable([store.distinct("task_id") for store in self.mem_stores]))
+        self.assertEqual(len(docs), len(actual_docs))
+        self.assertEqual(set(docs), set(actual_docs))
+
+    def test_not_implemented(self):
+        # Ensure collection property and update throw errors
+        with self.assertRaises(NotImplementedError):
+            self.store.collection
+            self.store.update([])
+
+    def test_groupby(self):
+        self.assertEqual(len(list(self.store.groupby("index"))), 4)
+        self.assertEqual(len(list(self.store.groupby("task_id"))), 40)
+
+
+    def test_query(self):
+
+        docs = list(self.store.query(properties=["task_id"]))
+        t_ids = [d["task_id"] for d in docs]
+        self.assertEqual(len(t_ids),len(set(t_ids)))
+        self.assertEqual(len(t_ids),40)
+
 
 
 if __name__ == "__main__":
