@@ -774,7 +774,7 @@ class ConcatStore(Store):
             for d in store.query(criteria=criteria, properties=properties, **kwargs):
                 yield d
 
-    def query_one(self,criteria=None,properties=None,**kwargs):
+    def query_one(self, criteria=None, properties=None, **kwargs):
         return next(self.query(criteria=criteria, properties=properties, **kwargs))
 
     def groupby(self, keys, criteria=None, properties=None, **kwargs):
@@ -787,7 +787,7 @@ class ConcatStore(Store):
             criteria (dict): mongo style query to reduce the docs to group
             properties (str or [str]): properties to project
         """
-        if isinstance(keys,str):
+        if isinstance(keys, str):
             keys = [keys]
 
         docs = []
@@ -797,6 +797,7 @@ class ConcatStore(Store):
                 docs.extend(group["docs"])
 
         def key_set(d):
+            "index function based on passed in keys"
             test_d = tuple(d.get(k, "") for k in keys)
             return test_d
 
