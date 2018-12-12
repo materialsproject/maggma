@@ -433,14 +433,12 @@ class ConcatStoreTest(unittest.TestCase):
         self.assertEqual(len(list(self.store.groupby("index"))), 4)
         self.assertEqual(len(list(self.store.groupby("task_id"))), 40)
 
-
     def test_query(self):
 
         docs = list(self.store.query(properties=["task_id"]))
         t_ids = [d["task_id"] for d in docs]
-        self.assertEqual(len(t_ids),len(set(t_ids)))
-        self.assertEqual(len(t_ids),40)
-
+        self.assertEqual(len(t_ids), len(set(t_ids)))
+        self.assertEqual(len(t_ids), 40)
 
 
 if __name__ == "__main__":
