@@ -33,7 +33,7 @@ class TestCopyBuilder(TestCase):
         self.source = MongoStore(self.dbname, "source", **kwargs)
         self.target = MongoStore(self.dbname, "target", **kwargs)
         self.builder = CopyBuilder(self.source, self.target)
-        
+
         self.source.connect()
         self.source.ensure_index(self.source.key)
         self.source.ensure_index(self.source.lu_field)

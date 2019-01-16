@@ -24,7 +24,7 @@ from pymongo import ReplaceOne
 from monty.json import MSONable, jsanitize, MontyDecoder
 from monty.io import zopen
 from monty.serialization import loadfn
-from maggma.utils import LU_KEY_ISOFORMAT, confirm_field_index
+from maggma.utils import LU_KEY_ISOFORMAT, confirm_field_index, source_keys_updated
 
 
 class Store(MSONable, metaclass=ABCMeta):
@@ -162,6 +162,23 @@ class Store(MSONable, metaclass=ABCMeta):
 
         lu_list = [t.last_updated for t in targets]
         return {self.lu_field: {"$gt": self.lu_func[1](max(lu_list))}}
+
+    def updated_keys(self, target, criteria=None):
+        """
+        Returns keys for docs that are newer in the target store in comparison
+        with this store when comparing the last updated field (lu_field)
+
+        Args:
+            target (Store): store to look for updated documents
+            criteria (dict): mongo query to limit scope
+
+        Returns:
+            list of keys that have been updated in target store
+        """
+        self.ensure_index(self.key)
+        self.ensure_index(self.lu_field)
+
+        return source_keys_updated(target,self,query=criteria)
 
     def __eq__(self, other):
         return hash(self) == hash(other)

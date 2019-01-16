@@ -16,7 +16,6 @@ test_dir = os.path.abspath(os.path.join(module_dir, "..", "..", "test_files", "t
 
 
 class TestMongoStore(unittest.TestCase):
-
     def setUp(self):
         self.mongostore = MongoStore("maggma_test", "test")
         self.mongostore.connect()
@@ -71,25 +70,24 @@ class TestMongoStore(unittest.TestCase):
 
     def test_groupby(self):
         self.mongostore.collection.drop()
-        self.mongostore.update(
-            [{
-                "e": 7,
-                "d": 9,
-                "f": 9
-            }, {
-                "e": 7,
-                "d": 9,
-                "f": 10
-            }, {
-                "e": 8,
-                "d": 9,
-                "f": 11
-            }, {
-                "e": 9,
-                "d": 10,
-                "f": 12
-            }],
-            key="f")
+        self.mongostore.update([{
+            "e": 7,
+            "d": 9,
+            "f": 9
+        }, {
+            "e": 7,
+            "d": 9,
+            "f": 10
+        }, {
+            "e": 8,
+            "d": 9,
+            "f": 11
+        }, {
+            "e": 9,
+            "d": 10,
+            "f": 12
+        }],
+                               key="f")
         data = list(self.mongostore.groupby("d"))
         self.assertEqual(len(data), 2)
         grouped_by_9 = [g['docs'] for g in data if g['_id']['d'] == 9][0]
@@ -122,6 +120,31 @@ class TestMongoStore(unittest.TestCase):
         self.mongostore.update([{self.mongostore.key: 1, "a": 1}])
         self.assertGreaterEqual(self.mongostore.last_updated, tic)
 
+    def test_updated_keys(self):
+        target = MongoStore("maggma_test", "test_target")
+        target.connect()
+
+        docs = []
+        for i in range(10):
+            docs.append({self.mongostore.key: i})
+
+        # Insert docs in source
+        self.mongostore.update(docs)
+        # Make copy in target
+        update_docs = list(self.mongostore.query())
+        for d in update_docs:
+            del d["_id"]
+        target.update(update_docs, update_lu=False)
+
+        # Update docs in source
+        self.mongostore.collection.drop()
+        self.mongostore.update(docs)
+
+        self.assertEqual(len(target.updated_keys(self.mongostore)), 10)
+        self.assertEqual(len(self.mongostore.updated_keys(target)), 0)
+
+        target.collection.drop()
+
     def tearDown(self):
         try:
             self.mongostore.collection.drop()
@@ -130,7 +153,6 @@ class TestMongoStore(unittest.TestCase):
 
 
 class TestMemoryStore(unittest.TestCase):
-
     def setUp(self):
         self.memstore = MemoryStore()
 
@@ -142,25 +164,24 @@ class TestMemoryStore(unittest.TestCase):
 
     def test_groupby(self):
         self.memstore.connect()
-        self.memstore.update(
-            [{
-                "e": 7,
-                "d": 9,
-                "f": 9
-            }, {
-                "e": 7,
-                "d": 9,
-                "f": 10
-            }, {
-                "e": 8,
-                "d": 9,
-                "f": 11
-            }, {
-                "e": 9,
-                "d": 10,
-                "f": 12
-            }],
-            key="f")
+        self.memstore.update([{
+            "e": 7,
+            "d": 9,
+            "f": 9
+        }, {
+            "e": 7,
+            "d": 9,
+            "f": 10
+        }, {
+            "e": 8,
+            "d": 9,
+            "f": 11
+        }, {
+            "e": 9,
+            "d": 10,
+            "f": 12
+        }],
+                             key="f")
         data = list(self.memstore.groupby("d"))
         self.assertEqual(len(data), 2)
         grouped_by_9 = [g['docs'] for g in data if g['_id']['d'] == 9][0]
@@ -173,7 +194,6 @@ class TestMemoryStore(unittest.TestCase):
 
 
 class TestJsonStore(unittest.TestCase):
-
     def test(self):
         files = []
         for f in ["a.json", "b.json"]:
@@ -189,7 +209,6 @@ class TestJsonStore(unittest.TestCase):
 
 
 class TestGridFSStore(unittest.TestCase):
-
     def setUp(self):
         self.gStore = GridFSStore("maggma_test", "test", key="task_id")
         self.gStore.connect()
