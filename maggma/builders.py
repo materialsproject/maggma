@@ -117,6 +117,24 @@ class Builder(MSONable, metaclass=ABCMeta):
         d = md.process_decoded(d)
         self.__init__(**d)
 
+    def run(self):
+        """
+        Run the builder serially
+
+        Args:
+            builder_id (int): the index of the builder in the builders list
+        """
+        self.connect()
+
+        cursor = self.get_items()
+
+        for chunk in grouper(cursor, self.chunk_size):
+            self.logger.info("Processing batch of {} items".format(self.chunk_size))
+            processed_items = [self.process_item(item) for item in chunk if item is not None]
+            self.update_targets(processed_items)
+
+        self.finalize(cursor)
+
 
 class MapBuilder(Builder, metaclass=ABCMeta):
     """
@@ -128,7 +146,14 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     """
 
-    def __init__(self, source, target, ufn, query=None, incremental=True, projection=None, delete_orphans=False,
+    def __init__(self,
+                 source,
+                 target,
+                 ufn,
+                 query=None,
+                 incremental=True,
+                 projection=None,
+                 delete_orphans=False,
                  **kwargs):
         """
         Apply a unary function to each source document.
@@ -139,8 +164,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             ufn (function): Unary function to process item
                             You do not need to provide values for
                             source.key and source.lu_field in the output.
-                            Any uncaught exceptions will be caught by 
-                            process_item and logged to the "error" field 
+                            Any uncaught exceptions will be caught by
+                            process_item and logged to the "error" field
                             in the target document.
             query (dict): optional query to filter source store
             incremental (bool): Whether to limit query to filter for only updated source documents.
@@ -214,10 +239,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             self.logger.error(traceback.format_exc())
             processed = {"error": str(e)}
         key, lu_field = self.source.key, self.source.lu_field
-        out = {
-            self.target.key: item[key],
-            self.target.lu_field: self.source.lu_func[0](item[self.source.lu_field])
-        }
+        out = {self.target.key: item[key], self.target.lu_field: self.source.lu_func[0](item[self.source.lu_field])}
         out.update(processed)
         return out
 

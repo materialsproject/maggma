@@ -7,7 +7,6 @@ from unittest import TestCase
 from uuid import uuid4
 
 from maggma.stores import MongoStore
-from maggma.runner import Runner
 from maggma.builders import CopyBuilder
 
 
@@ -76,12 +75,11 @@ class TestCopyBuilder(TestCase):
             list(self.builder.get_items())
         self.assertIn("Ensure indices", "\n".join(cm.output))
 
-    def test_runner(self):
+    def test_run(self):
         self.source.collection.insert_many(self.old_docs)
         self.source.update(self.new_docs, update_lu=False)
         self.target.collection.insert_many(self.old_docs)
-        runner = Runner([self.builder])
-        runner.run()
+        self.builder.run()
         self.assertEqual(self.target.query_one(criteria={"k": 0})["v"], "new")
         self.assertEqual(self.target.query_one(criteria={"k": 10})["v"], "old")
 
@@ -89,8 +87,7 @@ class TestCopyBuilder(TestCase):
         self.builder.query = {"k": {"$gt": 5}}
         self.source.collection.insert_many(self.old_docs)
         self.source.update(self.new_docs, update_lu=False)
-        runner = Runner([self.builder])
-        runner.run()
+        self.builder.run()
         all_docs = list(self.target.query(criteria={}))
         self.assertEqual(len(all_docs), 14)
         self.assertTrue(min([d['k'] for d in all_docs]), 6)
@@ -103,8 +100,7 @@ class TestCopyBuilder(TestCase):
 
         deletion_criteria = {"k": {"$in": list(range(5))}}
         self.source.collection.delete_many(deletion_criteria)
-        runner = Runner([self.builder])
-        runner.run()
+        self.builder.run()
 
         self.assertEqual(self.target.collection.count_documents(deletion_criteria), 0)
         self.assertEqual(self.target.query_one(criteria={"k": 5})["v"], "new")
@@ -120,7 +116,7 @@ class TestCopyBuilder(TestCase):
         self.target.collection.insert_many(later)
         query = {"k": {"$gt": 5}}
         self.builder = CopyBuilder(self.source, self.target, incremental=False, query=query)
-        Runner([self.builder]).run()
+        self.builder.run()
         docs = sorted(self.target.query(), key=lambda d: d["k"])
         self.assertTrue(all(d["lu"] == tic) for d in docs[5:])
         self.assertTrue(all(d["lu"] == toc) for d in docs[:5])
