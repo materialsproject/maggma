@@ -25,6 +25,40 @@ try:
 except NameError:
     from tqdm import tqdm
 
+
+def setup_progress_bars(cursor, builder, processor):
+    """
+    Sets up tqdm progress bars
+    """
+    total = None
+
+    if isinstance(cursor, types.GeneratorType):
+        try:
+            cursor = primed(cursor)
+            if hasattr(builder, "total"):
+                total = builder.total
+        except StopIteration:
+            processor.logger.debug("Get items returned empty iterator")
+
+    elif hasattr(cursor, "__len__"):
+        total = len(cursor)
+    elif hasattr(cursor, "count"):
+        total = cursor.count()
+
+    processor.get_pbar = tqdm(cursor, desc="Get Items", total=total)
+    processor.process_pbar = tqdm(desc="Processing Item", total=total)
+    processor.update_pbar = tqdm(desc="Updating Targets", total=total)
+
+
+def cleanup_progress_bars(processor):
+    """
+    Cleans up the TQDM bars
+    """
+    processor.get_pbar.close()
+    processor.process_pbar.close()
+    processor.update_pbar.close()
+
+
 class BaseProcessor(MSONable, metaclass=abc.ABCMeta):
     """
     Base processor class for multiprocessing paradigms
@@ -75,12 +109,21 @@ class SerialProcessor(BaseProcessor):
 
         cursor = builder.get_items()
 
-        for chunk in grouper(cursor, chunk_size):
+        setup_progress_bars(cursor, builder, self)
+
+        for chunk in grouper(self.get_pbar, chunk_size):
             self.logger.info("Processing batch of {} items".format(chunk_size))
-            processed_items = [builder.process_item(item) for item in chunk if item is not None]
+            processed_items = []
+            for item in chunk:
+                if item is not None:
+                    processed_items.append(builder.process_item(item))
+                self.process_pbar.update(1)
             builder.update_targets(processed_items)
+            self.update_pbar.update(len(processed_items))
 
         builder.finalize(cursor)
+
+        cleanup_progress_bars(self)
 
 
 class MPIProcessor(BaseProcessor):
