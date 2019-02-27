@@ -261,13 +261,13 @@ def source_keys_updated(source, target, query=None):
 class Timeout:
     # implementation courtesy of https://stackoverflow.com/a/22348885/637562
 
-    def __init__(self, seconds=16 * 24 * 60 * 60 / 1e5, error_message=""):
+    def __init__(self, seconds=14, error_message=""):
         """
         Set a maximum running time for functions.
 
         :param seconds (int): Seconds before TimeoutError raised, set to None to disable,
         default is set assuming a maximum running time of 1 day for 100,000 items
-        parallelized across 16 cores
+        parallelized across 16 cores, i.e. int(16 * 24 * 60 * 60 / 1e5)
         :param error_message (str): Error message to display with TimeoutError
         """
         self.seconds = int(seconds) if seconds else None
