@@ -10,6 +10,7 @@ from monty.json import MSONable, MontyDecoder
 from maggma.utils import source_keys_updated, grouper, Timeout
 from time import time
 
+
 class Builder(MSONable, metaclass=ABCMeta):
     """
     Base Builder class
@@ -138,6 +139,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         projection=None,
         delete_orphans=False,
         timeout=None,
+        store_process_time=True,
         **kwargs
     ):
         """
@@ -160,6 +162,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 with key values not present in source store. Deletion happens
                 after all updates, during Builder.finalize.
             timeout (int): maximum running time per item in seconds
+            store_process_time (bool): If True, add "_process_time" key to
+            document for profiling purposes
         """
         self.source = source
         self.target = target
@@ -171,6 +175,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.kwargs = kwargs
         self.total = None
         self.timeout = timeout
+        self.store_process_time = store_process_time
         super().__init__(sources=[source], targets=[target], **kwargs)
 
     def ensure_indexes(self):
@@ -243,8 +248,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         out = {
             self.target.key: item[key],
             self.target.lu_field: self.source.lu_func[0](item[self.source.lu_field]),
-            "_process_time": time_end - time_start
         }
+        if self.store_process_time:
+            out["_process_time"] = time_end - time_start
         out.update(processed)
         return out
 
@@ -378,4 +384,10 @@ class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
 
     def __init__(self, source, target, **kwargs):
-        super().__init__(source=source, target=target, ufn=lambda x: x, **kwargs)
+        super().__init__(
+            source=source,
+            target=target,
+            ufn=lambda x: x,
+            store_process_time=False,
+            **kwargs
+        )
