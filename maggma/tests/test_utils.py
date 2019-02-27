@@ -1,10 +1,11 @@
 # coding: utf-8
 """
-Tests utillities
+Tests utilities
 """
 import unittest
-from maggma.utils import recursive_update
 
+from maggma.utils import recursive_update, Timeout
+from time import sleep
 
 class UtilsTests(unittest.TestCase):
 
@@ -22,3 +23,11 @@ class UtilsTests(unittest.TestCase):
 
         recursive_update(d, {"a": {"b": [7]}})
         self.assertEqual(d["a"]["b"], [7])
+
+    def test_timeout(self):
+
+        def takes_too_long():
+            with Timeout(seconds=1):
+                sleep(2)
+
+        self.assertRaises(TimeoutError, takes_too_long)
