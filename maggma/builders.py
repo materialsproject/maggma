@@ -7,8 +7,8 @@ import logging
 import traceback
 from datetime import datetime
 from monty.json import MSONable, MontyDecoder
-from maggma.utils import source_keys_updated, grouper
-
+from maggma.utils import source_keys_updated, grouper, Timeout
+from time import time
 
 class Builder(MSONable, metaclass=ABCMeta):
     """
@@ -86,7 +86,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         Perform any final clean up.
         """
         # Close any Mongo connections.
-        for store in (self.sources + self.targets):
+        for store in self.sources + self.targets:
             try:
                 store.collection.database.client.close()
             except AttributeError:
@@ -128,8 +128,18 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     """
 
-    def __init__(self, source, target, ufn, query=None, incremental=True, projection=None, delete_orphans=False,
-                 **kwargs):
+    def __init__(
+        self,
+        source,
+        target,
+        ufn,
+        query=None,
+        incremental=True,
+        projection=None,
+        delete_orphans=False,
+        timeout=None,
+        **kwargs
+    ):
         """
         Apply a unary function to each source document.
 
@@ -149,6 +159,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             delete_orphans (bool): Whether to delete documents on target store
                 with key values not present in source store. Deletion happens
                 after all updates, during Builder.finalize.
+            timeout (int): maximum running time per item in seconds
         """
         self.source = source
         self.target = target
@@ -159,6 +170,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.delete_orphans = delete_orphans
         self.kwargs = kwargs
         self.total = None
+        self.timeout = timeout
         super().__init__(sources=[source], targets=[target], **kwargs)
 
     def ensure_indexes(self):
@@ -167,15 +179,17 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             self.source.ensure_index(self.source.key),
             self.source.ensure_index(self.source.lu_field),
             self.target.ensure_index(self.target.key),
-            self.target.ensure_index(self.target.lu_field)
+            self.target.ensure_index(self.target.lu_field),
         ]
 
         if not all(index_checks):
-            self.logger.warning("Missing one or more important indices on stores. "
-                                "Performance for large stores may be severely degraded. "
-                                "Ensure indices on target.key and "
-                                "[(store.lu_field, -1), (store.key, 1)] "
-                                "for each of source and target.")
+            self.logger.warning(
+                "Missing one or more important indices on stores. "
+                "Performance for large stores may be severely degraded. "
+                "Ensure indices on target.key and "
+                "[(store.lu_field, -1), (store.key, 1)] "
+                "for each of source and target."
+            )
 
     def get_items(self):
 
@@ -184,14 +198,18 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.ensure_indexes()
 
         if self.incremental:
-            keys = source_keys_updated(source=self.source, target=self.target, query=self.query)
+            keys = source_keys_updated(
+                source=self.source, target=self.target, query=self.query
+            )
         else:
             keys = self.source.distinct(self.source.key, self.query)
 
         self.logger.info("Processing {} items".format(len(keys)))
 
         if self.projection:
-            projection = list(set(self.projection + [self.source.key, self.source.lu_field]))
+            projection = list(
+                set(self.projection + [self.source.key, self.source.lu_field])
+            )
         else:
             projection = None
 
@@ -199,24 +217,33 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         for chunked_keys in grouper(keys, self.chunk_size, None):
             chunked_keys = list(filter(None.__ne__, chunked_keys))
             for doc in list(
-                    self.source.query(criteria={self.source.key: {
-                        "$in": chunked_keys
-                    }}, properties=projection)):
+                self.source.query(
+                    criteria={self.source.key: {"$in": chunked_keys}},
+                    properties=projection,
+                )
+            ):
                 yield doc
 
     def process_item(self, item):
 
         self.logger.debug("Processing: {}".format(item[self.source.key]))
 
+        time_start = time()
+
         try:
-            processed = self.ufn.__call__(item)
+            with Timeout(seconds=self.timeout):
+                processed = self.ufn.__call__(item)
         except Exception as e:
             self.logger.error(traceback.format_exc())
             processed = {"error": str(e)}
+
+        time_end = time()
+
         key, lu_field = self.source.key, self.source.lu_field
         out = {
             self.target.key: item[key],
-            self.target.lu_field: self.source.lu_func[0](item[self.source.lu_field])
+            self.target.lu_field: self.source.lu_func[0](item[self.source.lu_field]),
+            "_process_time": time_end - time_start
         }
         out.update(processed)
         return out
@@ -238,15 +265,21 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     def finalize(self, cursor=None):
         if self.delete_orphans:
             if not hasattr(self.target, "collection"):
-                self.logger.warning("delete_orphans parameter is only supported for "
-                                    "Mongolike target stores at this time.")
+                self.logger.warning(
+                    "delete_orphans parameter is only supported for "
+                    "Mongolike target stores at this time."
+                )
             else:
                 source_keyvals = set(self.source.distinct(self.source.key))
                 target_keyvals = set(self.target.distinct(self.target.key))
                 to_delete = list(target_keyvals - source_keyvals)
                 if len(to_delete):
-                    self.logger.info("Finalize: Deleting {} orphans.".format(len(to_delete)))
-                self.target.collection.delete_many({self.target.key: {"$in": to_delete}})
+                    self.logger.info(
+                        "Finalize: Deleting {} orphans.".format(len(to_delete))
+                    )
+                self.target.collection.delete_many(
+                    {self.target.key: {"$in": to_delete}}
+                )
         super().finalize(cursor)
 
 
@@ -281,8 +314,12 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
             if "_id" not in properties:
                 properties.update({"_id": 0})
         else:
-            properties = {entry: include for entry, include in self.grouping_properties()}
-        groups = self.docs_to_groups(self.source.query(criteria=criteria, properties=properties))
+            properties = {
+                entry: include for entry, include in self.grouping_properties()
+            }
+        groups = self.docs_to_groups(
+            self.source.query(criteria=criteria, properties=properties)
+        )
         self.total = len(groups)
         if hasattr(self, "n_items_per_group"):
             n = self.n_items_per_group

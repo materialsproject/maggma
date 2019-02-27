@@ -3,6 +3,10 @@
 Utilities to help with maggma functions
 """
 import itertools
+import signal
+import logging
+
+
 from collections import deque
 from datetime import datetime, timedelta
 from sys import getsizeof, stderr
@@ -10,12 +14,11 @@ from sys import getsizeof, stderr
 from pydash.utilities import to_path
 from pydash.objects import set_, get, has
 from pydash.objects import unset as _unset
-import logging
 
 # import tqdm Jupyter widget if running inside Jupyter
 try:
     # noinspection PyUnresolvedReferences
-    if get_ipython().__class__.__name__ == 'ZMQInteractiveShell':
+    if get_ipython().__class__.__name__ == "ZMQInteractiveShell":
         from tqdm import tqdm_notebook as tqdm
     else:  # likely 'TerminalInteractiveShell'
         from tqdm import tqdm
@@ -70,7 +73,7 @@ def confirm_field_index(store, fields):
     if not isinstance(fields, list):
         fields = [fields]
     info = store.collection.index_information().values()
-    for spec in (index['key'] for index in info):
+    for spec in (index["key"] for index in info):
         for field in fields:
             if spec[0][0] == field:
                 return True
@@ -79,7 +82,7 @@ def confirm_field_index(store, fields):
 
 def dt_to_isoformat_ceil_ms(dt):
     """Helper to account for Mongo storing datetimes with only ms precision."""
-    return (dt + timedelta(milliseconds=1)).isoformat(timespec='milliseconds')
+    return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
 
 
 def isostr_to_dt(s):
@@ -253,3 +256,31 @@ def source_keys_updated(source, target, query=None):
             keys_updated.add(key)
 
     return list(keys_updated)
+
+
+class Timeout:
+    # implementation courtesy of https://stackoverflow.com/a/22348885/637562
+
+    def __init__(self, seconds=16 * 24 * 60 * 60 / 1e5, error_message=""):
+        """
+        Set a maximum running time for functions.
+
+        :param seconds (int): Seconds before TimeoutError raised, set to None to disable,
+        default is set assuming a maximum running time of 1 day for 100,000 items
+        parallelized across 16 cores
+        :param error_message (str): Error message to display with TimeoutError
+        """
+        self.seconds = int(seconds)
+        self.error_message = error_message
+
+    def handle_timeout(self, signum, frame):
+        raise TimeoutError(self.error_message)
+
+    def __enter__(self):
+        if self.seconds:
+            signal.signal(signal.SIGALRM, self.handle_timeout)
+            signal.alarm(self.seconds)
+
+    def __exit__(self, type, value, traceback):
+        if self.seconds:
+            signal.alarm(0)
