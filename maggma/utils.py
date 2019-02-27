@@ -270,7 +270,7 @@ class Timeout:
         parallelized across 16 cores
         :param error_message (str): Error message to display with TimeoutError
         """
-        self.seconds = int(seconds)
+        self.seconds = int(seconds) if seconds else None
         self.error_message = error_message
 
     def handle_timeout(self, signum, frame):
