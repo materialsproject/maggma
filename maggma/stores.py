@@ -539,7 +539,7 @@ class JSONStore(MemoryStore):
                 data = data.decode() if isinstance(data, bytes) else data
                 objects = json.loads(data)
                 objects = [objects] if not isinstance(objects, list) else objects
-                self.collection.insert_many(objects)
+                self.update(objects)
 
     def __hash__(self):
         return hash((*self.paths, self.lu_field))
