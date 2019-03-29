@@ -9,7 +9,7 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name="maggma",
-        version="0.12.0",
+        version="0.13.0",
         description="MongoDB aggregation machine",
         long_description=open(os.path.join(module_dir, "README.md")).read(),
         url="https://github.com/materialsproject/maggma",
