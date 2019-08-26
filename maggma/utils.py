@@ -125,7 +125,12 @@ def grouper(iterable, n, fillvalue=None):
     """
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
     args = [iter(iterable)] * n
-    return itertools.zip_longest(*args, fillvalue=fillvalue)
+    iterator = itertools.zip_longest(*args, fillvalue=fillvalue)
+
+    if fillvalue == None:
+        iterator = filter(None.__ne__, iterator)
+
+    return iterator
 
 
 def get_mpi():
