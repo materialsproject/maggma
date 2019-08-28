@@ -193,12 +193,8 @@ class Store(MSONable, metaclass=ABCMeta):
         return self.as_dict()
 
     def __setstate__(self, d):
-        del d["@class"]
-        del d["@module"]
-        if "@version" in d:
-            del d["@version"]
-        md = MontyDecoder()
-        d = md.process_decoded(d)
+        d = {k:v in d.items() if not k.startswith("@")}
+        d = MontyDecoder().process_decoded(d)
         self.__init__(**d)
 
 
@@ -210,7 +206,7 @@ class Mongolike(object):
     @property
     def collection(self):
         if self._collection is None:
-            raise Exception("Must connect Mongo-like store before attemping to use it")
+            raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._collection
 
     def query(self, criteria=None, properties=None, **kwargs):

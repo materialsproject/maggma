@@ -100,26 +100,6 @@ class Builder(MSONable, metaclass=ABCMeta):
         except AttributeError:
             pass
 
-    def __getstate__(self):
-        """
-        Double underscore method used by pickle to serialize this object
-        This uses MSONable serialization instead
-        """
-        return self.as_dict()
-
-    def __setstate__(self, d):
-        """
-        Double underscore method used by pickle to deserialize this object
-        This uses MSONable deerialization instead
-        """
-        del d["@class"]
-        del d["@module"]
-        if "@version" in d:
-            del d["@version"]
-        md = MontyDecoder()
-        d = md.process_decoded(d)
-        self.__init__(**d)
-
     def run(self):
         """
         Run the builder serially
@@ -137,6 +117,14 @@ class Builder(MSONable, metaclass=ABCMeta):
             self.update_targets(processed_items)
 
         self.finalize(cursor)
+
+    def __getstate__(self):
+        return self.as_dict()
+
+    def __setstate__(self, d):
+        d = {k:v in d.items() if not k.startswith("@")}
+        d = MontyDecoder().process_decoded(d)
+        self.__init__(**d)
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
