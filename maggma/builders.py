@@ -114,6 +114,8 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         del d["@class"]
         del d["@module"]
+        if "@version" in d:
+            del d["@version"]
         md = MontyDecoder()
         d = md.process_decoded(d)
         self.__init__(**d)
