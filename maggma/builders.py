@@ -122,7 +122,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         return self.as_dict()
 
     def __setstate__(self, d):
-        d = {k:v in d.items() if not k.startswith("@")}
+        d = {k: v for k, v in d.items() if not k.startswith("@")}
         d = MontyDecoder().process_decoded(d)
         self.__init__(**d)
 
