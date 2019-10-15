@@ -22,6 +22,7 @@ from pymongo import MongoClient
 try:
     import boto3
     import botocore
+
     boto_import = True
 except ImportError:
     boto_import = False
@@ -39,7 +40,9 @@ class MongograntStore(Mongolike, Store):
     mongogrant documentation: https://github.com/materialsproject/mongogrant
     """
 
-    def __init__(self, mongogrant_spec, collection_name, mgclient_config_path=None, **kwargs):
+    def __init__(
+        self, mongogrant_spec, collection_name, mgclient_config_path=None, **kwargs
+    ):
         """
 
         Args:
@@ -56,9 +59,11 @@ class MongograntStore(Mongolike, Store):
         self.mgclient_config_path = mgclient_config_path
         self._collection = None
         if set(("username", "password", "database", "host")) & set(kwargs):
-            raise StoreError("MongograntStore does not accept "
-                             "username, password, database, or host "
-                             "arguments. Use `mongogrant_spec`.")
+            raise StoreError(
+                "MongograntStore does not accept "
+                "username, password, database, or host "
+                "arguments. Use `mongogrant_spec`."
+            )
         self.kwargs = kwargs
         super().__init__(**kwargs)
 
@@ -119,7 +124,7 @@ class VaultStore(MongoStore):
 
         # Read the vault secret
         json_db_creds = client.read(vault_secret_path)
-        db_creds = json.loads(json_db_creds['data']['value'])
+        db_creds = json.loads(json_db_creds["data"]["value"])
 
         database = db_creds.get("db")
         host = db_creds.get("host", "localhost")
@@ -127,7 +132,9 @@ class VaultStore(MongoStore):
         username = db_creds.get("username", "")
         password = db_creds.get("password", "")
 
-        super(VaultStore, self).__init__(database, collection_name, host, port, username, password)
+        super(VaultStore, self).__init__(
+            database, collection_name, host, port, username, password
+        )
 
 
 class AliasingStore(Store):
@@ -179,7 +186,9 @@ class AliasingStore(Store):
             criteria = criteria if criteria else {}
             # Update to ensure keys are there
             if all_exist:
-                criteria.update({k: {"$exists": True} for k in key if k not in criteria})
+                criteria.update(
+                    {k: {"$exists": True} for k in key if k not in criteria}
+                )
 
             results = []
             for d in self.groupby(key, properties=key, criteria=criteria):
@@ -204,7 +213,9 @@ class AliasingStore(Store):
         substitute(properties, self.reverse_aliases)
         lazy_substitute(criteria, self.reverse_aliases)
 
-        return self.store.groupby(keys=keys, properties=properties, criteria=criteria, **kwargs)
+        return self.store.groupby(
+            keys=keys, properties=properties, criteria=criteria, **kwargs
+        )
 
     def update(self, docs, update_lu=True, key=None):
         key = key if key else self.key
@@ -251,32 +262,44 @@ class SandboxStore(Store):
             key=self.store.key,
             lu_field=self.store.lu_field,
             lu_type=self.store.lu_type,
-            validator=self.store.validator)
+            validator=self.store.validator,
+        )
 
     @property
-    @lru_cache(maxsize=1)
     def sbx_criteria(self):
         if self.exclusive:
             return {"sbxn": self.sandbox}
         else:
-            return {"$or": [{"sbxn": {"$in": [self.sandbox]}}, {"sbxn": {"$exists": False}}]}
+            return {
+                "$or": [{"sbxn": {"$in": [self.sandbox]}}, {"sbxn": {"$exists": False}}]
+            }
 
     def query(self, criteria=None, properties=None, **kwargs):
-        criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        criteria = (
+            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        )
         return self.store.query(properties=properties, criteria=criteria, **kwargs)
 
     def query_one(self, criteria=None, properties=None, **kwargs):
-        criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        criteria = (
+            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        )
         return self.store.query_one(properties=properties, criteria=criteria, **kwargs)
 
     def distinct(self, key, criteria=None, **kwargs):
-        criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        criteria = (
+            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        )
         return self.store.distinct(key=key, criteria=criteria, **kwargs)
 
     def groupby(self, keys, criteria=None, properties=None, **kwargs):
-        criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        criteria = (
+            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        )
 
-        return self.store.groupby(keys=keys, properties=properties, criteria=criteria, **kwargs)
+        return self.store.groupby(
+            keys=keys, properties=properties, criteria=criteria, **kwargs
+        )
 
     def update(self, docs, update_lu=True, key=None):
         for d in docs:
@@ -315,7 +338,9 @@ class AmazonS3Store(Store):
             bucket (str) : name of the bucket
         """
         if not boto_import:
-            raise ValueError("boto not available, please install boto3 to " "use AmazonS3Store")
+            raise ValueError(
+                "boto not available, please install boto3 to " "use AmazonS3Store"
+            )
         self.index = index
         self.bucket = bucket
         self.s3 = None
@@ -359,7 +384,7 @@ class AmazonS3Store(Store):
             except botocore.exceptions.ClientError as e:
                 # If a client error is thrown, then check that it was a 404 error.
                 # If it was a 404 error, then the object does not exist.
-                error_code = int(e.response['Error']['Code'])
+                error_code = int(e.response["Error"]["Code"])
                 if error_code == 404:
                     self.logger.error("Could not find S3 object {}".format(f[self.key]))
                     break
@@ -389,7 +414,7 @@ class AmazonS3Store(Store):
             except botocore.exceptions.ClientError as e:
                 # If a client error is thrown, then check that it was a 404 error.
                 # If it was a 404 error, then the object does not exist.
-                error_code = int(e.response['Error']['Code'])
+                error_code = int(e.response["Error"]["Code"])
                 if error_code == 404:
                     self.logger.error("Could not find S3 object {}".format(f[self.key]))
                     return None
@@ -523,16 +548,18 @@ class AmazonS3Store(Store):
 class JointStore(Store):
     """Store corresponding to multiple collections, uses lookup to join"""
 
-    def __init__(self,
-                 database,
-                 collection_names,
-                 host="localhost",
-                 port=27017,
-                 username="",
-                 password="",
-                 master=None,
-                 merge_at_root=False,
-                 **kwargs):
+    def __init__(
+        self,
+        database,
+        collection_names,
+        host="localhost",
+        port=27017,
+        username="",
+        password="",
+        master=None,
+        merge_at_root=False,
+        **kwargs
+    ):
         self.database = database
         self.collection_names = collection_names
         self.host = host
@@ -551,7 +578,9 @@ class JointStore(Store):
         if self.username is not "":
             db.authenticate(self.username, self.password)
         self._collection = db[self.master]
-        self._has_merge_objects = self._collection.database.client.server_info()["version"] > "3.6"
+        self._has_merge_objects = (
+            self._collection.database.client.server_info()["version"] > "3.6"
+        )
 
     def close(self):
         self.collection.database.client.close()
@@ -568,7 +597,9 @@ class JointStore(Store):
     def last_updated(self):
         lus = []
         for cname in self.collection_names:
-            lu = MongoStore.from_collection(self.collection.database[cname], lu_field=self.lu_field).last_updated
+            lu = MongoStore.from_collection(
+                self.collection.database[cname], lu_field=self.lu_field
+            ).last_updated
             lus.append(lu)
         return max(lus)
 
@@ -586,9 +617,9 @@ class JointStore(Store):
             criteria.update({k: {"$exists": True} for k in g_key if k not in criteria})
         cursor = self.groupby(g_key, criteria=criteria, **kwargs)
         if isinstance(key, list):
-            return [d['_id'] for d in cursor]
+            return [d["_id"] for d in cursor]
         else:
-            return [get(d['_id'], key) for d in cursor]
+            return [get(d["_id"], key) for d in cursor]
 
     def ensure_index(self, key, unique=False, **kwargs):
         raise NotImplementedError("No ensure_index method for JointStore")
@@ -607,34 +638,50 @@ class JointStore(Store):
         pipeline = []
         for cname in self.collection_names:
             if cname is not self.master:
-                pipeline.append({
-                    "$lookup": {
-                        "from": cname,
-                        "localField": self.key,
-                        "foreignField": self.key,
-                        "as": cname
+                pipeline.append(
+                    {
+                        "$lookup": {
+                            "from": cname,
+                            "localField": self.key,
+                            "foreignField": self.key,
+                            "as": cname,
+                        }
                     }
-                })
+                )
 
                 if self.merge_at_root:
                     if not self._has_merge_objects:
-                        raise Exception("MongoDB server version too low to use $mergeObjects.")
+                        raise Exception(
+                            "MongoDB server version too low to use $mergeObjects."
+                        )
 
-                    pipeline.append({
-                        "$replaceRoot": {
-                            "newRoot": {
-                                "$mergeObjects": [{
-                                    "$arrayElemAt": ["${}".format(cname), 0]
-                                }, "$$ROOT"]
+                    pipeline.append(
+                        {
+                            "$replaceRoot": {
+                                "newRoot": {
+                                    "$mergeObjects": [
+                                        {"$arrayElemAt": ["${}".format(cname), 0]},
+                                        "$$ROOT",
+                                    ]
+                                }
                             }
                         }
-                    })
+                    )
                 else:
-                    pipeline.append({"$unwind": {"path": "${}".format(cname), "preserveNullAndEmptyArrays": True}})
+                    pipeline.append(
+                        {
+                            "$unwind": {
+                                "path": "${}".format(cname),
+                                "preserveNullAndEmptyArrays": True,
+                            }
+                        }
+                    )
 
         # Do projection for max last_updated
         lu_max_fields = ["${}".format(self.lu_field)]
-        lu_max_fields.extend(["${}.{}".format(cname, self.lu_field) for cname in self.collection_names])
+        lu_max_fields.extend(
+            ["${}.{}".format(cname, self.lu_field) for cname in self.collection_names]
+        )
         lu_proj = {self.lu_field: {"$max": lu_max_fields}}
         pipeline.append({"$addFields": lu_proj})
 
@@ -792,7 +839,9 @@ class ConcatStore(Store):
 
         docs = []
         for store in self.stores:
-            temp_docs = list(store.groupby(keys, criteria=criteria, properties=properties, **kwargs))
+            temp_docs = list(
+                store.groupby(keys, criteria=criteria, properties=properties, **kwargs)
+            )
             for group in temp_docs:
                 docs.extend(group["docs"])
 

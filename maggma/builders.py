@@ -113,7 +113,9 @@ class Builder(MSONable, metaclass=ABCMeta):
 
         for chunk in grouper(cursor, self.chunk_size):
             self.logger.info("Processing batch of {} items".format(self.chunk_size))
-            processed_items = [self.process_item(item) for item in chunk if item is not None]
+            processed_items = [
+                self.process_item(item) for item in chunk if item is not None
+            ]
             self.update_targets(processed_items)
 
         self.finalize(cursor)
@@ -137,17 +139,19 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     """
 
-    def __init__(self,
-                 source,
-                 target,
-                 ufn,
-                 query=None,
-                 incremental=True,
-                 projection=None,
-                 delete_orphans=False,
-                 timeout=None,
-                 store_process_time=True,
-                 **kwargs):
+    def __init__(
+        self,
+        source,
+        target,
+        ufn,
+        query=None,
+        incremental=True,
+        projection=None,
+        delete_orphans=False,
+        timeout=None,
+        store_process_time=True,
+        **kwargs
+    ):
         """
         Apply a unary function to each source document.
 
@@ -194,11 +198,13 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         ]
 
         if not all(index_checks):
-            self.logger.warning("Missing one or more important indices on stores. "
-                                "Performance for large stores may be severely degraded. "
-                                "Ensure indices on target.key and "
-                                "[(store.lu_field, -1), (store.key, 1)] "
-                                "for each of source and target.")
+            self.logger.warning(
+                "Missing one or more important indices on stores. "
+                "Performance for large stores may be severely degraded. "
+                "Ensure indices on target.key and "
+                "[(store.lu_field, -1), (store.key, 1)] "
+                "for each of source and target."
+            )
 
     def get_items(self):
 
@@ -207,14 +213,18 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.ensure_indexes()
 
         if self.incremental:
-            keys = source_keys_updated(source=self.source, target=self.target, query=self.query)
+            keys = source_keys_updated(
+                source=self.source, target=self.target, query=self.query
+            )
         else:
             keys = self.source.distinct(self.source.key, self.query)
 
         self.logger.info("Processing {} items".format(len(keys)))
 
         if self.projection:
-            projection = list(set(self.projection + [self.source.key, self.source.lu_field]))
+            projection = list(
+                set(self.projection + [self.source.key, self.source.lu_field])
+            )
         else:
             projection = None
 
@@ -222,12 +232,11 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         for chunked_keys in grouper(keys, self.chunk_size, None):
             chunked_keys = list(filter(None.__ne__, chunked_keys))
             for doc in list(
-                    self.source.query(
-                        criteria={self.source.key: {
-                            "$in": chunked_keys
-                        }},
-                        properties=projection,
-                    )):
+                self.source.query(
+                    criteria={self.source.key: {"$in": chunked_keys}},
+                    properties=projection,
+                )
+            ):
                 yield doc
 
     def process_item(self, item):
@@ -274,15 +283,21 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     def finalize(self, cursor=None):
         if self.delete_orphans:
             if not hasattr(self.target, "collection"):
-                self.logger.warning("delete_orphans parameter is only supported for "
-                                    "Mongolike target stores at this time.")
+                self.logger.warning(
+                    "delete_orphans parameter is only supported for "
+                    "Mongolike target stores at this time."
+                )
             else:
                 source_keyvals = set(self.source.distinct(self.source.key))
                 target_keyvals = set(self.target.distinct(self.target.key))
                 to_delete = list(target_keyvals - source_keyvals)
                 if len(to_delete):
-                    self.logger.info("Finalize: Deleting {} orphans.".format(len(to_delete)))
-                self.target.collection.delete_many({self.target.key: {"$in": to_delete}})
+                    self.logger.info(
+                        "Finalize: Deleting {} orphans.".format(len(to_delete))
+                    )
+                self.target.collection.delete_many(
+                    {self.target.key: {"$in": to_delete}}
+                )
         super().finalize(cursor)
 
 
@@ -317,8 +332,12 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
             if "_id" not in properties:
                 properties.update({"_id": 0})
         else:
-            properties = {entry: include for entry, include in self.grouping_properties()}
-        groups = self.docs_to_groups(self.source.query(criteria=criteria, properties=properties))
+            properties = {
+                entry: include for entry, include in self.grouping_properties()
+            }
+        groups = self.docs_to_groups(
+            self.source.query(criteria=criteria, properties=properties)
+        )
         self.total = len(groups)
         if hasattr(self, "n_items_per_group"):
             n = self.n_items_per_group
@@ -377,4 +396,10 @@ class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
 
     def __init__(self, source, target, **kwargs):
-        super().__init__(source=source, target=target, ufn=lambda x: x, store_process_time=False, **kwargs)
+        super().__init__(
+            source=source,
+            target=target,
+            ufn=lambda x: x,
+            store_process_time=False,
+            **kwargs
+        )
