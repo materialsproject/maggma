@@ -608,6 +608,20 @@ class GridFSStore(Store):
         # TODO: Should this return the real MongoCollection or the GridFS
         return self._collection
 
+    @property
+    def last_updated(self):
+        doc = next(self._files_collection.find(properties=[self.lu_field])
+                   .sort([(self.lu_field, pymongo.DESCENDING)])
+                   .limit(1), None)
+        if doc and self.lu_field not in doc:
+            raise StoreError(
+                "No field '{}' in store document. Please ensure Store.lu_field "
+                "is a datetime field in your store that represents the time of "
+                "last update to each document.".format(self.lu_field))
+        # Handle when collection has docs but `NoneType` lu_field.
+        return (self.lu_func[0](doc[self.lu_field])
+                if (doc and doc[self.lu_field]) else datetime.min)
+
     @classmethod
     def transform_criteria(cls, criteria):
         """
