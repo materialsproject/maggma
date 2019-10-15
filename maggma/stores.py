@@ -588,6 +588,8 @@ class GridFSStore(Store):
         if "key" not in kwargs:
             kwargs["key"] = "_id"
 
+        kwargs["lu_field"] = "uploadDate"
+
         super(GridFSStore, self).__init__(**kwargs)
 
     def connect(self, force_reset=False):
