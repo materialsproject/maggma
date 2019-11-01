@@ -655,7 +655,7 @@ class GridFSStore(Store):
     @property
     def last_updated(self):
         doc = next(
-            self._files_collection.find(properties=[self.lu_field])
+            self._files_collection.find(projection=[self.lu_field])
             .sort([(self.lu_field, pymongo.DESCENDING)])
             .limit(1),
             None,
