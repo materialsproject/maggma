@@ -13,6 +13,7 @@ if __name__ == "__main__":
         setup_requires=['setuptools_scm'],
         description="MongoDB aggregation machine",
         long_description=open(os.path.join(module_dir, "README.md")).read(),
+        long_description_content_type="text/markdown",
         url="https://github.com/materialsproject/maggma",
         author="The Materials Project",
         author_email="feedback@materialsproject.org",
