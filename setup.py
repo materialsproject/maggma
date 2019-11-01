@@ -9,12 +9,13 @@ module_dir = os.path.dirname(os.path.abspath(__file__))
 if __name__ == "__main__":
     setup(
         name="maggma",
-        version="0.13.0",
+        use_scm_version=True,
+        setup_requires=['setuptools_scm'],
         description="MongoDB aggregation machine",
         long_description=open(os.path.join(module_dir, "README.md")).read(),
         url="https://github.com/materialsproject/maggma",
-        author="MP Team",
-        author_email="matproj-develop@googlegroups.com",
+        author="The Materials Project",
+        author_email="feedback@materialsproject.org",
         license="modified BSD",
         packages=find_packages(),
         package_data={},
