@@ -33,7 +33,9 @@ class Store(MSONable, metaclass=ABCMeta):
     Defines the interface for all data going in and out of a Builder
     """
 
-    def __init__(self, key="task_id", lu_field='last_updated', lu_type="datetime", validator=None):
+    def __init__(
+        self, key="task_id", lu_field="last_updated", lu_type="datetime", validator=None
+    ):
         """
         Args:
             key (str): master key to index on
@@ -43,7 +45,9 @@ class Store(MSONable, metaclass=ABCMeta):
         self.key = key
         self.lu_field = lu_field
         self.lu_type = lu_type
-        self.lu_func = LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
+        self.lu_func = (
+            LU_KEY_ISOFORMAT if lu_type == "isoformat" else (identity, identity)
+        )
         self.validator = validator
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
@@ -135,17 +139,24 @@ class Store(MSONable, metaclass=ABCMeta):
 
     @property
     def last_updated(self):
-        doc = next(self.query(properties=[self.lu_field])
-                   .sort([(self.lu_field, pymongo.DESCENDING)])
-                   .limit(1), None)
+        doc = next(
+            self.query(properties=[self.lu_field])
+            .sort([(self.lu_field, pymongo.DESCENDING)])
+            .limit(1),
+            None,
+        )
         if doc and self.lu_field not in doc:
             raise StoreError(
                 "No field '{}' in store document. Please ensure Store.lu_field "
                 "is a datetime field in your store that represents the time of "
-                "last update to each document.".format(self.lu_field))
+                "last update to each document.".format(self.lu_field)
+            )
         # Handle when collection has docs but `NoneType` lu_field.
-        return (self.lu_func[0](doc[self.lu_field])
-                if (doc and doc[self.lu_field]) else datetime.min)
+        return (
+            self.lu_func[0](doc[self.lu_field])
+            if (doc and doc[self.lu_field])
+            else datetime.min
+        )
 
     def lu_filter(self, targets):
         """Creates a MongoDB filter for new documents.
@@ -178,7 +189,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.ensure_index(self.key)
         self.ensure_index(self.lu_field)
 
-        return source_keys_updated(target,self,query=criteria)
+        return source_keys_updated(target, self, query=criteria)
 
     def __eq__(self, other):
         return hash(self) == hash(other)
@@ -187,18 +198,14 @@ class Store(MSONable, metaclass=ABCMeta):
         return not self == other
 
     def __hash__(self):
-        return hash((self.lu_field, ))
+        return hash((self.lu_field,))
 
     def __getstate__(self):
         return self.as_dict()
 
     def __setstate__(self, d):
-        del d["@class"]
-        del d["@module"]
-        if "@version" in d:
-            del d["@version"]
-        md = MontyDecoder()
-        d = md.process_decoded(d)
+        d = {k: v for k, v in d.items() if not k.startswith("@")}
+        d = MontyDecoder().process_decoded(d)
         self.__init__(**d)
 
 
@@ -210,7 +217,7 @@ class Mongolike(object):
     @property
     def collection(self):
         if self._collection is None:
-            raise Exception("Must connect Mongo-like store before attemping to use it")
+            raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._collection
 
     def query(self, criteria=None, properties=None, **kwargs):
@@ -244,7 +251,9 @@ class Mongolike(object):
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
-        return self.collection.find_one(filter=criteria, projection=properties, **kwargs)
+        return self.collection.find_one(
+            filter=criteria, projection=properties, **kwargs
+        )
 
     def ensure_index(self, key, unique=False, **kwargs):
         """
@@ -253,7 +262,7 @@ class Mongolike(object):
         if "background" not in kwargs:
             kwargs["background"] = True
 
-        if confirm_field_index(self.collection,key):
+        if confirm_field_index(self.collection, key):
             return True
         else:
             try:
@@ -316,7 +325,9 @@ class Mongolike(object):
             criteria = criteria if criteria else {}
             # Update to ensure keys are there
             if all_exist:
-                criteria.update({k: {"$exists": True} for k in key if k not in criteria})
+                criteria.update(
+                    {k: {"$exists": True} for k in key if k not in criteria}
+                )
 
             results = []
             for d in self.groupby(key, properties=key, criteria=criteria):
@@ -335,7 +346,16 @@ class MongoStore(Mongolike, Store):
     A Store that connects to a Mongo collection
     """
 
-    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", **kwargs):
+    def __init__(
+        self,
+        database,
+        collection_name,
+        host="localhost",
+        port=27017,
+        username="",
+        password="",
+        **kwargs
+    ):
         """
         Args:
             database (str): database name
@@ -378,7 +398,9 @@ class MongoStore(Mongolike, Store):
         kwargs.pop("aliases", None)
         return cls(**kwargs)
 
-    def groupby(self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs):
+    def groupby(
+        self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs
+    ):
         """
         Simple grouping function that will group documents
         by keys.
@@ -573,10 +595,28 @@ class GridFSStore(Store):
     #   blob/master/source/gridfs/gridfs-spec.rst#terms
     #   (Under "Files collection document")
     files_collection_fields = (
-        "_id", "length", "chunkSize", "uploadDate", "md5", "filename",
-        "contentType", "aliases", "metadata")
+        "_id",
+        "length",
+        "chunkSize",
+        "uploadDate",
+        "md5",
+        "filename",
+        "contentType",
+        "aliases",
+        "metadata",
+    )
 
-    def __init__(self, database, collection_name, host="localhost", port=27017, username="", password="", compression=False, **kwargs):
+    def __init__(
+        self,
+        database,
+        collection_name,
+        host="localhost",
+        port=27017,
+        username="",
+        password="",
+        compression=False,
+        **kwargs
+    ):
 
         self.database = database
         self.collection_name = collection_name
@@ -591,6 +631,8 @@ class GridFSStore(Store):
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
+
+        kwargs["lu_field"] = "uploadDate"
 
         super(GridFSStore, self).__init__(**kwargs)
 
@@ -610,6 +652,27 @@ class GridFSStore(Store):
         # TODO: Should this return the real MongoCollection or the GridFS
         return self._collection
 
+    @property
+    def last_updated(self):
+        doc = next(
+            self._files_collection.find(projection=[self.lu_field])
+            .sort([(self.lu_field, pymongo.DESCENDING)])
+            .limit(1),
+            None,
+        )
+        if doc and self.lu_field not in doc:
+            raise StoreError(
+                "No field '{}' in store document. Please ensure Store.lu_field "
+                "is a datetime field in your store that represents the time of "
+                "last update to each document.".format(self.lu_field)
+            )
+        # Handle when collection has docs but `NoneType` lu_field.
+        return (
+            self.lu_func[0](doc[self.lu_field])
+            if (doc and doc[self.lu_field])
+            else datetime.min
+        )
+
     @classmethod
     def transform_criteria(cls, criteria):
         """
@@ -618,9 +681,10 @@ class GridFSStore(Store):
             criteria (dict): Query criteria
         """
         for field in criteria:
-            if (field not in cls.files_collection_fields
-                    and not field.startswith('metadata.')):
-                criteria['metadata.' + field] = copy.copy(criteria[field])
+            if field not in cls.files_collection_fields and not field.startswith(
+                "metadata."
+            ):
+                criteria["metadata." + field] = copy.copy(criteria[field])
                 del criteria[field]
 
     def query(self, criteria=None, properties=None, **kwargs):
@@ -682,7 +746,9 @@ class GridFSStore(Store):
             criteria = criteria if criteria else {}
             # Update to ensure keys are there
             if all_exist:
-                criteria.update({k: {"$exists": True} for k in key if k not in criteria})
+                criteria.update(
+                    {k: {"$exists": True} for k in key if k not in criteria}
+                )
 
             results = []
             for d in self.groupby(key, properties=key, criteria=criteria):
@@ -698,7 +764,9 @@ class GridFSStore(Store):
 
             return self._files_collection.distinct(key, filter=criteria, **kwargs)
 
-    def groupby(self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs):
+    def groupby(
+        self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs
+    ):
         """
         Simple grouping function that will group documents
         by keys.
@@ -723,14 +791,20 @@ class GridFSStore(Store):
             pipeline.append({"$match": criteria})
 
         if properties is not None:
-            properties = [p if p in self.files_collection_fields else "metadata.{}".format(p) for p in properties]
+            properties = [
+                p if p in self.files_collection_fields else "metadata.{}".format(p)
+                for p in properties
+            ]
             pipeline.append({"$project": {p: 1 for p in properties}})
 
         if isinstance(keys, str):
             keys = [keys]
 
         # ensure propper naming for keys in and outside of metadata
-        keys = [k if k in self.files_collection_fields else "metadata.{}".format(k) for k in key]
+        keys = [
+            k if k in self.files_collection_fields else "metadata.{}".format(k)
+            for k in key
+        ]
 
         group_id = {key: "${}".format(key) for key in keys}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
@@ -748,7 +822,7 @@ class GridFSStore(Store):
         if "background" not in kwargs:
             kwargs["background"] = True
 
-        if confirm_field_index(self.collection,key):
+        if confirm_field_index(self.collection, key):
             return True
         else:
             try:
@@ -791,8 +865,11 @@ class GridFSStore(Store):
             self.transform_criteria(search_doc)
 
             # Cleans up old gridfs entries
-            for fdoc in (self._files_collection.find(search_doc, ["_id"])
-                         .sort("uploadDate", -1).skip(1)):
+            for fdoc in (
+                self._files_collection.find(search_doc, ["_id"])
+                .sort("uploadDate", -1)
+                .skip(1)
+            ):
                 self.collection.delete(fdoc["_id"])
 
     def close(self):
@@ -801,4 +878,5 @@ class GridFSStore(Store):
 
 class StoreError(Exception):
     """General Store-related error."""
+
     pass
