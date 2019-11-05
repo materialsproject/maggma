@@ -3,130 +3,11 @@
 Base Builder class to define how builders need to be defined
 """
 from abc import ABCMeta, abstractmethod
-import logging
 import traceback
 from datetime import datetime
-from monty.json import MSONable, MontyDecoder
 from maggma.utils import source_keys_updated, grouper, Timeout
 from time import time
-
-
-class Builder(MSONable, metaclass=ABCMeta):
-    """
-    Base Builder class
-    At minimum this class should implement:
-    get_items - Get items from the sources
-    update_targets - Updates the sources with results
-
-    Multiprocessing and MPI processing can be used if all
-    the data processing is  limited to process_items
-    """
-
-    def __init__(self, sources, targets, chunk_size=1000):
-        """
-        Initialize the builder the framework.
-
-        Args:
-            sources([Store]): list of source stores
-            targets([Store]): list of target stores
-            chunk_size(int): chunk size for processing
-        """
-        self.sources = sources
-        self.targets = targets
-        self.chunk_size = chunk_size
-
-        self.logger = logging.getLogger(type(self).__name__)
-        self.logger.addHandler(logging.NullHandler())
-
-    def connect(self):
-        """
-        Connect to the builder sources and targets.
-        """
-        stores = self.sources + self.targets
-        for s in stores:
-            s.connect()
-
-    @abstractmethod
-    def get_items(self):
-        """
-        Returns all the items to process.
-
-        Returns:
-            generator or list of items to process
-        """
-        pass
-
-    def process_item(self, item):
-        """
-        Process an item. Should not expect DB access as this can be run MPI
-        Default behavior is to return the item.
-        Args:
-            item:
-
-        Returns:
-           item: an item to update
-        """
-        return item
-
-    @abstractmethod
-    def update_targets(self, items):
-        """
-        Takes a dictionary of targets and items from process item and updates them
-        Can also perform other book keeping in the process such as storing gridfs oids, etc.
-
-        Args:
-            items:
-
-        Returns:
-
-        """
-        pass
-
-    def finalize(self, cursor=None):
-        """
-        Perform any final clean up.
-        """
-        # Close any Mongo connections.
-        for store in self.sources + self.targets:
-            try:
-                store.collection.database.client.close()
-            except AttributeError:
-                continue
-        # Runner will pass iterable yielded by `self.get_items` as `cursor`. If
-        # this is a Mongo cursor with `no_cursor_timeout=True` (not the
-        # default), we must be explicitly kill it.
-        try:
-            cursor and cursor.close()
-        except AttributeError:
-            pass
-
-    def run(self):
-        """
-        Run the builder serially
-
-        Args:
-            builder_id (int): the index of the builder in the builders list
-        """
-        self.connect()
-
-        cursor = self.get_items()
-
-        for chunk in grouper(cursor, self.chunk_size):
-            self.logger.info("Processing batch of {} items".format(self.chunk_size))
-            processed_items = [
-                self.process_item(item) for item in chunk if item is not None
-            ]
-            self.update_targets(processed_items)
-
-        self.finalize(cursor)
-
-    def __getstate__(self):
-        return self.as_dict()
-
-    def __setstate__(self, d):
-        d = {k: v for k, v in d.items() if not k.startswith("@")}
-        d = MontyDecoder().process_decoded(d)
-        self.__init__(**d)
+from maggma.core import Builder
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -258,7 +139,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         out = {
             self.target.key: item[key],
-            self.target.lu_field: self.source.lu_func[0](item[self.source.lu_field]),
+            self.target.lu_field: self.source.lu_func[0](item[lu_field]),
         }
         if self.store_process_time:
             out["_process_time"] = time_end - time_start

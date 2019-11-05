@@ -5,34 +5,9 @@ of a Validator subclass to a Store .schema variable to enable validation on
 that Store.
 """
 
-from abc import ABC, abstractmethod
 from jsonschema import validate, ValidationError
 from jsonschema.validators import validator_for
-import pydash
-
-
-class Validator(ABC):
-    """
-    A generic class to perform document-level validation on Stores.
-    Attach a Validator to a Store during initialization, any all documents
-    added to the Store will call .validate_doc() before being added.
-    """
-
-    @abstractmethod
-    def is_valid(self, doc):
-        """
-        Returns (bool): True if document valid, False if document
-        invalid
-        """
-        return NotImplementedError
-
-    @abstractmethod
-    def validation_errors(self, doc):
-        """
-        Returns (bool): if document is not valid, provide a list of
-        strings to display for why validation has failed
-        """
-        return NotImplementedError
+from maggma.core import Validator
 
 
 class JSONSchemaValidator(Validator):
@@ -108,12 +83,12 @@ class JSONSchemaValidator(Validator):
             return []
 
         validator = validator_for(self.schema)(self.schema)
-        errors = ["{}: {}".format(".".join(error.absolute_path),
-                                  error.message)
-                  for error in validator.iter_errors(doc)]
+        errors = [
+            "{}: {}".format(".".join(error.absolute_path), error.message)
+            for error in validator.iter_errors(doc)
+        ]
 
         return errors
-
 
 
 def msonable_schema(cls):
@@ -125,6 +100,6 @@ def msonable_schema(cls):
         "required": ["@class", "@module"],
         "properties": {
             "@class": {"const": cls.__name__},
-            "@module": {"const": cls.__module__}
-        }
+            "@module": {"const": cls.__module__},
+        },
     }
