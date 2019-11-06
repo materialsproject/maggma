@@ -245,16 +245,16 @@ def source_keys_updated(source, target, query=None):
 
     keys_updated = set()  # Handle non-unique keys, e.g. for GroupBuilder.
 
-    props = {target.key: 1, target.lu_field: 1, "_id": 0}
+    props = {target.key: 1, target.last_updated_field: 1, "_id": 0}
     target_dates = {
-        d[target.key]: target.lu_func[0](d[target.lu_field])
+        d[target.key]: target._lu_func[0](d[target.last_updated_field])
         for d in target.query(properties=props)
     }
 
-    props = {source.key: 1, source.lu_field: 1, "_id": 0}
+    props = {source.key: 1, source.last_updated_field: 1, "_id": 0}
     cursor_source = source.query(criteria=query, properties=props)
     for sdoc in cursor_source:
-        key, lu = sdoc[source.key], source.lu_func[0](sdoc[source.lu_field])
+        key, lu = sdoc[source.key], source._lu_func[0](sdoc[source.last_updated_field])
         if key not in target_dates:
             keys_updated.add(key)
         elif lu > target_dates[key]:
