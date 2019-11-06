@@ -10,7 +10,7 @@ if __name__ == "__main__":
     setup(
         name="maggma",
         use_scm_version=True,
-        setup_requires=["setuptools_scm"],
+        setup_requires=["setuptools_scm", "pytest-runner"],
         description="MongoDB aggregation machine",
         long_description=open(os.path.join(module_dir, "README.md")).read(),
         long_description_content_type="text/markdown",
@@ -47,7 +47,6 @@ if __name__ == "__main__":
             "Topic :: Scientific/Engineering",
         ],
         entry_points={"console_scripts": ["mrun = maggma.cli.mrun:main"]},
-        test_suite="nose.collector",
-        tests_require=["nose"],
-        python_requires=">=3.8",
+        tests_require=["pytest"],
+        python_requires=">=3.7",
     )
