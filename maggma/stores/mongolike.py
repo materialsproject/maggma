@@ -53,7 +53,7 @@ class MongoStore(Store):
             password: Password to connect with
         """
         self.database = database
-        self.collection_name = collection_name
+        self._collection_name = collection_name
         self.host = host
         self.port = port
         self.username = username
@@ -71,10 +71,10 @@ class MongoStore(Store):
             db = conn[self.database]
             if self.username != "":
                 db.authenticate(self.username, self.password)
-            self._collection = db[self.collection_name]
+            self._collection = db[self._collection_name]
 
     def __hash__(self):
-        return hash((self.database, self.collection_name, self.last_updated_field))
+        return hash((self.database, self._collection_name, self.last_updated_field))
 
     @classmethod
     def from_db_file(cls, filename: str):
@@ -128,7 +128,7 @@ class MongoStore(Store):
             set_(group_id, key, "${}".format(key))
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
-        for d in self.collection.aggregate(pipeline, allowDiskUse=True):
+        for d in self._collection.aggregate(pipeline, allowDiskUse=True):
             yield (d["_id"], d["docs"])
 
     @classmethod
@@ -173,7 +173,7 @@ class MongoStore(Store):
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
-        for d in self.collection.find(
+        for d in self._collection.find(
             filter=criteria, projection=properties, skip=skip, limit=limit
         ):
             yield d
@@ -189,11 +189,11 @@ class MongoStore(Store):
             bool indicating if the index exists/was created
         """
 
-        if confirm_field_index(self.collection, key):
+        if confirm_field_index(self._collection, key):
             return True
         else:
             try:
-                self.collection.create_index(key, unique=unique, background=True)
+                self._collection.create_index(key, unique=unique, background=True)
                 return True
             except Exception:
                 return False
@@ -238,10 +238,10 @@ class MongoStore(Store):
 
                 requests.append(ReplaceOne(search_doc, d, upsert=True))
 
-        self.collection.bulk_write(requests, ordered=False)
+        self._collection.bulk_write(requests, ordered=False)
 
     def close(self):
-        self.collection.database.client.close()
+        self._collection.database.client.close()
 
 
 class MemoryStore(MongoStore):
@@ -296,13 +296,12 @@ class MemoryStore(MongoStore):
 
         if len(keys) > 1:
             grouper = itemgetter(*keys)
-            for key, grp in groupby(sorted(input_data, key=grouper), grouper):
-                temp_dict = {"_id": zip(keys, key), "docs": list(grp)}
-                yield temp_dict
+            for vals, grp in groupby(sorted(input_data, key=grouper), grouper):
+                yield {k: v for k, v in zip(keys, vals)}, list(grp)
         else:
             grouper = itemgetter(*keys)
-            for key, group in groupby(sorted(input_data, key=grouper), grouper):
-                yield (key, list(group))
+            for val, group in groupby(sorted(input_data, key=grouper), grouper):
+                yield {keys[0]: val}, list(group)
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
@@ -338,7 +337,7 @@ class MemoryStore(MongoStore):
                 else:
                     search_doc = {self.key: d[self.key]}
 
-                self.collection.update_one(d, criteria=search_doc)
+                self._collection.update_one(d, criteria=search_doc)
 
 
 class JSONStore(MemoryStore):
@@ -385,4 +384,4 @@ class DatetimeStore(MemoryStore):
 
     def connect(self, force_reset=False):
         super().connect(force_reset)
-        self.collection.insert_one({self.last_updated_field: self.__dt})
+        self._collection.insert_one({self.last_updated_field: self.__dt})
