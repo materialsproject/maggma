@@ -13,7 +13,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Union, Optional, Dict, List, Iterator, Tuple
 
-from pydash import identity
+from pydash import identity, get
 
 from monty.dev import deprecated
 from monty.json import MSONable, MontyDecoder
@@ -128,9 +128,11 @@ class Store(MSONable, metaclass=ABCMeta):
         field: Union[List[str], str],
         criteria: Optional[Dict] = None,
         all_exist: bool = False,
-    ) -> List:
+    ) -> Union[List[Dict], List]:
         """
-        Get all distinct values for a key
+        Get all distinct values for a field(s)
+        For a single field, this returns a list of values
+        For multiple fields, this return a list of of dictionaries for each unique combination
 
         Args:
             field: the field(s) to get distinct values for
@@ -146,6 +148,9 @@ class Store(MSONable, metaclass=ABCMeta):
         results = [
             key for key, _ in self.groupby(field, properties=field, criteria=criteria)
         ]
+        # Flatten out results if searching for a single field
+        if len(field) == 1:
+            results = [get(r, field[0]) for r in results]
         return results
 
     @abstractmethod
@@ -198,7 +203,7 @@ class Store(MSONable, metaclass=ABCMeta):
             limit: limit on total number of documents returned
 
         Returns:
-            generator returning tuples of (key, list of docs)
+            generator returning tuples of (dict, list of docs)
         """
         pass
 

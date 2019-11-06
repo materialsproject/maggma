@@ -7,7 +7,7 @@ import json
 import zlib
 from datetime import datetime
 
-from maggma.stores import Store
+from maggma.core import Store
 from monty.json import jsanitize
 
 try:
