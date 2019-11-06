@@ -254,7 +254,7 @@ class MemoryStore(MongoStore):
         self.name = name
         self._collection = None
         self.kwargs = kwargs
-        super().__init__(**kwargs)
+        super(MongoStore, self).__init__(**kwargs)
 
     def connect(self, force_reset: bool = False):
         """
@@ -337,7 +337,9 @@ class MemoryStore(MongoStore):
                 else:
                     search_doc = {self.key: d[self.key]}
 
-                self._collection.update_one(d, criteria=search_doc)
+                self._collection.replace_one(
+                    filter=search_doc, replacement=d, upsert=True
+                )
 
 
 class JSONStore(MemoryStore):

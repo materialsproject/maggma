@@ -1,9 +1,7 @@
 import pytest
-import numpy as np
 import mongomock.collection
 import pymongo.collection
 from datetime import datetime
-import numpy.testing.utils as nptu
 from maggma.core import StoreError
 from maggma.stores import MongoStore, MemoryStore, JSONStore
 
@@ -16,14 +14,21 @@ def mongostore():
     store._collection.drop()
 
 
-def test_connect():
+@pytest.fixture
+def memorystore():
+    store = MemoryStore()
+    store.connect()
+    return store
+
+
+def test_mongostore_connect():
     mongostore = MongoStore("maggma_test", "test")
     assert mongostore._collection is None
     mongostore.connect()
     assert isinstance(mongostore._collection, pymongo.collection.Collection)
 
 
-def test_query(mongostore):
+def test_mongostore_query(mongostore):
     mongostore._collection.insert({"a": 1, "b": 2, "c": 3})
     assert mongostore.query_one(properties=["a"])["a"] == 1
     assert mongostore.query_one(properties=["a"])["a"] == 1
@@ -31,7 +36,7 @@ def test_query(mongostore):
     assert mongostore.query_one(properties=["c"])["c"] == 3
 
 
-def test_distinct(mongostore):
+def test_mongostore_distinct(mongostore):
     mongostore._collection.insert({"a": 1, "b": 2, "c": 3})
     mongostore._collection.insert({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
     assert set(mongostore.distinct("a")) == {1, 4}
@@ -57,7 +62,7 @@ def test_distinct(mongostore):
     assert {s["d"] for s in ghs_ds}, {5 == 6}
 
 
-def test_update(mongostore):
+def test_mongostore_update(mongostore):
     mongostore.update([{"e": 6, "d": 4}], key="e")
     assert (
         mongostore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
@@ -70,7 +75,7 @@ def test_update(mongostore):
     assert mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 11
 
 
-def test_groupby(mongostore):
+def test_mongostore_groupby(mongostore):
     mongostore._collection.drop()
     mongostore.update(
         [
@@ -92,12 +97,12 @@ def test_groupby(mongostore):
     assert len(data) == 3
 
 
-def test_from_db_file(mongostore, db_json):
+def test_mongostore_from_db_file(mongostore, db_json):
     ms = MongoStore.from_db_file(db_json)
     assert ms._collection_name == "tmp"
 
 
-def test_from_collection(mongostore, db_json):
+def test_mongostore_from_collection(mongostore, db_json):
     ms = MongoStore.from_db_file(db_json)
     ms.connect()
 
@@ -106,7 +111,7 @@ def test_from_collection(mongostore, db_json):
     assert ms.database == other_ms.database
 
 
-def test_last_updated(mongostore):
+def test_mongostore_last_updated(mongostore):
     assert mongostore.last_updated == datetime.min
     start_time = datetime.now()
     mongostore._collection.insert_one({mongostore.key: 1, "a": 1})
@@ -119,7 +124,7 @@ def test_last_updated(mongostore):
     assert mongostore.last_updated > start_time
 
 
-def test_newer_in(mongostore):
+def test_mongostore_newer_in(mongostore):
     target = MongoStore("maggma_test", "test_target")
     target.connect()
 
@@ -144,3 +149,47 @@ def test_newer_in(mongostore):
     assert len(mongostore.newer_in(target)) == 0
 
     target._collection.drop()
+
+
+# Memory store tests
+def test_memory_store_connect():
+    memorystore = MemoryStore()
+    with pytest.raises(Exception):
+        memorystore.collection
+    memorystore.connect()
+    assert isinstance(memorystore.collection, mongomock.collection.Collection)
+
+
+def test_groupby(memorystore):
+    memorystore.update(
+        [
+            {"e": 7, "d": 9, "f": 9},
+            {"e": 7, "d": 9, "f": 10},
+            {"e": 8, "d": 9, "f": 11},
+            {"e": 9, "d": 10, "f": 12},
+        ],
+        key="f",
+    )
+    data = list(memorystore.groupby("d"))
+    assert len(data) == 2
+    grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
+    assert len(grouped_by_9) == 3
+    grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
+    assert len(grouped_by_10) == 1
+
+    data = list(memorystore.groupby(["e", "d"]))
+    assert len(data) == 3
+
+
+def test_json_store_load(test_dir):
+    files = []
+    for f in ["a.json", "b.json"]:
+        files.append(test_dir / "test_set" / f)
+
+    jsonstore = JSONStore(files)
+    jsonstore.connect()
+    assert len(list(jsonstore.query())) == 20
+
+    jsonstore = JSONStore(test_dir / "test_set" /"c.json.gz")
+    jsonstore.connect()
+    assert len(list(jsonstore.query())) == 20
