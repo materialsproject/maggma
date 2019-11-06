@@ -29,7 +29,7 @@ def test_mongostore_connect():
 
 
 def test_mongostore_query(mongostore):
-    mongostore._collection.insert({"a": 1, "b": 2, "c": 3})
+    mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert mongostore.query_one(properties=["a"])["a"] == 1
     assert mongostore.query_one(properties=["a"])["a"] == 1
     assert mongostore.query_one(properties=["b"])["b"] == 2
@@ -37,13 +37,13 @@ def test_mongostore_query(mongostore):
 
 
 def test_mongostore_distinct(mongostore):
-    mongostore._collection.insert({"a": 1, "b": 2, "c": 3})
-    mongostore._collection.insert({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
+    mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    mongostore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
     assert set(mongostore.distinct("a")) == {1, 4}
 
     # Test list distinct functionality
-    mongostore._collection.insert({"a": 4, "d": 6, "e": 7})
-    mongostore._collection.insert({"a": 4, "d": 6, "g": {"h": 2}})
+    mongostore._collection.insert_one({"a": 4, "d": 6, "e": 7})
+    mongostore._collection.insert_one({"a": 4, "d": 6, "g": {"h": 2}})
     ad_distinct = mongostore.distinct(["a", "d"])
     assert len(ad_distinct) == 3
     assert {"a": 4, "d": 6} in ad_distinct
@@ -154,10 +154,9 @@ def test_mongostore_newer_in(mongostore):
 # Memory store tests
 def test_memory_store_connect():
     memorystore = MemoryStore()
-    with pytest.raises(Exception):
-        memorystore.collection
+    assert memorystore._collection is None
     memorystore.connect()
-    assert isinstance(memorystore.collection, mongomock.collection.Collection)
+    assert isinstance(memorystore._collection, mongomock.collection.Collection)
 
 
 def test_groupby(memorystore):
@@ -190,6 +189,6 @@ def test_json_store_load(test_dir):
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
 
-    jsonstore = JSONStore(test_dir / "test_set" /"c.json.gz")
+    jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz")
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
