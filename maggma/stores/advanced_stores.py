@@ -5,7 +5,7 @@ Advanced Stores for behavior outside normal access patterns
 import os
 import hvac
 import json
-from typing import Union, Optional, Dict, List, Iterator
+from typing import Union, Optional, Dict, List, Iterator, Tuple
 
 from maggma.core import Store, StoreError, Sort
 from maggma.stores.mongolike import MongoStore
@@ -56,7 +56,7 @@ class MongograntStore(MongoStore):
                 "arguments. Use `mongogrant_spec`."
             )
         self.kwargs = kwargs
-        super().__init__(**kwargs)
+        super(MongoStore, self).__init__(**kwargs)
 
     def connect(self, force_reset: bool = False):
         """
@@ -75,7 +75,7 @@ class MongograntStore(MongoStore):
             self._collection = db[self.collection_name]
 
     def __hash__(self):
-        return hash((self.mongogrant_spec, self.collection_name, self.lu_field))
+        return hash((self.mongogrant_spec, self.collection_name, self.last_updated_field))
 
 
 class VaultStore(MongoStore):
@@ -150,7 +150,12 @@ class AliasingStore(Store):
         self.reverse_aliases = {v: k for k, v in aliases.items()}
         self.kwargs = kwargs
 
-        kwargs.update({"lu_field": store.lu_field, "lu_type": store.lu_type})
+        kwargs.update(
+            {
+                "last_updated_field": store.last_updated_field,
+                "last_updated_type": store.last_updated_type,
+            }
+        )
         super(AliasingStore, self).__init__(**kwargs)
 
     def query(
@@ -185,7 +190,10 @@ class AliasingStore(Store):
             yield d
 
     def distinct(
-        self, field: Union[List[str], str], criteria: Optional[Dict] = None, all_exist: bool = False
+        self,
+        field: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        all_exist: bool = False,
     ) -> List:
         """
         Get all distinct values for a key
@@ -202,7 +210,30 @@ class AliasingStore(Store):
         field = [self.aliases[f] for f in field]
         return self.store.distinct(field, criteria=criteria)
 
-    def groupby(self, keys, criteria=None, properties=None, **kwargs):
+    def groupby(
+        self,
+        keys: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Tuple[Dict, List[Dict]]]:
+        """
+        Simple grouping function that will group documents
+        by keys.
+
+        Args:
+            keys: fields to group documents
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
+
+        Returns:
+            generator returning tuples of (dict, list of docs)
+        """
         # Convert to a list
         keys = keys if isinstance(keys, list) else [keys]
 
@@ -215,10 +246,20 @@ class AliasingStore(Store):
         lazy_substitute(criteria, self.reverse_aliases)
 
         return self.store.groupby(
-            keys=keys, properties=properties, criteria=criteria, **kwargs
+            keys=keys, properties=properties, criteria=criteria, skip=skip, limit=limit
         )
 
-    def update(self, docs, update_lu=True, key=None):
+    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
+        """
+        Update documents into the Store
+
+        Args:
+            docs: the document or list of documents to update
+            key: field name(s) to determine uniqueness for a
+                 document, can be a list of multiple fields,
+                 a single field, or None if the Store's key
+                 field is to be used
+        """
         key = key if key else self.key
 
         for d in docs:
@@ -227,7 +268,7 @@ class AliasingStore(Store):
         if key in self.aliases:
             key = self.aliases[key]
 
-        self.store.update(docs, update_lu=update_lu, key=key)
+        self.store.update(docs, key=key)
 
     def ensure_index(self, key, unique=False, **kwargs):
         if key in self.aliases:
@@ -250,7 +291,7 @@ class SandboxStore(Store):
     Provides a sandboxed view to another store
     """
 
-    def __init__(self, store, sandbox, exclusive=False):
+    def __init__(self, store: Store, sandbox: str, exclusive: bool = False):
         """
         store (Store): store to wrap sandboxing around
         sandbox (string): the corresponding sandbox
@@ -261,13 +302,16 @@ class SandboxStore(Store):
         self.exclusive = exclusive
         super().__init__(
             key=self.store.key,
-            lu_field=self.store.lu_field,
-            lu_type=self.store.lu_type,
+            last_updated_field=self.store.last_updated_field,
+            last_updated_type=self.store.last_updated_type,
             validator=self.store.validator,
         )
 
     @property
-    def sbx_criteria(self):
+    def sbx_criteria(self) -> Dict:
+        """
+        Returns the sandbox criteria dict used to filter the source store
+        """
         if self.exclusive:
             return {"sbxn": self.sandbox}
         else:
@@ -275,41 +319,81 @@ class SandboxStore(Store):
                 "$or": [{"sbxn": {"$in": [self.sandbox]}}, {"sbxn": {"$exists": False}}]
             }
 
-    def query(self, criteria=None, properties=None, **kwargs):
+    def query(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Dict]:
+        """
+        Queries the Store for a set of documents
+
+        Args:
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
+        """
         criteria = (
             dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         )
-        return self.store.query(properties=properties, criteria=criteria, **kwargs)
-
-    def query_one(self, criteria=None, properties=None, **kwargs):
-        criteria = (
-            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        return self.store.query(
+            properties=properties, criteria=criteria, sort=sort, limit=limit, skip=skip
         )
-        return self.store.query_one(properties=properties, criteria=criteria, **kwargs)
 
-    def distinct(self, key, criteria=None, **kwargs):
-        criteria = (
-            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
-        )
-        return self.store.distinct(key=key, criteria=criteria, **kwargs)
+    def groupby(
+        self,
+        keys: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Tuple[Dict, List[Dict]]]:
+        """
+        Simple grouping function that will group documents
+        by keys.
 
-    def groupby(self, keys, criteria=None, properties=None, **kwargs):
+        Args:
+            keys: fields to group documents
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
+
+        Returns:
+            generator returning tuples of (dict, list of docs)
+        """
         criteria = (
             dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
         )
 
         return self.store.groupby(
-            keys=keys, properties=properties, criteria=criteria, **kwargs
+            keys=keys, properties=properties, criteria=criteria, skip=skip, limit=limit
         )
 
-    def update(self, docs, update_lu=True, key=None):
+    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
+        """
+        Update documents into the Store
+
+        Args:
+            docs: the document or list of documents to update
+            key: field name(s) to determine uniqueness for a
+                 document, can be a list of multiple fields,
+                 a single field, or None if the Store's key
+                 field is to be used
+        """
         for d in docs:
             if "sbxn" in d:
                 d["sbxn"] = list(set(d["sbxn"] + [self.sandbox]))
             else:
                 d["sbxn"] = [self.sandbox]
 
-        self.store.update(docs, update_lu=update_lu, key=key)
+        self.store.update(docs, key=key)
 
     def ensure_index(self, key, unique=False, **kwargs):
         return self.store.ensure_index(key, unique, **kwargs)
