@@ -11,6 +11,7 @@ from maggma.builders import CopyBuilder
 from maggma.stores import MongoStore
 
 
+@unittest.skip("Just don't")
 class TestMRun(TestCase):
     @classmethod
     def setUpClass(cls):
