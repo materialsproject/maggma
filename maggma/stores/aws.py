@@ -1,13 +1,14 @@
 # coding: utf-8
 """
-Advanced Stores for behavior outside normal access patterns
+Advanced Stores for connecting to AWS data
 """
 
 import json
 import zlib
-from datetime import datetime
 
-from maggma.core import Store
+from typing import Union, Optional, Dict, List, Iterator, Tuple
+
+from maggma.core import Store, Sort
 from monty.json import jsanitize
 
 try:
@@ -44,38 +45,54 @@ class AmazonS3Store(Store):
         kwargs["key"] = index.key
         super(AmazonS3Store, self).__init__(**kwargs)
 
-    def connect(self, force_reset=False):
+    def connect(self, force_reset: bool = False):
+        """
+        Connect to the source data
+        """
         self.index.connect(force_reset=force_reset)
         if not self.s3:
             self.s3 = boto3.resource("s3")
-            # TODO: Provide configuration variable to create bucket if not present
-            if self.bucket not in self.s3.list_buckets():
+
+            if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
                 raise Exception("Bucket not present on AWS: {}".format(self.bucket))
+
             self.s3_bucket = self.s3.Bucket(self.bucket)
 
     def close(self):
+        """
+        Closes any connections
+        """
         self.index.close()
+        self.s3 = None
+        self.s3_bucket = None
 
     @property
     def collection(self):
         # For now returns the index collection since that is what we would "search" on
         return self.index
 
-    def query(self, criteria=None, properties=None, **kwargs):
+    def query(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Dict]:
         """
-        Function that gets data from Amazon S3. This store ignores all
-        property projections as its designed for whole document access
+        Queries the Store for a set of documents
 
         Args:
-            properties (list or dict): This will be ignored by the S3
-                Store
-            criteria (dict): filter for query, matches documents
-                against key-value pairs
-            **kwargs (kwargs): further kwargs to Collection.find
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
         """
-        for f in self.index.query(criteria=criteria, **kwargs):
+        for f in self.index.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
             try:
-                data = self.s3_bucket.Object(f[self.key]).get()
+                # TODO : THis is ugly and unsafe, do some real checking before pulling data
+                data = self.s3_bucket.Object(f[self.key]).get()["Body"].read()
             except botocore.exceptions.ClientError as e:
                 # If a client error is thrown, then check that it was a 404 error.
                 # If it was a 404 error, then the object does not exist.
@@ -84,116 +101,109 @@ class AmazonS3Store(Store):
                     self.logger.error("Could not find S3 object {}".format(f[self.key]))
                     break
 
-            if f.get("compression", "") != "zlib":
+            if f.get("compression", "") == "zlib":
                 data = zlib.decompress(data)
-
+            print(data)
             yield json.loads(data)
 
-    def query_one(self, criteria=None, properties=None, **kwargs):
+    def distinct(
+        self,
+        field: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        all_exist: bool = False,
+    ) -> Union[List[Dict], List]:
         """
-        Function that gets a single document from Amazon S3. This store
-        ignores all property projections as its designed for whole
-        document access
+        Get all distinct values for a field(s)
+        For a single field, this returns a list of values
+        For multiple fields, this return a list of of dictionaries for each unique combination
 
         Args:
-            properties (list or dict): This will be ignored by the S3
-                Store
-            criteria (dict): filter for query, matches documents
-                against key-value pairs
-            **kwargs (kwargs): further kwargs to Collection.find
-        """
-        f = self.index.query_one(criteria=criteria, **kwargs)
-        if f:
-            try:
-                data = self.s3_bucket.Object(f[self.key]).get()
-            except botocore.exceptions.ClientError as e:
-                # If a client error is thrown, then check that it was a 404 error.
-                # If it was a 404 error, then the object does not exist.
-                error_code = int(e.response["Error"]["Code"])
-                if error_code == 404:
-                    self.logger.error("Could not find S3 object {}".format(f[self.key]))
-                    return None
-
-            if f.get("compression", "") != "zlib":
-                data = zlib.decompress(data)
-
-            return json.loads(data)
-        else:
-            return None
-
-    def distinct(self, key, criteria=None, all_exist=False, **kwargs):
-        """
-        Function get to get all distinct values of a certain key in the
-        AmazonS3 Store. This searches the index collection for this data
-
-        Args:
-            key (mongolike key or list of mongolike keys): key or keys
-                for which to find distinct values or sets of values.
-            criteria (filter criteria): criteria for filter
-            all_exist (bool): whether to ensure all keys in list exist
-                in each document, defaults to False
-            **kwargs (kwargs): kwargs corresponding to collection.distinct
+            field: the field(s) to get distinct values for
+            criteria : PyMongo filter for documents to search in
+            all_exist : ensure all fields exist for the distinct set
         """
         # Index is a store so it should have its own distinct function
-        return self.index.distinct(key, filter=criteria, **kwargs)
+        return self.index.distinct(field, criteria=criteria, all_exist=all_exist)
 
-    def groupby(self, keys, criteria=None, properties=None, **kwargs):
+    def groupby(
+        self,
+        keys: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
         Simple grouping function that will group documents
-        by keys. Only searches the index collection
+        by keys.
 
         Args:
-            keys (list or string): fields to group documents
-            criteria (dict): filter for documents to group
-            properties (list): properties to return in grouped documents
-            allow_disk_use (bool): whether to allow disk use in aggregation
+            keys: fields to group documents
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
 
         Returns:
-            command cursor corresponding to grouped documents
-
-            elements of the command cursor have the structure:
-            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
-             'docs': [list_of_documents corresponding to key values]}
-
+            generator returning tuples of (dict, list of docs)
         """
-        self.index.groupby(keys, properties, criteria, **kwargs)
+        self.index.groupby(
+            keys=keys,
+            criteria=criteria,
+            properties=properties,
+            sort=sort,
+            skip=skip,
+            limit=limit,
+        )
 
-    def ensure_index(self, key, unique=False):
+    def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
-        Wrapper for pymongo.Collection.ensure_index for the files collection
+        Tries to create an index and return true if it suceeded
+        Args:
+            key: single key to index
+            unique: Whether or not this index contains only unique keys
+
+        Returns:
+            bool indicating if the index exists/was created
         """
         return self.index.ensure_index(key, unique=unique, background=True)
 
-    def update(self, docs, update_lu=True, key=None, compress=False):
+    def update(
+        self,
+        docs: Union[List[Dict], Dict],
+        key: Union[List, str, None] = None,
+        compress=True,
+    ):
         """
-        Function to update associated MongoStore collection.
+        Update documents into the Store
 
         Args:
-            docs ([dict]): list of documents
-            key ([str] or str): keys to use to build search doc
-            compress (bool): compress the document or not
+            docs: the document or list of documents to update
+            key: field name(s) to determine uniqueness for a
+                 document, can be a list of multiple fields,
+                 a single field, or None if the Store's key
+                 field is to be used
+            compress: compress the documents into the S3 bucket
         """
-        now = datetime.now()
         search_docs = []
-        for d in docs:
-            if isinstance(key, list):
-                search_doc = {k: d[k] for k in key}
-            elif key:
-                search_doc = {key: d[key]}
-            else:
-                search_doc = {}
+        search_keys = []
 
-            # Always include our main key
-            search_doc[self.key] = d[self.key]
+        if isinstance(key, list):
+            search_keys = key
+        elif key:
+            search_keys = [key]
+        else:
+            search_keys = [self.key]
+
+        for d in docs:
+            search_doc = {k: d[k] for k in search_keys}
+            search_doc[self.key] = d[self.key]  # Ensure key is in metadata
 
             # Remove MongoDB _id from search
             if "_id" in search_doc:
                 del search_doc["_id"]
-
-            # Add a timestamp
-            if update_lu:
-                search_doc[self.lu_field] = now
-                d[self.lu_field] = now
 
             data = json.dumps(jsanitize(d)).encode()
 
@@ -212,17 +222,27 @@ class AmazonS3Store(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def lu_filter(self, targets):
-        """Creates a MongoDB filter for new documents.
-
-        By "new", we mean documents in this Store that were last updated later
-        than any document in targets.
+    def newer_in(
+        self,
+        target: Store,
+        key: Union[str, None] = None,
+        criteria: Optional[Dict] = None,
+        exhaustive: bool = False,
+    ) -> List[str]:
+        """
+        Returns the keys of documents that are newer in the target
+        Store than this Store.
 
         Args:
-            targets (list): A list of Stores
-
+            key: a single key field to return, defaults to Store.key
+            criteria : PyMongo filter for documents to search in
+            exhaustive: triggers an item-by-item check vs. checking
+                        the last_updated of the target Store and using
+                        that to filter out new items in
         """
-        self.index.lu_filter(targets)
+        self.index.newer_in(
+            target=target, key=key, criteria=criteria, exhaustive=exhaustive
+        )
 
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
