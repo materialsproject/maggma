@@ -15,7 +15,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     Apply a unary function to yield a target document for each source document.
 
     Supports incremental building, where a source document gets built only if it
-    has newer (by lu_field) data than the corresponding (by key) target
+    has newer (by last_updated_field) data than the corresponding (by key) target
     document.
 
     """
@@ -41,7 +41,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             target (Store): target store
             ufn (function): Unary function to process item
                             You do not need to provide values for
-                            source.key and source.lu_field in the output.
+                            source.key and source.last_updated_field in the output.
                             Any uncaught exceptions will be caught by
                             process_item and logged to the "error" field
                             in the target document.
@@ -73,9 +73,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         index_checks = [
             self.source.ensure_index(self.source.key),
-            self.source.ensure_index(self.source.lu_field),
+            self.source.ensure_index(self.source.last_updated_field),
             self.target.ensure_index(self.target.key),
-            self.target.ensure_index(self.target.lu_field),
+            self.target.ensure_index(self.target.last_updated_field),
         ]
 
         if not all(index_checks):
@@ -83,7 +83,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 "Missing one or more important indices on stores. "
                 "Performance for large stores may be severely degraded. "
                 "Ensure indices on target.key and "
-                "[(store.lu_field, -1), (store.key, 1)] "
+                "[(store.last_updated_field, -1), (store.key, 1)] "
                 "for each of source and target."
             )
 
@@ -94,17 +94,17 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.ensure_indexes()
 
         if self.incremental:
-            keys = source_keys_updated(
-                source=self.source, target=self.target, query=self.query
+            keys = self.target.newer_in(
+                self.source, criteria=self.query, exhaustive=True
             )
         else:
-            keys = self.source.distinct(self.source.key, self.query)
+            keys = self.source.distinct(self.source.key, criteria=self.query)
 
         self.logger.info("Processing {} items".format(len(keys)))
 
         if self.projection:
             projection = list(
-                set(self.projection + [self.source.key, self.source.lu_field])
+                set(self.projection + [self.source.key, self.source.last_updated_field])
             )
         else:
             projection = None
@@ -135,11 +135,13 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         time_end = time()
 
-        key, lu_field = self.source.key, self.source.lu_field
+        key, last_updated_field = self.source.key, self.source.last_updated_field
 
         out = {
             self.target.key: item[key],
-            self.target.lu_field: self.source.lu_func[0](item[lu_field]),
+            self.target.last_updated_field: self.source._lu_func[0](
+                item[last_updated_field]
+            ),
         }
         if self.store_process_time:
             out["_process_time"] = time_end - time_start
@@ -151,18 +153,21 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         source, target = self.source, self.target
         for item in items:
             # Use source last-updated value, ensuring `datetime` type.
-            item[target.lu_field] = source.lu_func[0](item[source.lu_field])
-            if source.lu_field != target.lu_field:
-                del item[source.lu_field]
+            item[target.last_updated_field] = source._lu_func[0](
+                item[source.last_updated_field]
+            )
+            if source.last_updated_field != target.last_updated_field:
+                del item[source.last_updated_field]
             item["_bt"] = datetime.utcnow()
             if "_id" in item:
                 del item["_id"]
 
         if len(items) > 0:
-            target.update(items, update_lu=False)
+            target.update(items)
 
     def finalize(self, cursor=None):
         if self.delete_orphans:
+            # TODO: Should we add delete to standard Store?
             if not hasattr(self.target, "collection"):
                 self.logger.warning(
                     "delete_orphans parameter is only supported for "
@@ -187,7 +192,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     Group source docs and produce one target doc from each group.
 
     Supports incremental building, where a source group gets (re)built only if
-    it has a newer (by lu_field) doc than the corresponding (by key) target doc.
+    it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.
     """
 
     def __init__(self, source, target, query=None, **kwargs):
