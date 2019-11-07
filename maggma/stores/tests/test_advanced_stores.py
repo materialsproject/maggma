@@ -9,6 +9,7 @@ import shutil
 import signal
 import subprocess
 import tempfile
+import pytest
 
 from mongogrant.client import seed, check
 from mongogrant.config import Config
@@ -27,7 +28,7 @@ from maggma.stores import (
     SandboxStore,
 )
 from maggma.stores.advanced_stores import substitute
-import pytest
+
 
 
 @pytest.fixture("module")

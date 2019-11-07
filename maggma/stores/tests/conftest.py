@@ -5,8 +5,9 @@ import pytest
 @pytest.fixture
 def test_dir():
     module_dir = Path(__file__).resolve().parent
-    test_dir = module_dir / ".." / ".." / ".." / "test_files" 
+    test_dir = module_dir / ".." / ".." / ".." / "test_files"
     return test_dir.resolve()
+
 
 @pytest.fixture
 def db_json(test_dir):
