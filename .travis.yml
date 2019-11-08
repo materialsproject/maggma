@@ -1,7 +1,7 @@
 language: python
 cache: pip
 python:
-  - "3.6"
+  - "3.7"
 install:
   - ./install-mpi.sh openmpi
   - pip install -r requirements.txt
@@ -29,15 +29,13 @@ before_script:
   - cd -
 script:
   - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
-  - nosetests --nocapture --with-coverage --cover-package=maggma
+  - pytest --cov=maggma/
 after_success:
   - coveralls
 notifications:
   email:
     recipients:
-      - montoyjh@lbl.gov
       - shyamd@lbl.gov
-      - dwinston@lbl.gov
     on_success: change
     on_failure: always
 deploy:
