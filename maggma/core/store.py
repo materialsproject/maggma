@@ -162,12 +162,12 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def remove_docs(self, query : Dict):
+    def remove_docs(self, criteria : Dict):
         """
         Remove docs matching the query dictionary
 
         Args:
-            query: query dictionary to match 
+            criteria: query dictionary to match
         """
         pass
 
