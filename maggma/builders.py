@@ -7,7 +7,8 @@ import traceback
 from datetime import datetime
 from maggma.utils import source_keys_updated, grouper, Timeout
 from time import time
-from maggma.core import Builder
+from maggma.core import Builder, Store
+from typing import Optional, Dict, List, Callable
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -22,38 +23,38 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def __init__(
         self,
-        source,
-        target,
-        ufn,
-        query=None,
-        incremental=True,
-        projection=None,
-        delete_orphans=False,
-        timeout=None,
-        store_process_time=True,
+        source: Store,
+        target: Store,
+        ufn: Callable,
+        query: Optional[Dict] = None,
+        incremental: bool = True,
+        projection: Optional[List] = None,
+        delete_orphans: bool = False,
+        timeout: int = 0,
+        store_process_time: bool = True,
         **kwargs
     ):
         """
         Apply a unary function to each source document.
 
         Args:
-            source (Store): source store
-            target (Store): target store
-            ufn (function): Unary function to process item
-                            You do not need to provide values for
-                            source.key and source.last_updated_field in the output.
-                            Any uncaught exceptions will be caught by
-                            process_item and logged to the "error" field
-                            in the target document.
-            query (dict): optional query to filter source store
-            incremental (bool): Whether to limit query to filter for only updated source documents.
-            projection (list): list of keys to project from the source for
+            source: source store
+            target: target store
+            ufn: Unary function to process item
+                You do not need to provide values for
+                source.key and source.last_updated_field in the output.
+                Any uncaught exceptions will be caught by
+                process_item and logged to the "error" field
+                in the target document.
+            query: optional query to filter source store
+            incremental: Whether to limit query to filter for only updated source documents.
+            projection: list of keys to project from the source for
                 processing. Limits data transfer to improve efficiency.
-            delete_orphans (bool): Whether to delete documents on target store
+            delete_orphans: Whether to delete documents on target store
                 with key values not present in source store. Deletion happens
                 after all updates, during Builder.finalize.
-            timeout (int): maximum running time per item in seconds
-            store_process_time (bool): If True, add "_process_time" key to
+            timeout: maximum running time per item in seconds
+            store_process_time: If True, add "_process_time" key to
             document for profiling purposes
         """
         self.source = source
@@ -61,7 +62,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.query = query
         self.incremental = incremental
         self.ufn = ufn
-        self.projection = projection if projection else []
+        self.projection = projection
         self.delete_orphans = delete_orphans
         self.kwargs = kwargs
         self.total = None
@@ -88,6 +89,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             )
 
     def get_items(self):
+        """
+        Generic get items for Map Builder designed to perform
+        incremental building
+        """
 
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
 
@@ -120,7 +125,11 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             ):
                 yield doc
 
-    def process_item(self, item):
+    def process_item(self, item: Dict):
+        """
+        Generic process items to process a dictionary using
+        a map function
+        """
 
         self.logger.debug("Processing: {}".format(item[self.source.key]))
 
@@ -149,7 +158,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         out.update(processed)
         return out
 
-    def update_targets(self, items):
+    def update_targets(self, items: List[Dict]):
+        """
+        Generic update targets for Map Builder
+        """
         source, target = self.source, self.target
         for item in items:
             # Use source last-updated value, ensuring `datetime` type.
@@ -167,23 +179,14 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def finalize(self, cursor=None):
         if self.delete_orphans:
-            # TODO: Should we add delete to standard Store?
-            if not hasattr(self.target, "collection"):
-                self.logger.warning(
-                    "delete_orphans parameter is only supported for "
-                    "Mongolike target stores at this time."
+            source_keyvals = set(self.source.distinct(self.source.key))
+            target_keyvals = set(self.target.distinct(self.target.key))
+            to_delete = list(target_keyvals - source_keyvals)
+            if len(to_delete):
+                self.logger.info(
+                    "Finalize: Deleting {} orphans.".format(len(to_delete))
                 )
-            else:
-                source_keyvals = set(self.source.distinct(self.source.key))
-                target_keyvals = set(self.target.distinct(self.target.key))
-                to_delete = list(target_keyvals - source_keyvals)
-                if len(to_delete):
-                    self.logger.info(
-                        "Finalize: Deleting {} orphans.".format(len(to_delete))
-                    )
-                self.target.collection.delete_many(
-                    {self.target.key: {"$in": to_delete}}
-                )
+            self.target.remove_docs({self.target.key: {"$in": to_delete}})
         super().finalize(cursor)
 
 
