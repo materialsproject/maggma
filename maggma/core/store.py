@@ -161,6 +161,16 @@ class Store(MSONable, metaclass=ABCMeta):
         """
         pass
 
+    @abstractmethod
+    def remove_docs(self, query : Dict):
+        """
+        Remove docs matching the query dictionary
+
+        Args:
+            query: query dictionary to match 
+        """
+        pass
+
     def query_one(self, criteria=None, properties=None, sort=sort):
         """
         Queries the Store for a single document
