@@ -284,7 +284,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
 
-    def __init__(self, source, target, **kwargs):
+    def __init__(self, source: Store, target: Store, **kwargs):
         super().__init__(
             source=source,
             target=target,
