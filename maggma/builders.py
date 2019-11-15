@@ -8,7 +8,7 @@ from datetime import datetime
 from maggma.utils import source_keys_updated, grouper, Timeout
 from time import time
 from maggma.core import Builder, Store
-from typing import Optional, Dict, List, Callable
+from typing import Optional, Dict, List
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -25,7 +25,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self,
         source: Store,
         target: Store,
-        ufn: Callable,
         query: Optional[Dict] = None,
         incremental: bool = True,
         projection: Optional[List] = None,
@@ -40,12 +39,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         Args:
             source: source store
             target: target store
-            ufn: Unary function to process item
-                You do not need to provide values for
-                source.key and source.last_updated_field in the output.
-                Any uncaught exceptions will be caught by
-                process_item and logged to the "error" field
-                in the target document.
             query: optional query to filter source store
             incremental: Whether to limit query to filter for only updated source documents.
             projection: list of keys to project from the source for
@@ -61,7 +54,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.target = target
         self.query = query
         self.incremental = incremental
-        self.ufn = ufn
         self.projection = projection
         self.delete_orphans = delete_orphans
         self.kwargs = kwargs
@@ -137,7 +129,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         try:
             with Timeout(seconds=self.timeout):
-                processed = self.ufn.__call__(item)
+                processed = self.unary_function(item)
         except Exception as e:
             self.logger.error(traceback.format_exc())
             processed = {"error": str(e)}
@@ -188,6 +180,18 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 )
             self.target.remove_docs({self.target.key: {"$in": to_delete}})
         super().finalize(cursor)
+
+    @abstractmethod
+    def unary_function(self, item):
+        """
+        ufn: Unary function to process item
+                You do not need to provide values for
+                source.key and source.last_updated_field in the output.
+                Any uncaught exceptions will be caught by
+                process_item and logged to the "error" field
+                in the target document.
+        """
+        pass
 
 
 class GroupBuilder(MapBuilder, metaclass=ABCMeta):
@@ -268,11 +272,5 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
 
-    def __init__(self, source: Store, target: Store, **kwargs):
-        super().__init__(
-            source=source,
-            target=target,
-            ufn=lambda x: x,
-            store_process_time=False,
-            **kwargs
-        )
+    def unary_function(item):
+        return item
