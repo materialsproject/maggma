@@ -6,7 +6,6 @@ from __future__ import annotations
 
 import logging
 
-
 from abc import ABCMeta, abstractmethod, abstractproperty
 
 from datetime import datetime
@@ -108,51 +107,6 @@ class Store(MSONable, metaclass=ABCMeta):
         """
         pass
 
-    def query_one(self, criteria=None, properties=None, **kwargs):
-        """
-        Function that gets a single document from GridFS. This store
-        ignores all property projections as its designed for whole
-        document access
-
-        Args:
-            criteria (dict): filter for query, matches documents
-                against key-value pairs
-            properties (list or dict): This will be ignored by the GridFS
-                Store
-            **kwargs (kwargs): further kwargs to Collection.find
-        """
-        return next(self.query(criteria=criteria, **kwargs), None)
-
-    def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-    ) -> Union[List[Dict], List]:
-        """
-        Get all distinct values for a field(s)
-        For a single field, this returns a list of values
-        For multiple fields, this return a list of of dictionaries for each unique combination
-
-        Args:
-            field: the field(s) to get distinct values for
-            criteria : PyMongo filter for documents to search in
-            all_exist : ensure all fields exist for the distinct set
-        """
-        field = field if isinstance(field, list) else [field]
-
-        criteria = criteria or {}
-
-        if all_exist:
-            criteria.update({f: {"$exists": 1} for f in field if f not in criteria})
-        results = [
-            key for key, _ in self.groupby(field, properties=field, criteria=criteria)
-        ]
-        # Flatten out results if searching for a single field
-        if len(field) == 1:
-            results = [get(r, field[0]) for r in results]
-        return results
-
     @abstractmethod
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
@@ -206,6 +160,49 @@ class Store(MSONable, metaclass=ABCMeta):
             generator returning tuples of (dict, list of docs)
         """
         pass
+
+    def query_one(self, criteria=None, properties=None, sort=sort):
+        """
+        Queries the Store for a single document
+
+        Args:
+            criteria : PyMongo filter for documents to search
+            properties: properties to return in the document
+            sort: Dictionary of sort order for fields
+        """
+        return next(
+            self.query(criteria=criteria, properties=properties, sort=sort), None
+        )
+
+    def distinct(
+        self,
+        field: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        all_exist: bool = False,
+    ) -> Union[List[Dict], List]:
+        """
+        Get all distinct values for a field(s)
+        For a single field, this returns a list of values
+        For multiple fields, this return a list of of dictionaries for each unique combination
+
+        Args:
+            field: the field(s) to get distinct values for
+            criteria : PyMongo filter for documents to search in
+            all_exist : ensure all fields exist for the distinct set
+        """
+        field = field if isinstance(field, list) else [field]
+
+        criteria = criteria or {}
+
+        if all_exist:
+            criteria.update({f: {"$exists": 1} for f in field if f not in criteria})
+        results = [
+            key for key, _ in self.groupby(field, properties=field, criteria=criteria)
+        ]
+        # Flatten out results if searching for a single field
+        if len(field) == 1:
+            results = [get(r, field[0]) for r in results]
+        return results
 
     @property
     def last_updated(self):
