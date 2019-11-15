@@ -162,7 +162,7 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def remove_docs(self, criteria : Dict):
+    def remove_docs(self, criteria: Dict):
         """
         Remove docs matching the query dictionary
 
@@ -171,7 +171,12 @@ class Store(MSONable, metaclass=ABCMeta):
         """
         pass
 
-    def query_one(self, criteria=None, properties=None, sort=sort):
+    def query_one(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+    ):
         """
         Queries the Store for a single document
 
