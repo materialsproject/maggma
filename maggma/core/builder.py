@@ -92,23 +92,16 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         pass
 
-    def finalize(self, cursor=None):
+    def finalize(self):
         """
         Perform any final clean up.
         """
         # Close any Mongo connections.
         for store in self.sources + self.targets:
             try:
-                store.collection.database.client.close()
+                store.close()
             except AttributeError:
                 continue
-        # Runner will pass iterable yielded by `self.get_items` as `cursor`. If
-        # this is a Mongo cursor with `no_cursor_timeout=True` (not the
-        # default), we must be explicitly kill it.
-        try:
-            cursor and cursor.close()
-        except AttributeError:
-            pass
 
     def run(self):
         """
