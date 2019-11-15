@@ -198,22 +198,6 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.
     """
 
-    def __init__(self, source, target, query=None, **kwargs):
-        """
-
-        Given criteria, get docs with needed grouping properties. With these
-        minimal docs, yield groups. For each group, fetch all needed data for
-        item processing, and yield one or more items (i.e. subgroups as
-        appropriate).
-
-        Args:
-            source (Store): source store
-            target (Store): target store
-            query (dict): optional query to filter source store
-        """
-        super().__init__(source, target, query=query, **kwargs)
-        self.total = None
-
     def get_items(self):
         criteria = source_keys_updated(self.source, self.target, query=self.query)
         if all(isinstance(entry, str) for entry in self.grouping_properties()):
