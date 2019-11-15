@@ -53,7 +53,7 @@ class TqdmLoggingHandler(logging.Handler):
             self.flush()
         except (KeyboardInterrupt, SystemExit):
             raise
-        except:
+        except Exception:
             self.handleError(record)
 
 
@@ -127,7 +127,7 @@ def grouper(iterable, n, fillvalue=None):
     args = [iter(iterable)] * n
     iterator = itertools.zip_longest(*args, fillvalue=fillvalue)
 
-    if fillvalue == None:
+    if fillvalue is None:
         iterator = filter(None.__ne__, iterator)
 
     return iterator
@@ -143,7 +143,7 @@ def get_mpi():
         comm = MPI.COMM_WORLD
         rank = comm.Get_rank()
         size = comm.Get_size()
-    except:
+    except Exception:
         comm = None
         rank = -1
         size = 0
