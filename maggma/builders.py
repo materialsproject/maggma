@@ -8,7 +8,7 @@ from datetime import datetime
 from maggma.utils import source_keys_updated, grouper, Timeout
 from time import time
 from maggma.core import Builder, Store
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Iterator
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -78,6 +78,17 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 "for each of source and target."
             )
 
+    def prechunk(self, number_splits: int) -> Iterator[Dict]:
+        """
+        Generic prechunk for map builder to perform domain-decompostion
+        by the key field
+        """
+        self.ensure_indexes()
+        keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
+
+        for split in grouper(keys, number_splits):
+            yield {self.source.key: {"$in": list(filter(None.__ne__, split))}}
+
     def get_items(self):
         """
         Generic get items for Map Builder designed to perform
@@ -88,10 +99,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         self.ensure_indexes()
 
-        
-        keys = self.target.newer_in(
-            self.source, criteria=self.query, exhaustive=True
-        )
+        keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
 
         self.logger.info("Processing {} items".format(len(keys)))
 

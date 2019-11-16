@@ -52,9 +52,20 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         Connect to the builder sources and targets.
         """
-        stores = self.sources + self.targets
-        for s in stores:
+        for s in self.sources + self.targets:
             s.connect()
+
+    def prechunk(self, number_splits: int) -> Iterator[Dict]:
+        """
+        Part of a domain-decomposition paradigm to allow the builder to operate on
+        multiple nodes by divinding up the IO as well as the compute
+        This function should return an iterator of dictionaries that can be distributed
+        to multiple instances of the builder to get/process/udpate on
+
+        Args:
+            number_splits: The number of groups to split the documents to work on
+        """
+        yield self.query
 
     @abstractmethod
     def get_items(self) -> Iterator:
