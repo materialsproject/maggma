@@ -17,14 +17,19 @@ def gridfsstore():
 def test_update(gridfsstore):
     data1 = np.random.rand(256)
     data2 = np.random.rand(256)
+    tic = datetime(2018, 4, 12, 16)
     # Test metadata storage
-    gridfsstore.update([{"task_id": "mp-1", "data": data1}])
+    gridfsstore.update(
+        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
+    )
     assert (
         gridfsstore._files_collection.find_one({"metadata.task_id": "mp-1"}) is not None
     )
 
     # Test storing data
-    gridfsstore.update([{"task_id": "mp-1", "data": data2}])
+    gridfsstore.update(
+        [{"task_id": "mp-1", "data": data2, gridfsstore.last_updated_field: tic}]
+    )
     assert len(list(gridfsstore.query({"task_id": "mp-1"}))) == 1
     assert "task_id" in gridfsstore.query_one({"task_id": "mp-1"})
     nptu.assert_almost_equal(
@@ -45,13 +50,33 @@ def test_update(gridfsstore):
     )
 
 
+def test_remove(gridfsstore):
+    data1 = np.random.rand(256)
+    data2 = np.random.rand(256)
+    tic = datetime(2018, 4, 12, 16)
+    gridfsstore.update(
+        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
+    )
+    gridfsstore.update(
+        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}]
+    )
+
+    assert gridfsstore.query_one(criteria={"task_id": "mp-1"})
+    assert gridfsstore.query_one(criteria={"task_id": "mp-2"})
+    gridfsstore.remove_docs({"task_id": "mp-1"})
+    assert gridfsstore.query_one(criteria={"task_id": "mp-1"}) is None
+    assert gridfsstore.query_one(criteria={"task_id": "mp-2"})
+
+
 def test_query(gridfsstore):
     data1 = np.random.rand(256)
     data2 = np.random.rand(256)
     tic = datetime(2018, 4, 12, 16)
-    gridfsstore.update([{"task_id": "mp-1", "data": data1}])
     gridfsstore.update(
-        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}], update_lu=False
+        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
+    )
+    gridfsstore.update(
+        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}]
     )
 
     doc = gridfsstore.query_one(criteria={"task_id": "mp-1"})

@@ -5,6 +5,9 @@ Stores are a default access pattern to data and provide
 various utillities
 """
 from __future__ import annotations
+
+from typing import Union, Optional, Dict, List, Iterator, Tuple
+
 import copy
 from datetime import datetime
 import json
@@ -14,10 +17,12 @@ import gridfs
 
 from pymongo import MongoClient
 from monty.json import jsanitize
+from monty.dev import deprecated
 from maggma.utils import confirm_field_index
-from maggma.core import Store
+from maggma.core import Store, Sort
 
 
+# TODO: Make arguments more specific for this
 class GridFSStore(Store):
     """
     A Store for GrdiFS backend. Provides a common access method consistent with other stores
@@ -74,12 +79,12 @@ class GridFSStore(Store):
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
-
-        kwargs["last_updated_field"] = "uploadDate"
-
         super().__init__(**kwargs)
 
-    def connect(self, force_reset=False):
+    def connect(self, force_reset: bool = False):
+        """
+        Connect to the source data
+        """
         conn = MongoClient(self.host, self.port)
         if not self._collection or force_reset:
             db = conn[self.database]
@@ -91,12 +96,16 @@ class GridFSStore(Store):
             self._chunks_collection = db["{}.chunks".format(self.collection_name)]
 
     @property
+    @deprecated(message="This will be removed in the future")
     def collection(self):
-        # TODO: Should this return the real MongoCollection or the GridFS
         return self._collection
 
     @property
-    def last_updated(self):
+    def last_updated(self) -> datetime:
+        """
+        Provides the most recent last_updated date time stamp from
+        the documents in this Store
+        """
         doc = next(
             self._files_collection.find(projection=[self.last_updated_field])
             .sort([(self.last_updated_field, pymongo.DESCENDING)])
@@ -117,34 +126,49 @@ class GridFSStore(Store):
         )
 
     @classmethod
-    def transform_criteria(cls, criteria):
+    def transform_criteria(cls, criteria: Dict) -> Dict:
         """
         Allow client to not need to prepend 'metadata.' to query fields.
         Args:
             criteria (dict): Query criteria
         """
-        for field in criteria:
+        new_criteria = dict(**criteria)
+        for field in new_criteria:
             if field not in cls.files_collection_fields and not field.startswith(
                 "metadata."
             ):
-                criteria["metadata." + field] = copy.copy(criteria[field])
-                del criteria[field]
+                new_criteria["metadata." + field] = copy.copy(new_criteria[field])
+                del new_criteria[field]
 
-    def query(self, criteria=None, properties=None, **kwargs):
+        return new_criteria
+
+    def query(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Dict]:
         """
-        Function that gets data from GridFS. This store ignores all
-        property projections as its designed for whole document access
+        Queries the GridFS Store for a set of documents
+        Currently ignores properties
+
+        TODO: If properties wholy in metadata, just query that
 
         Args:
-            criteria (dict): filter for query, matches documents
-                against key-value pairs
-            properties (list or dict): This will be ignored by the GridFS
-                Store
-            **kwargs (kwargs): further kwargs to Collection.find
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
         """
         if isinstance(criteria, dict):
-            self.transform_criteria(criteria)
-        for f in self.collection.find(filter=criteria, **kwargs):
+            criteria = self.transform_criteria(criteria)
+
+        for f in self._collection.find(
+            filter=criteria, skip=skip, limit=limit, sort=sort
+        ):
             data = f.read()
 
             metadata = f.metadata
@@ -160,7 +184,10 @@ class GridFSStore(Store):
     def distinct(self, key, criteria=None, all_exist=False, **kwargs):
         """
         Function get to get all distinct values of a certain key in
-        a mongolike store.  May take a single key or a list of keys
+        a GridFs store.
+
+        Currently not implemented
+        TODO: If key in metadata or transform to metadata field
 
         Args:
             key (mongolike key or list of mongolike keys): key or keys
@@ -170,52 +197,35 @@ class GridFSStore(Store):
                 in each document, defaults to False
             **kwargs (kwargs): kwargs corresponding to collection.distinct
         """
-        if isinstance(key, list):
-            criteria = criteria if criteria else {}
-            # Update to ensure keys are there
-            if all_exist:
-                criteria.update(
-                    {k: {"$exists": True} for k in key if k not in criteria}
-                )
-
-            results = []
-            for d in self.groupby(key, properties=key, criteria=criteria):
-                results.append(d["_id"])
-            return results
-
-        else:
-            if criteria:
-                self.transform_criteria(criteria)
-            # Transfor to metadata subfield if not supposed to be in gridfs main fields
-            if key not in self.files_collection_fields:
-                key = "metadata.{}".format(key)
-
-            return self._files_collection.distinct(key, filter=criteria, **kwargs)
+        raise Exception("Can't get distinct values of GridFS Store")
 
     def groupby(
-        self, keys, criteria=None, properties=None, allow_disk_use=True, **kwargs
-    ):
+        self,
+        keys: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
         Simple grouping function that will group documents
         by keys.
 
         Args:
-            keys (list or string): fields to group documents
-            criteria (dict): filter for documents to group
-            properties (list): properties to return in grouped documents
-            allow_disk_use (bool): whether to allow disk use in aggregation
+            keys: fields to group documents
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
 
         Returns:
-            command cursor corresponding to grouped documents
-
-            elements of the command cursor have the structure:
-            {'_id': {"KEY_1": value_1, "KEY_2": value_2 ...,
-             'docs': [list_of_documents corresponding to key values]}
-
+            generator returning tuples of (dict, list of docs)
         """
         pipeline = []
         if criteria is not None:
-            self.transform_criteria(criteria)
+            criteria = self.transform_criteria(criteria)
             pipeline.append({"$match": criteria})
 
         if properties is not None:
@@ -237,11 +247,19 @@ class GridFSStore(Store):
         group_id = {key: "${}".format(key) for key in keys}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
-        return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
+        for doc in self._collection.aggregate(pipeline, allowDiskUse=True):
+            yield (doc["_id"], doc["docs"])
 
-    def ensure_index(self, key, unique=False):
+    def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
-        Wrapper for pymongo.Collection.ensure_index for the files collection
+        Tries to create an index and return true if it suceeded
+        Currently operators on the GridFS files collection
+        Args:
+            key: single key to index
+            unique: Whether or not this index contains only unique keys
+
+        Returns:
+            bool indicating if the index exists/was created
         """
         # Transform key for gridfs first
         if key not in self.files_collection_fields:
@@ -251,20 +269,26 @@ class GridFSStore(Store):
             return True
         else:
             try:
-                self.collection.create_index(key, unique=unique, background=True)
+                self._collection.create_index(key, unique=unique, background=True)
                 return True
             except Exception:
                 return False
 
-    def update(self, docs, update_lu=True, key=None):
+    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Function to update associated MongoStore collection.
+        Update documents into the Store
 
         Args:
-            docs ([dict]): list of documents
-            update_lu (bool) : Updat the last_updated field or not
-            key (list or str): list or str of important parameters
+            docs: the document or list of documents to update
+            key: field name(s) to determine uniqueness for a
+                 document, can be a list of multiple fields,
+                 a single field, or None if the Store's key
+                 field is to be used
         """
+
+        if not isinstance(docs, list):
+            docs = [docs]
+
         if isinstance(key, str):
             key = [key]
         elif not key:
@@ -273,12 +297,9 @@ class GridFSStore(Store):
         key = list(set(key) | self.meta_keys - set(self.files_collection_fields))
 
         for d in docs:
-
             search_doc = {k: d[k] for k in key}
-            if update_lu:
-                d[self.last_updated_field] = datetime.utcnow()
 
-            metadata = {self.last_updated_field: d[self.last_updated_field]}
+            metadata = {k: d[k] for k in [self.last_updated_field] if k in d}
             metadata.update(search_doc)
 
             data = json.dumps(jsanitize(d)).encode("UTF-8")
@@ -286,8 +307,8 @@ class GridFSStore(Store):
                 data = zlib.compress(data)
                 metadata["compression"] = "zlib"
 
-            self.collection.put(data, metadata=metadata)
-            self.transform_criteria(search_doc)
+            self._collection.put(data, metadata=metadata)
+            search_doc = self.transform_criteria(search_doc)
 
             # Cleans up old gridfs entries
             for fdoc in (
@@ -295,10 +316,24 @@ class GridFSStore(Store):
                 .sort("uploadDate", -1)
                 .skip(1)
             ):
-                self.collection.delete(fdoc["_id"])
+                self._collection.delete(fdoc["_id"])
+
+    def remove_docs(self, criteria: Dict):
+        """
+        Remove docs matching the query dictionary
+
+        Args:
+            criteria: query dictionary to match
+        """
+        if isinstance(criteria, dict):
+            criteria = self.transform_criteria(criteria)
+        ids = [cursor._id for cursor in self._collection.find(criteria)]
+
+        for id in ids:
+            self._collection.delete(id)
 
     def close(self):
-        self.collection.database.client.close()
+        self._collection.database.client.close()
 
 
 class StoreError(Exception):
