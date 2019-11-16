@@ -16,7 +16,7 @@ from pydash import identity, get
 
 from monty.dev import deprecated
 from monty.json import MSONable, MontyDecoder
-from maggma.utils import source_keys_updated, LU_KEY_ISOFORMAT
+from maggma.utils import LU_KEY_ISOFORMAT
 from maggma.core import Validator
 
 
@@ -267,7 +267,28 @@ class Store(MSONable, metaclass=ABCMeta):
         self.ensure_index(self.key)
         self.ensure_index(self.last_updated_field)
         if exhaustive:
-            return source_keys_updated(target, self, query=criteria)
+
+            # Get our current last_updated dates for each key value
+            props = {self.key: 1, self.last_updated_field: 1, "_id": 0}
+            dates = {
+                d[self.key]: self._lu_func[0](d[self.last_updated_field])
+                for d in self.query(properties=props)
+            }
+
+            # Get the
+            props = {target.key: 1, target.last_updated_field: 1, "_id": 0}
+            target_dates = {
+                d[target.key]: target._lu_func[0](d[target.last_updated_field])
+                for d in target.query(criteria=criteria, properties=props)
+            }
+
+            new_keys = set(target_dates.keys()) - set(dates.keys())
+            updated_keys = {
+                key for key, date in dates.items() if target_dates[key] > date
+            }
+
+            return list(new_keys | updated_keys)
+
         else:
             key = key if key is not None else self.key  # Default value
             criteria = {
@@ -308,7 +329,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.ensure_index(self.key)
         self.ensure_index(self.last_updated_field)
 
-        return source_keys_updated(target, self, query=criteria)
+        return self.newer_in(target, criteria=criteria)
 
     def __eq__(self, other):
         return hash(self) == hash(other)
