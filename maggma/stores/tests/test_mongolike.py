@@ -76,7 +76,6 @@ def test_mongostore_update(mongostore):
 
 
 def test_mongostore_groupby(mongostore):
-    mongostore._collection.drop()
     mongostore.update(
         [
             {"e": 7, "d": 9, "f": 9},
@@ -96,6 +95,13 @@ def test_mongostore_groupby(mongostore):
     data = list(mongostore.groupby(["e", "d"]))
     assert len(data) == 3
 
+
+def test_mongostore_remove_docs(mongostore):
+    mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    mongostore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
+    mongostore.remove_docs({"a": 1})
+    assert len(list(mongostore.query({"a": 4}))) == 1
+    assert len(list(mongostore.query({"a": 1}))) == 0
 
 def test_mongostore_from_db_file(mongostore, db_json):
     ms = MongoStore.from_db_file(db_json)

@@ -238,7 +238,17 @@ class MongoStore(Store):
 
                 requests.append(ReplaceOne(search_doc, d, upsert=True))
 
-        self._collection.bulk_write(requests, ordered=False)
+        if len(requests) > 0:
+            self._collection.bulk_write(requests, ordered=False)
+
+    def remove_docs(self, criteria: Dict):
+        """
+        Remove docs matching the query dictionary
+
+        Args:
+            criteria: query dictionary to match
+        """
+        self._collection.delete_many(filter=criteria)
 
     def close(self):
         self._collection.database.client.close()
