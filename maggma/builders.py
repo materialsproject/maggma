@@ -40,7 +40,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             source: source store
             target: target store
             query: optional query to filter source store
-            incremental: Whether to limit query to filter for only updated source documents.
             projection: list of keys to project from the source for
                 processing. Limits data transfer to improve efficiency.
             delete_orphans: Whether to delete documents on target store
@@ -53,7 +52,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.source = source
         self.target = target
         self.query = query
-        self.incremental = incremental
         self.projection = projection
         self.delete_orphans = delete_orphans
         self.kwargs = kwargs
@@ -90,12 +88,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         self.ensure_indexes()
 
-        if self.incremental:
-            keys = self.target.newer_in(
-                self.source, criteria=self.query, exhaustive=True
-            )
-        else:
-            keys = self.source.distinct(self.source.key, criteria=self.query)
+        
+        keys = self.target.newer_in(
+            self.source, criteria=self.query, exhaustive=True
+        )
 
         self.logger.info("Processing {} items".format(len(keys)))
 
