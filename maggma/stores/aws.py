@@ -8,8 +8,11 @@ import zlib
 
 from typing import Union, Optional, Dict, List, Iterator, Tuple
 
-from maggma.core import Store, Sort
 from monty.json import jsanitize
+from monty.dev import deprecated
+
+from maggma.core import Store, Sort
+from maggma.utils import grouper
 
 try:
     import boto3
@@ -26,12 +29,13 @@ class AmazonS3Store(Store):
     Assumes Amazon AWS key and secret key are set in environment or default config file
     """
 
-    def __init__(self, index, bucket, **kwargs):
+    def __init__(self, index: Store, bucket: str, compress: bool = False, **kwargs):
         """
         Initializes an S3 Store
         Args:
             index (Store): a store to use to index the S3 Bucket
             bucket (str) : name of the bucket
+            compress (bool): compress files inserted into the store
         """
         if not boto_import:
             raise ValueError(
@@ -39,6 +43,7 @@ class AmazonS3Store(Store):
             )
         self.index = index
         self.bucket = bucket
+        self.compress = compress
         self.s3 = None
         self.s3_bucket = None
         # Force the key to be the same as the index
@@ -67,7 +72,12 @@ class AmazonS3Store(Store):
         self.s3_bucket = None
 
     @property
+    @deprecated(message="This will be removed in the future")
     def collection(self):
+        """
+        Returns a handle to the pymongo collection object
+        Not guaranteed to exist in the future
+        """
         # For now returns the index collection since that is what we would "search" on
         return self.index
 
@@ -89,21 +99,24 @@ class AmazonS3Store(Store):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
-        for f in self.index.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
+        for doc in self.index.query(
+            criteria=criteria, sort=sort, limit=limit, skip=skip
+        ):
             try:
                 # TODO : THis is ugly and unsafe, do some real checking before pulling data
-                data = self.s3_bucket.Object(f[self.key]).get()["Body"].read()
+                data = self.s3_bucket.Object(doc[self.key]).get()["Body"].read()
             except botocore.exceptions.ClientError as e:
                 # If a client error is thrown, then check that it was a 404 error.
                 # If it was a 404 error, then the object does not exist.
                 error_code = int(e.response["Error"]["Code"])
                 if error_code == 404:
-                    self.logger.error("Could not find S3 object {}".format(f[self.key]))
+                    self.logger.error(
+                        "Could not find S3 object {}".format(doc[self.key])
+                    )
                     break
 
-            if f.get("compression", "") == "zlib":
+            if doc.get("compression", "") == "zlib":
                 data = zlib.decompress(data)
-            print(data)
             yield json.loads(data)
 
     def distinct(
@@ -170,12 +183,7 @@ class AmazonS3Store(Store):
         """
         return self.index.ensure_index(key, unique=unique, background=True)
 
-    def update(
-        self,
-        docs: Union[List[Dict], Dict],
-        key: Union[List, str, None] = None,
-        compress=True,
-    ):
+    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
         Update documents into the Store
 
@@ -185,7 +193,6 @@ class AmazonS3Store(Store):
                  document, can be a list of multiple fields,
                  a single field, or None if the Store's key
                  field is to be used
-            compress: compress the documents into the S3 bucket
         """
         search_docs = []
         search_keys = []
@@ -208,7 +215,7 @@ class AmazonS3Store(Store):
             data = json.dumps(jsanitize(d)).encode()
 
             # Compress with zlib if chosen
-            if compress:
+            if self.compress:
                 search_doc["compression"] = "zlib"
                 data = zlib.compress(data)
 
@@ -217,6 +224,25 @@ class AmazonS3Store(Store):
 
         # Use store's update to remove key clashes
         self.index.update(search_docs)
+
+    def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
+        """
+        Remove docs matching the query dictionary
+
+        Args:
+            criteria: query dictionary to match
+            remove_s3_object: whether to remove the actual S3 Object or not
+        """
+        if not remove_s3_object:
+            self.index.remove_docs(criteria=criteria)
+        else:
+            to_remove = self.index.distinct(self.key, criteria=criteria)
+            self.index.remove_docs(criteria=criteria)
+
+            # Can remove up to 1000 items at a time via boto
+            to_remove_chunks = list(grouper(to_remove, N=1000))
+            for chunk_to_remove in to_remove_chunks:
+                self.s3_bucket.delete_objects()
 
     @property
     def last_updated(self):

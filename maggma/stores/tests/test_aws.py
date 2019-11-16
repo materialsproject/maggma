@@ -38,11 +38,24 @@ def test_qeuery(s3store):
 
 
 def test_update(s3store):
-    s3store.update([{"task_id": "mp-2", "data": "asd"}], compress=False)
+    s3store.update([{"task_id": "mp-2", "data": "asd"}])
     assert s3store.query_one({"task_id": "mp-2"}) is not None
 
-    s3store.update([{"task_id": "mp-4", "data": "asd"}], compress=True)
+    s3store.compress = True
+    s3store.update([{"task_id": "mp-4", "data": "asd"}])
     assert s3store.index.query_one({"task_id": "mp-4"})["compression"] == "zlib"
     assert s3store.query_one({"task_id": "mp-4"}) is not None
     assert s3store.query_one({"task_id": "mp-4"})["data"] == "asd"
 
+
+def test_remove(s3store):
+    s3store.update([{"task_id": "mp-2", "data": "asd"}])
+    s3store.update([{"task_id": "mp-4", "data": "asd"}])
+
+    assert s3store.query_one({"task_id": "mp-2"}) is not None
+    assert s3store.query_one({"task_id": "mp-4"}) is not None
+
+    s3store.remove_docs({"task_id": "mp-2"})
+
+    assert s3store.query_one({"task_id": "mp-2"}) is None
+    assert s3store.query_one({"task_id": "mp-4"}) is not None
