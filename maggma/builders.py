@@ -8,7 +8,7 @@ from datetime import datetime
 from maggma.utils import source_keys_updated, grouper, Timeout
 from time import time
 from maggma.core import Builder, Store
-from typing import Optional, Dict, List, Iterator
+from typing import Optional, Dict, List, Iterator, Union
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -206,7 +206,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.
     """
 
-    def get_items(self):
+    def get_items(self) -> Iterator[Dict]:
         criteria = source_keys_updated(self.source, self.target, query=self.query)
         if all(isinstance(entry, str) for entry in self.grouping_properties()):
             properties = {entry: 1 for entry in self.grouping_properties()}
@@ -230,7 +230,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def grouping_properties():
+    def grouping_properties() -> Union[List, Dict]:
         """
         Needed projection for docs_to_groups (passed to source.query).
 
@@ -244,14 +244,14 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def docs_to_groups(docs):
+    def docs_to_groups(docs: List[Dict]) -> Iterator:
         """
         Yield groups from (minimally-projected) documents.
 
         This could be as simple as returning a set of unique document keys.
 
         Args:
-            docs (pymongo.cursor.Cursor): documents with minimal projections
+            docs: documents with minimal projections
                 needed to determine groups.
 
         Returns:
@@ -259,7 +259,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def group_to_items(self, group):
+    def group_to_items(self, group: Dict) -> Iterator:
         """
         Given a group, yield items for this builder's process_item method.
 

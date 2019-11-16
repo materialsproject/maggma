@@ -220,7 +220,7 @@ class Store(MSONable, metaclass=ABCMeta):
         return results
 
     @property
-    def last_updated(self):
+    def last_updated(self) -> datetime:
         """
         Provides the most recent last_updated date time stamp from
         the documents in this Store
