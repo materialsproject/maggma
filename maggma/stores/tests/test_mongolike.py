@@ -146,6 +146,7 @@ def test_mongostore_newer_in(mongostore):
     )
 
     assert len(target.newer_in(mongostore)) == 10
+    assert len(target.newer_in(mongostore, exhaustive=True)) == 10
     assert len(mongostore.newer_in(target)) == 0
 
     target._collection.drop()
