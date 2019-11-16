@@ -75,7 +75,9 @@ class MongograntStore(MongoStore):
             self._collection = db[self.collection_name]
 
     def __hash__(self):
-        return hash((self.mongogrant_spec, self.collection_name, self.last_updated_field))
+        return hash(
+            (self.mongogrant_spec, self.collection_name, self.last_updated_field)
+        )
 
 
 class VaultStore(MongoStore):
@@ -270,6 +272,17 @@ class AliasingStore(Store):
 
         self.store.update(docs, key=key)
 
+    def remove_docs(self, criteria: Dict):
+        """
+        Remove docs matching the query dictionary
+
+        Args:
+            criteria: query dictionary to match
+        """
+        # Update criteria and properties based on aliases
+        lazy_substitute(criteria, self.reverse_aliases)
+        self.store.remove_docs(criteria)
+
     def ensure_index(self, key, unique=False, **kwargs):
         if key in self.aliases:
             key = self.aliases
@@ -394,6 +407,19 @@ class SandboxStore(Store):
                 d["sbxn"] = [self.sandbox]
 
         self.store.update(docs, key=key)
+
+    def remove_docs(self, criteria: Dict):
+        """
+        Remove docs matching the query dictionary
+
+        Args:
+            criteria: query dictionary to match
+        """
+        # Update criteria and properties based on aliases
+        criteria = (
+            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        )
+        self.store.remove_docs(criteria)
 
     def ensure_index(self, key, unique=False, **kwargs):
         return self.store.ensure_index(key, unique, **kwargs)

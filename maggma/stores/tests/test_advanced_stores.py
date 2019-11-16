@@ -30,9 +30,9 @@ from maggma.stores import (
 from maggma.stores.advanced_stores import substitute
 
 
-
 @pytest.fixture("module")
 def mgrant_server():
+    # TODO: This is whacked code that starts a mongo server. How do we fix this?
     _, config_path = tempfile.mkstemp()
     _, mdlogpath = tempfile.mkstemp()
     mdpath = tempfile.mkdtemp()
@@ -217,6 +217,23 @@ def test_aliasing_update(alias_store):
     assert list(alias_store.store.query(criteria={"task_id": "mp-5"}))[0]["g"]["h"] == 6
 
 
+def test_aliasing_remove_docs(alias_store):
+
+    alias_store.update(
+        [
+            {"task_id": "mp-3", "a": 4},
+            {"task_id": "mp-4", "c": {"d": 5}},
+            {"task_id": "mp-5", "f": 6},
+        ]
+    )
+    assert alias_store.query_one(criteria={"task_id": "mp-3"})
+    assert alias_store.query_one(criteria={"task_id": "mp-4"})
+    assert alias_store.query_one(criteria={"task_id": "mp-5"})
+
+    alias_store.remove_docs({"a": 4})
+    assert alias_store.query_one(criteria={"task_id": "mp-3"}) is None
+
+
 def test_aliasing_substitute(alias_store):
     aliases = {"a": "b", "c.d": "e", "f": "g.h"}
 
@@ -279,3 +296,19 @@ def test_sandbox_update(sandbox_store):
     assert sandbox_store.collection.find_one({"e": 6})["sbxn"] == ["test"]
     sandbox_store.update([{"e": 7, "sbxn": ["core"]}], key="e")
     assert set(sandbox_store.query_one(criteria={"e": 7})["sbxn"]) == {"test", "core"}
+
+
+def test_sandbox_remove_docs(sandbox_store):
+    sandbox_store.connect()
+    sandbox_store.update([{"e": 6, "d": 4}], key="e")
+    sandbox_store.update([{"e": 7, "sbxn": ["core"]}], key="e")
+
+    assert sandbox_store.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])
+    assert sandbox_store.query_one(criteria={"e": 7})
+    sandbox_store.remove_docs(criteria={"d": 4})
+
+    assert (
+        sandbox_store.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])
+        is None
+    )
+    assert sandbox_store.query_one(criteria={"e": 7})
