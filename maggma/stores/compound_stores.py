@@ -1,8 +1,12 @@
 from typing import List, Iterator, Tuple, Optional, Union, Dict
+from datetime import datetime
+from itertools import groupby
 from pydash import get, set_
 from pymongo import MongoClient
+from monty.dev import deprecated
 from maggma.core import Store, Sort
 from maggma.stores import MongoStore
+from operator import itemgetter
 
 
 class JointStore(Store):
@@ -43,9 +47,10 @@ class JointStore(Store):
         )
 
     def close(self):
-        self.collection.database.client.close()
+        self._collection.database.client.close()
 
     @property
+    @deprecated("This will be removed in the future")
     def collection(self):
         return self._collection
 
@@ -58,7 +63,7 @@ class JointStore(Store):
         lus = []
         for cname in self.collection_names:
             lu = MongoStore.from_collection(
-                self.collection.database[cname],
+                self._collection.database[cname],
                 last_updated_field=self.last_updated_field,
             ).last_updated
             lus.append(lu)
@@ -69,33 +74,7 @@ class JointStore(Store):
         raise NotImplementedError("No update method for JointStore")
 
     def _get_store_by_name(self, name):
-        return MongoStore.from_collection(self.collection.database[name])
-
-    def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-    ) -> List:
-        """
-        Get all distinct values for a key
-
-        Args:
-            field: the field(s) to get distinct values for
-            criteria : PyMongo filter for documents to search in
-            all_exist : ensure all fields exist for the distinct set
-        """
-        g_field = field if isinstance(field, list) else [field]
-        if all_exist:
-            criteria = criteria or {}
-            criteria.update(
-                {k: {"$exists": True} for k in g_field if k not in criteria}
-            )
-        cursor = self.groupby(g_field, criteria=criteria)
-        if isinstance(field, list):
-            return [d[0] for d in cursor]
-        else:
-            return [get(d[0], field) for d in cursor]
+        return MongoStore.from_collection(self._collection.database[name])
 
     def ensure_index(self, key, unique=False, **kwargs):
         raise NotImplementedError("No ensure_index method for JointStore")
@@ -237,11 +216,20 @@ class JointStore(Store):
         except StopIteration:
             return None
 
+    def remove_docs(self, criteria: Dict):
+        """
+        Remove docs matching the query dictionary
+
+        Args:
+            criteria: query dictionary to match
+        """
+        raise NotImplementedError("No remove_docs method for JointStore")
+
 
 class ConcatStore(Store):
     """Store concatting multiple stores"""
 
-    def __init__(self, *stores, **kwargs):
+    def __init__(self, *stores: Store, **kwargs):
         """
         Initialize a ConcatStore that concatenates multiple stores together
         to appear as one store
@@ -249,7 +237,7 @@ class ConcatStore(Store):
         self.stores = stores
         super(ConcatStore, self).__init__(**kwargs)
 
-    def connect(self, force_reset=False):
+    def connect(self, force_reset: bool = False):
         """
         Connect all stores in this ConcatStore
         Args:
@@ -267,11 +255,12 @@ class ConcatStore(Store):
             store.close()
 
     @property
+    @deprecated
     def collection(self):
         raise NotImplementedError("No collection property for ConcatStore")
 
     @property
-    def last_updated(self):
+    def last_updated(self) -> datetime:
         """
         Finds the most recent last_updated across all the stores.
         This might not be the most usefull way to do this for this type of Store
@@ -284,53 +273,105 @@ class ConcatStore(Store):
             lus.append(lu)
         return max(lus)
 
-    # TODO: implement update?
-    def update(self, docs, update_lu=True, key=None, **kwargs):
-        raise NotImplementedError("No update method for JointStore")
-
-    def distinct(self, key, criteria=None, all_exist=True, **kwargs):
+    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Return all distinct values for a key within the stores
+        Update documents into the Store
+        Not implemented in ConcatStore
+
         Args:
-            key (str): key to find distinct values
-            criteria (dict): criteria dictionary to reduce the documents to search on
-            all_exist (bool): ensure the key exists in the doc or not
+            docs: the document or list of documents to update
+            key: field name(s) to determine uniqueness for a
+                 document, can be a list of multiple fields,
+                 a single field, or None if the Store's key
+                 field is to be used
+        """
+        raise NotImplementedError("No update method for ConcatStore")
+
+    def distinct(
+        self,
+        field: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        all_exist: bool = False,
+    ) -> Union[List[Dict], List]:
+        """
+        Get all distinct values for a field(s)
+        For a single field, this returns a list of values
+        For multiple fields, this return a list of of dictionaries for each unique combination
+
+        Args:
+            field: the field(s) to get distinct values for
+            criteria : PyMongo filter for documents to search in
+            all_exist : ensure all fields exist for the distinct set
         """
         distincts = []
         for store in self.stores:
-            distincts.extend(store.distinct(key, criteria, all_exist, **kwargs))
-        return list(set(distincts))
+            distincts.extend(
+                store.distinct(field=field, criteria=criteria, all_exist=all_exist)
+            )
 
-    def ensure_index(self, key, unique=False, **kwargs):
+        if isinstance(field, str):
+            return list(set(distincts))
+        else:
+            return [dict(s) for s in set(frozenset(d.items()) for d in distincts)]
+
+    def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
         Ensure an index is properly set. Returns whether all stores support this index or not
         Args:
-            key (str or [str]): single key or list of keys to group by
-        """
-        return all([store.ensure_index(key, unique, **kwargs) for store in self.stores])
+            key: single key to index
+            unique: Whether or not this index contains only unique keys
 
-    def query(self, criteria=None, properties=None, **kwargs):
+        Returns:
+            bool indicating if the index exists/was created on all stores
         """
-        Queries across all the stores.
+        return all([store.ensure_index(key, unique) for store in self.stores])
+
+    def query(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Dict]:
+        """
+        Queries across all Store for a set of documents
+
         Args:
-            criteria (dict): mongo style query to reduce the docs to group
-            properties (str or [str]): properties to project
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
         """
+        # TODO: skip, sort and limit are broken. implement properly
         for store in self.stores:
-            for d in store.query(criteria=criteria, properties=properties, **kwargs):
+            for d in store.query(criteria=criteria, properties=properties):
                 yield d
 
-    def query_one(self, criteria=None, properties=None, **kwargs):
-        return next(self.query(criteria=criteria, properties=properties, **kwargs))
-
-    def groupby(self, keys, criteria=None, properties=None, **kwargs):
+    def groupby(
+        self,
+        keys: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Sort]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
-        Group documents by a key. This version is highly inefficient since it performs
-        post-grouping in python across all of its stores
+        Simple grouping function that will group documents
+        by keys.
+
         Args:
-            keys (str or [str]): single key or list of keys to group by
-            criteria (dict): mongo style query to reduce the docs to group
-            properties (str or [str]): properties to project
+            keys: fields to group documents
+            criteria : PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields
+            skip: number documents to skip
+            limit: limit on total number of documents returned
+
+        Returns:
+            generator returning tuples of (dict, list of docs)
         """
         if isinstance(keys, str):
             keys = [keys]
@@ -338,15 +379,31 @@ class ConcatStore(Store):
         docs = []
         for store in self.stores:
             temp_docs = list(
-                store.groupby(keys, criteria=criteria, properties=properties, **kwargs)
+                store.groupby(
+                    keys,
+                    criteria=criteria,
+                    properties=properties,
+                    sort=sort,
+                    skip=skip,
+                    limit=limit,
+                )
             )
             for group in temp_docs:
-                docs.extend(group["docs"])
+                docs.extend(group[1])
 
         def key_set(d):
             "index function based on passed in keys"
-            test_d = tuple(d.get(k, "") for k in keys)
+            test_d = tuple(d.get(k, None) for k in keys)
             return test_d
 
-        for k, group in groupby(docs, key=key_set):
-            yield list(group)
+        for k, group in groupby(sorted(docs, key=key_set), key=key_set):
+            yield k, list(group)
+
+    def remove_docs(self, criteria: Dict):
+        """
+        Remove docs matching the query dictionary
+
+        Args:
+            criteria: query dictionary to match
+        """
+        raise NotImplementedError("No remove_docs method for JointStore")

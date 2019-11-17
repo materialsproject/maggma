@@ -1,7 +1,7 @@
 import pytest
 from pydash import get
 from datetime import datetime
-from maggma.core import StoreError
+from itertools import chain
 from maggma.stores import MongoStore, MemoryStore, JointStore, ConcatStore
 
 
@@ -9,8 +9,8 @@ from maggma.stores import MongoStore, MemoryStore, JointStore, ConcatStore
 def jointstore():
     store = JointStore("maggma_test", ["test1", "test2"])
     store.connect()
-    store.collection.drop()
-    store.collection.insert_many(
+    store._collection.drop()
+    store._collection.insert_many(
         [
             {
                 "task_id": k,
@@ -21,8 +21,8 @@ def jointstore():
             for k in range(10)
         ]
     )
-    store.collection.database["test2"].drop()
-    store.collection.database["test2"].insert_many(
+    store._collection.database["test2"].drop()
+    store._collection.database["test2"].insert_many(
         [
             {
                 "task_id": 2 * k,
@@ -92,13 +92,12 @@ def test_joint_store_query_one(jointstore):
 
 
 def test_joint_store_distinct(jointstore):
-    dyour_prop = jointstore.distinct("test2.your_prop")
-    print(dyour_prop)
-    assert set(dyour_prop) == {k + 3 for k in range(5)}
-    dmy_prop = jointstore.distinct("my_prop")
-    assert set(dmy_prop) == {k + 1 for k in range(10)}
-    dmy_prop_cond = jointstore.distinct("my_prop", {"test2.your_prop": {"$gte": 5}})
-    assert set(dmy_prop_cond), {5, 7 == 9}
+    your_prop = jointstore.distinct("test2.your_prop")
+    assert set(your_prop) == {k + 3 for k in range(5)}
+    my_prop = jointstore.distinct("my_prop")
+    assert set(my_prop) == {k + 1 for k in range(10)}
+    my_prop_cond = jointstore.distinct("my_prop", {"test2.your_prop": {"$gte": 5}})
+    assert set(my_prop_cond), {5, 7 == 9}
 
 
 def test_joint_store_last_updated(jointstore, jointstore_test1, jointstore_test2):
@@ -140,6 +139,16 @@ def test_joint_store_groupby(jointstore):
     assert len(zero_docs[1]) == 3
 
 
+def test_joint_update(jointstore):
+    with pytest.raises(NotImplementedError):
+        jointstore.update({})
+
+
+def test_joint_remove_docs(jointstore):
+    with pytest.raises(NotImplementedError):
+        jointstore.remove_docs({})
+
+
 @pytest.fixture
 def concat_store():
     mem_stores = [MemoryStore(str(i)) for i in range(4)]
@@ -149,18 +158,18 @@ def concat_store():
     index = 0
 
     props = {i: str(i) for i in range(10)}
-    for store in mem_stores:
+    for mem_store in mem_stores:
         docs = [
             {"task_id": i, "prop": props[i - index], "index": index}
             for i in range(index, index + 10)
         ]
         index = index + 10
-        store.update(docs)
+        mem_store.update(docs)
     return store
 
 
-@pytest.fixture
 def test_concat_store_distinct(concat_store):
+    print(type(concat_store))
     docs = list(concat_store.distinct("task_id"))
     actual_docs = list(
         chain.from_iterable(
@@ -169,14 +178,6 @@ def test_concat_store_distinct(concat_store):
     )
     assert len(docs) == len(actual_docs)
     assert set(docs) == set(actual_docs)
-
-
-@pytest.fixture
-def test_concat_store_not_implemented(concat_store):
-    # Ensure collection property and update throw errors
-    with pytest.raises(NotImplementedError):
-        concat_store.collection
-        concat_store.update([])
 
 
 def test_concat_store_groupby(concat_store):
