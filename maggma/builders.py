@@ -31,6 +31,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         delete_orphans: bool = False,
         timeout: int = 0,
         store_process_time: bool = True,
+        retry_failed: bool = False,
         **kwargs
     ):
         """
@@ -47,7 +48,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 after all updates, during Builder.finalize.
             timeout: maximum running time per item in seconds
             store_process_time: If True, add "_process_time" key to
-            document for profiling purposes
+                document for profiling purposes
+            retry_failed: If True, will retry building documents that
+                previously failed
         """
         self.source = source
         self.target = target
@@ -58,6 +61,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.total = None
         self.timeout = timeout
         self.store_process_time = store_process_time
+        self.retry_failed = retry_failed
         super().__init__(sources=[source], targets=[target], **kwargs)
 
     def ensure_indexes(self):
@@ -67,6 +71,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             self.source.ensure_index(self.source.last_updated_field),
             self.target.ensure_index(self.target.key),
             self.target.ensure_index(self.target.last_updated_field),
+            self.target.ensure_index("state"),
         ]
 
         if not all(index_checks):
@@ -98,6 +103,12 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
 
         self.ensure_indexes()
+
+        temp_query = dict(**self.query) if self.query else {}
+        if self.retry_failed:
+            temp_query.pop("state", None)
+        else:
+            temp_query["state"] = {"$ne": "failed"}
 
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
 
@@ -134,9 +145,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         try:
             with Timeout(seconds=self.timeout):
                 processed = self.unary_function(item)
+                processed.update({"state": "successful"})
         except Exception as e:
             self.logger.error(traceback.format_exc())
-            processed = {"error": str(e)}
+            processed = {"error": str(e), "state": "failed"}
 
         time_end = time()
 
@@ -173,7 +185,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         if len(items) > 0:
             target.update(items)
 
-    def finalize(self, cursor=None):
+    def finalize(self):
         if self.delete_orphans:
             source_keyvals = set(self.source.distinct(self.source.key))
             target_keyvals = set(self.target.distinct(self.target.key))
@@ -183,7 +195,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                     "Finalize: Deleting {} orphans.".format(len(to_delete))
                 )
             self.target.remove_docs({self.target.key: {"$in": to_delete}})
-        super().finalize(cursor)
+        super().finalize()
 
     @abstractmethod
     def unary_function(self, item):
@@ -276,5 +288,5 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
 
-    def unary_function(item):
+    def unary_function(self,item):
         return item
