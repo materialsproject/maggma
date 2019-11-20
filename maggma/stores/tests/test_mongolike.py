@@ -103,9 +103,11 @@ def test_mongostore_remove_docs(mongostore):
     assert len(list(mongostore.query({"a": 4}))) == 1
     assert len(list(mongostore.query({"a": 1}))) == 0
 
+
 def test_mongostore_from_db_file(mongostore, db_json):
     ms = MongoStore.from_db_file(db_json)
-    assert ms._collection_name == "tmp"
+    ms.connect()
+    assert ms._collection.full_name == "maggma_tests.tmp"
 
 
 def test_mongostore_from_collection(mongostore, db_json):
@@ -113,7 +115,7 @@ def test_mongostore_from_collection(mongostore, db_json):
     ms.connect()
 
     other_ms = MongoStore.from_collection(ms._collection)
-    assert ms._collection_name == other_ms._collection_name
+    assert ms._collection.full_name == other_ms._collection.full_name
     assert ms.database == other_ms.database
 
 

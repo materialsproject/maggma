@@ -1,12 +1,11 @@
 from typing import List, Iterator, Tuple, Optional, Union, Dict
 from datetime import datetime
 from itertools import groupby
-from pydash import get, set_
+from pydash import set_
 from pymongo import MongoClient
 from monty.dev import deprecated
 from maggma.core import Store, Sort
 from maggma.stores import MongoStore
-from operator import itemgetter
 
 
 class JointStore(Store):

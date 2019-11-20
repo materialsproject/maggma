@@ -53,7 +53,7 @@ class MongoStore(Store):
             password: Password to connect with
         """
         self.database = database
-        self._collection_name = collection_name
+        self.collection_name = collection_name
         self.host = host
         self.port = port
         self.username = username
@@ -319,43 +319,6 @@ class MemoryStore(MongoStore):
             for val, group in groupby(sorted(input_data, key=grouper), grouper):
                 yield {keys[0]: val}, list(group)
 
-    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
-        """
-        Update documents into the Store
-
-        Args:
-            docs: the document or list of documents to update
-            key: field name(s) to determine uniqueness for a
-                 document, can be a list of multiple fields,
-                 a single field, or None if the Store's key
-                 field is to be used
-        """
-
-        for d in docs:
-
-            d = jsanitize(d, allow_bson=True)
-
-            # document-level validation is optional
-            validates = True
-            if self.validator:
-                validates = self.validator.is_valid(d)
-                if not validates:
-                    if self.validator.strict:
-                        raise ValueError(self.validator.validation_errors(d))
-                    else:
-                        self.logger.error(self.validator.validation_errors(d))
-
-            if validates:
-                if isinstance(key, list):
-                    search_doc = {k: d[k] for k in key}
-                elif key:
-                    search_doc = {key: d[key]}
-                else:
-                    search_doc = {self.key: d[self.key]}
-
-                self._collection.replace_one(
-                    filter=search_doc, replacement=d, upsert=True
-                )
 
 
 class JSONStore(MemoryStore):

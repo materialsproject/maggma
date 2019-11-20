@@ -60,10 +60,10 @@ def mgrant_server():
     # Yields the fixture to use
     yield config_path, mdport, dbname
 
-    os.remove(config_path)
     if not (os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS")):
         os.killpg(os.getpgid(mongod_process.pid), signal.SIGTERM)
         os.waitpid(mongod_process.pid, 0)
+    os.remove(config_path)
     shutil.rmtree(mdpath)
     os.remove(mdlogpath)
 
