@@ -28,8 +28,8 @@ before_script:
     --noauth --bind_ip_all --fork
   - cd -
 script:
-  - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
-  - pytest --cov=maggma/
+#  - mpiexec -n 2  python $PWD/maggma/tests/mpi_test.py
+  - pytest --cov=maggma
 after_success:
   - coveralls
 notifications:
