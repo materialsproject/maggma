@@ -72,6 +72,13 @@ class Store(MSONable, metaclass=ABCMeta):
         """
         pass
 
+    @abstractproperty
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        pass
+
     @abstractmethod
     def connect(self, force_reset: bool = False):
         """

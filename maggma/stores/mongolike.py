@@ -62,6 +62,12 @@ class MongoStore(Store):
         self.kwargs = kwargs
         super().__init__(**kwargs)
 
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        return self.collection_name
+
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
@@ -71,10 +77,10 @@ class MongoStore(Store):
             db = conn[self.database]
             if self.username != "":
                 db.authenticate(self.username, self.password)
-            self._collection = db[self._collection_name]
+            self._collection = db[self.collection_name]
 
     def __hash__(self):
-        return hash((self.database, self._collection_name, self.last_updated_field))
+        return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
     def from_db_file(cls, filename: str):

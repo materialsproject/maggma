@@ -81,6 +81,12 @@ class GridFSStore(Store):
             kwargs["key"] = "_id"
         super().__init__(**kwargs)
 
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        return self.collection_name
+
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data

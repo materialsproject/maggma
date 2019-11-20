@@ -160,6 +160,12 @@ class AliasingStore(Store):
         )
         super(AliasingStore, self).__init__(**kwargs)
 
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        return self.store.name
+
     def query(
         self,
         criteria: Optional[Dict] = None,
@@ -319,6 +325,12 @@ class SandboxStore(Store):
             last_updated_type=self.store.last_updated_type,
             validator=self.store.validator,
         )
+
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        return self.store.name
 
     @property
     def sbx_criteria(self) -> Dict:

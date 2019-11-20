@@ -50,6 +50,12 @@ class AmazonS3Store(Store):
         kwargs["key"] = index.key
         super(AmazonS3Store, self).__init__(**kwargs)
 
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        return self.bucket
+
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data

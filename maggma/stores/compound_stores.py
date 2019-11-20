@@ -36,6 +36,12 @@ class JointStore(Store):
         self.kwargs = kwargs
         super(JointStore, self).__init__(**kwargs)
 
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        return self.master
+
     def connect(self, force_reset: bool = False):
         conn = MongoClient(self.host, self.port)
         db = conn[self.database]
@@ -236,6 +242,12 @@ class ConcatStore(Store):
         """
         self.stores = stores
         super(ConcatStore, self).__init__(**kwargs)
+
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        return self.stores[0].name
 
     def connect(self, force_reset: bool = False):
         """
