@@ -16,7 +16,7 @@ from maggma.stores import JSONStore
 from tests.models import Material
 
 
-class MaterialEndPoint(EndpointCluster):
+class MaterialEndpointCluster(EndpointCluster):
     def __init__(self, db_source):
         super().__init__(db_source, Material)
         self.material_router = APIRouter()
@@ -68,11 +68,11 @@ class MaterialEndPoint(EndpointCluster):
     def run(self):
         app = FastAPI()
         app.include_router(self.material_router, prefix="/materials")
-        super(MaterialEndPoint, self).run(app)
+        super(MaterialEndpointCluster, self).run(app)
 
 
 store = JSONStore("./more_mats.json")
 store.connect()
-materialEndpointCluster = MaterialEndPoint(store)
+materialEndpointCluster = MaterialEndpointCluster(store)
 
 materialEndpointCluster.run()
