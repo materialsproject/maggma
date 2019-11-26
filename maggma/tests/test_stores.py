@@ -112,7 +112,7 @@ class TestMongoStore(unittest.TestCase):
 
     def test_last_updated(self):
         self.assertEqual(self.mongostore.last_updated, datetime.min)
-        tic = datetime.now()
+        tic = datetime.utcnow()
         self.mongostore.collection.insert_one({self.mongostore.key: 1, "a": 1})
         with self.assertRaises(StoreError) as cm:
             self.mongostore.last_updated
