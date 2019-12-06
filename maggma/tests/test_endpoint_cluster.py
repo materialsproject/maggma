@@ -1,78 +1,64 @@
-# import testing modules
-
-# set module path
+import unittest
+import warnings
 import os, sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-# import files
-from fastapi import Depends, FastAPI, Path, APIRouter
-
-from tests.models import CommonPaginationParams
-from pymatgen.core.composition import Composition, CompositionError
-from typing import List
-
-from endpoint_cluster import EndpointCluster
 from maggma.stores import JSONStore
-from tests.models import Material
+from examples.materials_endpoint import MaterialEndpointCluster
+
+from starlette.testclient import TestClient
 
 
-class MaterialEndpointCluster(EndpointCluster):
-    def __init__(self, db_source):
-        super().__init__(db_source, Material)
-        self.material_router = APIRouter()
-        self.material_router.get("/chemsys/{chemsys}",
-                        response_description="Get all the materials that matches the chemsys field",
-                        response_model=List[self.Model])(self.get_on_chemsys)
+class TestMaterialsEndpoint(unittest.TestCase):
+    def setUp(self):
+        warnings.simplefilter('ignore', category=DeprecationWarning)
+        self.store = JSONStore("../examples/more_mats.json")
+        self.store.connect()
+        materials_endpoint = MaterialEndpointCluster(self.store)
+        self.client = TestClient(materials_endpoint.app)
+
+    def test_materials_root(self):
+        response = self.client.get("/materials")
+        assert response.status_code == 200
+        assert response.json() == {"result": "At MaterialsEndpointCluster level"}
+
+    def test_root(self):
+        response = self.client.get("/")
+        print(response.status_code)
+        assert response.status_code == 200
+        assert response.json() == {"result": "At EndpointCluster root level"}
+
+    def test_root_task_id(self):
+        response = self.client.get("/task_id/mp-7283")
+        print(response.status_code)
+        assert response.status_code == 200
+
+    def test_materials_get_on_chemsys(self):
+        chemsys = "B-La"
+        response = self.client.get("/materials/chemsys/" + chemsys)
+        actual_cursor = self.store.query(criteria={"chemsys": chemsys})
+        response_json = response.json()
+
+        assert response.status_code == 200
+        assert len(response_json) == actual_cursor.count()
+        assert response_json[0]["chemsys"] == actual_cursor[0]["chemsys"]
+        assert response_json[0]["composition"] == actual_cursor[0]["composition"]
+        assert response_json[0]["nelements"] == actual_cursor[0]["nelements"]
+        assert response_json[0]["task_id"] == actual_cursor[0]["task_id"]
+
+        chemsys = "B-*"
+        response = self.client.get("/materials/chemsys/" + chemsys)
+        response_json = response.json()
+
+        assert response.status_code == 200
+        assert len(response_json) == 2
+        assert response_json[0]["chemsys"] == "B-La"
+        assert response_json[0]["composition"] == {"B": 16, "La": 4}
+        assert response_json[0]["task_id"] == "mp-7283"
+        assert response_json[1]["chemsys"] == "B-Dy"
+        assert response_json[1]["composition"] == {"B": 16, "Dy": 4}
+        assert response_json[1]["task_id"] == "mp-2719"
 
 
-    async def get_on_chemsys(self, chemsys: str = Path(..., title="The task_id of the item to get"),
-                             paginationParam: CommonPaginationParams = Depends()):
-        skip, limit = paginationParam.skip, paginationParam.limit
-        cursor = None
-        elements = chemsys.split("-")
-        unique_elements = set(elements) - {"*"}
-        crit = dict()
-        crit["elements"] = {"$all": list(unique_elements)}
-        crit["nelements"] = len(elements)
-        cursor = self.db_source.query(criteria=crit)
-        raw_result = [c for c in cursor]
-        for r in raw_result:
-            material = Material(**r)
-        return raw_result[skip:skip + limit]
-
-    def is_chemsys(self, query: str):
-        if "-" in query:
-            query = query.split("-")
-            for q in query:
-                try:
-                    Composition(q)
-                except CompositionError as e:
-                    return False
-            return True
-        return False
-
-    def is_formula(self, query):
-        try:
-            Composition(query)
-            return True
-        except Exception:
-            return False
-
-    def is_task_id(self, query):
-        if "-" in query:
-            splits = query.split("-")
-            if len(splits) == 2 and splits[1].isdigit():
-                return True
-        return False
-
-    def run(self):
-        app = FastAPI()
-        app.include_router(self.material_router, prefix="/materials")
-        super(MaterialEndpointCluster, self).run(app)
-
-
-store = JSONStore("./more_mats.json")
-store.connect()
-materialEndpointCluster = MaterialEndpointCluster(store)
-
-materialEndpointCluster.run()
+if __name__ == '__main__':
+    unittest.main()
