@@ -811,7 +811,7 @@ class GridFSStore(Store):
 
         return self.collection.aggregate(pipeline, allowDiskUse=allow_disk_use)
 
-    def ensure_index(self, key, unique=False):
+    def ensure_index(self, key, unique=False, **kwargs):
         """
         Wrapper for pymongo.Collection.ensure_index for the files collection
         """
@@ -822,11 +822,11 @@ class GridFSStore(Store):
         if "background" not in kwargs:
             kwargs["background"] = True
 
-        if confirm_field_index(self.collection, key):
+        if confirm_field_index(self._files_collection, key):
             return True
         else:
             try:
-                self.collection.create_index(key, unique=unique, **kwargs)
+                self._files_collection.create_index(key, unique=unique, **kwargs)
                 return True
             except:
                 return False
