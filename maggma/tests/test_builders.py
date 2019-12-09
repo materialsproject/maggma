@@ -29,7 +29,7 @@ def target():
 
 @pytest.fixture("module")
 def now():
-    return datetime.now()
+    return datetime.utcnow()
 
 
 @pytest.fixture
@@ -104,7 +104,7 @@ def test_delete_orphans(source, target, old_docs, new_docs):
 
 
 def test_incremental_false(source, target, old_docs, new_docs):
-    tic = datetime.now()
+    tic = datetime.utcnow()
     toc = tic + timedelta(seconds=1)
     keys = list(range(20))
     earlier = [{"lu": tic, "k": k, "v": "val"} for k in keys]
