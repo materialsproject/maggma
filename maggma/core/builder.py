@@ -132,7 +132,7 @@ class Builder(MSONable, metaclass=ABCMeta):
             ]
             self.update_targets(processed_items)
 
-        self.finalize(cursor)
+        self.finalize()
 
     def __getstate__(self):
         return self.as_dict()

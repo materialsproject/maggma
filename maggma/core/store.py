@@ -291,7 +291,7 @@ class Store(MSONable, metaclass=ABCMeta):
 
             new_keys = set(target_dates.keys()) - set(dates.keys())
             updated_keys = {
-                key for key, date in dates.items() if target_dates[key] > date
+                key for key, date in dates.items() if target_dates.get(key,datetime.min) > date
             }
 
             return list(new_keys | updated_keys)
