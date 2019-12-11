@@ -126,10 +126,6 @@ def grouper(iterable, n, fillvalue=None):
     # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
     args = [iter(iterable)] * n
     iterator = itertools.zip_longest(*args, fillvalue=fillvalue)
-
-    if fillvalue is None:
-        iterator = filter(None.__ne__, iterator)
-
     return iterator
 
 
