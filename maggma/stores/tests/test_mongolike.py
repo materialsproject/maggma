@@ -121,13 +121,13 @@ def test_mongostore_from_collection(mongostore, db_json):
 
 def test_mongostore_last_updated(mongostore):
     assert mongostore.last_updated == datetime.min
-    start_time = datetime.now()
+    start_time = datetime.utcnow()
     mongostore._collection.insert_one({mongostore.key: 1, "a": 1})
     with pytest.raises(StoreError) as cm:
         mongostore.last_updated
     assert cm.match(mongostore.last_updated_field)
     mongostore.update(
-        [{mongostore.key: 1, "a": 1, mongostore.last_updated_field: datetime.now()}]
+        [{mongostore.key: 1, "a": 1, mongostore.last_updated_field: datetime.utcnow()}]
     )
     assert mongostore.last_updated > start_time
 
@@ -140,7 +140,7 @@ def test_mongostore_newer_in(mongostore):
 
     target.update(
         [
-            {mongostore.key: i, mongostore.last_updated_field: datetime.now()}
+            {mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()}
             for i in range(10)
         ]
     )
@@ -148,7 +148,7 @@ def test_mongostore_newer_in(mongostore):
     # Update docs in source
     mongostore.update(
         [
-            {mongostore.key: i, mongostore.last_updated_field: datetime.now()}
+            {mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()}
             for i in range(10)
         ]
     )
