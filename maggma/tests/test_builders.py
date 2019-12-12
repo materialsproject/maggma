@@ -103,17 +103,11 @@ def test_delete_orphans(source, target, old_docs, new_docs):
     assert target.query_one(criteria={"k": 10})["v"] == "old"
 
 
-def test_incremental_false(source, target, old_docs, new_docs):
-    tic = datetime.utcnow()
-    toc = tic + timedelta(seconds=1)
-    keys = list(range(20))
-    earlier = [{"lu": tic, "k": k, "v": "val"} for k in keys]
-    later = [{"lu": toc, "k": k, "v": "val"} for k in keys]
-    source.update(earlier)
-    target.update(later)
-    query = {"k": {"$gt": 5}}
-    builder = CopyBuilder(source, target, incremental=False, query=query)
-    builder.run()
-    docs = sorted(target.query(), key=lambda d: d["k"])
-    assert (all(d["lu"] == tic) for d in docs[5:])
-    assert (all(d["lu"] == toc) for d in docs[:5])
+def test_prechunk(source, target, old_docs,new_docs):
+    builder = CopyBuilder(source, target, delete_orphans=True)
+    source.update(old_docs)
+    source.update(new_docs)
+
+    chunk_queries = list(builder.prechunk(2))
+    assert len(chunk_queries) == 2
+    assert chunk_queries[0] ==  {'k': {'$in': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}}
