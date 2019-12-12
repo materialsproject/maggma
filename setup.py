@@ -46,7 +46,7 @@ if __name__ == "__main__":
             "Topic :: Database :: Front-Ends",
             "Topic :: Scientific/Engineering",
         ],
-        entry_points={"console_scripts": ["mrun = maggma.cli.mrun:main"]},
+        entry_points={"console_scripts": ["mrun = maggma.cli:run"]},
         tests_require=["pytest"],
         python_requires=">=3.7",
     )
