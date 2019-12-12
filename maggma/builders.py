@@ -2,11 +2,12 @@
 """
 Base Builder class to define how builders need to be defined
 """
-from abc import ABCMeta, abstractmethod
 import traceback
+from abc import ABCMeta, abstractmethod
+from time import time
+from math import ceil
 from datetime import datetime
 from maggma.utils import source_keys_updated, grouper, Timeout
-from time import time
 from maggma.core import Builder, Store
 from typing import Optional, Dict, List, Iterator, Union
 
@@ -26,7 +27,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         source: Store,
         target: Store,
         query: Optional[Dict] = None,
-        incremental: bool = True,
         projection: Optional[List] = None,
         delete_orphans: bool = False,
         timeout: int = 0,
@@ -91,7 +91,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.ensure_indexes()
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
 
-        for split in grouper(keys, number_splits):
+        N = ceil(len(keys) / number_splits)
+        for split in grouper(keys, N):
             yield {self.source.key: {"$in": list(filter(None.__ne__, split))}}
 
     def get_items(self):
