@@ -103,11 +103,11 @@ def test_delete_orphans(source, target, old_docs, new_docs):
     assert target.query_one(criteria={"k": 10})["v"] == "old"
 
 
-def test_prechunk(source, target, old_docs,new_docs):
+def test_prechunk(source, target, old_docs, new_docs):
     builder = CopyBuilder(source, target, delete_orphans=True)
     source.update(old_docs)
     source.update(new_docs)
 
     chunk_queries = list(builder.prechunk(2))
     assert len(chunk_queries) == 2
-    assert chunk_queries[0] ==  {'k': {'$in': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}}
+    assert chunk_queries[0] == {"k": {"$in": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}}

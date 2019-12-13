@@ -19,6 +19,7 @@ from pymongo.collection import Collection
 from unittest.mock import patch
 from uuid import uuid4
 
+from maggma.core import StoreError
 from maggma.stores import (
     MongoStore,
     MongograntStore,
@@ -98,6 +99,15 @@ def connected_user(store):
     return store._collection.database.command("connectionStatus")["authInfo"][
         "authenticatedUsers"
     ][0]["user"]
+
+
+def test_mgrant_init():
+    with pytest.raises(StoreError):
+        store = MongograntStore("", "", username="")
+
+    with pytest.raises(ValueError):
+        store = MongograntStore("", "")
+        store.connect()
 
 
 def test_mgrant_connect(mgrant_server, mgrant_user):
@@ -253,6 +263,15 @@ def test_aliasing_substitute(alias_store):
     d = None
     substitute(d, aliases)
     assert d is None
+
+
+def test_aliasing_distinct(alias_store):
+    d = [{"b": 1}, {"e": 2}, {"g": {"h": 3}}]
+    alias_store.store._collection.insert_many(d)
+
+    assert alias_store.distinct("a") == [1]
+    assert alias_store.distinct("c.d") == [2]
+    assert alias_store.distinct("f") == [3]
 
 
 @pytest.fixture

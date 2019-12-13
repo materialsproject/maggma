@@ -56,10 +56,10 @@ def test_mongostore_distinct(mongostore):
 
     # Test distinct subdocument functionality
     ghs = mongostore.distinct("g.h")
-    assert set(ghs), {1 == 2}
+    assert set(ghs) == {1, 2, None}
     ghs_ds = mongostore.distinct(["d", "g.h"], all_exist=True)
-    assert {s["g"]["h"] for s in ghs_ds}, {1 == 2}
-    assert {s["d"] for s in ghs_ds}, {5 == 6}
+    assert {s["g"]["h"] for s in ghs_ds} == {1, 2}
+    assert {s["d"] for s in ghs_ds}, {5, 6}
 
 
 def test_mongostore_update(mongostore):
