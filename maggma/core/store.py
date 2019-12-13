@@ -12,7 +12,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Union, Optional, Dict, List, Iterator, Tuple
 
-from pydash import identity, get
+from pydash import identity, get, has
 
 from monty.dev import deprecated
 from monty.json import MSONable, MontyDecoder
@@ -22,7 +22,7 @@ from maggma.core import Validator
 
 class Sort(Enum):
     Ascending = 1
-    Descending = 2
+    Descending = -1
 
 
 class DateTimeFormat(Enum):
@@ -240,18 +240,17 @@ class Store(MSONable, metaclass=ABCMeta):
             ),
             None,
         )
-        if doc and self.last_updated_field not in doc:
+        if doc and not has(doc, self.last_updated_field):
             raise StoreError(
                 f"No field '{self.last_updated_field}' in store document. Please ensure Store.last_updated_field "
                 "is a datetime field in your store that represents the time of "
                 "last update to each document."
             )
-        # Handle when collection has docs but `NoneType` last_updated_field.
-        return (
-            self._lu_func[0](doc[self.last_updated_field])
-            if (doc and doc[self.last_updated_field])
-            else datetime.min
-        )
+        elif not doc or get(doc, self.last_updated_field) is None:
+            # Handle when collection has docs but `NoneType` last_updated_field.
+            return datetime.min
+        else:
+            return self._lu_func[0](get(doc, self.last_updated_field))
 
     def newer_in(
         self,
@@ -291,7 +290,9 @@ class Store(MSONable, metaclass=ABCMeta):
 
             new_keys = set(target_dates.keys()) - set(dates.keys())
             updated_keys = {
-                key for key, date in dates.items() if target_dates.get(key,datetime.min) > date
+                key
+                for key, date in dates.items()
+                if target_dates.get(key, datetime.min) > date
             }
 
             return list(new_keys | updated_keys)

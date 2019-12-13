@@ -178,8 +178,10 @@ class MongoStore(Store):
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
+
+        sort = [(k, v.value) for k, v in sort.items()] if sort else None
         for d in self._collection.find(
-            filter=criteria, projection=properties, skip=skip, limit=limit
+            filter=criteria, projection=properties, skip=skip, limit=limit, sort=sort
         ):
             yield d
 
