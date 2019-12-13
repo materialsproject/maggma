@@ -12,17 +12,17 @@ import copy
 from datetime import datetime
 import json
 import zlib
-import pymongo
 import gridfs
+from pydash import get, has
 
 from pymongo import MongoClient
 from monty.json import jsanitize
 from monty.dev import deprecated
 from maggma.utils import confirm_field_index
 from maggma.core import Store, Sort
+from maggma.stores import MongoStore
 
 
-# TODO: Make arguments more specific for this
 class GridFSStore(Store):
     """
     A Store for GrdiFS backend. Provides a common access method consistent with other stores
@@ -99,6 +99,8 @@ class GridFSStore(Store):
 
             self._collection = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db["{}.files".format(self.collection_name)]
+            self._files_store = MongoStore.from_collection(self._files_collection)
+            self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
             self._chunks_collection = db["{}.chunks".format(self.collection_name)]
 
     @property
@@ -112,24 +114,7 @@ class GridFSStore(Store):
         Provides the most recent last_updated date time stamp from
         the documents in this Store
         """
-        doc = next(
-            self._files_collection.find(projection=[self.last_updated_field])
-            .sort([(self.last_updated_field, pymongo.DESCENDING)])
-            .limit(1),
-            None,
-        )
-        if doc and self.last_updated_field not in doc:
-            raise StoreError(
-                "No field '{}' in store document. Please ensure Store.last_updated_field "
-                "is a datetime field in your store that represents the time of "
-                "last update to each document.".format(self.last_updated_field)
-            )
-        # Handle when collection has docs but `NoneType` last_updated_field.
-        return (
-            self._lu_func[0](doc[self.last_updated_field])
-            if (doc and doc[self.last_updated_field])
-            else datetime.min
-        )
+        return self._files_store.last_updated
 
     @classmethod
     def transform_criteria(cls, criteria: Dict) -> Dict:
@@ -187,13 +172,16 @@ class GridFSStore(Store):
                 pass
             yield data
 
-    def distinct(self, key, criteria=None, all_exist=False, **kwargs):
+    def distinct(
+        self,
+        field: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        all_exist: bool = False,
+    ) -> Union[List[Dict], List]:
         """
         Function get to get all distinct values of a certain key in
         a GridFs store.
 
-        Currently not implemented
-        TODO: If key in metadata or transform to metadata field
 
         Args:
             key (mongolike key or list of mongolike keys): key or keys
@@ -203,7 +191,21 @@ class GridFSStore(Store):
                 in each document, defaults to False
             **kwargs (kwargs): kwargs corresponding to collection.distinct
         """
-        raise Exception("Can't get distinct values of GridFS Store")
+        criteria = (
+            self.transform_criteria(criteria)
+            if isinstance(criteria, dict)
+            else criteria
+        )
+        field = [field] if not isinstance(field, list) else field
+        field = [
+            f"metadata.{k}"
+            if k not in self.files_collection_fields and not k.startswith("metadata.")
+            else k
+            for k in field
+        ]
+        return self._files_store.distinct(
+            field=field, criteria=criteria, all_exist=all_exist
+        )
 
     def groupby(
         self,
@@ -216,7 +218,8 @@ class GridFSStore(Store):
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
         Simple grouping function that will group documents
-        by keys.
+        by keys. Will only work if the keys are included in the files
+        collection for GridFS
 
         Args:
             keys: fields to group documents
@@ -229,32 +232,33 @@ class GridFSStore(Store):
         Returns:
             generator returning tuples of (dict, list of docs)
         """
-        pipeline = []
-        if criteria is not None:
-            criteria = self.transform_criteria(criteria)
-            pipeline.append({"$match": criteria})
 
-        if properties is not None:
-            properties = [
-                p if p in self.files_collection_fields else "metadata.{}".format(p)
-                for p in properties
-            ]
-            pipeline.append({"$project": {p: 1 for p in properties}})
-
-        if isinstance(keys, str):
-            keys = [keys]
-
-        # ensure propper naming for keys in and outside of metadata
+        criteria = (
+            self.transform_criteria(criteria)
+            if isinstance(criteria, dict)
+            else criteria
+        )
+        keys = [keys] if not isinstance(keys, list) else keys
         keys = [
-            k if k in self.files_collection_fields else "metadata.{}".format(k)
+            f"metadata.{k}"
+            if k not in self.files_collection_fields and not k.startswith("metadata.")
+            else k
             for k in keys
         ]
+        for group, ids in self._files_store.groupby(
+            keys, criteria=criteria, properties=[f"metadata.{self.key}"]
+        ):
+            ids = [
+                get(doc, f"metadata.{self.key}")
+                for doc in ids
+                if has(doc, f"metadata.{self.key}")
+            ]
 
-        group_id = {key: "${}".format(key) for key in keys}
-        pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
+            group = {
+                k.replace("metadata.", ""): get(group, k) for k in keys if has(group, k)
+            }
 
-        for doc in self._collection.aggregate(pipeline, allowDiskUse=True):
-            yield (doc["_id"], doc["docs"])
+            yield group, list(self.query(criteria={self.key: {"$in": ids}}))
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
@@ -301,13 +305,11 @@ class GridFSStore(Store):
             key = [self.key]
 
         key = list(set(key) | self.meta_keys - set(self.files_collection_fields))
-
         for d in docs:
             search_doc = {k: d[k] for k in key}
 
             metadata = {k: d[k] for k in [self.last_updated_field] if k in d}
             metadata.update(search_doc)
-
             data = json.dumps(jsanitize(d)).encode("UTF-8")
             if self.compression:
                 data = zlib.compress(data)
