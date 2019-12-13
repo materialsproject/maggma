@@ -119,22 +119,24 @@ class MongoStore(Store):
             generator returning tuples of (key, list of docs)
         """
         pipeline = []
+        if isinstance(keys, str):
+            keys = [keys]
+
         if criteria is not None:
             pipeline.append({"$match": criteria})
 
         if properties is not None:
-            pipeline.append({"$project": {p: 1 for p in properties}})
+            pipeline.append({"$project": {p: 1 for p in properties + keys}})
 
-        if isinstance(keys, str):
-            keys = [keys]
-
-        group_id = {}
-        for key in keys:
-            set_(group_id, key, "${}".format(key))
+        alpha = "abcdefghijklmnopqrstuvwxyz"
+        group_id = {letter: f"${key}" for letter, key in zip(alpha, keys)}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
-
         for d in self._collection.aggregate(pipeline, allowDiskUse=True):
-            yield (d["_id"], d["docs"])
+            id_doc = {}
+            for letter, key in group_id.items():
+                if has(d["_id"], letter):
+                    set_(id_doc, key[1:], d["_id"][letter])
+            yield (id_doc, d["docs"])
 
     @classmethod
     def from_collection(cls, collection):
