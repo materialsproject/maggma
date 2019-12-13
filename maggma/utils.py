@@ -129,24 +129,6 @@ def grouper(iterable, n, fillvalue=None):
     return iterator
 
 
-def get_mpi():
-    """
-    Helper that returns the mpi communicator, rank and size.
-    """
-    try:
-        from mpi4py import MPI
-
-        comm = MPI.COMM_WORLD
-        rank = comm.Get_rank()
-        size = comm.Get_size()
-    except Exception:
-        comm = None
-        rank = -1
-        size = 0
-
-    return comm, rank, size
-
-
 def lazy_substitute(d, aliases):
     """
     Simple top level substitute that doesn't dive into mongo like strings
