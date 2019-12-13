@@ -13,9 +13,8 @@ from typing import Union, Optional, Dict, List, Iterator, Tuple
 import mongomock
 
 from itertools import groupby
-from operator import itemgetter
 from pymongo import MongoClient
-from pydash import set_
+from pydash import set_, get, has
 
 from pymongo import ReplaceOne
 
@@ -307,18 +306,20 @@ class MemoryStore(MongoStore):
             generator returning tuples of (key, list of elemnts)
         """
         keys = keys if isinstance(keys, list) else [keys]
+        data = [
+            doc
+            for doc in self.query(properties=keys, criteria=criteria)
+            if all(has(doc, k) for k in keys)
+        ]
 
-        input_data = list(self.query(properties=keys, criteria=criteria))
+        def grouper(doc):
+            return tuple(get(doc, k) for k in keys)
 
-        if len(keys) > 1:
-            grouper = itemgetter(*keys)
-            for vals, grp in groupby(sorted(input_data, key=grouper), grouper):
-                yield {k: v for k, v in zip(keys, vals)}, list(grp)
-        else:
-            grouper = itemgetter(*keys)
-            for val, group in groupby(sorted(input_data, key=grouper), grouper):
-                yield {keys[0]: val}, list(group)
-
+        for vals, group in groupby(sorted(data, key=grouper), grouper):
+            doc = {}
+            for k, v in zip(keys, vals):
+                set_(doc, k, v)
+            yield doc, list(group)
 
 
 class JSONStore(MemoryStore):
