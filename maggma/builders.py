@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from time import time
 from math import ceil
 from datetime import datetime
-from maggma.utils import source_keys_updated, grouper, Timeout
+from maggma.utils import  grouper, Timeout
 from maggma.core import Builder, Store
 from typing import Optional, Dict, List, Iterator, Union
 
@@ -220,15 +220,13 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     """
 
     def get_items(self) -> Iterator[Dict]:
-        criteria = source_keys_updated(self.source, self.target, query=self.query)
-        if all(isinstance(entry, str) for entry in self.grouping_properties()):
-            properties = {entry: 1 for entry in self.grouping_properties()}
-            if "_id" not in properties:
-                properties.update({"_id": 0})
-        else:
-            properties = {
-                entry: include for entry, include in self.grouping_properties()
+        criteria = {
+            self.source.key: {
+                "$in": self.target.newer_in(self.source, criteria=self.query)
             }
+        }
+
+        properties = self.grouping_properties()
         groups = self.docs_to_groups(
             self.source.query(criteria=criteria, properties=properties)
         )
@@ -289,5 +287,5 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
 
-    def unary_function(self,item):
+    def unary_function(self, item):
         return item
