@@ -130,7 +130,6 @@ def test_joint_store_groupby(jointstore):
     assert len(docs[0][1]) == 5
     assert len(docs[1][1]) == 5
     docs = list(jointstore.groupby("test2.category2"))
-    print([d[0] for d in docs])
 
     none_docs = next(d for d in docs if get(d[0], "test2.category2") == [])
     one_docs = next(d for d in docs if get(d[0], "test2.category2") == [1])
@@ -170,7 +169,6 @@ def concat_store():
 
 
 def test_concat_store_distinct(concat_store):
-    print(type(concat_store))
     docs = list(concat_store.distinct("task_id"))
     actual_docs = list(
         chain.from_iterable(

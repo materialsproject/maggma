@@ -3,6 +3,7 @@ import numpy as np
 import numpy.testing.utils as nptu
 from datetime import datetime
 from maggma.stores import GridFSStore
+from maggma.core import Sort
 
 
 @pytest.fixture
@@ -89,7 +90,75 @@ def test_query(gridfsstore):
     assert gridfsstore.query_one(criteria={"task_id": "mp-3"}) is None
 
 
-@pytest.mark.skip("Not Done")
+def test_last_updated(gridfsstore):
+    data1 = np.random.rand(256)
+    data2 = np.random.rand(256)
+    tic = datetime(2018, 4, 12, 16)
+
+    gridfsstore.update(
+        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
+    )
+    gridfsstore.update(
+        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}]
+    )
+
+    assert gridfsstore.last_updated == tic
+
+    toc = datetime(2019, 6, 12, 16)
+    gridfsstore.update(
+        [{"task_id": "mp-3", "data": data2, gridfsstore.last_updated_field: toc}]
+    )
+
+    assert gridfsstore.last_updated == toc
+
+    tic = datetime(2017, 6, 12, 16)
+    gridfsstore.update(
+        [{"task_id": "mp-4", "data": data2, gridfsstore.last_updated_field: tic}]
+    )
+
+    assert gridfsstore.last_updated == toc
+
+
+def test_groupby(gridfsstore):
+    tic = datetime(2018, 4, 12, 16)
+
+    for i in range(3):
+        gridfsstore.update(
+            [{"task_id": f"mp-{i}", "a": 1, gridfsstore.last_updated_field: tic}],
+            key=["task_id", "a"],
+        )
+
+    for i in range(3, 7):
+        gridfsstore.update(
+            [{"task_id": f"mp-{i}", "a": 2, gridfsstore.last_updated_field: tic}],
+            key=["task_id", "a"],
+        )
+
+    groups = list(gridfsstore.groupby("a"))
+    assert len(groups) == 2
+    assert {g[0]["a"] for g in groups} == {1, 2}
+
+    by_group = {}
+    for group, docs in groups:
+        by_group[group["a"]] = {d["task_id"] for d in docs}
+    assert by_group[1] == {"mp-0", "mp-1", "mp-2"}
+    assert by_group[2] == {"mp-3", "mp-4", "mp-5", "mp-6"}
+
+
 def test_distinct(gridfsstore):
-    # TODO
-    pass
+    tic = datetime(2018, 4, 12, 16)
+
+    for i in range(3):
+        gridfsstore.update(
+            [{"task_id": f"mp-{i}", "a": 1, gridfsstore.last_updated_field: tic}],
+            key=["task_id", "a"],
+        )
+
+    for i in range(3, 7):
+        gridfsstore.update(
+            [{"task_id": f"mp-{i}", "a": 2, gridfsstore.last_updated_field: tic}],
+            key=["task_id", "a"],
+        )
+
+    assert set(gridfsstore.distinct("a")) == {1, 2}
+
