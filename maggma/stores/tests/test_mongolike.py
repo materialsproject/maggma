@@ -188,6 +188,19 @@ def test_groupby(memorystore):
     data = list(memorystore.groupby(["e", "d"]))
     assert len(data) == 3
 
+    memorystore.update(
+        [
+            {"e": { "d": 9}, "f": 9},
+            {"e": { "d": 9}, "f": 10},
+            {"e": { "d": 9}, "f": 11},
+            {"e": { "d": 10}, "f": 12},
+        ],
+        key="f",
+    )
+    data = list(memorystore.groupby("e.d"))
+    assert len(data) == 2
+    
+
 
 def test_json_store_load(test_dir):
     files = []
