@@ -14,13 +14,13 @@ class AsyncBackPressuredMap:
     async access with backpressure
     """
 
-    def __init__(self, iterator, builder, executor):
+    def __init__(self, iterator, func, max_run, executor):
         self.iterator = iter(iterator)
-        self.process = builder.process_item
+        self.func = func
         self.executor = executor
-        self.back_pressure = BoundedSemaphore(builder.chunk_size)
+        self.back_pressure = BoundedSemaphore(max_run)
 
-    async def __aiter__(self):
+    def __aiter__(self):
         return self
 
     async def __anext__(self):
@@ -33,7 +33,7 @@ class AsyncBackPressuredMap:
             raise StopAsyncIteration
 
         async def process_and_release():
-            future = loop.run_in_executor(self.executor, self.process, item)
+            future = loop.run_in_executor(self.executor, self.func, item)
             await future
             self.back_pressure.release()
             return future
@@ -58,7 +58,12 @@ async def multi(builder, num_workers):
     builder.connect()
     cursor = builder.get_items()
     executor = ProcessPoolExecutor(num_workers)
-    mapper = AsyncBackPressuredMap(tqdm(cursor, desc="Get"), builder, executor)
+    mapper = AsyncBackPressuredMap(
+        iterator=tqdm(cursor, desc="Get"),
+        func=builder.process_items,
+        max_run=builder.chunk_size,
+        executor=executor,
+    )
 
     async for chunk in grouper(mapper, builder.chunk_size, fillvalue=None):
         chunk = await asyncio.gather(*chunk)
