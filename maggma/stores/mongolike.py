@@ -61,6 +61,7 @@ class MongoStore(Store):
         self.kwargs = kwargs
         super().__init__(**kwargs)
 
+    @property
     def name(self) -> str:
         """
         Return a string representing this data source
@@ -269,8 +270,8 @@ class MemoryStore(MongoStore):
     to a MongoStore
     """
 
-    def __init__(self, name: str = "memory_db", **kwargs):
-        self.name = name
+    def __init__(self, collection_name: str = "memory_db", **kwargs):
+        self.collection_name = collection_name
         self._collection = None
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)
@@ -281,6 +282,10 @@ class MemoryStore(MongoStore):
         """
         if not self._collection or force_reset:
             self._collection = mongomock.MongoClient().db[self.name]
+
+    @property
+    def name(self):
+        return self.collection_name
 
     def __hash__(self):
         return hash((self.name, self.last_updated_field))
