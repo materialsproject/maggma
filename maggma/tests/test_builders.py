@@ -47,8 +47,14 @@ def test_get_items(source, target, old_docs):
     builder = CopyBuilder(source, target)
     source.update(old_docs)
     assert len(list(builder.get_items())) == len(old_docs)
+
     target.update(old_docs)
     assert len(list(builder.get_items())) == 0
+
+    builder = CopyBuilder(source, target, projection=["k"])
+    target.remove_docs({})
+    assert len(list(builder.get_items())) == len(old_docs)
+    assert all("v" not in d for d in builder.get_items())
 
 
 def test_process_item(source, target, old_docs):
