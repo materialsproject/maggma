@@ -4,6 +4,7 @@ import pymongo.collection
 from datetime import datetime
 from maggma.core import StoreError
 from maggma.stores import MongoStore, MemoryStore, JSONStore
+from maggma.validators import JSONSchemaValidator
 
 
 @pytest.fixture
@@ -63,7 +64,7 @@ def test_mongostore_distinct(mongostore):
 
 
 def test_mongostore_update(mongostore):
-    mongostore.update([{"e": 6, "d": 4}], key="e")
+    mongostore.update({"e": 6, "d": 4}, key="e")
     assert (
         mongostore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
     )
@@ -73,6 +74,18 @@ def test_mongostore_update(mongostore):
 
     mongostore.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
     assert mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 11
+
+    test_schema = {
+        "type": "object",
+        "properties": {"e": {"type": "integer"}},
+        "required": ["e"],
+    }
+    mongostore.validator = JSONSchemaValidator(schema=test_schema)
+    mongostore.update({"e": 100, "d": 3}, key="e")
+
+    # Non strict update
+    mongostore.update({"e": "abc", "d": 3}, key="e")
+
 
 
 def test_mongostore_groupby(mongostore):
@@ -117,6 +130,14 @@ def test_mongostore_from_collection(mongostore, db_json):
     other_ms = MongoStore.from_collection(ms._collection)
     assert ms._collection.full_name == other_ms._collection.full_name
     assert ms.database == other_ms.database
+
+
+def test_mongostore_name(mongostore):
+    assert mongostore.name == "test"
+
+def test_ensure_index(mongostore):
+    assert mongostore.ensure_index("test_key")
+    # TODO: How to check for exception?
 
 
 def test_mongostore_last_updated(mongostore):
@@ -190,16 +211,15 @@ def test_groupby(memorystore):
 
     memorystore.update(
         [
-            {"e": { "d": 9}, "f": 9},
-            {"e": { "d": 9}, "f": 10},
-            {"e": { "d": 9}, "f": 11},
-            {"e": { "d": 10}, "f": 12},
+            {"e": {"d": 9}, "f": 9},
+            {"e": {"d": 9}, "f": 10},
+            {"e": {"d": 9}, "f": 11},
+            {"e": {"d": 10}, "f": 12},
         ],
         key="f",
     )
     data = list(memorystore.groupby("e.d"))
     assert len(data) == 2
-    
 
 
 def test_json_store_load(test_dir):
