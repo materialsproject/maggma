@@ -359,20 +359,3 @@ class JSONStore(MemoryStore):
 
     def __hash__(self):
         return hash((*self.paths, self.last_updated_field))
-
-
-class DatetimeStore(MemoryStore):
-    """Utility store intended for use with `Store.lu_filter`."""
-
-    def __init__(self, dt, **kwargs):
-        """
-        Args:
-            dt (Datetime): Datetime to set
-        """
-        self.__dt = dt
-        self.kwargs = kwargs
-        super().__init__("date", **kwargs)
-
-    def connect(self, force_reset=False):
-        super().connect(force_reset)
-        self._collection.insert_one({self.last_updated_field: self.__dt})
