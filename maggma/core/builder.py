@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Union, Optional, Dict, List, Iterator, Any
+from typing import Union, Optional, Dict, List, Iterator, Iterable, Any
 
 from monty.json import MSONable, MontyDecoder
 from maggma.utils import grouper
@@ -45,7 +45,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.targets = targets if isinstance(targets, list) else [targets]
         self.chunk_size = chunk_size
         self.query = query
-        self.total = None
+        self.total = None  # type: Optional[int]
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
 
@@ -56,7 +56,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         for s in self.sources + self.targets:
             s.connect()
 
-    def prechunk(self, number_splits: int) -> Iterator[Dict]:
+    def prechunk(self, number_splits: int) -> Iterable[Dict]:
         """
         Part of a domain-decomposition paradigm to allow the builder to operate on
         multiple nodes by divinding up the IO as well as the compute
@@ -66,7 +66,10 @@ class Builder(MSONable, metaclass=ABCMeta):
         Args:
             number_splits: The number of groups to split the documents to work on
         """
-        yield self.query
+        if self.query:
+            return [self.query]
+        else:
+            return []
 
     @abstractmethod
     def get_items(self) -> Iterator:

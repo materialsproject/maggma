@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import json
 
-from typing import Union, Optional, Dict, List, Iterator, Tuple
+from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
 
 import mongomock
 
@@ -57,7 +57,7 @@ class MongoStore(Store):
         self.port = port
         self.username = username
         self.password = password
-        self._collection = None
+        self._collection = None  # type: Any
         self.kwargs = kwargs
         super().__init__(**kwargs)
 
@@ -79,7 +79,7 @@ class MongoStore(Store):
                 db.authenticate(self.username, self.password)
             self._collection = db[self.collection_name]
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
@@ -123,17 +123,22 @@ class MongoStore(Store):
         if isinstance(keys, str):
             keys = [keys]
 
+        if properties is None:
+            properties = []
+        if isinstance(properties, dict):
+            properties = list(properties.keys())
+
         if criteria is not None:
             pipeline.append({"$match": criteria})
 
-        if properties is not None:
+        if len(properties) > 0:
             pipeline.append({"$project": {p: 1 for p in properties + keys}})
 
         alpha = "abcdefghijklmnopqrstuvwxyz"
         group_id = {letter: f"${key}" for letter, key in zip(alpha, keys)}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
         for d in self._collection.aggregate(pipeline, allowDiskUse=True):
-            id_doc = {}
+            id_doc = {}  # type: Dict[str,Any]
             for letter, key in group_id.items():
                 if has(d["_id"], letter):
                     set_(id_doc, key[1:], d["_id"][letter])
@@ -154,7 +159,7 @@ class MongoStore(Store):
         store._collection = collection
         return store
 
-    @property
+    @property  # type: ignore
     @deprecated(message="This will be removed in the future")
     def collection(self):
         if self._collection is None:
@@ -182,9 +187,13 @@ class MongoStore(Store):
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
 
-        sort = [(k, v.value) for k, v in sort.items()] if sort else None
+        sort_list = [(k, v.value) for k, v in sort.items()] if sort else None
         for d in self._collection.find(
-            filter=criteria, projection=properties, skip=skip, limit=limit, sort=sort
+            filter=criteria,
+            projection=properties,
+            skip=skip,
+            limit=limit,
+            sort=sort_list,
         ):
             yield d
 
@@ -325,7 +334,7 @@ class MemoryStore(MongoStore):
             return tuple(get(doc, k) for k in keys)
 
         for vals, group in groupby(sorted(data, key=grouper), grouper):
-            doc = {}
+            doc = {}  # type: Dict[Any,Any]
             for k, v in zip(keys, vals):
                 set_(doc, k, v)
             yield doc, list(group)

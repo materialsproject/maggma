@@ -6,7 +6,7 @@ Advanced Stores for connecting to AWS data
 import json
 import zlib
 
-from typing import Union, Optional, Dict, List, Iterator, Tuple
+from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
 
 from monty.json import jsanitize
 from monty.dev import deprecated
@@ -44,8 +44,8 @@ class AmazonS3Store(Store):
         self.index = index
         self.bucket = bucket
         self.compress = compress
-        self.s3 = None
-        self.s3_bucket = None
+        self.s3 = None  # type: Any
+        self.s3_bucket = None  # type: Any
         # Force the key to be the same as the index
         kwargs["key"] = index.key
         super(AmazonS3Store, self).__init__(**kwargs)
@@ -77,7 +77,7 @@ class AmazonS3Store(Store):
         self.s3 = None
         self.s3_bucket = None
 
-    @property
+    @property  # type: ignore
     @deprecated(message="This will be removed in the future")
     def collection(self):
         """
@@ -170,7 +170,7 @@ class AmazonS3Store(Store):
         Returns:
             generator returning tuples of (dict, list of docs)
         """
-        self.index.groupby(
+        return self.index.groupby(
             keys=keys,
             criteria=criteria,
             properties=properties,
@@ -179,7 +179,7 @@ class AmazonS3Store(Store):
             limit=limit,
         )
 
-    def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
+    def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
         Tries to create an index and return true if it suceeded
         Args:
@@ -189,7 +189,7 @@ class AmazonS3Store(Store):
         Returns:
             bool indicating if the index exists/was created
         """
-        return self.index.ensure_index(key, unique=unique, background=True)
+        return self.index.ensure_index(key, unique=unique)
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
@@ -248,7 +248,7 @@ class AmazonS3Store(Store):
             self.index.remove_docs(criteria=criteria)
 
             # Can remove up to 1000 items at a time via boto
-            to_remove_chunks = list(grouper(to_remove, N=1000))
+            to_remove_chunks = list(grouper(to_remove, n=1000))
             for chunk_to_remove in to_remove_chunks:
                 self.s3_bucket.delete_objects()
 
@@ -257,11 +257,7 @@ class AmazonS3Store(Store):
         return self.index.last_updated
 
     def newer_in(
-        self,
-        target: Store,
-        key: Union[str, None] = None,
-        criteria: Optional[Dict] = None,
-        exhaustive: bool = False,
+        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
     ) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
@@ -274,8 +270,8 @@ class AmazonS3Store(Store):
                         the last_updated of the target Store and using
                         that to filter out new items in
         """
-        self.index.newer_in(
-            target=target, key=key, criteria=criteria, exhaustive=exhaustive
+        return self.index.newer_in(
+            target=target, criteria=criteria, exhaustive=exhaustive
         )
 
     def __hash__(self):

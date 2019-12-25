@@ -7,7 +7,7 @@ from abc import ABCMeta, abstractmethod
 from time import time
 from math import ceil
 from datetime import datetime
-from maggma.utils import  grouper, Timeout
+from maggma.utils import grouper, Timeout
 from maggma.core import Builder, Store
 from typing import Optional, Dict, List, Iterator, Union
 
@@ -254,7 +254,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def docs_to_groups(docs: List[Dict]) -> Iterator:
+    def docs_to_groups(docs: Iterator[Dict]) -> List:
         """
         Yield groups from (minimally-projected) documents.
 

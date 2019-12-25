@@ -1,4 +1,4 @@
-from typing import List, Iterator, Tuple, Optional, Union, Dict
+from typing import List, Iterator, Tuple, Optional, Union, Dict, Any
 from datetime import datetime
 from itertools import groupby
 from pydash import set_
@@ -29,7 +29,7 @@ class JointStore(Store):
         self.port = port
         self.username = username
         self.password = password
-        self._collection = None
+        self._collection = None  # type: Any
         self.master = master or collection_names[0]
         self.merge_at_root = merge_at_root
         self.kwargs = kwargs
@@ -54,7 +54,7 @@ class JointStore(Store):
     def close(self):
         self._collection.database.client.close()
 
-    @property
+    @property  # type: ignore
     @deprecated("This will be removed in the future")
     def collection(self):
         return self._collection
@@ -191,7 +191,7 @@ class JointStore(Store):
         )
         if not isinstance(keys, list):
             keys = [keys]
-        group_id = {}
+        group_id = {}  # type: Dict[str,Any]
         for key in keys:
             set_(group_id, key, "${}".format(key))
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
@@ -265,7 +265,7 @@ class ConcatStore(Store):
         for store in self.stores:
             store.close()
 
-    @property
+    @property  # type: ignore
     @deprecated
     def collection(self):
         raise NotImplementedError("No collection property for ConcatStore")
@@ -325,7 +325,7 @@ class ConcatStore(Store):
         else:
             return [dict(s) for s in set(frozenset(d.items()) for d in distincts)]
 
-    def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
+    def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
         Ensure an index is properly set. Returns whether all stores support this index or not
         Args:
@@ -391,7 +391,7 @@ class ConcatStore(Store):
         for store in self.stores:
             temp_docs = list(
                 store.groupby(
-                    keys,
+                    keys=keys,
                     criteria=criteria,
                     properties=properties,
                     sort=sort,
@@ -399,16 +399,18 @@ class ConcatStore(Store):
                     limit=limit,
                 )
             )
-            for group in temp_docs:
-                docs.extend(group[1])
+            for key, group in temp_docs:
+                docs.extend(group)
 
-        def key_set(d):
+        def key_set(d: Dict) -> Tuple:
             "index function based on passed in keys"
             test_d = tuple(d.get(k, None) for k in keys)
             return test_d
 
-        for k, group in groupby(sorted(docs, key=key_set), key=key_set):
-            yield k, list(group)
+        sorted_docs = sorted(docs, key=key_set)
+        for vals, group_iter in groupby(sorted_docs, key=key_set):
+            id_dict = {key: val for key, val in zip(keys, vals)}
+            yield id_dict, list(group_iter)
 
     def remove_docs(self, criteria: Dict):
         """

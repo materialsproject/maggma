@@ -10,7 +10,7 @@ from abc import ABCMeta, abstractmethod, abstractproperty
 
 from datetime import datetime
 from enum import Enum
-from typing import Union, Optional, Dict, List, Iterator, Tuple
+from typing import Union, Optional, Dict, List, Iterator, Tuple, Callable
 
 from pydash import identity, get, has
 
@@ -40,7 +40,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self,
         key: str = "task_id",
         last_updated_field: str = "last_updated",
-        last_updated_type: DateTimeFormat = "datetime",
+        last_updated_type: DateTimeFormat = DateTimeFormat("datetime"),
         validator: Optional[Validator] = None,
     ):
         """
@@ -58,12 +58,12 @@ class Store(MSONable, metaclass=ABCMeta):
             LU_KEY_ISOFORMAT
             if last_updated_type == DateTimeFormat.IsoFormat
             else (identity, identity)
-        )
+        )  # type: Tuple[Callable, Callable]
         self.validator = validator
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
 
-    @abstractproperty
+    @abstractproperty  # type: ignore
     @deprecated(message="This will be removed in the future")
     def collection(self):
         """
@@ -129,7 +129,7 @@ class Store(MSONable, metaclass=ABCMeta):
         pass
 
     @abstractmethod
-    def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
+    def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
         Tries to create an index and return true if it suceeded
         Args:
@@ -201,7 +201,7 @@ class Store(MSONable, metaclass=ABCMeta):
         field: Union[List[str], str],
         criteria: Optional[Dict] = None,
         all_exist: bool = False,
-    ) -> Union[List[Dict], List]:
+    ) -> List:
         """
         Get all distinct values for a field(s)
         For a single field, this returns a list of values

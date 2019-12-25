@@ -6,7 +6,7 @@ various utillities
 """
 from __future__ import annotations
 
-from typing import Union, Optional, Dict, List, Iterator, Tuple
+from typing import Union, Optional, Dict, List, Iterator, Tuple, Set, Any
 
 import copy
 from datetime import datetime
@@ -72,10 +72,10 @@ class GridFSStore(Store):
         self.port = port
         self.username = username
         self.password = password
-        self._collection = None
+        self._collection = None  # type: Any
         self.compression = compression
         self.kwargs = kwargs
-        self.meta_keys = set()
+        self.meta_keys = set()  # type: Set[str]
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
@@ -103,7 +103,7 @@ class GridFSStore(Store):
             self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
             self._chunks_collection = db["{}.chunks".format(self.collection_name)]
 
-    @property
+    @property  # type: ignore
     @deprecated(message="This will be removed in the future")
     def collection(self):
         return self._collection
