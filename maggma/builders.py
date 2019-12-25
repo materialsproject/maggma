@@ -58,7 +58,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.projection = projection
         self.delete_orphans = delete_orphans
         self.kwargs = kwargs
-        self.total = None
         self.timeout = timeout
         self.store_process_time = store_process_time
         self.retry_failed = retry_failed

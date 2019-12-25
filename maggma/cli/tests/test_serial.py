@@ -8,8 +8,8 @@ class TestBuilder(Builder):
         self.get_called = 0
         self.process_called = 0
         self.update_called = 0
-        self.total = total
         super().__init__(sources=[], targets=[])
+        self.total = total
 
     def get_items(self):
         for i in range(self.total):

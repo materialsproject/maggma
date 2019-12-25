@@ -45,6 +45,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.targets = targets if isinstance(targets, list) else [targets]
         self.chunk_size = chunk_size
         self.query = query
+        self.total = None
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
 
