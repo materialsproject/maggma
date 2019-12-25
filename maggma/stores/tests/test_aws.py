@@ -4,6 +4,8 @@ import boto3
 import zlib
 from moto import mock_s3
 from maggma.stores import MemoryStore, AmazonS3Store
+import maggma.stores.aws
+from botocore.exceptions import ClientError
 
 
 @pytest.fixture
@@ -59,3 +61,41 @@ def test_remove(s3store):
 
     assert s3store.query_one({"task_id": "mp-2"}) is None
     assert s3store.query_one({"task_id": "mp-4"}) is not None
+
+
+def test_close(s3store):
+    list(s3store.query())
+    s3store.close()
+    with pytest.raises(AttributeError):
+        list(s3store.query())
+
+
+@pytest.fixture
+def bad_import():
+    maggma.stores.aws.boto_import = False
+    yield
+    maggma.stores.aws.boto_import = True
+
+
+def test_bad_impot(bad_import):
+    with pytest.raises(ValueError):
+        index = MemoryStore("index'")
+        AmazonS3Store(index, "bucket1")
+
+
+def test_aws_error(s3store):
+    def raise_exception_404(data):
+        error_response = {"Error": {"Code": 404}}
+        raise ClientError(error_response, "raise_exception")
+
+    def raise_exception_other(data):
+        error_response = {"Error": {"Code": 405}}
+        raise ClientError(error_response, "raise_exception")
+
+    s3store.s3_bucket.Object = raise_exception_other
+    with pytest.raises(ClientError):
+        s3store.query_one()
+
+    # Should just pass
+    s3store.s3_bucket.Object = raise_exception_404
+    s3store.query_one()

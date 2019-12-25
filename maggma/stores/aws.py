@@ -120,6 +120,8 @@ class AmazonS3Store(Store):
                         "Could not find S3 object {}".format(doc[self.key])
                     )
                     break
+                else:
+                    raise e
 
             if doc.get("compression", "") == "zlib":
                 data = zlib.decompress(data)
