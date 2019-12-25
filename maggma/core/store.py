@@ -253,11 +253,7 @@ class Store(MSONable, metaclass=ABCMeta):
             return self._lu_func[0](get(doc, self.last_updated_field))
 
     def newer_in(
-        self,
-        target: Store,
-        key: Union[str, None] = None,
-        criteria: Optional[Dict] = None,
-        exhaustive: bool = False,
+        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
     ) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
@@ -272,8 +268,8 @@ class Store(MSONable, metaclass=ABCMeta):
         """
         self.ensure_index(self.key)
         self.ensure_index(self.last_updated_field)
-        if exhaustive:
 
+        if exhaustive:
             # Get our current last_updated dates for each key value
             props = {self.key: 1, self.last_updated_field: 1, "_id": 0}
             dates = {
@@ -281,7 +277,7 @@ class Store(MSONable, metaclass=ABCMeta):
                 for d in self.query(properties=props)
             }
 
-            # Get the
+            # Get the last_updated for the store we're comparing with
             props = {target.key: 1, target.last_updated_field: 1, "_id": 0}
             target_dates = {
                 d[target.key]: target._lu_func[0](d[target.last_updated_field])
@@ -298,11 +294,10 @@ class Store(MSONable, metaclass=ABCMeta):
             return list(new_keys | updated_keys)
 
         else:
-            key = key if key is not None else self.key  # Default value
             criteria = {
                 self.last_updated_field: {"$gt": self._lu_func[1](self.last_updated)}
             }
-            return target.distinct(field=key, criteria=criteria)
+            return target.distinct(field=self.key, criteria=criteria)
 
     @deprecated(message="Please use Store.newer_in")
     def lu_filter(self, targets):
