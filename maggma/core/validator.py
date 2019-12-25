@@ -23,7 +23,6 @@ class Validator(MSONable, metaclass=ABCMeta):
         Returns (bool): True if document valid, False if document
         invalid
         """
-        return NotImplementedError
 
     @abstractmethod
     def validation_errors(self, doc: Dict) -> bool:
@@ -31,4 +30,3 @@ class Validator(MSONable, metaclass=ABCMeta):
         Returns (bool): if document is not valid, provide a list of
         strings to display for why validation has failed
         """
-        return NotImplementedError
