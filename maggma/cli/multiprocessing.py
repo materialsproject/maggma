@@ -2,6 +2,7 @@
 # coding utf-8
 
 import asyncio
+import logging
 from asyncio import BoundedSemaphore
 from aioitertools import zip_longest
 from concurrent.futures import ProcessPoolExecutor
@@ -55,17 +56,20 @@ async def grouper(iterable, n, fillvalue=None):
 
 
 async def multi(builder, num_workers):
+    logger = logging.getLogger("MultiProcessor")
+
     builder.connect()
     cursor = builder.get_items()
     executor = ProcessPoolExecutor(num_workers)
     mapper = AsyncBackPressuredMap(
         iterator=tqdm(cursor, desc="Get"),
-        func=builder.process_items,
+        func=builder.process_item,
         max_run=builder.chunk_size,
         executor=executor,
     )
 
     async for chunk in grouper(mapper, builder.chunk_size, fillvalue=None):
+        logger.info("Processing batch of {} items".format(builder.chunk_size))
         chunk = await asyncio.gather(*chunk)
         processed_items = [c.result() for c in chunk if chunk is not None]
         builder.update_targets(processed_items)

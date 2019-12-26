@@ -12,29 +12,6 @@ from maggma.cli.serial import serial
 from maggma.cli.multiprocessing import multi
 
 
-""""
-mrun script1
-mrun script1 script2 script3
-mrun -n  32 script1 script2
-
-
-
-
-
-mrun master -N 4 sciprt1 script2 <-- have to deploy workers
-mrun worker -n 32 127.0.0.1:70001
-mrun worker -n 32 127.0.0.1:70001
-mrun worker -n 32 127.0.0.1:70001
-
-
-mrun master -N 4 script1 script 2
-mpirun -N 4 mrun worker -n 32 script1 script 2
-
-
-
-"""
-
-
 @click.command()
 @click.argument("builders", nargs=-1, type=click.Path(exists=True))
 @click.option(
