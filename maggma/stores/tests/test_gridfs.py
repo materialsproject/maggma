@@ -3,7 +3,6 @@ import numpy as np
 import numpy.testing.utils as nptu
 from datetime import datetime
 from maggma.stores import GridFSStore
-from maggma.core import Sort
 
 
 @pytest.fixture
@@ -161,4 +160,3 @@ def test_distinct(gridfsstore):
         )
 
     assert set(gridfsstore.distinct("a")) == {1, 2}
-

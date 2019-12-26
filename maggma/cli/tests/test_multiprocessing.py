@@ -1,8 +1,7 @@
 import pytest
 import time
 import asyncio
-from maggma.core import Builder
-from maggma.cli.multiprocessing import AsyncBackPressuredMap, grouper, multi
+from maggma.cli.multiprocessing import AsyncBackPressuredMap, grouper
 from concurrent.futures import ThreadPoolExecutor
 
 

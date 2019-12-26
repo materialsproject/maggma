@@ -87,7 +87,6 @@ def test_mongostore_update(mongostore):
     mongostore.update({"e": "abc", "d": 3}, key="e")
 
 
-
 def test_mongostore_groupby(mongostore):
     mongostore.update(
         [
@@ -134,6 +133,7 @@ def test_mongostore_from_collection(mongostore, db_json):
 
 def test_mongostore_name(mongostore):
     assert mongostore.name == "test"
+
 
 def test_ensure_index(mongostore):
     assert mongostore.ensure_index("test_key")

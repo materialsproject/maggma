@@ -1,4 +1,3 @@
-import pytest
 from maggma.core import Builder
 from maggma.cli.serial import serial
 

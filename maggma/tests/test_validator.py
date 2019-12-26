@@ -35,7 +35,7 @@ def test_jsonschemevalidator(test_schema):
     """
 
     validator = JSONSchemaValidator(schema=test_schema)
-    strict_validator = JSONSchemaValidator(schema=test_schema,strict=True)
+    strict_validator = JSONSchemaValidator(schema=test_schema, strict=True)
 
     lattice = LatticeMock(5)
 

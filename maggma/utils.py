@@ -6,10 +6,7 @@ import itertools
 import signal
 import logging
 
-
-from collections import deque
 from datetime import datetime, timedelta
-from sys import getsizeof, stderr
 
 from pydash.utilities import to_path
 from pydash.objects import set_, get, has
@@ -18,7 +15,7 @@ from pydash.objects import unset as _unset
 # import tqdm Jupyter widget if running inside Jupyter
 try:
     # noinspection PyUnresolvedReferences
-    if get_ipython().__class__.__name__ == "ZMQInteractiveShell": # type: ignore
+    if get_ipython().__class__.__name__ == "ZMQInteractiveShell":  # type: ignore
         from tqdm import tqdm_notebook as tqdm
     else:  # likely 'TerminalInteractiveShell'
         from tqdm import tqdm

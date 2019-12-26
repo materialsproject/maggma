@@ -27,4 +27,3 @@ def serial(builder: Builder):
         builder.update_targets(processed_items)
 
     builder.finalize()
-
