@@ -2,11 +2,27 @@
 # coding utf-8
 
 import asyncio
+import types
 import logging
 from asyncio import BoundedSemaphore
 from aioitertools import zip_longest
 from concurrent.futures import ProcessPoolExecutor
-from maggma.utils import tqdm
+from maggma.utils import tqdm, primed
+
+
+class ProcessItemsSemaphore(BoundedSemaphore):
+    """
+    Modified BoundedSemaphore to update a TQDM bar
+    for process_items
+    """
+
+    def __init__(self, total=None, *args, **kwargs):
+        self.tqdm = tqdm(total=total, desc="Process Items")
+        super().__init__(*args, **kwargs)
+
+    def release(self):
+        self.tqdm.update(1)
+        super().release()
 
 
 class AsyncBackPressuredMap:
@@ -15,11 +31,11 @@ class AsyncBackPressuredMap:
     async access with backpressure
     """
 
-    def __init__(self, iterator, func, max_run, executor):
+    def __init__(self, iterator, func, max_run, executor, total=None):
         self.iterator = iter(iterator)
         self.func = func
         self.executor = executor
-        self.back_pressure = BoundedSemaphore(max_run)
+        self.back_pressure = ProcessItemsSemaphore(value=max_run, total=total)
 
     def __aiter__(self):
         return self
@@ -42,6 +58,28 @@ class AsyncBackPressuredMap:
         return process_and_release()
 
 
+def get_total(cursor, builder):
+    """
+    Gets the total item count from the builder
+    """
+    total = None
+
+    if isinstance(cursor, types.GeneratorType):
+        try:
+            cursor = primed(cursor)
+            if hasattr(builder, "total"):
+                total = builder.total
+        except StopIteration:
+            pass
+
+    elif hasattr(cursor, "__len__"):
+        total = len(cursor)
+    elif hasattr(cursor, "count"):
+        total = cursor.count()
+
+    return total
+
+
 async def grouper(iterable, n, fillvalue=None):
     """
     Collect data into fixed-length chunks or blocks.
@@ -61,15 +99,20 @@ async def multi(builder, num_workers):
     builder.connect()
     cursor = builder.get_items()
     executor = ProcessPoolExecutor(num_workers)
+    total = get_total(cursor, builder)
+
     mapper = AsyncBackPressuredMap(
-        iterator=tqdm(cursor, desc="Get"),
+        iterator=tqdm(cursor, desc="Get", total=total),
         func=builder.process_item,
         max_run=builder.chunk_size,
         executor=executor,
+        total=total,
     )
+    update_items = tqdm(total=total, desc="Update Targets")
 
     async for chunk in grouper(mapper, builder.chunk_size, fillvalue=None):
         logger.info("Processing batch of {} items".format(builder.chunk_size))
         chunk = await asyncio.gather(*chunk)
         processed_items = [c.result() for c in chunk if chunk is not None]
         builder.update_targets(processed_items)
+        update_items.update(len(processed_items))
