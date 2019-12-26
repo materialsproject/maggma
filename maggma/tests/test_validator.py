@@ -3,7 +3,7 @@
 Tests the validators
 """
 import pytest
-from maggma.validators import JSONSchemaValidator, msonable_schema
+from maggma.validators import JSONSchemaValidator, msonable_schema, ValidationError
 from monty.json import MSONable
 
 
@@ -35,6 +35,7 @@ def test_jsonschemevalidator(test_schema):
     """
 
     validator = JSONSchemaValidator(schema=test_schema)
+    strict_validator = JSONSchemaValidator(schema=test_schema,strict=True)
 
     lattice = LatticeMock(5)
 
@@ -59,6 +60,10 @@ def test_jsonschemevalidator(test_schema):
     assert not validator.is_valid(invalid_doc_missing_key)
     assert not validator.is_valid(invalid_doc_wrong_type)
 
+    with pytest.raises(ValidationError):
+        strict_validator.is_valid(invalid_doc_msonable)
+
+    assert validator.validation_errors(valid_doc) == []
     assert validator.validation_errors(invalid_doc_msonable) == [
         "lattice: ['I am not a lattice!'] is not of type 'object'"
     ]
