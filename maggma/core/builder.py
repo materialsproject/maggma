@@ -121,6 +121,7 @@ class Builder(MSONable, metaclass=ABCMeta):
     def run(self):
         """
         Run the builder serially
+        This is only intended for diagnostic purposes
 
         Args:
             builder_id (int): the index of the builder in the builders list
