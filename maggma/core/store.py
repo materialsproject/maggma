@@ -70,28 +70,24 @@ class Store(MSONable, metaclass=ABCMeta):
         Returns a handle to the pymongo collection object
         Not guaranteed to exist in the future
         """
-        pass
 
     @abstractproperty
     def name(self) -> str:
         """
         Return a string representing this data source
         """
-        pass
 
     @abstractmethod
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
         """
-        pass
 
     @abstractmethod
     def close(self):
         """
         Closes any connections
         """
-        pass
 
     @abstractmethod
     def query(
@@ -112,7 +108,6 @@ class Store(MSONable, metaclass=ABCMeta):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
-        pass
 
     @abstractmethod
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
@@ -126,7 +121,6 @@ class Store(MSONable, metaclass=ABCMeta):
                  a single field, or None if the Store's key
                  field is to be used
         """
-        pass
 
     @abstractmethod
     def ensure_index(self, key: str, unique: bool = False) -> bool:
@@ -139,7 +133,6 @@ class Store(MSONable, metaclass=ABCMeta):
         Returns:
             bool indicating if the index exists/was created
         """
-        pass
 
     @abstractmethod
     def groupby(
@@ -166,7 +159,6 @@ class Store(MSONable, metaclass=ABCMeta):
         Returns:
             generator returning tuples of (dict, list of docs)
         """
-        pass
 
     @abstractmethod
     def remove_docs(self, criteria: Dict):
@@ -176,7 +168,6 @@ class Store(MSONable, metaclass=ABCMeta):
         Args:
             criteria: query dictionary to match
         """
-        pass
 
     def query_one(
         self,
@@ -354,5 +345,3 @@ class Store(MSONable, metaclass=ABCMeta):
 
 class StoreError(Exception):
     """General Store-related error."""
-
-    pass
