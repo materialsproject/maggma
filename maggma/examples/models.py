@@ -119,7 +119,7 @@ class MaterialModel(pydantic.BaseModel):
     task_id: str = Schema(
         ..., title="task id for this material. Also called the material id"
     )
-    # task_ids: List[str] = Optional ## TODO complete
+    task_ids: List[str] = Schema(None, title="List of task-ids that this material is associated with")
     volume: float = Schema(..., title="")
     _id: str
 
