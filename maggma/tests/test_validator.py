@@ -2,75 +2,76 @@
 """
 Tests the validators
 """
-import unittest
-from maggma.validator import JSONSchemaValidator, msonable_schema
+import pytest
+from maggma.validators import JSONSchemaValidator, msonable_schema, ValidationError
 from monty.json import MSONable
 
-class ValidatorTests(unittest.TestCase):
+
+class LatticeMock(MSONable):
     """
-    Tests for Validators.
+    A sample MSONable object, just for testing.
     """
 
-    def test_jsonschemevalidator(self):
-        """
-        Test the JSONSchemaValidator class.
-        """
+    def __init__(self, a):
+        self.a = a
 
-        class LatticeMock(MSONable):
-            """
-            A sample MSONable object, just for testing.
-            """
-            def __init__(self, a):
-                self.a = a
 
-        test_schema = {
-            "type": "object",
-            "properties":
-                {
-                    "task_id": {"type": "string"},
-                    "successful": {"type": "boolean"},
-                    "lattice": msonable_schema(LatticeMock)
-                },
-            "required": ["task_id", "successful"]
-        }
+@pytest.fixture
+def test_schema():
+    return {
+        "type": "object",
+        "properties": {
+            "task_id": {"type": "string"},
+            "successful": {"type": "boolean"},
+            "lattice": msonable_schema(LatticeMock),
+        },
+        "required": ["task_id", "successful"],
+    }
 
-        validator = JSONSchemaValidator(schema=test_schema)
 
-        lattice = LatticeMock(5)
+def test_jsonschemevalidator(test_schema):
+    """
+    Test the JSONSchemaValidator class.
+    """
 
-        valid_doc = {
-            'task_id': 'mp-test',
-            'successful': True,
-            'lattice': lattice.as_dict()
-        }
+    validator = JSONSchemaValidator(schema=test_schema)
+    strict_validator = JSONSchemaValidator(schema=test_schema, strict=True)
 
-        invalid_doc_msonable = {
-            'task_id': 'mp-test',
-            'successful': True,
-            'lattice': ['I am not a lattice!']
-        }
+    lattice = LatticeMock(5)
 
-        invalid_doc_missing_key = {
-            'task_id': 'mp-test',
-            'lattice': lattice.as_dict()
-        }
+    valid_doc = {"task_id": "mp-test", "successful": True, "lattice": lattice.as_dict()}
 
-        invalid_doc_wrong_type = {
-            'task_id': 'mp-test',
-            'successful': 'true',
-            'lattice': lattice.as_dict()
-        }
+    invalid_doc_msonable = {
+        "task_id": "mp-test",
+        "successful": True,
+        "lattice": ["I am not a lattice!"],
+    }
 
-        self.assertTrue(validator.is_valid(valid_doc))
-        self.assertFalse(validator.is_valid(invalid_doc_msonable))
-        self.assertFalse(validator.is_valid(invalid_doc_missing_key))
-        self.assertFalse(validator.is_valid(invalid_doc_wrong_type))
+    invalid_doc_missing_key = {"task_id": "mp-test", "lattice": lattice.as_dict()}
 
-        self.assertListEqual(validator.validation_errors(invalid_doc_msonable),
-                             ["lattice: ['I am not a lattice!'] is not of type 'object'"])
+    invalid_doc_wrong_type = {
+        "task_id": "mp-test",
+        "successful": "true",
+        "lattice": lattice.as_dict(),
+    }
 
-        self.assertListEqual(validator.validation_errors(invalid_doc_missing_key),
-                             [": 'successful' is a required property"])
+    assert validator.is_valid(valid_doc)
+    assert not validator.is_valid(invalid_doc_msonable)
+    assert not validator.is_valid(invalid_doc_missing_key)
+    assert not validator.is_valid(invalid_doc_wrong_type)
 
-        self.assertListEqual(validator.validation_errors(invalid_doc_wrong_type),
-                             ["successful: 'true' is not of type 'boolean'"])
+    with pytest.raises(ValidationError):
+        strict_validator.is_valid(invalid_doc_msonable)
+
+    assert validator.validation_errors(valid_doc) == []
+    assert validator.validation_errors(invalid_doc_msonable) == [
+        "lattice: ['I am not a lattice!'] is not of type 'object'"
+    ]
+
+    assert validator.validation_errors(invalid_doc_missing_key) == [
+        ": 'successful' is a required property"
+    ]
+
+    assert validator.validation_errors(invalid_doc_wrong_type) == [
+        "successful: 'true' is not of type 'boolean'"
+    ]

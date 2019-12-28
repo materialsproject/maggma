@@ -2,131 +2,14 @@
 """
 Base Builder class to define how builders need to be defined
 """
-from abc import ABCMeta, abstractmethod
-import logging
 import traceback
-from datetime import datetime
-from monty.json import MSONable, MontyDecoder
-from maggma.utils import source_keys_updated, grouper, Timeout
+from abc import ABCMeta, abstractmethod
 from time import time
-
-
-class Builder(MSONable, metaclass=ABCMeta):
-    """
-    Base Builder class
-    At minimum this class should implement:
-    get_items - Get items from the sources
-    update_targets - Updates the sources with results
-
-    Multiprocessing and MPI processing can be used if all
-    the data processing is  limited to process_items
-    """
-
-    def __init__(self, sources, targets, chunk_size=1000):
-        """
-        Initialize the builder the framework.
-
-        Args:
-            sources([Store]): list of source stores
-            targets([Store]): list of target stores
-            chunk_size(int): chunk size for processing
-        """
-        self.sources = sources
-        self.targets = targets
-        self.chunk_size = chunk_size
-
-        self.logger = logging.getLogger(type(self).__name__)
-        self.logger.addHandler(logging.NullHandler())
-
-    def connect(self):
-        """
-        Connect to the builder sources and targets.
-        """
-        stores = self.sources + self.targets
-        for s in stores:
-            s.connect()
-
-    @abstractmethod
-    def get_items(self):
-        """
-        Returns all the items to process.
-
-        Returns:
-            generator or list of items to process
-        """
-        pass
-
-    def process_item(self, item):
-        """
-        Process an item. Should not expect DB access as this can be run MPI
-        Default behavior is to return the item.
-        Args:
-            item:
-
-        Returns:
-           item: an item to update
-        """
-        return item
-
-    @abstractmethod
-    def update_targets(self, items):
-        """
-        Takes a dictionary of targets and items from process item and updates them
-        Can also perform other book keeping in the process such as storing gridfs oids, etc.
-
-        Args:
-            items:
-
-        Returns:
-
-        """
-        pass
-
-    def finalize(self, cursor=None):
-        """
-        Perform any final clean up.
-        """
-        # Close any Mongo connections.
-        for store in self.sources + self.targets:
-            try:
-                store.collection.database.client.close()
-            except AttributeError:
-                continue
-        # Runner will pass iterable yielded by `self.get_items` as `cursor`. If
-        # this is a Mongo cursor with `no_cursor_timeout=True` (not the
-        # default), we must be explicitly kill it.
-        try:
-            cursor and cursor.close()
-        except AttributeError:
-            pass
-
-    def run(self):
-        """
-        Run the builder serially
-
-        Args:
-            builder_id (int): the index of the builder in the builders list
-        """
-        self.connect()
-
-        cursor = self.get_items()
-
-        for chunk in grouper(cursor, self.chunk_size):
-            self.logger.info("Processing batch of {} items".format(self.chunk_size))
-            processed_items = [
-                self.process_item(item) for item in chunk if item is not None
-            ]
-            self.update_targets(processed_items)
-
-        self.finalize(cursor)
-
-    def __getstate__(self):
-        return self.as_dict()
-
-    def __setstate__(self, d):
-        d = {k: v for k, v in d.items() if not k.startswith("@")}
-        d = MontyDecoder().process_decoded(d)
-        self.__init__(**d)
+from math import ceil
+from datetime import datetime
+from maggma.utils import grouper, Timeout
+from maggma.core import Builder, Store
+from typing import Optional, Dict, List, Iterator, Union
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -134,67 +17,60 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     Apply a unary function to yield a target document for each source document.
 
     Supports incremental building, where a source document gets built only if it
-    has newer (by lu_field) data than the corresponding (by key) target
+    has newer (by last_updated_field) data than the corresponding (by key) target
     document.
 
     """
 
     def __init__(
         self,
-        source,
-        target,
-        ufn,
-        query=None,
-        incremental=True,
-        projection=None,
-        delete_orphans=False,
-        timeout=None,
-        store_process_time=True,
+        source: Store,
+        target: Store,
+        query: Optional[Dict] = None,
+        projection: Optional[List] = None,
+        delete_orphans: bool = False,
+        timeout: int = 0,
+        store_process_time: bool = True,
+        retry_failed: bool = False,
         **kwargs
     ):
         """
         Apply a unary function to each source document.
 
         Args:
-            source (Store): source store
-            target (Store): target store
-            ufn (function): Unary function to process item
-                            You do not need to provide values for
-                            source.key and source.lu_field in the output.
-                            Any uncaught exceptions will be caught by
-                            process_item and logged to the "error" field
-                            in the target document.
-            query (dict): optional query to filter source store
-            incremental (bool): Whether to limit query to filter for only updated source documents.
-            projection (list): list of keys to project from the source for
+            source: source store
+            target: target store
+            query: optional query to filter source store
+            projection: list of keys to project from the source for
                 processing. Limits data transfer to improve efficiency.
-            delete_orphans (bool): Whether to delete documents on target store
+            delete_orphans: Whether to delete documents on target store
                 with key values not present in source store. Deletion happens
                 after all updates, during Builder.finalize.
-            timeout (int): maximum running time per item in seconds
-            store_process_time (bool): If True, add "_process_time" key to
-            document for profiling purposes
+            timeout: maximum running time per item in seconds
+            store_process_time: If True, add "_process_time" key to
+                document for profiling purposes
+            retry_failed: If True, will retry building documents that
+                previously failed
         """
         self.source = source
         self.target = target
         self.query = query
-        self.incremental = incremental
-        self.ufn = ufn
-        self.projection = projection if projection else []
+        self.projection = projection
         self.delete_orphans = delete_orphans
         self.kwargs = kwargs
-        self.total = None
         self.timeout = timeout
         self.store_process_time = store_process_time
+        self.retry_failed = retry_failed
         super().__init__(sources=[source], targets=[target], **kwargs)
 
     def ensure_indexes(self):
 
         index_checks = [
             self.source.ensure_index(self.source.key),
-            self.source.ensure_index(self.source.lu_field),
+            self.source.ensure_index(self.source.last_updated_field),
             self.target.ensure_index(self.target.key),
-            self.target.ensure_index(self.target.lu_field),
+            self.target.ensure_index(self.target.last_updated_field),
+            self.target.ensure_index("state"),
         ]
 
         if not all(index_checks):
@@ -202,28 +78,45 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 "Missing one or more important indices on stores. "
                 "Performance for large stores may be severely degraded. "
                 "Ensure indices on target.key and "
-                "[(store.lu_field, -1), (store.key, 1)] "
+                "[(store.last_updated_field, -1), (store.key, 1)] "
                 "for each of source and target."
             )
 
+    def prechunk(self, number_splits: int) -> Iterator[Dict]:
+        """
+        Generic prechunk for map builder to perform domain-decompostion
+        by the key field
+        """
+        self.ensure_indexes()
+        keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
+
+        N = ceil(len(keys) / number_splits)
+        for split in grouper(keys, N):
+            yield {self.source.key: {"$in": list(filter(None.__ne__, split))}}
+
     def get_items(self):
+        """
+        Generic get items for Map Builder designed to perform
+        incremental building
+        """
 
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
 
         self.ensure_indexes()
 
-        if self.incremental:
-            keys = source_keys_updated(
-                source=self.source, target=self.target, query=self.query
-            )
+        temp_query = dict(**self.query) if self.query else {}
+        if self.retry_failed:
+            temp_query.pop("state", None)
         else:
-            keys = self.source.distinct(self.source.key, self.query)
+            temp_query["state"] = {"$ne": "failed"}
+
+        keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
 
         self.logger.info("Processing {} items".format(len(keys)))
 
         if self.projection:
             projection = list(
-                set(self.projection + [self.source.key, self.source.lu_field])
+                set(self.projection + [self.source.key, self.source.last_updated_field])
             )
         else:
             projection = None
@@ -239,7 +132,11 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             ):
                 yield doc
 
-    def process_item(self, item):
+    def process_item(self, item: Dict):
+        """
+        Generic process items to process a dictionary using
+        a map function
+        """
 
         self.logger.debug("Processing: {}".format(item[self.source.key]))
 
@@ -247,18 +144,21 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         try:
             with Timeout(seconds=self.timeout):
-                processed = self.ufn.__call__(item)
+                processed = self.unary_function(item)
+                processed.update({"state": "successful"})
         except Exception as e:
             self.logger.error(traceback.format_exc())
-            processed = {"error": str(e)}
+            processed = {"error": str(e), "state": "failed"}
 
         time_end = time()
 
-        key, lu_field = self.source.key, self.source.lu_field
+        key, last_updated_field = self.source.key, self.source.last_updated_field
 
         out = {
             self.target.key: item[key],
-            self.target.lu_field: self.source.lu_func[0](item[self.source.lu_field]),
+            self.target.last_updated_field: self.source._lu_func[0](
+                item[last_updated_field]
+            ),
         }
         if self.store_process_time:
             out["_process_time"] = time_end - time_start
@@ -266,39 +166,48 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         out.update(processed)
         return out
 
-    def update_targets(self, items):
+    def update_targets(self, items: List[Dict]):
+        """
+        Generic update targets for Map Builder
+        """
         source, target = self.source, self.target
         for item in items:
             # Use source last-updated value, ensuring `datetime` type.
-            item[target.lu_field] = source.lu_func[0](item[source.lu_field])
-            if source.lu_field != target.lu_field:
-                del item[source.lu_field]
+            item[target.last_updated_field] = source._lu_func[0](
+                item[source.last_updated_field]
+            )
+            if source.last_updated_field != target.last_updated_field:
+                del item[source.last_updated_field]
             item["_bt"] = datetime.utcnow()
             if "_id" in item:
                 del item["_id"]
 
         if len(items) > 0:
-            target.update(items, update_lu=False)
+            target.update(items)
 
-    def finalize(self, cursor=None):
+    def finalize(self):
         if self.delete_orphans:
-            if not hasattr(self.target, "collection"):
-                self.logger.warning(
-                    "delete_orphans parameter is only supported for "
-                    "Mongolike target stores at this time."
+            source_keyvals = set(self.source.distinct(self.source.key))
+            target_keyvals = set(self.target.distinct(self.target.key))
+            to_delete = list(target_keyvals - source_keyvals)
+            if len(to_delete):
+                self.logger.info(
+                    "Finalize: Deleting {} orphans.".format(len(to_delete))
                 )
-            else:
-                source_keyvals = set(self.source.distinct(self.source.key))
-                target_keyvals = set(self.target.distinct(self.target.key))
-                to_delete = list(target_keyvals - source_keyvals)
-                if len(to_delete):
-                    self.logger.info(
-                        "Finalize: Deleting {} orphans.".format(len(to_delete))
-                    )
-                self.target.collection.delete_many(
-                    {self.target.key: {"$in": to_delete}}
-                )
-        super().finalize(cursor)
+            self.target.remove_docs({self.target.key: {"$in": to_delete}})
+        super().finalize()
+
+    @abstractmethod
+    def unary_function(self, item):
+        """
+        ufn: Unary function to process item
+                You do not need to provide values for
+                source.key and source.last_updated_field in the output.
+                Any uncaught exceptions will be caught by
+                process_item and logged to the "error" field
+                in the target document.
+        """
+        pass
 
 
 class GroupBuilder(MapBuilder, metaclass=ABCMeta):
@@ -306,35 +215,17 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     Group source docs and produce one target doc from each group.
 
     Supports incremental building, where a source group gets (re)built only if
-    it has a newer (by lu_field) doc than the corresponding (by key) target doc.
+    it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.
     """
 
-    def __init__(self, source, target, query=None, **kwargs):
-        """
-
-        Given criteria, get docs with needed grouping properties. With these
-        minimal docs, yield groups. For each group, fetch all needed data for
-        item processing, and yield one or more items (i.e. subgroups as
-        appropriate).
-
-        Args:
-            source (Store): source store
-            target (Store): target store
-            query (dict): optional query to filter source store
-        """
-        super().__init__(source, target, query=query, **kwargs)
-        self.total = None
-
-    def get_items(self):
-        criteria = source_keys_updated(self.source, self.target, query=self.query)
-        if all(isinstance(entry, str) for entry in self.grouping_properties()):
-            properties = {entry: 1 for entry in self.grouping_properties()}
-            if "_id" not in properties:
-                properties.update({"_id": 0})
-        else:
-            properties = {
-                entry: include for entry, include in self.grouping_properties()
+    def get_items(self) -> Iterator[Dict]:
+        criteria = {
+            self.source.key: {
+                "$in": self.target.newer_in(self.source, criteria=self.query)
             }
+        }
+
+        properties = self.grouping_properties()
         groups = self.docs_to_groups(
             self.source.query(criteria=criteria, properties=properties)
         )
@@ -349,7 +240,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def grouping_properties():
+    def grouping_properties() -> Union[List, Dict]:
         """
         Needed projection for docs_to_groups (passed to source.query).
 
@@ -363,14 +254,14 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
     @staticmethod
     @abstractmethod
-    def docs_to_groups(docs):
+    def docs_to_groups(docs: Iterator[Dict]) -> List:
         """
         Yield groups from (minimally-projected) documents.
 
         This could be as simple as returning a set of unique document keys.
 
         Args:
-            docs (pymongo.cursor.Cursor): documents with minimal projections
+            docs: documents with minimal projections
                 needed to determine groups.
 
         Returns:
@@ -378,7 +269,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def group_to_items(self, group):
+    def group_to_items(self, group: Dict) -> Iterator:
         """
         Given a group, yield items for this builder's process_item method.
 
@@ -395,11 +286,5 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
 
-    def __init__(self, source, target, **kwargs):
-        super().__init__(
-            source=source,
-            target=target,
-            ufn=lambda x: x,
-            store_process_time=False,
-            **kwargs
-        )
+    def unary_function(self, item):
+        return item
