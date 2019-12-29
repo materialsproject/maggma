@@ -25,7 +25,7 @@ jobs:
         pycodestyle maggma
     - name: Lint with mypy
       run: |
-        pip install mypy
+        pip install mypy mypy-boto3
         mypy maggma
     - name: Lint with flake8
       run: |
