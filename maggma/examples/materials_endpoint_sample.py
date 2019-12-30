@@ -2,50 +2,57 @@
 
 # set module path
 import os, sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from cluster_manager import ClusterManager
+
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # import files
-from models import MaterialModel
+from models import MaterialModel, SpecieModel
 from fastapi import HTTPException, Depends
 from fastapi import Path
 
-from models import CommonPaginationParams, SpecieModel
+from models import CommonPaginationParams
 from pymatgen.core.composition import Composition, CompositionError
 from typing import List
 from starlette.responses import RedirectResponse
 from endpoint_cluster import EndpointCluster
 from maggma.stores import JSONStore
-import uvicorn
-import starlette.status
+from starlette.responses import JSONResponse
+from cluster_manager import ClusterManager
+
 
 
 class MaterialEndpointCluster(EndpointCluster):
-    def __init__(self, db_source: JSONStore, prefix: str = "/materials", tags: list = []):
-        super().__init__(db_source, MaterialModel, prefix, tags)
+    def __init__(self, db_source: JSONStore, tags=[], responses={}, prefix: str = "/materials"):
+        super().__init__(db_source, MaterialModel, prefix, tags, responses)
         # initialize routes
         # self.model = MaterialModel in this case
+
         self.router.get("/task_id/{task_id}",
                         response_description="Get Task ID",
                         response_model=self.model,
                         tags=self.tags,
-                        status_code=starlette.status.HTTP_200_OK,
+                        responses=self.responses
                         ) \
             (self.get_on_task_id)
         self.router.get("/chemsys/{chemsys}",
                         response_description="Get all the materials that matches the chemsys field",
                         response_model=List[self.model],
-                        tags=self.tags
+                        tags=self.tags,
+                        responses=self.responses
                         )(self.get_on_chemsys)
         self.router.get("/formula/{formula}",
                         response_model=List[self.model],
                         response_description="Get all the materials that matches the formula field",
-                        tags=self.tags) \
+                        tags=self.tags,
+                        responses=self.responses) \
             (self.get_on_formula)
         self.router.get("/{query}",
-                        tags=self.tags)(self.get_on_materials)
+                        tags=self.tags,
+                        responses=self.responses)(self.get_on_materials)
         self.router.get("/distinct/",
-                        tags=self.tags)(self.get_distinct_choices)
+                        tags=self.tags,
+                        responses= self.responses)(self.get_distinct_choices)
 
     async def get_on_chemsys(self, chemsys: str = Path(..., title="The task_id of the item to get"),
                              paginationParam: CommonPaginationParams = Depends()):
@@ -69,7 +76,9 @@ class MaterialEndpointCluster(EndpointCluster):
         raw_result = [c for c in cursor]
         for r in raw_result:
             material = MaterialModel(**r)
-        return raw_result[skip:skip + limit]
+        if len(raw_result) == 0:
+            return JSONResponse(status_code=404, content=self.responses[404])
+        return raw_result[skip:skip+limit]
 
     async def get_on_formula(self, formula: str = Path(..., title="The formula of the item to get"),
                              paginationParam: CommonPaginationParams = Depends()):
@@ -107,13 +116,18 @@ class MaterialEndpointCluster(EndpointCluster):
                 # pretty_formula = comp.reduced_formula
                 cursor = self.db_source.query(criteria=crit)
                 result = [c for c in cursor]
+                if len(result) == 0:
+                    return JSONResponse(status_code=404, content=self.responses[404])
                 return result[skip:skip + limit]
             except Exception as e:
                 raise e
         else:
             cursor = self.db_source.query(criteria={"formula_pretty": formula})
-            result = [] if cursor is None else [i for i in cursor]
-            return result[skip:skip + limit]
+            if cursor is None:
+                return JSONResponse(status_code=404, content=self.responses[404])
+            else:
+                result = [] if cursor is None else [i for i in cursor]
+                return result[skip:skip + limit]
 
     async def get_on_materials(self, query: str = Path(...)):
         """
@@ -198,11 +212,21 @@ class MaterialEndpointCluster(EndpointCluster):
 if __name__ == "__main__":
     json_store = JSONStore("./data/more_mats.json")
     json_store.connect()
-
+    custom_responses = {
+        204: {"description": "CUSTOM_DESCRIPTION: No content not found"},
+        302: {"description": "CUSTOM_DESCRIPTION: The item was moved"},
+        404: {"description": "CUSTOM_DESCRIPTION: NOT FOUND"},
+    }
     ## initialize endpoints
-    mp_endpoint1 = MaterialEndpointCluster(db_source=json_store, prefix="/materials1", tags=["material", "1"])
-    mp_endpoint2 = MaterialEndpointCluster(db_source=json_store, prefix="/materials2", tags=["material", "2"])
-    general_endpoint = EndpointCluster(db_source=json_store, model=SpecieModel)
+    mp_endpoint1 = MaterialEndpointCluster(db_source=json_store,
+                                           prefix="/materials1",
+                                           tags=["material", "1"],
+                                           responses=custom_responses)
+    mp_endpoint2 = MaterialEndpointCluster(db_source=json_store,
+                                           prefix="/materials2",
+                                           tags=["material", "2"])
+    general_endpoint = EndpointCluster(db_source=json_store,
+                                       model=SpecieModel)
 
     clusterManager = ClusterManager()
     clusterManager.addEndpoint(mp_endpoint1)
