@@ -2,13 +2,14 @@ import os, sys
 from maggma.stores import JSONStore
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from cluster_manager import ClusterManager
-from endpoint_cluster import EndpointCluster
+print(sys.path)
+from api.cluster_manager import ClusterManager
+from api.endpoint_cluster import EndpointCluster
 from materials.materials_endpoint import MaterialEndpointCluster
 from materials.models import SpecieModel
 
 if __name__ == "__main__":
-    json_store = JSONStore("./materials/data/more_mats.json")
+    json_store = JSONStore("./materials/data/more_mats.json.gz")
     json_store.connect()
     custom_responses = {
         204: {"description": "CUSTOM_DESCRIPTION: No content not found"},

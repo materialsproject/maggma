@@ -9,11 +9,10 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from materials.models import MaterialModel, CommonPaginationParams
 from fastapi import HTTPException, Depends
 from fastapi import Path
-
 from pymatgen.core.composition import Composition, CompositionError
 from typing import List
 from starlette.responses import RedirectResponse
-from endpoint_cluster import EndpointCluster
+from api.endpoint_cluster import EndpointCluster
 from maggma.stores import JSONStore
 from starlette.responses import JSONResponse
 
