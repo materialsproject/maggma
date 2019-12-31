@@ -84,6 +84,14 @@ class MongograntStore(MongoStore):
             (self.mongogrant_spec, self.collection_name, self.last_updated_field)
         )
 
+    @classmethod
+    def from_db_file(cls, file):
+        raise ValueError("MongograntStore doesn't implement from_db_file")
+
+    @classmethod
+    def from_collection(cls, collection):
+        raise ValueError("MongograntStore doesn't implement from_collection")
+
 
 class VaultStore(MongoStore):
     """
