@@ -127,6 +127,14 @@ def test_mgrant_connect(mgrant_server, mgrant_user):
     assert connected_user(store) == "writer"
 
 
+def test_mgrant_differences():
+    with pytest.raises(ValueError):
+        MongograntStore.from_db_file("")
+
+    with pytest.raises(ValueError):
+        MongograntStore.from_collection("")
+
+
 def vault_store():
     with patch("hvac.Client") as mock:
         instance = mock.return_value
