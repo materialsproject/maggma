@@ -1,21 +1,25 @@
-
 # import testing modules
 
 # set module path
 import os, sys
 
+
+
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # import files
-from materials.models import MaterialModel, CommonPaginationParams
+from models import MaterialModel, SpecieModel
 from fastapi import HTTPException, Depends
 from fastapi import Path
 
+from models import CommonPaginationParams
 from pymatgen.core.composition import Composition, CompositionError
 from typing import List
 from starlette.responses import RedirectResponse
 from endpoint_cluster import EndpointCluster
 from maggma.stores import JSONStore
 from starlette.responses import JSONResponse
+from cluster_manager import ClusterManager
+
 
 
 class MaterialEndpointCluster(EndpointCluster):
@@ -23,6 +27,14 @@ class MaterialEndpointCluster(EndpointCluster):
         super().__init__(db_source, MaterialModel, prefix, tags, responses)
         # initialize routes
         # self.model = MaterialModel in this case
+
+        self.router.get("/task_id/{task_id}",
+                        response_description="Get Task ID",
+                        response_model=self.model,
+                        tags=self.tags,
+                        responses=self.responses
+                        ) \
+            (self.get_on_task_id)
         self.router.get("/chemsys/{chemsys}",
                         response_description="Get all the materials that matches the chemsys field",
                         response_model=List[self.model],
@@ -40,7 +52,7 @@ class MaterialEndpointCluster(EndpointCluster):
                         responses=self.responses)(self.get_on_materials)
         self.router.get("/distinct/",
                         tags=self.tags,
-                        responses=self.responses)(self.get_distinct_choices)
+                        responses= self.responses)(self.get_distinct_choices)
 
     async def get_on_chemsys(self, chemsys: str = Path(..., title="The task_id of the item to get"),
                              paginationParam: CommonPaginationParams = Depends()):
@@ -66,8 +78,7 @@ class MaterialEndpointCluster(EndpointCluster):
             material = MaterialModel(**r)
         if len(raw_result) == 0:
             return JSONResponse(status_code=404, content=self.responses[404])
-        return raw_result[skip:skip + limit]
-
+        return raw_result[skip:skip+limit]
 
     async def get_on_formula(self, formula: str = Path(..., title="The formula of the item to get"),
                              paginationParam: CommonPaginationParams = Depends()):
@@ -128,13 +139,11 @@ class MaterialEndpointCluster(EndpointCluster):
             RedirectResponse to the correct route
         """
         if self.is_task_id(query):
-            return RedirectResponse("{}/task_id/{}".format(self.prefix, query))
+            return RedirectResponse("/task_id/{}".format(query))
         elif self.is_chemsys(query):
-            return RedirectResponse("{}/chemsys/{}".format(self.prefix, query))
+            return RedirectResponse("/chemsys/{}".format(query))
         elif self.is_formula(query):
-            return RedirectResponse("{}/formula/{}".format(self.prefix, query))
-        elif query == "distinct":
-            return RedirectResponse("{}/distinct/".format(self.prefix))
+            return RedirectResponse("/formula/{}".format(query))
         else:
             return HTTPException(status_code=404,
                                  detail="WARNING: Query <{}> does not match any of the endpoint features".format(query))
@@ -156,6 +165,23 @@ class MaterialEndpointCluster(EndpointCluster):
         for k in keys:
             result[k] = self.db_source.distinct(k)[skip:skip + limit]
         return result
+
+    async def get_on_task_id(self, task_id: str = Path(..., title="The task_id of the item to get")):
+        """
+        http://127.0.0.1:8000/task_id/mp-30933
+        Args:
+            task_id: in the format of mp-NUMBER
+
+        Returns:
+            a single material that satisfy the Material Model
+        """
+        cursor = self.db_source.query(criteria={"task_id": task_id})
+        material = cursor[0] if cursor.count() > 0 else None
+        if material:
+            material = self.model(**material)
+            return material
+        else:
+            raise HTTPException(status_code=404, detail="Item with Task_id = {} not found".format(task_id))
 
     def is_chemsys(self, query: str):
         if "-" in query:
@@ -181,3 +207,30 @@ class MaterialEndpointCluster(EndpointCluster):
             if len(splits) == 2 and splits[1].isdigit():
                 return True
         return False
+
+
+if __name__ == "__main__":
+    json_store = JSONStore("./data/more_mats.json")
+    json_store.connect()
+    custom_responses = {
+        204: {"description": "CUSTOM_DESCRIPTION: No content not found"},
+        302: {"description": "CUSTOM_DESCRIPTION: The item was moved"},
+        404: {"description": "CUSTOM_DESCRIPTION: NOT FOUND"},
+    }
+    ## initialize endpoints
+    mp_endpoint1 = MaterialEndpointCluster(db_source=json_store,
+                                           prefix="/materials1",
+                                           tags=["material", "1"],
+                                           responses=custom_responses)
+    mp_endpoint2 = MaterialEndpointCluster(db_source=json_store,
+                                           prefix="/materials2",
+                                           tags=["material", "2"])
+    general_endpoint = EndpointCluster(db_source=json_store,
+                                       model=SpecieModel)
+
+    clusterManager = ClusterManager()
+    clusterManager.addEndpoint(mp_endpoint1)
+    clusterManager.addEndpoint(mp_endpoint2)
+    clusterManager.addEndpoint(general_endpoint)
+
+    clusterManager.runAllEndpoints()
