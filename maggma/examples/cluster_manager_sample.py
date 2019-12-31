@@ -1,7 +1,6 @@
 import os, sys
 from maggma.stores import JSONStore
 
-
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from cluster_manager import ClusterManager
 from endpoint_cluster import EndpointCluster
@@ -16,7 +15,7 @@ if __name__ == "__main__":
         302: {"description": "CUSTOM_DESCRIPTION: The item was moved"},
         404: {"description": "CUSTOM_DESCRIPTION: NOT FOUND"},
     }
-    ## initialize endpoints
+
     mp_endpoint1 = MaterialEndpointCluster(db_source=json_store,
                                            prefix="/materials1",
                                            tags=["material", "1"],
