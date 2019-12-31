@@ -3,16 +3,21 @@
 Advanced Stores for behavior outside normal access patterns
 """
 import os
-import hvac
 import json
 from typing import Union, Optional, Dict, List, Iterator, Tuple
 
+from monty.dev import requires
 from maggma.core import Store, StoreError, Sort
 from maggma.stores.mongolike import MongoStore
 from maggma.utils import lazy_substitute, substitute
 from mongogrant import Client
 from mongogrant.client import check
 from mongogrant.config import Config
+
+try:
+    import hvac
+except ImportError:
+    hvac = None
 
 
 class MongograntStore(MongoStore):
@@ -86,6 +91,7 @@ class VaultStore(MongoStore):
     and uses these values to initialize MongoStore instance
     """
 
+    @requires(hvac is not None, "hvac is required to use VaultStore")
     def __init__(self, collection_name: str, vault_secret_path: str):
         """
         collection (string): name of mongo collection

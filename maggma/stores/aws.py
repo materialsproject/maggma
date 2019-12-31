@@ -9,18 +9,16 @@ import zlib
 from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
 
 from monty.json import jsanitize
-from monty.dev import deprecated
+from monty.dev import deprecated, requires
 
 from maggma.core import Store, Sort
 from maggma.utils import grouper
 
 try:
-    import boto3
     import botocore
-
-    boto_import = True
+    import boto3
 except ImportError:
-    boto_import = False
+    boto3 = None
 
 
 class AmazonS3Store(Store):
@@ -28,7 +26,8 @@ class AmazonS3Store(Store):
     GridFS like storage using Amazon S3 and a regular store for indexing
     Assumes Amazon AWS key and secret key are set in environment or default config file
     """
-
+    
+    @requires(boto3 is not None, "boto3 and botocore are required for AmazonS3Store")
     def __init__(self, index: Store, bucket: str, compress: bool = False, **kwargs):
         """
         Initializes an S3 Store
@@ -37,10 +36,6 @@ class AmazonS3Store(Store):
             bucket (str) : name of the bucket
             compress (bool): compress files inserted into the store
         """
-        if not boto_import:
-            raise ValueError(
-                "boto not available, please install boto3 to " "use AmazonS3Store"
-            )
         self.index = index
         self.bucket = bucket
         self.compress = compress
