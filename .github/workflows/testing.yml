@@ -10,15 +10,6 @@ jobs:
         image: mongo:4.0
         ports:
           - 27017:27017
-      
-      mgrant_mongodb:
-        image: mongo:4.0
-        environment:
-          MONGO_INITDB_ROOT_USERNAME: mongoadmin
-          MONGO_INITDB_ROOT_PASSWORD: mongoadminpass
-        command: --port 27020 --dbpath mongodbdata --logpath mongodblog --auth --bind_ip_all --fork
-        ports:
-          - 27020:27020
 
     strategy:
       max-parallel: 6
