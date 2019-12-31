@@ -50,6 +50,8 @@ def mgrant_server():
             "createUser", "mongoadmin", pwd="mongoadminpass", roles=["root"]
         )
         client.close()
+    else:
+        pytest.mark.skip("Disabling mongogrant tests on CI for now")
     dbname = "test_" + uuid4().hex
     db = MongoClient(f"mongodb://mongoadmin:mongoadminpass@127.0.0.1:{mdport}/admin")[
         dbname
