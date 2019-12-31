@@ -26,7 +26,7 @@ class AmazonS3Store(Store):
     GridFS like storage using Amazon S3 and a regular store for indexing
     Assumes Amazon AWS key and secret key are set in environment or default config file
     """
-    
+
     @requires(boto3 is not None, "boto3 and botocore are required for AmazonS3Store")
     def __init__(self, index: Store, bucket: str, compress: bool = False, **kwargs):
         """
