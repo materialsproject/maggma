@@ -46,7 +46,6 @@ def test_run_builder(mongostore):
         assert "SerialProcessor" in result.output
 
         result = runner.invoke(run, ["-v", "-n", "2", "test_builder.json"])
-        print(result)
         assert result.exit_code == 0
         assert "CopyBuilder" in result.output
         assert "MultiProcessor" in result.output

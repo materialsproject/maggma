@@ -80,6 +80,7 @@ class MongoStore(Store):
             self._collection = db[self.collection_name]
 
     def __hash__(self) -> int:
+        """ Hash for MongoStore """
         return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
@@ -162,6 +163,7 @@ class MongoStore(Store):
     @property  # type: ignore
     @deprecated(message="This will be removed in the future")
     def collection(self):
+        """ Property referring to underlying pymongo collection """
         if self._collection is None:
             raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._collection
@@ -270,6 +272,7 @@ class MongoStore(Store):
         self._collection.delete_many(filter=criteria)
 
     def close(self):
+        """ Close up all collections """
         self._collection.database.client.close()
 
 
@@ -280,6 +283,11 @@ class MemoryStore(MongoStore):
     """
 
     def __init__(self, collection_name: str = "memory_db", **kwargs):
+        """
+        Initializes the Memory Store
+        Args:
+            collection_name: name for the collection in memory
+        """
         self.collection_name = collection_name
         self._collection = None
         self.kwargs = kwargs
@@ -294,9 +302,11 @@ class MemoryStore(MongoStore):
 
     @property
     def name(self):
+        """ Name for the store """
         return self.collection_name
 
     def __hash__(self):
+        """ Hash for the store """
         return hash((self.name, self.last_updated_field))
 
     def groupby(
@@ -357,6 +367,9 @@ class JSONStore(MemoryStore):
         super().__init__("collection", **kwargs)
 
     def connect(self, force_reset=False):
+        """
+        Loads the files into the collection in memory
+        """
         super().connect(force_reset=force_reset)
         for path in self.paths:
             with zopen(path) as f:

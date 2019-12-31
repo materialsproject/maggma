@@ -23,11 +23,8 @@ except ImportError:
 class MongograntStore(MongoStore):
     """Initialize a Store with a mongogrant "<role>:<host>/<db>." spec.
 
-    This class does not subclass MongoStore, though it aims to reproduce
-    relevant functionality through method delegation, e.g. groupby.
-
-    It does not subclass MongoStore because some class methods of
-    MongoStore, e.g. from_db_file and from_collection, are not supported.
+    Some class methods of MongoStore, e.g. from_db_file and from_collection,
+    are not supported.
 
     mongogrant documentation: https://github.com/materialsproject/mongogrant
     """

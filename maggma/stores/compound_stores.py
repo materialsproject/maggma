@@ -1,3 +1,4 @@
+""" Special stores that combine underlying Stores together """
 from typing import List, Iterator, Tuple, Optional, Union, Dict, Any
 from datetime import datetime
 from itertools import groupby
@@ -23,6 +24,19 @@ class JointStore(Store):
         merge_at_root: bool = False,
         **kwargs
     ):
+        """
+        Args:
+            database: The database name
+            collection_names: list of all collections
+                to join
+            host: Hostname for the database
+            port: TCP port to connect to
+            username: Username for the collection
+            password: Password to connect with
+            master: name for the master collection
+                if not specified this defaults to the first
+                in collection_names list
+        """
         self.database = database
         self.collection_names = collection_names
         self.host = host
@@ -42,6 +56,12 @@ class JointStore(Store):
         return self.master
 
     def connect(self, force_reset: bool = False):
+        """
+        Connects the underlying Mongo database and
+        all collection connections
+        Args:
+            force_reset - whether to forcibly reset the connection
+        """
         conn = MongoClient(self.host, self.port)
         db = conn[self.database]
         if self.username != "":
@@ -52,36 +72,60 @@ class JointStore(Store):
         )
 
     def close(self):
+        """
+        Closes underlying database connections
+        """
         self._collection.database.client.close()
 
     @property  # type: ignore
     @deprecated("This will be removed in the future")
     def collection(self):
+        """
+        The root collection for this JointStore
+        """
         return self._collection
 
     @property
-    def nonmaster_names(self):
+    def nonmaster_names(self) -> List:
+        """
+        alll non-master collection names
+        """
         return list(set(self.collection_names) - {self.master})
 
     @property
-    def last_updated(self):
+    def last_updated(self) -> datetime:
+        """
+        Special last_updated for this JointStore
+        that checks all underlying collections
+        """
         lus = []
         for cname in self.collection_names:
-            lu = MongoStore.from_collection(
-                self._collection.database[cname],
-                last_updated_field=self.last_updated_field,
-            ).last_updated
+            store = MongoStore.from_collection(self._collection.database[cname])
+            store.last_updated_field = self.last_updated_field
+            lu = store.last_updated
             lus.append(lu)
         return max(lus)
 
     # TODO: implement update?
     def update(self, docs, update_lu=True, key=None, **kwargs):
+        """
+        Update documents into the underlying collections
+        Not Implemented for JointStore
+        """
         raise NotImplementedError("No update method for JointStore")
 
-    def _get_store_by_name(self, name):
+    def _get_store_by_name(self, name) -> MongoStore:
+        """
+        Gets an underlying collection as a mongoStore
+        """
+        if name not in self.collection_names:
+            raise ValueError("Asking for collection not referenced in this Store")
         return MongoStore.from_collection(self._collection.database[name])
 
     def ensure_index(self, key, unique=False, **kwargs):
+        """
+        Can't ensure index for JointStore
+        """
         raise NotImplementedError("No ensure_index method for JointStore")
 
     def _get_pipeline(self, criteria=None, properties=None, skip=0, limit=0):

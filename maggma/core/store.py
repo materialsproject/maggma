@@ -21,11 +21,13 @@ from maggma.core import Validator
 
 
 class Sort(Enum):
+    """ Enumeration for sorting order """
     Ascending = 1
     Descending = -1
 
 
 class DateTimeFormat(Enum):
+    """ Datetime format in store document """
     DateTime = "datetime"
     IsoFormat = "isoformat"
 

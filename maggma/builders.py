@@ -64,7 +64,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         super().__init__(sources=[source], targets=[target], **kwargs)
 
     def ensure_indexes(self):
-
+        """
+        Ensures indicies on critical fields for MapBuilder
+        """
         index_checks = [
             self.source.ensure_index(self.source.key),
             self.source.ensure_index(self.source.last_updated_field),
@@ -186,6 +188,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             target.update(items)
 
     def finalize(self):
+        """
+        Finalize MapBuilder operations including removing orphaned documents
+        """
         if self.delete_orphans:
             source_keyvals = set(self.source.distinct(self.source.key))
             target_keyvals = set(self.target.distinct(self.target.key))
@@ -219,6 +224,9 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     """
 
     def get_items(self) -> Iterator[Dict]:
+        """
+        Rebuilt get_items for GroupBuilder
+        """
         criteria = {
             self.source.key: {
                 "$in": self.target.newer_in(self.source, criteria=self.query)
@@ -287,4 +295,9 @@ class CopyBuilder(MapBuilder):
     """Sync a source store with a target store."""
 
     def unary_function(self, item):
+        """
+        Identity function for copy builder map operation
+        """
+        if "_id" in item:
+            del item["_id"]
         return item

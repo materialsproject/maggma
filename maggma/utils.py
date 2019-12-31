@@ -41,9 +41,15 @@ class TqdmLoggingHandler(logging.Handler):
     """
 
     def __init__(self, level=logging.NOTSET):
+        """
+        Initialize the Tqdm handler
+        """
         super().__init__(level)
 
     def emit(self, record):
+        """
+        Emit a record via Tqdm screen
+        """
         try:
             msg = self.format(record)
             tqdm.write(msg)
@@ -159,7 +165,10 @@ def unset(d, key):
 
 
 class Timeout:
-    # implementation courtesy of https://stackoverflow.com/a/22348885/637562
+    """
+    Context manager that provides context.
+    implementation courtesy of https://stackoverflow.com/a/22348885/637562
+    """
 
     def __init__(self, seconds=14, error_message=""):
         """
@@ -174,13 +183,22 @@ class Timeout:
         self.error_message = error_message
 
     def handle_timeout(self, signum, frame):
+        """
+        Raises an error on timeout
+        """
         raise TimeoutError(self.error_message)
 
     def __enter__(self):
+        """
+        Enter context with timeout
+        """
         if self.seconds:
             signal.signal(signal.SIGALRM, self.handle_timeout)
             signal.alarm(self.seconds)
 
     def __exit__(self, type, value, traceback):
+        """
+        Exit context with timeout
+        """
         if self.seconds:
             signal.alarm(0)
