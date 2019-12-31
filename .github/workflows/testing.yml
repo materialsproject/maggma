@@ -32,6 +32,8 @@ jobs:
         pip install -r requirements-testing.txt
         pip install -r requirements-optional.txt
     - name: Test with pytest
+      env:
+        CONTINUOUS_INTEGRATION: True
       run: |
         pip install -e .
         pytest --cov=maggma

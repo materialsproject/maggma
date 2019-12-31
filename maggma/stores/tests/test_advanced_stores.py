@@ -38,7 +38,7 @@ def mgrant_server():
     _, mdlogpath = tempfile.mkstemp()
     mdpath = tempfile.mkdtemp()
     mdport = 27020
-    if not (os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS")):
+    if not os.getenv("CONTINUOUS_INTEGRATION"):
         basecmd = (
             f"mongod --port {mdport} --dbpath {mdpath} --quiet --logpath {mdlogpath} "
             "--bind_ip_all --auth"
