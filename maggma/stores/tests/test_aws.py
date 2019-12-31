@@ -4,7 +4,6 @@ import boto3
 import zlib
 from moto import mock_s3
 from maggma.stores import MemoryStore, AmazonS3Store
-import maggma.stores.aws
 from botocore.exceptions import ClientError
 
 
@@ -70,16 +69,9 @@ def test_close(s3store):
         list(s3store.query())
 
 
-@pytest.fixture
-def bad_import():
-    temp_var = maggma.stores.aws.boto3
-    maggma.stores.aws.boto3 = None
-    yield
-    maggma.stores.aws.boto3 = temp_var
-
-
-def test_bad_impot(bad_import):
-    with pytest.raises(ValueError):
+def test_bad_import(mocker):
+    mocker.patch("maggma.stores.aws.boto3", None)
+    with pytest.raises(RuntimeError):
         index = MemoryStore("index'")
         AmazonS3Store(index, "bucket1")
 
