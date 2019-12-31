@@ -72,9 +72,10 @@ def test_close(s3store):
 
 @pytest.fixture
 def bad_import():
-    maggma.stores.aws.boto_import = False
+    temp_var = maggma.stores.aws.boto3
+    maggma.stores.aws.boto3 = None
     yield
-    maggma.stores.aws.boto_import = True
+    maggma.stores.aws.boto3 = temp_var
 
 
 def test_bad_impot(bad_import):
