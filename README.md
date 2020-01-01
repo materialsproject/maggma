@@ -1,4 +1,5 @@
 
-# Maggma [![Build Status](https://travis-ci.org/materialsproject/maggma.svg?branch=master)](https://travis-ci.org/materialsproject/maggma)
+# Maggma 
+![](https://github.com/materialsproject/maggma/workflows/linting/badge.svg) ![](https://github.com/materialsproject/maggma/workflows/testing/badge.svg)
 
 Workflow tools for MongoDB aggregation in Python
