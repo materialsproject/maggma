@@ -37,3 +37,6 @@ jobs:
       run: |
         pip install -e .
         pytest --cov=maggma
+    - uses: codecov/codecov-action@v1
+      with:
+        token: ${{ secrets.CODECOV_TOKEN }}
