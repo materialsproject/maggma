@@ -1,4 +1,4 @@
-name: Python Linting
+name: linting
 
 on: [push, pull_request]
 

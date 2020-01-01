@@ -1,4 +1,4 @@
-name: Maggma testing
+name: testing
 
 on: [push, pull_request]
 
