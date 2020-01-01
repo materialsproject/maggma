@@ -3,6 +3,15 @@ import numpy as np
 import numpy.testing.utils as nptu
 from datetime import datetime
 from maggma.stores import GridFSStore
+from maggma.stores import MongoStore
+
+
+@pytest.fixture
+def mongostore():
+    store = MongoStore("maggma_test", "test")
+    store.connect()
+    yield store
+    store._collection.drop()
 
 
 @pytest.fixture
@@ -160,3 +169,9 @@ def test_distinct(gridfsstore):
         )
 
     assert set(gridfsstore.distinct("a")) == {1, 2}
+
+
+def test_eq(mongostore, gridfsstore):
+    assert gridfsstore == gridfsstore
+
+    assert mongostore != gridfsstore
