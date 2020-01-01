@@ -58,7 +58,7 @@ class MongograntStore(MongoStore):
                 "arguments. Use `mongogrant_spec`."
             )
         self.kwargs = kwargs
-        super(MongoStore, self).__init__(**kwargs)
+        super(MongoStore, self).__init__(**kwargs)  # noqa
 
     def connect(self, force_reset: bool = False):
         """

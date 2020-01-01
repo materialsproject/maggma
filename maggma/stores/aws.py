@@ -246,7 +246,8 @@ class AmazonS3Store(Store):
             # Can remove up to 1000 items at a time via boto
             to_remove_chunks = list(grouper(to_remove, n=1000))
             for chunk_to_remove in to_remove_chunks:
-                self.s3_bucket.delete_objects()
+                objlist = [{"Key": obj} for obj in chunk_to_remove]
+                self.s3_bucket.delete_objects(Delete={"Objects": objlist})
 
     @property
     def last_updated(self):

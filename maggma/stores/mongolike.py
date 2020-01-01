@@ -291,7 +291,7 @@ class MemoryStore(MongoStore):
         self.collection_name = collection_name
         self._collection = None
         self.kwargs = kwargs
-        super(MongoStore, self).__init__(**kwargs)
+        super(MongoStore, self).__init__(**kwargs)  # noqa
 
     def connect(self, force_reset: bool = False):
         """
