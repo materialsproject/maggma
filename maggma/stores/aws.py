@@ -285,3 +285,14 @@ class AmazonS3Store(Store):
             index_docs.append(file.metadata)
 
         self.index.update(index_docs)
+
+    def __eq__(self, other: "AmazonS3Store") -> bool:
+        """
+        Check equality for AmazonS3Store
+        other: other AmazonS3Store to compare with
+        """
+        if not isinstance(other, AmazonS3Store):
+            return False
+
+        fields = ["index", "bucket", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)

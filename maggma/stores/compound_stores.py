@@ -274,6 +274,24 @@ class JointStore(Store):
         """
         raise NotImplementedError("No remove_docs method for JointStore")
 
+    def __eq__(self, other: "JointStore") -> bool:
+        """
+        Check equality for JointStore
+        other: other JointStore to compare with
+        """
+        if not isinstance(other, JointStore):
+            return False
+
+        fields = [
+            "database",
+            "collection_names",
+            "host",
+            "port",
+            "master",
+            "merge_at_root",
+        ]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
+
 
 class ConcatStore(Store):
     """Store concatting multiple stores"""
@@ -464,3 +482,14 @@ class ConcatStore(Store):
             criteria: query dictionary to match
         """
         raise NotImplementedError("No remove_docs method for JointStore")
+
+    def __eq__(self, other: "ConcatStore") -> bool:
+        """
+        Check equality for ConcatStore
+        other: other ConcatStore to compare with
+        """
+        if not isinstance(other, ConcatStore):
+            return False
+
+        fields = ["stores"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
