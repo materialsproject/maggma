@@ -364,7 +364,7 @@ class JSONStore(MemoryStore):
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
         self.kwargs = kwargs
-        super().__init__("collection", **kwargs)
+        super().__init__(collectoin_name="collection", **kwargs)
 
     def connect(self, force_reset=False):
         """
