@@ -3,10 +3,10 @@
 Advanced Stores for behavior outside normal access patterns
 """
 import os
-import hvac
 import json
 from typing import Union, Optional, Dict, List, Iterator, Tuple
 
+from monty.dev import requires
 from maggma.core import Store, StoreError, Sort
 from maggma.stores.mongolike import MongoStore
 from maggma.utils import lazy_substitute, substitute
@@ -14,15 +14,17 @@ from mongogrant import Client
 from mongogrant.client import check
 from mongogrant.config import Config
 
+try:
+    import hvac
+except ImportError:
+    hvac = None
+
 
 class MongograntStore(MongoStore):
     """Initialize a Store with a mongogrant "<role>:<host>/<db>." spec.
 
-    This class does not subclass MongoStore, though it aims to reproduce
-    relevant functionality through method delegation, e.g. groupby.
-
-    It does not subclass MongoStore because some class methods of
-    MongoStore, e.g. from_db_file and from_collection, are not supported.
+    Some class methods of MongoStore, e.g. from_db_file and from_collection,
+    are not supported.
 
     mongogrant documentation: https://github.com/materialsproject/mongogrant
     """
@@ -79,6 +81,14 @@ class MongograntStore(MongoStore):
             (self.mongogrant_spec, self.collection_name, self.last_updated_field)
         )
 
+    @classmethod
+    def from_db_file(cls, file):
+        raise ValueError("MongograntStore doesn't implement from_db_file")
+
+    @classmethod
+    def from_collection(cls, collection):
+        raise ValueError("MongograntStore doesn't implement from_collection")
+
 
 class VaultStore(MongoStore):
     """
@@ -86,6 +96,7 @@ class VaultStore(MongoStore):
     and uses these values to initialize MongoStore instance
     """
 
+    @requires(hvac is not None, "hvac is required to use VaultStore")
     def __init__(self, collection_name: str, vault_secret_path: str):
         """
         collection (string): name of mongo collection

@@ -123,13 +123,14 @@ class GridFSStore(Store):
         Args:
             criteria (dict): Query criteria
         """
-        new_criteria = dict(**criteria)
-        for field in new_criteria:
+        new_criteria = dict()
+        for field in criteria:
             if field not in cls.files_collection_fields and not field.startswith(
                 "metadata."
             ):
-                new_criteria["metadata." + field] = copy.copy(new_criteria[field])
-                del new_criteria[field]
+                new_criteria["metadata." + field] = copy.copy(criteria[field])
+            else:
+                new_criteria[field] = copy.copy(criteria[field])
 
         return new_criteria
 

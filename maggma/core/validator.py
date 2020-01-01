@@ -7,7 +7,7 @@ that Store.
 
 from abc import ABCMeta, abstractmethod
 from monty.json import MSONable
-from typing import Dict
+from typing import Dict, List
 
 
 class Validator(MSONable, metaclass=ABCMeta):
@@ -20,13 +20,18 @@ class Validator(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def is_valid(self, doc: Dict) -> bool:
         """
-        Returns (bool): True if document valid, False if document
-        invalid
+        Determines if the document is valid
+        Args:
+            doc - document to check
         """
 
     @abstractmethod
-    def validation_errors(self, doc: Dict) -> bool:
+    def validation_errors(self, doc: Dict) -> List[str]:
         """
-        Returns (bool): if document is not valid, provide a list of
+        If document is not valid, provides a list of
         strings to display for why validation has failed
+
+        Returns empty list if the document is valid
+        Args:
+            doc - document to check
         """

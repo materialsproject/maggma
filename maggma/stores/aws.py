@@ -15,12 +15,10 @@ from maggma.core import Store, Sort
 from maggma.utils import grouper
 
 try:
-    import boto3
     import botocore
-
-    boto_import = True
+    import boto3
 except ImportError:
-    boto_import = False
+    boto3 = None
 
 
 class AmazonS3Store(Store):
@@ -37,10 +35,8 @@ class AmazonS3Store(Store):
             bucket (str) : name of the bucket
             compress (bool): compress files inserted into the store
         """
-        if not boto_import:
-            raise ValueError(
-                "boto not available, please install boto3 to " "use AmazonS3Store"
-            )
+        if boto3 is None:
+            raise RuntimeError("boto3 and botocore are required for AmazonS3Store")
         self.index = index
         self.bucket = bucket
         self.compress = compress

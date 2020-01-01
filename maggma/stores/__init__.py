@@ -1,3 +1,4 @@
+""" Root store module with easy imports for implemented Stores """
 from maggma.stores.mongolike import MongoStore, JSONStore, MemoryStore
 from maggma.stores.gridfs import GridFSStore
 from maggma.stores.advanced_stores import (

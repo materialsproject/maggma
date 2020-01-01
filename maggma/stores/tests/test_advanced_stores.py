@@ -38,7 +38,7 @@ def mgrant_server():
     _, mdlogpath = tempfile.mkstemp()
     mdpath = tempfile.mkdtemp()
     mdport = 27020
-    if not (os.getenv("CONTINUOUS_INTEGRATION") and os.getenv("TRAVIS")):
+    if not os.getenv("CONTINUOUS_INTEGRATION"):
         basecmd = (
             f"mongod --port {mdport} --dbpath {mdpath} --quiet --logpath {mdlogpath} "
             "--bind_ip_all --auth"
@@ -50,6 +50,8 @@ def mgrant_server():
             "createUser", "mongoadmin", pwd="mongoadminpass", roles=["root"]
         )
         client.close()
+    else:
+        pytest.skip("Disabling mongogrant tests on CI for now")
     dbname = "test_" + uuid4().hex
     db = MongoClient(f"mongodb://mongoadmin:mongoadminpass@127.0.0.1:{mdport}/admin")[
         dbname
@@ -125,6 +127,14 @@ def test_mgrant_connect(mgrant_server, mgrant_user):
     store.connect()
     assert isinstance(store._collection, Collection)
     assert connected_user(store) == "writer"
+
+
+def test_mgrant_differences():
+    with pytest.raises(ValueError):
+        MongograntStore.from_db_file("")
+
+    with pytest.raises(ValueError):
+        MongograntStore.from_collection("")
 
 
 def vault_store():
