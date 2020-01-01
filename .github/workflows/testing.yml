@@ -36,7 +36,8 @@ jobs:
         CONTINUOUS_INTEGRATION: True
       run: |
         pip install -e .
-        pytest --cov=maggma
+        pytest --cov=maggma --cov-report=xml
     - uses: codecov/codecov-action@v1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        file: ./coverage.xml
