@@ -275,7 +275,7 @@ class MongoStore(Store):
         """ Close up all collections """
         self._collection.database.client.close()
 
-    def __eq__(self, other: "MongoStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for MongoStore
         other: other mongostore to compare with
@@ -360,7 +360,7 @@ class MemoryStore(MongoStore):
                 set_(doc, k, v)
             yield doc, list(group)
 
-    def __eq__(self, other: "MemoryStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for MemoryStore
         other: other MemoryStore to compare with
@@ -404,7 +404,7 @@ class JSONStore(MemoryStore):
     def __hash__(self):
         return hash((*self.paths, self.last_updated_field))
 
-    def __eq__(self, other: "JSONStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for JSONStore
         other: other JSONStore to compare with

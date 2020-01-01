@@ -286,7 +286,7 @@ class AmazonS3Store(Store):
 
         self.index.update(index_docs)
 
-    def __eq__(self, other: "AmazonS3Store") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for AmazonS3Store
         other: other AmazonS3Store to compare with

@@ -89,7 +89,7 @@ class MongograntStore(MongoStore):
     def from_collection(cls, collection):
         raise ValueError("MongograntStore doesn't implement from_collection")
 
-    def __eq__(self, other: "MongograntStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for MongograntStore
         other: other MongograntStore to compare with
@@ -160,7 +160,7 @@ class VaultStore(MongoStore):
             database, collection_name, host, port, username, password
         )
 
-    def __eq__(self, other: "VaultStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for VaultStore
         other: other VaultStore to compare with
@@ -342,7 +342,7 @@ class AliasingStore(Store):
     def connect(self, force_reset=False):
         self.store.connect(force_reset=force_reset)
 
-    def __eq__(self, other: "AliasingStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for AliasingStore
         other: other AliasingStore to compare with
@@ -495,7 +495,7 @@ class SandboxStore(Store):
     def connect(self, force_reset=False):
         self.store.connect(force_reset=force_reset)
 
-    def __eq__(self, other: "SandboxStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for SandboxStore
         other: other SandboxStore to compare with

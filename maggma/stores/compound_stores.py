@@ -274,7 +274,7 @@ class JointStore(Store):
         """
         raise NotImplementedError("No remove_docs method for JointStore")
 
-    def __eq__(self, other: "JointStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for JointStore
         other: other JointStore to compare with
@@ -483,7 +483,7 @@ class ConcatStore(Store):
         """
         raise NotImplementedError("No remove_docs method for JointStore")
 
-    def __eq__(self, other: "ConcatStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for ConcatStore
         other: other ConcatStore to compare with

@@ -344,7 +344,7 @@ class GridFSStore(Store):
     def close(self):
         self._collection.database.client.close()
 
-    def __eq__(self, other: "GridFSStore") -> bool:
+    def __eq__(self, other: object) -> bool:
         """
         Check equality for GridFSStore
         other: other GridFSStore to compare with
