@@ -5,6 +5,5 @@
 - [ ] I have broken down my PR scope into the following TODO tasks
    -  [ ] task 1
    -  [ ] task 2
-- [ ] I have run the tests locally and they passed. 
+- [ ] I have run the tests locally and they passed.
 - [ ] I have added tests, or extended existing tests, to cover any new features or bugs fixed in this PR
-
