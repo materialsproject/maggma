@@ -7,25 +7,26 @@ from maggma import __version__
 
 
 @task
-def setver(c, patch=False, new_ver=''):
+def setver(c, patch=False, new_ver=""):
     if (not patch and not new_ver) or (patch and new_ver):
-        raise Exception("Either use --patch or specify "
-                        "e.g. --new-ver=\"x.y.z\".")
+        raise Exception("Either use --patch or specify " 'e.g. --new-ver="x.y.z".')
     if patch:
         v = [int(x) for x in __version__.split(".")]
         v[2] += 1
         new_ver = ".".join(map(str, v))
     with open("maggma/__init__.py", "r") as f:
-        lines = [re.sub('__version__ = .+',
-                        '__version__ = "{}"'.format(new_ver),
-                        l.rstrip()) for l in f]
+        lines = [
+            re.sub("__version__ = .+", '__version__ = "{}"'.format(new_ver), l.rstrip())
+            for l in f
+        ]
     with open("maggma/__init__.py", "w") as f:
         f.write("\n".join(lines))
 
     with open("setup.py", "r") as f:
-        lines = [re.sub('version=([^,]+),',
-                        'version="{}",'.format(new_ver),
-                        l.rstrip()) for l in f]
+        lines = [
+            re.sub("version=([^,]+),", 'version="{}",'.format(new_ver), l.rstrip())
+            for l in f
+        ]
     with open("setup.py", "w") as f:
         f.write("\n".join(lines))
         f.write("\n")
