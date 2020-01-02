@@ -122,6 +122,9 @@ class VaultStore(MongoStore):
         VAULT_ADDR - URL of vault server (eg. https://matgen8.lbl.gov:8200)
         VAULT_TOKEN or GITHUB_TOKEN - token used to authenticate to vault
         """
+        self.collection_name = collection_name
+        self.vault_secret_path = vault_secret_path
+
         # TODO: Switch this over to Pydantic ConfigSettings
         vault_addr = os.getenv("VAULT_ADDR")
 
