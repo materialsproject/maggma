@@ -10,7 +10,10 @@ from maggma.stores import MongoStore
 
 
 class JointStore(Store):
-    """Store corresponding to multiple collections, uses lookup to join"""
+    """
+    Store that implements a on-the-fly join across multiple collections all in the same MongoDB database.
+    This is a Read-Only Store designed to combine data from multiple collections.
+    """
 
     def __init__(
         self,
@@ -112,7 +115,7 @@ class JointStore(Store):
         Update documents into the underlying collections
         Not Implemented for JointStore
         """
-        raise NotImplementedError("No update method for JointStore")
+        raise NotImplementedError("JointStore is a read-only store")
 
     def _get_store_by_name(self, name) -> MongoStore:
         """
@@ -140,46 +143,46 @@ class JointStore(Store):
             list of aggregation operators
         """
         pipeline = []
-        for cname in self.collection_names:
-            if cname is not self.master:
+        collection_names = list(set(self.collection_names) - set(self.master))
+        for cname in collection_names:
+            pipeline.append(
+                {
+                    "$lookup": {
+                        "from": cname,
+                        "localField": self.key,
+                        "foreignField": self.key,
+                        "as": cname,
+                    }
+                }
+            )
+
+            if self.merge_at_root:
+                if not self._has_merge_objects:
+                    raise Exception(
+                        "MongoDB server version too low to use $mergeObjects."
+                    )
+
                 pipeline.append(
                     {
-                        "$lookup": {
-                            "from": cname,
-                            "localField": self.key,
-                            "foreignField": self.key,
-                            "as": cname,
+                        "$replaceRoot": {
+                            "newRoot": {
+                                "$mergeObjects": [
+                                    {"$arrayElemAt": ["${}".format(cname), 0]},
+                                    "$$ROOT",
+                                ]
+                            }
                         }
                     }
                 )
-
-                if self.merge_at_root:
-                    if not self._has_merge_objects:
-                        raise Exception(
-                            "MongoDB server version too low to use $mergeObjects."
-                        )
-
-                    pipeline.append(
-                        {
-                            "$replaceRoot": {
-                                "newRoot": {
-                                    "$mergeObjects": [
-                                        {"$arrayElemAt": ["${}".format(cname), 0]},
-                                        "$$ROOT",
-                                    ]
-                                }
-                            }
+            else:
+                pipeline.append(
+                    {
+                        "$unwind": {
+                            "path": "${}".format(cname),
+                            "preserveNullAndEmptyArrays": True,
                         }
-                    )
-                else:
-                    pipeline.append(
-                        {
-                            "$unwind": {
-                                "path": "${}".format(cname),
-                                "preserveNullAndEmptyArrays": True,
-                            }
-                        }
-                    )
+                    }
+                )
 
         # Do projection for max last_updated
         lu_max_fields = ["${}".format(self.last_updated_field)]
