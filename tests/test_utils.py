@@ -10,6 +10,7 @@ from maggma.utils import (
     primed,
     dt_to_isoformat_ceil_ms,
     isostr_to_dt,
+    dynamic_import,
 )
 from time import sleep
 from datetime import datetime
@@ -71,3 +72,8 @@ def test_datetime_utils():
     assert isostr_to_dt("2019-12-13T00:23:11.010") == datetime(
         2019, 12, 13, 0, 23, 11, 10000
     )
+
+
+def test_dynamic_import():
+
+    assert dynamic_import("maggma.stores", "MongoStore").__name__ == "MongoStore"
