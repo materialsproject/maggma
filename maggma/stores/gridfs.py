@@ -344,6 +344,17 @@ class GridFSStore(Store):
     def close(self):
         self._collection.database.client.close()
 
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for GridFSStore
+        other: other GridFSStore to compare with
+        """
+        if not isinstance(other, GridFSStore):
+            return False
+
+        fields = ["database", "collection_name", "host", "port"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
+
 
 class StoreError(Exception):
     """General Store-related error."""

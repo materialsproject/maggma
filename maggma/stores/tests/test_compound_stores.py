@@ -5,6 +5,14 @@ from itertools import chain
 from maggma.stores import MongoStore, MemoryStore, JointStore, ConcatStore
 
 
+@pytest.fixture
+def mongostore():
+    store = MongoStore("maggma_test", "test")
+    store.connect()
+    yield store
+    store._collection.drop()
+
+
 @pytest.fixture("module")
 def jointstore():
     store = JointStore("maggma_test", ["test1", "test2"])
@@ -190,3 +198,12 @@ def test_concat_store_query(concat_store):
     t_ids = [d["task_id"] for d in docs]
     assert len(t_ids) == len(set(t_ids))
     assert len(t_ids) == 40
+
+
+def test_eq(mongostore, jointstore, concat_store):
+    assert jointstore == jointstore
+    assert concat_store == concat_store
+
+    assert mongostore != jointstore
+    assert mongostore != concat_store
+    assert jointstore != concat_store

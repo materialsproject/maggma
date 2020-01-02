@@ -31,6 +31,14 @@ from maggma.stores import (
 from maggma.stores.advanced_stores import substitute
 
 
+@pytest.fixture
+def mongostore():
+    store = MongoStore("maggma_test", "test")
+    store.connect()
+    yield store
+    store._collection.drop()
+
+
 @pytest.fixture("module")
 def mgrant_server():
     # TODO: This is whacked code that starts a mongo server. How do we fix this?
@@ -341,3 +349,38 @@ def test_sandbox_remove_docs(sandbox_store):
         is None
     )
     assert sandbox_store.query_one(criteria={"e": 7})
+
+
+@pytest.fixture
+def mgrantstore(mgrant_server, mgrant_user):
+    config_path, mdport, dbname = mgrant_server
+    assert mgrant_user is not None
+    store = MongograntStore(
+        "ro:testhost/testdb", "tasks", mgclient_config_path=config_path
+    )
+    store.connect()
+
+    return store
+
+
+@pytest.fixture
+def vaultstore():
+    os.environ["VAULT_ADDR"] = "https://fake:8200/"
+    os.environ["VAULT_TOKEN"] = "dummy"
+
+    # Just test that we successfully instantiated
+    v = vault_store()
+    return v
+
+
+def test_eq(mgrantstore, vaultstore, alias_store, sandbox_store):
+
+    assert mgrantstore == mgrantstore
+    assert alias_store == alias_store
+    assert sandbox_store == sandbox_store
+    assert vaultstore == vaultstore
+
+    assert sandbox_store != mgrantstore
+    assert mgrantstore != sandbox_store
+    assert alias_store != vaultstore
+    assert vaultstore != alias_store

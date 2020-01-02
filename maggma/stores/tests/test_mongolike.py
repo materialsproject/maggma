@@ -22,6 +22,16 @@ def memorystore():
     return store
 
 
+@pytest.fixture
+def jsonstore(test_dir):
+
+    files = []
+    for f in ["a.json", "b.json"]:
+        files.append(test_dir / "test_set" / f)
+
+    return JSONStore(files)
+
+
 def test_mongostore_connect():
     mongostore = MongoStore("maggma_test", "test")
     assert mongostore._collection is None
@@ -222,15 +232,20 @@ def test_groupby(memorystore):
     assert len(data) == 2
 
 
-def test_json_store_load(test_dir):
-    files = []
-    for f in ["a.json", "b.json"]:
-        files.append(test_dir / "test_set" / f)
-
-    jsonstore = JSONStore(files)
+def test_json_store_load(jsonstore, test_dir):
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
 
     jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz")
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
+
+
+def test_eq(mongostore, memorystore, jsonstore):
+    assert mongostore == mongostore
+    assert memorystore == memorystore
+    assert jsonstore == jsonstore
+
+    assert mongostore != memorystore
+    assert mongostore != jsonstore
+    assert memorystore != jsonstore

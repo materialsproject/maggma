@@ -275,6 +275,17 @@ class MongoStore(Store):
         """ Close up all collections """
         self._collection.database.client.close()
 
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for MongoStore
+        other: other mongostore to compare with
+        """
+        if not isinstance(other, MongoStore):
+            return False
+
+        fields = ["database", "collection_name", "host", "port", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
+
 
 class MemoryStore(MongoStore):
     """
@@ -349,6 +360,17 @@ class MemoryStore(MongoStore):
                 set_(doc, k, v)
             yield doc, list(group)
 
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for MemoryStore
+        other: other MemoryStore to compare with
+        """
+        if not isinstance(other, MemoryStore):
+            return False
+
+        fields = ["collection_name", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
+
 
 class JSONStore(MemoryStore):
     """
@@ -364,7 +386,7 @@ class JSONStore(MemoryStore):
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
         self.kwargs = kwargs
-        super().__init__("collection", **kwargs)
+        super().__init__(collection_name="collection", **kwargs)
 
     def connect(self, force_reset=False):
         """
@@ -381,3 +403,14 @@ class JSONStore(MemoryStore):
 
     def __hash__(self):
         return hash((*self.paths, self.last_updated_field))
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for JSONStore
+        other: other JSONStore to compare with
+        """
+        if not isinstance(other, JSONStore):
+            return False
+
+        fields = ["paths", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)

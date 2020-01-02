@@ -89,6 +89,22 @@ class MongograntStore(MongoStore):
     def from_collection(cls, collection):
         raise ValueError("MongograntStore doesn't implement from_collection")
 
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for MongograntStore
+        other: other MongograntStore to compare with
+        """
+        if not isinstance(other, MongograntStore):
+            return False
+
+        fields = [
+            "mongogrant_spec",
+            "collection_name",
+            "mgclient_config_path",
+            "last_updated_field",
+        ]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
+
 
 class VaultStore(MongoStore):
     """
@@ -106,6 +122,9 @@ class VaultStore(MongoStore):
         VAULT_ADDR - URL of vault server (eg. https://matgen8.lbl.gov:8200)
         VAULT_TOKEN or GITHUB_TOKEN - token used to authenticate to vault
         """
+        self.collection_name = collection_name
+        self.vault_secret_path = vault_secret_path
+
         # TODO: Switch this over to Pydantic ConfigSettings
         vault_addr = os.getenv("VAULT_ADDR")
 
@@ -143,6 +162,17 @@ class VaultStore(MongoStore):
         super(VaultStore, self).__init__(
             database, collection_name, host, port, username, password
         )
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for VaultStore
+        other: other VaultStore to compare with
+        """
+        if not isinstance(other, VaultStore):
+            return False
+
+        fields = ["vault_secret_path", "collection_name", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
 class AliasingStore(Store):
@@ -315,6 +345,17 @@ class AliasingStore(Store):
     def connect(self, force_reset=False):
         self.store.connect(force_reset=force_reset)
 
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for AliasingStore
+        other: other AliasingStore to compare with
+        """
+        if not isinstance(other, AliasingStore):
+            return False
+
+        fields = ["store", "aliases", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
+
 
 class SandboxStore(Store):
     """
@@ -456,3 +497,14 @@ class SandboxStore(Store):
 
     def connect(self, force_reset=False):
         self.store.connect(force_reset=force_reset)
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for SandboxStore
+        other: other SandboxStore to compare with
+        """
+        if not isinstance(other, SandboxStore):
+            return False
+
+        fields = ["store", "sandbox", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)

@@ -5,6 +5,15 @@ import zlib
 from moto import mock_s3
 from maggma.stores import MemoryStore, AmazonS3Store
 from botocore.exceptions import ClientError
+from maggma.stores import MongoStore
+
+
+@pytest.fixture
+def mongostore():
+    store = MongoStore("maggma_test", "test")
+    store.connect()
+    yield store
+    store._collection.drop()
 
 
 @pytest.fixture
@@ -92,3 +101,8 @@ def test_aws_error(s3store):
     # Should just pass
     s3store.s3_bucket.Object = raise_exception_404
     s3store.query_one()
+
+
+def test_eq(mongostore, s3store):
+    assert s3store == s3store
+    assert mongostore != s3store
