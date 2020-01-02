@@ -1,78 +1,118 @@
-from fastapi import FastAPI, APIRouter, Path, HTTPException
+from typing import List, Dict, Union, Optional
+from pydantic import BaseModel
 from monty.json import MSONable
-import pydantic
+from fastapi import FastAPI, APIRouter, Path, HTTPException
+from maggma.core import Store
+from maggma.api import default_error_responses as default_responses
+from maggma.utils import dynamic_import
 
 
 class EndpointCluster(MSONable):
+    """
+    Implements an endpoint cluster which is a REST Compatible Resource as
+    a URL endpoint
+    """
+
     def __init__(
         self,
-        db_source,
-        model: pydantic.BaseModel,
-        prefix: str = "",
-        tags: list = [],
-        responses: dict = {},
-    ):
-        self.db_source = db_source
-        self.router = APIRouter()
-        # self.app = app # no need, include router in manager
-        self.prefix = prefix
-        self.model = model
-        self.tags = tags
-        self.responses = default_responses.copy()
-
-        self.responses.update(responses)
-
-        self.router.post("/simple_post")(self.simple_post)
-        self.router.get("/", tags=self.tags, responses=self.responses)(self.root)
-        self.router.get(
-            "/task_id/{task_id}",
-            response_description="Get Task ID",
-            response_model=self.model,
-            tags=self.tags,
-            responses=self.responses,
-        )(self.get_on_task_id)
-        # self.prepareEndpoint()
-
-    async def root(self):
-        """
-        Default root response
-
-        Returns:
-            Default response
-        """
-        return {"response": "At root level"}
-
-    async def get_on_task_id(
-        self, task_id: str = Path(..., title="The task_id of the item to get")
+        store: Store,
+        model: Union[BaseModel, str],
+        tags: Optional[List[str]] = None,
+        responses: Optional[Dict] = None,
     ):
         """
-        http://127.0.0.1:8000/task_id/mp-30933
         Args:
-            task_id: in the format of mp-NUMBER
-
-        Returns:
-            a single material that satisfy the Material Model
+            store: The Maggma Store to get data from
+            model: the pydantic model to apply to the documents from the Store
+                This can be a string with a full python path to a model or
+                an actuall pydantic Model if this is being instantied in python
+                code. Serializing this via Monty will autoconvert the pydantic model
+                into a python path string
+            tags: list of tags for the Endpoint
+            responses: default responses for error codes
         """
-        cursor = self.db_source.query(criteria={"task_id": task_id})
-        material = cursor[0] if cursor.count() > 0 else None
-        if material:
-            material = self.model(**material)
-            return material
+        self.store = store
+        self.router = APIRouter()
+        self.tags = tags
+        self.responses = responses
+
+        if isinstance(model, BaseModel):
+            self.model = model
+        elif isinstance(model, str):
+            module_path = ".".join(model.split(".")[:-1])
+            class_name = model.split(".")[-1]
+            dynamic_import(module_path, class_name)
         else:
-            raise HTTPException(
-                status_code=404,
-                detail="Item with Task_id = {} not found".format(task_id),
+            raise ValueError(
+                "Model has to be a pydantic model or python path to a pydantic model"
             )
 
-    async def simple_post(self, data: str):
-        # https://www.errietta.me/blog/python-fastapi-intro/
-        # https://fastapi.tiangolo.com/tutorial/request-forms/
-        return {"response": "posting " + data}
+        self.prepare_endpoint()
 
-    @property
-    def app(self):
+    def prepare_endpoint(self):
+        """
+        Internal method to prepare the endpoint by setting up default handlers
+        for routes
+        """
+        key_name = self.store.key
+        model_name = self.model.__class__.__name__
+        responses = dict(**default_responses)
+        if self.responses:
+            responses.update(self.responses)
+
+        tags = self.tags or []
+
+        async def get_by_key(
+            self, key: str = Path(..., title=f"The {key_name} of the item to get")
+        ):
+            f"""
+            Get's a document by the primary key in the store
+
+            Args:
+                {key_name}: the id of a single
+
+            Returns:
+                a single document that satisfies the {self.model.__class__.__name__} model
+            """
+            item = self.store.query_one(criteria={self.store.key: key})
+
+            if item is None:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Item with {self.store.key} = {key} not found",
+                )
+            else:
+                model_item = self.model(**item)
+                return model_item
+
+        self.router.get(
+            f"/{key_name}/{{task_id}}",
+            response_description=f"Get an {model_name} by {key_name}",
+            response_model=self.model,
+            tags=tags,
+            responses=responses,
+        )(get_by_key)
+
+    def run(self):
+        """
+        Runs the Endpoint cluster locally
+        This is intended for testing not production
+        """
+        import uvicorn
+
         app = FastAPI()
         app.include_router(self.router, prefix="")
-        # NOTE: per documentation of uvicorn, unable to attach reload=True attribute
-        # https://www.uvicorn.org/deployment/#running-programmatically
-        return app
+        uvicorn.run(app)
+
+    def as_dict(self) -> Dict:
+        """
+        Special as_dict implemented to convert pydantic models into strings
+        """
+
+        d = super().as_dict()  # Ensures sub-classes serialize correctly
+        d["model"] = f"{self.store.__class__.__module__}.{self.store.__class__.name}"
+
+        for field in ["tags", "responses"]:
+            if not d.get(field, None):
+                del d[field]
+        return d
