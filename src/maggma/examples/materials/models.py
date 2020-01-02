@@ -56,7 +56,15 @@ class CrystalSystem(str, Enum):
     hexagonal = "hexagonal"
     cubic = "cubic"
     trigonal = "trigonal"
-    types = [tetragonal, triclinic, orthorhombic, monoclinic, hexagonal, cubic, trigonal]
+    types = [
+        tetragonal,
+        triclinic,
+        orthorhombic,
+        monoclinic,
+        hexagonal,
+        cubic,
+        trigonal,
+    ]
 
 
 class SymmetryModel(pydantic.BaseModel):
@@ -68,22 +76,26 @@ class SymmetryModel(pydantic.BaseModel):
     crystal_system: str
     hall: str
 
-    @validator('crystal_system')
+    @validator("crystal_system")
     def check_crystal_system(cls, cs):
         if cs in CrystalSystem.types:
             return cs
         else:
-            raise ValueError(f'Unknown Crystal System')
+            raise ValueError(f"Unknown Crystal System")
 
 
 class CompositionModel(pydantic.BaseModel):
     # this is not going to work because name != elem, for instance, Ti != elem
-    elem: int = Schema(None, title="composition as a dictionary of elements and their amount")
+    elem: int = Schema(
+        None, title="composition as a dictionary of elements and their amount"
+    )
 
 
 class CompositionReducedModel(pydantic.BaseModel):
     # this is not going to work because name != elem, for instance, Ti != elem
-    elem: int = Schema(None, title="reduced composition as a dictionary of elements and their amount")
+    elem: int = Schema(
+        None, title="reduced composition as a dictionary of elements and their amount"
+    )
 
 
 class MaterialModel(pydantic.BaseModel):
@@ -111,7 +123,9 @@ class MaterialModel(pydantic.BaseModel):
     elements: List[str] = Schema(..., title="list of elements")
     formula_anonymous: str = Schema(..., title="formula using anonymized elements")
     formula_pretty: str = Schema(..., title="clean representation of the formula")
-    last_updated: datetime = Schema(..., title="timestamp for the most recent calculation")
+    last_updated: datetime = Schema(
+        ..., title="timestamp for the most recent calculation"
+    )
     nelements: int = Schema(..., title="number of elements")
     nsites: int = Schema(..., title="number of sites")
     structure: StructureModel = Schema(..., title="the structure object")
@@ -119,7 +133,9 @@ class MaterialModel(pydantic.BaseModel):
     task_id: str = Schema(
         ..., title="task id for this material. Also called the material id"
     )
-    task_ids: List[str] = Schema(None, title="List of task-ids that this material is associated with") ## TODO complete
+    task_ids: List[str] = Schema(
+        None, title="List of task-ids that this material is associated with"
+    )  ## TODO complete
     volume: float = Schema(..., title="")
     _id: str
 
@@ -173,6 +189,4 @@ class CompositionReduced(PydanticObjectType):
 class Material(PydanticObjectType):
     class Meta:
         model = MaterialModel
-        exclude_fields = ("_id",
-                          "composition",
-                          "composition_reduced")
+        exclude_fields = ("_id", "composition", "composition_reduced")

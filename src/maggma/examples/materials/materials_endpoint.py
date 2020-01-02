@@ -1,4 +1,3 @@
-
 # import testing modules
 
 # set module path
@@ -18,31 +17,38 @@ from starlette.responses import JSONResponse
 
 
 class MaterialEndpointCluster(EndpointCluster):
-    def __init__(self, db_source: JSONStore, tags=[], responses={}, prefix: str = "/materials"):
+    def __init__(
+        self, db_source: JSONStore, tags=[], responses={}, prefix: str = "/materials"
+    ):
         super().__init__(db_source, MaterialModel, prefix, tags, responses)
         # initialize routes
         # self.model = MaterialModel in this case
-        self.router.get("/chemsys/{chemsys}",
-                        response_description="Get all the materials that matches the chemsys field",
-                        response_model=List[self.model],
-                        tags=self.tags,
-                        responses=self.responses
-                        )(self.get_on_chemsys)
-        self.router.get("/formula/{formula}",
-                        response_model=List[self.model],
-                        response_description="Get all the materials that matches the formula field",
-                        tags=self.tags,
-                        responses=self.responses) \
-            (self.get_on_formula)
-        self.router.get("/{query}",
-                        tags=self.tags,
-                        responses=self.responses)(self.get_on_materials)
-        self.router.get("/distinct/",
-                        tags=self.tags,
-                        responses=self.responses)(self.get_distinct_choices)
+        self.router.get(
+            "/chemsys/{chemsys}",
+            response_description="Get all the materials that matches the chemsys field",
+            response_model=List[self.model],
+            tags=self.tags,
+            responses=self.responses,
+        )(self.get_on_chemsys)
+        self.router.get(
+            "/formula/{formula}",
+            response_model=List[self.model],
+            response_description="Get all the materials that matches the formula field",
+            tags=self.tags,
+            responses=self.responses,
+        )(self.get_on_formula)
+        self.router.get("/{query}", tags=self.tags, responses=self.responses)(
+            self.get_on_materials
+        )
+        self.router.get("/distinct/", tags=self.tags, responses=self.responses)(
+            self.get_distinct_choices
+        )
 
-    async def get_on_chemsys(self, chemsys: str = Path(..., title="The task_id of the item to get"),
-                             paginationParam: CommonPaginationParams = Depends()):
+    async def get_on_chemsys(
+        self,
+        chemsys: str = Path(..., title="The task_id of the item to get"),
+        paginationParam: CommonPaginationParams = Depends(),
+    ):
         """
         Ex: http://127.0.0.1:8000/chemsys/B-La
         Args:
@@ -65,11 +71,13 @@ class MaterialEndpointCluster(EndpointCluster):
             material = MaterialModel(**r)
         if len(raw_result) == 0:
             return JSONResponse(status_code=404, content=self.responses[404])
-        return raw_result[skip:skip + limit]
+        return raw_result[skip : skip + limit]
 
-
-    async def get_on_formula(self, formula: str = Path(..., title="The formula of the item to get"),
-                             paginationParam: CommonPaginationParams = Depends()):
+    async def get_on_formula(
+        self,
+        formula: str = Path(..., title="The formula of the item to get"),
+        paginationParam: CommonPaginationParams = Depends(),
+    ):
         """
         Return the materials that matches the input formula
         - **formula**: The formula of the item to get
@@ -87,26 +95,32 @@ class MaterialEndpointCluster(EndpointCluster):
         cursor = None
         if "*" in formula:
             nstars = formula.count("*")
-            dummies = 'ADEGJLMQRXZ'
+            dummies = "ADEGJLMQRXZ"
             formula_dummies = formula.replace("*", "{}").format(*dummies[:nstars])
             try:
                 comp = Composition(formula_dummies).reduced_composition
                 crit = dict()
                 crit["formula_anonymous"] = comp.anonymized_formula
-                real_elts = [str(e) for e in comp.elements
-                             if not e.as_dict().get("element", "A") in dummies]
+                real_elts = [
+                    str(e)
+                    for e in comp.elements
+                    if not e.as_dict().get("element", "A") in dummies
+                ]
 
                 # Paranoia below about floating-point "equality"
                 for el, n in comp.to_reduced_dict.items():
                     if el in real_elts:
-                        crit['composition_reduced.{}'.format(el)] = {"$gt": .99 * n, "$lt": 1.01 * n}
+                        crit["composition_reduced.{}".format(el)] = {
+                            "$gt": 0.99 * n,
+                            "$lt": 1.01 * n,
+                        }
 
                 # pretty_formula = comp.reduced_formula
                 cursor = self.db_source.query(criteria=crit)
                 result = [c for c in cursor]
                 if len(result) == 0:
                     return JSONResponse(status_code=404, content=self.responses[404])
-                return result[skip:skip + limit]
+                return result[skip : skip + limit]
             except Exception as e:
                 raise e
         else:
@@ -115,7 +129,7 @@ class MaterialEndpointCluster(EndpointCluster):
                 return JSONResponse(status_code=404, content=self.responses[404])
             else:
                 result = [] if cursor is None else [i for i in cursor]
-                return result[skip:skip + limit]
+                return result[skip : skip + limit]
 
     async def get_on_materials(self, query: str = Path(...)):
         """
@@ -135,11 +149,16 @@ class MaterialEndpointCluster(EndpointCluster):
         elif query == "distinct":
             return RedirectResponse("{}/distinct/".format(self.prefix))
         else:
-            return HTTPException(status_code=404,
-                                 detail="WARNING: Query <{}> does not match any of the endpoint features".format(query))
+            return HTTPException(
+                status_code=404,
+                detail="WARNING: Query <{}> does not match any of the endpoint features".format(
+                    query
+                ),
+            )
 
-    async def get_distinct_choices(self,
-                                   paginationParam: CommonPaginationParams = Depends()):
+    async def get_distinct_choices(
+        self, paginationParam: CommonPaginationParams = Depends()
+    ):
         """
 
         Args:
@@ -153,7 +172,7 @@ class MaterialEndpointCluster(EndpointCluster):
         keys = data.keys()
         result = dict()
         for k in keys:
-            result[k] = self.db_source.distinct(k)[skip:skip + limit]
+            result[k] = self.db_source.distinct(k)[skip : skip + limit]
         return result
 
     def is_chemsys(self, query: str):

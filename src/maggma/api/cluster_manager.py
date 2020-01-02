@@ -18,8 +18,10 @@ class ClusterManager(MSONable):
         Returns:
             None
         """
-        assert endpoint.prefix not in self.endpoints, "ERR: endpoint [{}] already exist, please modify the endpoint " \
-                                                      "in-place".format(endpoint.prefix)
+        assert endpoint.prefix not in self.endpoints, (
+            "ERR: endpoint [{}] already exist, please modify the endpoint "
+            "in-place".format(endpoint.prefix)
+        )
 
         self.endpoints[endpoint.prefix] = endpoint
 
@@ -34,11 +36,10 @@ class ClusterManager(MSONable):
         assert len(self.endpoints) > 0, "ERROR: There are no endpoints provided"
         # print(self.endpoints)
         for prefix, endpoint in self.endpoints.items():
-            self.app.include_router(
-                endpoint.router,
-                prefix=prefix
-            )
-        uvicorn.run(self.app, host="127.0.0.1", port=8000, log_level="info", reload=False)
+            self.app.include_router(endpoint.router, prefix=prefix)
+        uvicorn.run(
+            self.app, host="127.0.0.1", port=8000, log_level="info", reload=False
+        )
 
     def getEndpoints(self):
         """
@@ -48,7 +49,7 @@ class ClusterManager(MSONable):
         """
         return self.endpoints.values()
 
-    def getEndpoint(self, key:str):
+    def getEndpoint(self, key: str):
         """
 
         Args:

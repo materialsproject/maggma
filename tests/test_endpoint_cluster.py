@@ -1,4 +1,3 @@
-
 """
 Test for endpoint_cluster
 """
@@ -9,11 +8,13 @@ from maggma.examples.materials.models import MaterialModel
 from fastapi import FastAPI
 from starlette.testclient import TestClient
 
+
 @pytest.fixture()
 def setup_store():
     store = JSONStore("../examples/materials/data/more_mats.json.gz")
     store.connect()
     return store
+
 
 def test_route(setup_store):
     cluster = EndpointCluster(setup_store, MaterialModel)
@@ -22,4 +23,3 @@ def test_route(setup_store):
     client = TestClient(app)
     response = client.get("/")
     assert response.status_code == 200
-

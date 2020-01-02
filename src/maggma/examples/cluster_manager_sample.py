@@ -17,15 +17,16 @@ if __name__ == "__main__":
         404: {"description": "CUSTOM_DESCRIPTION: NOT FOUND"},
     }
 
-    mp_endpoint1 = MaterialEndpointCluster(db_source=json_store,
-                                           prefix="/materials1",
-                                           tags=["material", "1"],
-                                           responses=custom_responses)
-    mp_endpoint2 = MaterialEndpointCluster(db_source=json_store,
-                                           prefix="/materials2",
-                                           tags=["material", "2"])
-    general_endpoint = EndpointCluster(db_source=json_store,
-                                       model=SpecieModel)
+    mp_endpoint1 = MaterialEndpointCluster(
+        db_source=json_store,
+        prefix="/materials1",
+        tags=["material", "1"],
+        responses=custom_responses,
+    )
+    mp_endpoint2 = MaterialEndpointCluster(
+        db_source=json_store, prefix="/materials2", tags=["material", "2"]
+    )
+    general_endpoint = EndpointCluster(db_source=json_store, model=SpecieModel)
 
     clusterManager = ClusterManager()
     clusterManager.addEndpoint(mp_endpoint1)
