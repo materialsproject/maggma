@@ -1,61 +1,44 @@
-from fastapi import FastAPI
-from endpoint_cluster import EndpointCluster
 import uvicorn
+from fastapi import FastAPI
+from typing import Dict
 from monty.json import MSONable
+from maggma.api.endpoint_cluster import EndpointCluster
 
 
 class ClusterManager(MSONable):
-    def __init__(self):
-        self.endpoints = dict()
-        self.app = FastAPI()
+    def __init__(self, endpoints: Dict[str, EndpointCluster]):
+        self.endpoints = endpoints
 
-    def addEndpoint(self, endpoint: EndpointCluster):
+    def run(self, ip: str = "127.0.0.1", port: int = 8000, log_level: str = "info"):
         """
-        add a endpoint to the cluster manager
+        Runs the Cluster Manager locally
+
         Args:
-            endpoint: the new endpoint to add in
+            ip: Local IP to listen on
+            port: Local port to listen on
+            log_level: Logging level for the webserver
 
         Returns:
             None
         """
-        assert endpoint.prefix not in self.endpoints, (
-            "ERR: endpoint [{}] already exist, please modify the endpoint "
-            "in-place".format(endpoint.prefix)
-        )
-
-        self.endpoints[endpoint.prefix] = endpoint
-
-    def runAllEndpoints(self):
-        """
-        Must of AT LEAST one endpoint in the list
-        initialize and run all endpoints with their respective parameters
-
-        Returns:
-            None
-        """
+        app = FastAPI()
         assert len(self.endpoints) > 0, "ERROR: There are no endpoints provided"
-        # print(self.endpoints)
+
         for prefix, endpoint in self.endpoints.items():
-            self.app.include_router(endpoint.router, prefix=prefix)
-        uvicorn.run(
-            self.app, host="127.0.0.1", port=8000, log_level="info", reload=False
-        )
+            app.include_router(endpoint.router, prefix=prefix)
+        uvicorn.run(app, host=ip, port=port, log_level=log_level, reload=False)
 
-    def getEndpoints(self):
-        """
+    def __setitem__(self, key, item):
+        self.endpoints[key] = item
 
-        Returns:
-            a list of existing endpoints
-        """
-        return self.endpoints.values()
-
-    def getEndpoint(self, key: str):
-        """
-
-        Args:
-            key: the given key
-
-        Returns:
-            return the endpoint if the key is in self.endpoints, otherwise, raise error
-        """
+    def __getitem__(self, key):
         return self.endpoints[key]
+
+    def __len__(self):
+        return len(self.endpoints)
+
+    def keys(self):
+        return self.endpoints.keys()
+
+    def __contains__(self, item):
+        return item in self.endpoints
