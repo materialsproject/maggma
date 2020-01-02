@@ -363,11 +363,24 @@ def mgrantstore(mgrant_server, mgrant_user):
     return store
 
 
-def test_eq(mgrantstore, alias_store, sandbox_store):
+@pytest.fixture
+def vaultstore():
+    os.environ["VAULT_ADDR"] = "https://fake:8200/"
+    os.environ["VAULT_TOKEN"] = "dummy"
+
+    # Just test that we successfully instantiated
+    v = vault_store()
+    return v
+
+
+def test_eq(mgrantstore, vaultstore, alias_store, sandbox_store):
 
     assert mgrantstore == mgrantstore
     assert alias_store == alias_store
     assert sandbox_store == sandbox_store
+    assert vaultstore == vaultstore
 
     assert sandbox_store != mgrantstore
-    assert alias_store != sandbox_store
+    assert mgrantstore != sandbox_store
+    assert alias_store != vaultstore
+    assert vaultstore != alias_store
