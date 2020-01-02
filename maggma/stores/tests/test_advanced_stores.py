@@ -373,14 +373,16 @@ def vaultstore():
     return v
 
 
-def test_eq(mgrantstore, vaultstore, alias_store, sandbox_store):
-
+def test_eq_mgrant(mgrantstore, mongostore):
     assert mgrantstore == mgrantstore
+    assert mgrantstore != mongostore
+
+
+def test_eq(vaultstore, alias_store, sandbox_store):
     assert alias_store == alias_store
     assert sandbox_store == sandbox_store
     assert vaultstore == vaultstore
 
-    assert sandbox_store != mgrantstore
-    assert mgrantstore != sandbox_store
+    assert sandbox_store != alias_store
     assert alias_store != vaultstore
-    assert vaultstore != alias_store
+    assert vaultstore != sandbox_store
