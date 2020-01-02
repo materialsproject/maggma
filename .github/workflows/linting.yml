@@ -24,15 +24,15 @@ jobs:
     - name: Lint with pycodestyle
       run: |
         pip install pycodestyle
-        pycodestyle maggma
+        pycodestyle src/maggma
     - name: Lint with mypy
       run: |
         pip install mypy mypy-boto3
-        mypy maggma
+        mypy src/maggma
     - name: Lint with flake8
       run: |
         pip install flake8
         # stop the build if there are Python syntax errors or undefined names
-        flake8 --count --show-source --statistics maggma
+        flake8 --count --show-source --statistics src/maggma
         # exit-zero treats all errors as warnings.
-        flake8 --count --exit-zero --max-complexity=20 --statistics maggma
+        flake8 --count --exit-zero --max-complexity=20 --statistics src/maggma
