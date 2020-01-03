@@ -7,3 +7,5 @@ tqdm==4.37.0
 mongogrant==0.3.0
 aioitertools==0.5.1
 numpy==1.17.3
+pydantic==0.32.2
+fastapi==0.42.0
