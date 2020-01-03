@@ -45,7 +45,7 @@ class EndpointCluster(MSONable):
             module_path = ".".join(model.split(".")[:-1])
             class_name = model.split(".")[-1]
             self.model = dynamic_import(module_path, class_name)
-        elif isclass(model) and issubclass(model, BaseModel):
+        elif isclass(model) and issubclass(model, BaseModel):  # type: ignore
             self.model = model
         else:
             raise ValueError(
