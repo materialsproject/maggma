@@ -5,14 +5,12 @@ from random import randint, choice
 from maggma.stores import MemoryStore
 from maggma.api import EndpointCluster, ClusterManager
 from starlette.testclient import TestClient
+from fastapi.encoders import jsonable_encoder
 
 
 class PetType(str, Enum):
     cat = "cat"
     dog = "dog"
-
-    def __str__(self):
-        return str(self.value)
 
 
 class Owner(BaseModel):
@@ -51,7 +49,7 @@ def pets(owners):
 def owner_store(owners):
     store = MemoryStore("owners", key="name")
     store.connect()
-    owners = [d.dict() for d in owners]
+    owners = [jsonable_encoder(d) for d in owners]
     store.update(owners)
     return store
 
@@ -60,7 +58,7 @@ def owner_store(owners):
 def pet_store(pets):
     store = MemoryStore("pets", key="name")
     store.connect()
-    pets = [d.dict() for d in pets]
+    pets = [jsonable_encoder(d) for d in pets]
     print(pets[0])
     store.update(pets)
     return store
@@ -93,4 +91,7 @@ def test_cluster_run(owner_store, pet_store):
 
     assert client.get("/").status_code == 404
     assert client.get("/owners/name/Person1").status_code == 200
+    assert client.get("/owners/name/Person1").json()["name"] == "Person1"
+
     assert client.get("/pets/name/Pet1").status_code == 200
+    assert client.get("/pets/name/Pet1").json()["name"] == "Pet1"

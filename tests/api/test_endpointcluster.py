@@ -65,3 +65,4 @@ def test_endpoint_function(owner_store):
     assert client.get("/").status_code == 404
 
     assert client.get("/name/Person1").status_code == 200
+    assert client.get("/name/Person1").json()["name"] == "Person1"
