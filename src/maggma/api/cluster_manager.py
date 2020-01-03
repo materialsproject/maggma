@@ -9,6 +9,19 @@ class ClusterManager(MSONable):
     def __init__(self, endpoints: Dict[str, EndpointCluster]):
         self.endpoints = endpoints
 
+    @property
+    def app(self):
+        """
+        App server for the cluster manager
+        """
+        app = FastAPI()
+        if len(self) == 0:
+            raise RuntimeError("ERROR: There are no endpoints provided")
+
+        for prefix, endpoint in self.endpoints.items():
+            app.include_router(endpoint.router, prefix=f"/{prefix}")
+        return app
+
     def run(self, ip: str = "127.0.0.1", port: int = 8000, log_level: str = "info"):
         """
         Runs the Cluster Manager locally
@@ -21,12 +34,8 @@ class ClusterManager(MSONable):
         Returns:
             None
         """
-        app = FastAPI()
-        assert len(self.endpoints) > 0, "ERROR: There are no endpoints provided"
 
-        for prefix, endpoint in self.endpoints.items():
-            app.include_router(endpoint.router, prefix=prefix)
-        uvicorn.run(app, host=ip, port=port, log_level=log_level, reload=False)
+        uvicorn.run(self.app, host=ip, port=port, log_level=log_level, reload=False)
 
     def __setitem__(self, key, item):
         self.endpoints[key] = item
