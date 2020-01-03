@@ -1,15 +1,8 @@
 import pytest
-from pydantic import BaseModel, Schema, validator
-from enum import Enum
-from random import randint, choice
+from random import randint
+from pydantic import BaseModel, Schema
 from maggma.stores import MemoryStore
 from maggma.api import EndpointCluster
-
-
-class PetType(str, Enum):
-    cat = "cat"
-    dog = "dog"
-    types = [cat, dog]
 
 
 class Owner(BaseModel):
@@ -18,36 +11,11 @@ class Owner(BaseModel):
     weight: int = Schema(..., title="Owner's weight")
 
 
-class Pet(BaseModel):
-    name: str = Schema(..., title="Pet's Name")
-    pet_type: PetType = Schema(..., title="Pet Type")
-    owner_name: str = Schema(..., title="Owner's name")
-
-    @validator("pet_type")
-    def check_pet_type(cls, pt):
-        if pt in PetType.types:
-            return pt
-        else:
-            raise ValueError(f"Unknown Pet Type")
-
-
 @pytest.fixture("session")
 def owners():
     return [
         Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
         for i in list(range(10)[1:])
-    ]
-
-
-@pytest.fixture("session")
-def pets(owners):
-    return [
-        Pet(
-            name=f"Pet{i}",
-            pet_type=choice(list(PetType)),
-            owner_name=choice(owners).name,
-        )
-        for i in list(range(40))[1:]
     ]
 
 
