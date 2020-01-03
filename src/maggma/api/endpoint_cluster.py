@@ -1,10 +1,15 @@
+import pathlib
+import copy
+from inspect import isclass
 from typing import List, Dict, Union, Optional
 from pydantic import BaseModel
 from monty.json import MSONable
+from monty.serialization import loadfn
 from fastapi import FastAPI, APIRouter, Path, HTTPException
 from maggma.core import Store
-from maggma.api import default_error_responses as default_responses
 from maggma.utils import dynamic_import
+
+default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
 
 
 class EndpointCluster(MSONable):
@@ -36,12 +41,12 @@ class EndpointCluster(MSONable):
         self.tags = tags
         self.responses = responses
 
-        if isinstance(model, BaseModel):
-            self.model = model
-        elif isinstance(model, str):
+        if isinstance(model, str):
             module_path = ".".join(model.split(".")[:-1])
             class_name = model.split(".")[-1]
-            dynamic_import(module_path, class_name)
+            self.model = dynamic_import(module_path, class_name)
+        elif isclass(model) and issubclass(model, BaseModel):
+            self.model = model
         else:
             raise ValueError(
                 "Model has to be a pydantic model or python path to a pydantic model"
@@ -55,15 +60,16 @@ class EndpointCluster(MSONable):
         for routes
         """
         key_name = self.store.key
-        model_name = self.model.__class__.__name__
-        responses = dict(**default_responses)
+        model_name = self.model.__name__
+        responses = copy.copy(default_responses)
         if self.responses:
             responses.update(self.responses)
 
         tags = self.tags or []
 
         async def get_by_key(
-            self, key: str = Path(..., title=f"The {key_name} of the item to get")
+            self,
+            key: str = Path(..., title=f"The {key_name} of the {model_name} to get"),
         ):
             f"""
             Get's a document by the primary key in the store
@@ -72,7 +78,7 @@ class EndpointCluster(MSONable):
                 {key_name}: the id of a single
 
             Returns:
-                a single document that satisfies the {self.model.__class__.__name__} model
+                a single document that satisfies the {model_name} model
             """
             item = self.store.query_one(criteria={self.store.key: key})
 
@@ -93,7 +99,7 @@ class EndpointCluster(MSONable):
             responses=responses,
         )(get_by_key)
 
-    def run(self):
+    def run(self):  # pragma: no cover
         """
         Runs the Endpoint cluster locally
         This is intended for testing not production
@@ -110,7 +116,7 @@ class EndpointCluster(MSONable):
         """
 
         d = super().as_dict()  # Ensures sub-classes serialize correctly
-        d["model"] = f"{self.store.__class__.__module__}.{self.store.__class__.name}"
+        d["model"] = f"{self.model.__module__}.{self.model.__name__}"
 
         for field in ["tags", "responses"]:
             if not d.get(field, None):
