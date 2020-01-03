@@ -68,7 +68,6 @@ class EndpointCluster(MSONable):
         tags = self.tags or []
 
         async def get_by_key(
-            self,
             key: str = Path(..., title=f"The {key_name} of the {model_name} to get"),
         ):
             f"""
@@ -92,7 +91,7 @@ class EndpointCluster(MSONable):
                 return model_item
 
         self.router.get(
-            f"/{key_name}/{{task_id}}",
+            f"/{key_name}/{{key}}",
             response_description=f"Get an {model_name} by {key_name}",
             response_model=self.model,
             tags=tags,
