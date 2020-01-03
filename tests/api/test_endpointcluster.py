@@ -3,6 +3,8 @@ from random import randint
 from pydantic import BaseModel, Schema
 from maggma.stores import MemoryStore
 from maggma.api import EndpointCluster
+from starlette.testclient import TestClient
+from fastapi import FastAPI
 
 
 class Owner(BaseModel):
@@ -51,3 +53,15 @@ def test_endpoint_msonable(owner_store):
 
     assert isinstance(endpoint_dict["model"], str)
     assert endpoint_dict["model"] == "tests.api.test_endpointcluster.Owner"
+
+
+def test_endpoint_function(owner_store):
+    endpoint = EndpointCluster(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    assert client.get("/").status_code == 404
+
+    assert client.get("/name/Person1").status_code == 200
