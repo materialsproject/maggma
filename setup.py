@@ -22,6 +22,7 @@ setup(
     packages=find_packages("src"),
     package_dir={"": "src"},
     zip_safe=False,
+    include_package_data=True,
     install_requires=[
         "pymongo>=3.6",
         "monty>=1.0.2",
