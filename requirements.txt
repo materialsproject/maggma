@@ -2,10 +2,12 @@ pymongo==3.9.0
 monty==3.0.2
 mongomock==3.18.0
 pydash==4.7.5
-jsonschema==3.1.1
-tqdm==4.37.0
+jsonschema==3.2.0
+tqdm==4.41.1
 mongogrant==0.3.0
 aioitertools==0.5.1
-numpy==1.17.3
+numpy==1.18.0
 pydantic==0.32.2
 fastapi==0.42.0
+
+
