@@ -5,14 +5,19 @@ copyright: Built by The Materials Project
 theme:
   name: 'material'
 
-
 nav:
-  - Home: "index.md"
-  - Core Concepts: "concepts.md"
+  - Home: index.md
+  - Core Concepts: concepts.md
+  - Getting Started:
+    - Writing a Builder: getting_started/simple_builder.md
+    - Advanced Builders: getting_started/advanced_builder.md
 
 repo_url: https://github.com/materialsproject/maggma/
-docs_dir: ./src/docs2
+docs_dir: ./src/docs
 markdown_extensions:
   - codehilite
   - admonition
   - pymdownx.superfences
+plugins:
+  - search
+  - minify
