@@ -84,16 +84,14 @@ class MongograntStore(MongoStore):
     @classmethod
     def from_db_file(cls, file):
         """
-        Raises:
-            ValueError since MongograntStores can't be initialized from a file
+        Raises ValueError since MongograntStores can't be initialized from a file
         """
         raise ValueError("MongograntStore doesn't implement from_db_file")
 
     @classmethod
     def from_collection(cls, collection):
         """
-        Raises:
-            ValueError since MongograntStores can't be initialized from a PyMongo collection
+        Raises ValueError since MongograntStores can't be initialized from a PyMongo collection
         """
         raise ValueError("MongograntStore doesn't implement from_collection")
 
@@ -126,7 +124,7 @@ class VaultStore(MongoStore):
     def __init__(self, collection_name: str, vault_secret_path: str):
         """
         Args:
-            collection: name of mongo collection
+            collection_name: name of mongo collection
             vault_secret_path: path on vault server with mongo creds object
 
         Important:
@@ -233,7 +231,7 @@ class AliasingStore(Store):
         Queries the Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -263,8 +261,8 @@ class AliasingStore(Store):
 
         Args:
             field: the field(s) to get distinct values for
-            criteria : PyMongo filter for documents to search in
-            all_exist : ensure all fields exist for the distinct set
+            criteria: PyMongo filter for documents to search in
+            all_exist: ensure all fields exist for the distinct set
         """
         criteria = criteria if criteria else {}
         lazy_substitute(criteria, self.reverse_aliases)
@@ -288,7 +286,7 @@ class AliasingStore(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -397,7 +395,7 @@ class SandboxStore(Store):
 
     def name(self) -> str:
         """
-        Return:
+        Returns:
             a string representing this data source
         """
         return self.store.name
@@ -427,7 +425,7 @@ class SandboxStore(Store):
         Queries the Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -455,7 +453,7 @@ class SandboxStore(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip

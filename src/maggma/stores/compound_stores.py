@@ -62,8 +62,9 @@ class JointStore(Store):
         """
         Connects the underlying Mongo database and
         all collection connections
+
         Args:
-            force_reset - whether to forcibly reset the connection
+            force_reset: whether to forcibly reset the connection
         """
         conn = MongoClient(self.host, self.port)
         db = conn[self.database]
@@ -134,6 +135,7 @@ class JointStore(Store):
     def _get_pipeline(self, criteria=None, properties=None, skip=0, limit=0):
         """
         Gets the aggregation pipeline for query and query_one
+
         Args:
             properties: properties to be returned
             criteria: criteria to filter by
@@ -251,10 +253,12 @@ class JointStore(Store):
     def query_one(self, criteria=None, properties=None, **kwargs):
         """
         Get one document
+
         Args:
-            properties([str] or {}): properties to return in query
-            criteria ({}): filter for matching
-            **kwargs: kwargs for collection.aggregate
+            properties: properties to return in query
+            criteria: filter for matching
+            kwargs: kwargs for collection.aggregate
+
         Returns:
             single document
         """
@@ -280,7 +284,8 @@ class JointStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for JointStore
-        other: other JointStore to compare with
+        Args:
+            other: other JointStore to compare with
         """
         if not isinstance(other, JointStore):
             return False
@@ -303,22 +308,25 @@ class ConcatStore(Store):
         """
         Initialize a ConcatStore that concatenates multiple stores together
         to appear as one store
+
+        Args:
+            stores: list of stores to concatenate together
         """
         self.stores = stores
         super(ConcatStore, self).__init__(**kwargs)
 
     def name(self) -> str:
         """
-        Return a string representing this data source
+        A string representing this data source
         """
         return self.stores[0].name
 
     def connect(self, force_reset: bool = False):
         """
         Connect all stores in this ConcatStore
+
         Args:
-            force_reset (bool): Whether to forcibly reset the connection for
-            all stores
+            force_reset: Whether to forcibly reset the connection for all stores
         """
         for store in self.stores:
             store.connect(force_reset)
@@ -376,8 +384,8 @@ class ConcatStore(Store):
 
         Args:
             field: the field(s) to get distinct values for
-            criteria : PyMongo filter for documents to search in
-            all_exist : ensure all fields exist for the distinct set
+            criteria: PyMongo filter for documents to search in
+            all_exist: ensure all fields exist for the distinct set
         """
         distincts = []
         for store in self.stores:
@@ -393,6 +401,7 @@ class ConcatStore(Store):
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
         Ensure an index is properly set. Returns whether all stores support this index or not
+
         Args:
             key: single key to index
             unique: Whether or not this index contains only unique keys
@@ -414,7 +423,7 @@ class ConcatStore(Store):
         Queries across all Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -440,7 +449,7 @@ class ConcatStore(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -489,7 +498,9 @@ class ConcatStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for ConcatStore
-        other: other ConcatStore to compare with
+
+        Args:
+            other: other JointStore to compare with
         """
         if not isinstance(other, ConcatStore):
             return False

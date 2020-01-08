@@ -19,7 +19,7 @@ from pymongo import MongoClient
 from monty.json import jsanitize
 from monty.dev import deprecated
 from maggma.utils import confirm_field_index
-from maggma.core import Store, Sort
+from maggma.core import Store, Sort, StoreError
 from maggma.stores import MongoStore
 
 
@@ -121,7 +121,7 @@ class GridFSStore(Store):
         """
         Allow client to not need to prepend 'metadata.' to query fields.
         Args:
-            criteria (dict): Query criteria
+            criteria: Query criteria
         """
         new_criteria = dict()
         for field in criteria:
@@ -149,7 +149,7 @@ class GridFSStore(Store):
         TODO: If properties wholy in metadata, just query that
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -185,12 +185,11 @@ class GridFSStore(Store):
 
 
         Args:
-            key (mongolike key or list of mongolike keys): key or keys
+            field: key or keys
                 for which to find distinct values or sets of values.
-            criteria (filter criteria): criteria for filter
-            all_exist (bool): whether to ensure all keys in list exist
+            criteria: criteria for filter
+            all_exist: whether to ensure all keys in list exist
                 in each document, defaults to False
-            **kwargs (kwargs): kwargs corresponding to collection.distinct
         """
         criteria = (
             self.transform_criteria(criteria)
@@ -224,7 +223,7 @@ class GridFSStore(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -354,9 +353,3 @@ class GridFSStore(Store):
 
         fields = ["database", "collection_name", "host", "port"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
-
-
-class StoreError(Exception):
-    """General Store-related error."""
-
-    pass

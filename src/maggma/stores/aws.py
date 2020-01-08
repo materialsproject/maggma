@@ -100,7 +100,7 @@ class AmazonS3Store(Store):
         Queries the Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -110,7 +110,7 @@ class AmazonS3Store(Store):
             criteria=criteria, sort=sort, limit=limit, skip=skip
         ):
             try:
-                # TODO : THis is ugly and unsafe, do some real checking before pulling data
+                # TODO: THis is ugly and unsafe, do some real checking before pulling data
                 data = self.s3_bucket.Object(doc[self.key]).get()["Body"].read()
             except botocore.exceptions.ClientError as e:
                 # If a client error is thrown, then check that it was a 404 error.
@@ -141,8 +141,8 @@ class AmazonS3Store(Store):
 
         Args:
             field: the field(s) to get distinct values for
-            criteria : PyMongo filter for documents to search in
-            all_exist : ensure all fields exist for the distinct set
+            criteria: PyMongo filter for documents to search in
+            all_exist: ensure all fields exist for the distinct set
         """
         # Index is a store so it should have its own distinct function
         return self.index.distinct(field, criteria=criteria, all_exist=all_exist)
@@ -162,7 +162,7 @@ class AmazonS3Store(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -267,8 +267,8 @@ class AmazonS3Store(Store):
         Store than this Store.
 
         Args:
-            key: a single key field to return, defaults to Store.key
-            criteria : PyMongo filter for documents to search in
+            target: target Store
+            criteria: PyMongo filter for documents to search in
             exhaustive: triggers an item-by-item check vs. checking
                         the last_updated of the target Store and using
                         that to filter out new items in

@@ -45,7 +45,7 @@ class MongoStore(Store):
         """
         Args:
             database: The database name
-            collection: The collection name
+            collection_name: The collection name
             host: Hostname for the database
             port: TCP port to connect to
             username: Username for the collection
@@ -111,7 +111,7 @@ class MongoStore(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -151,6 +151,9 @@ class MongoStore(Store):
         Generates a MongoStore from a pymongo collection object
         This is not a fully safe operation as it gives dummy information to the MongoStore
         As a result, this will not serialize and can not reset its connection
+
+        Args:
+            collection: the PyMongo collection to create a MongoStore around
         """
         # TODO: How do we make this safer?
         coll_name = collection.name
@@ -180,7 +183,7 @@ class MongoStore(Store):
         Queries the Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -335,7 +338,7 @@ class MemoryStore(MongoStore):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -377,11 +380,10 @@ class JSONStore(MemoryStore):
     A Store for access to a single or multiple JSON files
     """
 
-    def __init__(self, paths, **kwargs):
+    def __init__(self, paths: Union[str, List[str]], **kwargs):
         """
         Args:
-            paths (str or list): paths for json files to
-                turn into a Store
+            paths: paths for json files to turn into a Store
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
@@ -407,7 +409,9 @@ class JSONStore(MemoryStore):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for JSONStore
-        other: other JSONStore to compare with
+
+        Args:
+            other: other JSONStore to compare with
         """
         if not isinstance(other, JSONStore):
             return False
