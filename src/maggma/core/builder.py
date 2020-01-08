@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Union, Optional, Dict, List, Iterator, Iterable, Any
+from typing import Union, Optional, Dict, List, Iterable, Any
 
 from monty.json import MSONable, MontyDecoder
 from maggma.utils import grouper
@@ -72,7 +72,7 @@ class Builder(MSONable, metaclass=ABCMeta):
             return []
 
     @abstractmethod
-    def get_items(self) -> Iterator:
+    def get_items(self) -> Iterable:
         """
         Returns all the items to process.
 
