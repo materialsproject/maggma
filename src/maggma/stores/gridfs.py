@@ -19,7 +19,7 @@ from pymongo import MongoClient
 from monty.json import jsanitize
 from monty.dev import deprecated
 from maggma.utils import confirm_field_index
-from maggma.core import Store, Sort, StoreError
+from maggma.core import Store, Sort
 from maggma.stores import MongoStore
 
 
