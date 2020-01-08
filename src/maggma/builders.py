@@ -284,7 +284,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         This method does the work of fetching data needed for processing.
 
         Args:
-            group (dict): sufficient as or to produce a source filter
+            group: sufficient as or to produce a source filter
 
         Returns:
             iterable: one or more items per group for process_item.

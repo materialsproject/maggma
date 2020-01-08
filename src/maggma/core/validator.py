@@ -21,8 +21,9 @@ class Validator(MSONable, metaclass=ABCMeta):
     def is_valid(self, doc: Dict) -> bool:
         """
         Determines if the document is valid
+
         Args:
-            doc - document to check
+            doc: document to check
         """
 
     @abstractmethod
@@ -32,6 +33,7 @@ class Validator(MSONable, metaclass=ABCMeta):
         strings to display for why validation has failed
 
         Returns empty list if the document is valid
+
         Args:
-            doc - document to check
+            doc:  document to check
         """

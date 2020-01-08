@@ -30,10 +30,11 @@ class AmazonS3Store(Store):
     def __init__(self, index: Store, bucket: str, compress: bool = False, **kwargs):
         """
         Initializes an S3 Store
+
         Args:
-            index (Store): a store to use to index the S3 Bucket
-            bucket (str) : name of the bucket
-            compress (bool): compress files inserted into the store
+            index: a store to use to index the S3 Bucket
+            bucket: name of the bucket
+            compress: compress files inserted into the store
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for AmazonS3Store")
@@ -48,7 +49,8 @@ class AmazonS3Store(Store):
 
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Returns:
+            a string representing this data source
         """
         return self.bucket
 
@@ -77,8 +79,11 @@ class AmazonS3Store(Store):
     @deprecated(message="This will be removed in the future")
     def collection(self):
         """
-        Returns a handle to the pymongo collection object
-        Not guaranteed to exist in the future
+        Returns:
+            a handle to the pymongo collection object
+
+        Important:
+            Not guaranteed to exist in the future
         """
         # For now returns the index collection since that is what we would "search" on
         return self.index
@@ -178,6 +183,7 @@ class AmazonS3Store(Store):
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
         Tries to create an index and return true if it suceeded
+
         Args:
             key: single key to index
             unique: Whether or not this index contains only unique keys

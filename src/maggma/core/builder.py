@@ -34,7 +34,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         Initialize the builder the framework.
 
-        Args:
+        Arguments:
             sources: source Store(s)
             targets: target Store(s)
             chunk_size: chunk size for processing
@@ -63,7 +63,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         This function should return an iterator of dictionaries that can be distributed
         to multiple instances of the builder to get/process/udpate on
 
-        Args:
+        Arguments:
             number_splits: The number of groups to split the documents to work on
         """
         if self.query:
@@ -85,7 +85,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         Process an item. Should not expect DB access as this can be run MPI
         Default behavior is to return the item.
-        Args:
+        Arguments:
             item:
 
         Returns:
@@ -99,7 +99,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         Takes a dictionary of targets and items from process item and updates them
         Can also perform other book keeping in the process such as storing gridfs oids, etc.
 
-        Args:
+        Arguments:
             items:
 
         Returns:
@@ -122,9 +122,6 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         Run the builder serially
         This is only intended for diagnostic purposes
-
-        Args:
-            builder_id (int): the index of the builder in the builders list
         """
         self.connect()
 
