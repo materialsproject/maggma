@@ -1,0 +1,1558 @@
+
+
+
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="Documentation for Maggma, a files-to-API data pipeline for scientific applications">
+      
+      
+      
+      
+        <meta name="lang:clipboard.copy" content="Copy to clipboard">
+      
+        <meta name="lang:clipboard.copied" content="Copied to clipboard">
+      
+        <meta name="lang:search.language" content="en">
+      
+        <meta name="lang:search.pipeline.stopwords" content="True">
+      
+        <meta name="lang:search.pipeline.trimmer" content="True">
+      
+        <meta name="lang:search.result.none" content="No matching documents">
+      
+        <meta name="lang:search.result.one" content="1 matching document">
+      
+        <meta name="lang:search.result.other" content="# matching documents">
+      
+        <meta name="lang:search.tokenizer" content="[\s\-]+">
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
+    
+    
+      
+        <title>Builders - Maggma Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
+      
+      
+    
+    
+      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
+    
+    
+      
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+    
+    <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
+    
+    
+    
+      
+    
+    
+  </head>
+  
+    <body dir="ltr">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
+    
+      <a href="#maggma.builders.CopyBuilder" tabindex="1" class="md-skip">
+        Skip to content
+      </a>
+    
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="../.." title="Maggma Documentation" class="md-header-nav__button md-logo">
+          
+            <i class="md-icon"></i>
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
+          
+            <span class="md-header-nav__topic">
+              Maggma Documentation
+            </span>
+            <span class="md-header-nav__topic">
+              
+                Builders
+              
+            </span>
+          
+        </div>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <label class="md-icon md-search__icon" for="__search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
+        &#xE5CD;
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result">
+          <div class="md-search-result__meta">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+<a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+        
+      
+      
+      <main class="md-main" role="main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="__drawer">
+    <a href="../.." title="Maggma Documentation" class="md-nav__button md-logo">
+      
+        <i class="md-icon"></i>
+      
+    </a>
+    Maggma Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+<a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-source="github">
+  
+    <div class="md-source__icon">
+      <svg viewBox="0 0 24 24" width="24" height="24">
+        <use xlink:href="#__github" width="24" height="24"></use>
+      </svg>
+    </div>
+  
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." title="Home" class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/" title="Core Concepts" class="md-nav__link">
+      Core Concepts
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
+      Getting Started
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        Getting Started
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/simple_builder/" title="Writing a Builder" class="md-nav__link">
+      Writing a Builder
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/advanced_builder/" title="Advanced Builders" class="md-nav__link">
+      Advanced Builders
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
+    <label class="md-nav__link" for="nav-4">
+      Reference
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        Reference
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-1" type="checkbox" id="nav-4-1">
+    
+    <label class="md-nav__link" for="nav-4-1">
+      Core
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-1">
+        Core
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../core_store/" title="Store" class="md-nav__link">
+      Store
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../core_builder/" title="Builder" class="md-nav__link">
+      Builder
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../core_validator/" title="Validator" class="md-nav__link">
+      Validator
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../stores/" title="Stores" class="md-nav__link">
+      Stores
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Builders
+      </label>
+    
+    <a href="./" title="Builders" class="md-nav__link md-nav__link--active">
+      Builders
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.builders.CopyBuilder" class="md-nav__link">
+    CopyBuilder
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.CopyBuilder.unary_function" class="md-nav__link">
+    unary_function()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder" class="md-nav__link">
+    GroupBuilder
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder.docs_to_groups" class="md-nav__link">
+    docs_to_groups()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder.get_items" class="md-nav__link">
+    get_items()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder.group_to_items" class="md-nav__link">
+    group_to_items()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder.grouping_properties" class="md-nav__link">
+    grouping_properties()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder" class="md-nav__link">
+    MapBuilder
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.ensure_indexes" class="md-nav__link">
+    ensure_indexes()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.finalize" class="md-nav__link">
+    finalize()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.get_items" class="md-nav__link">
+    get_items()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.prechunk" class="md-nav__link">
+    prechunk()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.process_item" class="md-nav__link">
+    process_item()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.unary_function" class="md-nav__link">
+    unary_function()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.update_targets" class="md-nav__link">
+    update_targets()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.builders.CopyBuilder" class="md-nav__link">
+    CopyBuilder
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.CopyBuilder.unary_function" class="md-nav__link">
+    unary_function()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder" class="md-nav__link">
+    GroupBuilder
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder.docs_to_groups" class="md-nav__link">
+    docs_to_groups()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder.get_items" class="md-nav__link">
+    get_items()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder.group_to_items" class="md-nav__link">
+    group_to_items()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.GroupBuilder.grouping_properties" class="md-nav__link">
+    grouping_properties()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder" class="md-nav__link">
+    MapBuilder
+  </a>
+  
+    <nav class="md-nav">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.ensure_indexes" class="md-nav__link">
+    ensure_indexes()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.finalize" class="md-nav__link">
+    finalize()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.get_items" class="md-nav__link">
+    get_items()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.prechunk" class="md-nav__link">
+    prechunk()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.process_item" class="md-nav__link">
+    process_item()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.unary_function" class="md-nav__link">
+    unary_function()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.builders.MapBuilder.update_targets" class="md-nav__link">
+    update_targets()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/materialsproject/maggma/edit/master/docs/reference/builders.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                
+                
+                  <h1>Builders</h1>
+                
+                <p>Base Builder class to define how builders need to be defined</p>
+<h2 id="maggma.builders.CopyBuilder"><code class="codehilite"><span class="n">CopyBuilder</span></code><a class="headerlink" href="#maggma.builders.CopyBuilder" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p>Sync a source store with a target store.</p>
+<h3 id="maggma.builders.CopyBuilder.unary_function"><code class="codehilite"><span class="n">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.CopyBuilder.unary_function" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>297
+298
+299
+300
+301
+302
+303</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Identity function for copy builder map operation</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;_id&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">item</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Identity function for copy builder map operation</p>
+</div>
+</div>
+<h2 id="maggma.builders.GroupBuilder"><code class="codehilite"><span class="n">GroupBuilder</span></code><a class="headerlink" href="#maggma.builders.GroupBuilder" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p>Group source docs and produce one target doc from each group.</p>
+<p>Supports incremental building, where a source group gets (re)built only if
+it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.</p>
+<h3 id="maggma.builders.GroupBuilder.docs_to_groups"><code class="codehilite"><span class="n">docs_to_groups</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span></code> <em>(staticmethod)</em><a class="headerlink" href="#maggma.builders.GroupBuilder.docs_to_groups" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>263
+264
+265
+266
+267
+268
+269
+270
+271
+272
+273
+274
+275
+276
+277</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">docs_to_groups</span><span class="p">(</span><span class="n">docs</span><span class="p">:</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Yield groups from (minimally-projected) documents.</span>
+
+<span class="sd">        This could be as simple as returning a set of unique document keys.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            docs: documents with minimal projections</span>
+<span class="sd">                needed to determine groups.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            iterable: one group at a time</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Yield groups from (minimally-projected) documents.</p>
+<p>This could be as simple as returning a set of unique document keys.</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="codehilite"><span class="err">docs</span></code></td>
+<td><code class="codehilite"><span class="n">Iterator</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
+<td>documents with minimal projections needed to determine groups.</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="codehilite"><span class="err">List</span></code></td>
+<td>iterable: one group at a time</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="maggma.builders.GroupBuilder.get_items"><code class="codehilite"><span class="n">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.GroupBuilder.get_items" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Rebuilt get_items for GroupBuilder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">criteria</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">)</span>
+            <span class="p">}</span>
+        <span class="p">}</span>
+
+        <span class="n">properties</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">grouping_properties</span><span class="p">()</span>
+        <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">docs_to_groups</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;n_items_per_group&quot;</span><span class="p">):</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">n_items_per_group</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">n</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">and</span> <span class="n">n</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">*=</span> <span class="n">n</span>
+        <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">group_to_items</span><span class="p">(</span><span class="n">group</span><span class="p">):</span>
+                <span class="k">yield</span> <span class="n">item</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Rebuilt get_items for GroupBuilder</p>
+</div>
+<h3 id="maggma.builders.GroupBuilder.group_to_items"><code class="codehilite"><span class="n">group_to_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.GroupBuilder.group_to_items" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>279
+280
+281
+282
+283
+284
+285
+286
+287
+288
+289
+290
+291</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">group_to_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">group</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a group, yield items for this builder&#39;s process_item method.</span>
+
+<span class="sd">        This method does the work of fetching data needed for processing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            group: sufficient as or to produce a source filter</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            iterable: one or more items per group for process_item.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Given a group, yield items for this builder's process_item method.</p>
+<p>This method does the work of fetching data needed for processing.</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="codehilite"><span class="err">group</span></code></td>
+<td><code class="codehilite"><span class="err">Dict</span></code></td>
+<td>sufficient as or to produce a source filter</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="codehilite"><span class="err">Iterator</span></code></td>
+<td>iterable: one or more items per group for process_item.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="maggma.builders.GroupBuilder.grouping_properties"><code class="codehilite"><span class="n">grouping_properties</span><span class="p">()</span></code> <em>(staticmethod)</em><a class="headerlink" href="#maggma.builders.GroupBuilder.grouping_properties" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>249
+250
+251
+252
+253
+254
+255
+256
+257
+258
+259
+260
+261</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@staticmethod</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">grouping_properties</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Needed projection for docs_to_groups (passed to source.query).</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list or dict: of the same form as projection param passed to</span>
+<span class="sd">                pymongo.collection.Collection.find. If a list, it is converted</span>
+<span class="sd">                to dict form with {&quot;_id&quot;: 0} unless &quot;_id&quot; is explicitly</span>
+<span class="sd">                included in the list. This is to ease use of index-covered</span>
+<span class="sd">                queries in docs_to_groups.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Needed projection for docs_to_groups (passed to source.query).</p>
+<p><strong>Returns</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="codehilite"><span class="err">Union[List, Dict]</span></code></td>
+<td 0="0" __id_:="&quot;_id&quot;:">list or dict: of the same form as projection param passed to         pymongo.collection.Collection.find. If a list, it is converted         to dict form with </td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<h2 id="maggma.builders.MapBuilder"><code class="codehilite"><span class="n">MapBuilder</span></code><a class="headerlink" href="#maggma.builders.MapBuilder" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p>Apply a unary function to yield a target document for each source document.</p>
+<p>Supports incremental building, where a source document gets built only if it
+has newer (by last_updated_field) data than the corresponding (by key) target
+document.</p>
+<h3 id="maggma.builders.MapBuilder.__init__"><code class="codehilite"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delete_orphans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">store_process_time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">retry_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.__init__" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
+        <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">projection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">delete_orphans</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">store_process_time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">retry_failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Apply a unary function to each source document.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            source: source store</span>
+<span class="sd">            target: target store</span>
+<span class="sd">            query: optional query to filter source store</span>
+<span class="sd">            projection: list of keys to project from the source for</span>
+<span class="sd">                processing. Limits data transfer to improve efficiency.</span>
+<span class="sd">            delete_orphans: Whether to delete documents on target store</span>
+<span class="sd">                with key values not present in source store. Deletion happens</span>
+<span class="sd">                after all updates, during Builder.finalize.</span>
+<span class="sd">            timeout: maximum running time per item in seconds</span>
+<span class="sd">            store_process_time: If True, add &quot;_process_time&quot; key to</span>
+<span class="sd">                document for profiling purposes</span>
+<span class="sd">            retry_failed: If True, will retry building documents that</span>
+<span class="sd">                previously failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">projection</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">delete_orphans</span> <span class="o">=</span> <span class="n">delete_orphans</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store_process_time</span> <span class="o">=</span> <span class="n">store_process_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed</span> <span class="o">=</span> <span class="n">retry_failed</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="n">source</span><span class="p">],</span> <span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="n">target</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Apply a unary function to each source document.</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code class="codehilite"><span class="err">source</span></code></td>
+<td><code class="codehilite"><span class="err">Store</span></code></td>
+<td>source store</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code class="codehilite"><span class="err">target</span></code></td>
+<td><code class="codehilite"><span class="err">Store</span></code></td>
+<td>target store</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code class="codehilite"><span class="err">query</span></code></td>
+<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
+<td>optional query to filter source store</td>
+<td><code class="codehilite"><span class="err">None</span></code></td>
+</tr>
+<tr>
+<td><code class="codehilite"><span class="err">projection</span></code></td>
+<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">List</span><span class="o">]</span><span class="w"></span></code></td>
+<td>list of keys to project from the source for processing. Limits data transfer to improve efficiency.</td>
+<td><code class="codehilite"><span class="err">None</span></code></td>
+</tr>
+<tr>
+<td><code class="codehilite"><span class="err">delete_orphans</span></code></td>
+<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td>Whether to delete documents on target store with key values not present in source store. Deletion happens after all updates, during Builder.finalize.</td>
+<td><code class="codehilite"><span class="err">False</span></code></td>
+</tr>
+<tr>
+<td><code class="codehilite"><span class="err">timeout</span></code></td>
+<td><code class="codehilite"><span class="err">int</span></code></td>
+<td>maximum running time per item in seconds</td>
+<td><code class="codehilite"><span class="err">0</span></code></td>
+</tr>
+<tr>
+<td><code class="codehilite"><span class="err">store_process_time</span></code></td>
+<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td>If True, add "_process_time" key to document for profiling purposes</td>
+<td><code class="codehilite"><span class="err">True</span></code></td>
+</tr>
+<tr>
+<td><code class="codehilite"><span class="err">retry_failed</span></code></td>
+<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td>If True, will retry building documents that previously failed</td>
+<td><code class="codehilite"><span class="err">False</span></code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="maggma.builders.MapBuilder.ensure_indexes"><code class="codehilite"><span class="n">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.ensure_indexes" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Ensures indicies on critical fields for MapBuilder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index_checks</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">),</span>
+        <span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">index_checks</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Missing one or more important indices on stores. &quot;</span>
+                <span class="s2">&quot;Performance for large stores may be severely degraded. &quot;</span>
+                <span class="s2">&quot;Ensure indices on target.key and &quot;</span>
+                <span class="s2">&quot;[(store.last_updated_field, -1), (store.key, 1)] &quot;</span>
+                <span class="s2">&quot;for each of source and target.&quot;</span>
+            <span class="p">)</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Ensures indicies on critical fields for MapBuilder</p>
+</div>
+<h3 id="maggma.builders.MapBuilder.finalize"><code class="codehilite"><span class="n">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.finalize" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Finalize MapBuilder operations including removing orphaned documents</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_orphans</span><span class="p">:</span>
+            <span class="n">source_keyvals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">))</span>
+            <span class="n">target_keyvals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">))</span>
+            <span class="n">to_delete</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">target_keyvals</span> <span class="o">-</span> <span class="n">source_keyvals</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s2">&quot;Finalize: Deleting </span><span class="si">{}</span><span class="s2"> orphans.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">))</span>
+                <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">remove_docs</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">to_delete</span><span class="p">}})</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Finalize MapBuilder operations including removing orphaned documents</p>
+</div>
+<h3 id="maggma.builders.MapBuilder.get_items"><code class="codehilite"><span class="n">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.get_items" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span> 99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generic get items for Map Builder designed to perform</span>
+<span class="sd">        incremental building</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting </span><span class="si">{}</span><span class="s2"> Builder&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
+
+        <span class="n">temp_query</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="k">else</span> <span class="p">{}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed</span><span class="p">:</span>
+            <span class="n">temp_query</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">temp_query</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;$ne&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">}</span>
+
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)))</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">:</span>
+            <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">projection</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">chunked_keys</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+            <span class="n">chunked_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="o">.</span><span class="fm">__ne__</span><span class="p">,</span> <span class="n">chunked_keys</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+                    <span class="n">criteria</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">chunked_keys</span><span class="p">}},</span>
+                    <span class="n">properties</span><span class="o">=</span><span class="n">projection</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="p">):</span>
+                <span class="k">yield</span> <span class="n">doc</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Generic get items for Map Builder designed to perform
+incremental building</p>
+</div>
+<h3 id="maggma.builders.MapBuilder.prechunk"><code class="codehilite"><span class="n">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.prechunk" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generic prechunk for map builder to perform domain-decompostion</span>
+<span class="sd">        by the key field</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">N</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">/</span> <span class="n">number_splits</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
+            <span class="k">yield</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="o">.</span><span class="fm">__ne__</span><span class="p">,</span> <span class="n">split</span><span class="p">))}}</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Generic prechunk for map builder to perform domain-decompostion
+by the key field</p>
+</div>
+<h3 id="maggma.builders.MapBuilder.process_item"><code class="codehilite"><span class="n">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.process_item" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generic process items to process a dictionary using</span>
+<span class="sd">        a map function</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
+
+        <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">Timeout</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">timeout</span><span class="p">):</span>
+                <span class="n">processed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unary_function</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                <span class="n">processed</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;successful&quot;</span><span class="p">})</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">processed</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">}</span>
+
+        <span class="n">time_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+
+        <span class="n">key</span><span class="p">,</span> <span class="n">last_updated_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span>
+
+        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
+                <span class="n">item</span><span class="p">[</span><span class="n">last_updated_field</span><span class="p">]</span>
+            <span class="p">),</span>
+        <span class="p">}</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_process_time</span><span class="p">:</span>
+            <span class="n">out</span><span class="p">[</span><span class="s2">&quot;_process_time&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_end</span> <span class="o">-</span> <span class="n">time_start</span>
+
+        <span class="n">out</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">processed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Generic process items to process a dictionary using
+a map function</p>
+</div>
+<h3 id="maggma.builders.MapBuilder.unary_function"><code class="codehilite"><span class="n">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.unary_function" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ufn: Unary function to process item</span>
+<span class="sd">                You do not need to provide values for</span>
+<span class="sd">                source.key and source.last_updated_field in the output.</span>
+<span class="sd">                Any uncaught exceptions will be caught by</span>
+<span class="sd">                process_item and logged to the &quot;error&quot; field</span>
+<span class="sd">                in the target document.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>ufn: Unary function to process item
+        You do not need to provide values for
+        source.key and source.last_updated_field in the output.
+        Any uncaught exceptions will be caught by
+        process_item and logged to the "error" field
+        in the target document.</p>
+</div>
+<h3 id="maggma.builders.MapBuilder.update_targets"><code class="codehilite"><span class="n">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.update_targets" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Generic update targets for Map Builder</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">source</span><span class="p">,</span> <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="c1"># Use source last-updated value, ensuring `datetime` type.</span>
+            <span class="n">item</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
+                <span class="n">item</span><span class="p">[</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">!=</span> <span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">item</span><span class="p">[</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span>
+            <span class="n">item</span><span class="p">[</span><span class="s2">&quot;_bt&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">()</span>
+            <span class="k">if</span> <span class="s2">&quot;_id&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Generic update targets for Map Builder</p>
+</div>
+</div>
+                
+                  
+                
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../stores/" title="Stores" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Stores
+              </span>
+            </div>
+          </a>
+        
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
+            Built by The Materials Project
+          </div>
+        
+        powered by
+        <a href="https://www.mkdocs.org">MkDocs</a>
+        and
+        <a href="https://squidfunk.github.io/mkdocs-material/">
+          Material for MkDocs</a>
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/application.808e90bb.js"></script>
+      
+      <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
+      
+    
+  </body>
+</html>

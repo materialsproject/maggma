@@ -330,6 +330,114 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      Reference
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        Reference
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-1" type="checkbox" id="nav-4-1">
+    
+    <label class="md-nav__link" for="nav-4-1">
+      Core
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-1">
+        Core
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../reference/core_store/" title="Store" class="md-nav__link">
+      Store
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../reference/core_builder/" title="Builder" class="md-nav__link">
+      Builder
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../reference/core_validator/" title="Validator" class="md-nav__link">
+      Validator
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../reference/stores/" title="Stores" class="md-nav__link">
+      Stores
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../reference/builders/" title="Builders" class="md-nav__link">
+      Builders
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -390,12 +498,18 @@
                 
                   <h1>Core Concepts</h1>
                 
-                <h2 id="msonable">MSONable</h2>
-<p>Maggma objects implement the <code>MSONable</code> pattern which enables these objects to serialize and deserialize to python dictionaries or even JSON. The MSONable encoder injects in <code>@module</code> and <code>@class</code> info so that the object can be deserialized without the manual. This enables much of Maggma to operate like a plugin system.</p>
-<h2 id="store">Store</h2>
-<p>Stores are document-based data sources and data sinks. They are modeled around the MongoDB collection although they can represent more complex data sources as well. Stores implement methods to <code>connect</code>, <code>query</code>, find <code>distinct</code> values, <code>groupby</code> fields, <code>update</code> documents, and <code>remove</code> documents. Stores also implement a number of critical fields for Maggma: the <code>key</code> and the <code>last_updated_field</code>. <code>key</code> is the field that is used to index the underlying data source. <code>last_updated_field</code> is the timestamp of when that document.</p>
-<h2 id="builder">Builder</h2>
-<p>Builders represent a data transformation step. Builders break down each transformation into 3 key steps: <code>get_items</code>, <code>process_item</code>, and <code>update_targets</code>. Both <code>get_items</code> and <code>update_targets</code> can perform IO to the data stores. <code>process_item</code> is expected to not perform any IO so that it can be parallelized by Maggma. Builders can be chained together into a array and then saved as a JSON file to be run on a production system.</p>
+                <h2 id="msonable">MSONable<a class="headerlink" href="#msonable" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p>Maggma objects implement the <code class="codehilite"><span class="err">MSONable</span></code> pattern which enables these objects to serialize and deserialize to python dictionaries or even JSON. The MSONable encoder injects in <code class="codehilite"><span class="err">@module</span></code> and <code class="codehilite"><span class="err">@class</span></code> info so that the object can be deserialized without the manual. This enables much of Maggma to operate like a plugin system.</p>
+</div>
+<h2 id="store">Store<a class="headerlink" href="#store" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p>Stores are document-based data sources and data sinks. They are modeled around the MongoDB collection although they can represent more complex data sources as well. Stores implement methods to <code class="codehilite"><span class="err">connect</span></code>, <code class="codehilite"><span class="err">query</span></code>, find <code class="codehilite"><span class="err">distinct</span></code> values, <code class="codehilite"><span class="err">groupby</span></code> fields, <code class="codehilite"><span class="err">update</span></code> documents, and <code class="codehilite"><span class="err">remove</span></code> documents. Stores also implement a number of critical fields for Maggma: the <code class="codehilite"><span class="err">key</span></code> and the <code class="codehilite"><span class="err">last_updated_field</span></code>. <code class="codehilite"><span class="err">key</span></code> is the field that is used to index the underlying data source. <code class="codehilite"><span class="err">last_updated_field</span></code> is the timestamp of when that document.</p>
+</div>
+<h2 id="builder">Builder<a class="headerlink" href="#builder" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p>Builders represent a data transformation step. Builders break down each transformation into 3 key steps: <code class="codehilite"><span class="err">get_items</span></code>, <code class="codehilite"><span class="k">proc</span><span class="nb">es</span><span class="nv">s_item</span></code>, and <code class="codehilite"><span class="err">update_targets</span></code>. Both <code class="codehilite"><span class="err">get_items</span></code> and <code class="codehilite"><span class="err">update_targets</span></code> can perform IO to the data stores. <code class="codehilite"><span class="k">proc</span><span class="nb">es</span><span class="nv">s_item</span></code> is expected to not perform any IO so that it can be parallelized by Maggma. Builders can be chained together into a array and then saved as a JSON file to be run on a production system.</p>
+</div>
                 
                   
                 

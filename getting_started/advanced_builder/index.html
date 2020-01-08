@@ -336,6 +336,114 @@
   </li>
 
     
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4">
+    
+    <label class="md-nav__link" for="nav-4">
+      Reference
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        Reference
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-1" type="checkbox" id="nav-4-1">
+    
+    <label class="md-nav__link" for="nav-4-1">
+      Core
+    </label>
+    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-1">
+        Core
+      </label>
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../reference/core_store/" title="Store" class="md-nav__link">
+      Store
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../reference/core_builder/" title="Builder" class="md-nav__link">
+      Builder
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../reference/core_validator/" title="Validator" class="md-nav__link">
+      Validator
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../reference/stores/" title="Stores" class="md-nav__link">
+      Stores
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../reference/builders/" title="Builders" class="md-nav__link">
+      Builders
+    </a>
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
   </ul>
 </nav>
                   </div>
@@ -396,23 +504,29 @@
                   <a href="https://github.com/materialsproject/maggma/edit/master/docs/getting_started/advanced_builder.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="advanced-builder-concepts">Advanced Builder Concepts</h1>
-<p>There are a number of features in <code>maggma</code> designed to assist with advanced features:</p>
-<h2 id="logging">Logging</h2>
-<p><code>maggma</code> builders have a python <code>logger</code> object that is already setup to output to the correct level. You can directly use it to output <code>info</code>, <code>debug</code>, and <code>error</code> messages.</p>
+                <h1 id="advanced-builder-concepts">Advanced Builder Concepts<a class="headerlink" href="#advanced-builder-concepts" title="Permanent link">&para;</a></h1>
+<div class="autodoc">
+<p>There are a number of features in <code class="codehilite"><span class="err">maggma</span></code> designed to assist with advanced features:</p>
+<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p><code class="codehilite"><span class="err">maggma</span></code> builders have a python <code class="codehilite"><span class="err">logger</span></code> object that is already setup to output to the correct level. You can directly use it to output <code class="codehilite"><span class="err">info</span></code>, <code class="codehilite"><span class="err">debug</span></code>, and <code class="codehilite"><span class="err">error</span></code> messages.</p>
 <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
         <span class="o">...</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got {len(to_process_ids)} to process&quot;</span><span class="p">)</span>
         <span class="o">...</span>
 </pre></div>
 
-<h2 id="querying-for-updated-documents">Querying for Updated Documents</h2>
-<p>One of the most important features in a builder is incremental building which allows the builder to just process new documents. One of the parameters for a maggma store is the <code>last_updated_field</code> and the <code>last_updated_type</code> which tell <code>maggma</code> how to deal with dates in the source and target documents. This allows us to get the <code>id</code> of any documents that are newer in the target than the newest document in the source:</p>
+</div>
+<h2 id="querying-for-updated-documents">Querying for Updated Documents<a class="headerlink" href="#querying-for-updated-documents" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p>One of the most important features in a builder is incremental building which allows the builder to just process new documents. One of the parameters for a maggma store is the <code class="codehilite"><span class="err">last_updated_field</span></code> and the <code class="codehilite"><span class="err">last_updated_type</span></code> which tell <code class="codehilite"><span class="err">maggma</span></code> how to deal with dates in the source and target documents. This allows us to get the <code class="codehilite"><span class="err">id</span></code> of any documents that are newer in the target than the newest document in the source:</p>
 <div class="codehilite"><pre><span></span>        <span class="n">new_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
 </pre></div>
 
-<h2 id="speeding-up-io">Speeding up IO</h2>
-<p>Since <code>maggma</code> is designed around Mongo style data sources and sinks, building indexes or in-memory copies of fields you want to search on is critical to get the fastest possible IO. Since this is very builder and document style dependent, <code>maggma</code> provides a direct interface to <code>ensure_indexes</code> on a Store. A common paradigm is to do this in the beginning of <code>get_items</code>:</p>
+</div>
+<h2 id="speeding-up-io">Speeding up IO<a class="headerlink" href="#speeding-up-io" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p>Since <code class="codehilite"><span class="err">maggma</span></code> is designed around Mongo style data sources and sinks, building indexes or in-memory copies of fields you want to search on is critical to get the fastest possible IO. Since this is very builder and document style dependent, <code class="codehilite"><span class="err">maggma</span></code> provides a direct interface to <code class="codehilite"><span class="err">ensure_indexes</span></code> on a Store. A common paradigm is to do this in the beginning of <code class="codehilite"><span class="err">get_items</span></code>:</p>
 <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="s2">&quot;some_search_fields&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
@@ -421,6 +535,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
         <span class="o">...</span>
 </pre></div>
+</div>
+</div>
                 
                   
                 
@@ -456,6 +572,20 @@
             </div>
           </a>
         
+        
+          <a href="../../reference/core_store/" title="Store" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Store
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
         
       </nav>
     </div>
