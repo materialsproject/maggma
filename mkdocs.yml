@@ -9,6 +9,7 @@ nav:
   - Home: index.md
   - Core Concepts: concepts.md
   - Getting Started:
+    - Using Stores: getting_started/stores.md
     - Writing a Builder: getting_started/simple_builder.md
     - Advanced Builders: getting_started/advanced_builder.md
     - Running a Builder Pipeline: getting_started/running_builders.md
