@@ -136,12 +136,10 @@ Finally, we have to put the processed item in to the target store:
         self.target.update(items)
 ```
 
-
 Putting it all together we get:
 
-
 ``` python
-from typing import Dict, Iterable
+from typing import Dict, Iterable, List
 from maggma.core import Builder
 from maggma.core import Store
 
@@ -165,13 +163,11 @@ class MultiplyBuilder(Builder):
 
         super().__init__(sources=source,targets=target,**kwargs)
 
-
     def get_items(self) -> Iterable:
         """
         Gets induvidual documents to multiply
         """
         docs = list(self.source.query())
-
 
     def process_items(self, item : Dict) -> Dict:
         """
