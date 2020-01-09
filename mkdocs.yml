@@ -12,6 +12,7 @@ nav:
     - Writing a Builder: getting_started/simple_builder.md
     - Advanced Builders: getting_started/advanced_builder.md
     - Running a Builder Pipeline: getting_started/running_builders.md
+    - Working with MapBuilder: getting_started/map_builder.md
   - Reference:
       Core:
         Store: reference/core_store.md
