@@ -30,10 +30,11 @@ class AmazonS3Store(Store):
     def __init__(self, index: Store, bucket: str, compress: bool = False, **kwargs):
         """
         Initializes an S3 Store
+
         Args:
-            index (Store): a store to use to index the S3 Bucket
-            bucket (str) : name of the bucket
-            compress (bool): compress files inserted into the store
+            index: a store to use to index the S3 Bucket
+            bucket: name of the bucket
+            compress: compress files inserted into the store
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for AmazonS3Store")
@@ -48,7 +49,8 @@ class AmazonS3Store(Store):
 
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Returns:
+            a string representing this data source
         """
         return self.bucket
 
@@ -77,8 +79,11 @@ class AmazonS3Store(Store):
     @deprecated(message="This will be removed in the future")
     def collection(self):
         """
-        Returns a handle to the pymongo collection object
-        Not guaranteed to exist in the future
+        Returns:
+            a handle to the pymongo collection object
+
+        Important:
+            Not guaranteed to exist in the future
         """
         # For now returns the index collection since that is what we would "search" on
         return self.index
@@ -95,7 +100,7 @@ class AmazonS3Store(Store):
         Queries the Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -105,7 +110,7 @@ class AmazonS3Store(Store):
             criteria=criteria, sort=sort, limit=limit, skip=skip
         ):
             try:
-                # TODO : THis is ugly and unsafe, do some real checking before pulling data
+                # TODO: THis is ugly and unsafe, do some real checking before pulling data
                 data = self.s3_bucket.Object(doc[self.key]).get()["Body"].read()
             except botocore.exceptions.ClientError as e:
                 # If a client error is thrown, then check that it was a 404 error.
@@ -136,8 +141,8 @@ class AmazonS3Store(Store):
 
         Args:
             field: the field(s) to get distinct values for
-            criteria : PyMongo filter for documents to search in
-            all_exist : ensure all fields exist for the distinct set
+            criteria: PyMongo filter for documents to search in
+            all_exist: ensure all fields exist for the distinct set
         """
         # Index is a store so it should have its own distinct function
         return self.index.distinct(field, criteria=criteria, all_exist=all_exist)
@@ -157,7 +162,7 @@ class AmazonS3Store(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -178,6 +183,7 @@ class AmazonS3Store(Store):
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
         Tries to create an index and return true if it suceeded
+
         Args:
             key: single key to index
             unique: Whether or not this index contains only unique keys
@@ -261,8 +267,8 @@ class AmazonS3Store(Store):
         Store than this Store.
 
         Args:
-            key: a single key field to return, defaults to Store.key
-            criteria : PyMongo filter for documents to search in
+            target: target Store
+            criteria: PyMongo filter for documents to search in
             exhaustive: triggers an item-by-item check vs. checking
                         the last_updated of the target Store and using
                         that to filter out new items in

@@ -1,0 +1,40 @@
+site_name: Maggma Documentation
+site_description: Documentation for Maggma, a files-to-API data pipeline for scientific applications
+copyright: Built by The Materials Project
+
+theme:
+  name: 'material'
+
+nav:
+  - Home: index.md
+  - Core Concepts: concepts.md
+  - Getting Started:
+    - Using Stores: getting_started/stores.md
+    - Writing a Builder: getting_started/simple_builder.md
+    - Advanced Builders: getting_started/advanced_builder.md
+    - Running a Builder Pipeline: getting_started/running_builders.md
+    - Working with MapBuilder: getting_started/map_builder.md
+  - Reference:
+      Core:
+        Store: reference/core_store.md
+        Builder: reference/core_builder.md
+        Validator: reference/core_validator.md
+      Stores: reference/stores.md
+      Builders: reference/builders.md
+
+repo_url: https://github.com/materialsproject/maggma/
+docs_dir: ./src/docs
+markdown_extensions:
+  - admonition
+  - codehilite
+  - attr_list
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.inlinehilite
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - minify
+  - mkdocstrings

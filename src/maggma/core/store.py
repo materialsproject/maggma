@@ -49,11 +49,11 @@ class Store(MSONable, metaclass=ABCMeta):
     ):
         """
         Args:
-            key : master key to index on
-            last_updated_field : field for date/time stamping the data
-            last_updated_type : the date/time format for the last_updated_field.
+            key: master key to index on
+            last_updated_field: field for date/time stamping the data
+            last_updated_type: the date/time format for the last_updated_field.
                                 Can be "datetime" or "isoformat"
-            validator : Validator to validate documents going into the store
+            validator: Validator to validate documents going into the store
         """
         self.key = key
         self.last_updated_field = last_updated_field
@@ -85,6 +85,9 @@ class Store(MSONable, metaclass=ABCMeta):
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
+
+        Args:
+            force_reset: whether to reset the connection or not
         """
 
     @abstractmethod
@@ -106,7 +109,7 @@ class Store(MSONable, metaclass=ABCMeta):
         Queries the Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -130,6 +133,7 @@ class Store(MSONable, metaclass=ABCMeta):
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
         Tries to create an index and return true if it suceeded
+
         Args:
             key: single key to index
             unique: Whether or not this index contains only unique keys
@@ -154,7 +158,7 @@ class Store(MSONable, metaclass=ABCMeta):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -183,7 +187,7 @@ class Store(MSONable, metaclass=ABCMeta):
         Queries the Store for a single document
 
         Args:
-            criteria : PyMongo filter for documents to search
+            criteria: PyMongo filter for documents to search
             properties: properties to return in the document
             sort: Dictionary of sort order for fields
         """
@@ -204,8 +208,8 @@ class Store(MSONable, metaclass=ABCMeta):
 
         Args:
             field: the field(s) to get distinct values for
-            criteria : PyMongo filter for documents to search in
-            all_exist : ensure all fields exist for the distinct set
+            criteria: PyMongo filter for documents to search in
+            all_exist: ensure all fields exist for the distinct set
         """
         field = field if isinstance(field, list) else [field]
 
@@ -255,8 +259,8 @@ class Store(MSONable, metaclass=ABCMeta):
         Store than this Store.
 
         Args:
-            key: a single key field to return, defaults to Store.key
-            criteria : PyMongo filter for documents to search in
+            target: target Store to
+            criteria: PyMongo filter for documents to search in
             exhaustive: triggers an item-by-item check vs. checking
                         the last_updated of the target Store and using
                         that to filter out new items in
@@ -345,4 +349,7 @@ class Store(MSONable, metaclass=ABCMeta):
 
 
 class StoreError(Exception):
-    """General Store-related error."""
+    """ General Store-related error """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(self, *args, **kwargs)

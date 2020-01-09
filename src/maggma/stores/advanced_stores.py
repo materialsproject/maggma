@@ -37,14 +37,13 @@ class MongograntStore(MongoStore):
         **kwargs
     ):
         """
-
         Args:
-            mongogrant_spec (str): of the form <role>:<host>/<db>, where
+            mongogrant_spec: of the form <role>:<host>/<db>, where
                 role is one of {"read", "readWrite"} or aliases {"ro", "rw"};
                 host is a db host (w/ optional port) or alias; and db is a db
                 on that host, or alias. See mongogrant documentation.
-            collection_name (str): name of mongo collection
-            mgclient_config_path (str): Path to mongogrant client config file,
+            collection_name: name of mongo collection
+            mgclient_config_path: Path to mongogrant client config file,
                or None if default path (`mongogrant.client.path`).
         """
         self.mongogrant_spec = mongogrant_spec
@@ -63,6 +62,7 @@ class MongograntStore(MongoStore):
     def connect(self, force_reset: bool = False):
         """
         Connect to the mongogrant source
+
         Args:
             force_reset: forces the connection to reset rather than just
                          ensuring the connection is present
@@ -83,16 +83,24 @@ class MongograntStore(MongoStore):
 
     @classmethod
     def from_db_file(cls, file):
+        """
+        Raises ValueError since MongograntStores can't be initialized from a file
+        """
         raise ValueError("MongograntStore doesn't implement from_db_file")
 
     @classmethod
     def from_collection(cls, collection):
+        """
+        Raises ValueError since MongograntStores can't be initialized from a PyMongo collection
+        """
         raise ValueError("MongograntStore doesn't implement from_collection")
 
     def __eq__(self, other: object) -> bool:
         """
         Check equality for MongograntStore
-        other: other MongograntStore to compare with
+
+        Args:
+            other: other MongograntStore to compare with
         """
         if not isinstance(other, MongograntStore):
             return False
@@ -115,12 +123,14 @@ class VaultStore(MongoStore):
     @requires(hvac is not None, "hvac is required to use VaultStore")
     def __init__(self, collection_name: str, vault_secret_path: str):
         """
-        collection (string): name of mongo collection
-        vault_secret_path (string): path on vault server with mongo creds object
+        Args:
+            collection_name: name of mongo collection
+            vault_secret_path: path on vault server with mongo creds object
 
-        Environment (must be set prior to invocation):
-        VAULT_ADDR - URL of vault server (eg. https://matgen8.lbl.gov:8200)
-        VAULT_TOKEN or GITHUB_TOKEN - token used to authenticate to vault
+        Important:
+            Environment variables that must be set prior to invocation
+            VAULT_ADDR - URL of vault server (eg. https://matgen8.lbl.gov:8200)
+            VAULT_TOKEN or GITHUB_TOKEN - token used to authenticate to vault
         """
         self.collection_name = collection_name
         self.vault_secret_path = vault_secret_path
@@ -166,7 +176,9 @@ class VaultStore(MongoStore):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for VaultStore
-        other: other VaultStore to compare with
+
+        Args:
+            other: other VaultStore to compare with
         """
         if not isinstance(other, VaultStore):
             return False
@@ -219,7 +231,7 @@ class AliasingStore(Store):
         Queries the Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -249,8 +261,8 @@ class AliasingStore(Store):
 
         Args:
             field: the field(s) to get distinct values for
-            criteria : PyMongo filter for documents to search in
-            all_exist : ensure all fields exist for the distinct set
+            criteria: PyMongo filter for documents to search in
+            all_exist: ensure all fields exist for the distinct set
         """
         criteria = criteria if criteria else {}
         lazy_substitute(criteria, self.reverse_aliases)
@@ -274,7 +286,7 @@ class AliasingStore(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -348,7 +360,9 @@ class AliasingStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for AliasingStore
-        other: other AliasingStore to compare with
+
+        Args:
+            other: other AliasingStore to compare with
         """
         if not isinstance(other, AliasingStore):
             return False
@@ -364,9 +378,10 @@ class SandboxStore(Store):
 
     def __init__(self, store: Store, sandbox: str, exclusive: bool = False):
         """
-        store (Store): store to wrap sandboxing around
-        sandbox (string): the corresponding sandbox
-        exclusive (bool): whether to be exclusively in this sandbox or include global items
+        Args:
+            store: store to wrap sandboxing around
+            sandbox: the corresponding sandbox
+            exclusive: whether to be exclusively in this sandbox or include global items
         """
         self.store = store
         self.sandbox = sandbox
@@ -380,14 +395,16 @@ class SandboxStore(Store):
 
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Returns:
+            a string representing this data source
         """
         return self.store.name
 
     @property
     def sbx_criteria(self) -> Dict:
         """
-        Returns the sandbox criteria dict used to filter the source store
+        Returns:
+            the sandbox criteria dict used to filter the source store
         """
         if self.exclusive:
             return {"sbxn": self.sandbox}
@@ -408,7 +425,7 @@ class SandboxStore(Store):
         Queries the Store for a set of documents
 
         Args:
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -436,7 +453,7 @@ class SandboxStore(Store):
 
         Args:
             keys: fields to group documents
-            criteria : PyMongo filter for documents to search in
+            criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields
             skip: number documents to skip
@@ -501,7 +518,9 @@ class SandboxStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for SandboxStore
-        other: other SandboxStore to compare with
+
+        Args:
+            other: other SandboxStore to compare with
         """
         if not isinstance(other, SandboxStore):
             return False
