@@ -35,3 +35,10 @@ Since `maggma` is designed around Mongo style data sources and sinks, building i
         self.ensure_indexes()
         ...
 ```
+
+
+## Getting Advanced Features for Free
+
+`maggma` implements standard builders that implement many of these advanced features:
+
+- [MapBuilder](map_builder.md)
