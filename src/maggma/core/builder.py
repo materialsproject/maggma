@@ -83,7 +83,7 @@ class Builder(MSONable, metaclass=ABCMeta):
 
     def process_item(self, item: Any) -> Any:
         """
-        Process an item. Should not expect DB access as this can be run MPI
+        Process an item. There should be no database operations in this method.
         Default behavior is to return the item.
         Arguments:
             item:
@@ -96,7 +96,7 @@ class Builder(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def update_targets(self, items: List):
         """
-        Takes a dictionary of targets and items from process item and updates them
+        Takes a list of items from process item and updates the targets with them.
         Can also perform other book keeping in the process such as storing gridfs oids, etc.
 
         Arguments:
