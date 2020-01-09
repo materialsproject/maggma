@@ -12,12 +12,12 @@ All `Store`s have a few basic arguments that are critical to understand. Any `St
 
 Stores provide a number of basic methods that make easy to use:
 
-- query: standard mongo style `find` method that lets you search the store
-- query_one: same as above but limits to the first document
-- update: update the documents into the collection, this will override documents if the key field matches. You can temporarily provide extra fields to key these documents if you don't to maintain duplicates, for instance keying on both `key` and `last_udpated_field`
-- ensure_index: this creates an index the underlying data-source for fast querying
-- distinct: gets distinct values of a field
-- groupby: similar to query but performs a grouping operation and returns sets of documents
-- remove_docs: removes documents from the underlying data source
-- last_updated: finds the most recently updated `last_updated_field` value and returns that. Usefull for knowing how old a data-source is
-- newer_in: finds all documents that are newer in the target collection and returns their `key`s. This is a very usefull way of performing incremental processing
+- query: Standard mongo style `find` method that lets you search the store.
+- query_one: Same as above but limits to the first document.
+- update: Update the documents into the collection. This will override documents if the key field matches. You can temporarily provide extra fields to key these documents if you don't to maintain duplicates, for instance keying on both `key` and `last_udpated_field`.
+- ensure_index: This creates an index the underlying data-source for fast querying.
+- distinct: Gets distinct values of a field.
+- groupby: Similar to query but performs a grouping operation and returns sets of documents.
+- remove_docs: Removes documents from the underlying data source.
+- last_updated: Finds the most recently updated `last_updated_field` value and returns that. Usefull for knowing how old a data-source is.
+- newer_in: Finds all documents that are newer in the target collection and returns their `key`s. This is a very useful way of performing incremental processing.
