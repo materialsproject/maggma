@@ -35,7 +35,7 @@ class MultiplyBuilder(Builder):
 The `__init__` for a builder can have any set of parameters. Generally, you want a source `Store` and a target `Store` along with any parameters that configure the builder. Due to the `MSONable` pattern, any parameters to `__init__` have to be stored as attributes. A simple `__init__` would look like this:
 
 ``` python
-    def __init__(self, source: Store, target: Store, multiplier: int = 2. **kwargs):
+    def __init__(self, source: Store, target: Store, multiplier: int = 2, **kwargs):
         """
         Arguments:
             source: the source store
@@ -71,7 +71,7 @@ Calling the parent class `__init__` is a good practice as sub-classing builders 
 
 ## `get_items`
 
-`get_items` is one of the easiest and most difficult methods to implement. All of the IO logic getting data from the sources has to happen here, which requires some planning. `get_items` shoudl also sort all of the data into induvidual **items** to process. This simple builder has a very easy `get_items`:
+`get_items` is conceptually a simple method to implement, but in practice can easily be more code than the rest of the builder. All of the logic for getting data from the sources has to happen here, which requires some planning. `get_items` should also sort all of the data into induvidual **items** to process. This simple builder has a very easy `get_items`:
 
 ``` python
 
@@ -128,6 +128,59 @@ Our simple process item just has to multiply one field by `self.mulitplier`:
 Finally, we have to put the processed item in to the target store:
 
 ``` python
+
+    def update_targets(self,items: List[Dict]):
+        """
+        Adds the processed items into the target store
+        """
+        self.target.update(items)
+```
+
+
+Putting it all together we get:
+
+
+``` python
+from typing import Dict, Iterable
+from maggma.core import Builder
+from maggma.core import Store
+
+class MultiplyBuilder(Builder):
+    """
+    Simple builder that multiplies the "a" sub-document by pre-set value
+    """
+
+
+    def __init__(self, source: Store, target: Store, multiplier: int = 2, **kwargs):
+        """
+        Arguments:
+            source: the source store
+            target: the target store
+            multiplier: the multiplier to apply to "a" sub-document
+        """
+        self.source = source
+        self.target = target
+        self.multiplier = multiplier
+        self.kwargs = kwargs
+
+        super().__init__(sources=source,targets=target,**kwargs)
+
+
+    def get_items(self) -> Iterable:
+        """
+        Gets induvidual documents to multiply
+        """
+        docs = list(self.source.query())
+
+
+    def process_items(self, item : Dict) -> Dict:
+        """
+        Multiplies the "a" sub-document by self.multiplier
+        """
+        new_item = dict(**item)
+        new_item["a"] *= self.multiplier
+        return new_item
+
 
     def update_targets(self,items: List[Dict]):
         """
