@@ -277,6 +277,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/running_builders/" title="Running a Builder Pipeline" class="md-nav__link">
+      Running a Builder Pipeline
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -856,7 +868,7 @@ to multiple instances of the builder to get/process/udpate on</p>
 93
 94</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Process an item. Should not expect DB access as this can be run MPI</span>
+<span class="sd">        Process an item. There should be no database operations in this method.</span>
 <span class="sd">        Default behavior is to return the item.</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            item:</span>
@@ -869,7 +881,7 @@ to multiple instances of the builder to get/process/udpate on</p>
 </td></tr></table>
 
 </details>
-<p>Process an item. Should not expect DB access as this can be run MPI
+<p>Process an item. There should be no database operations in this method.
 Default behavior is to return the item.
 <strong>Parameters</strong></p>
 <table>
@@ -966,7 +978,7 @@ This is only intended for diagnostic purposes</p>
 108</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Takes a dictionary of targets and items from process item and updates them</span>
+<span class="sd">        Takes a list of items from process item and updates the targets with them.</span>
 <span class="sd">        Can also perform other book keeping in the process such as storing gridfs oids, etc.</span>
 
 <span class="sd">        Arguments:</span>
@@ -980,7 +992,7 @@ This is only intended for diagnostic purposes</p>
 </td></tr></table>
 
 </details>
-<p>Takes a dictionary of targets and items from process item and updates them
+<p>Takes a list of items from process item and updates the targets with them.
 Can also perform other book keeping in the process such as storing gridfs oids, etc.</p>
 <p><strong>Parameters</strong></p>
 <table>
