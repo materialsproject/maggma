@@ -1,13 +1,14 @@
 
 name: docs
 
-on: pull_request
-    #types: [closed]
+on:
+  pull_request:
+    types: [closed]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    #if: github.event.pull_request.merged
+    if: github.event.pull_request.merged
     steps:
     - uses: actions/checkout@v1
 
