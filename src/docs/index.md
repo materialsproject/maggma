@@ -26,8 +26,7 @@ You can install Maggma directly from a clone of the [Git repository](https://git
 
 ``` shell tab="Local Clone"
 git clone https://github.com//materialsproject/maggma
-cd sphinx
-pip install .
+python setup.py install
 ```
 
 ``` shell tab="Direct Git"
