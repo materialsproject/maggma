@@ -23,6 +23,7 @@ setup(
     package_dir={"": "src"},
     zip_safe=False,
     install_requires=[
+        "setuptools",
         "pymongo>=3.6",
         "mongomock>=3.10.0",
         "monty>=1.0.2",
