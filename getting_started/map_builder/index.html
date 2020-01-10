@@ -469,8 +469,8 @@
                 
                 <h1 id="map-builder">Map Builder<a class="headerlink" href="#map-builder" title="Permanent link">&para;</a></h1>
 <div class="autodoc">
-<p><code class="codehilite"><span class="err">maggma</span></code> has a built in builder called the <code class="codehilite"><span class="err">MapBuilder</span></code> which handles a number of tedious tasks in writing a builder. This class is designed to be used similar to a map operator in any other framework in even the map function in python. <code class="codehilite"><span class="err">MapBuilder</span></code> will take each document in the source store, apply the function you give it, and then store that in the target store. It handles incremental building, keeping track of errors, getting only the data you need, managing timeouts, and deleting orphaned documents through configurational options.</p>
-<p>Let's rebuild the <code class="codehilite"><span class="err">MultiplierBuilder</span></code> we wrote earlier using <code class="codehilite"><span class="err">MapBuilder</span></code>:</p>
+<p><code class="codehilite"><span class="n">maggma</span></code> has a built in builder called the <code class="codehilite"><span class="n">MapBuilder</span></code> which handles a number of tedious tasks in writing a builder. This class is designed to be used similar to a map operator in any other framework in even the map function in python. <code class="codehilite"><span class="n">MapBuilder</span></code> will take each document in the source store, apply the function you give it, and then store that in the target store. It handles incremental building, keeping track of errors, getting only the data you need, managing timeouts, and deleting orphaned documents through configurational options.</p>
+<p>Let's rebuild the <code class="codehilite"><span class="n">MultiplierBuilder</span></code> we wrote earlier using <code class="codehilite"><span class="n">MapBuilder</span></code>:</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">maggma.builders</span> <span class="kn">import</span> <span class="n">MapBuilder</span>
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
@@ -480,7 +480,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 </pre></div>
 
-<p>Just like before we define a new class, but this time it should inherit from <code class="codehilite"><span class="err">MapBuilder</span></code>.</p>
+<p>Just like before we define a new class, but this time it should inherit from <code class="codehilite"><span class="n">MapBuilder</span></code>.</p>
 <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
@@ -496,10 +496,10 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
                          <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
                          <span class="n">projection</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">],</span>
-                         <span class="n">delete_orphans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                         <span class="n">delete_orphans</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span>
                          <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                         <span class="n">store_process_timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                         <span class="n">retry_failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                         <span class="n">store_process_timeout</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                         <span class="n">retry_failed</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 
@@ -511,7 +511,7 @@
 <li>store_process_timeout: adds the process time into the target document for profiling</li>
 <li>retry_failed: retries running the process function on previously failed documents</li>
 </ul>
-<p>Finally let's get to the hard part which is running our function. We do this by defining <code class="codehilite"><span class="err">unary_function</span></code></p>
+<p>Finally let's get to the hard part which is running our function. We do this by defining <code class="codehilite"><span class="n">unary_function</span></code></p>
 <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">item</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mulitplier</span><span class="p">}</span>
 </pre></div>

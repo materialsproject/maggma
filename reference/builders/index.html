@@ -834,7 +834,7 @@ it has a newer (by last_updated_field) doc than the corresponding (by key) targe
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">docs</span></code></td>
+<td><code class="codehilite"><span class="n">docs</span></code></td>
 <td><code class="codehilite"><span class="n">Iterator</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
 <td>documents with minimal projections needed to determine groups.</td>
 <td><em>required</em></td>
@@ -851,7 +851,7 @@ it has a newer (by last_updated_field) doc than the corresponding (by key) targe
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">List</span></code></td>
+<td><code class="codehilite"><span class="n">List</span></code></td>
 <td>iterable: one group at a time</td>
 </tr>
 </tbody>
@@ -953,8 +953,8 @@ it has a newer (by last_updated_field) doc than the corresponding (by key) targe
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">group</span></code></td>
-<td><code class="codehilite"><span class="err">Dict</span></code></td>
+<td><code class="codehilite"><span class="k">group</span></code></td>
+<td><code class="codehilite"><span class="n">Dict</span></code></td>
 <td>sufficient as or to produce a source filter</td>
 <td><em>required</em></td>
 </tr>
@@ -970,7 +970,7 @@ it has a newer (by last_updated_field) doc than the corresponding (by key) targe
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">Iterator</span></code></td>
+<td><code class="codehilite"><span class="n">Iterator</span></code></td>
 <td>iterable: one or more items per group for process_item.</td>
 </tr>
 </tbody>
@@ -1018,7 +1018,7 @@ it has a newer (by last_updated_field) doc than the corresponding (by key) targe
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">Union[List, Dict]</span></code></td>
+<td><code class="codehilite"><span class="k">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]</span></code></td>
 <td 0="0" __id_:="&quot;_id&quot;:">list or dict: of the same form as projection param passed to         pymongo.collection.Collection.find. If a list, it is converted         to dict form with </td>
 </tr>
 </tbody>
@@ -1031,7 +1031,7 @@ it has a newer (by last_updated_field) doc than the corresponding (by key) targe
 <p>Supports incremental building, where a source document gets built only if it
 has newer (by last_updated_field) data than the corresponding (by key) target
 document.</p>
-<h3 id="maggma.builders.MapBuilder.__init__"><code class="codehilite"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">delete_orphans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">store_process_time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">retry_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.__init__" title="Permanent link">&para;</a></h3>
+<h3 id="maggma.builders.MapBuilder.__init__"><code class="codehilite"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">delete_orphans</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">store_process_time</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">retry_failed</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code><a class="headerlink" href="#maggma.builders.MapBuilder.__init__" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
 <details class="note"><summary>Show source code in maggma/builders.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>25
 26
@@ -1076,12 +1076,12 @@ document.</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
         <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
-        <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">projection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">delete_orphans</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="n">projection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
+        <span class="n">delete_orphans</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
         <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">store_process_time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">retry_failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">store_process_time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="n">retry_failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="bp">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1129,52 +1129,52 @@ document.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">source</span></code></td>
-<td><code class="codehilite"><span class="err">Store</span></code></td>
+<td><code class="codehilite"><span class="k">source</span></code></td>
+<td><code class="codehilite"><span class="n">Store</span></code></td>
 <td>source store</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">target</span></code></td>
-<td><code class="codehilite"><span class="err">Store</span></code></td>
+<td><code class="codehilite"><span class="n">target</span></code></td>
+<td><code class="codehilite"><span class="n">Store</span></code></td>
 <td>target store</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">query</span></code></td>
+<td><code class="codehilite"><span class="n">query</span></code></td>
 <td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
 <td>optional query to filter source store</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code class="codehilite"><span class="k">None</span></code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">projection</span></code></td>
+<td><code class="codehilite"><span class="n">projection</span></code></td>
 <td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">List</span><span class="o">]</span><span class="w"></span></code></td>
 <td>list of keys to project from the source for processing. Limits data transfer to improve efficiency.</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code class="codehilite"><span class="k">None</span></code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">delete_orphans</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code class="codehilite"><span class="n">delete_orphans</span></code></td>
+<td><code class="codehilite"><span class="n">bool</span></code></td>
 <td>Whether to delete documents on target store with key values not present in source store. Deletion happens after all updates, during Builder.finalize.</td>
-<td><code class="codehilite"><span class="err">False</span></code></td>
+<td><code class="codehilite"><span class="k">False</span></code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">timeout</span></code></td>
-<td><code class="codehilite"><span class="err">int</span></code></td>
+<td><code class="codehilite"><span class="n">timeout</span></code></td>
+<td><code class="codehilite"><span class="nb">int</span></code></td>
 <td>maximum running time per item in seconds</td>
-<td><code class="codehilite"><span class="err">0</span></code></td>
+<td><code class="codehilite"><span class="mi">0</span></code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">store_process_time</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code class="codehilite"><span class="n">store_process_time</span></code></td>
+<td><code class="codehilite"><span class="n">bool</span></code></td>
 <td>If True, add "_process_time" key to document for profiling purposes</td>
-<td><code class="codehilite"><span class="err">True</span></code></td>
+<td><code class="codehilite"><span class="k">True</span></code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">retry_failed</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code class="codehilite"><span class="n">retry_failed</span></code></td>
+<td><code class="codehilite"><span class="n">bool</span></code></td>
 <td>If True, will retry building documents that previously failed</td>
-<td><code class="codehilite"><span class="err">False</span></code></td>
+<td><code class="codehilite"><span class="k">False</span></code></td>
 </tr>
 </tbody>
 </table>
@@ -1251,7 +1251,7 @@ document.</p>
             <span class="n">to_delete</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">target_keyvals</span> <span class="o">-</span> <span class="n">source_keyvals</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s2">&quot;Finalize: Deleting </span><span class="si">{}</span><span class="s2"> orphans.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">))</span>
+                    <span class="s2">&quot;Finalize: Deleting {} orphans.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">))</span>
                 <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">remove_docs</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">to_delete</span><span class="p">}})</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
@@ -1305,30 +1305,30 @@ document.</p>
 <span class="sd">        incremental building</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting </span><span class="si">{}</span><span class="s2"> Builder&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting {} Builder&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
 
         <span class="n">temp_query</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="k">else</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed</span><span class="p">:</span>
-            <span class="n">temp_query</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="n">temp_query</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;state&quot;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">temp_query</span><span class="p">[</span><span class="s2">&quot;state&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;$ne&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">}</span>
 
-        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing {} items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)))</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">:</span>
             <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">projection</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">projection</span> <span class="o">=</span> <span class="bp">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">chunked_keys</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
-            <span class="n">chunked_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="o">.</span><span class="fm">__ne__</span><span class="p">,</span> <span class="n">chunked_keys</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">chunked_keys</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">chunked_keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="bp">None</span><span class="o">.</span><span class="fm">__ne__</span><span class="p">,</span> <span class="n">chunked_keys</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
                     <span class="n">criteria</span><span class="o">=</span><span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">chunked_keys</span><span class="p">}},</span>
@@ -1361,11 +1361,11 @@ incremental building</p>
 <span class="sd">        by the key field</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
         <span class="n">N</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span> <span class="o">/</span> <span class="n">number_splits</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
-            <span class="k">yield</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="o">.</span><span class="fm">__ne__</span><span class="p">,</span> <span class="n">split</span><span class="p">))}}</span>
+            <span class="k">yield</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="bp">None</span><span class="o">.</span><span class="fm">__ne__</span><span class="p">,</span> <span class="n">split</span><span class="p">))}}</span>
 </pre></div>
 </td></tr></table>
 
@@ -1413,7 +1413,7 @@ by the key field</p>
 <span class="sd">        a map function</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing: {}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
 
         <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 

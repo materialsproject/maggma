@@ -469,7 +469,7 @@
                 
                 <h1 id="running-builders">Running Builders<a class="headerlink" href="#running-builders" title="Permanent link">&para;</a></h1>
 <div class="autodoc">
-<p><code class="codehilite"><span class="err">maggma</span></code> is designed to run build-pipelines in a production environment. Builders can be run directly in a python environment, but this gives you none of the performance features such as multiprocessing. The base <code class="codehilite"><span class="err">Builder</span></code> class implements a simple <code class="codehilite"><span class="err">run</span></code> method that can be used to run that builder:</p>
+<p><code class="codehilite"><span class="n">maggma</span></code> is designed to run build-pipelines in a production environment. Builders can be run directly in a python environment, but this gives you none of the performance features such as multiprocessing. The base <code class="codehilite"><span class="n">Builder</span></code> class implements a simple <code class="codehilite"><span class="n">run</span></code> method that can be used to run that builder:</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
@@ -482,17 +482,17 @@
 <span class="n">my_builder</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 
-<p>A better way to run this builder would be to use the <code class="codehilite"><span class="err">mrun</span></code> command line tool. Since evrything in <code class="codehilite"><span class="err">maggma</span></code> is MSONable, we can use <code class="codehilite"><span class="err">monty</span></code> to dump the builders into a JSON file:</p>
+<p>A better way to run this builder would be to use the <code class="codehilite"><span class="n">mrun</span></code> command line tool. Since evrything in <code class="codehilite"><span class="n">maggma</span></code> is MSONable, we can use <code class="codehilite"><span class="n">monty</span></code> to dump the builders into a JSON file:</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">dumpfn</span>
 
 <span class="n">dumpfn</span><span class="p">(</span><span class="n">my_builder</span><span class="p">,</span><span class="s2">&quot;my_builder.json&quot;</span><span class="p">)</span>
 </pre></div>
 
-<p>Then we can run the builder using <code class="codehilite"><span class="err">mrun</span></code>:</p>
+<p>Then we can run the builder using <code class="codehilite"><span class="n">mrun</span></code>:</p>
 <div class="codehilite"><pre><span></span>mrun my_builder.json
 </pre></div>
 
-<p><code class="codehilite"><span class="err">mrun</span></code> has a number of usefull options:
+<p><code class="codehilite"><span class="n">mrun</span></code> has a number of usefull options:
 <div class="codehilite"><pre><span></span>mrun --help
 Usage: mrun <span class="o">[</span>OPTIONS<span class="o">]</span> <span class="o">[</span>BUILDERS<span class="o">]</span>...
 
@@ -503,8 +503,8 @@ Options:
                                   single processing
   --help                          Show this message and exit.
 </pre></div></p>
-<p>We can use the <code class="codehilite"><span class="err">-n</span></code> option to control how many workers run <code class="codehilite"><span class="k">proc</span><span class="nb">es</span><span class="nv">s_items</span></code> in parallel.
-Similarly, <code class="codehilite"><span class="err">-v</span></code> controls the logging verbosity from just WARNINGs to INFO to DEBUG output.</p>
+<p>We can use the <code class="codehilite"><span class="o">-</span><span class="n">n</span></code> option to control how many workers run <code class="codehilite"><span class="n">process_items</span></code> in parallel.
+Similarly, <code class="codehilite"><span class="o">-</span><span class="n">v</span></code> controls the logging verbosity from just WARNINGs to INFO to DEBUG output.</p>
 <p>The result will be something that looks like this:
 <div class="codehilite"><pre><span></span><span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,187 - Builder - INFO - Starting Builder Builder
 <span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,217 - Builder - INFO - Processing <span class="m">100</span> items
