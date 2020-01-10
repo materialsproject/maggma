@@ -1,11 +1,9 @@
 name: release
 
 on:
-  push:
-    branches:
-      - master
+  create:
     tags:
-      - 'v*'
+      - v*
 
 jobs:
   lint:
