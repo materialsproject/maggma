@@ -26,6 +26,7 @@ You can install Maggma directly from a clone of the [Git repository](https://git
 
 ``` shell tab="Local Clone"
 git clone https://github.com//materialsproject/maggma
+cd maggma
 python setup.py install
 ```
 
