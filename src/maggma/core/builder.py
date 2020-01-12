@@ -29,7 +29,6 @@ class Builder(MSONable, metaclass=ABCMeta):
         sources: Union[List[Store], Store],
         targets: Union[List[Store], Store],
         chunk_size: int = 1000,
-        query: Optional[Dict] = None,
     ):
         """
         Initialize the builder the framework.
@@ -44,7 +43,6 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.sources = sources if isinstance(sources, list) else [sources]
         self.targets = targets if isinstance(targets, list) else [targets]
         self.chunk_size = chunk_size
-        self.query = query
         self.total = None  # type: Optional[int]
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
@@ -66,10 +64,13 @@ class Builder(MSONable, metaclass=ABCMeta):
         Arguments:
             number_splits: The number of groups to split the documents to work on
         """
-        if self.query:
-            return [self.query]
-        else:
-            return []
+        # Defaults to returning an empty dict to that the builder atleast runs
+        # in distributed mode but doesn't take advnatage
+        self.logger.info(
+            f"{self.__class__.__name__} doesn't have distributed processing capabillities."
+            " Instead this builder will run on just one worker for all processing"
+        )
+        return [{}]
 
     @abstractmethod
     def get_items(self) -> Iterable:
