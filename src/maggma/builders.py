@@ -94,7 +94,9 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         N = ceil(len(keys) / number_splits)
         for split in grouper(keys, N):
-            yield {self.source.key: {"$in": list(filter(None.__ne__, split))}}
+            yield {
+                "query": {self.source.key: {"$in": list(filter(None.__ne__, split))}}
+            }
 
     def get_items(self):
         """
