@@ -10,6 +10,7 @@ from monty.serialization import loadfn
 from maggma.utils import TqdmLoggingHandler
 from maggma.cli.serial import serial
 from maggma.cli.multiprocessing import multi
+from maggma.cli.distributed import master, worker
 
 
 @click.command()
@@ -30,7 +31,9 @@ from maggma.cli.multiprocessing import multi
     default=1,
     type=click.IntRange(1),
 )
-def run(builders, verbosity, num_workers):
+@click.option("-u", "--url", "url", default=None, type=str)
+@click.option("-N", "--num_chunks", "num_chunks", default=0, type=int)
+def run(builders, verbosity, num_workers, url, num_chunks):
 
     # Set Logging
     levels = [logging.WARNING, logging.INFO, logging.DEBUG]
@@ -48,9 +51,17 @@ def run(builders, verbosity, num_workers):
     builders = [b if isinstance(b, list) else [b] for b in builders]
     builders = list(chain.from_iterable(builders))
 
-    if num_workers == 1:
-        for builder in builders:
-            serial(builder)
+    if url:
+        if num_chunks > 0:
+            # Master
+            asyncio.run(master(url, builders, num_chunks))
+        else:
+            # worker
+            asyncio.run(worker(url, num_workers))
     else:
-        for builder in builders:
-            asyncio.run(multi(builder, num_workers))
+        if num_workers == 1:
+            for builder in builders:
+                serial(builder)
+        else:
+            for builder in builders:
+                asyncio.run(multi(builder, num_workers))
