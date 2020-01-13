@@ -51,7 +51,7 @@ async def master(url: str, builders: List[Builder], num_chunks: int):
                     await worker.pipe.asend(
                         json.dumps(temp_builder_dict).encode("utf-8")
                     )
-            except NotImplemented as e:
+            except NotImplemented:
                 logger.info(f"Can't distributed process {builder._class__.__name__}")
 
         # Clean up and tell workers to shut down
@@ -71,7 +71,7 @@ async def worker(url: str, num_workers: int):
         logger.info(f"Connected to Master at {url}")
         running = True
         while running:
-            await master.asend(b"")
+            await master.asend(b"Ready")
             message = await master.arecv()
             work = json.loads(message.decode("utf-8"))
             if "@class" in work and "@module" in work:
