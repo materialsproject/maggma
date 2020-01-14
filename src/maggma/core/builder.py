@@ -37,8 +37,6 @@ class Builder(MSONable, metaclass=ABCMeta):
             sources: source Store(s)
             targets: target Store(s)
             chunk_size: chunk size for processing
-            query: dictionary of options to utilize on a source;
-                   Each builder has internal logic on which souce this will apply to
         """
         self.sources = sources if isinstance(sources, list) else [sources]
         self.targets = targets if isinstance(targets, list) else [targets]
