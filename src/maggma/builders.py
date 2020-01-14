@@ -32,7 +32,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         timeout: int = 0,
         store_process_time: bool = True,
         retry_failed: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """
         Apply a unary function to each source document.
@@ -106,13 +106,12 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         self.ensure_indexes()
 
-        temp_query = dict(**self.query) if self.query else {}
-        if self.retry_failed:
-            temp_query.pop("state", None)
-        else:
-            temp_query["state"] = {"$ne": "failed"}
-
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
+        if self.retry_failed:
+            failed_keys = self.target.distinct(
+                self.target.key, criteria={"state": {"$ne": "failed"}}
+            )
+            keys = list(set(keys + failed_keys))
 
         self.logger.info("Processing {} items".format(len(keys)))
 
