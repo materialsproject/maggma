@@ -10,6 +10,7 @@ from maggma.utils import (
     primed,
     dt_to_isoformat_ceil_ms,
     isostr_to_dt,
+    grouper,
 )
 from time import sleep
 from datetime import datetime
@@ -71,3 +72,15 @@ def test_datetime_utils():
     assert isostr_to_dt("2019-12-13T00:23:11.010") == datetime(
         2019, 12, 13, 0, 23, 11, 10000
     )
+
+
+def test_grouper():
+
+    my_iterable = list(range(100))
+
+    assert len(list(grouper(my_iterable, 10))) == 10
+
+    my_iterable = list(range(100)) + [None]
+    my_groups = list(grouper(my_iterable, 10))
+    assert len(my_groups) == 11
+    assert len(my_groups[10]) == 1

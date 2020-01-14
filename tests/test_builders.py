@@ -116,4 +116,4 @@ def test_prechunk(source, target, old_docs, new_docs):
 
     chunk_queries = list(builder.prechunk(2))
     assert len(chunk_queries) == 2
-    assert chunk_queries[0] == {"k": {"$in": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}}
+    assert chunk_queries[0] == {"query": {"k": {"$in": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]}}}

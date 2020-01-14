@@ -184,3 +184,49 @@ class MultiplyBuilder(Builder):
         """
         self.target.update(items)
 ```
+
+## Distributed Processing
+
+`maggma` can distribute a builder across multiple computers.
+
+The `Builder` must have a `prechunk` method defined. `prechunk` should do a subset of `get_items` to figure out what needs to be processed and then return dictionaries that modify the `Builder` in-place to only work on each subset.
+
+For example, if in the above example we'd first have to update the builder to be able to work on a subset of keys. One pattern is to define a generic `query` argument for the builder and use that in get items:
+
+``` python
+    def __init__(self, source: Store, target: Store, multiplier: int = 2, query: Optional[Dict] = None, **kwargs):
+        """
+        Arguments:
+            source: the source store
+            target: the target store
+            multiplier: the multiplier to apply to "a" sub-document
+        """
+        self.source = source
+        self.target = target
+        self.multiplier = multiplier
+        self.query = query
+        self.kwargs = kwargs
+
+        super().__init__(sources=source,targets=target,**kwargs)
+
+    def get_items(self) -> Iterable:
+        """
+        Gets induvidual documents to multiply
+        """
+        query = self.query or {}
+        docs = list(self.source.query(criteria=query))
+```
+
+Then we can define a prechunk method that modifies the `Builder` dict in place to operate on just a subset of the keys:
+
+``` python
+    from maggma.utils import grouper
+    def prechunk(self, number_splits: int) -> Iterable[Dict]:
+        keys  = self.source.distinct(self.source.key)
+        for split in grouper(keys, N):
+            yield {
+                "query": {self.source.key: {"$in": list(split)}}
+            }
+```
+
+When distributed processing runs, it will modify the `Builder` dictionary in place by the prechunk dictionary. In this case, each builder distribute to a worker will get a modified `query` parameter that only runs on a subset of all posible keys.

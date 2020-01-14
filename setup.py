@@ -30,6 +30,7 @@ setup(
         "pydash>=4.1.0",
         "tqdm>=4.19.6",
         "mongogrant>=0.2.2",
+        "pynng>=0.5.0",
     ],
     extras_require={"vault": ["hvac>=0.9.5"], "S3": ["boto3==1.10.10"]},
     classifiers=[

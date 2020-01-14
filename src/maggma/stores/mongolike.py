@@ -354,10 +354,10 @@ class MemoryStore(MongoStore):
             if all(has(doc, k) for k in keys)
         ]
 
-        def grouper(doc):
+        def grouping_keys(doc):
             return tuple(get(doc, k) for k in keys)
 
-        for vals, group in groupby(sorted(data, key=grouper), grouper):
+        for vals, group in groupby(sorted(data, key=grouping_keys), key=grouping_keys):
             doc = {}  # type: Dict[Any,Any]
             for k, v in zip(keys, vals):
                 set_(doc, k, v)
