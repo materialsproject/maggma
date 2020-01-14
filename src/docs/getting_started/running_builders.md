@@ -66,3 +66,7 @@ There are progress bars for each of the three steps, which lets you understand w
 
 1. Run a `mrun` master by providing it with a `--url` to listen for workers on and `--num-chunks`(`-N`) which tells `mrun` how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause `mrun` to call the builder's `prechunk` to get the distribution of work and run distributd work on all workers
 2. Run `mrun` workers b y providing it with a `--url` to listen for a master and `--num-workers` (`-n`) to tell it how many processes to run in this worker.
+
+
+The `url` argument takes a fully qualified url including protocol. `tcp` is recommended:
+Example: `tcp://127.0.0.1:8080`
