@@ -32,7 +32,7 @@ from maggma.cli.distributed import master, worker
     type=click.IntRange(1),
 )
 @click.option("-u", "--url", "url", default=None, type=str)
-@click.option("-N", "--num_chunks", "num_chunks", default=0, type=int)
+@click.option("-N", "--num-chunks", "num_chunks", default=0, type=int)
 def run(builders, verbosity, num_workers, url, num_chunks):
 
     # Set Logging

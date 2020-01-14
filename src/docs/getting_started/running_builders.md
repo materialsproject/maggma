@@ -58,3 +58,11 @@ Process Items: 100%|████████████████████
 ```
 
 There are progress bars for each of the three steps, which lets you understand what the slowest step is and the overall progress of the system.
+
+
+# Running Distributed
+
+`maggma` can distribute work across multiple computers. There are two steps to this:
+
+1. Run a `mrun` master by providing it with a `--url` to listen for workers on and `--num-chunks`(`-N`) which tells `mrun` how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause `mrun` to call the builder's `prechunk` to get the distribution of work and run distributd work on all workers
+2. Run `mrun` workers b y providing it with a `--url` to listen for a master and `--num-workers` (`-n`) to tell it how many processes to run in this worker.

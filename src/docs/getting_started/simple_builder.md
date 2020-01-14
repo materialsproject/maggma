@@ -187,7 +187,7 @@ class MultiplyBuilder(Builder):
 
 ## Distributed Processing
 
-`maggma` can distribute a builder across multiple computers using two subcommands in `mrun`: `mrun master` and `mrun worker`.
+`maggma` can distribute a builder across multiple computers.
 
 The `Builder` must have a `prechunk` method defined. `prechunk` should do a subset of `get_items` to figure out what needs to be processed and then return dictionaries that modify the `Builder` in-place to only work on each subset.
 
