@@ -21,9 +21,7 @@ def serial(builder: Builder):
 
     for chunk in grouper(tqdm(cursor), builder.chunk_size):
         logger.info("Processing batch of {} items".format(builder.chunk_size))
-        processed_items = [
-            builder.process_item(item) for item in chunk if item is not None
-        ]
+        processed_items = [builder.process_item(item) for item in chunk]
         builder.update_targets(processed_items)
 
     builder.finalize()

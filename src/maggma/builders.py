@@ -94,9 +94,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         N = ceil(len(keys) / number_splits)
         for split in grouper(keys, N):
-            yield {
-                "query": {self.source.key: {"$in": list(filter(None.__ne__, split))}}
-            }
+            yield {"query": {self.source.key: {"$in": list(split)}}}
 
     def get_items(self):
         """
@@ -126,8 +124,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             projection = None
 
         self.total = len(keys)
-        for chunked_keys in grouper(keys, self.chunk_size, None):
-            chunked_keys = list(filter(None.__ne__, chunked_keys))
+        for chunked_keys in grouper(keys, self.chunk_size):
+            chunked_keys = list(chunked_keys)
             for doc in list(
                 self.source.query(
                     criteria={self.source.key: {"$in": chunked_keys}},

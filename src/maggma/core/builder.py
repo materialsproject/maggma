@@ -64,13 +64,14 @@ class Builder(MSONable, metaclass=ABCMeta):
         Arguments:
             number_splits: The number of groups to split the documents to work on
         """
-        # Defaults to returning an empty dict to that the builder atleast runs
-        # in distributed mode but doesn't take advnatage
         self.logger.info(
             f"{self.__class__.__name__} doesn't have distributed processing capabillities."
             " Instead this builder will run on just one worker for all processing"
         )
-        return [{}]
+        raise NotImplementedError(
+            f"{self.__class__.__name__} doesn't have distributed processing capabillities."
+            " Instead this builder will run on just one worker for all processing"
+        )
 
     @abstractmethod
     def get_items(self) -> Iterable:
@@ -130,9 +131,7 @@ class Builder(MSONable, metaclass=ABCMeta):
 
         for chunk in grouper(cursor, self.chunk_size):
             self.logger.info("Processing batch of {} items".format(self.chunk_size))
-            processed_items = [
-                self.process_item(item) for item in chunk if item is not None
-            ]
+            processed_items = [self.process_item(item) for item in chunk]
             self.update_targets(processed_items)
 
         self.finalize()
