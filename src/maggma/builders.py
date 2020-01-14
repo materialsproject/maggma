@@ -3,13 +3,15 @@
 Base Builder class to define how builders need to be defined
 """
 import traceback
-from abc import ABCMeta, abstractmethod
+from abc import ABCMeta, abstractmethod, abstractproperty
 from time import time
 from math import ceil
 from datetime import datetime
 from maggma.utils import grouper, Timeout
 from maggma.core import Builder, Store
-from typing import Optional, Dict, List, Iterator, Union
+from typing import Optional, Dict, List, Iterator, Iterable, Set, Tuple
+from pydash import get
+from itertools import groupby, chain
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -216,78 +218,158 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
 class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     """
-    Group source docs and produce one target doc from each group.
-
+    Group source docs and produces merged documents for each group
     Supports incremental building, where a source group gets (re)built only if
     it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.
     """
 
-    def get_items(self) -> Iterator[Dict]:
+    def ensure_indexes(self):
         """
-        Rebuilt get_items for GroupBuilder
+        Ensures indicies on critical fields for MapBuilder
         """
-        criteria = {
-            self.source.key: {
-                "$in": self.target.newer_in(self.source, criteria=self.query)
-            }
-        }
 
-        properties = self.grouping_properties()
-        groups = self.docs_to_groups(
-            self.source.query(criteria=criteria, properties=properties)
-        )
+        if not self.target.ensure_index(f"{self.target.key}s"):
+            self.logger.warning()
+        super().ensure_indexes()
+
+    def prechunk(self, number_splits: int) -> Iterator[Dict]:
+        """
+        Generic prechunk for map builder to perform domain-decompostion
+        by the key field
+        """
+        self.ensure_indexes()
+        keys = self.get_ids_to_process()
+        groups = self.get_groups_from_keys(keys)
+
+        for split in grouper(groups, number_splits):
+            yield {"query": dict(zip(self.grouping_keys, split))}
+
+    def get_ids_to_process(self) -> Iterable:
+        """
+        Gets the IDs that need to be processed
+        """
+
+        processed_ids = set(self.target.distinct(f"{self.target.key}s"))
+        all_ids = set(self.source.distinct(self.source.key))
+        new_ids = all_ids - processed_ids
+        self.logger.info(f"Found {len(new_ids)} to process")
+        # TODO Updated keys and Failed keys
+
+        return list(new_ids)
+
+    def get_groups_from_keys(self, keys) -> Iterable:
+        """
+        Get the groups by grouping_keys for these documents
+        """
+        grouping_keys = self.grouping_keys
+
+        groups: Set[Tuple] = set()
+        for chunked_keys in grouper(keys, self.chunk_size, None):
+            chunked_keys = list(filter(None.__ne__, chunked_keys))
+
+            docs = list(
+                self.source.query(
+                    criteria={self.source.key: {"$in": chunked_keys}},
+                    properties=grouping_keys,
+                )
+            )
+            groups |= {(get(prop, d, None) for prop in grouping_keys) for d in docs}
+
+        groups = [g[0] for g in groupby(sorted(groups))]
+        self.logger.info(f"Found {len(groups)} to process")
+        return groups
+
+    def get_items(self):
+
+        self.logger.info("Starting {} Builder".format(self.__class__.__name__))
+
+        self.ensure_indexes()
+        keys = self.get_ids_to_process()
+        groups = self.get_groups_from_keys(keys)
+
+        if self.projection:
+            projection = list(
+                set(self.projection + [self.source.key, self.source.last_updated_field])
+            )
+        else:
+            projection = None
+
         self.total = len(groups)
-        if hasattr(self, "n_items_per_group"):
-            n = self.n_items_per_group
-            if isinstance(n, int) and n >= 1:
-                self.total *= n
         for group in groups:
-            for item in self.group_to_items(group):
-                yield item
+            docs = list(
+                self.source.query(
+                    criteria=dict(zip(self.grouping_keys, group)), projection=projection
+                )
+            )
+            yield docs
 
-    @staticmethod
-    @abstractmethod
-    def grouping_properties() -> Union[List, Dict]:
+    def process_item(self, item: List[Dict]) -> Dict[Tuple, Dict]:
+
+        keys = (d[self.source.key] for d in item)
+        self.logger.debug("Processing: {}".format(keys))
+
+        time_start = time()
+
+        try:
+            with Timeout(seconds=self.timeout):
+                processed = self.grouped_unary_function(item)
+                for _, d in processed:
+                    d.update({"state": "successful"})
+        except Exception as e:
+            self.logger.error(traceback.format_exc())
+            processed = {keys: {"error": str(e), "state": "failed"}}
+
+        time_end = time()
+
+        for doc_keys, doc in processed.items():
+            last_updated = [item[k][self.source.last_updated_field] for k in doc_keys]
+            last_updated = [self.source._lu_func[0](lu) for lu in last_updated]
+
+            doc.update(
+                {
+                    f"{self.target.key}s": doc_keys,
+                    self.target.last_updated_field: max(last_updated),
+                    "_bt": datetime.utcnow(),
+                    self.target.key: doc_keys[0],
+                }
+            )
+
+        if self.store_process_time:
+            for doc in processed.values():
+                doc["_process_time"] = time_end - time_start
+
+        return list(processed.values())
+
+    def update_targets(self, items: List[List[Dict]]):
         """
-        Needed projection for docs_to_groups (passed to source.query).
+        Generic update targets for Map Builder
+        """
+        items = list(chain.from_iterable(items))
+
+        for item in items:
+            # Add the built time
+            if "_id" in item:
+                del item["_id"]
+
+        if len(items) > 0:
+            self.target.update(items)
+
+    def grouped_unary_function(self, items: List[Dict]) -> Dict[Tuple, Dict]:
+        """
+        Processing function for GroupBuilder
+
 
         Returns:
-            list or dict: of the same form as projection param passed to
-                pymongo.collection.Collection.find. If a list, it is converted
-                to dict form with {"_id": 0} unless "_id" is explicitly
-                included in the list. This is to ease use of index-covered
-                queries in docs_to_groups.
+            Dictionary mapping:
+                tuple of source document keys that are in the grouped document
+                to
+                the grouped and processed document
         """
+        pass
 
-    @staticmethod
-    @abstractmethod
-    def docs_to_groups(docs: Iterator[Dict]) -> List:
-        """
-        Yield groups from (minimally-projected) documents.
-
-        This could be as simple as returning a set of unique document keys.
-
-        Args:
-            docs: documents with minimal projections
-                needed to determine groups.
-
-        Returns:
-            iterable: one group at a time
-        """
-
-    @abstractmethod
-    def group_to_items(self, group: Dict) -> Iterator:
-        """
-        Given a group, yield items for this builder's process_item method.
-
-        This method does the work of fetching data needed for processing.
-
-        Args:
-            group: sufficient as or to produce a source filter
-
-        Returns:
-            iterable: one or more items per group for process_item.
-        """
+    @abstractproperty
+    def grouping_keys(self) -> List[str]:
+        pass
 
 
 class CopyBuilder(MapBuilder):
