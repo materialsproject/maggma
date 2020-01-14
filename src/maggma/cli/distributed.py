@@ -51,8 +51,10 @@ async def master(url: str, builders: List[Builder], num_chunks: int):
                     await worker.pipe.asend(
                         json.dumps(temp_builder_dict).encode("utf-8")
                     )
-            except NotImplemented:
-                logger.info(f"Can't distributed process {builder._class__.__name__}")
+            except NotImplementedError:
+                logger.error(
+                    f"Can't distributed process {builder.__class__.__name__}. Skipping for now"
+                )
 
         # Clean up and tell workers to shut down
         await wait([pipe.asend("{}".encode("utf-8")) for pipe in workers.pipes])

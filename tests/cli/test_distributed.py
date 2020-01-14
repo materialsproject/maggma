@@ -7,16 +7,13 @@ from maggma.core import Builder
 from maggma.cli.distributed import master, worker
 
 
-class DummyBuilder(Builder):
+class DummyBuilderWithNoPrechunk(Builder):
     def __init__(self, dummy_prechunk: bool, val: int = -1, **kwargs):
         self.dummy_prechunk = dummy_prechunk
         self.connected = False
         self.kwargs = kwargs
         self.val = val
         super().__init__(sources=[], targets=[])
-
-    def prechunk(self, num_chunks):
-        return [{"val": i} for i in range(num_chunks)]
 
     def connect(self):
         self.connected = True
@@ -29,6 +26,11 @@ class DummyBuilder(Builder):
 
     def update_targets(self, items):
         pass
+
+
+class DummyBuilder(DummyBuilderWithNoPrechunk):
+    def prechunk(self, num_chunks):
+        return [{"val": i} for i in range(num_chunks)]
 
 
 @pytest.fixture
@@ -93,6 +95,7 @@ async def test_worker():
         }
         for i in range(2):
             await worker_socket.asend(json.dumps(dummy_work).encode("utf-8"))
+            await asyncio.sleep(1)
             message = await worker_socket.arecv()
             assert message == b"Ready"
 
@@ -103,3 +106,20 @@ async def test_worker():
         assert len(worker_socket.pipes) == 0
 
         worker_task.cancel()
+
+
+@pytest.mark.asyncio
+async def test_no_prechunk(caplog):
+
+    asyncio.create_task(
+        master(
+            "tcp://127.0.0.1:8234",
+            [DummyBuilderWithNoPrechunk(dummy_prechunk=False)],
+            num_chunks=10,
+        )
+    )
+    await asyncio.sleep(1)
+    assert (
+        f"Can't distributed process DummyBuilderWithNoPrechunk. Skipping for now"
+        in caplog.text
+    )
