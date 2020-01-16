@@ -5,12 +5,16 @@ from typing import List, Dict, Union, Optional
 from pydantic import BaseModel
 from monty.json import MSONable
 from monty.serialization import loadfn
-from fastapi import FastAPI, APIRouter, Path, HTTPException
+from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends
 from maggma.core import Store
 from maggma.utils import dynamic_import
 
 default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
 
+class PaginationParams:
+    def __init__(self, skip: int = 0, limit: int = 10):
+        self.skip = skip
+        self.limit = limit
 
 class EndpointCluster(MSONable):
     """
@@ -102,7 +106,8 @@ class EndpointCluster(MSONable):
             return {"Result": "Root reached"}
 
         async def generic_search(
-                query_param: str = Path(..., title="The generic search query that user requsted")):
+                query_param: str = Path(..., title="The generic search query that user requsted"),
+                paginationParam: PaginationParams = Depends()):
             """
             Automatically re-route to the correct endpoint for that functionality
             Args:
@@ -111,6 +116,7 @@ class EndpointCluster(MSONable):
             Returns:
                 document(s) that relates to that search
             """
+            skip, limit = paginationParam.skip, paginationParam.limit
             return {"Result": "NOT IMPLEMENTED YET"}
 
         self.router.get("/",
