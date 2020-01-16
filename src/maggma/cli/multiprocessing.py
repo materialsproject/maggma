@@ -6,7 +6,8 @@ from types import GeneratorType
 from asyncio import BoundedSemaphore, get_running_loop, gather
 from aioitertools import zip_longest
 from concurrent.futures import ProcessPoolExecutor
-from maggma.utils import tqdm, primed
+from maggma.utils import primed
+from tqdm import tqdm
 
 
 class ProcessItemsSemaphore(BoundedSemaphore):
