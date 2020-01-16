@@ -254,8 +254,16 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         new_ids = all_ids - processed_ids
         self.logger.info(f"Found {len(new_ids)} to process")
         # TODO Updated keys and Failed keys
+        query = self.query or {}
 
-        return list(new_ids)
+        processed_ids = set(self.target.distinct(f"{self.target.key}s", criteria=query))
+        all_ids = set(self.source.distinct(self.source.key, criteria=query))
+        unprocessed_ids = all_ids - processed_ids
+        self.logger.info(f"Found {len(unprocessed_ids)} to process")
+
+        new_ids = self.source.newer_in(self.target, criteria=query, exhaustive=False)
+
+        return list(new_ids | unprocessed_ids)
 
     def get_groups_from_keys(self, keys) -> Iterable:
         """
