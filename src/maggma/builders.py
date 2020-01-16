@@ -11,7 +11,7 @@ from maggma.utils import grouper, Timeout
 from maggma.core import Builder, Store
 from typing import Optional, Dict, List, Iterator, Iterable, Set, Tuple
 from pydash import get
-from itertools import groupby, chain
+from itertools import chain
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -225,7 +225,8 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
     def ensure_indexes(self):
         """
-        Ensures indicies on critical fields for MapBuilder
+        Ensures indicies on critical fields for GroupBuilder
+        which include the plural version of the target's key field
         """
 
         if not self.target.ensure_index(f"{self.target.key}s"):
@@ -234,10 +235,11 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
     def prechunk(self, number_splits: int) -> Iterator[Dict]:
         """
-        Generic prechunk for map builder to perform domain-decompostion
-        by the key field
+        Generic prechunk for group builder to perform domain-decompostion
+        by the grouping keys
         """
         self.ensure_indexes()
+
         keys = self.get_ids_to_process()
         groups = self.get_groups_from_keys(keys)
 
@@ -249,11 +251,6 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         Gets the IDs that need to be processed
         """
 
-        processed_ids = set(self.target.distinct(f"{self.target.key}s"))
-        all_ids = set(self.source.distinct(self.source.key))
-        new_ids = all_ids - processed_ids
-        self.logger.info(f"Found {len(new_ids)} to process")
-        # TODO Updated keys and Failed keys
         query = self.query or {}
 
         processed_ids = set(self.target.distinct(f"{self.target.key}s", criteria=query))
@@ -265,7 +262,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
         return list(new_ids | unprocessed_ids)
 
-    def get_groups_from_keys(self, keys) -> Iterable:
+    def get_groups_from_keys(self, keys) -> Set[Tuple]:
         """
         Get the groups by grouping_keys for these documents
         """
@@ -281,9 +278,8 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
                     properties=grouping_keys,
                 )
             )
-            groups |= {(get(prop, d, None) for prop in grouping_keys) for d in docs}
+            groups |= set((get(prop, d, None) for prop in grouping_keys) for d in docs)
 
-        groups = [g[0] for g in groupby(sorted(groups))]
         self.logger.info(f"Found {len(groups)} to process")
         return groups
 
