@@ -98,6 +98,27 @@ class EndpointCluster(MSONable):
             responses=responses,
         )(get_by_key)
 
+        async def root():
+            return {"Result": "Root reached"}
+
+        async def generic_search(
+                query_param: str = Path(..., title="The generic search query that user requsted")):
+            """
+            Automatically re-route to the correct endpoint for that functionality
+            Args:
+                query_param: the user specified query
+
+            Returns:
+                document(s) that relates to that search
+            """
+            return {"Result": "NOT IMPLEMENTED YET"}
+
+        self.router.get("/",
+                        response_description="Default endpoint root")(root)
+
+        self.router.get("/{query_param}",
+                        response_description="Default generic search endpoint")(generic_search)
+
     def run(self):  # pragma: no cover
         """
         Runs the Endpoint cluster locally
