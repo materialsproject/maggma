@@ -8,6 +8,7 @@ from monty.serialization import loadfn
 from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends
 from maggma.core import Store
 from maggma.utils import dynamic_import
+import ast
 
 default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
 
@@ -75,9 +76,13 @@ class EndpointCluster(MSONable):
         self.router.get("/",
                         response_description="Default endpoint root, listing possible Paths")(self.root)
 
-        # self.router.get("/",
-        #                 response_description="Default generic search endpoint")(
-        #     self.generic_search)  ## TODO change this to https://fastapi.tiangolo.com/tutorial/query-params/
+        self.router.get("/search",
+                        response_description="Default generic search endpoint",
+                        # response_model=List[self.model],
+                        tags=tags,
+                        responses=responses,
+                        )(
+            self.generic_search)  ## TODO change this to https://fastapi.tiangolo.com/tutorial/query-params/
 
     async def root(self, commonParams: CommonParams = Depends()) -> List[str]:
         """
@@ -94,6 +99,33 @@ class EndpointCluster(MSONable):
 
         result = [route.path for route in self.router.routes]
         return result[skip:skip + limit]
+
+    async def generic_search(self, query: str, commonParams: CommonParams = Depends()):
+        """
+        Sample generic search, need to build a query language, but this query is used for testing purpose:
+        '{"age":12}'
+        '{"weight":150}'
+        Args:
+            query: input query
+            commonParams: default paging requirements
+        Return:
+            A list of items that matches the input query
+
+        """
+        try:
+            query_dictionary = ast.literal_eval(ast.literal_eval(query)) ## idk why it is like this
+        except:
+            raise HTTPException(status_code=500, detail="Unable to parse query")
+
+        result = []
+        for key, value in query_dictionary.items():
+            r = self.store.query(criteria={key:value})
+            result.extend(list(r))
+        result = [self.model(**r) for r in result]
+        return result
+
+
+
 
     def prepare_endpoint(self):
         """

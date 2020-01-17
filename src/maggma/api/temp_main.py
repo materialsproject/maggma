@@ -16,9 +16,10 @@ class Owner(BaseModel):
 
 def owners():
     return [
-        Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
+        Owner(name=f"Person{i}", age=randint(10, 15), weight=randint(100, 200))
         for i in list(range(10)[1:])
-    ]
+    ] + [Owner(name="PersonAge2", age=12, weight=randint(100,200))] + \
+        [Owner(name="PersonWeight150", age=randint(10, 15), weight=150)]
 
 def owner_store(owners):
     store = MemoryStore("owners", key="name")
