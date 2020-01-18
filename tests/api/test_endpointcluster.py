@@ -15,11 +15,14 @@ class Owner(BaseModel):
 
 @pytest.fixture("session")
 def owners():
-    return [
-               Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
-               for i in list(range(10)[1:])
-           ] + [Owner(name="PersonAge12", age=12, weight=randint(100, 200))] + \
-           [Owner(name="PersonWeight150", age=randint(10, 15), weight=150)]
+    return (
+        [
+            Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
+            for i in list(range(10)[1:])
+        ]
+        + [Owner(name="PersonAge12", age=12, weight=randint(100, 200))]
+        + [Owner(name="PersonWeight150", age=randint(10, 15), weight=150)]
+    )
 
 
 @pytest.fixture
@@ -77,14 +80,18 @@ def test_endpoint_search(owner_store):
     client = TestClient(app)
 
     # test '{"age":12}' with all_include = True
-    res = client.get("/search?query=%27%7B%22age%22%3A12%7D%27&limit=10&all_include=true")
+    res = client.get(
+        "/search?query=%27%7B%22age%22%3A12%7D%27&limit=10&all_include=true"
+    )
     assert res.status_code == 200
     assert len(res.json()) >= 1
     assert True in [d["name"] == "PersonAge12" for d in res.json()]
 
     # test '{"weight":150}' with projection '["name","age"]', which means weight should be missing in the return object
-    res = client.get("search?query=%27%7B%22weight%22%3A150%7D%27&projection=%27%5B%22name%22%2C%22age%22%5D%27&limit"
-                     "=10&all_include=false")
+    res = client.get(
+        "search?query=%27%7B%22weight%22%3A150%7D%27&projection=%27%5B%22name%22%2C%22age%22%5D%27&limit"
+        "=10&all_include=false"
+    )
     assert res.status_code == 200
     assert len(res.json()) >= 1
     assert True in [d["name"] == "PersonWeight150" for d in res.json()]
@@ -92,12 +99,16 @@ def test_endpoint_search(owner_store):
         assert d["weight"] is None
 
     # test '{"age":12}' with all_include = True and limit = 0, which i should
-    res = client.get("/search?query=%27%7B%22age%22%3A12%7D%27&limit=0&all_include=true")
+    res = client.get(
+        "/search?query=%27%7B%22age%22%3A12%7D%27&limit=0&all_include=true"
+    )
     assert res.status_code == 200
     assert res.json() == []
 
     # test '{"age":200}' with all_include = True, which i should get nothing
-    res = client.get("/search?query=%27%7B%22age%22%3A200%7D%27&limit=10&all_include=true")
+    res = client.get(
+        "/search?query=%27%7B%22age%22%3A200%7D%27&limit=10&all_include=true"
+    )
     assert res.status_code == 200
     assert res.json() == []
 
@@ -108,7 +119,9 @@ def test_endpoint_alias(owner_store):
     app.include_router(endpoint.router)
 
     client = TestClient(app)
-    res = client.get("search?query=%27%7B%22mass%22%3A150%7D%27&projection=%27%5B%22name%22%5D%27&limit=10"
-                     "&all_include=false&alias=%27%7B%22mass%22%3A%22weight%22%7D%27")
+    res = client.get(
+        "search?query=%27%7B%22mass%22%3A150%7D%27&projection=%27%5B%22name%22%5D%27&limit=10"
+        "&all_include=false&alias=%27%7B%22mass%22%3A%22weight%22%7D%27"
+    )
     assert res.status_code == 200
     assert len(res.json()) >= 1
