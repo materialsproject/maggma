@@ -1,6 +1,6 @@
 import pytest
 from random import randint
-from pydantic import BaseModel, Schema, Field
+from pydantic import BaseModel, Field
 from maggma.stores import MemoryStore
 from maggma.api import EndpointCluster
 from starlette.testclient import TestClient
@@ -16,10 +16,10 @@ class Owner(BaseModel):
 @pytest.fixture("session")
 def owners():
     return [
-        Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
-        for i in list(range(10)[1:])
-    ] + [Owner(name="PersonAge12", age=12, weight=randint(100,200))] + \
-        [Owner(name="PersonWeight150", age=randint(10, 15), weight=150)]
+               Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
+               for i in list(range(10)[1:])
+           ] + [Owner(name="PersonAge12", age=12, weight=randint(100, 200))] + \
+           [Owner(name="PersonWeight150", age=randint(10, 15), weight=150)]
 
 
 @pytest.fixture
@@ -46,7 +46,6 @@ def test_init_endpoint(owner_store):
 
 
 def test_endpoint_msonable(owner_store):
-
     endpoint = EndpointCluster(owner_store, Owner)
     endpoint_dict = endpoint.as_dict()
 
@@ -68,6 +67,7 @@ def test_endpoint_function(owner_store):
 
     assert client.get("/name/Person1").status_code == 200
     assert client.get("/name/Person1").json()["name"] == "Person1"
+
 
 def test_endpoint_search(owner_store):
     endpoint = EndpointCluster(owner_store, Owner)
@@ -112,4 +112,3 @@ def test_endpoint_alias(owner_store):
                      "&all_include=false&alias=%27%7B%22mass%22%3A%22weight%22%7D%27")
     assert res.status_code == 200
     assert len(res.json()) >= 1
-
