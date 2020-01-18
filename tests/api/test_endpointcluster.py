@@ -32,7 +32,7 @@ def owner_store(owners):
 
 def test_init_endpoint(owner_store):
     endpoint = EndpointCluster(owner_store, Owner)
-    assert len(endpoint.router.routes) == 1
+    assert len(endpoint.router.routes) == 3
     assert endpoint.router.routes[0]
 
     endpoint = EndpointCluster(owner_store, "tests.api.test_endpointcluster.Owner")
@@ -62,7 +62,7 @@ def test_endpoint_function(owner_store):
 
     client = TestClient(app)
 
-    assert client.get("/").status_code == 404
+    assert client.get("/").status_code == 200
 
     assert client.get("/name/Person1").status_code == 200
     assert client.get("/name/Person1").json()["name"] == "Person1"
