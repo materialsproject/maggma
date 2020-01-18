@@ -102,4 +102,14 @@ def test_endpoint_search(owner_store):
     assert res.json() == []
 
 
+def test_endpoint_alias(owner_store):
+    endpoint = EndpointCluster(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+    res = client.get("search?query=%27%7B%22mass%22%3A150%7D%27&projection=%27%5B%22name%22%5D%27&limit=10"
+                     "&all_include=false&alias=%27%7B%22mass%22%3A%22weight%22%7D%27")
+    assert res.status_code == 200
+    assert len(res.json()) >= 1
 
