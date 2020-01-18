@@ -3,6 +3,8 @@ from fastapi import FastAPI
 from typing import Dict
 from monty.json import MSONable
 from maggma.api.endpoint_cluster import EndpointCluster
+from inspect import isclass
+from maggma.utils import dynamic_import
 
 
 class ClusterManager(MSONable):
@@ -36,6 +38,29 @@ class ClusterManager(MSONable):
         """
 
         uvicorn.run(self.app, host=ip, port=port, log_level=log_level, reload=False)
+
+    def load(self, endpoint, prefix: str = "/"):
+        """
+        loads an endpoint dynamically. The endpoint can be either a path to an EndpointCluster instance,
+        or a EndpointCluster instance Args: endpoint:
+
+        Returns:
+            None
+        Raises:
+            ValueError -- if the endpoint is not a path to an EndpointCluster or it is not an EndpointCluster
+        """
+        if isinstance((endpoint, str)):
+            module_path = ".".join(endpoint.split(".")[:-1])
+            class_name = endpoint.split(".")[-1]
+            new_endpoint = dynamic_import(module_path, class_name)
+            self.__setitem__(prefix, new_endpoint)
+            pass
+        elif isclass(endpoint) and issubclass(endpoint, EndpointCluster):
+            self.__setitem__(prefix, endpoint)
+        else:
+            raise ValueError(
+                "endpont has to be a EndpointCluster instance or a path to EndpointCluster instance"
+            )
 
     def __setitem__(self, key, item):
         self.endpoints[key] = item

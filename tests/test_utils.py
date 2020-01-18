@@ -12,7 +12,6 @@ from maggma.utils import (
     isostr_to_dt,
     dynamic_import,
     grouper,
-
 )
 from time import sleep
 from datetime import datetime
@@ -76,10 +75,10 @@ def test_datetime_utils():
     )
 
 
-
 def test_dynamic_import():
 
     assert dynamic_import("maggma.stores", "MongoStore").__name__ == "MongoStore"
+
 
 def test_grouper():
 
