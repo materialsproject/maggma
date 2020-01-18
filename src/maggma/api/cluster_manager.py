@@ -38,7 +38,6 @@ class ClusterManager(MSONable):
         uvicorn.run(self.app, host=ip, port=port, log_level=log_level, reload=False)
 
     def __setitem__(self, key, item):
-        # wouldn't this already be dynamic?
         self.endpoints[key] = item
 
     def __getitem__(self, key):

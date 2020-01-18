@@ -14,24 +14,33 @@ default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.ya
 
 
 class CommonParams:
-    def __init__(self, projection: str = None, skip: int = 0, limit: int = 10, all_include:bool=True):
+    def __init__(self, projection: str = None, skip: int = 0, limit: int = 10, all_include: bool = True,
+                 alias: str = None):
+        """
+        Common parameters that a lot of the queries might use. The purpose is to simplify code
+        Args:
+            projection: a list in string format -> '["name"]'
+            skip: integer for skip
+            limit: integer for limit
+            all_include: boolean for include all or not
+            alias: a dictionary in string format mapping user input field to actual data field -> '{"mass":"weight"}'
+        """
         self.skip = skip
         self.limit = limit
         self.all_includes = all_include
 
-        ## TODO this part is buggie
-        try:
-            if projection is None:
-                self.projection = set()
-            else:
-                self.projection = set(ast.literal_eval(ast.literal_eval(projection))) ## idk why it is like this
-        except:
-            raise Exception("Cannot parse projection field")
-
-        if self.all_includes and self.projection != set():
+        if projection is not None and all_include:
             raise Exception("projection and all_includes does not match")
+        else:
+            try:
+                self.projection = set() if projection is None else set(ast.literal_eval(ast.literal_eval(projection)))
+            except Exception:
+                raise Exception("Cannot parse projection field")
 
-
+        try:
+            self.alias = dict() if alias is None else ast.literal_eval(ast.literal_eval(alias))
+        except Exception:
+            raise Exception("Cannot convert alias")
 
 
 class EndpointCluster(MSONable):
@@ -81,7 +90,7 @@ class EndpointCluster(MSONable):
             self.default_projection = model_fields if default_projection is None else default_projection
             if not self.default_projection.issubset(model_fields):
                 raise Exception("default projection contains some fields that are not in the model fields")
-        except:
+        except Exception:
             raise Exception("Cannot set default_filter")
 
         self.prepare_endpoint()
@@ -130,26 +139,31 @@ class EndpointCluster(MSONable):
             A list of items that matches the input query
 
         """
-        projection, skip, limit, all_includes = commonParams.projection, commonParams.skip, commonParams.limit, commonParams.all_includes
+
+        projection = commonParams.projection
+        skip = commonParams.skip
+        limit = commonParams.limit
+        all_includes = commonParams.all_includes
+        alias = commonParams.alias
+
         try:
-            query_dictionary = ast.literal_eval(ast.literal_eval(query)) ## idk why it is like this
+            query_dictionary = ast.literal_eval(ast.literal_eval(query))  ## idk why it is like this
         except:
             raise HTTPException(status_code=500, detail="Unable to parse query")
 
         result = []
         for key, value in query_dictionary.items():
-            r = self.store.query(criteria={key:value})
+            if key in alias:
+                key = alias[key]
+            r = self.store.query(criteria={key: value})
             result.extend(list(r))
-        result = [self.model(**r) for r in result][skip:skip+limit]
+        result = [self.model(**r) for r in result][skip:skip + limit]
         if all_includes:
-            return result[skip:skip+limit]
+            return result[skip:skip + limit]
         elif projection:
             return [r.dict(include=projection) for r in result]
         else:
             return [r.dict(include=self.default_projection) for r in result]
-
-
-
 
     def prepare_endpoint(self):
         """
