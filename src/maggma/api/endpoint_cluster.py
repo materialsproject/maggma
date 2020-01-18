@@ -1,7 +1,7 @@
 import pathlib
 import copy
 from inspect import isclass
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Set
 from pydantic import BaseModel
 from monty.json import MSONable
 from monty.serialization import loadfn
@@ -14,13 +14,24 @@ default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.ya
 
 
 class CommonParams:
-    def __init__(self, projection: set = None, skip: int = 0, limit: int = 10, all_include=True):
-        if projection is None:
-            projection = []
-        self.projection = projection
+    def __init__(self, projection: str = None, skip: int = 0, limit: int = 10, all_include:bool=True):
         self.skip = skip
         self.limit = limit
         self.all_includes = all_include
+
+        ## TODO this part is buggie
+        try:
+            if projection is None:
+                self.projection = []
+            else:
+                self.projection = set(ast.literal_eval(ast.literal_eval(projection)))
+        except:
+            raise Exception("Cannot parse projection field")
+
+        if self.all_includes and self.projection != []:
+            raise Exception("projection and all_includes does not match")
+
+
 
 
 class EndpointCluster(MSONable):
@@ -35,7 +46,7 @@ class EndpointCluster(MSONable):
             model: Union[BaseModel, str],
             tags: Optional[List[str]] = None,
             responses: Optional[Dict] = None,
-            default_projection: Optional[List[str]] = None,
+            default_projection: Optional[Set[str]] = None,
             # TODO default fields for this endpoint for projection for pydantic model
             # TODO also do checking here to make sure that the fields passed in are actually in the model
     ):
@@ -78,11 +89,11 @@ class EndpointCluster(MSONable):
 
         self.router.get("/search",
                         response_description="Default generic search endpoint",
-                        # response_model=List[self.model],
+                        response_model=List[self.model],
                         tags=tags,
                         responses=responses,
                         )(
-            self.generic_search)  ## TODO change this to https://fastapi.tiangolo.com/tutorial/query-params/
+            self.generic_search)
 
     async def root(self, commonParams: CommonParams = Depends()) -> List[str]:
         """
@@ -105,6 +116,9 @@ class EndpointCluster(MSONable):
         Sample generic search, need to build a query language, but this query is used for testing purpose:
         '{"age":12}'
         '{"weight":150}'
+        Example:
+        http://127.0.0.1:8000/search?query=%27%7B%22weight%22%3A150%7D%27&projection=%27%5B%22name%22%2C%22age%22%5D%27&limit=10&all_include=false
+        http://127.0.0.1:8000/search?query=%27%7B%22weight%22%3A150%7D%27&limit=10&all_include=true
         Args:
             query: input query
             commonParams: default paging requirements
@@ -112,6 +126,7 @@ class EndpointCluster(MSONable):
             A list of items that matches the input query
 
         """
+        projection, skip, limit, all_includes = commonParams.projection, commonParams.skip, commonParams.limit, commonParams.all_includes
         try:
             query_dictionary = ast.literal_eval(ast.literal_eval(query)) ## idk why it is like this
         except:
@@ -121,8 +136,13 @@ class EndpointCluster(MSONable):
         for key, value in query_dictionary.items():
             r = self.store.query(criteria={key:value})
             result.extend(list(r))
-        result = [self.model(**r) for r in result]
-        return result
+        result = [self.model(**r) for r in result][skip:skip+limit]
+        if all_includes:
+            return result[skip:skip+limit]
+        elif projection != []:
+            return [r.dict(include=set(projection)) for r in result]
+        else:
+            return [r.dict(include=self.default_projection) for r in result]
 
 
 

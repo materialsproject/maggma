@@ -11,8 +11,8 @@ import uvicorn
 
 class Owner(BaseModel):
     name: str = Field(..., title="Owner's name")
-    age: int = Field(..., title="Owne'r Age")
-    weight: int = Field(..., title="Owner's weight")
+    age: int = Field(None, title="Owne'r Age")
+    weight: int = Field(None, title="Owner's weight")
 
 def owners():
     return [
