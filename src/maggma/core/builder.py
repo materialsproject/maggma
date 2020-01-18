@@ -6,7 +6,7 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Union, Optional, Dict, List, Iterator, Iterable, Any
+from typing import Union, Optional, Dict, List, Iterable, Any
 
 from monty.json import MSONable, MontyDecoder
 from maggma.utils import grouper
@@ -29,22 +29,18 @@ class Builder(MSONable, metaclass=ABCMeta):
         sources: Union[List[Store], Store],
         targets: Union[List[Store], Store],
         chunk_size: int = 1000,
-        query: Optional[Dict] = None,
     ):
         """
         Initialize the builder the framework.
 
-        Args:
+        Arguments:
             sources: source Store(s)
             targets: target Store(s)
             chunk_size: chunk size for processing
-            query: dictionary of options to utilize on a source;
-                   Each builder has internal logic on which souce this will apply to
         """
         self.sources = sources if isinstance(sources, list) else [sources]
         self.targets = targets if isinstance(targets, list) else [targets]
         self.chunk_size = chunk_size
-        self.query = query
         self.total = None  # type: Optional[int]
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
@@ -63,16 +59,20 @@ class Builder(MSONable, metaclass=ABCMeta):
         This function should return an iterator of dictionaries that can be distributed
         to multiple instances of the builder to get/process/udpate on
 
-        Args:
+        Arguments:
             number_splits: The number of groups to split the documents to work on
         """
-        if self.query:
-            return [self.query]
-        else:
-            return []
+        self.logger.info(
+            f"{self.__class__.__name__} doesn't have distributed processing capabillities."
+            " Instead this builder will run on just one worker for all processing"
+        )
+        raise NotImplementedError(
+            f"{self.__class__.__name__} doesn't have distributed processing capabillities."
+            " Instead this builder will run on just one worker for all processing"
+        )
 
     @abstractmethod
-    def get_items(self) -> Iterator:
+    def get_items(self) -> Iterable:
         """
         Returns all the items to process.
 
@@ -83,9 +83,9 @@ class Builder(MSONable, metaclass=ABCMeta):
 
     def process_item(self, item: Any) -> Any:
         """
-        Process an item. Should not expect DB access as this can be run MPI
+        Process an item. There should be no database operations in this method.
         Default behavior is to return the item.
-        Args:
+        Arguments:
             item:
 
         Returns:
@@ -96,10 +96,10 @@ class Builder(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def update_targets(self, items: List):
         """
-        Takes a dictionary of targets and items from process item and updates them
+        Takes a list of items from process item and updates the targets with them.
         Can also perform other book keeping in the process such as storing gridfs oids, etc.
 
-        Args:
+        Arguments:
             items:
 
         Returns:
@@ -122,9 +122,6 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         Run the builder serially
         This is only intended for diagnostic purposes
-
-        Args:
-            builder_id (int): the index of the builder in the builders list
         """
         self.connect()
 
@@ -132,9 +129,7 @@ class Builder(MSONable, metaclass=ABCMeta):
 
         for chunk in grouper(cursor, self.chunk_size):
             self.logger.info("Processing batch of {} items".format(self.chunk_size))
-            processed_items = [
-                self.process_item(item) for item in chunk if item is not None
-            ]
+            processed_items = [self.process_item(item) for item in chunk]
             self.update_targets(processed_items)
 
         self.finalize()

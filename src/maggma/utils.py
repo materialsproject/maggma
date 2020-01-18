@@ -123,14 +123,17 @@ def recursive_update(d, u):
             d[k] = v
 
 
-def grouper(iterable, n, fillvalue=None):
+def grouper(iterable, n):
     """
     Collect data into fixed-length chunks or blocks.
+    >>> list(grouper(3, 'ABCDEFG'))
+    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
+
+    Updated from:
+    https://stackoverflow.com/questions/31164731/python-chunking-csv-file-multiproccessing/31170795#31170795
     """
-    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
-    args = [iter(iterable)] * n
-    iterator = itertools.zip_longest(*args, fillvalue=fillvalue)
-    return iterator
+    iterable = iter(iterable)
+    return iter(lambda: list(itertools.islice(iterable, n)), [])
 
 
 def lazy_substitute(d, aliases):

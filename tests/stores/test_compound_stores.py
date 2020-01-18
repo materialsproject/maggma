@@ -14,38 +14,6 @@ def mongostore():
 
 
 @pytest.fixture("module")
-def jointstore():
-    store = JointStore("maggma_test", ["test1", "test2"])
-    store.connect()
-    store._collection.drop()
-    store._collection.insert_many(
-        [
-            {
-                "task_id": k,
-                "my_prop": k + 1,
-                "last_updated": datetime.utcnow(),
-                "category": k // 5,
-            }
-            for k in range(10)
-        ]
-    )
-    store._collection.database["test2"].drop()
-    store._collection.database["test2"].insert_many(
-        [
-            {
-                "task_id": 2 * k,
-                "your_prop": k + 3,
-                "last_updated": datetime.utcnow(),
-                "category2": k // 3,
-            }
-            for k in range(5)
-        ]
-    )
-
-    return store
-
-
-@pytest.fixture("module")
 def jointstore_test1():
     store = MongoStore("maggma_test", "test1")
     store.connect()
@@ -59,6 +27,39 @@ def jointstore_test2():
     store.connect()
     yield store
     store._collection.drop()
+
+
+@pytest.fixture("module")
+def jointstore(jointstore_test1, jointstore_test2):
+
+    jointstore_test1.update(
+        [
+            {
+                "task_id": k,
+                "my_prop": k + 1,
+                "last_updated": datetime.utcnow(),
+                "category": k // 5,
+            }
+            for k in range(10)
+        ]
+    )
+
+    jointstore_test2.update(
+        [
+            {
+                "task_id": 2 * k,
+                "your_prop": k + 3,
+                "last_updated": datetime.utcnow(),
+                "category2": k // 3,
+            }
+            for k in range(5)
+        ]
+    )
+
+    store = JointStore("maggma_test", ["test1", "test2"])
+    store.connect()
+
+    return store
 
 
 def test_joint_store_query(jointstore):

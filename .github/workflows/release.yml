@@ -1,13 +1,9 @@
-name: testing
+name: release
 
 on:
-  push:
-    branches:
-      - master
-
-  pull_request:
-    branches:
-      - master
+  create:
+    tags:
+      - v*
 
 jobs:
   lint:
@@ -44,6 +40,7 @@ jobs:
         flake8 --count --show-source --statistics src/maggma
         # exit-zero treats all errors as warnings.
         flake8 --count --exit-zero --max-complexity=20 --statistics src/maggma
+
 
   test:
     services:
@@ -85,3 +82,61 @@ jobs:
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs:
+    - lint
+    - test
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install setuptools setuptools_scm wheel
+
+    - name: Build packages
+      run: |
+        python setup.py sdist bdist_wheel
+
+    - name: Publish package
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        user: __token__
+        password: ${{ secrets.PYPY_API_TOKEN }}
+
+  docs:
+    runs-on: ubuntu-latest
+    needs:
+    - lint
+    - test
+    - deploy
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - uses: actions/setup-python@v1
+      with:
+        python-version: 3.7
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-docs.txt
+        pip install -e .
+
+    - name: Build
+      run: mkdocs build -d docs
+
+    - name: Deploy
+      uses: peaceiris/actions-gh-pages@v2
+      env:
+        ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
+        PUBLISH_BRANCH: gh-pages
+        PUBLISH_DIR: ./docs

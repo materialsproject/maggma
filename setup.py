@@ -24,6 +24,7 @@ setup(
     zip_safe=False,
     include_package_data=True,
     install_requires=[
+        "setuptools",
         "pymongo>=3.6",
         "monty>=1.0.2",
         "mongomock>=3.10.0",
@@ -35,6 +36,7 @@ setup(
         "numpy>=1.17.3",
         "pydantic>=0.32.2",
         "fastapi>=0.42.0",
+        "pynng>=0.5.0",
     ],
     extras_require={"vault": ["hvac>=0.9.5"], "S3": ["boto3==1.10.10"]},
     classifiers=[
