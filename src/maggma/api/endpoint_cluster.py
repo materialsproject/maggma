@@ -22,13 +22,13 @@ class CommonParams:
         ## TODO this part is buggie
         try:
             if projection is None:
-                self.projection = []
+                self.projection = set()
             else:
-                self.projection = set(ast.literal_eval(ast.literal_eval(projection)))
+                self.projection = set(ast.literal_eval(ast.literal_eval(projection))) ## idk why it is like this
         except:
             raise Exception("Cannot parse projection field")
 
-        if self.all_includes and self.projection != []:
+        if self.all_includes and self.projection != set():
             raise Exception("projection and all_includes does not match")
 
 
@@ -47,7 +47,6 @@ class EndpointCluster(MSONable):
             tags: Optional[List[str]] = None,
             responses: Optional[Dict] = None,
             default_projection: Optional[Set[str]] = None,
-            # TODO default fields for this endpoint for projection for pydantic model
             # TODO also do checking here to make sure that the fields passed in are actually in the model
     ):
         """
@@ -77,8 +76,11 @@ class EndpointCluster(MSONable):
         self.tags = tags
         self.responses = responses
         try:
-            self.default_projection = list(
-                self.model.__dict__["__fields__"].keys()) if default_projection is None else default_projection
+            model_fields = set(self.model.__dict__["__fields__"].keys())
+
+            self.default_projection = model_fields if default_projection is None else default_projection
+            if not self.default_projection.issubset(model_fields):
+                raise Exception("default projection contains some fields that are not in the model fields")
         except:
             raise Exception("Cannot set default_filter")
 
@@ -117,6 +119,8 @@ class EndpointCluster(MSONable):
         '{"age":12}'
         '{"weight":150}'
         Example:
+
+        http://127.0.0.1:8000/search?query=%27%7B%22weight%22%3A150%7D%27&limit=10&all_include=false
         http://127.0.0.1:8000/search?query=%27%7B%22weight%22%3A150%7D%27&projection=%27%5B%22name%22%2C%22age%22%5D%27&limit=10&all_include=false
         http://127.0.0.1:8000/search?query=%27%7B%22weight%22%3A150%7D%27&limit=10&all_include=true
         Args:
@@ -139,8 +143,8 @@ class EndpointCluster(MSONable):
         result = [self.model(**r) for r in result][skip:skip+limit]
         if all_includes:
             return result[skip:skip+limit]
-        elif projection != []:
-            return [r.dict(include=set(projection)) for r in result]
+        elif projection:
+            return [r.dict(include=projection) for r in result]
         else:
             return [r.dict(include=self.default_projection) for r in result]
 
