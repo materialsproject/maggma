@@ -56,7 +56,6 @@ class EndpointCluster(MSONable):
             tags: Optional[List[str]] = None,
             responses: Optional[Dict] = None,
             default_projection: Optional[Set[str]] = None,
-            # TODO also do checking here to make sure that the fields passed in are actually in the model
     ):
         """
         Args:
@@ -117,7 +116,7 @@ class EndpointCluster(MSONable):
         # -the-root-page-of-a-rest-api] and example from github[https://api.github.com/], it seems like the root
         # should return a list of child endpoints. In this case, i think we should display a set of supported paths
 
-        projection, skip, limit, all_includes = commonParams.projection, commonParams.skip, commonParams.limit, commonParams.all_includes
+        skip, limit = commonParams.skip, commonParams.limit
 
         result = [route.path for route in self.router.routes]
         return result[skip:skip + limit]
@@ -147,8 +146,8 @@ class EndpointCluster(MSONable):
         alias = commonParams.alias
 
         try:
-            query_dictionary = ast.literal_eval(ast.literal_eval(query))  ## idk why it is like this
-        except:
+            query_dictionary = ast.literal_eval(ast.literal_eval(query))  # idk why it is like this
+        except Exception:
             raise HTTPException(status_code=500, detail="Unable to parse query")
 
         result = []
@@ -180,7 +179,6 @@ class EndpointCluster(MSONable):
 
         async def get_by_key(
                 key: str = Path(..., title=f"The {key_name} of the {model_name} to get"),
-                commonParams: CommonParams = Depends()
         ):
             f"""
             Get's a document by the primary key in the store
@@ -191,7 +189,6 @@ class EndpointCluster(MSONable):
             Returns:
                 a single document that satisfies the {model_name} model
             """
-            projection, skip, limit, all_includes = commonParams.projection, commonParams.skip, commonParams.limit, commonParams.all_includes
             item = self.store.query_one(criteria={self.store.key: key})
 
             if item is None:
