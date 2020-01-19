@@ -46,6 +46,7 @@ class ClusterManager(MSONable):
 
         Returns:
             None
+
         Raises:
             ValueError -- if the endpoint is not a path to an EndpointCluster or it is not an EndpointCluster
         """
