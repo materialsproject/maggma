@@ -22,9 +22,9 @@ One of the most important features in a builder is incremental building which al
         new_ids = self.target.newer_in(self.source)
 ```
 
-## Speeding up IO
+## Speeding up Data Transfers
 
-Since `maggma` is designed around Mongo style data sources and sinks, building indexes or in-memory copies of fields you want to search on is critical to get the fastest possible IO. Since this is very builder and document style dependent, `maggma` provides a direct interface to `ensure_indexes` on a Store. A common paradigm is to do this in the beginning of `get_items`:
+Since `maggma` is designed around Mongo style data sources and sinks, building indexes or in-memory copies of fields you want to search on is critical to get the fastest possible data input/output (IO). Since this is very builder and document style dependent, `maggma` provides a direct interface to `ensure_indexes` on a Store. A common paradigm is to do this in the beginning of `get_items`:
 
 ``` python
     def ensure_indexes(self):
@@ -37,8 +37,8 @@ Since `maggma` is designed around Mongo style data sources and sinks, building i
 ```
 
 
-## Getting Advanced Features for Free
+## Built in Templates for Advanced Builders
 
-`maggma` implements standard builders that implement many of these advanced features:
+`maggma` implements templates for builders that have many of these advanced features listed above:
 
-- [MapBuilder](map_builder.md)
+- [MapBuilder](map_builder.md) Creates one-to-one document mapping of items in the source Store to the transformed documents in the target Store.

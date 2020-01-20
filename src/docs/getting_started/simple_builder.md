@@ -106,6 +106,8 @@ We could have also returned a list of items:
         docs = list(self.source.query())
 ```
 
+One advantage of using the generator approach is it is less memory intensive than the approach where a list of items returned. For large datasets, returning a list of all items for processing may be prohibitive due to memory constraints.
+
 ## `process_item`
 
 `process_item` just has to do the parallelizable work on each item. Since the item is whatever comes out of `get_items`, you know exactly what it should be. It may be a single document, a list of documents, a mapping, a set, etc.

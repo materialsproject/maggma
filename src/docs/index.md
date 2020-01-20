@@ -17,7 +17,7 @@ versions of Python.
 Open your terminal and run the following command.
 
 ``` shell
-pip install -U maggma
+pip install --upgrade maggma
 ```
 
 ## Installation from source
