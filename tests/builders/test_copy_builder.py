@@ -1,6 +1,6 @@
 # coding: utf-8
 """
-Tests for builders
+Tests for MapBuilder
 """
 import pytest
 from datetime import datetime, timedelta
