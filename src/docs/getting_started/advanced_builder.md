@@ -42,3 +42,4 @@ Since `maggma` is designed around Mongo style data sources and sinks, building i
 `maggma` implements templates for builders that have many of these advanced features listed above:
 
 - [MapBuilder](map_builder.md) Creates one-to-one document mapping of items in the source Store to the transformed documents in the target Store.
+- [GroupBuilder](group_builder.md) Creates many-to-one document mapping of items in the source Store to transformed documents in the traget Store
