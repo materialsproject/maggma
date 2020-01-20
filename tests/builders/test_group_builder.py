@@ -7,7 +7,7 @@ from maggma.stores import MemoryStore
 from maggma.builders import GroupBuilder
 from datetime import datetime
 from random import randint
-from typing import List, Dict, Tuple
+from typing import List, Dict
 
 
 @pytest.fixture("module")
@@ -40,7 +40,7 @@ def target():
 
 
 class DummyGrouper(GroupBuilder):
-    def unary_function(self, items: List[Dict]) -> Dict[Tuple, Dict]:
+    def unary_function(self, items: List[Dict]) -> Dict:
         """
         Processing function for GroupBuilder
 
