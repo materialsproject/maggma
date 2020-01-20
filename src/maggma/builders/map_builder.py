@@ -145,8 +145,13 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         try:
             with Timeout(seconds=self.timeout):
-                processed = self.unary_function(item)
+                processed = dict(self.unary_function(item))
                 processed.update({"state": "successful"})
+
+            for k in [self.source.key, self.source.last_updated_field]:
+                if k in processed:
+                    del processed[k]
+
         except Exception as e:
             self.logger.error(traceback.format_exc())
             processed = {"error": str(e), "state": "failed"}
@@ -161,6 +166,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 item[last_updated_field]
             ),
         }
+
         if self.store_process_time:
             out["_process_time"] = time_end - time_start
 
@@ -171,14 +177,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         """
         Generic update targets for Map Builder
         """
-        source, target = self.source, self.target
+        target = self.target
         for item in items:
-            # Use source last-updated value, ensuring `datetime` type.
-            item[target.last_updated_field] = source._lu_func[0](
-                item[source.last_updated_field]
-            )
-            if source.last_updated_field != target.last_updated_field:
-                del item[source.last_updated_field]
             item["_bt"] = datetime.utcnow()
             if "_id" in item:
                 del item["_id"]
