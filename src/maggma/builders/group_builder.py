@@ -90,7 +90,6 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         groups: Set[Tuple] = set()
 
         for chunked_keys in grouper(keys, self.chunk_size):
-            chunked_keys = chunked_keys
 
             docs = [
                 d[0]
@@ -130,7 +129,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
             )
             yield docs
 
-    def process_item(self, item: List[Dict]) -> Dict[Tuple, Dict]:
+    def process_item(self, item: List[Dict]) -> Dict[Tuple, Dict]:  # type: ignore
 
         keys = list(d[self.source.key] for d in item)
 
