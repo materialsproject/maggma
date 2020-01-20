@@ -19,13 +19,15 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
     Supports incremental building, where a source group gets (re)built only if
     it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.
 
-    This is a Many-to-One Builder
+    This is a Many-to-One Builder. As a result, this builder can't determined when a source document
+    is orphaned.
     """
 
     def __init__(
         self, source: Store, target: Store, grouping_keys: List[str], **kwargs
     ):
         self.grouping_keys = grouping_keys
+        kwargs["delete_orphans"] = False
         super().__init__(source=source, target=target, **kwargs)
 
     def ensure_indexes(self):
