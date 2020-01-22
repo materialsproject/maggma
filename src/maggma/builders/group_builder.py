@@ -151,8 +151,9 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
         time_end = time()
 
-        last_updated = [d[self.source.last_updated_field] for d in item]
-        last_updated = [self.source._lu_func[0](lu) for lu in last_updated]
+        last_updated = [
+            self.source._lu_func[0](d[self.source.last_updated_field]) for d in item
+        ]
 
         processed.update(
             {
