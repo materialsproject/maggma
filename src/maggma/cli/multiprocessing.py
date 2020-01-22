@@ -49,8 +49,9 @@ class AsyncBackPressuredMap:
         except StopIteration:
             raise StopAsyncIteration
 
+        future = loop.run_in_executor(self.executor, self.func, item)
+
         async def process_and_release():
-            future = loop.run_in_executor(self.executor, self.func, item)
             await future
             self.back_pressure.release()
             return future
