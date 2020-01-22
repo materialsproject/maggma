@@ -92,13 +92,12 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         groups: Set[Tuple] = set()
 
         for chunked_keys in grouper(keys, self.chunk_size):
-
-            docs = [
-                d[0]
-                for d in self.source.groupby(
-                    grouping_keys, criteria={self.source.key: {"$in": chunked_keys}}
+            docs = list(
+                self.source.query(
+                    criteria={self.source.key: {"$in": chunked_keys}},
+                    properties=grouping_keys,
                 )
-            ]
+            )
 
             groups |= set(
                 tuple(get(d, prop, None) for prop in grouping_keys) for d in docs
