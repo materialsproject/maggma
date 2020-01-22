@@ -83,24 +83,30 @@ def confirm_field_index(store, fields):
     return False
 
 
-def dt_to_isoformat_ceil_ms(dt):
+def to_isoformat_ceil_ms(dt):
     """Helper to account for Mongo storing datetimes with only ms precision."""
-    return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
+    if isinstance(dt, datetime):
+        return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
+    elif isinstance(dt, str):
+        return dt
 
 
-def isostr_to_dt(s):
+def to_dt(s):
     """Convert an ISO 8601 string to a datetime."""
-    try:
-        return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
-    except ValueError:
-        return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+    if isinstance(s, str):
+        try:
+            return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
+        except ValueError:
+            return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+    elif isinstance(s, datetime):
+        return s
 
 
 # This lu_key prioritizes not duplicating potentially expensive item
 # processing on incremental rebuilds at the expense of potentially missing a
 # source document updated within 1 ms of a builder get_items call. Ensure
 # appropriate builder validation.
-LU_KEY_ISOFORMAT = (isostr_to_dt, dt_to_isoformat_ceil_ms)
+LU_KEY_ISOFORMAT = (to_dt, to_isoformat_ceil_ms)
 
 
 def recursive_update(d, u):
