@@ -15,12 +15,12 @@ default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.ya
 
 class CommonParams:
     def __init__(
-            self,
-            projection: str = None,
-            skip: int = 0,
-            limit: int = 10,
-            all_include: bool = True,
-            alias: str = None,
+        self,
+        projection: str = None,
+        skip: int = 0,
+        limit: int = 10,
+        all_include: bool = True,
+        alias: str = None,
     ):
         """
         Common parameters that a lot of the queries might use. The purpose is to simplify code
@@ -62,12 +62,12 @@ class EndpointCluster(MSONable):
     """
 
     def __init__(
-            self,
-            store: Store,
-            model: Union[BaseModel, str],
-            tags: Optional[List[str]] = None,
-            responses: Optional[Dict] = None,
-            default_projection: Optional[Set[str]] = None,
+        self,
+        store: Store,
+        model: Union[BaseModel, str],
+        tags: Optional[List[str]] = None,
+        responses: Optional[Dict] = None,
+        default_projection: Optional[Set[str]] = None,
     ):
         """
         Args:
@@ -131,9 +131,10 @@ class EndpointCluster(MSONable):
         # DELETE
         self.set_default_delete()
 
-    ################
-    # GET #
-    ################
+    """
+    GET Request Code Block
+    """
+
     def set_get_by_key_router(self):
         key_name = self.store.key
         model_name = self.model.__name__
@@ -142,7 +143,7 @@ class EndpointCluster(MSONable):
             responses.update(self.responses)
 
         async def get_by_key(
-                key: str = Path(..., title=f"The {key_name} of the {model_name} to get"),
+            key: str = Path(..., title=f"The {key_name} of the {model_name} to get"),
         ):
             f"""
             Get's a document by the primary key in the store
@@ -191,7 +192,7 @@ class EndpointCluster(MSONable):
             skip, limit = commonParams.skip, commonParams.limit
 
             result = [route.path for route in self.router.routes]
-            return result[skip: skip + limit]
+            return result[skip : skip + limit]
 
         self.router.get(
             "/",
@@ -243,9 +244,9 @@ class EndpointCluster(MSONable):
                     key = alias[key]
                 r = self.store.query(criteria={key: value})
                 result.extend(list(r))
-            result = [self.model(**r) for r in result][skip: skip + limit]
+            result = [self.model(**r) for r in result][skip : skip + limit]
             if all_includes:
-                return result[skip: skip + limit]
+                return result[skip : skip + limit]
             elif projection:
                 return [r.dict(include=projection) for r in result]
             else:
@@ -259,9 +260,10 @@ class EndpointCluster(MSONable):
             responses=responses,
         )(generic_search)
 
-    ################
-    # POST #
-    ################
+    """
+    POST Request Code Block
+    """
+
     def set_default_post(self):
         model = self.model
 
@@ -279,9 +281,10 @@ class EndpointCluster(MSONable):
             responses=responses,
         )(post_item)
 
-    ################
-    # PUT #
-    ################
+    """
+    PUT Request Code Block
+    """
+
     def set_default_put(self):
         model = self.model
 
@@ -299,9 +302,10 @@ class EndpointCluster(MSONable):
             responses=responses,
         )(put_item)
 
-    ################
-    # PATCH #
-    ################
+    """
+    PATCH Request Code Block
+    """
+
     def set_default_patch(self):
         model = self.model
 
@@ -319,9 +323,10 @@ class EndpointCluster(MSONable):
             responses=responses,
         )(patch_item)
 
-    ################
-    # DELETE #
-    ################
+    """
+    DELETE Request Code Block
+    """
+
     def set_default_delete(self):
         model = self.model
 
