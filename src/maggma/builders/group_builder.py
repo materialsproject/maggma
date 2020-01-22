@@ -99,11 +99,14 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
                 )
             )
 
-            groups |= set(
+            sub_groups = set(
                 tuple(get(d, prop, None) for prop in grouping_keys) for d in docs
             )
+            self.logger.debug(f"Found {len(sub_groups)} subgroups to process")
 
-        self.logger.info(f"Found {len(groups)} to process")
+            groups |= sub_groups
+
+        self.logger.info(f"Found {len(groups)} groups to process")
         return groups
 
     def get_items(self):
