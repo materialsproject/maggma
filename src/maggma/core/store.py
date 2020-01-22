@@ -60,7 +60,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.last_updated_type = last_updated_type
         self._lu_func = (
             LU_KEY_ISOFORMAT
-            if last_updated_type == DateTimeFormat.IsoFormat
+            if DateTimeFormat(last_updated_type) == DateTimeFormat.IsoFormat
             else (identity, identity)
         )  # type: Tuple[Callable, Callable]
         self.validator = validator
