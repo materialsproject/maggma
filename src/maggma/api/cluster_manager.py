@@ -77,3 +77,38 @@ class ClusterManager(MSONable):
 
     def __contains__(self, item):
         return item in self.endpoints
+
+    def sort(self):
+        """
+        Return :
+            A sorted list of endpoints in the following order:
+                1. By inheritance
+                2. By lexicographical
+
+        """
+        prefixes = list(self.endpoints.keys())
+        # results = []
+        print(prefixes)
+        # split the url path by "/", keep track using a dict mapping {current_path --> original}
+        # im searching for more information regarding endpoint sorting
+        # recursively group the paths from left to right
+
+        pass
+
+    def pprint(self):
+        """
+            pretty print an list of endpoints in the following order:
+            1. By inheritance
+            2. By lexicographical
+            Example: if we have ["/temp", "/main","/main/temp"], this function would return the list in the order of
+            ["/main","/main/temp","/temp"]
+
+
+        Returns:
+
+        """
+        self.sort()
+        # result = []
+        # for prefix in self.keys():
+        #     result.append(prefix)
+        # print(result)

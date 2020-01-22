@@ -95,3 +95,21 @@ def test_cluster_run(owner_store, pet_store):
 
     assert client.get("/pets/name/Pet1").status_code == 200
     assert client.get("/pets/name/Pet1").json()["name"] == "Pet1"
+
+
+def test_cluster_pprint(owner_store, pet_store):
+    endpoint_main = EndpointCluster(owner_store, Owner, description="main")
+    endpoint_main_temp = EndpointCluster(pet_store, Pet, description="main_temp")
+    endpoint_temp = EndpointCluster(owner_store, Owner, description="temp")
+
+    manager = ClusterManager(
+        {
+            "/temp": endpoint_temp,
+            "/main": endpoint_main,
+            "/main/temp": endpoint_main_temp,
+        }
+    )
+
+    res = manager.sort()
+
+    assert res == ["/main", "/main/temp", "/temp"]

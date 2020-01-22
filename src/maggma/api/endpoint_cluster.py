@@ -68,6 +68,7 @@ class EndpointCluster(MSONable):
         tags: Optional[List[str]] = None,
         responses: Optional[Dict] = None,
         default_projection: Optional[Set[str]] = None,
+        description: str = "No Description",
     ):
         """
         Args:
@@ -107,7 +108,7 @@ class EndpointCluster(MSONable):
                 )
         except Exception:
             raise Exception("Cannot set default_filter")
-
+        self.description = description
         self.prepare_endpoint()
 
     def prepare_endpoint(self):
@@ -367,3 +368,6 @@ class EndpointCluster(MSONable):
             if not d.get(field, None):
                 del d[field]
         return d
+
+    def get_description(self):
+        return self.description
