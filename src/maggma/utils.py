@@ -5,8 +5,11 @@ Utilities to help with maggma functions
 import itertools
 import signal
 import logging
+import uuid
+from bson import ObjectId
 
 from datetime import datetime, timedelta
+
 
 from pydash.utilities import to_path
 from pydash.objects import set_, get, has
@@ -211,3 +214,42 @@ class Timeout:
         """
         if self.seconds:
             signal.alarm(0)
+class ReportingHandler(logging.Handler):
+    """
+    Helper to route reporting messages
+    This uses the NOTSET level to send reporting messages
+    """
+
+    def __init__(self, reporting_store):
+        """
+        Initialize the Reporting Logger
+        """
+        super().__init__(logging.NOTSET)
+        self.reporting_store = reporting_store
+        self.reporting_store.connect()
+        self.errors = 0
+        self.warnings = 0
+
+    def emit(self, record):
+        """
+        Emit a record via Tqdm screen
+        """
+        if "maggma" in record.__dict__:
+            maggma_record = record.maggma
+            event = maggma_record["event"]
+
+            maggma_record.update(
+                {
+                    "last_updated": datetime.utcnow(),
+                    "machine": uuid.UUID(int=uuid.getnode()),
+                }
+            )
+
+            if event == "BUILD_STARTED":
+                self.errors = 0
+                self.warnings = 0
+            elif event == "BUILD_ENDED":
+                maggma_record.update({"errors": self.errors, "warnings": self.warnings})
+
+            maggma_record["_id"] = ObjectId()
+            self.reporting_store.update(maggma_record, key="_id")
