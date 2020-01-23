@@ -30,9 +30,9 @@ def serial(builder: Builder):
             pass
 
     elif hasattr(cursor, "__len__"):
-        total = len(cursor)
+        total = len(cursor)  # type: ignore
     elif hasattr(cursor, "count"):
-        total = cursor.count()
+        total = cursor.count()  # type: ignore
 
     logger.info(
         f"Starting serial processing: {builder.__class__.__name__}",
