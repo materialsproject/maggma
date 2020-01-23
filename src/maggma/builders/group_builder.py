@@ -74,7 +74,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
         all_ids = set(self.source.distinct(self.source.key, criteria=query))
         unprocessed_ids = all_ids - set(processed_ids)
-        self.logger.info(f"Found {len(unprocessed_ids)} to process")
+        self.logger.info(f"Found {len(unprocessed_ids)} IDs to process")
 
         new_ids = set(
             self.source.newer_in(self.target, criteria=query, exhaustive=False)
@@ -92,19 +92,21 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         groups: Set[Tuple] = set()
 
         for chunked_keys in grouper(keys, self.chunk_size):
-
-            docs = [
-                d[0]
-                for d in self.source.groupby(
-                    grouping_keys, criteria={self.source.key: {"$in": chunked_keys}}
+            docs = list(
+                self.source.query(
+                    criteria={self.source.key: {"$in": chunked_keys}},
+                    properties=grouping_keys,
                 )
-            ]
-
-            groups |= set(
-                tuple(get(d, prop, None) for prop in grouping_keys) for d in docs
             )
 
-        self.logger.info(f"Found {len(groups)} to process")
+            sub_groups = set(
+                tuple(get(d, prop, None) for prop in grouping_keys) for d in docs
+            )
+            self.logger.debug(f"Found {len(sub_groups)} subgroups to process")
+
+            groups |= sub_groups
+
+        self.logger.info(f"Found {len(groups)} groups to process")
         return groups
 
     def get_items(self):
@@ -149,8 +151,9 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
         time_end = time()
 
-        last_updated = [d[self.source.last_updated_field] for d in item]
-        last_updated = [self.source._lu_func[0](lu) for lu in last_updated]
+        last_updated = [
+            self.source._lu_func[0](d[self.source.last_updated_field]) for d in item
+        ]
 
         processed.update(
             {

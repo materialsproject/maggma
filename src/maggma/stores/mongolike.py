@@ -66,7 +66,7 @@ class MongoStore(Store):
         """
         Return a string representing this data source
         """
-        return self.collection_name
+        return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
         """
@@ -317,7 +317,7 @@ class MemoryStore(MongoStore):
     @property
     def name(self):
         """ Name for the store """
-        return self.collection_name
+        return f"mem://{self.collection_name}"
 
     def __hash__(self):
         """ Hash for the store """

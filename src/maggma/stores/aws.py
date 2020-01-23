@@ -52,7 +52,7 @@ class AmazonS3Store(Store):
         Returns:
             a string representing this data source
         """
-        return self.bucket
+        return f"s3://{self.bucket}"
 
     def connect(self, force_reset: bool = False):
         """

@@ -2,7 +2,6 @@
 
 `maggma` is designed to run build-pipelines in a production environment. Builders can be run directly in a python environment, but this gives you none of the performance features such as multiprocessing. The base `Builder` class implements a simple `run` method that can be used to run that builder:
 
-
 ``` python
 class MultiplyBuilder(Builder):
     """
@@ -31,6 +30,7 @@ mrun my_builder.json
 ```
 
 `mrun` has a number of usefull options:
+
 ``` shell
 mrun --help
 Usage: mrun [OPTIONS] [BUILDERS]...
@@ -47,6 +47,7 @@ We can use the `-n` option to control how many workers run `process_items` in pa
 Similarly, `-v` controls the logging verbosity from just WARNINGs to INFO to DEBUG output.
 
 The result will be something that looks like this:
+
 ``` shell
 
 2020-01-08 14:33:17,187 - Builder - INFO - Starting Builder Builder
@@ -59,14 +60,22 @@ Process Items: 100%|████████████████████
 
 There are progress bars for each of the three steps, which lets you understand what the slowest step is and the overall progress of the system.
 
-
-# Running Distributed
+## Running Distributed
 
 `maggma` can distribute work across multiple computers. There are two steps to this:
 
 1. Run a `mrun` master by providing it with a `--url` to listen for workers on and `--num-chunks`(`-N`) which tells `mrun` how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause `mrun` to call the builder's `prechunk` to get the distribution of work and run distributd work on all workers
 2. Run `mrun` workers b y providing it with a `--url` to listen for a master and `--num-workers` (`-n`) to tell it how many processes to run in this worker.
 
-
 The `url` argument takes a fully qualified url including protocol. `tcp` is recommended:
 Example: `tcp://127.0.0.1:8080`
+
+## Reporting Build State
+
+`mrun` has the ability to report the status of the build pipeline to a user-provided `Store`. To do this, you first have to save the `Store` as a JSON or YAML file. Then you can use the `-r` option to give this to `mrun`. It will then periodicially add documents to the `Store` for one of 3 different events:
+
+* `BUILD_STARTED` - This event tells us that a new builder started, the names of the `sources` and `targets` as well as the `total` number of items the builder expects to process
+* `UPDATE` - This event tells us that a batch of items was processed and is going to `update_targets`. The number of items is stored in `items`.
+* `BUILD_ENDED` - This event tells us the build process finished this specific builder. It also indicates the total number of `errors` and `warnings` that were caught during the process.
+
+These event docs also contain the `builder`, a `build_id` which is unique for each time a builder is run and anonymous but unique ID for the machine the builder was run on.

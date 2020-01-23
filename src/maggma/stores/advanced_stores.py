@@ -34,7 +34,7 @@ class MongograntStore(MongoStore):
         mongogrant_spec: str,
         collection_name: str,
         mgclient_config_path: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -398,7 +398,7 @@ class SandboxStore(Store):
         Returns:
             a string representing this data source
         """
-        return self.store.name
+        return f"Sandbox[{self.store.name}][{self.sandbox}]"
 
     @property
     def sbx_criteria(self) -> Dict:

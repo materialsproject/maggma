@@ -5,8 +5,11 @@ Utilities to help with maggma functions
 import itertools
 import signal
 import logging
+import uuid
+from bson import ObjectId
 
 from datetime import datetime, timedelta
+
 
 from pydash.utilities import to_path
 from pydash.objects import set_, get, has
@@ -83,24 +86,30 @@ def confirm_field_index(store, fields):
     return False
 
 
-def dt_to_isoformat_ceil_ms(dt):
+def to_isoformat_ceil_ms(dt):
     """Helper to account for Mongo storing datetimes with only ms precision."""
-    return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
+    if isinstance(dt, datetime):
+        return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
+    elif isinstance(dt, str):
+        return dt
 
 
-def isostr_to_dt(s):
+def to_dt(s):
     """Convert an ISO 8601 string to a datetime."""
-    try:
-        return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
-    except ValueError:
-        return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+    if isinstance(s, str):
+        try:
+            return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
+        except ValueError:
+            return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+    elif isinstance(s, datetime):
+        return s
 
 
 # This lu_key prioritizes not duplicating potentially expensive item
 # processing on incremental rebuilds at the expense of potentially missing a
 # source document updated within 1 ms of a builder get_items call. Ensure
 # appropriate builder validation.
-LU_KEY_ISOFORMAT = (isostr_to_dt, dt_to_isoformat_ceil_ms)
+LU_KEY_ISOFORMAT = (to_dt, to_isoformat_ceil_ms)
 
 
 def recursive_update(d, u):
@@ -205,3 +214,48 @@ class Timeout:
         """
         if self.seconds:
             signal.alarm(0)
+
+
+class ReportingHandler(logging.Handler):
+    """
+    Helper to route reporting messages
+    This uses the NOTSET level to send reporting messages
+    """
+
+    def __init__(self, reporting_store):
+        """
+        Initialize the Reporting Logger
+        """
+        super().__init__(logging.NOTSET)
+        self.reporting_store = reporting_store
+        self.reporting_store.connect()
+        self.errors = 0
+        self.warnings = 0
+        self.build_id = uuid.uuid4()
+
+    def emit(self, record):
+        """
+        Emit a record via Tqdm screen
+        """
+        if "maggma" in record.__dict__:
+            maggma_record = record.maggma
+            event = maggma_record["event"]
+
+            maggma_record.update(
+                {
+                    "last_updated": datetime.utcnow(),
+                    "machine": uuid.UUID(int=uuid.getnode()),
+                }
+            )
+
+            if event == "BUILD_STARTED":
+                self.errors = 0
+                self.warnings = 0
+                self.build_id = uuid.uuid4()
+
+            elif event == "BUILD_ENDED":
+                maggma_record.update({"errors": self.errors, "warnings": self.warnings})
+
+            maggma_record["_id"] = ObjectId()
+            maggma_record["build_id"] = self.build_id
+            self.reporting_store.update(maggma_record, key="_id")
