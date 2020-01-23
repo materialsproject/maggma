@@ -20,8 +20,6 @@ def serial(builder: Builder):
 
     cursor = builder.get_items()
 
-    for chunk in grouper(tqdm(cursor), builder.chunk_size):
-        logger.info("Processing batch of {} items".format(builder.chunk_size))
     total = None
     if isinstance(cursor, GeneratorType):
         try:
@@ -36,8 +34,44 @@ def serial(builder: Builder):
     elif hasattr(cursor, "count"):
         total = cursor.count()
 
+
+    logger.info(
+        f"Starting serial processing: {builder.__class__.__name__}",
+        extra={
+            "maggma": {
+                "event": "BUILD_STARTED",
+                "total": total,
+                "builder": builder.__class__.__name__,
+                "sources": [source.name for source in builder.sources],
+                "targets": [target.name for target in builder.targets],
+            }
+        },
+    )
     for chunk in grouper(tqdm(cursor, total=total), builder.chunk_size):
+        logger.info(
+            "Processing batch of {} items".format(builder.chunk_size),
+            extra={
+                "maggma": {
+                    "event": "UPDATE",
+                    "items": len(chunk),
+                    "builder": builder.__class__.__name__,
+                    "sources": [source.name for source in builder.sources],
+                    "targets": [target.name for target in builder.targets],
+                }
+            },
+        )
         processed_items = [builder.process_item(item) for item in chunk]
         builder.update_targets(processed_items)
 
+    logger.info(
+        f"Ended serial processing: {builder.__class__.__name__}",
+        extra={
+            "maggma": {
+                "event": "BUILD_ENDED",
+                "builder": builder.__class__.__name__,
+                "sources": [source.name for source in builder.sources],
+                "targets": [target.name for target in builder.targets],
+            }
+        },
+    )
     builder.finalize()
