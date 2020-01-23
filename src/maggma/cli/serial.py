@@ -54,8 +54,6 @@ def serial(builder: Builder):
                     "event": "UPDATE",
                     "items": len(chunk),
                     "builder": builder.__class__.__name__,
-                    "sources": [source.name for source in builder.sources],
-                    "targets": [target.name for target in builder.targets],
                 }
             },
         )
@@ -65,12 +63,7 @@ def serial(builder: Builder):
     logger.info(
         f"Ended serial processing: {builder.__class__.__name__}",
         extra={
-            "maggma": {
-                "event": "BUILD_ENDED",
-                "builder": builder.__class__.__name__,
-                "sources": [source.name for source in builder.sources],
-                "targets": [target.name for target in builder.targets],
-            }
+            "maggma": {"event": "BUILD_ENDED", "builder": builder.__class__.__name__}
         },
     )
     builder.finalize()

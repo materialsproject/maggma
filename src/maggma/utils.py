@@ -231,6 +231,7 @@ class ReportingHandler(logging.Handler):
         self.reporting_store.connect()
         self.errors = 0
         self.warnings = 0
+        self.build_id = uuid.uuid4()
 
     def emit(self, record):
         """
@@ -250,8 +251,11 @@ class ReportingHandler(logging.Handler):
             if event == "BUILD_STARTED":
                 self.errors = 0
                 self.warnings = 0
+                self.build_id = uuid.uuid4()
+
             elif event == "BUILD_ENDED":
                 maggma_record.update({"errors": self.errors, "warnings": self.warnings})
 
             maggma_record["_id"] = ObjectId()
+            maggma_record["build_id"] = self.build_id
             self.reporting_store.update(maggma_record, key="_id")
