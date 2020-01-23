@@ -142,7 +142,7 @@ def test_mongostore_from_collection(mongostore, db_json):
 
 
 def test_mongostore_name(mongostore):
-    assert mongostore.name == "test"
+    assert mongostore.name == "mongo://localhost/maggma_test/test"
 
 
 def test_ensure_index(mongostore):

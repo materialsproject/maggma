@@ -85,7 +85,7 @@ class GridFSStore(Store):
         """
         Return a string representing this data source
         """
-        return self.collection_name
+        return f"gridfs://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
         """

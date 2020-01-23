@@ -25,7 +25,7 @@ class JointStore(Store):
         password: str = "",
         master: Optional[str] = None,
         merge_at_root: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -56,7 +56,8 @@ class JointStore(Store):
         """
         Return a string representing this data source
         """
-        return self.master
+        compound_name = ",".join(self.collection_names)
+        return f"Compound[{self.host}/{self.database}][{compound_name}]"
 
     def connect(self, force_reset: bool = False):
         """
@@ -319,7 +320,8 @@ class ConcatStore(Store):
         """
         A string representing this data source
         """
-        return self.stores[0].name
+        compound_name = ",".join([store.name for store in self.stores])
+        return f"Concat[{compound_name}]"
 
     def connect(self, force_reset: bool = False):
         """
