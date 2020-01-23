@@ -380,6 +380,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../group_builder/" title="Working with GroupBuilder" class="md-nav__link">
+      Working with GroupBuilder
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -566,9 +578,9 @@
                   <a href="https://github.com/materialsproject/maggma/edit/master/docs/getting_started/stores.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="using-store">Using <code class="codehilite"><span class="n">Store</span></code><a class="headerlink" href="#using-store" title="Permanent link">&para;</a></h1>
+                <h1 id="using-store">Using <code class="codehilite"><span class="err">Store</span></code><a class="headerlink" href="#using-store" title="Permanent link">&para;</a></h1>
 <div class="autodoc">
-<p>A <code class="codehilite"><span class="n">Store</span></code> is just a wrapper to access data from somewhere. That somewhere is typically a MongoDB collection, but it could also be GridFS which lets you keep large binary objects. <code class="codehilite"><span class="n">maggma</span></code> makes GridFS and MongoDB collections feel the same. Beyond that it adds in something that looks like GridFS but is actually using AWS S3 as the storage space. Finally, <code class="codehilite"><span class="n">Store</span></code> can actually perform logic, concatenating two or more <code class="codehilite"><span class="n">Stores</span></code> together to make them look like one data source for instance. This means you only have to write a <code class="codehilite"><span class="n">Builder</span></code> for one scenario and the choice of <code class="codehilite"><span class="n">Store</span></code> lets you control how and where the data goes.</p>
+<p>A <code class="codehilite"><span class="err">Store</span></code> is just a wrapper to access data from somewhere. That somewhere is typically a MongoDB collection, but it could also be GridFS which lets you keep large binary objects. <code class="codehilite"><span class="err">maggma</span></code> makes GridFS and MongoDB collections feel the same. Beyond that it adds in something that looks like GridFS but is actually using AWS S3 as the storage space. Finally, <code class="codehilite"><span class="err">Store</span></code> can actually perform logic, concatenating two or more <code class="codehilite"><span class="err">Stores</span></code> together to make them look like one data source for instance. This means you only have to write a <code class="codehilite"><span class="err">Builder</span></code> for one scenario of how to transform data and the choice of <code class="codehilite"><span class="err">Store</span></code> lets you control where the data comes from and goes.</p>
 <h2 id="list-of-stores">List of Stores<a class="headerlink" href="#list-of-stores" title="Permanent link">&para;</a></h2>
 <div class="autodoc">
 <p>Current working and tested Stores include:</p>
@@ -580,31 +592,31 @@
 <li>MongograntStore: uses Mongogrant to get credentials for MongoDB database</li>
 <li>VaulStore: uses Vault to get credentials for a MongoDB database</li>
 <li>AliasingStore: aliases keys from the underlying store to new names</li>
-<li>SandboxStore: provides permission control to documents via a <code class="codehilite"><span class="n">_sbxn</span></code> sandbox key</li>
+<li>SandboxStore: provides permission control to documents via a <code class="codehilite"><span class="err">_sbxn</span></code> sandbox key</li>
 <li>AmazonS3Store: provides an interface to an S3 Bucket</li>
-<li>JointStore: joins several MongoDB collections together, merging documents with the same <code class="codehilite"><span class="k">key</span></code>, so they look like one collection</li>
+<li>JointStore: joins several MongoDB collections together, merging documents with the same <code class="codehilite"><span class="err">key</span></code>, so they look like one collection</li>
 <li>ConcatStore: concatenates several MongoDB collections in series so they look like one collection</li>
 </ul>
 </div>
-<h2 id="the-store-interface">The <code class="codehilite"><span class="n">Store</span></code> interface<a class="headerlink" href="#the-store-interface" title="Permanent link">&para;</a></h2>
+<h2 id="the-store-interface">The <code class="codehilite"><span class="err">Store</span></code> interface<a class="headerlink" href="#the-store-interface" title="Permanent link">&para;</a></h2>
 <div class="autodoc">
 <h3 id="initializing-a-store">Initializing a Store<a class="headerlink" href="#initializing-a-store" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<p>All <code class="codehilite"><span class="n">Store</span></code>s have a few basic arguments that are critical to understand. Any <code class="codehilite"><span class="n">Store</span></code> has two special fields: <code class="codehilite"><span class="k">key</span></code> and <code class="codehilite"><span class="n">last_updated_field</span></code>. The <code class="codehilite"><span class="k">key</span></code> defines how the <code class="codehilite"><span class="n">Store</span></code> tells documents part. Typically this is <code class="codehilite"><span class="n">_id</span></code> in MongoDB, but you could use your own field. <code class="codehilite"><span class="n">last_updated_field</span></code> tells <code class="codehilite"><span class="n">Store</span></code> how to order the documents by a date field.  <code class="codehilite"><span class="n">Store</span></code>s can also take a <code class="codehilite"><span class="k">Validator</span></code> object to make sure the data going into obeys some schema.</p>
+<p>All <code class="codehilite"><span class="err">Store</span></code>s have a few basic arguments that are critical to understand. Every <code class="codehilite"><span class="err">Store</span></code> has two attributes that the user should customize based on the data contained in that store: <code class="codehilite"><span class="err">key</span></code> and <code class="codehilite"><span class="err">last_updated_field</span></code>. The <code class="codehilite"><span class="err">key</span></code> defines how the <code class="codehilite"><span class="err">Store</span></code> tells documents part. Typically this is <code class="codehilite"><span class="err">_id</span></code> in MongoDB, but you could use your own field (be sure all values under the key field can be used to uniquely identify documents). <code class="codehilite"><span class="err">last_updated_field</span></code> tells <code class="codehilite"><span class="err">Store</span></code> how to order the documents by a date, which is typically in the <code class="codehilite"><span class="err">datetime</span></code> format, but can also be a ISO 8601-format (ex: <code class="codehilite"><span class="c">2009-05-28T16:15:00</span></code>)  <code class="codehilite"><span class="err">Store</span></code>s can also take a <code class="codehilite"><span class="err">Validator</span></code> object to make sure the data going into obeys some schema.</p>
 </div>
 <h3 id="using-a-store">Using a Store<a class="headerlink" href="#using-a-store" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
 <p>Stores provide a number of basic methods that make easy to use:</p>
 <ul>
-<li>query: Standard mongo style <code class="codehilite"><span class="n">find</span></code> method that lets you search the store.</li>
-<li>query_one: Same as above but limits to the first document.</li>
-<li>update: Update the documents into the collection. This will override documents if the key field matches. You can temporarily provide extra fields to key these documents if you don't to maintain duplicates, for instance keying on both <code class="codehilite"><span class="k">key</span></code> and <code class="codehilite"><span class="n">last_udpated_field</span></code>.</li>
+<li>query: Standard mongo style <code class="codehilite"><span class="err">find</span></code> method that lets you search the store.</li>
+<li>query_one: Same as above but limits returned results to just the first document that matches your query.</li>
+<li>update: Update the documents into the collection. This will override documents if the key field matches.</li>
 <li>ensure_index: This creates an index the underlying data-source for fast querying.</li>
 <li>distinct: Gets distinct values of a field.</li>
 <li>groupby: Similar to query but performs a grouping operation and returns sets of documents.</li>
 <li>remove_docs: Removes documents from the underlying data source.</li>
-<li>last_updated: Finds the most recently updated <code class="codehilite"><span class="n">last_updated_field</span></code> value and returns that. Usefull for knowing how old a data-source is.</li>
-<li>newer_in: Finds all documents that are newer in the target collection and returns their <code class="codehilite"><span class="k">key</span></code>s. This is a very useful way of performing incremental processing.</li>
+<li>last_updated: Finds the most recently updated <code class="codehilite"><span class="err">last_updated_field</span></code> value and returns that. Usefull for knowing how old a data-source is.</li>
+<li>newer_in: Finds all documents that are newer in the target collection and returns their <code class="codehilite"><span class="err">key</span></code>s. This is a very useful way of performing incremental processing.</li>
 </ul>
 </div>
 </div>

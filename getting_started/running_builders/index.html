@@ -305,9 +305,45 @@
       
     
     
+      <label class="md-nav__link md-nav__link--active" for="__toc">
+        Running a Builder Pipeline
+      </label>
+    
     <a href="./" title="Running a Builder Pipeline" class="md-nav__link md-nav__link--active">
       Running a Builder Pipeline
     </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-distributed" class="md-nav__link">
+    Running Distributed
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reporting-build-state" class="md-nav__link">
+    Reporting Build State
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
+</nav>
     
   </li>
 
@@ -320,6 +356,18 @@
   <li class="md-nav__item">
     <a href="../map_builder/" title="Working with MapBuilder" class="md-nav__link">
       Working with MapBuilder
+    </a>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../group_builder/" title="Working with GroupBuilder" class="md-nav__link">
+      Working with GroupBuilder
     </a>
   </li>
 
@@ -454,6 +502,29 @@
     
   
   
+    <label class="md-nav__title" for="__toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#running-distributed" class="md-nav__link">
+    Running Distributed
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reporting-build-state" class="md-nav__link">
+    Reporting Build State
+  </a>
+  
+</li>
+      
+      
+      
+      
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -469,7 +540,7 @@
                 
                 <h1 id="running-builders">Running Builders<a class="headerlink" href="#running-builders" title="Permanent link">&para;</a></h1>
 <div class="autodoc">
-<p><code class="codehilite"><span class="n">maggma</span></code> is designed to run build-pipelines in a production environment. Builders can be run directly in a python environment, but this gives you none of the performance features such as multiprocessing. The base <code class="codehilite"><span class="n">Builder</span></code> class implements a simple <code class="codehilite"><span class="n">run</span></code> method that can be used to run that builder:</p>
+<p><code class="codehilite"><span class="err">maggma</span></code> is designed to run build-pipelines in a production environment. Builders can be run directly in a python environment, but this gives you none of the performance features such as multiprocessing. The base <code class="codehilite"><span class="err">Builder</span></code> class implements a simple <code class="codehilite"><span class="err">run</span></code> method that can be used to run that builder:</p>
 <div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
@@ -482,17 +553,17 @@
 <span class="n">my_builder</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </pre></div>
 
-<p>A better way to run this builder would be to use the <code class="codehilite"><span class="n">mrun</span></code> command line tool. Since evrything in <code class="codehilite"><span class="n">maggma</span></code> is MSONable, we can use <code class="codehilite"><span class="n">monty</span></code> to dump the builders into a JSON file:</p>
+<p>A better way to run this builder would be to use the <code class="codehilite"><span class="err">mrun</span></code> command line tool. Since evrything in <code class="codehilite"><span class="err">maggma</span></code> is MSONable, we can use <code class="codehilite"><span class="err">monty</span></code> to dump the builders into a JSON file:</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">dumpfn</span>
 
 <span class="n">dumpfn</span><span class="p">(</span><span class="n">my_builder</span><span class="p">,</span><span class="s2">&quot;my_builder.json&quot;</span><span class="p">)</span>
 </pre></div>
 
-<p>Then we can run the builder using <code class="codehilite"><span class="n">mrun</span></code>:</p>
+<p>Then we can run the builder using <code class="codehilite"><span class="err">mrun</span></code>:</p>
 <div class="codehilite"><pre><span></span>mrun my_builder.json
 </pre></div>
 
-<p><code class="codehilite"><span class="n">mrun</span></code> has a number of usefull options:
+<p><code class="codehilite"><span class="err">mrun</span></code> has a number of usefull options:</p>
 <div class="codehilite"><pre><span></span>mrun --help
 Usage: mrun <span class="o">[</span>OPTIONS<span class="o">]</span> <span class="o">[</span>BUILDERS<span class="o">]</span>...
 
@@ -502,18 +573,40 @@ Options:
                                   Number of worker processes. Defaults to
                                   single processing
   --help                          Show this message and exit.
-</pre></div></p>
-<p>We can use the <code class="codehilite"><span class="o">-</span><span class="n">n</span></code> option to control how many workers run <code class="codehilite"><span class="n">process_items</span></code> in parallel.
-Similarly, <code class="codehilite"><span class="o">-</span><span class="n">v</span></code> controls the logging verbosity from just WARNINGs to INFO to DEBUG output.</p>
-<p>The result will be something that looks like this:
+</pre></div>
+
+<p>We can use the <code class="codehilite"><span class="err">-n</span></code> option to control how many workers run <code class="codehilite"><span class="k">proc</span><span class="nb">es</span><span class="nv">s_items</span></code> in parallel.
+Similarly, <code class="codehilite"><span class="err">-v</span></code> controls the logging verbosity from just WARNINGs to INFO to DEBUG output.</p>
+<p>The result will be something that looks like this:</p>
 <div class="codehilite"><pre><span></span><span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,187 - Builder - INFO - Starting Builder Builder
 <span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,217 - Builder - INFO - Processing <span class="m">100</span> items
 Get: <span class="m">100</span>%<span class="p">|</span>██████████████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">15366</span>.00it/s<span class="o">]</span>
 <span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,235 - MultiProcessor - INFO - Processing batch of <span class="m">1000</span> items
 Update Targets: <span class="m">100</span>%<span class="p">|</span>█████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">584</span>.51it/s<span class="o">]</span>
 Process Items: <span class="m">100</span>%<span class="p">|</span>██████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">567</span>.39it/s<span class="o">]</span>
-</pre></div></p>
+</pre></div>
+
 <p>There are progress bars for each of the three steps, which lets you understand what the slowest step is and the overall progress of the system.</p>
+<h2 id="running-distributed">Running Distributed<a class="headerlink" href="#running-distributed" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p><code class="codehilite"><span class="err">maggma</span></code> can distribute work across multiple computers. There are two steps to this:</p>
+<ol>
+<li>Run a <code class="codehilite"><span class="err">mrun</span></code> master by providing it with a <code class="codehilite"><span class="err">--url</span></code> to listen for workers on and <code class="codehilite"><span class="err">--num-chunks</span></code>(<code class="codehilite"><span class="err">-N</span></code>) which tells <code class="codehilite"><span class="err">mrun</span></code> how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause <code class="codehilite"><span class="err">mrun</span></code> to call the builder's <code class="codehilite"><span class="err">prechunk</span></code> to get the distribution of work and run distributd work on all workers</li>
+<li>Run <code class="codehilite"><span class="err">mrun</span></code> workers b y providing it with a <code class="codehilite"><span class="err">--url</span></code> to listen for a master and <code class="codehilite"><span class="err">--num-workers</span></code> (<code class="codehilite"><span class="err">-n</span></code>) to tell it how many processes to run in this worker.</li>
+</ol>
+<p>The <code class="codehilite"><span class="err">url</span></code> argument takes a fully qualified url including protocol. <code class="codehilite"><span class="err">tcp</span></code> is recommended:
+Example: <code class="codehilite"><span class="c">tcp://127.0.0.1:8080</span></code></p>
+</div>
+<h2 id="reporting-build-state">Reporting Build State<a class="headerlink" href="#reporting-build-state" title="Permanent link">&para;</a></h2>
+<div class="autodoc">
+<p><code class="codehilite"><span class="err">mrun</span></code> has the ability to report the status of the build pipeline to a user-provided <code class="codehilite"><span class="err">Store</span></code>. To do this, you first have to save the <code class="codehilite"><span class="err">Store</span></code> as a JSON or YAML file. Then you can use the <code class="codehilite"><span class="err">-r</span></code> option to give this to <code class="codehilite"><span class="err">mrun</span></code>. It will then periodicially add documents to the <code class="codehilite"><span class="err">Store</span></code> for one of 3 different events:</p>
+<ul>
+<li><code class="codehilite"><span class="err">BUILD_STARTED</span></code> - This event tells us that a new builder started, the names of the <code class="codehilite"><span class="err">sources</span></code> and <code class="codehilite"><span class="err">targets</span></code> as well as the <code class="codehilite"><span class="err">total</span></code> number of items the builder expects to process</li>
+<li><code class="codehilite"><span class="err">UPDATE</span></code> - This event tells us that a batch of items was processed and is going to <code class="codehilite"><span class="err">update_targets</span></code>. The number of items is stored in <code class="codehilite"><span class="err">items</span></code>.</li>
+<li><code class="codehilite"><span class="err">BUILD_ENDED</span></code> - This event tells us the build process finished this specific builder. It also indicates the total number of <code class="codehilite"><span class="err">errors</span></code> and <code class="codehilite"><span class="err">warnings</span></code> that were caught during the process.</li>
+</ul>
+<p>These event docs also contain the <code class="codehilite"><span class="err">builder</span></code>, a <code class="codehilite"><span class="err">build_id</span></code> which is unique for each time a builder is run and anonymous but unique ID for the machine the builder was run on.</p>
+</div>
 </div>
                 
                   

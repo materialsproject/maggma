@@ -38,7 +38,7 @@
     
     
       
-        <title>Working with MapBuilder - Maggma Documentation</title>
+        <title>Working with GroupBuilder - Maggma Documentation</title>
       
     
     
@@ -79,7 +79,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#map-builder" tabindex="1" class="md-skip">
+      <a href="#group-builder" tabindex="1" class="md-skip">
         Skip to content
       </a>
     
@@ -105,7 +105,7 @@
             </span>
             <span class="md-header-nav__topic">
               
-                Working with MapBuilder
+                Working with GroupBuilder
               
             </span>
           
@@ -307,6 +307,18 @@
           
           
 
+
+  <li class="md-nav__item">
+    <a href="../map_builder/" title="Working with MapBuilder" class="md-nav__link">
+      Working with MapBuilder
+    </a>
+  </li>
+
+        
+          
+          
+          
+
   
 
 
@@ -317,22 +329,10 @@
       
     
     
-    <a href="./" title="Working with MapBuilder" class="md-nav__link md-nav__link--active">
-      Working with MapBuilder
-    </a>
-    
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../group_builder/" title="Working with GroupBuilder" class="md-nav__link">
+    <a href="./" title="Working with GroupBuilder" class="md-nav__link md-nav__link--active">
       Working with GroupBuilder
     </a>
+    
   </li>
 
         
@@ -476,59 +476,81 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/materialsproject/maggma/edit/master/docs/getting_started/map_builder.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
+                  <a href="https://github.com/materialsproject/maggma/edit/master/docs/getting_started/group_builder.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
                 
                 
-                <h1 id="map-builder">Map Builder<a class="headerlink" href="#map-builder" title="Permanent link">&para;</a></h1>
+                <h1 id="group-builder">Group Builder<a class="headerlink" href="#group-builder" title="Permanent link">&para;</a></h1>
 <div class="autodoc">
-<p><code class="codehilite"><span class="err">maggma</span></code> has a built in builder called the <code class="codehilite"><span class="err">MapBuilder</span></code> which handles a number of tedious tasks in writing a builder. This class is designed to be used similar to a map operator in any other framework in even the map function in python. <code class="codehilite"><span class="err">MapBuilder</span></code> will take each document in the source store, apply the function you give it, and then store that in the target store. It handles incremental building, keeping track of errors, getting only the data you need, managing timeouts, and deleting orphaned documents through configurational options.</p>
-<p>Let's create the same <code class="codehilite"><span class="err">MultiplierBuilder</span></code> we wrote earlier using <code class="codehilite"><span class="err">MapBuilder</span></code>:</p>
-<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">maggma.builders</span> <span class="kn">import</span> <span class="n">MapBuilder</span>
+<p>Another advanced template in <code class="codehilite"><span class="err">maggma</span></code> is the <code class="codehilite"><span class="err">GroupBuilder</span></code>, which groups documents together before applying your function on the group of items. Just like <code class="codehilite"><span class="err">MapBuilder</span></code>, <code class="codehilite"><span class="err">GroupBuilder</span></code> also handles incremental building, keeping track of errors, getting only the data you need, and managing timeouts. GroupBuilder won't delete orphaned documents since that reverse relationshop isn't valid.</p>
+<p>Let's create a simple <code class="codehilite"><span class="err">ResupplyBuilder</span></code>, which will look at the inventory of items and determine what items need resupply. The source document will look something like this:</p>
+<div class="codehilite"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Banana&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;fruit&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;quantity&quot;</span><span class="p">:</span> <span class="mi">20</span><span class="p">,</span>
+    <span class="nt">&quot;minimum&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+    <span class="nt">&quot;last_updated&quot;</span><span class="p">:</span> <span class="s2">&quot;2019-11-3T19:09:45&quot;</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>Our builder should give us documents that look like this:</p>
+<div class="codehilite"><pre><span></span><span class="p">{</span>
+    <span class="nt">&quot;names&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;Grapes&quot;</span><span class="p">,</span> <span class="s2">&quot;Apples&quot;</span><span class="p">,</span> <span class="s2">&quot;Bananas&quot;</span><span class="p">],</span>
+    <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;fruit&quot;</span><span class="p">,</span>
+    <span class="nt">&quot;resupply&quot;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="nt">&quot;Apples&quot;</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="nt">&quot;Bananes&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="nt">&quot;Grapes&quot;</span><span class="p">:</span> <span class="mi">5</span>
+    <span class="p">},</span>
+    <span class="nt">&quot;last_updated&quot;</span><span class="p">:</span> <span class="s2">&quot;2019-11-3T19:09:45&quot;</span>
+<span class="p">}</span>
+</pre></div>
+
+<p>To begin, we define our <code class="codehilite"><span class="err">GroupBuilder</span></code>:</p>
+<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">maggma.builders</span> <span class="kn">import</span> <span class="n">GroupBuilder</span>
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
-<span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">MapBuilder</span><span class="p">):</span>
+<span class="k">class</span> <span class="nc">ResupplyBuilder</span><span class="p">(</span><span class="n">GroupBuilder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
+<span class="sd">    Simple builder that determines which items to resupply</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-</pre></div>
 
-<p>Just like before we define a new class, but this time it should inherit from <code class="codehilite"><span class="err">MapBuilder</span></code>.</p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">resupply</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span><span class="n">resupply_percent</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
-<span class="sd">            source: the source store</span>
-<span class="sd">            target: the target store</span>
-<span class="sd">            multiplier: the multiplier to apply to &quot;a&quot; sub-document</span>
+<span class="sd">            inventory: current inventory information</span>
+<span class="sd">            resupply: target resupply information</span>
+<span class="sd">            resupply_percent: the percent of the minimum to include in the resupply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span> <span class="o">=</span> <span class="n">multiplier</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">inventory</span> <span class="o">=</span> <span class="n">inventory</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resupply</span> <span class="o">=</span> <span class="n">resupply</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">resupply_percent</span> <span class="o">=</span> <span class="n">resupply_percent</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
-                         <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
-                         <span class="n">projection</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">],</span>
-                         <span class="n">delete_orphans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                         <span class="n">store_process_timeout</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                         <span class="n">retry_failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">inventory</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">resupply</span><span class="p">,</span> <span class="n">grouping_properties</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 
-<p>MapBuilder has a number of configurational options that you can hardcode as above or expose as properties for the user through **kwargs:</p>
+<p>Note that unlike the previous <code class="codehilite"><span class="err">MapBuilder</span></code> example, we didn't call the source and target stores as such. Providing more usefull names is a good idea in writing builders to make it clearer what the underlying data should look like.</p>
+<p><code class="codehilite"><span class="err">GroupBuilder</span></code> inherits from <code class="codehilite"><span class="err">MapBuilder</span></code> so it has the same configurational parameters.</p>
 <ul>
 <li>projection: list of the fields you want to project. This can reduce the data transfer load if you only need certain fields or sub-documents from the source documents</li>
-<li>delete_orphans: this will delete documents in the target which don't have a corresponding document in the source</li>
 <li>timeout: optional timeout on the process function</li>
 <li>store_process_timeout: adds the process time into the target document for profiling</li>
 <li>retry_failed: retries running the process function on previously failed documents</li>
 </ul>
+<p>One parameter that doens't work in <code class="codehilite"><span class="err">GroupBuilder</span></code> is <code class="codehilite"><span class="err">delete_orphans</span></code>, since the Many-to-One relationshop makes determining orphaned documents very difficult.</p>
 <p>Finally let's get to the hard part which is running our function. We do this by defining <code class="codehilite"><span class="err">unary_function</span></code></p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">item</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mulitplier</span><span class="p">}</span>
+<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="n">resupply</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;quantity&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;minimum&quot;</span><span class="p">]:</span>
+                <span class="n">resupply</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;minimum&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">resupply_percent</span> <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">resupply</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;resupply&quot;</span><span class="p">:</span> <span class="n">resupply</span><span class="p">}</span>
 </pre></div>
 
-<p>Note that we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source <code class="codehilite"><span class="err">key</span></code> and convert it to the target <code class="codehilite"><span class="err">key</span></code>. Same goes for the <code class="codehilite"><span class="err">last_updated_field</span></code>. <code class="codehilite"><span class="err">MapBuilder</span></code> takes care of this, while also recording errors, processing time, and the Builder version.</p>
+<p>Just as in <code class="codehilite"><span class="err">MapBuilder</span></code>, we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source <code class="codehilite"><span class="err">key</span></code> and convert it to the target <code class="codehilite"><span class="err">key</span></code>. Same goes for the <code class="codehilite"><span class="err">last_updated_field</span></code>. <code class="codehilite"><span class="err">GroupBuilder</span></code> takes care of this, while also recording errors, processing time, and the Builder version.<code class="codehilite"><span class="err">GroupBuilder</span></code> also keeps a plural version of the <code class="codehilite"><span class="err">source.key</span></code> field, so in this example, all the <code class="codehilite"><span class="err">name</span></code> values wil be put together and kept in <code class="codehilite"><span class="err">names</span></code></p>
 </div>
                 
                   
@@ -551,7 +573,7 @@
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../running_builders/" title="Running a Builder Pipeline" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../map_builder/" title="Working with MapBuilder" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -560,19 +582,19 @@
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Running a Builder Pipeline
+                Working with MapBuilder
               </span>
             </div>
           </a>
         
         
-          <a href="../group_builder/" title="Working with GroupBuilder" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../../reference/core_store/" title="Store" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Working with GroupBuilder
+                Store
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

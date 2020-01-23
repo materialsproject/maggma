@@ -313,6 +313,18 @@
   </li>
 
         
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/group_builder/" title="Working with GroupBuilder" class="md-nav__link">
+      Working with GroupBuilder
+    </a>
+  </li>
+
+        
       </ul>
     </nav>
   </li>
@@ -643,7 +655,7 @@ get_items - Get items from the sources
 update_targets - Updates the sources with results</p>
 <p>Multiprocessing and MPI processing can be used if all
 the data processing is  limited to process_items</p>
-<h3 id="maggma.core.builder.Builder.__init__"><code class="codehilite"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.builder.Builder.__init__" title="Permanent link">&para;</a></h3>
+<h3 id="maggma.core.builder.Builder.__init__"><code class="codehilite"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sources</span><span class="p">,</span> <span class="n">targets</span><span class="p">,</span> <span class="n">chunk_size</span><span class="o">=</span><span class="mi">1000</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.builder.Builder.__init__" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
 <details class="note"><summary>Show source code in maggma/core/builder.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>27
 28
@@ -664,16 +676,11 @@ the data processing is  limited to process_items</p>
 43
 44
 45
-46
-47
-48
-49
-50</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+46</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">sources</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Store</span><span class="p">],</span> <span class="n">Store</span><span class="p">],</span>
         <span class="n">targets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Store</span><span class="p">],</span> <span class="n">Store</span><span class="p">],</span>
         <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
-        <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the builder the framework.</span>
@@ -682,14 +689,11 @@ the data processing is  limited to process_items</p>
 <span class="sd">            sources: source Store(s)</span>
 <span class="sd">            targets: target Store(s)</span>
 <span class="sd">            chunk_size: chunk size for processing</span>
-<span class="sd">            query: dictionary of options to utilize on a source;</span>
-<span class="sd">                   Each builder has internal logic on which souce this will apply to</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">=</span> <span class="n">sources</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sources</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">sources</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">targets</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">targets</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span> <span class="o">=</span> <span class="n">chunk_size</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="bp">None</span>  <span class="c1"># type: Optional[int]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[int]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
 </pre></div>
@@ -709,40 +713,34 @@ the data processing is  limited to process_items</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="n">sources</span></code></td>
+<td><code class="codehilite"><span class="err">sources</span></code></td>
 <td><code class="codehilite"><span class="ow">Union</span><span class="o">[</span><span class="n">List[Store</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">Store</span><span class="err">]</span><span class="w"></span></code></td>
 <td>source Store(s)</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="n">targets</span></code></td>
+<td><code class="codehilite"><span class="err">targets</span></code></td>
 <td><code class="codehilite"><span class="ow">Union</span><span class="o">[</span><span class="n">List[Store</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">Store</span><span class="err">]</span><span class="w"></span></code></td>
 <td>target Store(s)</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="n">chunk_size</span></code></td>
-<td><code class="codehilite"><span class="nb">int</span></code></td>
+<td><code class="codehilite"><span class="err">chunk_size</span></code></td>
+<td><code class="codehilite"><span class="err">int</span></code></td>
 <td>chunk size for processing</td>
-<td><code class="codehilite"><span class="mi">1000</span></code></td>
-</tr>
-<tr>
-<td><code class="codehilite"><span class="n">query</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
-<td>dictionary of options to utilize on a source; Each builder has internal logic on which souce this will apply to</td>
-<td><code class="codehilite"><span class="k">None</span></code></td>
+<td><code class="codehilite"><span class="err">1000</span></code></td>
 </tr>
 </tbody>
 </table>
 </div>
 <h3 id="maggma.core.builder.Builder.connect"><code class="codehilite"><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.builder.Builder.connect" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/builder.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>52
-53
-54
-55
-56
-57</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<details class="note"><summary>Show source code in maggma/core/builder.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>48
+49
+50
+51
+52
+53</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Connect to the builder sources and targets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -815,7 +813,7 @@ the data processing is  limited to process_items</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="n">Iterable</span></code></td>
+<td><code class="codehilite"><span class="err">Iterable</span></code></td>
 <td>generator or list of items to process</td>
 </tr>
 </tbody>
@@ -823,7 +821,11 @@ the data processing is  limited to process_items</p>
 </div>
 <h3 id="maggma.core.builder.Builder.prechunk"><code class="codehilite"><span class="n">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.builder.Builder.prechunk" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/builder.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>59
+<details class="note"><summary>Show source code in maggma/core/builder.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>55
+56
+57
+58
+59
 60
 61
 62
@@ -846,10 +848,14 @@ the data processing is  limited to process_items</p>
 <span class="sd">        Arguments:</span>
 <span class="sd">            number_splits: The number of groups to split the documents to work on</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self.__class__.__name__}</span><span class="s2"> doesn&#39;t have distributed processing capabillities.&quot;</span>
+            <span class="s2">&quot; Instead this builder will run on just one worker for all processing&quot;</span>
+        <span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{self.__class__.__name__}</span><span class="s2"> doesn&#39;t have distributed processing capabillities.&quot;</span>
+            <span class="s2">&quot; Instead this builder will run on just one worker for all processing&quot;</span>
+        <span class="p">)</span>
 </pre></div>
 </td></tr></table>
 
@@ -870,8 +876,8 @@ to multiple instances of the builder to get/process/udpate on</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="n">number_splits</span></code></td>
-<td><code class="codehilite"><span class="nb">int</span></code></td>
+<td><code class="codehilite"><span class="err">number_splits</span></code></td>
+<td><code class="codehilite"><span class="err">int</span></code></td>
 <td>The number of groups to split the documents to work on</td>
 <td><em>required</em></td>
 </tr>
@@ -919,8 +925,8 @@ Default behavior is to return the item.
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="n">item</span></code></td>
-<td><code class="codehilite"><span class="k">Any</span></code></td>
+<td><code class="codehilite"><span class="err">item</span></code></td>
+<td><code class="codehilite"><span class="err">Any</span></code></td>
 <td></td>
 <td><em>required</em></td>
 </tr>
@@ -936,14 +942,14 @@ Default behavior is to return the item.
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="k">Any</span></code></td>
+<td><code class="codehilite"><span class="err">Any</span></code></td>
 <td></td>
 </tr>
 </tbody>
 </table>
 <p>item: an item to update</p>
 </div>
-<h3 id="maggma.core.builder.Builder.run"><code class="codehilite"><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.builder.Builder.run" title="Permanent link">&para;</a></h3>
+<h3 id="maggma.core.builder.Builder.run"><code class="codehilite"><span class="n">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.builder.Builder.run" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
 <details class="note"><summary>Show source code in maggma/core/builder.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>121
 122
@@ -961,20 +967,36 @@ Default behavior is to return the item.
 134
 135
 136
-137</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+137
+138
+139
+140
+141
+142
+143
+144
+145</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the builder serially</span>
 <span class="sd">        This is only intended for diagnostic purposes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set up logging</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
+        <span class="n">ch</span> <span class="o">=</span> <span class="n">TqdmLoggingHandler</span><span class="p">()</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
+            <span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_items</span><span class="p">()</span>
 
-        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">cursor</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing batch of {} items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">))</span>
-            <span class="n">processed_items</span> <span class="o">=</span> <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">process_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">chunk</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
-            <span class="p">]</span>
+        <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">cursor</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing batch of </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">))</span>
+            <span class="n">processed_items</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">process_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_targets</span><span class="p">(</span><span class="n">processed_items</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
@@ -1030,8 +1052,8 @@ Can also perform other book keeping in the process such as storing gridfs oids, 
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="n">items</span></code></td>
-<td><code class="codehilite"><span class="n">List</span></code></td>
+<td><code class="codehilite"><span class="err">items</span></code></td>
+<td><code class="codehilite"><span class="err">List</span></code></td>
 <td></td>
 <td><em>required</em></td>
 </tr>
@@ -1047,7 +1069,7 @@ Can also perform other book keeping in the process such as storing gridfs oids, 
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="n">_empty</span></code></td>
+<td><code class="codehilite"><span class="err">_empty</span></code></td>
 <td></td>
 </tr>
 </tbody>
