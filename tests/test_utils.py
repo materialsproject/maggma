@@ -61,6 +61,10 @@ def test_primed():
     assert is_primed is True
     assert list(iterator) == list(range(10))
 
+    # test stop itteration
+    with pytest.raises(StopIteration):
+        next(primed(iterator))
+
 
 def test_datetime_utils():
 
@@ -68,8 +72,12 @@ def test_datetime_utils():
         to_isoformat_ceil_ms(datetime(2019, 12, 13, 0, 23, 11, 9515))
         == "2019-12-13T00:23:11.010"
     )
+    assert to_isoformat_ceil_ms("2019-12-13T00:23:11.010") == "2019-12-13T00:23:11.010"
 
     assert to_dt("2019-12-13T00:23:11.010") == datetime(2019, 12, 13, 0, 23, 11, 10000)
+    assert to_dt(datetime(2019, 12, 13, 0, 23, 11, 10000)) == datetime(
+        2019, 12, 13, 0, 23, 11, 10000
+    )
 
 
 def test_grouper():
