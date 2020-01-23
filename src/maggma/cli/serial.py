@@ -34,7 +34,6 @@ def serial(builder: Builder):
     elif hasattr(cursor, "count"):
         total = cursor.count()
 
-
     logger.info(
         f"Starting serial processing: {builder.__class__.__name__}",
         extra={

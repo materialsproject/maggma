@@ -214,6 +214,8 @@ class Timeout:
         """
         if self.seconds:
             signal.alarm(0)
+
+
 class ReportingHandler(logging.Handler):
     """
     Helper to route reporting messages
