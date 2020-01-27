@@ -97,6 +97,15 @@ class Store(MSONable, metaclass=ABCMeta):
         """
 
     @abstractmethod
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+
+    @abstractmethod
     def query(
         self,
         criteria: Optional[Dict] = None,
