@@ -134,6 +134,18 @@ class GridFSStore(Store):
 
         return new_criteria
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        if isinstance(criteria, dict):
+            criteria = self.transform_criteria(criteria)
+
+        return self._files_store.count(criteria)
+
     def query(
         self,
         criteria: Optional[Dict] = None,
