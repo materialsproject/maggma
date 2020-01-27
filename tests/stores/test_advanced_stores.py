@@ -213,6 +213,13 @@ def alias_store():
     return alias_store
 
 
+def test_alias_count(alias_store):
+
+    d = [{"b": 1}, {"e": 2}, {"g": {"h": 3}}]
+    alias_store.store._collection.insert_many(d)
+    assert alias_store.count({"a": 1}) == 1
+
+
 def test_aliasing_query(alias_store):
 
     d = [{"b": 1}, {"e": 2}, {"g": {"h": 3}}]
@@ -298,6 +305,14 @@ def sandbox_store():
     store = SandboxStore(memstore, sandbox="test")
     store.connect()
     return store
+
+
+def test_sandbox_count(sandbox_store):
+    sandbox_store.collection.insert_one({"a": 1, "b": 2, "c": 3})
+    assert sandbox_store.count({"a": 1}) == 1
+
+    sandbox_store.collection.insert_one({"a": 1, "b": 3, "sbxn": ["test"]})
+    assert sandbox_store.count({"a": 1}) == 2
 
 
 def test_sandbox_query(sandbox_store):
