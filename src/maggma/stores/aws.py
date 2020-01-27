@@ -88,6 +88,16 @@ class AmazonS3Store(Store):
         # For now returns the index collection since that is what we would "search" on
         return self.index
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+
+        return self.index.count(criteria)
+
     def query(
         self,
         criteria: Optional[Dict] = None,
