@@ -171,6 +171,17 @@ class MongoStore(Store):
             raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._collection
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+
+        criteria = criteria if criteria else {}
+        return self._collection.count_documents(filter=criteria)
+
     def query(
         self,
         criteria: Optional[Dict] = None,

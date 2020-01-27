@@ -47,6 +47,14 @@ def test_mongostore_query(mongostore):
     assert mongostore.query_one(properties=["c"])["c"] == 3
 
 
+def test_mongostore_count(mongostore):
+    mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    assert mongostore.count() == 1
+    mongostore._collection.insert_one({"aa": 1, "b": 2, "c": 3})
+    assert mongostore.count() == 2
+    assert mongostore.count({"a": 1}) == 1
+
+
 def test_mongostore_distinct(mongostore):
     mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     mongostore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})

@@ -219,6 +219,17 @@ class AliasingStore(Store):
         """
         return self.store.name
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        criteria = criteria if criteria else {}
+        lazy_substitute(criteria, self.reverse_aliases)
+        return self.store.count(criteria)
+
     def query(
         self,
         criteria: Optional[Dict] = None,
@@ -412,6 +423,18 @@ class SandboxStore(Store):
             return {
                 "$or": [{"sbxn": {"$in": [self.sandbox]}}, {"sbxn": {"$exists": False}}]
             }
+
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        criteria = (
+            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        )
+        return self.store.count(criteria=criteria)
 
     def query(
         self,

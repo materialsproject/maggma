@@ -12,6 +12,7 @@ def mongostore():
     store = MongoStore("maggma_test", "test")
     store.connect()
     yield store
+    store.remove_docs({})
     store._collection.drop()
 
 
@@ -20,6 +21,7 @@ def reporting_store():
     store = MongoStore("maggma_test", "reporting")
     store.connect()
     yield store
+    store.remove_docs({})
     store._collection.drop()
 
 

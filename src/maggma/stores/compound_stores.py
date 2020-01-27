@@ -212,6 +212,18 @@ class JointStore(Store):
             pipeline.append({"$limit": limit})
         return pipeline
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        pipeline = self._get_pipeline(criteria=criteria)
+        pipeline.append({"$count": "count"})
+        agg = list(self._collection.aggregate(pipeline))
+        return agg[0].get("count", 0) if len(agg) > 0 else 0
+
     def query(
         self,
         criteria: Optional[Dict] = None,
@@ -412,6 +424,17 @@ class ConcatStore(Store):
             bool indicating if the index exists/was created on all stores
         """
         return all([store.ensure_index(key, unique) for store in self.stores])
+
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        counts = [store.count(criteria) for store in self.stores]
+
+        return sum(counts)
 
     def query(
         self,
