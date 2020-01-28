@@ -7,6 +7,7 @@ A `Store` is just a wrapper to access data from somewhere. That somewhere is typ
 Current working and tested Stores include:
 
 - MongoStore: interfaces to a MongoDB Collection
+- MongoURIStore: MongoDB Introduced advanced URIs including their special "mongodb+srv://" which uses a combination of SRV and TXT DNS records to fully setup the client. This store is to safely handle these kinds of URIs.
 - MemoryStore: just a Store that exists temporarily in memory
 - JSONStore: buids a MemoryStore and then populates it with the contents of the given JSON files
 - GridFSStore: interfaces to GridFS collection in MongoDB
