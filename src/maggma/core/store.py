@@ -217,7 +217,7 @@ class Store(MSONable, metaclass=ABCMeta):
         criteria = criteria or {}
 
         results = [
-            key for key, _ in self.groupby(field, properties=field, criteria=criteria)
+            key for key, _ in self.groupby(field, properties=[field], criteria=criteria)
         ]
         results = [get(r, field) for r in results]
         return results
