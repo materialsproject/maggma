@@ -938,52 +938,52 @@ document.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">source</span></code></td>
-<td><code class="codehilite"><span class="err">Store</span></code></td>
+<td><code>source</code></td>
+<td><code>Store</code></td>
 <td>source store</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">target</span></code></td>
-<td><code class="codehilite"><span class="err">Store</span></code></td>
+<td><code>target</code></td>
+<td><code>Store</code></td>
 <td>target store</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">query</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
+<td><code>query</code></td>
+<td><code>Optional[Dict]</code></td>
 <td>optional query to filter source store</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">projection</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">List</span><span class="o">]</span><span class="w"></span></code></td>
+<td><code>projection</code></td>
+<td><code>Optional[List]</code></td>
 <td>list of keys to project from the source for processing. Limits data transfer to improve efficiency.</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">delete_orphans</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code>delete_orphans</code></td>
+<td><code>bool</code></td>
 <td>Whether to delete documents on target store with key values not present in source store. Deletion happens after all updates, during Builder.finalize.</td>
-<td><code class="codehilite"><span class="err">False</span></code></td>
+<td><code>False</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">timeout</span></code></td>
-<td><code class="codehilite"><span class="err">int</span></code></td>
+<td><code>timeout</code></td>
+<td><code>int</code></td>
 <td>maximum running time per item in seconds</td>
-<td><code class="codehilite"><span class="err">0</span></code></td>
+<td><code>0</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">store_process_time</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code>store_process_time</code></td>
+<td><code>bool</code></td>
 <td>If True, add "_process_time" key to document for profiling purposes</td>
-<td><code class="codehilite"><span class="err">True</span></code></td>
+<td><code>True</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">retry_failed</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code>retry_failed</code></td>
+<td><code>bool</code></td>
 <td>If True, will retry building documents that previously failed</td>
-<td><code class="codehilite"><span class="err">False</span></code></td>
+<td><code>False</code></td>
 </tr>
 </tbody>
 </table>
@@ -1692,7 +1692,7 @@ a map function</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">Dict</span></code></td>
+<td><code>Dict</code></td>
 <td>Dictionary mapping:         tuple of source document keys that are in the grouped document         to         the grouped and processed document</td>
 </tr>
 </tbody>

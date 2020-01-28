@@ -480,9 +480,8 @@
                 
                 
                 <h1 id="group-builder">Group Builder<a class="headerlink" href="#group-builder" title="Permanent link">&para;</a></h1>
-<div class="autodoc">
-<p>Another advanced template in <code class="codehilite"><span class="err">maggma</span></code> is the <code class="codehilite"><span class="err">GroupBuilder</span></code>, which groups documents together before applying your function on the group of items. Just like <code class="codehilite"><span class="err">MapBuilder</span></code>, <code class="codehilite"><span class="err">GroupBuilder</span></code> also handles incremental building, keeping track of errors, getting only the data you need, and managing timeouts. GroupBuilder won't delete orphaned documents since that reverse relationshop isn't valid.</p>
-<p>Let's create a simple <code class="codehilite"><span class="err">ResupplyBuilder</span></code>, which will look at the inventory of items and determine what items need resupply. The source document will look something like this:</p>
+<p>Another advanced template in <code>maggma</code> is the <code>GroupBuilder</code>, which groups documents together before applying your function on the group of items. Just like <code>MapBuilder</code>, <code>GroupBuilder</code> also handles incremental building, keeping track of errors, getting only the data you need, and managing timeouts. GroupBuilder won't delete orphaned documents since that reverse relationshop isn't valid.</p>
+<p>Let's create a simple <code>ResupplyBuilder</code>, which will look at the inventory of items and determine what items need resupply. The source document will look something like this:</p>
 <div class="codehilite"><pre><span></span><span class="p">{</span>
     <span class="nt">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;Banana&quot;</span><span class="p">,</span>
     <span class="nt">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;fruit&quot;</span><span class="p">,</span>
@@ -505,7 +504,7 @@
 <span class="p">}</span>
 </pre></div>
 
-<p>To begin, we define our <code class="codehilite"><span class="err">GroupBuilder</span></code>:</p>
+<p>To begin, we define our <code>GroupBuilder</code>:</p>
 <div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">maggma.builders</span> <span class="kn">import</span> <span class="n">GroupBuilder</span>
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
@@ -529,16 +528,16 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">inventory</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">resupply</span><span class="p">,</span> <span class="n">grouping_properties</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </pre></div>
 
-<p>Note that unlike the previous <code class="codehilite"><span class="err">MapBuilder</span></code> example, we didn't call the source and target stores as such. Providing more usefull names is a good idea in writing builders to make it clearer what the underlying data should look like.</p>
-<p><code class="codehilite"><span class="err">GroupBuilder</span></code> inherits from <code class="codehilite"><span class="err">MapBuilder</span></code> so it has the same configurational parameters.</p>
+<p>Note that unlike the previous <code>MapBuilder</code> example, we didn't call the source and target stores as such. Providing more usefull names is a good idea in writing builders to make it clearer what the underlying data should look like.</p>
+<p><code>GroupBuilder</code> inherits from <code>MapBuilder</code> so it has the same configurational parameters.</p>
 <ul>
 <li>projection: list of the fields you want to project. This can reduce the data transfer load if you only need certain fields or sub-documents from the source documents</li>
 <li>timeout: optional timeout on the process function</li>
 <li>store_process_timeout: adds the process time into the target document for profiling</li>
 <li>retry_failed: retries running the process function on previously failed documents</li>
 </ul>
-<p>One parameter that doens't work in <code class="codehilite"><span class="err">GroupBuilder</span></code> is <code class="codehilite"><span class="err">delete_orphans</span></code>, since the Many-to-One relationshop makes determining orphaned documents very difficult.</p>
-<p>Finally let's get to the hard part which is running our function. We do this by defining <code class="codehilite"><span class="err">unary_function</span></code></p>
+<p>One parameter that doens't work in <code>GroupBuilder</code> is <code>delete_orphans</code>, since the Many-to-One relationshop makes determining orphaned documents very difficult.</p>
+<p>Finally let's get to the hard part which is running our function. We do this by defining <code>unary_function</code></p>
 <div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="n">resupply</span> <span class="o">=</span> <span class="p">{}</span>
 
@@ -550,8 +549,7 @@
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;resupply&quot;</span><span class="p">:</span> <span class="n">resupply</span><span class="p">}</span>
 </pre></div>
 
-<p>Just as in <code class="codehilite"><span class="err">MapBuilder</span></code>, we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source <code class="codehilite"><span class="err">key</span></code> and convert it to the target <code class="codehilite"><span class="err">key</span></code>. Same goes for the <code class="codehilite"><span class="err">last_updated_field</span></code>. <code class="codehilite"><span class="err">GroupBuilder</span></code> takes care of this, while also recording errors, processing time, and the Builder version.<code class="codehilite"><span class="err">GroupBuilder</span></code> also keeps a plural version of the <code class="codehilite"><span class="err">source.key</span></code> field, so in this example, all the <code class="codehilite"><span class="err">name</span></code> values wil be put together and kept in <code class="codehilite"><span class="err">names</span></code></p>
-</div>
+<p>Just as in <code>MapBuilder</code>, we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source <code>key</code> and convert it to the target <code>key</code>. Same goes for the <code>last_updated_field</code>. <code>GroupBuilder</code> takes care of this, while also recording errors, processing time, and the Builder version.<code>GroupBuilder</code> also keeps a plural version of the <code>source.key</code> field, so in this example, all the <code>name</code> values wil be put together and kept in <code>names</code></p>
                 
                   
                 

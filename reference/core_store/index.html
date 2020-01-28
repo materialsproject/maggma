@@ -458,6 +458,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.count" class="md-nav__link">
+    count()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#maggma.core.store.Store.distinct" class="md-nav__link">
     distinct()
   </a>
@@ -670,6 +677,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.count" class="md-nav__link">
+    count()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#maggma.core.store.Store.distinct" class="md-nav__link">
     distinct()
   </a>
@@ -849,28 +863,28 @@ the documents in this Store</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">key</span></code></td>
-<td><code class="codehilite"><span class="err">str</span></code></td>
+<td><code>key</code></td>
+<td><code>str</code></td>
 <td>master key to index on</td>
-<td><code class="codehilite"><span class="err">task_id</span></code></td>
+<td><code>'task_id'</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">last_updated_field</span></code></td>
-<td><code class="codehilite"><span class="err">str</span></code></td>
+<td><code>last_updated_field</code></td>
+<td><code>str</code></td>
 <td>field for date/time stamping the data</td>
-<td><code class="codehilite"><span class="err">last_updated</span></code></td>
+<td><code>'last_updated'</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">last_updated_type</span></code></td>
-<td><code class="codehilite"><span class="err">DateTimeFormat</span></code></td>
+<td><code>last_updated_type</code></td>
+<td><code>DateTimeFormat</code></td>
 <td>the date/time format for the last_updated_field. Can be "datetime" or "isoformat"</td>
-<td><code class="codehilite"><span class="err">DateTimeFormat.DateTime</span></code></td>
+<td><code>&lt;DateTimeFormat.DateTime: 'datetime'&gt;</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">validator</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Validator</span><span class="o">]</span><span class="w"></span></code></td>
+<td><code>validator</code></td>
+<td><code>Optional[Validator]</code></td>
 <td>Validator to validate documents going into the store</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 </tbody>
 </table>
@@ -926,26 +940,59 @@ the documents in this Store</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">force_reset</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code>force_reset</code></td>
+<td><code>bool</code></td>
 <td>whether to reset the connection or not</td>
-<td><code class="codehilite"><span class="err">False</span></code></td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+</div>
+<h3 id="maggma.core.store.Store.count"><code class="codehilite"><span class="n">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.count" title="Permanent link">&para;</a></h3>
+<div class="autodoc">
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span> 99
+100
+101
+102
+103
+104
+105
+106</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Counts the number of documents matching the query criteria</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            criteria: PyMongo filter for documents to count in</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+</pre></div>
+</td></tr></table>
+
+</details>
+<p>Counts the number of documents matching the query criteria</p>
+<p><strong>Parameters</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>criteria</code></td>
+<td><code>Optional[Dict]</code></td>
+<td>PyMongo filter for documents to count in</td>
+<td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 </div>
 <h3 id="maggma.core.store.Store.distinct"><code class="codehilite"><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.distinct" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>198
-199
-200
-201
-202
-203
-204
-205
-206
-207
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>207
 208
 209
 210
@@ -961,45 +1008,28 @@ the documents in this Store</p>
 220
 221
 222
-223
-224
-225
-226</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">field</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+223</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get all distinct values for a field(s)</span>
-<span class="sd">        For a single field, this returns a list of values</span>
-<span class="sd">        For multiple fields, this return a list of of dictionaries for each unique combination</span>
+<span class="sd">        Get all distinct values for a field</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            field: the field(s) to get distinct values for</span>
 <span class="sd">            criteria: PyMongo filter for documents to search in</span>
-<span class="sd">            all_exist: ensure all fields exist for the distinct set</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">field</span> <span class="o">=</span> <span class="n">field</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">field</span><span class="p">]</span>
-
         <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="ow">or</span> <span class="p">{}</span>
 
-        <span class="k">if</span> <span class="n">all_exist</span><span class="p">:</span>
-            <span class="n">criteria</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">f</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$exists&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">}</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">field</span> <span class="k">if</span> <span class="n">f</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">criteria</span><span class="p">})</span>
         <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+            <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
         <span class="p">]</span>
-        <span class="c1"># Flatten out results if searching for a single field</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">field</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">results</span>
 </pre></div>
 </td></tr></table>
 
 </details>
-<p>Get all distinct values for a field(s)
-For a single field, this returns a list of values
-For multiple fields, this return a list of of dictionaries for each unique combination</p>
+<p>Get all distinct values for a field</p>
 <p><strong>Parameters</strong></p>
 <table>
 <thead>
@@ -1012,40 +1042,34 @@ For multiple fields, this return a list of of dictionaries for each unique combi
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">field</span></code></td>
-<td><code class="codehilite"><span class="ow">Union</span><span class="o">[</span><span class="n">List[str</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="nf">str</span><span class="err">]</span><span class="w"></span></code></td>
+<td><code>field</code></td>
+<td><code>str</code></td>
 <td>the field(s) to get distinct values for</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">criteria</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
+<td><code>criteria</code></td>
+<td><code>Optional[Dict]</code></td>
 <td>PyMongo filter for documents to search in</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
-</tr>
-<tr>
-<td><code class="codehilite"><span class="err">all_exist</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
-<td>ensure all fields exist for the distinct set</td>
-<td><code class="codehilite"><span class="err">False</span></code></td>
+<td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 </div>
 <h3 id="maggma.core.store.Store.ensure_index"><code class="codehilite"><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.ensure_index" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>132
-133
-134
-135
-136
-137
-138
-139
-140
-141
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>141
 142
-143</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Tries to create an index and return true if it suceeded</span>
@@ -1074,16 +1098,16 @@ For multiple fields, this return a list of of dictionaries for each unique combi
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">key</span></code></td>
-<td><code class="codehilite"><span class="err">str</span></code></td>
+<td><code>key</code></td>
+<td><code>str</code></td>
 <td>single key to index</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">unique</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code>unique</code></td>
+<td><code>bool</code></td>
 <td>Whether or not this index contains only unique keys</td>
-<td><code class="codehilite"><span class="err">False</span></code></td>
+<td><code>False</code></td>
 </tr>
 </tbody>
 </table>
@@ -1097,7 +1121,7 @@ For multiple fields, this return a list of of dictionaries for each unique combi
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code>bool</code></td>
 <td>bool indicating if the index exists/was created</td>
 </tr>
 </tbody>
@@ -1105,16 +1129,7 @@ For multiple fields, this return a list of of dictionaries for each unique combi
 </div>
 <h3 id="maggma.core.store.Store.groupby"><code class="codehilite"><span class="n">groupby</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.groupby" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>145
-146
-147
-148
-149
-150
-151
-152
-153
-154
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>154
 155
 156
 157
@@ -1129,7 +1144,16 @@ For multiple fields, this return a list of of dictionaries for each unique combi
 166
 167
 168
-169</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
@@ -1172,40 +1196,40 @@ by keys.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">keys</span></code></td>
-<td><code class="codehilite"><span class="ow">Union</span><span class="o">[</span><span class="n">List[str</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="nf">str</span><span class="err">]</span><span class="w"></span></code></td>
+<td><code>keys</code></td>
+<td><code>Union[List[str], str]</code></td>
 <td>fields to group documents</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">criteria</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
+<td><code>criteria</code></td>
+<td><code>Optional[Dict]</code></td>
 <td>PyMongo filter for documents to search in</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">properties</span></code></td>
-<td><code class="codehilite"><span class="err">Union[Dict, List, None]</span></code></td>
+<td><code>properties</code></td>
+<td><code>Union[Dict, List, None]</code></td>
 <td>properties to return in grouped documents</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">sort</span></code></td>
-<td><code class="codehilite"><span class="err">Optional[Dict[str, Sort]]</span></code></td>
+<td><code>sort</code></td>
+<td><code>Optional[Dict[str, Sort]]</code></td>
 <td>Dictionary of sort order for fields</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">skip</span></code></td>
-<td><code class="codehilite"><span class="err">int</span></code></td>
+<td><code>skip</code></td>
+<td><code>int</code></td>
 <td>number documents to skip</td>
-<td><code class="codehilite"><span class="err">0</span></code></td>
+<td><code>0</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">limit</span></code></td>
-<td><code class="codehilite"><span class="err">int</span></code></td>
+<td><code>limit</code></td>
+<td><code>int</code></td>
 <td>limit on total number of documents returned</td>
-<td><code class="codehilite"><span class="err">0</span></code></td>
+<td><code>0</code></td>
 </tr>
 </tbody>
 </table>
@@ -1219,7 +1243,7 @@ by keys.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="n">Iterator</span><span class="o">[</span><span class="n">Tuple[Dict, List[Dict</span><span class="o">]</span><span class="err">]]</span><span class="w"></span></code></td>
+<td><code>Iterator[Tuple[Dict, List[Dict]]]</code></td>
 <td>generator returning tuples of (dict, list of docs)</td>
 </tr>
 </tbody>
@@ -1227,7 +1251,10 @@ by keys.</p>
 </div>
 <h3 id="maggma.core.store.Store.newer_in"><code class="codehilite"><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.newer_in" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>254
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>251
+252
+253
+254
 255
 256
 257
@@ -1269,10 +1296,7 @@ by keys.</p>
 293
 294
 295
-296
-297
-298
-299</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
+296</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1336,38 +1360,29 @@ Store than this Store.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">target</span></code></td>
-<td><code class="codehilite"><span class="err">Store</span></code></td>
+<td><code>target</code></td>
+<td><code>Store</code></td>
 <td>target Store to</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">criteria</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
+<td><code>criteria</code></td>
+<td><code>Optional[Dict]</code></td>
 <td>PyMongo filter for documents to search in</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">exhaustive</span></code></td>
-<td><code class="codehilite"><span class="err">bool</span></code></td>
+<td><code>exhaustive</code></td>
+<td><code>bool</code></td>
 <td>triggers an item-by-item check vs. checking the last_updated of the target Store and using that to filter out new items in</td>
-<td><code class="codehilite"><span class="err">False</span></code></td>
+<td><code>False</code></td>
 </tr>
 </tbody>
 </table>
 </div>
 <h3 id="maggma.core.store.Store.query"><code class="codehilite"><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.query" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span> 99
-100
-101
-102
-103
-104
-105
-106
-107
-108
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>108
 109
 110
 111
@@ -1376,7 +1391,16 @@ Store than this Store.</p>
 114
 115
 116
-117</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1412,57 +1436,57 @@ Store than this Store.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">criteria</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
+<td><code>criteria</code></td>
+<td><code>Optional[Dict]</code></td>
 <td>PyMongo filter for documents to search in</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">properties</span></code></td>
-<td><code class="codehilite"><span class="err">Union[Dict, List, None]</span></code></td>
+<td><code>properties</code></td>
+<td><code>Union[Dict, List, None]</code></td>
 <td>properties to return in grouped documents</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">sort</span></code></td>
-<td><code class="codehilite"><span class="err">Optional[Dict[str, Sort]]</span></code></td>
+<td><code>sort</code></td>
+<td><code>Optional[Dict[str, Sort]]</code></td>
 <td>Dictionary of sort order for fields</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">skip</span></code></td>
-<td><code class="codehilite"><span class="err">int</span></code></td>
+<td><code>skip</code></td>
+<td><code>int</code></td>
 <td>number documents to skip</td>
-<td><code class="codehilite"><span class="err">0</span></code></td>
+<td><code>0</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">limit</span></code></td>
-<td><code class="codehilite"><span class="err">int</span></code></td>
+<td><code>limit</code></td>
+<td><code>int</code></td>
 <td>limit on total number of documents returned</td>
-<td><code class="codehilite"><span class="err">0</span></code></td>
+<td><code>0</code></td>
 </tr>
 </tbody>
 </table>
 </div>
 <h3 id="maggma.core.store.Store.query_one"><code class="codehilite"><span class="n">query_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.query_one" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>180
-181
-182
-183
-184
-185
-186
-187
-188
-189
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>189
 190
 191
 192
 193
 194
 195
-196</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">query_one</span><span class="p">(</span>
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">query_one</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1496,36 +1520,36 @@ Store than this Store.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">criteria</span></code></td>
-<td><code class="codehilite"><span class="n">Optional</span><span class="o">[</span><span class="n">Dict</span><span class="o">]</span><span class="w"></span></code></td>
+<td><code>criteria</code></td>
+<td><code>Optional[Dict]</code></td>
 <td>PyMongo filter for documents to search</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">properties</span></code></td>
-<td><code class="codehilite"><span class="err">Union[Dict, List, None]</span></code></td>
+<td><code>properties</code></td>
+<td><code>Union[Dict, List, None]</code></td>
 <td>properties to return in the document</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">sort</span></code></td>
-<td><code class="codehilite"><span class="err">Optional[Dict[str, Sort]]</span></code></td>
+<td><code>sort</code></td>
+<td><code>Optional[Dict[str, Sort]]</code></td>
 <td>Dictionary of sort order for fields</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 </tbody>
 </table>
 </div>
 <h3 id="maggma.core.store.Store.remove_docs"><code class="codehilite"><span class="n">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.remove_docs" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>171
-172
-173
-174
-175
-176
-177
-178</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>180
+181
+182
+183
+184
+185
+186
+187</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove docs matching the query dictionary</span>
@@ -1550,8 +1574,8 @@ Store than this Store.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">criteria</span></code></td>
-<td><code class="codehilite"><span class="err">Dict</span></code></td>
+<td><code>criteria</code></td>
+<td><code>Dict</code></td>
 <td>query dictionary to match</td>
 <td><em>required</em></td>
 </tr>
@@ -1560,18 +1584,18 @@ Store than this Store.</p>
 </div>
 <h3 id="maggma.core.store.Store.update"><code class="codehilite"><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.update" title="Permanent link">&para;</a></h3>
 <div class="autodoc">
-<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>119
-120
-121
-122
-123
-124
-125
-126
-127
-128
+<details class="note"><summary>Show source code in maggma/core/store.py</summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>128
 129
-130</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139</pre></div></td><td class="code"><div class="codehilite"><pre><span></span>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Update documents into the Store</span>
@@ -1600,16 +1624,16 @@ Store than this Store.</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">docs</span></code></td>
-<td><code class="codehilite"><span class="ow">Union</span><span class="o">[</span><span class="n">List[Dict</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">Dict</span><span class="err">]</span><span class="w"></span></code></td>
+<td><code>docs</code></td>
+<td><code>Union[List[Dict], Dict]</code></td>
 <td>the document or list of documents to update</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">key</span></code></td>
-<td><code class="codehilite"><span class="err">Union[List, str, None]</span></code></td>
+<td><code>key</code></td>
+<td><code>Union[List, str, None]</code></td>
 <td>field name(s) to determine uniqueness for a document, can be a list of multiple fields, a single field, or None if the Store's key field is to be used</td>
-<td><code class="codehilite"><span class="err">None</span></code></td>
+<td><code>None</code></td>
 </tr>
 </tbody>
 </table>

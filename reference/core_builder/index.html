@@ -713,22 +713,22 @@ the data processing is  limited to process_items</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">sources</span></code></td>
-<td><code class="codehilite"><span class="ow">Union</span><span class="o">[</span><span class="n">List[Store</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">Store</span><span class="err">]</span><span class="w"></span></code></td>
+<td><code>sources</code></td>
+<td><code>Union[List[Store], Store]</code></td>
 <td>source Store(s)</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">targets</span></code></td>
-<td><code class="codehilite"><span class="ow">Union</span><span class="o">[</span><span class="n">List[Store</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">Store</span><span class="err">]</span><span class="w"></span></code></td>
+<td><code>targets</code></td>
+<td><code>Union[List[Store], Store]</code></td>
 <td>target Store(s)</td>
 <td><em>required</em></td>
 </tr>
 <tr>
-<td><code class="codehilite"><span class="err">chunk_size</span></code></td>
-<td><code class="codehilite"><span class="err">int</span></code></td>
+<td><code>chunk_size</code></td>
+<td><code>int</code></td>
 <td>chunk size for processing</td>
-<td><code class="codehilite"><span class="err">1000</span></code></td>
+<td><code>1000</code></td>
 </tr>
 </tbody>
 </table>
@@ -813,7 +813,7 @@ the data processing is  limited to process_items</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">Iterable</span></code></td>
+<td><code>Iterable</code></td>
 <td>generator or list of items to process</td>
 </tr>
 </tbody>
@@ -876,8 +876,8 @@ to multiple instances of the builder to get/process/udpate on</p>
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">number_splits</span></code></td>
-<td><code class="codehilite"><span class="err">int</span></code></td>
+<td><code>number_splits</code></td>
+<td><code>int</code></td>
 <td>The number of groups to split the documents to work on</td>
 <td><em>required</em></td>
 </tr>
@@ -925,8 +925,8 @@ Default behavior is to return the item.
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">item</span></code></td>
-<td><code class="codehilite"><span class="err">Any</span></code></td>
+<td><code>item</code></td>
+<td><code>Any</code></td>
 <td></td>
 <td><em>required</em></td>
 </tr>
@@ -942,7 +942,7 @@ Default behavior is to return the item.
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">Any</span></code></td>
+<td><code>Any</code></td>
 <td></td>
 </tr>
 </tbody>
@@ -1052,8 +1052,8 @@ Can also perform other book keeping in the process such as storing gridfs oids, 
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">items</span></code></td>
-<td><code class="codehilite"><span class="err">List</span></code></td>
+<td><code>items</code></td>
+<td><code>List</code></td>
 <td></td>
 <td><em>required</em></td>
 </tr>
@@ -1069,7 +1069,7 @@ Can also perform other book keeping in the process such as storing gridfs oids, 
 </thead>
 <tbody>
 <tr>
-<td><code class="codehilite"><span class="err">_empty</span></code></td>
+<td><code>_empty</code></td>
 <td></td>
 </tr>
 </tbody>
