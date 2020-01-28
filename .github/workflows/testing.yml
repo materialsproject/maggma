@@ -78,6 +78,7 @@ jobs:
     - name: Test with pytest
       env:
         CONTINUOUS_INTEGRATION: True
+        MONGODB_SRV_URI: ${{ secrets.MONGODB_SRV_URI }}
       run: |
         pip install -e .
         pytest --cov=maggma --cov-report=xml

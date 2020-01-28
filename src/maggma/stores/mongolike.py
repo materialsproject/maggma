@@ -314,6 +314,45 @@ class MongoStore(Store):
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
+class MongoURIStore(MongoStore):
+    """
+    A Store that connects to a Mongo collection via a URI
+    This is expected to be a special mongodb+srv:// URIs that include
+    client parameters via TXT records
+    """
+
+    def __init__(self, uri: str, database: str, collection_name: str, **kwargs):
+        """
+        Args:
+            uri: MongoDB+SRV URI
+            database: database to connect to
+            collection_name: The collection name
+        """
+        self.uri = uri
+        self.database = database
+        self.collection_name = collection_name
+        self.kwargs = kwargs
+        self._collection = None
+        super(MongoStore, self).__init__(**kwargs)
+
+    @property
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        # TODO: This is not very safe since it exposes the username/password info
+        return self.uri
+
+    def connect(self, force_reset: bool = False):
+        """
+        Connect to the source data
+        """
+        if not self._collection or force_reset:
+            conn = MongoClient(self.uri)
+            db = conn[self.database]
+            self._collection = db[self.collection_name]
+
+
 class MemoryStore(MongoStore):
     """
     An in-memory Store that functions similarly

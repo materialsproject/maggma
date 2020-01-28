@@ -1,9 +1,10 @@
+import os
 import pytest
 import mongomock.collection
 import pymongo.collection
 from datetime import datetime
 from maggma.core import StoreError
-from maggma.stores import MongoStore, MemoryStore, JSONStore
+from maggma.stores import MongoStore, MemoryStore, JSONStore, MongoURIStore
 from maggma.validators import JSONSchemaValidator
 
 
@@ -245,3 +246,16 @@ def test_eq(mongostore, memorystore, jsonstore):
     assert mongostore != memorystore
     assert mongostore != jsonstore
     assert memorystore != jsonstore
+
+
+@pytest.mark.skipif(
+    os.environ.get("MONGODB_SRV_URI", None) is None,
+    reason="requires special mongodb+srv URI",
+)
+def test_mongo_uri():
+    uri = os.environ["MONGODB_SRV_URI"]
+    store = MongoURIStore(uri, database="mp_core", collection_name="xas")
+    store.connect()
+    is_name = store.name is uri
+    # This is try and keep the secret safe
+    assert is_name

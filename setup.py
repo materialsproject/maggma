@@ -31,6 +31,7 @@ setup(
         "tqdm>=4.19.6",
         "mongogrant>=0.2.2",
         "pynng>=0.5.0",
+        "dnspython>=1.16.0",
     ],
     extras_require={"vault": ["hvac>=0.9.5"], "S3": ["boto3==1.11.9"]},
     classifiers=[
