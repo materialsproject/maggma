@@ -8,3 +8,4 @@ mongogrant==0.3.0
 aioitertools==0.5.1
 numpy==1.18.0
 pynng==0.5.0
+dnspython==1.16.0
