@@ -386,31 +386,20 @@ class ConcatStore(Store):
         raise NotImplementedError("No update method for ConcatStore")
 
     def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-    ) -> Union[List[Dict], List]:
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
-        Get all distinct values for a field(s)
-        For a single field, this returns a list of values
-        For multiple fields, this return a list of of dictionaries for each unique combination
+        Get all distinct values for a field
 
         Args:
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
-            all_exist: ensure all fields exist for the distinct set
         """
         distincts = []
         for store in self.stores:
-            distincts.extend(
-                store.distinct(field=field, criteria=criteria, all_exist=all_exist)
-            )
+            distincts.extend(store.distinct(field=field, criteria=criteria))
 
-        if isinstance(field, str):
-            return list(set(distincts))
-        else:
-            return [dict(s) for s in set(frozenset(d.items()) for d in distincts)]
+        return list(set(distincts))
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
