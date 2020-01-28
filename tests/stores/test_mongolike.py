@@ -63,22 +63,10 @@ def test_mongostore_distinct(mongostore):
     # Test list distinct functionality
     mongostore._collection.insert_one({"a": 4, "d": 6, "e": 7})
     mongostore._collection.insert_one({"a": 4, "d": 6, "g": {"h": 2}})
-    ad_distinct = mongostore.distinct(["a", "d"])
-    assert len(ad_distinct) == 3
-    assert {"a": 4, "d": 6} in ad_distinct
-    assert {"a": 1} in ad_distinct
-    assert len(mongostore.distinct(["d", "e"], {"a": 4})) == 3
-    all_exist = mongostore.distinct(["a", "b"], all_exist=True)
-    assert len(all_exist) == 1
-    all_exist2 = mongostore.distinct(["a", "e"], all_exist=True, criteria={"d": 6})
-    assert len(all_exist2) == 1
 
     # Test distinct subdocument functionality
     ghs = mongostore.distinct("g.h")
-    assert set(ghs) == {1, 2, None}
-    ghs_ds = mongostore.distinct(["d", "g.h"], all_exist=True)
-    assert {s["g"]["h"] for s in ghs_ds} == {1, 2}
-    assert {s["d"] for s in ghs_ds}, {5, 6}
+    assert set(ghs) == {1, 2}
 
 
 def test_mongostore_update(mongostore):

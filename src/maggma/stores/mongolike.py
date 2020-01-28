@@ -96,6 +96,19 @@ class MongoStore(Store):
         kwargs.pop("aliases", None)
         return cls(**kwargs)
 
+    def distinct(
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
+        """
+        Get all distinct values for a field
+
+        Args:
+            field: the field(s) to get distinct values for
+            criteria: PyMongo filter for documents to search in
+        """
+        criteria = criteria or {}
+        return self._collection.distinct(field, criteria)
+
     def groupby(
         self,
         keys: Union[List[str], str],

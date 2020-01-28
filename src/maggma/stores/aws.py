@@ -139,23 +139,17 @@ class AmazonS3Store(Store):
             yield json.loads(data)
 
     def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-    ) -> Union[List[Dict], List]:
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
-        Get all distinct values for a field(s)
-        For a single field, this returns a list of values
-        For multiple fields, this return a list of of dictionaries for each unique combination
+        Get all distinct values for a field
 
         Args:
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
-            all_exist: ensure all fields exist for the distinct set
         """
         # Index is a store so it should have its own distinct function
-        return self.index.distinct(field, criteria=criteria, all_exist=all_exist)
+        return self.index.distinct(field, criteria=criteria)
 
     def groupby(
         self,

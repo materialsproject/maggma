@@ -76,6 +76,10 @@ class MongograntStore(MongoStore):
             db = client.db(self.mongogrant_spec)
             self._collection = db[self.collection_name]
 
+    @property
+    def name(self):
+        return f"mgrant://{self.mongogrant_spec}/{self.collection_name}"
+
     def __hash__(self):
         return hash(
             (self.mongogrant_spec, self.collection_name, self.last_updated_field)
@@ -262,25 +266,20 @@ class AliasingStore(Store):
             yield d
 
     def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
     ) -> List:
         """
-        Get all distinct values for a key
+        Get all distinct values for a field
 
         Args:
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
-            all_exist: ensure all fields exist for the distinct set
         """
         criteria = criteria if criteria else {}
         lazy_substitute(criteria, self.reverse_aliases)
-        field = field if isinstance(field, list) else [field]
+
         # substitute forward
-        field = [self.aliases[f] for f in field]
-        return self.store.distinct(field, criteria=criteria)
+        return self.store.distinct(self.aliases[field], criteria=criteria)
 
     def groupby(
         self,
