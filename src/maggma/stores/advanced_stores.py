@@ -76,6 +76,10 @@ class MongograntStore(MongoStore):
             db = client.db(self.mongogrant_spec)
             self._collection = db[self.collection_name]
 
+    @property
+    def name(self):
+        return f"mgrant://{self.mongogrant_spec}/{self.collection_name}"
+
     def __hash__(self):
         return hash(
             (self.mongogrant_spec, self.collection_name, self.last_updated_field)
