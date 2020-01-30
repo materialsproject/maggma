@@ -39,6 +39,11 @@ def s3store():
         yield store
 
 
+def test_count(s3store):
+    assert s3store.count() == 2
+    assert s3store.count({"task_id": "mp-3"}) == 1
+
+
 def test_qeuery(s3store):
     assert s3store.query_one(criteria={"task_id": "mp-2"}) is None
     assert s3store.query_one(criteria={"task_id": "mp-1"})["data"] == "asd"

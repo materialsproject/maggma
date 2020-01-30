@@ -37,8 +37,9 @@ setup(
         "pydantic>=0.32.2",
         "fastapi>=0.42.0",
         "pynng>=0.5.0",
+        "dnspython>=1.16.0",
     ],
-    extras_require={"vault": ["hvac>=0.9.5"], "S3": ["boto3==1.10.10"]},
+    extras_require={"vault": ["hvac>=0.9.5"], "S3": ["boto3==1.11.9"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",

@@ -9,7 +9,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Union, Optional, Dict, List, Iterable, Any
 
 from monty.json import MSONable, MontyDecoder
-from maggma.utils import grouper
+from maggma.utils import grouper, tqdm, TqdmLoggingHandler
 from maggma.core import Store
 
 
@@ -118,16 +118,26 @@ class Builder(MSONable, metaclass=ABCMeta):
             except AttributeError:
                 continue
 
-    def run(self):
+    def run(self, log_level=logging.DEBUG):
         """
         Run the builder serially
         This is only intended for diagnostic purposes
         """
+        # Set up logging
+        root = logging.getLogger()
+        root.setLevel(log_level)
+        ch = TqdmLoggingHandler()
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+        ch.setFormatter(formatter)
+        root.addHandler(ch)
+
         self.connect()
 
         cursor = self.get_items()
 
-        for chunk in grouper(cursor, self.chunk_size):
+        for chunk in grouper(tqdm(cursor), self.chunk_size):
             self.logger.info("Processing batch of {} items".format(self.chunk_size))
             processed_items = [self.process_item(item) for item in chunk]
             self.update_targets(processed_items)

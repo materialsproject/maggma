@@ -8,9 +8,11 @@ from maggma.utils import (
     recursive_update,
     Timeout,
     primed,
-    dt_to_isoformat_ceil_ms,
-    isostr_to_dt,
+    # dt_to_isoformat_ceil_ms,
+    # isostr_to_dt,
     dynamic_import,
+    to_isoformat_ceil_ms,
+    to_dt,
     grouper,
 )
 from time import sleep
@@ -62,15 +64,21 @@ def test_primed():
     assert is_primed is True
     assert list(iterator) == list(range(10))
 
+    # test stop itteration
+    with pytest.raises(StopIteration):
+        next(primed(iterator))
+
 
 def test_datetime_utils():
 
     assert (
-        dt_to_isoformat_ceil_ms(datetime(2019, 12, 13, 0, 23, 11, 9515))
+        to_isoformat_ceil_ms(datetime(2019, 12, 13, 0, 23, 11, 9515))
         == "2019-12-13T00:23:11.010"
     )
+    assert to_isoformat_ceil_ms("2019-12-13T00:23:11.010") == "2019-12-13T00:23:11.010"
 
-    assert isostr_to_dt("2019-12-13T00:23:11.010") == datetime(
+    assert to_dt("2019-12-13T00:23:11.010") == datetime(2019, 12, 13, 0, 23, 11, 10000)
+    assert to_dt(datetime(2019, 12, 13, 0, 23, 11, 10000)) == datetime(
         2019, 12, 13, 0, 23, 11, 10000
     )
 

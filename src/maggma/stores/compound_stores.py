@@ -25,7 +25,7 @@ class JointStore(Store):
         password: str = "",
         master: Optional[str] = None,
         merge_at_root: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -56,7 +56,8 @@ class JointStore(Store):
         """
         Return a string representing this data source
         """
-        return self.master
+        compound_name = ",".join(self.collection_names)
+        return f"Compound[{self.host}/{self.database}][{compound_name}]"
 
     def connect(self, force_reset: bool = False):
         """
@@ -211,6 +212,18 @@ class JointStore(Store):
             pipeline.append({"$limit": limit})
         return pipeline
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        pipeline = self._get_pipeline(criteria=criteria)
+        pipeline.append({"$count": "count"})
+        agg = list(self._collection.aggregate(pipeline))
+        return agg[0].get("count", 0) if len(agg) > 0 else 0
+
     def query(
         self,
         criteria: Optional[Dict] = None,
@@ -319,7 +332,8 @@ class ConcatStore(Store):
         """
         A string representing this data source
         """
-        return self.stores[0].name
+        compound_name = ",".join([store.name for store in self.stores])
+        return f"Concat[{compound_name}]"
 
     def connect(self, force_reset: bool = False):
         """
@@ -372,31 +386,20 @@ class ConcatStore(Store):
         raise NotImplementedError("No update method for ConcatStore")
 
     def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-    ) -> Union[List[Dict], List]:
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
-        Get all distinct values for a field(s)
-        For a single field, this returns a list of values
-        For multiple fields, this return a list of of dictionaries for each unique combination
+        Get all distinct values for a field
 
         Args:
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
-            all_exist: ensure all fields exist for the distinct set
         """
         distincts = []
         for store in self.stores:
-            distincts.extend(
-                store.distinct(field=field, criteria=criteria, all_exist=all_exist)
-            )
+            distincts.extend(store.distinct(field=field, criteria=criteria))
 
-        if isinstance(field, str):
-            return list(set(distincts))
-        else:
-            return [dict(s) for s in set(frozenset(d.items()) for d in distincts)]
+        return list(set(distincts))
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
@@ -410,6 +413,17 @@ class ConcatStore(Store):
             bool indicating if the index exists/was created on all stores
         """
         return all([store.ensure_index(key, unique) for store in self.stores])
+
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        counts = [store.count(criteria) for store in self.stores]
+
+        return sum(counts)
 
     def query(
         self,

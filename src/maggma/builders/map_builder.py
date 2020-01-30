@@ -1,6 +1,6 @@
 # coding: utf-8
 """
-Base Builder class to define how builders need to be defined
+One-to-One Map Builder and a simple CopyBuilder implementation
 """
 import traceback
 from abc import ABCMeta, abstractmethod
@@ -9,7 +9,7 @@ from math import ceil
 from datetime import datetime
 from maggma.utils import grouper, Timeout
 from maggma.core import Builder, Store
-from typing import Optional, Dict, List, Iterator, Union
+from typing import Optional, Dict, List, Iterator
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -32,7 +32,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         timeout: int = 0,
         store_process_time: bool = True,
         retry_failed: bool = False,
-        **kwargs
+        **kwargs,
     ):
         """
         Apply a unary function to each source document.
@@ -106,13 +106,12 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         self.ensure_indexes()
 
-        temp_query = dict(**self.query) if self.query else {}
-        if self.retry_failed:
-            temp_query.pop("state", None)
-        else:
-            temp_query["state"] = {"$ne": "failed"}
-
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
+        if self.retry_failed:
+            failed_keys = self.target.distinct(
+                self.target.key, criteria={"state": {"$ne": "failed"}}
+            )
+            keys = list(set(keys + failed_keys))
 
         self.logger.info("Processing {} items".format(len(keys)))
 
@@ -146,8 +145,13 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         try:
             with Timeout(seconds=self.timeout):
-                processed = self.unary_function(item)
+                processed = dict(self.unary_function(item))
                 processed.update({"state": "successful"})
+
+            for k in [self.source.key, self.source.last_updated_field]:
+                if k in processed:
+                    del processed[k]
+
         except Exception as e:
             self.logger.error(traceback.format_exc())
             processed = {"error": str(e), "state": "failed"}
@@ -162,6 +166,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 item[last_updated_field]
             ),
         }
+
         if self.store_process_time:
             out["_process_time"] = time_end - time_start
 
@@ -172,14 +177,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         """
         Generic update targets for Map Builder
         """
-        source, target = self.source, self.target
+        target = self.target
         for item in items:
-            # Use source last-updated value, ensuring `datetime` type.
-            item[target.last_updated_field] = source._lu_func[0](
-                item[source.last_updated_field]
-            )
-            if source.last_updated_field != target.last_updated_field:
-                del item[source.last_updated_field]
             item["_bt"] = datetime.utcnow()
             if "_id" in item:
                 del item["_id"]
@@ -213,82 +212,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 in the target document.
         """
         pass
-
-
-class GroupBuilder(MapBuilder, metaclass=ABCMeta):
-    """
-    Group source docs and produce one target doc from each group.
-
-    Supports incremental building, where a source group gets (re)built only if
-    it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.
-    """
-
-    def get_items(self) -> Iterator[Dict]:
-        """
-        Rebuilt get_items for GroupBuilder
-        """
-        criteria = {
-            self.source.key: {
-                "$in": self.target.newer_in(self.source, criteria=self.query)
-            }
-        }
-
-        properties = self.grouping_properties()
-        groups = self.docs_to_groups(
-            self.source.query(criteria=criteria, properties=properties)
-        )
-        self.total = len(groups)
-        if hasattr(self, "n_items_per_group"):
-            n = self.n_items_per_group
-            if isinstance(n, int) and n >= 1:
-                self.total *= n
-        for group in groups:
-            for item in self.group_to_items(group):
-                yield item
-
-    @staticmethod
-    @abstractmethod
-    def grouping_properties() -> Union[List, Dict]:
-        """
-        Needed projection for docs_to_groups (passed to source.query).
-
-        Returns:
-            list or dict: of the same form as projection param passed to
-                pymongo.collection.Collection.find. If a list, it is converted
-                to dict form with {"_id": 0} unless "_id" is explicitly
-                included in the list. This is to ease use of index-covered
-                queries in docs_to_groups.
-        """
-
-    @staticmethod
-    @abstractmethod
-    def docs_to_groups(docs: Iterator[Dict]) -> List:
-        """
-        Yield groups from (minimally-projected) documents.
-
-        This could be as simple as returning a set of unique document keys.
-
-        Args:
-            docs: documents with minimal projections
-                needed to determine groups.
-
-        Returns:
-            iterable: one group at a time
-        """
-
-    @abstractmethod
-    def group_to_items(self, group: Dict) -> Iterator:
-        """
-        Given a group, yield items for this builder's process_item method.
-
-        This method does the work of fetching data needed for processing.
-
-        Args:
-            group: sufficient as or to produce a source filter
-
-        Returns:
-            iterable: one or more items per group for process_item.
-        """
 
 
 class CopyBuilder(MapBuilder):

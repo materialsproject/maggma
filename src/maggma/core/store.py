@@ -60,7 +60,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self.last_updated_type = last_updated_type
         self._lu_func = (
             LU_KEY_ISOFORMAT
-            if last_updated_type == DateTimeFormat.IsoFormat
+            if DateTimeFormat(last_updated_type) == DateTimeFormat.IsoFormat
             else (identity, identity)
         )  # type: Tuple[Callable, Callable]
         self.validator = validator
@@ -94,6 +94,15 @@ class Store(MSONable, metaclass=ABCMeta):
     def close(self):
         """
         Closes any connections
+        """
+
+    @abstractmethod
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
         """
 
     @abstractmethod
@@ -196,33 +205,21 @@ class Store(MSONable, metaclass=ABCMeta):
         )
 
     def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
     ) -> List:
         """
-        Get all distinct values for a field(s)
-        For a single field, this returns a list of values
-        For multiple fields, this return a list of of dictionaries for each unique combination
+        Get all distinct values for a field
 
         Args:
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
-            all_exist: ensure all fields exist for the distinct set
         """
-        field = field if isinstance(field, list) else [field]
-
         criteria = criteria or {}
 
-        if all_exist:
-            criteria.update({f: {"$exists": 1} for f in field if f not in criteria})
         results = [
-            key for key, _ in self.groupby(field, properties=field, criteria=criteria)
+            key for key, _ in self.groupby(field, properties=[field], criteria=criteria)
         ]
-        # Flatten out results if searching for a single field
-        if len(field) == 1:
-            results = [get(r, field[0]) for r in results]
+        results = [get(r, field) for r in results]
         return results
 
     @property

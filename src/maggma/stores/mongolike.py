@@ -66,7 +66,7 @@ class MongoStore(Store):
         """
         Return a string representing this data source
         """
-        return self.collection_name
+        return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
         """
@@ -95,6 +95,19 @@ class MongoStore(Store):
         # Get rid of aliases from traditional query engine db docs
         kwargs.pop("aliases", None)
         return cls(**kwargs)
+
+    def distinct(
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
+        """
+        Get all distinct values for a field
+
+        Args:
+            field: the field(s) to get distinct values for
+            criteria: PyMongo filter for documents to search in
+        """
+        criteria = criteria or {}
+        return self._collection.distinct(field, criteria)
 
     def groupby(
         self,
@@ -170,6 +183,17 @@ class MongoStore(Store):
         if self._collection is None:
             raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._collection
+
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+
+        criteria = criteria if criteria else {}
+        return self._collection.count_documents(filter=criteria)
 
     def query(
         self,
@@ -290,6 +314,45 @@ class MongoStore(Store):
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
+class MongoURIStore(MongoStore):
+    """
+    A Store that connects to a Mongo collection via a URI
+    This is expected to be a special mongodb+srv:// URIs that include
+    client parameters via TXT records
+    """
+
+    def __init__(self, uri: str, database: str, collection_name: str, **kwargs):
+        """
+        Args:
+            uri: MongoDB+SRV URI
+            database: database to connect to
+            collection_name: The collection name
+        """
+        self.uri = uri
+        self.database = database
+        self.collection_name = collection_name
+        self.kwargs = kwargs
+        self._collection = None
+        super(MongoStore, self).__init__(**kwargs)
+
+    @property
+    def name(self) -> str:
+        """
+        Return a string representing this data source
+        """
+        # TODO: This is not very safe since it exposes the username/password info
+        return self.uri
+
+    def connect(self, force_reset: bool = False):
+        """
+        Connect to the source data
+        """
+        if not self._collection or force_reset:
+            conn = MongoClient(self.uri)
+            db = conn[self.database]
+            self._collection = db[self.collection_name]
+
+
 class MemoryStore(MongoStore):
     """
     An in-memory Store that functions similarly
@@ -317,7 +380,7 @@ class MemoryStore(MongoStore):
     @property
     def name(self):
         """ Name for the store """
-        return self.collection_name
+        return f"mem://{self.collection_name}"
 
     def __hash__(self):
         """ Hash for the store """

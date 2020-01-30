@@ -6,7 +6,8 @@ from types import GeneratorType
 from asyncio import BoundedSemaphore, get_running_loop, gather
 from aioitertools import zip_longest
 from concurrent.futures import ProcessPoolExecutor
-from maggma.utils import tqdm, primed
+from maggma.utils import primed
+from tqdm import tqdm
 
 
 class ProcessItemsSemaphore(BoundedSemaphore):
@@ -48,8 +49,9 @@ class AsyncBackPressuredMap:
         except StopIteration:
             raise StopAsyncIteration
 
+        future = loop.run_in_executor(self.executor, self.func, item)
+
         async def process_and_release():
-            future = loop.run_in_executor(self.executor, self.func, item)
             await future
             self.back_pressure.release()
             return future
@@ -103,9 +105,45 @@ async def multi(builder, num_workers):
     )
     update_items = tqdm(total=total, desc="Update Targets")
 
+    logger.info(
+        f"Starting multiprocessing: {builder.__class__.__name__}",
+        extra={
+            "maggma": {
+                "event": "BUILD_STARTED",
+                "total": total,
+                "builder": builder.__class__.__name__,
+                "sources": [source.name for source in builder.sources],
+                "targets": [target.name for target in builder.targets],
+            }
+        },
+    )
     async for chunk in grouper(mapper, builder.chunk_size, fillvalue=None):
-        logger.info("Processing batch of {} items".format(builder.chunk_size))
+        logger.info(
+            "Processing batch of {} items".format(builder.chunk_size),
+            extra={
+                "maggma": {
+                    "event": "UPDATE",
+                    "items": len(chunk),
+                    "builder": builder.__class__.__name__,
+                    "sources": [source.name for source in builder.sources],
+                    "targets": [target.name for target in builder.targets],
+                }
+            },
+        )
         chunk = await gather(*chunk)
         processed_items = [c.result() for c in chunk if chunk is not None]
         builder.update_targets(processed_items)
         update_items.update(len(processed_items))
+
+    logger.info(
+        f"Ended multiprocessing: {builder.__class__.__name__}",
+        extra={
+            "maggma": {
+                "event": "BUILD_ENDED",
+                "builder": builder.__class__.__name__,
+                "sources": [source.name for source in builder.sources],
+                "targets": [target.name for target in builder.targets],
+            }
+        },
+    )
+    builder.finalize()

@@ -34,7 +34,7 @@ class MongograntStore(MongoStore):
         mongogrant_spec: str,
         collection_name: str,
         mgclient_config_path: Optional[str] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Args:
@@ -75,6 +75,10 @@ class MongograntStore(MongoStore):
                 client = Client()
             db = client.db(self.mongogrant_spec)
             self._collection = db[self.collection_name]
+
+    @property
+    def name(self):
+        return f"mgrant://{self.mongogrant_spec}/{self.collection_name}"
 
     def __hash__(self):
         return hash(
@@ -219,6 +223,17 @@ class AliasingStore(Store):
         """
         return self.store.name
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        criteria = criteria if criteria else {}
+        lazy_substitute(criteria, self.reverse_aliases)
+        return self.store.count(criteria)
+
     def query(
         self,
         criteria: Optional[Dict] = None,
@@ -251,25 +266,20 @@ class AliasingStore(Store):
             yield d
 
     def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
     ) -> List:
         """
-        Get all distinct values for a key
+        Get all distinct values for a field
 
         Args:
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
-            all_exist: ensure all fields exist for the distinct set
         """
         criteria = criteria if criteria else {}
         lazy_substitute(criteria, self.reverse_aliases)
-        field = field if isinstance(field, list) else [field]
+
         # substitute forward
-        field = [self.aliases[f] for f in field]
-        return self.store.distinct(field, criteria=criteria)
+        return self.store.distinct(self.aliases[field], criteria=criteria)
 
     def groupby(
         self,
@@ -398,7 +408,7 @@ class SandboxStore(Store):
         Returns:
             a string representing this data source
         """
-        return self.store.name
+        return f"Sandbox[{self.store.name}][{self.sandbox}]"
 
     @property
     def sbx_criteria(self) -> Dict:
@@ -412,6 +422,18 @@ class SandboxStore(Store):
             return {
                 "$or": [{"sbxn": {"$in": [self.sandbox]}}, {"sbxn": {"$exists": False}}]
             }
+
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        criteria = (
+            dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
+        )
+        return self.store.count(criteria=criteria)
 
     def query(
         self,
