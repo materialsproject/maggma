@@ -35,7 +35,7 @@ def owner_store(owners):
 
 
 def test_init_endpoint(owner_store):
-    num_default_api_routes = 3
+    num_default_api_routes = 7
     endpoint = EndpointCluster(owner_store, Owner)
     assert len(endpoint.router.routes) == num_default_api_routes
     assert endpoint.router.routes[0]
