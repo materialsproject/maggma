@@ -5,15 +5,90 @@ from typing import List, Dict, Union, Optional, Set
 from pydantic import BaseModel
 from monty.json import MSONable
 from monty.serialization import loadfn
-from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends
+from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends, Query
 from maggma.core import Store
 from maggma.utils import dynamic_import
 import ast
+import inspect
 
 default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
 
 
+def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
+    """
+    Building default query fields by inspecting the model passed in,
+    and constructing a dynamic_call function on the fly.
+    Args:
+        additional_signature_fields: additional fields that user can specify. In the format of {"FIELD_NAME": [FIELD_TYPE, Query]}
+        model: the PyDantic model that holds the data. Its fields are used to build Query
+
+    Returns:
+        A function named dynamic_call that has its signature built according to the data model passed in.
+
+    """
+    if additional_signature_fields is None:
+        additional_signature_fields = dict()
+    params = dict()
+    # construct fields
+    for name, model_field in model.__fields__.items():
+        if model_field.type_ == str:
+            params[f"{model_field.name}_eq"] = [
+                model_field.type_,
+                Query(model_field.default),
+            ]
+            params[f"{model_field.name}_not_eq"] = [
+                model_field.type_,
+                Query(model_field.default),
+            ]
+        elif model_field.type_ == int or model_field == float:
+            params[f"{model_field.name}_lt"] = [
+                model_field.type_,
+                Query(model_field.default),
+            ]
+            params[f"{model_field.name}_gt"] = [
+                model_field.type_,
+                Query(model_field.default),
+            ]
+            params[f"{model_field.name}_eq"] = [
+                model_field.type_,
+                Query(model_field.default),
+            ]
+            params[f"{model_field.name}_not_eq"] = [
+                model_field.type_,
+                Query(model_field.default),
+            ]
+        else:
+            raise NotImplementedError(
+                f"Field name {model_field.name} with {model_field.type_} not implemented"
+            )
+
+    def dynamic_call(**kwargs):
+        return kwargs
+
+    # user's input always have higher priority than the default's -- data model
+    params.update(additional_signature_fields)
+    # building the signatures for FastAPI Swagger UI
+    signatures = []
+    signatures.extend(
+        inspect.Parameter(
+            param,
+            inspect.Parameter.POSITIONAL_OR_KEYWORD,
+            default=query[1],
+            annotation=query[0],
+        )
+        for param, query in params.items()
+    )
+
+    dynamic_call.__signature__ = inspect.Signature(signatures)
+
+    return dynamic_call
+
+
 class CommonParams:
+    """
+    Common Paging parameters
+    """
+
     def __init__(
         self,
         projection: str = None,
@@ -120,8 +195,8 @@ class EndpointCluster(MSONable):
         # GET
         self.set_root_router()
         self.set_get_by_key_router()
-        self.set_generic_search_router()
-
+        # self.set_generic_search_router()
+        self.set_dynamic_model_search()
         # POST
         self.set_default_post()
 
@@ -135,6 +210,24 @@ class EndpointCluster(MSONable):
     """
     GET Request Code Block
     """
+
+    def set_dynamic_model_search(self):
+        responses = copy.copy(default_responses)
+        if self.responses:
+            responses.update(self.responses)
+
+        async def dynamic_model_search(
+            params: Dict = Depends(build_dynamic_query(self.model)),
+            commonParams: CommonParams = Depends(),
+        ):
+            print("dynamic_model_search -->", params)
+            print("common_params -->", commonParams)
+            pass
+
+        self.router.get(
+            "/{query}", response_description="WIP", tags=self.tags, responses=responses,
+        )(dynamic_model_search)
+        return None
 
     def set_get_by_key_router(self):
         key_name = self.store.key
