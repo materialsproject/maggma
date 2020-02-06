@@ -14,6 +14,59 @@ import inspect
 default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
 
 
+class DynamicQueryMetaClass(type):
+    def __new__(cls, model: BaseModel, additional_signature_fields=None):
+        if additional_signature_fields is None:
+            additional_signature_fields = dict()
+        cls.params = dict()
+        # construct fields
+        for name, model_field in model.__fields__.items():
+            if model_field.type_ == str:
+                cls.params[f"{model_field.name}_eq"] = [
+                    model_field.type_,
+                    Query(model_field.default),
+                ]
+                cls.params[f"{model_field.name}_not_eq"] = [
+                    model_field.type_,
+                    Query(model_field.default),
+                ]
+            elif model_field.type_ == int or model_field == float:
+                cls.params[f"{model_field.name}_lt"] = [
+                    model_field.type_,
+                    Query(model_field.default),
+                ]
+                cls.params[f"{model_field.name}_gt"] = [
+                    model_field.type_,
+                    Query(model_field.default),
+                ]
+                cls.params[f"{model_field.name}_eq"] = [
+                    model_field.type_,
+                    Query(model_field.default),
+                ]
+                cls.params[f"{model_field.name}_not_eq"] = [
+                    model_field.type_,
+                    Query(model_field.default),
+                ]
+            else:
+                raise NotImplementedError(
+                    f"Field name {model_field.name} with {model_field.type_} not implemented"
+                )
+            cls.params.update(additional_signature_fields)
+        signatures = []
+        signatures.extend(
+            inspect.Parameter(
+                param,
+                inspect.Parameter.POSITIONAL_OR_KEYWORD,
+                default=query[1],
+                annotation=query[0],
+            )
+            for param, query in cls.params.items()
+        )
+        # dynamic_call.__signature__ = inspect.Signature(signatures)
+
+        cls.__init__.__signature__ = inspect.Signature(signatures)
+
+
 def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
     """
     Building default query fields by inspecting the model passed in,

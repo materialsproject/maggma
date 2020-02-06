@@ -52,31 +52,60 @@ o_s = owner_store(owners())
 owner_model = Owner(name="PersonAge12", age=12, weight=randint(100, 200))
 endpoint_model_extractor = EndpointCluster(o_s, Owner)
 endpoint_model_extractor.run()
-
+# import inspect
 # from fastapi import Query
 #
-# params = dict()
-# for name, model_field in owner_model.__fields__.items():
-#     if model_field.type_ == str:
-#         params[name] = {f"{model_field.name}_eq": Query(...),
-#                         f"{model_field.name}_not_eq": Query(...)}
-#     elif model_field.type_ == int:
-#         params[name] = {f"{model_field.name}_lt": Query(...),
-#                         f"{model_field.name}_gt": Query(...),
-#                         f"{model_field.name}_eq": Query(...),
-#                         f"{model_field.name}_not_eq": Query(...)}
-#     elif model_field.type_ == float:
-#         params[name] = {f"{model_field.name}_lt": Query(...),
-#                         f"{model_field.name}_gt": Query(...),
-#                         f"{model_field.name}_eq": Query(...),
-#                         f"{model_field.name}_not_eq": Query(...)}
-#     else:
-#         print(model_field.type_)
+# class DynamicQueryMetaClass(type):
+#     def __new__(cls, model: BaseModel, additional_signature_fields=None):
+#         if additional_signature_fields is None:
+#             additional_signature_fields = dict()
+#         cls.params = dict()
+#         # construct fields
+#         for name, model_field in model.__fields__.items():
+#             if model_field.type_ == str:
+#                 cls.params[f"{model_field.name}_eq"] = [
+#                     model_field.type_,
+#                     Query(model_field.default),
+#                 ]
+#                 cls.params[f"{model_field.name}_not_eq"] = [
+#                     model_field.type_,
+#                     Query(model_field.default),
+#                 ]
+#             elif model_field.type_ == int or model_field == float:
+#                 cls.params[f"{model_field.name}_lt"] = [
+#                     model_field.type_,
+#                     Query(model_field.default),
+#                 ]
+#                 cls.params[f"{model_field.name}_gt"] = [
+#                     model_field.type_,
+#                     Query(model_field.default),
+#                 ]
+#                 cls.params[f"{model_field.name}_eq"] = [
+#                     model_field.type_,
+#                     Query(model_field.default),
+#                 ]
+#                 cls.params[f"{model_field.name}_not_eq"] = [
+#                     model_field.type_,
+#                     Query(model_field.default),
+#                 ]
+#             else:
+#                 raise NotImplementedError(
+#                     f"Field name {model_field.name} with {model_field.type_} not implemented"
+#                 )
+#             cls.params.update(additional_signature_fields)
+#         signatures = []
+#         signatures.extend(
+#             inspect.Parameter(
+#                 param,
+#                 inspect.Parameter.POSITIONAL_OR_KEYWORD,
+#                 default=query[1],
+#                 annotation=query[0],
+#             )
+#             for param, query in cls.params.items()
+#         )
+#         # dynamic_call.__signature__ = inspect.Signature(signatures)
 #
+#         cls.__init__.__signature__ = inspect.Signature(signatures)
 #
-# def dynamic_call(x):
-#     pass
-#
-# import inspect
-# param = inspect.Parameter("name", kind= inspect.Parameter.POSITIONAL_OR_KEYWORD, default="name")
-# print("new_parap ->", param)
+# dynamic_query_meta_class = DynamicQueryMetaClass(owner_model)
+# print(dynamic_query_meta_class)
