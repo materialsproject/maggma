@@ -11,74 +11,109 @@ from maggma.utils import dynamic_import
 from starlette import responses
 import inspect
 from typing_extensions import Literal
+from mongo_query_mapping import query_mapping, supported_types, translate_operator
 
 default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
-mapping = {
-    "eq": "$eq",
-    "not_eq": "$not",
-    "lt": "$lt",
-    "gt": "$gt",
-}
+
+
+def fields_to_operator(all_fields):
+    params = dict()
+    for name, model_field in all_fields:
+        if model_field.type_ in supported_types:
+            params[f"{model_field.name}_eq"] = [
+                model_field.type_,
+                Query(
+                    model_field.default,
+                    description=f"Querying if {model_field.name} is equal to another",
+                ),
+            ]
+            params[f"{model_field.name}_not_eq"] = [
+                model_field.type_,
+                Query(
+                    model_field.default,
+                    description=f"Querying if {model_field.name} is not equal to another",
+                ),
+            ]
+            params[f"{model_field.name}_in"] = [
+                List[model_field.type_],
+                Query(
+                    model_field.default,
+                    description=f"Querying if item is in {model_field.name}",
+                ),
+            ]
+            params[f"{model_field.name}_not_in"] = [
+                List[model_field.type_],
+                Query(
+                    model_field.default,
+                    description=f"Querying if item is not in {model_field.name} ",
+                ),
+            ]
+
+            if model_field.type_ == int or model_field == float:
+                params[f"{model_field.name}_lt"] = [
+                    model_field.type_,
+                    Query(
+                        model_field.default,
+                        description=f"Querying if {model_field.name} is less than to another",
+                    ),
+                ]
+                params[f"{model_field.name}_gt"] = [
+                    model_field.type_,
+                    Query(
+                        model_field.default,
+                        description=f"Querying if {model_field.name} is greater than to another",
+                    ),
+                ]
+        else:
+            raise NotImplementedError(
+                f"Field name {model_field.name} with {model_field.type_} not implemented"
+            )
+    return params
 
 
 def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
     """
     Building default query fields by inspecting the model passed in,
-    and constructing a dynamic_call function on the fly.
+    and constructing a dynamic_call function on-the-fly.
+    Incorporating type checking on-the-fly as well
     Args:
         additional_signature_fields: additional fields that user can specify. In the format of {"FIELD_NAME": [FIELD_TYPE, Query]}
         model: the PyDantic model that holds the data. Its fields are used to build Query
 
     Returns:
         A function named dynamic_call that has its signature built according to the data model passed in.
+        The function will return a valid PyMongo Query criteria
 
     """
-    print(mapping)
+
     if additional_signature_fields is None:
         additional_signature_fields = dict()
-    params = dict()
     # construct fields
-
+    # find all fields in data_object
     all_fields = list(model.__fields__.items())
-    print(all_fields)
 
-    for name, model_field in model.__fields__.items():
-        if model_field.type_ == str:
-            params[f"{model_field.name}_eq"] = [
-                model_field.type_,
-                Query(model_field.default),
-            ]
-            params[f"{model_field.name}_not_eq"] = [
-                model_field.type_,
-                Query(model_field.default),
-            ]
-        elif model_field.type_ == int or model_field == float:
-            params[f"{model_field.name}_lt"] = [
-                model_field.type_,
-                Query(model_field.default),
-            ]
-            params[f"{model_field.name}_gt"] = [
-                model_field.type_,
-                Query(model_field.default),
-            ]
-            params[f"{model_field.name}_eq"] = [
-                model_field.type_,
-                Query(model_field.default),
-            ]
-            params[f"{model_field.name}_not_eq"] = [
-                model_field.type_,
-                Query(model_field.default),
-            ]
-        else:
-            raise NotImplementedError(
-                f"Field name {model_field.name} with {model_field.type_} not implemented"
-            )
+    # turn fields into operators, also do type checking
+    params = fields_to_operator(all_fields)
 
-    def dynamic_call(**kwargs):
-        return kwargs
-
-    # user's input always have higher priority than the default's -- data model
+    # combine with additional_fields
+    # user's input always have higher priority than the the default data model's
     params.update(additional_signature_fields)
+
+    # dummy method whose parameters will be modified
+    def dynamic_call(**kwargs):
+        # we know that kwargs will contain all the information in params
+        crit = dict()
+        for k, v in kwargs.items():
+            if v is not None:
+                try:
+                    crit[k] = {query_mapping[translate_operator(k)]: v}
+                except KeyError:
+                    raise KeyError(
+                        f"Cannot find key {k} in current query to database mapping"
+                    )
+        print(crit)
+        return crit
+
     # building the signatures for FastAPI Swagger UI
     signatures = []
     signatures.extend(
@@ -90,7 +125,6 @@ def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
         )
         for param, query in params.items()
     )
-
     dynamic_call.__signature__ = inspect.Signature(signatures)
 
     return dynamic_call
@@ -320,7 +354,7 @@ class EndpointCluster(MSONable):
         )(get_by_key)
 
     def set_root_router(self):
-        async def root() -> responses:
+        async def root():
             """
             Return:
                 a list of child endpoints
@@ -336,7 +370,6 @@ class EndpointCluster(MSONable):
             "/",
             response_description="Default GET endpoint root, listing possible Paths",
             tags=self.tags,
-            responses=responses,
         )(root)
 
     """
