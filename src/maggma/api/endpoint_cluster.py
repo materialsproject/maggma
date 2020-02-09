@@ -11,7 +11,7 @@ from maggma.utils import dynamic_import
 from starlette import responses
 import inspect
 from typing_extensions import Literal
-from mongo_query_mapping import query_mapping, supported_types, translate_operator
+from mongo_query_mapping import query_mapping, supported_types
 
 default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
 
@@ -105,13 +105,13 @@ def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
         crit = dict()
         for k, v in kwargs.items():
             if v is not None:
+                name, operator = k.split("_", 1)
                 try:
-                    crit[k] = {query_mapping[translate_operator(k)]: v}
+                    crit[name] = {query_mapping[operator]: v}
                 except KeyError:
                     raise KeyError(
                         f"Cannot find key {k} in current query to database mapping"
                     )
-        print(crit)
         return crit
 
     # building the signatures for FastAPI Swagger UI
@@ -299,6 +299,7 @@ class EndpointCluster(MSONable):
             field_set: Dict = Depends(FieldSetParamFactory(self.model)),
             pagination: Dict = Depends(PaginationParamsFactory()),
         ):
+            print(criteria, field_set, pagination)
             items = self.store.query(
                 criteria=criteria,
                 skip=pagination.get("skip"),
