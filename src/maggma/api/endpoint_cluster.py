@@ -1,70 +1,24 @@
 import pathlib
 import copy
 from inspect import isclass
-from typing import List, Dict, Union, Optional, Set
+from typing import List, Dict, Union, Optional, Set, Any
 from pydantic import BaseModel
 from monty.json import MSONable
 from monty.serialization import loadfn
 from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends, Query
 from maggma.core import Store
 from maggma.utils import dynamic_import
-import ast
+from starlette import responses
 import inspect
+from typing_extensions import Literal
 
 default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
-
-
-class DynamicQueryMetaClass(type):
-    def __new__(cls, model: BaseModel, additional_signature_fields=None):
-        if additional_signature_fields is None:
-            additional_signature_fields = dict()
-        cls.params = dict()
-        # construct fields
-        for name, model_field in model.__fields__.items():
-            if model_field.type_ == str:
-                cls.params[f"{model_field.name}_eq"] = [
-                    model_field.type_,
-                    Query(model_field.default),
-                ]
-                cls.params[f"{model_field.name}_not_eq"] = [
-                    model_field.type_,
-                    Query(model_field.default),
-                ]
-            elif model_field.type_ == int or model_field == float:
-                cls.params[f"{model_field.name}_lt"] = [
-                    model_field.type_,
-                    Query(model_field.default),
-                ]
-                cls.params[f"{model_field.name}_gt"] = [
-                    model_field.type_,
-                    Query(model_field.default),
-                ]
-                cls.params[f"{model_field.name}_eq"] = [
-                    model_field.type_,
-                    Query(model_field.default),
-                ]
-                cls.params[f"{model_field.name}_not_eq"] = [
-                    model_field.type_,
-                    Query(model_field.default),
-                ]
-            else:
-                raise NotImplementedError(
-                    f"Field name {model_field.name} with {model_field.type_} not implemented"
-                )
-            cls.params.update(additional_signature_fields)
-        signatures = []
-        signatures.extend(
-            inspect.Parameter(
-                param,
-                inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                default=query[1],
-                annotation=query[0],
-            )
-            for param, query in cls.params.items()
-        )
-        # dynamic_call.__signature__ = inspect.Signature(signatures)
-
-        cls.__init__.__signature__ = inspect.Signature(signatures)
+mapping = {
+    "eq": "$eq",
+    "not_eq": "$not",
+    "lt": "$lt",
+    "gt": "$gt",
+}
 
 
 def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
@@ -79,10 +33,15 @@ def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
         A function named dynamic_call that has its signature built according to the data model passed in.
 
     """
+    print(mapping)
     if additional_signature_fields is None:
         additional_signature_fields = dict()
     params = dict()
     # construct fields
+
+    all_fields = list(model.__fields__.items())
+    print(all_fields)
+
     for name, model_field in model.__fields__.items():
         if model_field.type_ == str:
             params[f"{model_field.name}_eq"] = [
@@ -137,50 +96,83 @@ def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
     return dynamic_call
 
 
-class CommonParams:
+def PaginationParamsFactory(
+    default_skip: int = 0, default_limit: int = 10, max_limit: int = 100
+):
     """
-    Common Paging parameters
+    Factory method to generate a dependency for pagination in FastAPI
+
+    Args:
+        default_skip: default number of items to skip
+        default_limit: default number of items to return
+        max_limit: max number of items to return
     """
 
-    def __init__(
-        self,
-        projection: str = None,
-        skip: int = 0,
-        limit: int = 10,
-        all_include: bool = True,
-        alias: str = None,
+    def paginate(
+        skip: int = Query(
+            default_skip, description="Number of entries to skip in the search"
+        ),
+        limit: int = Query(
+            default_limit,
+            description="Max number of entries to return in a single query."
+            f" Limited to {max_limit}",
+        ),
+    ) -> Dict[Literal["criteria", "properties", "skip", "limit"], Any]:
+        """
+        Pagination parameters for the API Endpoint
+        """
+        if limit > max_limit:
+            raise Exception(
+                "Requested more data per query than allowed by this endpoint."
+                f"The max limit is {max_limit} entries"
+            )
+        return {"skip": skip, "limit": limit}
+
+    return paginate
+
+
+def FieldSetParamFactory(
+    model: BaseModel,
+    default_fields: Union[None, str, List[str]] = None,
+    exclusion_fields: Union[None, str, List[str]] = None,
+):
+    """
+    Factory method to generate a dependency for sparse field sets in FastAPI
+
+    Args:
+        exclusion_fields: fields that are ignored.
+        model: PyDantic Model that represents the underlying data source
+        default_fields: default fields to return in the API response if no fields are explicitly requested
+    """
+
+    default_fields = ",".join(default_fields) if default_fields else None
+    projection_type = Optional[str] if default_fields is None else str
+    all_model_fields = list(model.__fields__.keys())
+
+    # TODO: Add ability to not consider some model fields
+
+    def field_set(
+        fields: projection_type = Query(
+            default_fields,
+            description=f"Fields to project from {model.__name__} as a list of comma separated strings",
+        ),
+        all_fields: bool = Query(False, description="Include all fields."),
     ):
         """
-        Common parameters that a lot of the queries might use. The purpose is to simplify code
-        Args:
-            projection: a list in string format -> '["name"]'
-            skip: integer for skip
-            limit: integer for limit
-            all_include: boolean for include all or not
-            alias: a dictionary in string format mapping user input field to actual data field -> '{"mass":"weight"}'
+        Projection parameters for the API Endpoint
         """
-        self.skip = skip
-        self.limit = limit
-        self.all_includes = all_include
+        all_fields = all_fields
 
-        if projection is not None and all_include:
+        fields = fields.split(",") if isinstance(fields, str) else None
+
+        if fields is not None and all_fields:
             raise Exception("projection and all_includes does not match")
-        else:
-            try:
-                self.projection = (
-                    set()
-                    if projection is None
-                    else set(ast.literal_eval(ast.literal_eval(projection)))
-                )
-            except Exception:
-                raise Exception("Cannot parse projection field")
+        elif all_fields:
+            fields = all_model_fields
 
-        try:
-            self.alias = (
-                dict() if alias is None else ast.literal_eval(ast.literal_eval(alias))
-            )
-        except Exception:
-            raise Exception("Cannot convert alias")
+        return {"properties": fields}
+
+    return field_set
 
 
 class EndpointCluster(MSONable):
@@ -248,7 +240,6 @@ class EndpointCluster(MSONable):
         # GET
         self.set_root_router()
         self.set_get_by_key_router()
-        # self.set_generic_search_router()
         self.set_dynamic_model_search()
         # POST
         self.set_default_post()
@@ -270,12 +261,20 @@ class EndpointCluster(MSONable):
             responses.update(self.responses)
 
         async def dynamic_model_search(
-            params: Dict = Depends(build_dynamic_query(self.model)),
-            commonParams: CommonParams = Depends(),
+            criteria: Dict = Depends(build_dynamic_query(self.model)),
+            field_set: Dict = Depends(FieldSetParamFactory(self.model)),
+            pagination: Dict = Depends(PaginationParamsFactory()),
         ):
-            print("dynamic_model_search -->", params)
-            print("common_params -->", commonParams)
-            pass
+            items = self.store.query(
+                criteria=criteria,
+                skip=pagination.get("skip"),
+                limit=pagination.get("limit"),
+            )
+            result = []
+            for item in items:
+                model_item = self.model(**item)
+                result.append(model_item)
+            return result
 
         self.router.get(
             "/{query}", response_description="WIP", tags=self.tags, responses=responses,
@@ -321,14 +320,8 @@ class EndpointCluster(MSONable):
         )(get_by_key)
 
     def set_root_router(self):
-        responses = copy.copy(default_responses)
-        if self.responses:
-            responses.update(self.responses)
-
-        async def root(commonParams: CommonParams = Depends()) -> List[str]:
+        async def root() -> responses:
             """
-            Args:
-                commonParams: default paging requirements
             Return:
                 a list of child endpoints
             """
@@ -336,10 +329,8 @@ class EndpointCluster(MSONable):
             # -for -the-root-page-of-a-rest-api] and example from github[https://api.github.com/], it seems like the
             # root should return a list of child endpoints. In this case, i think we should display a set of
             # supported paths
-            skip, limit = commonParams.skip, commonParams.limit
 
-            result = [route.path for route in self.router.routes]
-            return result[skip : skip + limit]
+            return responses.RedirectResponse(url="/docs")
 
         self.router.get(
             "/",
@@ -347,65 +338,6 @@ class EndpointCluster(MSONable):
             tags=self.tags,
             responses=responses,
         )(root)
-
-    def set_generic_search_router(self):
-        responses = copy.copy(default_responses)
-        if self.responses:
-            responses.update(self.responses)
-
-        tags = self.tags or []
-
-        async def generic_search(query: str, commonParams: CommonParams = Depends()):
-            """
-            Sample generic search, need to build a query language, but this query is used for testing purpose:
-
-
-            Example:
-
-            http://127.0.0.1:8000/%27%7B%22weight%22%3A150%7D%27&limit=10&all_include=false
-            http://127.0.0.1:8000/%27%7B%22weight%22%3A150%7D%27&projection=%27%5B%22name%22%2C%22age%22%5D%27&limit=10&all_include=false
-            http://127.0.0.1:8000/%27%7B%22weight%22%3A150%7D%27&limit=10&all_include=true
-            Args:
-                query: input query in format like: '{"weight":150}' or '{"age":12}'
-                commonParams: default paging requirements
-            Return:
-                A list of items that matches the input query
-
-            """
-            projection = commonParams.projection
-            skip = commonParams.skip
-            limit = commonParams.limit
-            all_includes = commonParams.all_includes
-            alias = commonParams.alias
-
-            try:
-                query_dictionary = ast.literal_eval(
-                    ast.literal_eval(query)
-                )  # idk why it is like this
-            except Exception:
-                raise HTTPException(status_code=500, detail="Unable to parse query")
-
-            result = []
-            for key, value in query_dictionary.items():
-                if key in alias:
-                    key = alias[key]
-                r = self.store.query(criteria={key: value})
-                result.extend(list(r))
-            result = [self.model(**r) for r in result][skip : skip + limit]
-            if all_includes:
-                return result[skip : skip + limit]
-            elif projection:
-                return [r.dict(include=projection) for r in result]
-            else:
-                return [r.dict(include=self.default_projection) for r in result]
-
-        self.router.get(
-            "/{query}",
-            response_description="Default generic search endpoint",
-            response_model=List[self.model],
-            tags=tags,
-            responses=responses,
-        )(generic_search)
 
     """
     POST Request Code Block
