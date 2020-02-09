@@ -166,9 +166,7 @@ def PaginationParamsFactory(
 
 
 def FieldSetParamFactory(
-    model: BaseModel,
-    default_fields: Union[None, str, List[str]] = None,
-    exclusion_fields: Union[None, str, List[str]] = None,
+    model: BaseModel, default_fields: Union[None, str, List[str]] = None,
 ):
     """
     Factory method to generate a dependency for sparse field sets in FastAPI
@@ -179,32 +177,35 @@ def FieldSetParamFactory(
         default_fields: default fields to return in the API response if no fields are explicitly requested
     """
 
-    default_fields = ",".join(default_fields) if default_fields else None
-    projection_type = Optional[str] if default_fields is None else str
-    all_model_fields = list(model.__fields__.keys())
+    default_fields = ",".join(default_fields) if default_fields else []
+    all_model_fields = set(model.__fields__.keys())
 
     # TODO: Add ability to not consider some model fields
 
     def field_set(
-        fields: projection_type = Query(
-            default_fields,
-            description=f"Fields to project from {model.__name__} as a list of comma separated strings",
+        included_fields: Set[str] = Query(
+            default=default_fields,
+            description=f"Fields to project from {model.__name__} as a list of strings",
         ),
-        all_fields: bool = Query(False, description="Include all fields."),
-    ):
+        all_fields: bool = Query(default=False, description="Include all fields."),
+        excluded_fields: Set[str] = Query(
+            default=[],
+            description=f"Fields to exclude from {model.__name__} as a list ofstrings",
+        ),
+    ) -> Dict[str, Set[str]]:
         """
         Projection parameters for the API Endpoint
         """
-        all_fields = all_fields
-
-        fields = fields.split(",") if isinstance(fields, str) else None
-
-        if fields is not None and all_fields:
-            raise Exception("projection and all_includes does not match")
+        if (included_fields != set() and excluded_fields != set()) or (
+            all_fields and (included_fields != set() or excluded_fields != set())
+        ):
+            raise Exception(
+                "projection fields, all_includes, and excluded_fields do not match"
+            )
         elif all_fields:
-            fields = all_model_fields
-
-        return {"properties": fields}
+            return {"include": all_model_fields, "exclude": []}
+        else:
+            return {"include": included_fields, "exclude": excluded_fields}
 
     return field_set
 
@@ -299,7 +300,11 @@ class EndpointCluster(MSONable):
             field_set: Dict = Depends(FieldSetParamFactory(self.model)),
             pagination: Dict = Depends(PaginationParamsFactory()),
         ):
-            print(criteria, field_set, pagination)
+            print(
+                " criteria = {} \n field_set = {} \n pagination = {} \n".format(
+                    criteria, field_set, pagination
+                )
+            )
             items = self.store.query(
                 criteria=criteria,
                 skip=pagination.get("skip"),
@@ -308,7 +313,13 @@ class EndpointCluster(MSONable):
             result = []
             for item in items:
                 model_item = self.model(**item)
-                result.append(model_item)
+
+                result.append(
+                    model_item.json(
+                        include=field_set.get("include"),
+                        exclude=field_set.get("exclude"),
+                    )
+                )
             return result
 
         self.router.get(
