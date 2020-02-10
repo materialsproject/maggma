@@ -30,14 +30,13 @@ def owner_store(owners):
     return store
 
 
-#
 o_s = owner_store(owners())
 #
-# endpoint_main = EndpointCluster(o_s, Owner, description="main")
-# endpoint_main_temp = EndpointCluster(o_s, Owner, description="main_temp")
-# endpoint_temp = EndpointCluster(o_s, Owner, description="temp")
-# endpoint_main_a_temp = EndpointCluster(o_s, Owner, description="main_a_temp")
-# # endpoint.run()
+endpoint_main = EndpointCluster(o_s, Owner, description="main")
+endpoint_main_temp = EndpointCluster(o_s, Owner, description="main_temp")
+endpoint_temp = EndpointCluster(o_s, Owner, description="temp")
+endpoint_main_a_temp = EndpointCluster(o_s, Owner, description="main_a_temp")
+# endpoint.run()
 # manager = ClusterManager(
 #     {
 #         "/temp": endpoint_temp,

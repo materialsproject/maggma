@@ -180,8 +180,6 @@ def FieldSetParamFactory(
     default_fields = ",".join(default_fields) if default_fields else []
     all_model_fields = set(model.__fields__.keys())
 
-    # TODO: Add ability to not consider some model fields
-
     def field_set(
         included_fields: Set[str] = Query(
             default=default_fields,
@@ -235,6 +233,8 @@ class EndpointCluster(MSONable):
                 into a python path string
             tags: list of tags for the Endpoint
             responses: default responses for error codes
+            default_projection: default projection for the model
+            description: description of what does this endpoint cluster do
         """
         if isinstance(model, str):
             module_path = ".".join(model.split(".")[:-1])
