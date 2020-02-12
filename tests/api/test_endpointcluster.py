@@ -5,23 +5,27 @@ from maggma.stores import MemoryStore
 from maggma.api import EndpointCluster
 from starlette.testclient import TestClient
 from fastapi import FastAPI
+from urllib.parse import urlencode
+from requests import Response
 
 
 class Owner(BaseModel):
     name: str = Field(..., title="Owner's name")
     age: int = Field(None, title="Owne'r Age")
-    weight: int = Field(None, title="Owner's weight")
+    weight: float = Field(None, title="Owner's weight")
 
 
 @pytest.fixture("session")
 def owners():
     return (
         [
-            Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
+            Owner(
+                name=f"Person{i}", age=randint(10, 100), weight=float(randint(100, 200))
+            )
             for i in list(range(10)[1:])
-        ]
-        + [Owner(name="PersonAge12", age=12, weight=randint(100, 200))]
-        + [Owner(name="PersonWeight150", age=randint(10, 15), weight=150)]
+        ]  # there are 8 owners here
+        + [Owner(name="PersonAge12", age=12, weight=float(randint(100, 200)))]
+        + [Owner(name="PersonWeight150", age=randint(10, 15), weight=float(150))]
     )
 
 
@@ -44,9 +48,6 @@ def test_init_endpoint(owner_store):
     assert len(endpoint.router.routes) == num_default_api_routes
     assert endpoint.router.routes[0]
 
-    with pytest.raises(ValueError):
-        endpoint = EndpointCluster(owner_store, 3)
-
 
 def test_endpoint_msonable(owner_store):
     endpoint = EndpointCluster(owner_store, Owner)
@@ -59,7 +60,7 @@ def test_endpoint_msonable(owner_store):
     assert endpoint_dict["model"] == "tests.api.test_endpointcluster.Owner"
 
 
-def test_endpoint_function(owner_store):
+def test_endpoint_get_by_key(owner_store):
     endpoint = EndpointCluster(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
@@ -72,50 +73,73 @@ def test_endpoint_function(owner_store):
     assert client.get("/name/Person1").json()["name"] == "Person1"
 
 
-def test_endpoint_get_with_param(owner_store):
-    endpoint = EndpointCluster(owner_store, Owner)
-    app = FastAPI()
-    app.include_router(endpoint.router)
-
-    client = TestClient(app)
-
-    # test '{"age":12}' with all_include = True
-    res = client.get("/%27%7B%22age%22%3A12%7D%27?limit=10&all_include=true")
-    assert res.status_code == 200
-    assert len(res.json()) >= 1
-    assert True in [d["name"] == "PersonAge12" for d in res.json()]
-
-    # test '{"weight":150}' with projection '["name","age"]', which means weight should be missing in the return object
-    res = client.get(
-        "/%27%7B%22weight%22%3A150%7D%27?projection=%27%5B%22name%22%2C%22age%22%5D%27&limit=10&all_include=false"
-    )
-    assert res.status_code == 200
-    assert len(res.json()) >= 1
-    assert True in [d["name"] == "PersonWeight150" for d in res.json()]
-    for d in res.json():
-        assert d["weight"] is None
-
-    # test '{"age":12}' with all_include = True and limit = 0, which i should get nothing
-    res = client.get("/%27%7B%22age%22%3A12%7D%27?limit=0&all_include=true")
-    assert res.status_code == 200
-    assert res.json() == []
-
-    # test '{"age":200}' with all_include = True, which i should get nothing
-    res = client.get("/%27%7B%22age%22%3A200%7D%27?limit=10&all_include=true")
-    assert res.status_code == 200
-    assert res.json() == []
-
-
 def test_endpoint_alias(owner_store):
     endpoint = EndpointCluster(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
 
-    client = TestClient(app)
 
-    # test '{"mass":150}' with alias '{"mass":"weight"}'
-    res = client.get(
-        "/%27%7B%22mass%22%3A150%7D%27?limit=10&all_include=true&alias=%27%7B%22mass%22%3A%22weight%22%7D%27"
-    )
+def dynamic_model_search_response_helper(
+    client, payload, base: str = "/query?"
+) -> Response:
+    """
+    Helper function for dynamicModelSearch function, to reduce redundant code
+    Args:
+        base: base of the query, default to /query?
+        client: TestClient generated from FastAPI
+        payload: query in dictionary format
+
+    Returns:
+        request.Response object that contains the response of the correspoding payload
+    """
+
+    url = base + urlencode(payload)
+    res = client.get(url)
+    return res
+
+
+def test_endpoint_dynamic_model_search_eq_not_eq_test(owner_store):
+    endpoint = EndpointCluster(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+    payload = {"name_eq": "PersonAge12"}
+    res = dynamic_model_search_response_helper(client=client, payload=payload)
+
+    # String eq
     assert res.status_code == 200
-    assert len(res.json()) >= 1
+    assert len(res.json()) == 1
+    assert res.json()[0]["name"] == "PersonAge12"
+
+    # int Eq
+    assert res.json()[0]["age"] == 12
+
+    # float Eq
+    payload = {"name_eq": "PersonWeight150"}
+
+    res = dynamic_model_search_response_helper(client, payload)
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+    assert res.json()[0]["weight"] == 150.0
+
+
+def test_endpoint_dynamic_model_search_lt_gt_test(owner_store):
+    endpoint = EndpointCluster(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+    payload = {
+        "age_lt": 101  # see if there are 10 entries, all age should be less than 100
+    }
+
+    res = dynamic_model_search_response_helper(client, payload)
+
+    assert res.status_code == 200
+    assert len(res.json()) == 10
+
+    payload = {"age_gt": 0}  # there should be 10 entries, all age are greater than 10
+    res = dynamic_model_search_response_helper(client, payload)
+    assert res.status_code == 200
+    assert len(res.json()) == 10
