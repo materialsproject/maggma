@@ -5,15 +5,24 @@ from typing import List, Dict, Union, Optional, Set, Any
 from pydantic import BaseModel
 from monty.json import MSONable
 from monty.serialization import loadfn
-from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends, Query
+from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends, Query, Body
 from maggma.core import Store
 from maggma.utils import dynamic_import
 from starlette import responses
 import inspect
 from typing_extensions import Literal
-from mongo_query_mapping import query_mapping, supported_types
 
 default_responses = loadfn(pathlib.Path(__file__).parent / "default_responses.yaml")
+query_mapping = {
+    "eq": "$eq",
+    "not_eq": "$ne",
+    "lt": "$lt",
+    "gt": "$gt",
+    "in": "$in",
+    "not_in": "$nin",
+}
+
+supported_types = [str, int, float]
 
 
 def fields_to_operator(all_fields):
@@ -65,9 +74,14 @@ def fields_to_operator(all_fields):
                     ),
                 ]
         else:
-            raise NotImplementedError(
+            import warnings
+
+            warnings.warn(
                 f"Field name {model_field.name} with {model_field.type_} not implemented"
             )
+            # raise NotImplementedError(
+            #     f"Field name {model_field.name} with {model_field.type_} not implemented"
+            # )
     return params
 
 
@@ -172,7 +186,6 @@ def FieldSetParamFactory(
     Factory method to generate a dependency for sparse field sets in FastAPI
 
     Args:
-        exclusion_fields: fields that are ignored.
         model: PyDantic Model that represents the underlying data source
         default_fields: default fields to return in the API response if no fields are explicitly requested
     """
@@ -185,15 +198,17 @@ def FieldSetParamFactory(
             default=default_fields,
             description=f"Fields to project from {model.__name__} as a list of strings",
         ),
-        all_fields: bool = Query(default=False, description="Include all fields."),
+        all_fields: bool = Query(default=True, description="Include all fields."),
         excluded_fields: Set[str] = Query(
-            default=[],
+            default=set(),
             description=f"Fields to exclude from {model.__name__} as a list ofstrings",
         ),
-    ) -> Dict[str, Set[str]]:
+        # alias: Dict[str, str] = Query(default=dict(), description="Alias fields"),
+    ) -> Dict[str, Any]:
         """
         Projection parameters for the API Endpoint
         """
+        alias = dict()
         if (included_fields != set() and excluded_fields != set()) or (
             all_fields and (included_fields != set() or excluded_fields != set())
         ):
@@ -201,9 +216,13 @@ def FieldSetParamFactory(
                 "projection fields, all_includes, and excluded_fields do not match"
             )
         elif all_fields:
-            return {"include": all_model_fields, "exclude": []}
+            return {"include": all_model_fields, "exclude": [], "alias": alias}
         else:
-            return {"include": included_fields, "exclude": excluded_fields}
+            return {
+                "include": included_fields,
+                "exclude": excluded_fields,
+                "alias": alias,
+            }
 
     return field_set
 
@@ -305,17 +324,24 @@ class EndpointCluster(MSONable):
                     criteria, field_set, pagination
                 )
             )
+            alias = field_set.get("alias", dict())
+            if alias != dict():
+                for k, v in alias.items():
+                    if k in criteria.keys():
+                        criteria[v] = criteria[k]
+                        del criteria[k]
+
             items = self.store.query(
                 criteria=criteria,
                 skip=pagination.get("skip"),
                 limit=pagination.get("limit"),
             )
             result = []
+
             for item in items:
                 model_item = self.model(**item)
-
                 result.append(
-                    model_item.json(
+                    model_item.dict(
                         include=field_set.get("include"),
                         exclude=field_set.get("exclude"),
                     )
@@ -323,7 +349,7 @@ class EndpointCluster(MSONable):
             return result
 
         self.router.get(
-            "/{query}", response_description="WIP", tags=self.tags, responses=responses,
+            "/query", response_description="WIP", tags=self.tags, responses=responses,
         )(dynamic_model_search)
         return None
 
