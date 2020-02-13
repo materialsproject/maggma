@@ -269,14 +269,18 @@ class Store(MSONable, metaclass=ABCMeta):
             # Get our current last_updated dates for each key value
             props = {self.key: 1, self.last_updated_field: 1, "_id": 0}
             dates = {
-                d[self.key]: self._lu_func[0](d[self.last_updated_field])
+                d[self.key]: self._lu_func[0](
+                    d.get(self.last_updated_field, datetime.max)
+                )
                 for d in self.query(properties=props)
             }
 
             # Get the last_updated for the store we're comparing with
             props = {target.key: 1, target.last_updated_field: 1, "_id": 0}
             target_dates = {
-                d[target.key]: target._lu_func[0](d[target.last_updated_field])
+                d[target.key]: target._lu_func[0](
+                    d.get(target.last_updated_field, datetime.min)
+                )
                 for d in target.query(criteria=criteria, properties=props)
             }
 
