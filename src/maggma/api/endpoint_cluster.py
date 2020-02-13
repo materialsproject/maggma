@@ -91,7 +91,8 @@ def build_dynamic_query(model: BaseModel, additional_signature_fields=None):
     and constructing a dynamic_call function on-the-fly.
     Incorporating type checking on-the-fly as well
     Args:
-        additional_signature_fields: additional fields that user can specify. In the format of {"FIELD_NAME": [FIELD_TYPE, Query]}
+        additional_signature_fields: additional fields that user can specify. In the format of {"FIELD_NAME":
+        [FIELD_TYPE, Query]}
         model: the PyDantic model that holds the data. Its fields are used to build Query
 
     Returns:
