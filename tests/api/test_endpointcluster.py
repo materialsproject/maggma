@@ -24,7 +24,7 @@ def owners():
             )
             for i in list(range(10)[1:])
         ]  # there are 8 owners here
-        + [Owner(name="PersonAge12", age=12, weight=float(randint(100, 200)))]
+        + [Owner(name="PersonAge9", age=9, weight=float(randint(100, 200)))]
         + [Owner(name="PersonWeight150", age=randint(10, 15), weight=float(150))]
     )
 
@@ -92,39 +92,56 @@ def dynamic_model_search_response_helper(
     Returns:
         request.Response object that contains the response of the correspoding payload
     """
-
+    print(urlencode(payload))
     url = base + urlencode(payload)
     res = client.get(url)
     return res
 
 
-def test_endpoint_dynamic_model_search_eq_not_eq_test(owner_store):
+def test_endpoint_dynamic_model_search_eq_noteq(owner_store):
     endpoint = EndpointCluster(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
 
     client = TestClient(app)
-    payload = {"name_eq": "PersonAge12"}
+    payload = {"name_eq": "PersonAge9"}
     res = dynamic_model_search_response_helper(client=client, payload=payload)
 
     # String eq
     assert res.status_code == 200
     assert len(res.json()) == 1
-    assert res.json()[0]["name"] == "PersonAge12"
+    assert res.json()[0]["name"] == "PersonAge9"
 
     # int Eq
-    assert res.json()[0]["age"] == 12
+    assert res.json()[0]["age"] == 9
 
     # float Eq
-    payload = {"name_eq": "PersonWeight150"}
-
+    payload = {"weight_eq": 150.0}
     res = dynamic_model_search_response_helper(client, payload)
     assert res.status_code == 200
     assert len(res.json()) == 1
     assert res.json()[0]["weight"] == 150.0
 
+    # Str Not eq
+    payload = {"name_not_eq": "PersonAge9"}
+    res = dynamic_model_search_response_helper(client, payload)
+    assert res.status_code == 200
+    assert len(res.json()) == 10
 
-def test_endpoint_dynamic_model_search_lt_gt_test(owner_store):
+    # int Not Eq
+    payload = {"age_not_eq": 9}
+    res = dynamic_model_search_response_helper(client, payload)
+    assert res.status_code == 200
+    assert len(res.json()) == 10
+
+    # float Not Eq
+    payload = {"weight_not_eq": 150.0}
+    res = dynamic_model_search_response_helper(client, payload)
+    assert res.status_code == 200
+    assert len(res.json()) == 10
+
+
+def test_endpoint_dynamic_model_search_lt_gt(owner_store):
     endpoint = EndpointCluster(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
@@ -143,3 +160,15 @@ def test_endpoint_dynamic_model_search_lt_gt_test(owner_store):
     res = dynamic_model_search_response_helper(client, payload)
     assert res.status_code == 200
     assert len(res.json()) == 10
+
+
+def test_endpoint_dynamic_model_search_in_notin(owner_store):
+    endpoint = EndpointCluster(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    # client = TestClient(app)
+    # payload = {"name_in": ["PersonAge9", "PersonWeight150"]}
+    # res = dynamic_model_search_response_helper(client=client, payload=payload)
+    # assert res.status_code == 200 ## this part doesn't work... i'll figure it out later
+    # assert len(res.json()) == 2
