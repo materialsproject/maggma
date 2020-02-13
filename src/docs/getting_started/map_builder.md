@@ -29,6 +29,8 @@ Just like before we define a new class, but this time it should inherit from `Ma
         self.multiplier = multiplier
         self.kwargs = kwargs
 
+        kwargs = {k,v in kwargs.items() if k not in ["projection","delete_orphans","timeout","store_process_time","retry_failed"]}
+
         super().__init__(source=source,
                          target=target,
                          projection=["a"],
