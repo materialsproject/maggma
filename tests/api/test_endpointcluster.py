@@ -92,7 +92,6 @@ def dynamic_model_search_response_helper(
     Returns:
         request.Response object that contains the response of the correspoding payload
     """
-    print(urlencode(payload))
     url = base + urlencode(payload)
     res = client.get(url)
     return res
@@ -167,8 +166,15 @@ def test_endpoint_dynamic_model_search_in_notin(owner_store):
     app = FastAPI()
     app.include_router(endpoint.router)
 
-    # client = TestClient(app)
-    # payload = {"name_in": ["PersonAge9", "PersonWeight150"]}
-    # res = dynamic_model_search_response_helper(client=client, payload=payload)
-    # assert res.status_code == 200 ## this part doesn't work... i'll figure it out later
-    # assert len(res.json()) == 2
+    client = TestClient(app)
+    # In
+    url = "/query?age_in=9&age_in=101&all_fields=true&limit=10"
+    res = client.get(url)
+    assert res.status_code == 200
+    assert len(res.json()) == 1
+
+    # Not In
+    url = "/query?age_not_in=9&age_not_in=101&all_fields=true&limit=10"
+    res = client.get(url)
+    assert res.status_code == 200
+    assert len(res.json()) == 10

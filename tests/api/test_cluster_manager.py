@@ -65,54 +65,51 @@ def pet_store(pets):
 
 
 def test_cluster_dict_behavior(owner_store, pet_store):
-    pass
-    # owner_endpoint = EndpointCluster(owner_store, Owner)
-    # pet_endpoint = EndpointCluster(pet_store, Pet)
-    #
-    # manager = ClusterManager({"owners": owner_endpoint})
-    #
-    # assert manager["owners"] == owner_endpoint  # test __getitem__
-    # assert len(manager) == 1  # test len
-    # assert "owners" in manager.keys()  # test keys
-    # assert "owners" in manager  # test __contains__
-    # assert "pets" not in manager.keys()  # test __keys__
-    #
-    # manager["pets"] = pet_endpoint  # test __setitem__
-    # assert len(manager) == 2
-    # assert manager["pets"] == pet_endpoint
+    owner_endpoint = EndpointCluster(owner_store, Owner)
+    pet_endpoint = EndpointCluster(pet_store, Pet)
+
+    manager = ClusterManager({"owners": owner_endpoint})
+
+    assert manager["owners"] == owner_endpoint  # test __getitem__
+    assert len(manager) == 1  # test len
+    assert "owners" in manager.keys()  # test keys
+    assert "owners" in manager  # test __contains__
+    assert "pets" not in manager.keys()  # test __keys__
+
+    manager["pets"] = pet_endpoint  # test __setitem__
+    assert len(manager) == 2
+    assert manager["pets"] == pet_endpoint
 
 
 def test_cluster_run(owner_store, pet_store):
-    pass
-    # owner_endpoint = EndpointCluster(owner_store, Owner)
-    # pet_endpoint = EndpointCluster(pet_store, Pet)
-    #
-    # manager = ClusterManager({"owners": owner_endpoint, "pets": pet_endpoint})
-    #
-    # client = TestClient(manager.app)
-    #
-    # assert client.get("/").status_code == 404
-    # assert client.get("/owners/name/Person1").status_code == 200
-    # assert client.get("/owners/name/Person1").json()["name"] == "Person1"
-    #
-    # assert client.get("/pets/name/Pet1").status_code == 200
-    # assert client.get("/pets/name/Pet1").json()["name"] == "Pet1"
+    owner_endpoint = EndpointCluster(owner_store, Owner)
+    pet_endpoint = EndpointCluster(pet_store, Pet)
+
+    manager = ClusterManager({"owners": owner_endpoint, "pets": pet_endpoint})
+
+    client = TestClient(manager.app)
+
+    assert client.get("/").status_code == 404
+    assert client.get("/owners/name/Person1").status_code == 200
+    assert client.get("/owners/name/Person1").json()["name"] == "Person1"
+
+    assert client.get("/pets/name/Pet1").status_code == 200
+    assert client.get("/pets/name/Pet1").json()["name"] == "Pet1"
 
 
 def test_cluster_pprint(owner_store, pet_store):
-    pass
-    # endpoint_main = EndpointCluster(owner_store, Owner, description="main")
-    # endpoint_main_temp = EndpointCluster(pet_store, Pet, description="main_temp")
-    # endpoint_temp = EndpointCluster(owner_store, Owner, description="temp")
+    endpoint_main = EndpointCluster(owner_store, Owner, description="main")
+    endpoint_main_temp = EndpointCluster(pet_store, Pet, description="main_temp")
+    endpoint_temp = EndpointCluster(owner_store, Owner, description="temp")
 
-    # manager = ClusterManager(
-    #     {
-    #         "/temp": endpoint_temp,
-    #         "/main": endpoint_main,
-    #         "/main/temp": endpoint_main_temp,
-    #     }
-    # )
-    #
-    # res = manager.sort()
-    #
-    # assert res == ["/main", "/main/temp", "/temp"]
+    manager = ClusterManager(
+        {
+            "/temp": endpoint_temp,
+            "/main": endpoint_main,
+            "/main/temp": endpoint_main_temp,
+        }
+    )
+
+    res = manager.sort()
+
+    assert res == ["/main", "/main/temp", "/temp"]
