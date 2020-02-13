@@ -34,7 +34,7 @@ Just like before we define a new class, but this time it should inherit from `Ma
                          projection=["a"],
                          delete_orphans=False,
                          timeout=10,
-                         store_process_timeout=True,
+                         store_process_time=True,
                          retry_failed=True,
                          **kwargs)
 ```
@@ -52,7 +52,7 @@ Finally let's get to the hard part which is running our function. We do this by 
 ``` python
 
     def unary_function(self,item):
-        return {"a": item["a"] * self.mulitplier}
+        return {"a": item["a"] * self.multiplier}
 
 ```
 
