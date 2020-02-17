@@ -29,12 +29,14 @@ Just like before we define a new class, but this time it should inherit from `Ma
         self.multiplier = multiplier
         self.kwargs = kwargs
 
+        kwargs = {k,v in kwargs.items() if k not in ["projection","delete_orphans","timeout","store_process_time","retry_failed"]}
+
         super().__init__(source=source,
                          target=target,
                          projection=["a"],
                          delete_orphans=False,
                          timeout=10,
-                         store_process_timeout=True,
+                         store_process_time=True,
                          retry_failed=True,
                          **kwargs)
 ```
@@ -52,7 +54,7 @@ Finally let's get to the hard part which is running our function. We do this by 
 ``` python
 
     def unary_function(self,item):
-        return {"a": item["a"] * self.mulitplier}
+        return {"a": item["a"] * self.multiplier}
 
 ```
 

@@ -163,7 +163,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         out = {
             self.target.key: item[key],
             self.target.last_updated_field: self.source._lu_func[0](
-                item[last_updated_field]
+                item.get(last_updated_field, datetime.utcnow())
             ),
         }
 
