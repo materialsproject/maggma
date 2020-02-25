@@ -87,7 +87,7 @@ class Projection_Builder(Builder):
                     projection_mapping.append(f)
                 else:
                     raise TypeError(
-                        """Input fields_to_project elements must be a list or dict. 
+                        """Input fields_to_project elements must be a list or dict.
                         E.g. [['str1','str2'],{'A':'str1','B':str2'}]"""
                     )
             # ensure key is included in projection for get_items query
