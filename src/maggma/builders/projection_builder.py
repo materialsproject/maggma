@@ -3,7 +3,7 @@ from pydash import get
 from copy import deepcopy
 from datetime import datetime
 from maggma.utils import grouper
-from typing import Union, Dict, List, Iterable, Any
+from typing import Union, Dict, List, Iterable
 from maggma.core import Store
 
 
@@ -26,8 +26,10 @@ class Projection_Builder(Builder):
         self,
         source_stores: List[Store],
         target_store: Store,
-        fields_to_project: Union[List[Union[List, Dict]],None]=None,  #!!!check type hint validity
-        query_by_key: List=None,
+        fields_to_project: Union[
+            List[Union[List, Dict]], None
+        ] = None,  # !!!check type hint validity
+        query_by_key: List = None,
         **kwargs
     ):
         """
@@ -61,14 +63,14 @@ class Projection_Builder(Builder):
                 every document from the input stores will be projected.
         """
         # check for user input errors
-        if isinstance(source_stores, list) == False:
+        if isinstance(source_stores, list) is False:
             raise TypeError("Input source_stores must be provided in a list")
         if isinstance(fields_to_project, list):
             if len(source_stores) != len(fields_to_project):
                 raise ValueError(
                     "There must be an equal number of elements in source_stores and fields_to_project"
                 )
-        elif fields_to_project != None:
+        elif fields_to_project is not None:
             raise TypeError(
                 "Input fields_to_project must be a list. E.g. [['str1','str2'],{'A':'str1','B':str2'}]"
             )
@@ -85,7 +87,8 @@ class Projection_Builder(Builder):
                     projection_mapping.append(f)
                 else:
                     raise TypeError(
-                        "Input fields_to_project elements must be a list or dict. E.g. [['str1','str2'],{'A':'str1','B':str2'}]"
+                        """Input fields_to_project elements must be a list or dict. 
+                        E.g. [['str1','str2'],{'A':'str1','B':str2'}]"""
                     )
             # ensure key is included in projection for get_items query
             for store, p in zip(source_stores, projection_mapping):
@@ -141,7 +144,7 @@ class Projection_Builder(Builder):
         # project fields specified by projection_mapping
         for chunked_keys in grouper(keys, self.chunk_size):
             chunked_keys = [k for k in chunked_keys if k is not None]
-            #chunked_keys = list(chunked_keys) !!!
+            # chunked_keys = list(chunked_keys) !!!
             self.logger.debug("Querying by chunked_keys: {}".format(chunked_keys))
 
             unsorted_items_to_process = []
