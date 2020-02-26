@@ -2,13 +2,13 @@ import uvicorn
 from fastapi import FastAPI
 from typing import Dict
 from monty.json import MSONable
-from maggma.api.endpoint_cluster import EndpointCluster
+from resource import Resource
 from inspect import isclass
-from maggma.utils import dynamic_import
+from util import dynamic_import
 
 
 class ClusterManager(MSONable):
-    def __init__(self, endpoints: Dict[str, EndpointCluster]):
+    def __init__(self, endpoints: Dict[str, Resource]):
         self.endpoints = endpoints
 
     @property
@@ -56,7 +56,7 @@ class ClusterManager(MSONable):
             new_endpoint = dynamic_import(module_path, class_name)
             self.__setitem__(prefix, new_endpoint)
             pass
-        elif isclass(endpoint) and issubclass(endpoint, EndpointCluster):
+        elif isclass(endpoint) and issubclass(endpoint, Resource):
             self.__setitem__(prefix, endpoint)
         else:
             raise ValueError(

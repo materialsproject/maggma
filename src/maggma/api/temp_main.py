@@ -1,7 +1,7 @@
 from random import randint
 from pydantic import BaseModel, Field
 from maggma.stores import MemoryStore
-from endpoint_cluster import EndpointCluster
+from resource import Resource
 from cluster_manager import ClusterManager
 
 
@@ -32,10 +32,10 @@ def owner_store(owners):
 
 o_s = owner_store(owners())
 #
-endpoint_main = EndpointCluster(o_s, Owner, description="main")
-endpoint_main_temp = EndpointCluster(o_s, Owner, description="main_temp")
-endpoint_temp = EndpointCluster(o_s, Owner, description="temp")
-endpoint_main_a_temp = EndpointCluster(o_s, Owner, description="main_a_temp")
+# endpoint_main = EndpointCluster(o_s, Owner, description="main")
+# endpoint_main_temp = EndpointCluster(o_s, Owner, description="main_temp")
+# endpoint_temp = EndpointCluster(o_s, Owner, description="temp")
+# endpoint_main_a_temp = EndpointCluster(o_s, Owner, description="main_a_temp")
 # endpoint.run()
 # manager = ClusterManager(
 #     {
@@ -48,6 +48,6 @@ endpoint_main_a_temp = EndpointCluster(o_s, Owner, description="main_a_temp")
 #
 # manager.pprint()
 
-owner_model = Owner(name="PersonAge12", age=12, weight=randint(100, 200))
-endpoint_model_extractor = EndpointCluster(o_s, Owner)
+# owner_model = Owner(name="PersonAge12", age=12, weight=randint(100, 200))
+endpoint_model_extractor = Resource(o_s, Owner)
 endpoint_model_extractor.run()
