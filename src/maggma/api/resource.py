@@ -15,7 +15,7 @@ from maggma.api.query_operator import (
     DefaultDynamicQuery,
 )
 from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends
-from models import Response, Meta
+from maggma.api.models import Response, Meta
 from starlette.responses import RedirectResponse
 
 

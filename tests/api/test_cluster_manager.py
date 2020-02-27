@@ -3,7 +3,8 @@ from pydantic import BaseModel, Field
 from enum import Enum
 from random import randint, choice
 from maggma.stores import MemoryStore
-from maggma.api import EndpointCluster, ClusterManager
+from maggma.api.resource import Resource
+from maggma.api.cluster_manager import ClusterManager
 from starlette.testclient import TestClient
 from fastapi.encoders import jsonable_encoder
 
@@ -65,8 +66,8 @@ def pet_store(pets):
 
 
 def test_cluster_dict_behavior(owner_store, pet_store):
-    owner_endpoint = EndpointCluster(owner_store, Owner)
-    pet_endpoint = EndpointCluster(pet_store, Pet)
+    owner_endpoint = Resource(owner_store, Owner)
+    pet_endpoint = Resource(pet_store, Pet)
 
     manager = ClusterManager({"owners": owner_endpoint})
 
@@ -82,8 +83,8 @@ def test_cluster_dict_behavior(owner_store, pet_store):
 
 
 def test_cluster_run(owner_store, pet_store):
-    owner_endpoint = EndpointCluster(owner_store, Owner)
-    pet_endpoint = EndpointCluster(pet_store, Pet)
+    owner_endpoint = Resource(owner_store, Owner)
+    pet_endpoint = Resource(pet_store, Pet)
 
     manager = ClusterManager({"owners": owner_endpoint, "pets": pet_endpoint})
 
@@ -98,9 +99,9 @@ def test_cluster_run(owner_store, pet_store):
 
 
 def test_cluster_pprint(owner_store, pet_store):
-    endpoint_main = EndpointCluster(owner_store, Owner, description="main")
-    endpoint_main_temp = EndpointCluster(pet_store, Pet, description="main_temp")
-    endpoint_temp = EndpointCluster(owner_store, Owner, description="temp")
+    endpoint_main = Resource(owner_store, Owner, description="main")
+    endpoint_main_temp = Resource(pet_store, Pet, description="main_temp")
+    endpoint_temp = Resource(owner_store, Owner, description="temp")
 
     manager = ClusterManager(
         {

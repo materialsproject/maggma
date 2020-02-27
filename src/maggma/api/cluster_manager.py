@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from typing import Dict
 from monty.json import MSONable
-from resource import Resource
+from maggma.api.resource import Resource
 from inspect import isclass
 from util import dynamic_import
 

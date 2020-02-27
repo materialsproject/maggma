@@ -71,7 +71,6 @@ class Response(GenericModel, Generic[DataT]):
 
     @validator("meta", pre=True, always=True)
     def default_meta(cls, v, values):
-        print("Checking meta")
         if v is None:
             v = Meta().dict()
         else:
@@ -79,6 +78,4 @@ class Response(GenericModel, Generic[DataT]):
                 v["total_doc"] = len(values["data"])
             else:
                 v["total_doc"] = 0
-            print(v)
-            print(values)
         return v
