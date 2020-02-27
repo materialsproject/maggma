@@ -77,6 +77,8 @@ class Response(GenericModel, Generic[DataT]):
         else:
             if values.get("data", None) is not None:
                 v["total_doc"] = len(values["data"])
+            else:
+                v["total_doc"] = 0
             print(v)
             print(values)
         return v
