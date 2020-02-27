@@ -1,6 +1,8 @@
 from random import randint
 from pydantic import BaseModel, Field
 from maggma.stores import MemoryStore
+
+# from maggma.api.resource import Resource
 from resource import Resource
 from cluster_manager import ClusterManager
 

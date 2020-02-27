@@ -1,9 +1,14 @@
 from typing import List, Dict, Union, Optional
 from pydantic import BaseModel
 from monty.json import MSONable
-from util import dynamic_import, STORE_PARAMS, merge_queries, attach_signature
+from maggma.api.util import (
+    dynamic_import,
+    STORE_PARAMS,
+    merge_queries,
+    attach_signature,
+)
 from maggma.core import Store
-from query_operator import (
+from maggma.api.query_operator import (
     QueryOperator,
     PaginationQuery,
     SparseFieldsQuery,
@@ -153,10 +158,8 @@ class Resource(MSONable):
             elements = self.store.distinct("elements", count_query)
             data = [self.model(**d) for d in self.store.query(**query)]
             meta = Meta(total=count, elements=elements)
-            response = Response(data=data, meta=meta.dict())
-
+            response = Response[self.model](data=data, meta=meta.dict())
             return response
-            # return data
 
         attach_signature(
             search,

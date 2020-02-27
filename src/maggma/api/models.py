@@ -1,7 +1,5 @@
 from datetime import datetime
-
-# from pymatgen import Element
-from mp_api import __version__
+from maggma import __version__
 from pydantic import BaseModel, Field, validator
 from typing import Generic, TypeVar, Optional, List
 from pydantic.generics import GenericModel
@@ -73,9 +71,12 @@ class Response(GenericModel, Generic[DataT]):
 
     @validator("meta", pre=True, always=True)
     def default_meta(cls, v, values):
+        print("Checking meta")
         if v is None:
             v = Meta().dict()
         else:
-            if "total_doc" not in v and values.get("data", None) is not None:
+            if values.get("data", None) is not None:
                 v["total_doc"] = len(values["data"])
+            print(v)
+            print(values)
         return v

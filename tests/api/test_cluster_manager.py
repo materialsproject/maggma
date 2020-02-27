@@ -1,5 +1,5 @@
 import pytest
-from pydantic import BaseModel, Schema
+from pydantic import BaseModel, Field
 from enum import Enum
 from random import randint, choice
 from maggma.stores import MemoryStore
@@ -14,15 +14,15 @@ class PetType(str, Enum):
 
 
 class Owner(BaseModel):
-    name: str = Schema(..., title="Owner's name")
-    age: int = Schema(..., title="Owne'r Age")
-    weight: int = Schema(..., title="Owner's weight")
+    name: str = Field(..., title="Owner's name")
+    age: int = Field(..., title="Owne'r Age")
+    weight: int = Field(..., title="Owner's weight")
 
 
 class Pet(BaseModel):
-    name: str = Schema(..., title="Pet's Name")
-    pet_type: PetType = Schema(..., title="Pet Type")
-    owner_name: str = Schema(..., title="Owner's name")
+    name: str = Field(..., title="Pet's Name")
+    pet_type: PetType = Field(..., title="Pet Type")
+    owner_name: str = Field(..., title="Owner's name")
 
 
 @pytest.fixture("session")

@@ -1,3 +1,8 @@
 """ Simple API Interface for Maggma """
-from maggma.api.endpoint_cluster import EndpointCluster
-from maggma.api.cluster_manager import ClusterManager
+from pkg_resources import get_distribution, DistributionNotFound
+
+try:
+    __version__ = get_distribution(__name__).version
+except DistributionNotFound:
+    # package is not installed
+    pass

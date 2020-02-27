@@ -2,7 +2,7 @@ from typing import List, Dict, Optional
 from pydantic import BaseModel
 from fastapi import Query
 from monty.json import MSONable
-from mp_api.core.utils import STORE_PARAMS, dynamic_import
+from maggma.api.util import STORE_PARAMS, dynamic_import
 import inspect
 
 
