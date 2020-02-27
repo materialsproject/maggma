@@ -107,7 +107,9 @@ class MongoStore(Store):
             criteria: PyMongo filter for documents to search in
         """
         criteria = criteria or {}
-        return self._collection.distinct(field, criteria)
+        distinct_vals = self._collection.distinct(field, criteria)
+
+        return distinct_vals if distinct_vals is not None else []
 
     def groupby(
         self,
