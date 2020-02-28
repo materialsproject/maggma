@@ -26,9 +26,7 @@ class Projection_Builder(Builder):
         self,
         source_stores: List[Store],
         target_store: Store,
-        fields_to_project: Union[
-            List[Union[List, Dict]], None
-        ] = None,  # !!!check type hint validity
+        fields_to_project: Union[List[Union[List, Dict]], None] = None,
         query_by_key: List = None,
         **kwargs
     ):
@@ -127,7 +125,7 @@ class Projection_Builder(Builder):
         if len(self.query_by_key) > 0:
             keys = self.query_by_key
         else:
-            unique_keys = set()
+            unique_keys = set()  # type: Set
             for store in self.sources:
                 store_keys = store.distinct(field=store.key)
                 unique_keys.update(store_keys)
@@ -217,7 +215,7 @@ class Projection_Builder(Builder):
         """
         self.logger.debug("Processing items: sorting by key values...")
         key = self.target.key
-        items_sorted_by_key = dict()
+        items_sorted_by_key = {}  # type: Dict
         for i in items:
             key_value = i[key]
             if key_value not in items_sorted_by_key.keys():
@@ -227,7 +225,7 @@ class Projection_Builder(Builder):
         items_for_target = []
         for k, i_sorted in items_sorted_by_key.items():
             self.logger.debug("Aggregating items for {}: {}".format(key, k))
-            target_doc = dict()
+            target_doc = {}  # type: Dict
             for i in i_sorted:
                 target_doc.update(i)
             # last modification is adding key value avoid overwriting
