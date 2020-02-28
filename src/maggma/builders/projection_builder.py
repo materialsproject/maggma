@@ -10,12 +10,12 @@ from maggma.core import Store
 class Projection_Builder(Builder):
     """
     This builder is used to create new documents that combines
-    information from multiple input stores and stores these
+    information from multiple input stores and adds these
     summary documents in the specified target store.
 
     Key values are used for matching such that multiple docs
-    from the source_stores with the same key value will be
-    combined into a single doc in the target store.
+    from the source_stores with the same key value will be combined
+    into a single doc for that key value in the target store.
 
     Built in functionalities include user specification of which
     fields to project into the target store from each input store
@@ -76,8 +76,9 @@ class Projection_Builder(Builder):
             )
 
         # interpret fields_to_project to create projection_mapping attribute
+        projection_mapping: List[Dict]  # PEP 484 Type Hinting
         if fields_to_project is None:
-            projection_mapping = [None] * len(source_stores)
+            projection_mapping = [{}] * len(source_stores)
         else:
             projection_mapping = []
             for f in fields_to_project:
@@ -126,17 +127,17 @@ class Projection_Builder(Builder):
         if len(self.query_by_key) > 0:
             keys = self.query_by_key
         else:
-            keys = set()
+            unique_keys = set()
             for store in self.sources:
                 store_keys = store.distinct(field=store.key)
-                keys.update(store_keys)
+                unique_keys.update(store_keys)
                 if None in store_keys:
                     self.logger.debug(
                         "None found as a key value for store {} with key {}".format(
                             store.collection_name, store.key
                         )
                     )
-            keys = list(keys)
+            keys = list(unique_keys)
             self.logger.debug("{} distinct key values found".format(len(keys)))
             self.logger.debug("None found in key values? {}".format(None in keys))
 
@@ -153,6 +154,7 @@ class Projection_Builder(Builder):
                 # project all fields from store if corresponding element
                 # in projection_mapping is an empty dict,
                 # else only project the specified fields
+                properties: Union[List, None]
                 if projection == {}:  # all fields are projected
                     properties = None
                     self.logger.debug(
@@ -178,7 +180,7 @@ class Projection_Builder(Builder):
                     if properties is None:  # all fields are projected as is
                         item = deepcopy(d)
                     else:  # specified fields are renamed
-                        item = {}
+                        item = dict()
                         for k, v in projection.items():
                             item[k] = get(d, v)
 
@@ -215,7 +217,7 @@ class Projection_Builder(Builder):
         """
         self.logger.debug("Processing items: sorting by key values...")
         key = self.target.key
-        items_sorted_by_key = {}
+        items_sorted_by_key = dict()
         for i in items:
             key_value = i[key]
             if key_value not in items_sorted_by_key.keys():
@@ -225,7 +227,7 @@ class Projection_Builder(Builder):
         items_for_target = []
         for k, i_sorted in items_sorted_by_key.items():
             self.logger.debug("Aggregating items for {}: {}".format(key, k))
-            target_doc = {}
+            target_doc = dict()
             for i in i_sorted:
                 target_doc.update(i)
             # last modification is adding key value avoid overwriting
@@ -246,7 +248,7 @@ class Projection_Builder(Builder):
                 corresponding to a single key value
         """
         num_items = len(items)
-        self.logger.debug("Updating target with {} items...".format(num_items))
+        self.logger.info("Updating target with {} items...".format(num_items))
         target = self.target
 
         target_insertion_time = datetime.utcnow()
