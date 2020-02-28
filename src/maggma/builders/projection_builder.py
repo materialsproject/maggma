@@ -200,7 +200,7 @@ class Projection_Builder(Builder):
 
             yield unsorted_items_to_process
 
-    def process_item(self, items: Iterable) -> List[Dict]:
+    def process_item(self, items: Union[List, Iterable]) -> List[Dict]:
         """
         Takes a chunk of items belonging to a subset of key values
         and groups them by key value. Combines items for each
@@ -213,9 +213,7 @@ class Projection_Builder(Builder):
             items_for_target: a list of items where now each
                 item corresponds to a single key value
         """
-        self.logger.info(
-            "Processing {} items: sorting by key values...".format(len(items))
-        )
+        self.logger.info("Processing items: sorting by key values...")
         key = self.target.key
         items_sorted_by_key = {}  # type: Dict
         for i in items:
