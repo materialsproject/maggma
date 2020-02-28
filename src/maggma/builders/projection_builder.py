@@ -3,7 +3,7 @@ from pydash import get
 from copy import deepcopy
 from datetime import datetime
 from maggma.utils import grouper
-from typing import Union, Dict, List, Iterable
+from typing import Union, Dict, List, Iterable, Set
 from maggma.core import Store
 
 
