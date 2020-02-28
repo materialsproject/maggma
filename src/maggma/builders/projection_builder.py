@@ -9,17 +9,18 @@ from maggma.core import Store
 
 class Projection_Builder(Builder):
     """
-    This builder is used to create new documents that combines
-    information from multiple input stores and adds these
-    summary documents in the specified target store.
+    This builder creates new documents that combine
+    information from multiple input stores. These summary
+    documents are then added to the specified target store.
 
     Key values are used for matching such that multiple docs
-    from the source_stores with the same key value will be combined
+    from the input stores with the same key value will be combined
     into a single doc for that key value in the target store.
 
     Built in functionalities include user specification of which
-    fields to project into the target store from each input store
-    and limiting the builder to only consider certain key values.
+    fields to project into the target store from each input store,
+    renaming projected fields, and limiting the builder to only
+    consider certain key values.
     """
 
     def __init__(
@@ -32,9 +33,9 @@ class Projection_Builder(Builder):
     ):
         """
         Args:
-            source_stores ([MongoStore]): list of stores. Fields from
+            source_stores ([MongoStore]): List of stores. Fields from
                 these input stores will be projected into target_store
-            target_store (MongoStore): store where the aggregated
+            target_store (MongoStore): Store where the summary/aggregated
                 output documents produced will be stored
             fields_to_project ([List,Dict]): If provided, the order of items in
                 this list must correspond to source_stores. By default, all
@@ -136,14 +137,13 @@ class Projection_Builder(Builder):
                         )
                     )
             keys = list(unique_keys)
-            self.logger.debug("{} distinct key values found".format(len(keys)))
+            self.logger.info("{} distinct key values found".format(len(keys)))
             self.logger.debug("None found in key values? {}".format(None in keys))
 
         # for every key (in chunks), query from each store and
         # project fields specified by projection_mapping
         for chunked_keys in grouper(keys, self.chunk_size):
             chunked_keys = [k for k in chunked_keys if k is not None]
-            # chunked_keys = list(chunked_keys) !!!
             self.logger.debug("Querying by chunked_keys: {}".format(chunked_keys))
 
             unsorted_items_to_process = []
@@ -200,7 +200,7 @@ class Projection_Builder(Builder):
 
             yield unsorted_items_to_process
 
-    def process_item(self, items: Iterable) -> List:
+    def process_item(self, items: Iterable) -> List[Dict]:
         """
         Takes a chunk of items belonging to a subset of key values
         and groups them by key value. Combines items for each
@@ -213,7 +213,9 @@ class Projection_Builder(Builder):
             items_for_target: a list of items where now each
                 item corresponds to a single key value
         """
-        self.logger.debug("Processing items: sorting by key values...")
+        self.logger.info(
+            "Processing {} items: sorting by key values...".format(len(items))
+        )
         key = self.target.key
         items_sorted_by_key = {}  # type: Dict
         for i in items:
@@ -224,7 +226,7 @@ class Projection_Builder(Builder):
 
         items_for_target = []
         for k, i_sorted in items_sorted_by_key.items():
-            self.logger.debug("Aggregating items for {}: {}".format(key, k))
+            self.logger.debug("Combined items for {}: {}".format(key, k))
             target_doc = {}  # type: Dict
             for i in i_sorted:
                 target_doc.update(i)
