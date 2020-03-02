@@ -74,6 +74,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
 
         all_ids = set(self.source.distinct(self.source.key, criteria=query))
         unprocessed_ids = all_ids - set(processed_ids)
+        self.logger.debug(f"Found {len(all_ids)} total docs in source")
         self.logger.info(f"Found {len(unprocessed_ids)} IDs to process")
 
         new_ids = set(
