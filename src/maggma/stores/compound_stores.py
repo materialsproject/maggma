@@ -317,7 +317,7 @@ class JointStore(Store):
 class ConcatStore(Store):
     """Store concatting multiple stores"""
 
-    def __init__(self, *stores: Store, **kwargs):
+    def __init__(self, stores: List[Store], **kwargs):
         """
         Initialize a ConcatStore that concatenates multiple stores together
         to appear as one store
