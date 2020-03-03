@@ -3,7 +3,7 @@ monty==3.0.2
 mongomock==3.18.0
 pydash==4.7.6
 jsonschema==3.2.0
-tqdm==4.42.0
+tqdm==4.43.0
 mongogrant==0.3.0
 aioitertools==0.5.1
 numpy==1.18.1
