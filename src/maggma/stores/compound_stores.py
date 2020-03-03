@@ -326,6 +326,7 @@ class ConcatStore(Store):
             stores: list of stores to concatenate together
         """
         self.stores = stores
+        self.kwargs = kwargs
         super(ConcatStore, self).__init__(**kwargs)
 
     def name(self) -> str:

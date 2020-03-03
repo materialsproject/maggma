@@ -27,6 +27,7 @@ class GroupBuilder(MapBuilder, metaclass=ABCMeta):
         self, source: Store, target: Store, grouping_keys: List[str], **kwargs
     ):
         self.grouping_keys = grouping_keys
+        self.kwargs = kwargs
         kwargs["delete_orphans"] = False
         super().__init__(source=source, target=target, **kwargs)
 
