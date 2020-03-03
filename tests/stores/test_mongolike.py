@@ -249,7 +249,7 @@ def test_eq(mongostore, memorystore, jsonstore):
 
 
 @pytest.mark.skipif(
-    "mongodb+srv" in os.environ.get("MONGODB_SRV_URI", ""),
+    "mongodb+srv" not in os.environ.get("MONGODB_SRV_URI", ""),
     reason="requires special mongodb+srv URI",
 )
 def test_mongo_uri():
