@@ -12,7 +12,7 @@ from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
 
 import mongomock
 
-from itertools import groupby
+from itertools import groupby, chain
 from pymongo import MongoClient
 from pydash import set_, get, has
 
@@ -106,10 +106,25 @@ class MongoStore(Store):
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
         """
-        criteria = criteria or {}
-        distinct_vals = self._collection.distinct(field, criteria)
 
-        return distinct_vals if distinct_vals is not None else []
+        pipeline = []
+
+        if criteria is not None:
+            pipeline.append({"$match": criteria})
+
+        pipeline.append({"$project": {field: 1}})
+        pipeline.append({"$group": {"_id": f"${field}"}})
+
+        distinct_vals = [d["_id"] for d in self._collection.aggregate(pipeline)]
+
+        if len(distinct_vals) > 0:
+            if isinstance(distinct_vals[0], list):
+                distinct_vals = set(chain.from_iterable(distinct_vals))
+            else:
+                distinct_vals = set(distinct_vals)
+            return list(distinct_vals)
+
+        return []
 
     def groupby(
         self,
