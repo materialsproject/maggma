@@ -107,7 +107,7 @@ class MongoStore(Store):
             criteria: PyMongo filter for documents to search in
         """
 
-        pipeline = []
+        pipeline: List[Dict] = []
 
         # Ensure field exists
         pipeline.append({"$match": {field: {"$exists": 1}}})
@@ -117,13 +117,13 @@ class MongoStore(Store):
 
         pipeline.append({"$group": {"_id": f"${field}"}})
 
-        distinct_vals = [d["_id"] for d in self._collection.aggregate(pipeline)]
+        pipeline_results = [d["_id"] for d in self._collection.aggregate(pipeline)]
 
-        if len(distinct_vals) > 0:
-            if isinstance(distinct_vals[0], list):
-                distinct_vals = set(chain.from_iterable(distinct_vals))
+        if len(pipeline_results) > 0:
+            if isinstance(pipeline_results[0], list):
+                distinct_vals = set(chain.from_iterable(pipeline_results))
             else:
-                distinct_vals = set(distinct_vals)
+                distinct_vals = set(pipeline_results)
             return list(distinct_vals)
 
         return []
