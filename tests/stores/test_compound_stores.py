@@ -219,3 +219,11 @@ def test_eq(mongostore, jointstore, concat_store):
     assert mongostore != jointstore
     assert mongostore != concat_store
     assert jointstore != concat_store
+
+
+def test_serialize(concat_store):
+
+    d = concat_store.as_dict()
+    new_concat_store = ConcatStore.from_dict(d)
+
+    assert len(new_concat_store.stores) == len(concat_store.stores)
