@@ -166,7 +166,7 @@ def test_joint_remove_docs(jointstore):
 @pytest.fixture
 def concat_store():
     mem_stores = [MemoryStore(str(i)) for i in range(4)]
-    store = ConcatStore(*mem_stores)
+    store = ConcatStore(mem_stores)
     store.connect()
 
     index = 0
