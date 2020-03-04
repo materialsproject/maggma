@@ -109,10 +109,12 @@ class MongoStore(Store):
 
         pipeline = []
 
+        # Ensure field exists
+        pipeline.append({"$match": {field: {"$exists": 1}}})
+
         if criteria is not None:
             pipeline.append({"$match": criteria})
 
-        pipeline.append({"$project": {field: 1}})
         pipeline.append({"$group": {"_id": f"${field}"}})
 
         distinct_vals = [d["_id"] for d in self._collection.aggregate(pipeline)]
