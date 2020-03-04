@@ -27,19 +27,21 @@ class AmazonS3Store(Store):
     Assumes Amazon AWS key and secret key are set in environment or default config file
     """
 
-    def __init__(self, index: Store, bucket: str, compress: bool = False, **kwargs):
+    def __init__(self, index: Store, bucket: str, s3_profile: str = None, compress: bool = False, **kwargs):
         """
         Initializes an S3 Store
 
         Args:
             index: a store to use to index the S3 Bucket
             bucket: name of the bucket
+            s3_profile: name of aws profile containing credentials for role
             compress: compress files inserted into the store
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for AmazonS3Store")
         self.index = index
         self.bucket = bucket
+        self.s3_profile = s3_profile
         self.compress = compress
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
@@ -59,13 +61,16 @@ class AmazonS3Store(Store):
         Connect to the source data
         """
         self.index.connect(force_reset=force_reset)
-        if not self.s3:
-            self.s3 = boto3.resource("s3")
 
+        session = boto3.Session(profile_name=self.s3_profile)
+        resource = session.resource("s3")
+
+        if not self.s3:
+            self.s3 = resource
             if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
                 raise Exception("Bucket not present on AWS: {}".format(self.bucket))
 
-            self.s3_bucket = self.s3.Bucket(self.bucket)
+            self.s3_bucket = resource.Bucket(self.bucket)
 
     def close(self):
         """
@@ -116,31 +121,28 @@ class AmazonS3Store(Store):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
-        for doc in self.index.query(
-            criteria=criteria, sort=sort, limit=limit, skip=skip
-        ):
-            try:
-                # TODO: THis is ugly and unsafe, do some real checking before pulling data
-                data = self.s3_bucket.Object(doc[self.key]).get()["Body"].read()
-            except botocore.exceptions.ClientError as e:
-                # If a client error is thrown, then check that it was a 404 error.
-                # If it was a 404 error, then the object does not exist.
-                error_code = int(e.response["Error"]["Code"])
-                if error_code == 404:
-                    self.logger.error(
-                        "Could not find S3 object {}".format(doc[self.key])
-                    )
-                    break
-                else:
-                    raise e
+        for doc in self.index.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
+            if set(properties).issubset(set(doc.keys())):
+                yield {p: doc[p] for p in properties if p in doc}
+            else:
+                try:
+                    # TODO: THis is ugly and unsafe, do some real checking before pulling data
+                    data = self.s3_bucket.Object(doc[self.key]).get()["Body"].read()
+                except botocore.exceptions.ClientError as e:
+                    # If a client error is thrown, then check that it was a 404 error.
+                    # If it was a 404 error, then the object does not exist.
+                    error_code = int(e.response["Error"]["Code"])
+                    if error_code == 404:
+                        self.logger.error("Could not find S3 object {}".format(doc[self.key]))
+                        break
+                    else:
+                        raise e
 
-            if doc.get("compression", "") == "zlib":
-                data = zlib.decompress(data)
-            yield json.loads(data)
+                if doc.get("compression", "") == "zlib":
+                    data = zlib.decompress(data)
+                yield json.loads(data)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -176,12 +178,7 @@ class AmazonS3Store(Store):
             generator returning tuples of (dict, list of docs)
         """
         return self.index.groupby(
-            keys=keys,
-            criteria=criteria,
-            properties=properties,
-            sort=sort,
-            skip=skip,
-            limit=limit,
+            keys=keys, criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit,
         )
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
@@ -263,9 +260,7 @@ class AmazonS3Store(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def newer_in(
-        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
-    ) -> List[str]:
+    def newer_in(self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
@@ -277,9 +272,7 @@ class AmazonS3Store(Store):
                         the last_updated of the target Store and using
                         that to filter out new items in
         """
-        return self.index.newer_in(
-            target=target, criteria=criteria, exhaustive=exhaustive
-        )
+        return self.index.newer_in(target=target, criteria=criteria, exhaustive=exhaustive)
 
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
