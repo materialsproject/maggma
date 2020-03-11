@@ -17,8 +17,9 @@ from maggma.utils import grouper
 try:
     import botocore
     import boto3
+    from boto3.session import Session
 except ImportError:
-    boto3 = None
+    boto3 = None  # type: ignore
 
 
 class AmazonS3Store(Store):
@@ -69,7 +70,7 @@ class AmazonS3Store(Store):
         """
         self.index.connect(force_reset=force_reset)
 
-        session = boto3.Session(profile_name=self.s3_profile)
+        session = Session(profile_name=self.s3_profile)
         resource = session.resource("s3")
 
         if not self.s3:
@@ -128,10 +129,16 @@ class AmazonS3Store(Store):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
+        prop_keys = set()
+        if isinstance(properties, dict):
+            prop_keys = set(properties.keys())
+        elif isinstance(properties, list):
+            prop_keys = set(properties)
+
         for doc in self.index.query(
             criteria=criteria, sort=sort, limit=limit, skip=skip
         ):
-            if set(properties).issubset(set(doc.keys())):
+            if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
                 try:
