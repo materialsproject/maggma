@@ -27,7 +27,14 @@ class AmazonS3Store(Store):
     Assumes Amazon AWS key and secret key are set in environment or default config file
     """
 
-    def __init__(self, index: Store, bucket: str, s3_profile: str = None, compress: bool = False, **kwargs):
+    def __init__(
+        self,
+        index: Store,
+        bucket: str,
+        s3_profile: str = None,
+        compress: bool = False,
+        **kwargs,
+    ):
         """
         Initializes an S3 Store
 
@@ -121,7 +128,9 @@ class AmazonS3Store(Store):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
-        for doc in self.index.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
+        for doc in self.index.query(
+            criteria=criteria, sort=sort, limit=limit, skip=skip
+        ):
             if set(properties).issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
@@ -133,7 +142,9 @@ class AmazonS3Store(Store):
                     # If it was a 404 error, then the object does not exist.
                     error_code = int(e.response["Error"]["Code"])
                     if error_code == 404:
-                        self.logger.error("Could not find S3 object {}".format(doc[self.key]))
+                        self.logger.error(
+                            "Could not find S3 object {}".format(doc[self.key])
+                        )
                         break
                     else:
                         raise e
@@ -142,7 +153,9 @@ class AmazonS3Store(Store):
                     data = zlib.decompress(data)
                 yield json.loads(data)
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def distinct(
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
         Get all distinct values for a field
 
@@ -178,7 +191,12 @@ class AmazonS3Store(Store):
             generator returning tuples of (dict, list of docs)
         """
         return self.index.groupby(
-            keys=keys, criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit,
+            keys=keys,
+            criteria=criteria,
+            properties=properties,
+            sort=sort,
+            skip=skip,
+            limit=limit,
         )
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
@@ -260,7 +278,9 @@ class AmazonS3Store(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def newer_in(self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
+    def newer_in(
+        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
+    ) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
@@ -272,7 +292,9 @@ class AmazonS3Store(Store):
                         the last_updated of the target Store and using
                         that to filter out new items in
         """
-        return self.index.newer_in(target=target, criteria=criteria, exhaustive=exhaustive)
+        return self.index.newer_in(
+            target=target, criteria=criteria, exhaustive=exhaustive
+        )
 
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
