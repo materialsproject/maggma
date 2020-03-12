@@ -212,7 +212,7 @@ class MongoStore(Store):
         """
 
         criteria = criteria if criteria else {}
-        return self._collection.estimated_document_count(filter=criteria)
+        return self._collection.find(filter=criteria).count()
 
     def query(
         self,
