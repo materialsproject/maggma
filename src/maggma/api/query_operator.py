@@ -108,7 +108,7 @@ class SparseFieldsQuery(QueryOperator):
                 default_fields_string,
                 description=f"Fields to project from {model.__name__} as a list of comma seperated strings",
             ),
-            all_fields: bool = Query(False, description="Include all fields."),
+            all_fields: bool = Query(True, description="Include all fields."),
         ) -> STORE_PARAMS:
             """
             Pagination parameters for the API Endpoint

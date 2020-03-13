@@ -36,7 +36,6 @@ class ClusterManager(MSONable):
         Returns:
             None
         """
-
         uvicorn.run(self.app, host=ip, port=port, log_level=log_level, reload=False)
 
     def load(self, endpoint, prefix: str = "/"):

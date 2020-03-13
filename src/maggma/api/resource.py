@@ -37,6 +37,7 @@ class Resource(MSONable):
         model: Union[BaseModel, str],
         tags: Optional[List[str]] = None,
         query_operators: Optional[List[QueryOperator]] = None,
+        description: str = None,
     ):
         """
         Args:
@@ -48,9 +49,11 @@ class Resource(MSONable):
                 into a python path string
             tags: list of tags for the Endpoint
             query_operators: operators for the query language
+            description: an explanation of wht does this resource do
         """
         self.store = store
         self.tags = tags or []
+        self.description = description
 
         if isinstance(model, str):
             module_path = ".".join(model.split(".")[:-1])
@@ -84,7 +87,7 @@ class Resource(MSONable):
         for routes
         """
         self.set_root()
-        # self.build_get_by_key()
+        self.build_get_by_key()
         self.set_dynamic_model_search()
 
     def set_root(self):
