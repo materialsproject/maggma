@@ -4,7 +4,7 @@ from typing import Dict
 from monty.json import MSONable
 from maggma.api.resource import Resource
 from inspect import isclass
-from util import dynamic_import
+from maggma.api.util import dynamic_import
 
 
 class ClusterManager(MSONable):
