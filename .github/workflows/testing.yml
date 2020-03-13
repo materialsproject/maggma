@@ -35,7 +35,7 @@ jobs:
     - name: Lint with mypy
       run: |
         pip install mypy mypy-boto3
-#        mypy src/maggma
+        mypy src/maggma
 
     - name: Lint with flake8
       run: |
