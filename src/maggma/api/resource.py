@@ -87,7 +87,7 @@ class Resource(MSONable):
         for routes
         """
         self.set_root()
-        self.build_get_by_key()
+        # self.build_get_by_key()
         self.set_dynamic_model_search()
 
     def set_root(self):
