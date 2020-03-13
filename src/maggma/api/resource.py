@@ -25,10 +25,6 @@ class Resource(MSONable):
         This class provides a number of convenience features
         including full pagination, field projection, and the
         MAPI query lanaugage
-
-        - implements custom error handlers to provide MAPI Responses
-        - implement standard metadata response for class
-        - JSON Configuration
         """
 
     def __init__(
@@ -65,14 +61,12 @@ class Resource(MSONable):
         else:
             self.model = model
 
-        # print(self.store.key)
-
         self.query_operators = (
             query_operators
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(self.model, default_fields=[self.store.key],),
+                SparseFieldsQuery(self.model, default_fields=[self.store.key]),
                 DefaultDynamicQuery(self.model),
             ]
         )
@@ -86,17 +80,8 @@ class Resource(MSONable):
         Internal method to prepare the endpoint by setting up default handlers
         for routes
         """
-        self.set_root()
-        # self.build_get_by_key()
+        self.build_get_by_key()
         self.set_dynamic_model_search()
-
-    def set_root(self):
-        async def get_root():
-            return RedirectResponse("/docs")
-
-        self.router.get(
-            "/", response_description="Root level of this resource", tags=self.tags,
-        )(get_root)
 
     def build_get_by_key(self):
         key_name = self.store.key
@@ -121,9 +106,6 @@ class Resource(MSONable):
             """
             self.store.connect()
 
-            query = {self.store.key: key}
-
-            elements = self.store.distinct("elements", query)
             item = self.store.query_one(
                 criteria={self.store.key: key}, properties=fields["properties"]
             )
@@ -134,13 +116,12 @@ class Resource(MSONable):
                     detail=f"Item with {self.store.key} = {key} not found",
                 )
 
-            response = Response(data=[item])
-            response.meta.elements = elements
+            response = {"data": [item], "meta": Meta()}
 
-            return response.dict()
+            return response
 
         self.router.get(
-            f"/{{{key_name}}}",
+            f"/{{{key_name}}}/",
             response_description=f"Get an {model_name} by {key_name}",
             response_model=self.response_model,
             response_model_exclude_unset=True,
@@ -158,10 +139,9 @@ class Resource(MSONable):
 
             count_query = query["criteria"]
             count = self.store.count(count_query)
-            elements = self.store.distinct("elements", count_query)
-            data = [self.model(**d) for d in self.store.query(**query)]
-            meta = Meta(total=count, elements=elements)
-            response = Response[self.model](data=data, meta=meta.dict())
+            data = list(self.store.query(**query))
+            meta = Meta(total=count)
+            response = {"data": data, "meta": meta.dict()}
             return response
 
         attach_signature(
@@ -176,10 +156,10 @@ class Resource(MSONable):
         )
 
         self.router.get(
-            "/search",
+            "/",
             tags=self.tags,
             summary=f"Get {model_name} documents",
-            # response_model=self.response_model,
+            response_model=self.response_model,
             response_description=f"Search for a {model_name}",
             response_model_exclude_unset=True,
         )(search)
