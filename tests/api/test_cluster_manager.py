@@ -7,6 +7,8 @@ from maggma.api.resource import Resource
 from maggma.api.cluster_manager import ClusterManager
 from starlette.testclient import TestClient
 from fastapi.encoders import jsonable_encoder
+from urllib.parse import urlencode
+from requests import Response
 
 
 class PetType(str, Enum):
@@ -60,7 +62,6 @@ def pet_store(pets):
     store = MemoryStore("pets", key="name")
     store.connect()
     pets = [jsonable_encoder(d) for d in pets]
-    print(pets[0])
     store.update(pets)
     return store
 
@@ -82,6 +83,30 @@ def test_cluster_dict_behavior(owner_store, pet_store):
     assert manager["pets"] == pet_endpoint
 
 
+def dynamic_model_search_response_helper(
+    client, payload, base: str = "/search?"
+) -> Response:
+    """
+    Helper function for dynamicModelSearch function, to reduce redundant code
+    Args:
+        base: base of the query, default to /query?
+        client: TestClient generated from FastAPI
+        payload: query in dictionary format
+
+    Returns:
+        request.Response object that contains the response of the correspoding payload
+    """
+    url = base + urlencode(payload)
+    print(url)
+    res = client.get(url)
+    return res
+
+
+def get_fields(res: Response):
+    json = res.json()
+    return json["data"], json["meta"], json["errors"]
+
+
 def test_cluster_run(owner_store, pet_store):
     owner_endpoint = Resource(owner_store, Owner)
     pet_endpoint = Resource(pet_store, Pet)
@@ -91,11 +116,25 @@ def test_cluster_run(owner_store, pet_store):
     client = TestClient(manager.app)
 
     assert client.get("/").status_code == 404
-    assert client.get("/owners/name/Person1").status_code == 200
-    assert client.get("/owners/name/Person1").json()["name"] == "Person1"
+    payload = {"name_eq": "Person1", "limit": 10, "all_fields": True}
 
-    assert client.get("/pets/name/Pet1").status_code == 200
-    assert client.get("/pets/name/Pet1").json()["name"] == "Pet1"
+    res = dynamic_model_search_response_helper(
+        client=client, payload=payload, base="/owners/search?"
+    )
+    data, meta, err = get_fields(res)
+    assert res.status_code == 200
+    assert len(data) == 1
+    assert data[0]["name"] == "Person1"
+
+    payload = {"name_eq": "Pet1", "limit": 10, "all_fields": True}
+
+    res = dynamic_model_search_response_helper(
+        client=client, payload=payload, base="/pets/search?"
+    )
+    data, meta, err = get_fields(res)
+    assert res.status_code == 200
+    assert len(data) == 1
+    assert data[0]["name"] == "Pet1"
 
 
 def test_cluster_pprint(owner_store, pet_store):
