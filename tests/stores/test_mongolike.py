@@ -69,6 +69,13 @@ def test_mongostore_distinct(mongostore):
     ghs = mongostore.distinct("g.h")
     assert set(ghs) == {1, 2}
 
+    # Test when key doesn't exist
+    assert mongostore.distinct("blue") == []
+
+    # Test when null is a value
+    mongostore._collection.insert_one({"i": None})
+    assert mongostore.distinct("i") == [None]
+
 
 def test_mongostore_update(mongostore):
     mongostore.update({"e": 6, "d": 4}, key="e")
@@ -249,7 +256,7 @@ def test_eq(mongostore, memorystore, jsonstore):
 
 
 @pytest.mark.skipif(
-    os.environ.get("MONGODB_SRV_URI", None) is None,
+    "mongodb+srv" not in os.environ.get("MONGODB_SRV_URI", ""),
     reason="requires special mongodb+srv URI",
 )
 def test_mongo_uri():
