@@ -106,8 +106,11 @@ class MongoStore(Store):
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
         """
+
         criteria = criteria or {}
-        return self._collection.distinct(field, criteria)
+        distinct_vals = self._collection.distinct(field, criteria)
+
+        return distinct_vals if distinct_vals is not None else []
 
     def groupby(
         self,
@@ -193,7 +196,7 @@ class MongoStore(Store):
         """
 
         criteria = criteria if criteria else {}
-        return self._collection.count_documents(filter=criteria)
+        return self._collection.find(filter=criteria).count()
 
     def query(
         self,
