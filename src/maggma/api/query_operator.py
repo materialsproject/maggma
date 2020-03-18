@@ -2,9 +2,10 @@ from typing import List, Dict, Optional, Any, Tuple
 from pydantic import BaseModel
 from fastapi import Query
 from monty.json import MSONable
-from maggma.api.util import STORE_PARAMS, dynamic_import, attach_signature
-import inspect
+from maggma.core import Store
+from maggma.api.util import STORE_PARAMS, dynamic_import
 from pydantic.fields import ModelField
+import inspect
 
 
 class QueryOperator(MSONable):
@@ -19,9 +20,13 @@ class QueryOperator(MSONable):
         """
         raise NotImplementedError("Query operators must implement query")
 
-    def meta(self) -> Dict:
+    def meta(self, store: Store, query: Dict) -> Dict:
         """
         Returns meta data to return with the Response
+
+        Args:
+            store: the Maggma Store that the resource uses
+            query: the query being executed in this API call
         """
         return {}
 
@@ -70,7 +75,7 @@ class PaginationQuery(QueryOperator):
 
         self.query = query  # type: ignore
 
-    def meta(self) -> Dict:
+    def meta(self, store: Store, query: Dict) -> Dict:
         """
         Metadata for the pagination params
         """
@@ -91,9 +96,7 @@ class SparseFieldsQuery(QueryOperator):
 
         self.model = model
 
-        model_fields: List[str] = list(self.model.__fields__.keys())
-        # print(model_fields)
-        # print(default_fields)
+        model_fields = list(self.model.__fields__.keys())
         self.default_fields = (
             model_fields if default_fields is None else list(default_fields)
         )
@@ -110,7 +113,7 @@ class SparseFieldsQuery(QueryOperator):
                 description=f"Fields to project from {model.__name__} "  # type: ignore
                 f"as a list of comma seperated strings",
             ),
-            all_fields: bool = Query(True, description="Include all fields."),
+            all_fields: bool = Query(False, description="Include all fields."),
         ) -> STORE_PARAMS:
             """
             Pagination parameters for the API Endpoint
@@ -124,7 +127,7 @@ class SparseFieldsQuery(QueryOperator):
 
         self.query = query  # type: ignore
 
-    def meta(self) -> Dict:
+    def meta(self, store: Store, query: Dict) -> Dict:
         """
         Returns metadata for the Sparse field set
         """
@@ -141,7 +144,9 @@ class SparseFieldsQuery(QueryOperator):
 
     @classmethod
     def from_dict(cls, d):
-
+        """
+        Special from_dict to autoload the pydantic model from the location string
+        """
         model = d.get("model")
         if isinstance(model, str):
             module_path = ".".join(model.split(".")[:-1])
@@ -160,24 +165,25 @@ class DefaultDynamicQuery(QueryOperator):
     def __init__(
         self,
         model: BaseModel,
-        additional_signature_fields=None,
-        supported_types: list = None,
-        query_mapping: dict = None,
+        additional_signature_fields=None,  # TODO field types -> name, type, default value
     ):
+        """
+        TODO: better description of this query operator with what it supports: types, search patterns, etc.
+        Args:
+            model: PyDantic Model to base the query language on
+        """
         self.model = model
 
-        self.supported_types = (
-            supported_types if supported_types is not None else [str, int, float]
-        )
         default_mapping = {
-            "eq": "$eq",
+            "eq": "$eq",  # TODO: don't need _eq for equals
             "not_eq": "$ne",
             "lt": "$lt",
             "gt": "$gt",
             "in": "$in",
             "not_in": "$nin",
         }
-        mapping: dict = default_mapping if query_mapping is None else query_mapping
+        mapping: dict = default_mapping  # if query_mapping is None else query_mapping
+        # TODO: hardcode back into the main query generation function
 
         self.additional_signature_fields = additional_signature_fields
         if additional_signature_fields is None:
@@ -241,8 +247,8 @@ class DefaultDynamicQuery(QueryOperator):
             a dictionary of FIELD_[operator] -> query
         """
         params = dict()
-        for name, model_field in all_fields.items():
-            if model_field.type_ in self.supported_types:
+        for name, model_field in all_fields:
+            if model_field.type_ in [str, int, float]:
                 t = model_field.type_
                 params[f"{model_field.name}_eq"] = [
                     t,

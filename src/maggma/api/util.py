@@ -17,8 +17,8 @@ def dynamic_import(abs_module_path, class_name):
 
 
 def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
-    criteria = {}
-    properties = []
+    criteria: STORE_PARAMS = {}
+    properties: List[str] = []
 
     for sub_query in queries:
         if "criteria" in sub_query:
