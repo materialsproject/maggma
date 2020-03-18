@@ -21,6 +21,7 @@ setup(
     license="modified BSD",
     packages=find_packages("src"),
     package_dir={"": "src"},
+    package_data={"maggma": ["py.typed"]},
     zip_safe=False,
     install_requires=[
         "setuptools",
