@@ -1,5 +1,5 @@
 import inspect
-from typing import List, Dict, Callable, Any
+from typing import List, Dict, Callable, Any, Optional
 from typing_extensions import Literal
 from importlib import import_module
 
@@ -17,7 +17,6 @@ def dynamic_import(abs_module_path, class_name):
 
 
 def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
-
     criteria = {}
     properties = []
 
@@ -34,9 +33,9 @@ def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
         if k not in ["criteria", "properties"]
     }
 
-    properties = properties if len(properties) > 0 else None
+    p: Optional[List[Any]] = properties if len(properties) > 0 else None
 
-    return {"criteria": criteria, "properties": properties, **remainder}
+    return {"criteria": criteria, "properties": p, **remainder}
 
 
 def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
@@ -70,4 +69,7 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
         for param in defaults.keys()
     ]
 
-    function.__signature__ = inspect.Signature(required_params + optional_params)
+    setattr(
+        function, "__signature__", inspect.Signature(required_params + optional_params)
+    )
+    # function.__signature__ = inspect.Signature(required_params + optional_params)

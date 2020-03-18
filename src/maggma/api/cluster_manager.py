@@ -49,7 +49,7 @@ class ClusterManager(MSONable):
         Raises:
             ValueError -- if the endpoint is not a path to an EndpointCluster or it is not an EndpointCluster
         """
-        if isinstance((endpoint, str)):
+        if isinstance(endpoint, str):
             module_path = ".".join(endpoint.split(".")[:-1])
             class_name = endpoint.split(".")[-1]
             new_endpoint = dynamic_import(module_path, class_name)

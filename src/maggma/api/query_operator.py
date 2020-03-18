@@ -1,8 +1,8 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 from pydantic import BaseModel
 from fastapi import Query
 from monty.json import MSONable
-from maggma.api.util import STORE_PARAMS, dynamic_import
+from maggma.api.util import STORE_PARAMS, dynamic_import, attach_signature
 import inspect
 
 
@@ -67,7 +67,7 @@ class PaginationQuery(QueryOperator):
                 )
             return {"skip": skip, "limit": limit}
 
-        self.query = query
+        self.query = query  # type: ignore
 
     def meta(self) -> Dict:
         """
@@ -90,7 +90,7 @@ class SparseFieldsQuery(QueryOperator):
 
         self.model = model
 
-        model_fields = list(self.model.__fields__.keys())
+        model_fields: List[str] = list(self.model.__fields__.keys())
         # print(model_fields)
         # print(default_fields)
         self.default_fields = (
@@ -101,12 +101,13 @@ class SparseFieldsQuery(QueryOperator):
             model_fields
         ), "default projection contains some fields that are not in the model fields"
 
-        default_fields_string = ",".join(default_fields)
+        default_fields_string = ",".join(default_fields)  # type: ignore
 
         def query(
             fields: str = Query(
                 default_fields_string,
-                description=f"Fields to project from {model.__name__} as a list of comma seperated strings",
+                description=f"Fields to project from {model.__name__} "  # type: ignore
+                f"as a list of comma seperated strings",
             ),
             all_fields: bool = Query(True, description="Include all fields."),
         ) -> STORE_PARAMS:
@@ -114,13 +115,13 @@ class SparseFieldsQuery(QueryOperator):
             Pagination parameters for the API Endpoint
             """
 
-            fields = fields.split(",")
+            return_fields: List[str] = fields.split(",")
             if all_fields:
-                fields = model_fields
+                return_fields = model_fields
 
-            return {"properties": fields}
+            return {"properties": return_fields}
 
-        self.query = query
+        self.query = query  # type: ignore
 
     def meta(self) -> Dict:
         """
@@ -134,7 +135,7 @@ class SparseFieldsQuery(QueryOperator):
         """
 
         d = super().as_dict()  # Ensures sub-classes serialize correctly
-        d["model"] = f"{self.model.__module__}.{self.model.__name__}"
+        d["model"] = f"{self.model.__module__}.{self.model.__name__}"  # type: ignore
         return d
 
     @classmethod
@@ -167,26 +168,22 @@ class DefaultDynamicQuery(QueryOperator):
         self.supported_types = (
             supported_types if supported_types is not None else [str, int, float]
         )
-
-        if query_mapping is None:
-            self.query_mapping = {
-                "eq": "$eq",
-                "not_eq": "$ne",
-                "lt": "$lt",
-                "gt": "$gt",
-                "in": "$in",
-                "not_in": "$nin",
-            }
-            query_mapping = self.query_mapping
-        else:
-            self.query_mapping = query_mapping
+        default_mapping = {
+            "eq": "$eq",
+            "not_eq": "$ne",
+            "lt": "$lt",
+            "gt": "$gt",
+            "in": "$in",
+            "not_in": "$nin",
+        }
+        mapping: dict = default_mapping if query_mapping is None else query_mapping
 
         self.additional_signature_fields = additional_signature_fields
         if additional_signature_fields is None:
             self.additional_signature_fields = dict()
 
-            # construct fields
-            # find all fields in data_object
+        # construct fields
+        # find all fields in data_object
         all_fields = list(model.__fields__.items())
 
         # turn fields into operators, also do type checking
@@ -202,7 +199,7 @@ class DefaultDynamicQuery(QueryOperator):
                 if v is not None:
                     name, operator = k.split("_", 1)
                     try:
-                        crit[name] = {query_mapping[operator]: v}
+                        crit[name] = {mapping[operator]: v}
                     except KeyError:
                         raise KeyError(
                             f"Cannot find key {k} in current query to database mapping"
@@ -211,7 +208,8 @@ class DefaultDynamicQuery(QueryOperator):
             # TODO ask shyam about this part, how to let it return something compatible to STORE_PARAMS
 
         # building the signatures for FastAPI Swagger UI
-        signatures = []
+
+        signatures: List[Any] = []
         signatures.extend(
             inspect.Parameter(
                 param,
@@ -221,6 +219,7 @@ class DefaultDynamicQuery(QueryOperator):
             )
             for param, query in params.items()
         )
+
         query.__signature__ = inspect.Signature(signatures)
 
         self.query = query
@@ -279,7 +278,4 @@ class DefaultDynamicQuery(QueryOperator):
                 warnings.warn(
                     f"Field name {model_field.name} with {model_field.type_} not implemented"
                 )
-                # raise NotImplementedError(
-                #     f"Field name {model_field.name} with {model_field.type_} not implemented"
-                # )
         return params
