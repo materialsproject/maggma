@@ -1,9 +1,10 @@
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Optional, Any, Tuple
 from pydantic import BaseModel
 from fastapi import Query
 from monty.json import MSONable
 from maggma.api.util import STORE_PARAMS, dynamic_import, attach_signature
 import inspect
+from pydantic.fields import ModelField
 
 
 class QueryOperator(MSONable):
@@ -184,7 +185,7 @@ class DefaultDynamicQuery(QueryOperator):
 
         # construct fields
         # find all fields in data_object
-        all_fields = list(model.__fields__.items())
+        all_fields: Dict[str, ModelField] = model.__fields__
 
         # turn fields into operators, also do type checking
         params = self.fields_to_operator(all_fields)
@@ -192,6 +193,8 @@ class DefaultDynamicQuery(QueryOperator):
         # combine with additional_fields
         # user's input always have higher priority than the the default data model's
         params.update(self.additional_signature_fields)
+
+        print(params)
 
         def query(**kwargs) -> STORE_PARAMS:
             crit = dict()
@@ -205,7 +208,6 @@ class DefaultDynamicQuery(QueryOperator):
                             f"Cannot find key {k} in current query to database mapping"
                         )
             return {"criteria": crit}
-            # TODO ask shyam about this part, how to let it return something compatible to STORE_PARAMS
 
         # building the signatures for FastAPI Swagger UI
 
@@ -219,38 +221,52 @@ class DefaultDynamicQuery(QueryOperator):
             )
             for param, query in params.items()
         )
+        setattr(query, "__signature__", inspect.Signature(signatures))
 
-        query.__signature__ = inspect.Signature(signatures)
+        self.query = query  # type: ignore
 
-        self.query = query
+    def fields_to_operator(self, all_fields: Dict[str, ModelField]) -> dict:
+        """
+        Getting a list of tuple of fields
 
-    def fields_to_operator(self, all_fields):
+        turn them into a mapping of
+
+        FIELD_[operator] -> query
+
+
+        Args:
+            all_fields: dictionary of str -> ModelField
+
+        Returns:
+            a dictionary of FIELD_[operator] -> query
+        """
         params = dict()
-        for name, model_field in all_fields:
+        for name, model_field in all_fields.items():
             if model_field.type_ in self.supported_types:
+                t = model_field.type_
                 params[f"{model_field.name}_eq"] = [
-                    model_field.type_,
+                    t,
                     Query(
                         model_field.default,
                         description=f"Querying if {model_field.name} is equal to another",
                     ),
                 ]
                 params[f"{model_field.name}_not_eq"] = [
-                    model_field.type_,
+                    t,
                     Query(
                         model_field.default,
                         description=f"Querying if {model_field.name} is not equal to another",
                     ),
                 ]
                 params[f"{model_field.name}_in"] = [
-                    List[model_field.type_],
+                    t,
                     Query(
                         model_field.default,
                         description=f"Querying if item is in {model_field.name}",
                     ),
                 ]
                 params[f"{model_field.name}_not_in"] = [
-                    List[model_field.type_],
+                    t,
                     Query(
                         model_field.default,
                         description=f"Querying if item is not in {model_field.name} ",

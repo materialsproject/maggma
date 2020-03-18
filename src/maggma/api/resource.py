@@ -54,18 +54,13 @@ class Resource(MSONable):
         self.store = store
         self.tags = tags or []
         self.description = description
-
+        self.model: BaseModel = BaseModel()
         if isinstance(model, str):
             module_path = ".".join(model.split(".")[:-1])
             class_name = model.split(".")[-1]
             self.model = dynamic_import(module_path, class_name)
-            assert issubclass(
-                self.model, BaseModel
-            ), "The resource model has to be a PyDantic Model"
         else:
             self.model = model
-
-        # print(self.store.key)
 
         self.query_operators = (
             query_operators
@@ -77,8 +72,8 @@ class Resource(MSONable):
             ]
         )
 
+        self.response_model = Response[self.model]  # type: ignore
         self.router = APIRouter()
-        self.response_model = Response[self.model]
         self.prepare_endpoint()
 
     def prepare_endpoint(self):
@@ -121,9 +116,6 @@ class Resource(MSONable):
             """
             self.store.connect()
 
-            query = {self.store.key: key}
-
-            elements = self.store.distinct("elements", query)
             item = self.store.query_one(
                 criteria={self.store.key: key}, properties=fields["properties"]
             )
@@ -134,8 +126,7 @@ class Resource(MSONable):
                     detail=f"Item with {self.store.key} = {key} not found",
                 )
 
-            response = Response(data=[item])
-            response.meta.elements = elements
+            response: Response = Response(data=[item])
 
             return response.dict()
 
@@ -159,9 +150,9 @@ class Resource(MSONable):
             count_query = query["criteria"]
             count = self.store.count(count_query)
             elements = self.store.distinct("elements", count_query)
-            data = [self.model(**d) for d in self.store.query(**query)]
+            data = [self.model(**d) for d in self.store.query(**query)]  # type: ignore
             meta = Meta(total=count, elements=elements)
-            response = Response[self.model](data=data, meta=meta.dict())
+            response = Response[self.model](data=data, meta=meta.dict())  # type: ignore
             return response
 
         attach_signature(
@@ -201,5 +192,5 @@ class Resource(MSONable):
         """
 
         d = super().as_dict()  # Ensures sub-classes serialize correctly
-        d["model"] = f"{self.model.__module__}.{self.model.__name__}"
+        d["model"] = f"{self.model.__module__}.{self.model.__name__}"  # type: ignore
         return d
