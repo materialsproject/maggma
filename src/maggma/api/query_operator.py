@@ -200,8 +200,6 @@ class DefaultDynamicQuery(QueryOperator):
         # user's input always have higher priority than the the default data model's
         params.update(self.additional_signature_fields)
 
-        print(params)
-
         def query(**kwargs) -> STORE_PARAMS:
             crit = dict()
             for k, v in kwargs.items():
@@ -247,7 +245,7 @@ class DefaultDynamicQuery(QueryOperator):
             a dictionary of FIELD_[operator] -> query
         """
         params = dict()
-        for name, model_field in all_fields:
+        for name, model_field in all_fields.items():
             if model_field.type_ in [str, int, float]:
                 t = model_field.type_
                 params[f"{model_field.name}_eq"] = [

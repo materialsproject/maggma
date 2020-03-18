@@ -1,4 +1,4 @@
-from typing import List, Dict, Union, Optional
+from typing import List, Dict, Union, Optional, Any
 from pydantic import BaseModel
 from monty.json import MSONable
 from maggma.api.util import (
@@ -130,7 +130,7 @@ class Resource(MSONable):
         async def search(**queries: STORE_PARAMS):
             self.store.connect()
 
-            query = merge_queries(list(queries.values()))
+            query: Dict[Any, Any] = merge_queries(list(queries.values()))
 
             count_query = query["criteria"]
             count = self.store.count(count_query)
