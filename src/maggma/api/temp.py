@@ -4,7 +4,7 @@ from maggma.stores import MemoryStore
 from maggma.api.resource import Resource
 from fastapi import FastAPI
 import uvicorn
-from maggma.api.cluster_manager import ClusterManager
+from maggma.api.APIManager import APIManager
 
 
 class Owner(BaseModel):
@@ -33,5 +33,5 @@ app.include_router(endpoint.router)
 # uvicorn.run(app)
 
 owner_endpoint = Resource(owner_store, Owner)  # type:ignore
-manager = ClusterManager({"owners": owner_endpoint})
+manager = APIManager({"owners": owner_endpoint})
 # manager.run()

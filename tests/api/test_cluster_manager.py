@@ -4,7 +4,7 @@ from enum import Enum
 from random import randint, choice
 from maggma.stores import MemoryStore
 from maggma.api.resource import Resource
-from maggma.api.cluster_manager import ClusterManager
+from maggma.api.APIManager import APIManager
 from starlette.testclient import TestClient
 from fastapi.encoders import jsonable_encoder
 from urllib.parse import urlencode
@@ -70,7 +70,7 @@ def test_cluster_dict_behavior(owner_store, pet_store):
     owner_endpoint = Resource(owner_store, Owner)
     pet_endpoint = Resource(pet_store, Pet)
 
-    manager = ClusterManager({"owners": owner_endpoint})
+    manager = APIManager({"owners": owner_endpoint})
 
     assert manager["owners"] == owner_endpoint  # test __getitem__
     assert len(manager) == 1  # test len
@@ -111,7 +111,7 @@ def test_cluster_run(owner_store, pet_store):
     owner_endpoint = Resource(owner_store, Owner)
     pet_endpoint = Resource(pet_store, Pet)
 
-    manager = ClusterManager({"owners": owner_endpoint, "pets": pet_endpoint})
+    manager = APIManager({"owners": owner_endpoint, "pets": pet_endpoint})
 
     client = TestClient(manager.app)
 
@@ -142,7 +142,7 @@ def test_cluster_pprint(owner_store, pet_store):
     endpoint_main_temp = Resource(pet_store, Pet, description="main_temp")
     endpoint_temp = Resource(owner_store, Owner, description="temp")
 
-    manager = ClusterManager(
+    manager = APIManager(
         {
             "/temp": endpoint_temp,
             "/main": endpoint_main,

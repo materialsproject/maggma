@@ -7,7 +7,7 @@ from inspect import isclass
 from maggma.api.util import dynamic_import
 
 
-class ClusterManager(MSONable):
+class APIManager(MSONable):
     def __init__(self, endpoints: Dict[str, Resource]):
         self.endpoints = endpoints
 

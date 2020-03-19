@@ -49,7 +49,7 @@ def test_init_resource(owner_store):
     assert endpoint.router.routes[0]
 
 
-def test_endpoint_msonable(owner_store):
+def test_resource_msonable(owner_store):
     endpoint = Resource(owner_store, Owner)
     endpoint_dict = endpoint.as_dict()
 
@@ -60,7 +60,7 @@ def test_endpoint_msonable(owner_store):
     assert endpoint_dict["model"] == "tests.api.test_resource.Owner"
 
 
-def test_endpoint_get_by_key(owner_store):
+def test_resource_get_by_key(owner_store):
     endpoint = Resource(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
@@ -71,12 +71,6 @@ def test_endpoint_get_by_key(owner_store):
 
     assert client.get("/Person1/").status_code == 200
     assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
-
-
-def test_endpoint_alias(owner_store):
-    endpoint = Resource(owner_store, Owner)
-    app = FastAPI()
-    app.include_router(endpoint.router)
 
 
 def dynamic_model_search_response_helper(
@@ -105,7 +99,7 @@ def get_fields(res: Response):
     return json.get("data", []), json.get("meta", {}), json.get("error", [])
 
 
-def test_endpoint_dynamic_model_search_eq_noteq(owner_store):
+def test_resource_dynamic_model_search_eq_noteq(owner_store):
     endpoint = Resource(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
@@ -163,7 +157,7 @@ def test_endpoint_dynamic_model_search_eq_noteq(owner_store):
     assert len(data) == 10
 
 
-def test_endpoint_dynamic_model_search_lt_gt(owner_store):
+def test_resource_dynamic_model_search_lt_gt(owner_store):
     endpoint = Resource(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
@@ -190,7 +184,7 @@ def test_endpoint_dynamic_model_search_lt_gt(owner_store):
     assert len(data) == 10
 
 
-def test_endpoint_dynamic_model_search_in_notin(owner_store):
+def test_resource_dynamic_model_search_in_notin(owner_store):
     endpoint = Resource(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
@@ -212,7 +206,7 @@ def test_endpoint_dynamic_model_search_in_notin(owner_store):
     assert len(data) == 10
 
 
-def test_endpoint_no_explicit_eq(owner_store):
+def test_resource_no_explicit_eq(owner_store):
     endpoint = Resource(owner_store, Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
@@ -229,3 +223,7 @@ def test_endpoint_no_explicit_eq(owner_store):
     assert res.status_code == 200
     assert len(data) == 1
     assert data[0]["name"] == "PersonAge9"
+
+
+def test_resource_compound(owner_store):
+    pass
