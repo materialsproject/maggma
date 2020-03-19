@@ -30,7 +30,7 @@ owner_store.update(owners)  # type:ignore
 endpoint = Resource(owner_store, Owner)  # type:ignore
 app = FastAPI()
 app.include_router(endpoint.router)
-# uvicorn.run(app)
+uvicorn.run(app)
 
 owner_endpoint = Resource(owner_store, Owner)  # type:ignore
 manager = APIManager({"owners": owner_endpoint})

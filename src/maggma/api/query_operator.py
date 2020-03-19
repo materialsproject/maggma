@@ -119,7 +119,10 @@ class SparseFieldsQuery(QueryOperator):
             Pagination parameters for the API Endpoint
             """
 
-            return_fields: List[str] = fields.split(",")
+            return_fields: List[str] = [s.strip() for s in fields.split(",")]
+            # need to strip to avoid input such as "name, weight" to be parsed into ["name", " weight"]
+            # we need ["name", "weight"]
+            print("return_fields", return_fields)
             if all_fields:
                 return_fields = model_fields
 

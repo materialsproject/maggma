@@ -20,12 +20,13 @@ def owners():
     return (
         [
             Owner(
-                name=f"Person{i}", age=randint(10, 100), weight=float(randint(100, 200))
+                name=f"Person{i}", age=randint(10, 100), weight=float(randint(100, 100))
             )
             for i in list(range(10)[1:])
         ]  # there are 8 owners here
         + [Owner(name="PersonAge9", age=9, weight=float(randint(100, 200)))]
         + [Owner(name="PersonWeight150", age=randint(10, 15), weight=float(150))]
+        + [Owner(name="PersonAge20Weight200", age=20, weight=float(200))]
     )
 
 
@@ -226,4 +227,40 @@ def test_resource_no_explicit_eq(owner_store):
 
 
 def test_resource_compound(owner_store):
-    pass
+    endpoint = Resource(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    payload = {
+        "name": "PersonAge20Weight200",
+        "all_fields": True,
+        "weight": 200,
+        "age": 20,
+    }
+    res = dynamic_model_search_response_helper(
+        client=client, payload=payload, base="/?", debug=True
+    )
+    data, meta, err = get_fields(res)
+
+    assert res.status_code == 200
+    assert len(data) == 1
+    assert data[0]["name"] == "PersonAge20Weight200"
+
+    payload = {
+        "name": "PersonAge20Weight200",
+        "all_fields": False,
+        "fields": "name, age",
+        "weight": 200,
+        "age": 20,
+    }
+    res = dynamic_model_search_response_helper(
+        client=client, payload=payload, base="/?", debug=True
+    )
+    data, meta, err = get_fields(res)
+    assert res.status_code == 200
+    assert len(data) == 1
+    assert data[0]["name"] == "PersonAge20Weight200"
+    assert data[0]["age"] == 20
+    assert "weight" not in data[0]
