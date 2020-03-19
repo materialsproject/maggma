@@ -191,7 +191,7 @@ class DefaultDynamicQuery(QueryOperator):
         self.model = model
 
         default_mapping = {
-            "eq": "$eq",  # TODO: don't need _eq for equals
+            "eq": "$eq",
             "not_eq": "$ne",
             "lt": "$lt",
             "gt": "$gt",
@@ -199,7 +199,6 @@ class DefaultDynamicQuery(QueryOperator):
             "not_in": "$nin",
         }
         mapping: dict = default_mapping  # if query_mapping is None else query_mapping
-        # TODO: hardcode back into the main query generation function
 
         self.additional_signature_fields: Mapping[
             str, List
