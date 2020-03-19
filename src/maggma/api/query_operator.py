@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional, Any, Tuple
+from typing import List, Dict, Optional, Any, Type
 from pydantic import BaseModel
 from fastapi import Query
 from monty.json import MSONable
@@ -247,32 +247,32 @@ class DefaultDynamicQuery(QueryOperator):
         params = dict()
         for name, model_field in all_fields.items():
             if model_field.type_ in [str, int, float]:
-                t = model_field.type_
+                t: Any = model_field.type_
                 params[f"{model_field.name}_eq"] = [
                     t,
                     Query(
-                        model_field.default,
+                        default=model_field.default,
                         description=f"Querying if {model_field.name} is equal to another",
                     ),
                 ]
                 params[f"{model_field.name}_not_eq"] = [
                     t,
                     Query(
-                        model_field.default,
+                        default=model_field.default,
                         description=f"Querying if {model_field.name} is not equal to another",
                     ),
                 ]
                 params[f"{model_field.name}_in"] = [
-                    t,
+                    List[t],
                     Query(
-                        model_field.default,
+                        default=model_field.default,
                         description=f"Querying if item is in {model_field.name}",
                     ),
                 ]
                 params[f"{model_field.name}_not_in"] = [
-                    t,
+                    List[t],
                     Query(
-                        model_field.default,
+                        default=model_field.default,
                         description=f"Querying if item is not in {model_field.name} ",
                     ),
                 ]
