@@ -104,7 +104,7 @@ def dynamic_model_search_response_helper(
 
 def get_fields(res: Response):
     json = res.json()
-    return json["data"], json["meta"], json["errors"]
+    return json.get("data", []), json.get("meta", {}), json.get("error", [])
 
 
 def test_cluster_run(owner_store, pet_store):
@@ -119,7 +119,7 @@ def test_cluster_run(owner_store, pet_store):
     payload = {"name_eq": "Person1", "limit": 10, "all_fields": True}
 
     res = dynamic_model_search_response_helper(
-        client=client, payload=payload, base="/owners/search?"
+        client=client, payload=payload, base="/owners/?"
     )
     data, meta, err = get_fields(res)
     assert res.status_code == 200
@@ -129,7 +129,7 @@ def test_cluster_run(owner_store, pet_store):
     payload = {"name_eq": "Pet1", "limit": 10, "all_fields": True}
 
     res = dynamic_model_search_response_helper(
-        client=client, payload=payload, base="/pets/search?"
+        client=client, payload=payload, base="/pets/?"
     )
     data, meta, err = get_fields(res)
     assert res.status_code == 200

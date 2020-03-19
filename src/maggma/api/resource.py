@@ -112,7 +112,8 @@ class Resource(MSONable):
                     status_code=404,
                     detail=f"Item with {self.store.key} = {key} not found",
                 )
-            response = {"data": [item], "meta": Meta()}
+
+            response = {"data": [item]}  # , "meta": Meta()}
             return response
 
         self.router.get(
