@@ -180,7 +180,7 @@ class DefaultDynamicQuery(QueryOperator):
         self,
         model: BaseModel,
         additional_signature_fields: Mapping[str, List] = None,
-        alias=None,
+        alias=None,  # I cannot type hint this because mypy is going to complain
     ):
         """
         This function will take query, parse it, and output the mongo criteria.
