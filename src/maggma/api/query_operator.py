@@ -211,6 +211,7 @@ class DefaultDynamicQuery(QueryOperator):
         """
         self.model = model
         self.alias = alias if alias is not None else dict()
+        alias = self.alias
         default_mapping = {
             "eq": "$eq",
             "not_eq": "$ne",
@@ -249,6 +250,11 @@ class DefaultDynamicQuery(QueryOperator):
                         raise KeyError(
                             f"Cannot find key {k} in current query to database mapping"
                         )
+            # Processing alias
+            for data_name, input_name in alias.items():
+                if input_name in crit.keys():
+                    crit[data_name] = crit[input_name]
+                    del crit[input_name]
 
             return {"criteria": crit}
 
