@@ -33,6 +33,7 @@ class Resource(MSONable):
         model: Union[BaseModel, str],
         tags: Optional[List[str]] = None,
         query_operators: Optional[List[QueryOperator]] = None,
+        alias: Optional[Dict[str, str]] = None,
         description: str = None,
     ):
         """
@@ -45,6 +46,7 @@ class Resource(MSONable):
                 into a python path string
             tags: list of tags for the Endpoint
             query_operators: operators for the query language
+            alias: Alias mapping of NAME_IN_MODEL -> INPUT_NAME
             description: an explanation of wht does this resource do
         """
         self.store = store
@@ -58,13 +60,17 @@ class Resource(MSONable):
         else:
             self.model = model
 
+        self.alias: Dict[str, str] = alias if alias else dict()
+        print("self.alias in resource = {}".format(self.alias))
         self.query_operators = (
             query_operators
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(self.model, default_fields=[self.store.key]),
-                DefaultDynamicQuery(self.model),
+                SparseFieldsQuery(
+                    self.model, default_fields=[self.store.key], alias=self.alias
+                ),
+                DefaultDynamicQuery(self.model, alias=self.alias),
             ]
         )
 

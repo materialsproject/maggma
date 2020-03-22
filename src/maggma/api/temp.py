@@ -27,11 +27,11 @@ owner_store.connect()
 owners = [d.dict() for d in owners]  # type:ignore
 owner_store.update(owners)  # type:ignore
 
-endpoint = Resource(owner_store, Owner)  # type:ignore
+endpoint = Resource(owner_store, Owner, alias={"weight": "mass"})  # type:ignore
 app = FastAPI()
 app.include_router(endpoint.router)
 uvicorn.run(app)
 
-owner_endpoint = Resource(owner_store, Owner)  # type:ignore
-manager = APIManager({"owners": owner_endpoint})
+# owner_endpoint = Resource(owner_store, Owner)  # type:ignore
+# manager = APIManager({"owners": owner_endpoint})
 # manager.run()

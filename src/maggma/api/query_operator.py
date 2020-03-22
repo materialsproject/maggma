@@ -6,6 +6,7 @@ from maggma.core import Store
 from maggma.api.util import STORE_PARAMS, dynamic_import
 from pydantic.fields import ModelField
 import inspect
+import warnings
 
 
 class QueryOperator(MSONable):
@@ -83,18 +84,23 @@ class PaginationQuery(QueryOperator):
 
 
 class SparseFieldsQuery(QueryOperator):
-    """
-    Factory function to generate a dependency for sparse field sets in FastAPI
-    """
-
-    def __init__(self, model: BaseModel, default_fields: Optional[List[str]] = None):
+    def __init__(
+        self,
+        model: BaseModel,
+        default_fields: Optional[List[str]] = None,
+        alias: Optional[Dict[str, str]] = None,
+    ):
         """
         Args:
             model: PyDantic Model that represents the underlying data source
             default_fields: default fields to return in the API response if no fields are explicitly requested
+            alias: mapping of alias of NAME_IN_MODEL -> INPUT_NAME
         """
 
         self.model = model
+        self.alias: Dict[str, str] = alias if alias else dict()
+        # Workaround, query func does not have reference to self
+        alias = self.alias
 
         model_fields = list(self.model.__fields__.keys())
         self.default_fields = (
@@ -105,7 +111,7 @@ class SparseFieldsQuery(QueryOperator):
             model_fields
         ), "default projection contains some fields that are not in the model fields"
 
-        default_fields_string = ",".join(default_fields)  # type: ignore
+        default_fields_string = ",".join(self.default_fields)  # type: ignore
 
         def query(
             fields: str = Query(
@@ -116,19 +122,28 @@ class SparseFieldsQuery(QueryOperator):
             all_fields: bool = Query(False, description="Include all fields."),
         ) -> STORE_PARAMS:
             """
-            Pagination parameters for the API Endpoint
+            Projection parameters for the API Endpoint
             """
 
-            return_fields: List[str] = [s.strip() for s in fields.split(",")]
+            projection_fields: List[str] = [s.strip() for s in fields.split(",")]
+
+            # processing alias
+            for data_name, input_name in alias.items():
+                if input_name in projection_fields:
+                    projection_fields.remove(input_name)
+                    projection_fields.append(data_name)
+
             # need to strip to avoid input such as "name, weight" to be parsed into ["name", " weight"]
             # we need ["name", "weight"]
-            print("return_fields", return_fields)
             if all_fields:
-                return_fields = model_fields
-
-            return {"properties": return_fields}
+                projection_fields = model_fields
+            return {"properties": projection_fields}
 
         self.query = query  # type: ignore
+
+    """
+    Factory function to generate a dependency for sparse field sets in FastAPI
+    """
 
     def meta(self, store: Store, query: Dict) -> Dict:
         """
@@ -166,7 +181,10 @@ class SparseFieldsQuery(QueryOperator):
 
 class DefaultDynamicQuery(QueryOperator):
     def __init__(
-        self, model: BaseModel, additional_signature_fields: Mapping[str, List] = None
+        self,
+        model: BaseModel,
+        additional_signature_fields: Mapping[str, List] = None,
+        alias: Optional[Dict[str, str]] = None,
     ):
         """
         This function will take query, parse it, and output the mongo criteria.
@@ -189,10 +207,10 @@ class DefaultDynamicQuery(QueryOperator):
         Args:
             model: PyDantic Model to base the query language on
             additional_signature_fields: mapping of NAME_OF_THE_FIELD -> [DEFAULT_VALUE, QUERY]
-
+            alias: mapping of alias of NAME_IN_MODEL -> ACTUAL_NAME
         """
         self.model = model
-
+        self.alias = alias if alias is not None else dict()
         default_mapping = {
             "eq": "$eq",
             "not_eq": "$ne",
@@ -201,7 +219,7 @@ class DefaultDynamicQuery(QueryOperator):
             "in": "$in",
             "not_in": "$nin",
         }
-        mapping: dict = default_mapping  # if query_mapping is None else query_mapping
+        mapping: dict = default_mapping
 
         self.additional_signature_fields: Mapping[
             str, List
@@ -268,35 +286,40 @@ class DefaultDynamicQuery(QueryOperator):
         for name, model_field in all_fields.items():
             if model_field.type_ in [str, int, float]:
                 t: Any = model_field.type_
-                params[f"{model_field.name}"] = [
+                name = (
+                    self.alias[model_field.name]
+                    if model_field.name in self.alias.keys()
+                    else model_field.name
+                )
+                params[f"{name}"] = [
                     t,
                     Query(
                         default=model_field.default,
                         description=f"Querying if {model_field.name} is equal to another",
                     ),
                 ]  # supporting both with and with out explicit _eq
-                params[f"{model_field.name}_eq"] = [
+                params[f"{name}_eq"] = [
                     t,
                     Query(
                         default=model_field.default,
                         description=f"Querying if {model_field.name} is equal to another",
                     ),
                 ]
-                params[f"{model_field.name}_not_eq"] = [
+                params[f"{name}_not_eq"] = [
                     t,
                     Query(
                         default=model_field.default,
                         description=f"Querying if {model_field.name} is not equal to another",
                     ),
                 ]
-                params[f"{model_field.name}_in"] = [
+                params[f"{name}_in"] = [
                     List[t],
                     Query(
                         default=model_field.default,
                         description=f"Querying if item is in {model_field.name}",
                     ),
                 ]
-                params[f"{model_field.name}_not_in"] = [
+                params[f"{name}_not_in"] = [
                     List[t],
                     Query(
                         default=model_field.default,
@@ -305,14 +328,14 @@ class DefaultDynamicQuery(QueryOperator):
                 ]
 
                 if model_field.type_ == int or model_field == float:
-                    params[f"{model_field.name}_lt"] = [
+                    params[f"{name}_lt"] = [
                         model_field.type_,
                         Query(
                             model_field.default,
                             description=f"Querying if {model_field.name} is less than to another",
                         ),
                     ]
-                    params[f"{model_field.name}_gt"] = [
+                    params[f"{name}_gt"] = [
                         model_field.type_,
                         Query(
                             model_field.default,
@@ -320,9 +343,7 @@ class DefaultDynamicQuery(QueryOperator):
                         ),
                     ]
             else:
-                import warnings
-
                 warnings.warn(
-                    f"Field name {model_field.name} with {model_field.type_} not implemented"
+                    f"Field name {name} with {model_field.type_} not implemented"
                 )
         return params
