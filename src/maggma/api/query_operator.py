@@ -85,10 +85,7 @@ class PaginationQuery(QueryOperator):
 
 class SparseFieldsQuery(QueryOperator):
     def __init__(
-        self,
-        model: BaseModel,
-        default_fields: Optional[List[str]] = None,
-        alias: Optional[Dict[str, str]] = None,
+        self, model: BaseModel, default_fields: Optional[List[str]] = None, alias=None,
     ):
         """
         Args:
@@ -97,10 +94,9 @@ class SparseFieldsQuery(QueryOperator):
             alias: mapping of alias of NAME_IN_MODEL -> INPUT_NAME
         """
 
+        if alias is None:
+            alias = {}
         self.model = model
-        self.alias: Dict[str, str] = alias if alias else dict()
-        # Workaround, query func does not have reference to self
-        alias = self.alias
 
         model_fields = list(self.model.__fields__.keys())
         self.default_fields = (
@@ -184,7 +180,7 @@ class DefaultDynamicQuery(QueryOperator):
         self,
         model: BaseModel,
         additional_signature_fields: Mapping[str, List] = None,
-        alias: Optional[Dict[str, str]] = None,
+        alias=None,
     ):
         """
         This function will take query, parse it, and output the mongo criteria.
@@ -210,8 +206,8 @@ class DefaultDynamicQuery(QueryOperator):
             alias: mapping of alias of NAME_IN_MODEL -> ACTUAL_NAME
         """
         self.model = model
-        self.alias = alias if alias is not None else dict()
-        alias = self.alias
+        alias = alias if alias is not None else dict()
+        self.alias = alias
         default_mapping = {
             "eq": "$eq",
             "not_eq": "$ne",
