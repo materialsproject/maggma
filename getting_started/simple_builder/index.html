@@ -34,7 +34,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
+      <meta name="generator" content="mkdocs-1.1, mkdocs-material-4.6.3">
     
     
       
@@ -42,12 +42,12 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.adb8469c.css">
       
       
     
     
-      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
+      <script src="../../assets/javascripts/modernizr.86422ebf.js"></script>
     
     
       
@@ -79,7 +79,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#writing-a-builder" tabindex="1" class="md-skip">
+      <a href="#writing-a-builder" tabindex="0" class="md-skip">
         Skip to content
       </a>
     
@@ -88,7 +88,7 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="../.." title="Maggma Documentation" class="md-header-nav__button md-logo">
+        <a href="../.." title="Maggma Documentation" aria-label="Maggma Documentation" class="md-header-nav__button md-logo">
           
             <i class="md-icon"></i>
           
@@ -119,7 +119,7 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <input type="text" class="md-search__input" aria-label="search" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
       <label class="md-icon md-search__icon" for="__search"></label>
       <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
         &#xE5CD;
@@ -603,26 +603,26 @@
 <li><code>update_targets</code>: This method should take a list of processed items and update the target stores.</li>
 </ul>
 <p>To make this less abstract, we will write a builder that multiplies the "a" sub-document by a pre-configured <code>multiplier</code>. Let's assume we have some source collection in MongoDB with documents that look like this:</p>
-<div class="codehilite"><pre><span></span><span class="p">{</span>
+<div class="codehilite"><pre><span></span><code><span class="p">{</span>
     <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
     <span class="nt">&quot;a&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
     <span class="nt">&quot;last_updated&quot;</span><span class="p">:</span> <span class="s2">&quot;2019-11-3&quot;</span>
 <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
 <h2 id="class-definition-and-__init__">Class definition and <code>__init__</code><a class="headerlink" href="#class-definition-and-__init__" title="Permanent link">&para;</a></h2>
 <p>A simple class definition for a Maggma-based builder looks like this:</p>
-<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Builder</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Builder</span>
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
 <span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-</pre></div>
+</code></pre></div>
 
 <p>The <code>__init__</code> for a builder can have any set of parameters. Generally, you want a source <code>Store</code> and a target <code>Store</code> along with any parameters that configure the builder. Due to the <code>MSONable</code> pattern, any parameters to <code>__init__</code> have to be stored as attributes. A simple <code>__init__</code> would look like this:</p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            source: the source store</span>
@@ -635,72 +635,72 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="n">source</span><span class="p">,</span><span class="n">targets</span><span class="o">=</span><span class="n">target</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
+</code></pre></div>
 
 <p>Python type annotations provide a really nice way of documenting the types we expect and being able to later type check using <code>mypy</code>. We defined the type for <code>source</code> and <code>target</code> as <code>Store</code> since we only care that implements that pattern. How exactly these <code>Store</code>s operate doesn't concern us here.</p>
 <p>Note that the <code>__init__</code> arguments: <code>source</code>, <code>target</code>, <code>multiplier</code>, and <code>kwargs</code> get saved as attributess:</p>
-<div class="codehilite"><pre><span></span>        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+<div class="codehilite"><pre><span></span><code>        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span> <span class="o">=</span> <span class="n">multiplier</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
-</pre></div>
+</code></pre></div>
 
 <p>Finally, we want to call the base <code>Builder</code>'s <code>__init__</code> to tell it our sources and targets for this builder. In addition, we pass along any extra parameters that might configured the base builder class.</p>
-<div class="codehilite"><pre><span></span><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="n">source</span><span class="p">,</span><span class="n">targets</span><span class="o">=</span><span class="n">target</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-</pre></div>
+<div class="codehilite"><pre><span></span><code><span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="n">source</span><span class="p">,</span><span class="n">targets</span><span class="o">=</span><span class="n">target</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre></div>
 
 <p>Calling the parent class <code>__init__</code> is a good practice as sub-classing builders is a good way to encapsulate complex logic.</p>
 <h2 id="get_items"><code>get_items</code><a class="headerlink" href="#get_items" title="Permanent link">&para;</a></h2>
 <p><code>get_items</code> is conceptually a simple method to implement, but in practice can easily be more code than the rest of the builder. All of the logic for getting data from the sources has to happen here, which requires some planning. <code>get_items</code> should also sort all of the data into induvidual <strong>items</strong> to process. This simple builder has a very easy <code>get_items</code>:</p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
-</pre></div>
+</code></pre></div>
 
 <p>Here, get items just returns the results of <code>query()</code> from the store. It could also have been written as a generator:</p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">():</span>
             <span class="k">yield</span> <span class="n">doc</span>
-</pre></div>
+</code></pre></div>
 
 <p>We could have also returned a list of items:</p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">())</span>
-</pre></div>
+</code></pre></div>
 
 <p>One advantage of using the generator approach is it is less memory intensive than the approach where a list of items returned. For large datasets, returning a list of all items for processing may be prohibitive due to memory constraints.</p>
 <h2 id="process_item"><code>process_item</code><a class="headerlink" href="#process_item" title="Permanent link">&para;</a></h2>
 <p><code>process_item</code> just has to do the parallelizable work on each item. Since the item is whatever comes out of <code>get_items</code>, you know exactly what it should be. It may be a single document, a list of documents, a mapping, a set, etc.</p>
 <p>Our simple process item just has to multiply one field by <code>self.mulitplier</code>:</p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">process_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">process_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies the &quot;a&quot; sub-document by self.multiplier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_item</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="n">item</span><span class="p">)</span>
         <span class="n">new_item</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">*=</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span>
         <span class="k">return</span> <span class="n">new_item</span>
-</pre></div>
+</code></pre></div>
 
 <h2 id="update_targets"><code>update_targets</code><a class="headerlink" href="#update_targets" title="Permanent link">&para;</a></h2>
 <p>Finally, we have to put the processed item in to the target store:</p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds the processed items into the target store</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-</pre></div>
+</code></pre></div>
 
 <p>Putting it all together we get:</p>
-<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Builder</span>
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
@@ -744,13 +744,13 @@
 <span class="sd">        Adds the processed items into the target store</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
-</pre></div>
+</code></pre></div>
 
 <h2 id="distributed-processing">Distributed Processing<a class="headerlink" href="#distributed-processing" title="Permanent link">&para;</a></h2>
 <p><code>maggma</code> can distribute a builder across multiple computers.</p>
 <p>The <code>Builder</code> must have a <code>prechunk</code> method defined. <code>prechunk</code> should do a subset of <code>get_items</code> to figure out what needs to be processed and then return dictionaries that modify the <code>Builder</code> in-place to only work on each subset.</p>
 <p>For example, if in the above example we'd first have to update the builder to be able to work on a subset of keys. One pattern is to define a generic <code>query</code> argument for the builder and use that in get items:</p>
-<div class="codehilite"><pre><span></span>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            source: the source store</span>
@@ -771,17 +771,17 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="n">docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">))</span>
-</pre></div>
+</code></pre></div>
 
 <p>Then we can define a prechunk method that modifies the <code>Builder</code> dict in place to operate on just a subset of the keys:</p>
-<div class="codehilite"><pre><span></span>    <span class="kn">from</span> <span class="nn">maggma.utils</span> <span class="kn">import</span> <span class="n">grouper</span>
+<div class="codehilite"><pre><span></span><code>    <span class="kn">from</span> <span class="nn">maggma.utils</span> <span class="kn">import</span> <span class="n">grouper</span>
     <span class="k">def</span> <span class="nf">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
         <span class="n">keys</span>  <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
             <span class="k">yield</span> <span class="p">{</span>
                 <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">)}}</span>
             <span class="p">}</span>
-</pre></div>
+</code></pre></div>
 
 <p>When distributed processing runs, it will modify the <code>Builder</code> dictionary in place by the prechunk dictionary. In this case, each builder distribute to a worker will get a modified <code>query</code> parameter that only runs on a subset of all posible keys.</p>
                 
@@ -846,9 +846,9 @@
           </div>
         
         powered by
-        <a href="https://www.mkdocs.org">MkDocs</a>
+        <a href="https://www.mkdocs.org" target="_blank" rel="noopener">MkDocs</a>
         and
-        <a href="https://squidfunk.github.io/mkdocs-material/">
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
           Material for MkDocs</a>
       </div>
       
@@ -858,9 +858,9 @@
       
     </div>
     
-      <script src="../../assets/javascripts/application.808e90bb.js"></script>
+      <script src="../../assets/javascripts/application.c33a9706.js"></script>
       
-      <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
+      <script>app.initialize({version:"1.1",url:{base:"../.."}})</script>
       
     
   </body>

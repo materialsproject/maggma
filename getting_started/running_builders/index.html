@@ -34,7 +34,7 @@
         <meta name="lang:search.tokenizer" content="[\s\-]+">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.0.4, mkdocs-material-4.6.0">
+      <meta name="generator" content="mkdocs-1.1, mkdocs-material-4.6.3">
     
     
       
@@ -42,12 +42,12 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/application.1b62728e.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/application.adb8469c.css">
       
       
     
     
-      <script src="../../assets/javascripts/modernizr.268332fc.js"></script>
+      <script src="../../assets/javascripts/modernizr.86422ebf.js"></script>
     
     
       
@@ -79,7 +79,7 @@
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
     <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
     
-      <a href="#running-builders" tabindex="1" class="md-skip">
+      <a href="#running-builders" tabindex="0" class="md-skip">
         Skip to content
       </a>
     
@@ -88,7 +88,7 @@
   <nav class="md-header-nav md-grid">
     <div class="md-flex">
       <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="../.." title="Maggma Documentation" class="md-header-nav__button md-logo">
+        <a href="../.." title="Maggma Documentation" aria-label="Maggma Documentation" class="md-header-nav__button md-logo">
           
             <i class="md-icon"></i>
           
@@ -119,7 +119,7 @@
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
+      <input type="text" class="md-search__input" aria-label="search" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
       <label class="md-icon md-search__icon" for="__search"></label>
       <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
         &#xE5CD;
@@ -540,7 +540,7 @@
                 
                 <h1 id="running-builders">Running Builders<a class="headerlink" href="#running-builders" title="Permanent link">&para;</a></h1>
 <p><code>maggma</code> is designed to run build-pipelines in a production environment. Builders can be run directly in a python environment, but this gives you none of the performance features such as multiprocessing. The base <code>Builder</code> class implements a simple <code>run</code> method that can be used to run that builder:</p>
-<div class="codehilite"><pre><span></span><span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -550,20 +550,20 @@
 
 <span class="n">my_builder</span> <span class="o">=</span> <span class="n">MultiplyBuilder</span><span class="p">(</span><span class="n">source_store</span><span class="p">,</span><span class="n">target_store</span><span class="p">,</span><span class="n">multiplier</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">my_builder</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
-</pre></div>
+</code></pre></div>
 
 <p>A better way to run this builder would be to use the <code>mrun</code> command line tool. Since evrything in <code>maggma</code> is MSONable, we can use <code>monty</code> to dump the builders into a JSON file:</p>
-<div class="codehilite"><pre><span></span><span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">dumpfn</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">dumpfn</span>
 
 <span class="n">dumpfn</span><span class="p">(</span><span class="n">my_builder</span><span class="p">,</span><span class="s2">&quot;my_builder.json&quot;</span><span class="p">)</span>
-</pre></div>
+</code></pre></div>
 
 <p>Then we can run the builder using <code>mrun</code>:</p>
-<div class="codehilite"><pre><span></span>mrun my_builder.json
-</pre></div>
+<div class="codehilite"><pre><span></span><code>mrun my_builder.json
+</code></pre></div>
 
 <p><code>mrun</code> has a number of usefull options:</p>
-<div class="codehilite"><pre><span></span>mrun --help
+<div class="codehilite"><pre><span></span><code>mrun --help
 Usage: mrun <span class="o">[</span>OPTIONS<span class="o">]</span> <span class="o">[</span>BUILDERS<span class="o">]</span>...
 
 Options:
@@ -572,18 +572,18 @@ Options:
                                   Number of worker processes. Defaults to
                                   single processing
   --help                          Show this message and exit.
-</pre></div>
+</code></pre></div>
 
 <p>We can use the <code>-n</code> option to control how many workers run <code>process_items</code> in parallel.
 Similarly, <code>-v</code> controls the logging verbosity from just WARNINGs to INFO to DEBUG output.</p>
 <p>The result will be something that looks like this:</p>
-<div class="codehilite"><pre><span></span><span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,187 - Builder - INFO - Starting Builder Builder
+<div class="codehilite"><pre><span></span><code><span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,187 - Builder - INFO - Starting Builder Builder
 <span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,217 - Builder - INFO - Processing <span class="m">100</span> items
 Get: <span class="m">100</span>%<span class="p">|</span>██████████████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">15366</span>.00it/s<span class="o">]</span>
 <span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,235 - MultiProcessor - INFO - Processing batch of <span class="m">1000</span> items
 Update Targets: <span class="m">100</span>%<span class="p">|</span>█████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">584</span>.51it/s<span class="o">]</span>
 Process Items: <span class="m">100</span>%<span class="p">|</span>██████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">567</span>.39it/s<span class="o">]</span>
-</pre></div>
+</code></pre></div>
 
 <p>There are progress bars for each of the three steps, which lets you understand what the slowest step is and the overall progress of the system.</p>
 <h2 id="running-distributed">Running Distributed<a class="headerlink" href="#running-distributed" title="Permanent link">&para;</a></h2>
@@ -664,9 +664,9 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
           </div>
         
         powered by
-        <a href="https://www.mkdocs.org">MkDocs</a>
+        <a href="https://www.mkdocs.org" target="_blank" rel="noopener">MkDocs</a>
         and
-        <a href="https://squidfunk.github.io/mkdocs-material/">
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
           Material for MkDocs</a>
       </div>
       
@@ -676,9 +676,9 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
       
     </div>
     
-      <script src="../../assets/javascripts/application.808e90bb.js"></script>
+      <script src="../../assets/javascripts/application.c33a9706.js"></script>
       
-      <script>app.initialize({version:"1.0.4",url:{base:"../.."}})</script>
+      <script>app.initialize({version:"1.1",url:{base:"../.."}})</script>
       
     
   </body>
