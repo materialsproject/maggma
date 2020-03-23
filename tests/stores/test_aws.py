@@ -3,7 +3,7 @@ import json
 import boto3
 import zlib
 from moto import mock_s3
-from maggma.stores import MemoryStore, AmazonS3Store
+from maggma.stores import MemoryStore, S3Store
 from botocore.exceptions import ClientError
 from maggma.stores import MongoStore
 
@@ -23,7 +23,7 @@ def s3store():
         conn.create_bucket(Bucket="bucket1")
 
         index = MemoryStore("index'")
-        store = AmazonS3Store(index, "bucket1")
+        store = S3Store(index, "bucket1")
         store.connect()
 
         check_doc = {"task_id": "mp-1", "data": "asd"}
@@ -87,7 +87,7 @@ def test_bad_import(mocker):
     mocker.patch("maggma.stores.aws.boto3", None)
     with pytest.raises(RuntimeError):
         index = MemoryStore("index'")
-        AmazonS3Store(index, "bucket1")
+        S3Store(index, "bucket1")
 
 
 def test_aws_error(s3store):

@@ -22,7 +22,7 @@ except ImportError:
     boto3 = None  # type: ignore
 
 
-class AmazonS3Store(Store):
+class S3Store(Store):
     """
     GridFS like storage using Amazon S3 and a regular store for indexing
     Assumes Amazon AWS key and secret key are set in environment or default config file
@@ -48,7 +48,7 @@ class AmazonS3Store(Store):
             endpoint_url: endpoint_url to allow interface to minio service
         """
         if boto3 is None:
-            raise RuntimeError("boto3 and botocore are required for AmazonS3Store")
+            raise RuntimeError("boto3 and botocore are required for S3Store")
         self.index = index
         self.bucket = bucket
         self.s3_profile = s3_profile
@@ -58,7 +58,7 @@ class AmazonS3Store(Store):
         self.s3_bucket = None  # type: Any
         # Force the key to be the same as the index
         kwargs["key"] = index.key
-        super(AmazonS3Store, self).__init__(**kwargs)
+        super(S3Store, self).__init__(**kwargs)
 
     def name(self) -> str:
         """
@@ -323,10 +323,10 @@ class AmazonS3Store(Store):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for AmazonS3Store
-        other: other AmazonS3Store to compare with
+        Check equality for S3Store
+        other: other S3Store to compare with
         """
-        if not isinstance(other, AmazonS3Store):
+        if not isinstance(other, S3Store):
             return False
 
         fields = ["index", "bucket", "last_updated_field"]

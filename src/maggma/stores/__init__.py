@@ -8,5 +8,5 @@ from maggma.stores.advanced_stores import (
     AliasingStore,
     SandboxStore,
 )
-from maggma.stores.aws import AmazonS3Store
+from maggma.stores.aws import S3Store
 from maggma.stores.compound_stores import JointStore, ConcatStore
