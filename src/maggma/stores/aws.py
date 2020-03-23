@@ -34,6 +34,7 @@ class AmazonS3Store(Store):
         bucket: str,
         s3_profile: str = None,
         compress: bool = False,
+        endpoint_url: str = None,
         **kwargs,
     ):
         """
@@ -44,6 +45,7 @@ class AmazonS3Store(Store):
             bucket: name of the bucket
             s3_profile: name of aws profile containing credentials for role
             compress: compress files inserted into the store
+            endpoint_url: endpoint_url to allow interface to minio service
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for AmazonS3Store")
@@ -51,6 +53,7 @@ class AmazonS3Store(Store):
         self.bucket = bucket
         self.s3_profile = s3_profile
         self.compress = compress
+        self.endpoint_url = endpoint_url
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         # Force the key to be the same as the index
@@ -71,7 +74,7 @@ class AmazonS3Store(Store):
         self.index.connect(force_reset=force_reset)
 
         session = Session(profile_name=self.s3_profile)
-        resource = session.resource("s3")
+        resource = session.resource("s3", endpoint_url=self.endpoint_url)
 
         if not self.s3:
             self.s3 = resource
