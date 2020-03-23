@@ -264,26 +264,3 @@ def test_resource_compound(owner_store):
     assert data[0]["name"] == "PersonAge20Weight200"
     assert data[0]["age"] == 20
     assert "weight" not in data[0]
-
-
-def test_alias(owner_store):
-    endpoint = Resource(owner_store, Owner, alias={"weight": "mass"})
-    app = FastAPI()
-    app.include_router(endpoint.router)
-
-    client = TestClient(app)
-
-    payload = {
-        "name": "PersonAge20Weight200",
-        "all_fields": True,
-        "mass": 200,  # this line is making things fail
-        "age": 20,
-    }
-    res = dynamic_model_search_response_helper(
-        client=client, payload=payload, base="/?", debug=True
-    )
-    data, meta, err = get_fields(res)
-
-    assert res.status_code == 200
-    assert len(data) == 1
-    assert data[0]["name"] == "PersonAge20Weight200"

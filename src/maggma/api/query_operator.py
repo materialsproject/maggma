@@ -84,18 +84,13 @@ class PaginationQuery(QueryOperator):
 
 
 class SparseFieldsQuery(QueryOperator):
-    def __init__(
-        self, model: BaseModel, default_fields: Optional[List[str]] = None, alias=None,
-    ):
+    def __init__(self, model: BaseModel, default_fields: Optional[List[str]] = None):
         """
         Args:
             model: PyDantic Model that represents the underlying data source
             default_fields: default fields to return in the API response if no fields are explicitly requested
-            alias: mapping of alias of NAME_IN_MODEL -> INPUT_NAME
         """
 
-        if alias is None:
-            alias = {}
         self.model = model
 
         model_fields = list(self.model.__fields__.keys())
@@ -122,12 +117,6 @@ class SparseFieldsQuery(QueryOperator):
             """
 
             projection_fields: List[str] = [s.strip() for s in fields.split(",")]
-
-            # processing alias
-            for data_name, input_name in alias.items():
-                if input_name in projection_fields:
-                    projection_fields.remove(input_name)
-                    projection_fields.append(data_name)
 
             # need to strip to avoid input such as "name, weight" to be parsed into ["name", " weight"]
             # we need ["name", "weight"]
@@ -177,10 +166,7 @@ class SparseFieldsQuery(QueryOperator):
 
 class DefaultDynamicQuery(QueryOperator):
     def __init__(
-        self,
-        model: BaseModel,
-        additional_signature_fields: Mapping[str, List] = None,
-        alias=None,  # I cannot type hint this because mypy is going to complain
+        self, model: BaseModel, additional_signature_fields: Mapping[str, List] = None,
     ):
         """
         This function will take query, parse it, and output the mongo criteria.
@@ -203,11 +189,8 @@ class DefaultDynamicQuery(QueryOperator):
         Args:
             model: PyDantic Model to base the query language on
             additional_signature_fields: mapping of NAME_OF_THE_FIELD -> [DEFAULT_VALUE, QUERY]
-            alias: mapping of alias of NAME_IN_MODEL -> ACTUAL_NAME
         """
         self.model = model
-        alias = alias if alias is not None else dict()
-        self.alias = alias
         default_mapping = {
             "eq": "$eq",
             "not_eq": "$ne",
@@ -246,11 +229,6 @@ class DefaultDynamicQuery(QueryOperator):
                         raise KeyError(
                             f"Cannot find key {k} in current query to database mapping"
                         )
-            # Processing alias
-            for data_name, input_name in alias.items():
-                if input_name in crit.keys():
-                    crit[data_name] = crit[input_name]
-                    del crit[input_name]
 
             return {"criteria": crit}
 
@@ -288,11 +266,7 @@ class DefaultDynamicQuery(QueryOperator):
         for name, model_field in all_fields.items():
             if model_field.type_ in [str, int, float]:
                 t: Any = model_field.type_
-                name = (
-                    self.alias[model_field.name]
-                    if model_field.name in self.alias.keys()
-                    else model_field.name
-                )
+                name = model_field.name
                 params[f"{name}"] = [
                     t,
                     Query(
