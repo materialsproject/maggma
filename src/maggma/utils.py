@@ -8,8 +8,8 @@ import logging
 import uuid
 from bson import ObjectId
 
+from importlib import import_module
 from datetime import datetime, timedelta
-
 
 from pydash.utilities import to_path
 from pydash.objects import set_, get, has
@@ -207,6 +207,15 @@ class Timeout:
         """
         if self.seconds:
             signal.alarm(0)
+
+
+def dynamic_import(abs_module_path, class_name):
+    """
+    Dynamic class importer from: https://www.bnmetrics.com/blog/dynamic-import-in-python3
+    """
+    module_object = import_module(abs_module_path)
+    target_class = getattr(module_object, class_name)
+    return target_class
 
 
 class ReportingHandler(logging.Handler):

@@ -8,6 +8,9 @@ from maggma.utils import (
     recursive_update,
     Timeout,
     primed,
+    # dt_to_isoformat_ceil_ms,
+    # isostr_to_dt,
+    dynamic_import,
     to_isoformat_ceil_ms,
     to_dt,
     grouper,
@@ -78,6 +81,11 @@ def test_datetime_utils():
     assert to_dt(datetime(2019, 12, 13, 0, 23, 11, 10000)) == datetime(
         2019, 12, 13, 0, 23, 11, 10000
     )
+
+
+def test_dynamic_import():
+
+    assert dynamic_import("maggma.stores", "MongoStore").__name__ == "MongoStore"
 
 
 def test_grouper():
