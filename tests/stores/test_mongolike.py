@@ -1,9 +1,10 @@
+import os
 import pytest
 import mongomock.collection
 import pymongo.collection
 from datetime import datetime
 from maggma.core import StoreError
-from maggma.stores import MongoStore, MemoryStore, JSONStore
+from maggma.stores import MongoStore, MemoryStore, JSONStore, MongoURIStore
 from maggma.validators import JSONSchemaValidator
 
 
@@ -47,6 +48,14 @@ def test_mongostore_query(mongostore):
     assert mongostore.query_one(properties=["c"])["c"] == 3
 
 
+def test_mongostore_count(mongostore):
+    mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    assert mongostore.count() == 1
+    mongostore._collection.insert_one({"aa": 1, "b": 2, "c": 3})
+    assert mongostore.count() == 2
+    assert mongostore.count({"a": 1}) == 1
+
+
 def test_mongostore_distinct(mongostore):
     mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     mongostore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
@@ -55,22 +64,17 @@ def test_mongostore_distinct(mongostore):
     # Test list distinct functionality
     mongostore._collection.insert_one({"a": 4, "d": 6, "e": 7})
     mongostore._collection.insert_one({"a": 4, "d": 6, "g": {"h": 2}})
-    ad_distinct = mongostore.distinct(["a", "d"])
-    assert len(ad_distinct) == 3
-    assert {"a": 4, "d": 6} in ad_distinct
-    assert {"a": 1} in ad_distinct
-    assert len(mongostore.distinct(["d", "e"], {"a": 4})) == 3
-    all_exist = mongostore.distinct(["a", "b"], all_exist=True)
-    assert len(all_exist) == 1
-    all_exist2 = mongostore.distinct(["a", "e"], all_exist=True, criteria={"d": 6})
-    assert len(all_exist2) == 1
 
     # Test distinct subdocument functionality
     ghs = mongostore.distinct("g.h")
-    assert set(ghs) == {1, 2, None}
-    ghs_ds = mongostore.distinct(["d", "g.h"], all_exist=True)
-    assert {s["g"]["h"] for s in ghs_ds} == {1, 2}
-    assert {s["d"] for s in ghs_ds}, {5, 6}
+    assert set(ghs) == {1, 2}
+
+    # Test when key doesn't exist
+    assert mongostore.distinct("blue") == []
+
+    # Test when null is a value
+    mongostore._collection.insert_one({"i": None})
+    assert mongostore.distinct("i") == [None]
 
 
 def test_mongostore_update(mongostore):
@@ -142,7 +146,7 @@ def test_mongostore_from_collection(mongostore, db_json):
 
 
 def test_mongostore_name(mongostore):
-    assert mongostore.name == "test"
+    assert mongostore.name == "mongo://localhost/maggma_test/test"
 
 
 def test_ensure_index(mongostore):
@@ -249,3 +253,16 @@ def test_eq(mongostore, memorystore, jsonstore):
     assert mongostore != memorystore
     assert mongostore != jsonstore
     assert memorystore != jsonstore
+
+
+@pytest.mark.skipif(
+    "mongodb+srv" not in os.environ.get("MONGODB_SRV_URI", ""),
+    reason="requires special mongodb+srv URI",
+)
+def test_mongo_uri():
+    uri = os.environ["MONGODB_SRV_URI"]
+    store = MongoURIStore(uri, database="mp_core", collection_name="xas")
+    store.connect()
+    is_name = store.name is uri
+    # This is try and keep the secret safe
+    assert is_name

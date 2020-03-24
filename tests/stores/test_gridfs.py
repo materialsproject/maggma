@@ -77,6 +77,24 @@ def test_remove(gridfsstore):
     assert gridfsstore.query_one(criteria={"task_id": "mp-2"})
 
 
+def test_count(gridfsstore):
+    data1 = np.random.rand(256)
+    data2 = np.random.rand(256)
+    tic = datetime(2018, 4, 12, 16)
+    gridfsstore.update(
+        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
+    )
+
+    assert gridfsstore.count() == 1
+
+    gridfsstore.update(
+        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}]
+    )
+
+    assert gridfsstore.count() == 2
+    assert gridfsstore.count({"task_id": "mp-2"}) == 1
+
+
 def test_query(gridfsstore):
     data1 = np.random.rand(256)
     data2 = np.random.rand(256)

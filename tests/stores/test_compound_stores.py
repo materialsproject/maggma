@@ -62,6 +62,11 @@ def jointstore(jointstore_test1, jointstore_test2):
     return store
 
 
+def test_joint_store_count(jointstore):
+    assert jointstore.count() == 10
+    assert jointstore.count({"test2.category2": {"$exists": 1}}) == 5
+
+
 def test_joint_store_query(jointstore):
     # Test query all
     docs = list(jointstore.query())
@@ -161,7 +166,7 @@ def test_joint_remove_docs(jointstore):
 @pytest.fixture
 def concat_store():
     mem_stores = [MemoryStore(str(i)) for i in range(4)]
-    store = ConcatStore(*mem_stores)
+    store = ConcatStore(mem_stores)
     store.connect()
 
     index = 0
@@ -193,6 +198,12 @@ def test_concat_store_groupby(concat_store):
     assert len(list(concat_store.groupby("task_id"))) == 40
 
 
+def test_concat_store_count(concat_store):
+
+    assert concat_store.count() == 40
+    assert concat_store.count({"prop": "3"}) == 4
+
+
 def test_concat_store_query(concat_store):
 
     docs = list(concat_store.query(properties=["task_id"]))
@@ -208,3 +219,11 @@ def test_eq(mongostore, jointstore, concat_store):
     assert mongostore != jointstore
     assert mongostore != concat_store
     assert jointstore != concat_store
+
+
+def test_serialize(concat_store):
+
+    d = concat_store.as_dict()
+    new_concat_store = ConcatStore.from_dict(d)
+
+    assert len(new_concat_store.stores) == len(concat_store.stores)

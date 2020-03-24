@@ -85,7 +85,7 @@ class GridFSStore(Store):
         """
         Return a string representing this data source
         """
-        return self.collection_name
+        return f"gridfs://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
         """
@@ -134,6 +134,18 @@ class GridFSStore(Store):
 
         return new_criteria
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+        if isinstance(criteria, dict):
+            criteria = self.transform_criteria(criteria)
+
+        return self._files_store.count(criteria)
+
     def query(
         self,
         criteria: Optional[Dict] = None,
@@ -174,38 +186,29 @@ class GridFSStore(Store):
             yield data
 
     def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-    ) -> Union[List[Dict], List]:
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
-        Function get to get all distinct values of a certain key in
-        a GridFs store.
-
+        Get all distinct values for a field
 
         Args:
-            field: key or keys
-                for which to find distinct values or sets of values.
-            criteria: criteria for filter
-            all_exist: whether to ensure all keys in list exist
-                in each document, defaults to False
+            field: the field(s) to get distinct values for
+            criteria: PyMongo filter for documents to search in
         """
         criteria = (
             self.transform_criteria(criteria)
             if isinstance(criteria, dict)
             else criteria
         )
-        field = [field] if not isinstance(field, list) else field
-        field = [
-            f"metadata.{k}"
-            if k not in self.files_collection_fields and not k.startswith("metadata.")
-            else k
-            for k in field
-        ]
-        return self._files_store.distinct(
-            field=field, criteria=criteria, all_exist=all_exist
+
+        field = (
+            f"metadata.{field}"
+            if field not in self.files_collection_fields
+            and not field.startswith("metadata.")
+            else field
         )
+
+        return self._files_store.distinct(field=field, criteria=criteria)
 
     def groupby(
         self,

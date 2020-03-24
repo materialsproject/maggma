@@ -7,7 +7,7 @@ import click
 import asyncio
 from itertools import chain
 from monty.serialization import loadfn
-from maggma.utils import TqdmLoggingHandler
+from maggma.utils import TqdmLoggingHandler, ReportingHandler
 from maggma.cli.serial import serial
 from maggma.cli.multiprocessing import multi
 from maggma.cli.distributed import master, worker
@@ -31,9 +31,16 @@ from maggma.cli.distributed import master, worker
     default=1,
     type=click.IntRange(1),
 )
+@click.option(
+    "-r",
+    "--reporting",
+    "reporting_store",
+    help="Store in JSON/YAML form to send reporting data to",
+    type=click.Path(exists=True),
+)
 @click.option("-u", "--url", "url", default=None, type=str)
 @click.option("-N", "--num-chunks", "num_chunks", default=0, type=int)
-def run(builders, verbosity, num_workers, url, num_chunks):
+def run(builders, verbosity, reporting_store, num_workers, url, num_chunks):
 
     # Set Logging
     levels = [logging.WARNING, logging.INFO, logging.DEBUG]
@@ -50,6 +57,10 @@ def run(builders, verbosity, num_workers, url, num_chunks):
     builders = [loadfn(b) for b in builders]
     builders = [b if isinstance(b, list) else [b] for b in builders]
     builders = list(chain.from_iterable(builders))
+
+    if reporting_store:
+        reporting_store = loadfn(reporting_store)
+        root.addHandler(ReportingHandler(reporting_store))
 
     if url:
         if num_chunks > 0:

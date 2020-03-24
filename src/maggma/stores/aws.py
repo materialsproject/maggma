@@ -17,55 +17,71 @@ from maggma.utils import grouper
 try:
     import botocore
     import boto3
+    from boto3.session import Session
 except ImportError:
-    boto3 = None
+    boto3 = None  # type: ignore
 
 
-class AmazonS3Store(Store):
+class S3Store(Store):
     """
     GridFS like storage using Amazon S3 and a regular store for indexing
     Assumes Amazon AWS key and secret key are set in environment or default config file
     """
 
-    def __init__(self, index: Store, bucket: str, compress: bool = False, **kwargs):
+    def __init__(
+        self,
+        index: Store,
+        bucket: str,
+        s3_profile: str = None,
+        compress: bool = False,
+        endpoint_url: str = None,
+        **kwargs,
+    ):
         """
         Initializes an S3 Store
 
         Args:
             index: a store to use to index the S3 Bucket
             bucket: name of the bucket
+            s3_profile: name of aws profile containing credentials for role
             compress: compress files inserted into the store
+            endpoint_url: endpoint_url to allow interface to minio service
         """
         if boto3 is None:
-            raise RuntimeError("boto3 and botocore are required for AmazonS3Store")
+            raise RuntimeError("boto3 and botocore are required for S3Store")
         self.index = index
         self.bucket = bucket
+        self.s3_profile = s3_profile
         self.compress = compress
+        self.endpoint_url = endpoint_url
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         # Force the key to be the same as the index
         kwargs["key"] = index.key
-        super(AmazonS3Store, self).__init__(**kwargs)
+        super(S3Store, self).__init__(**kwargs)
 
     def name(self) -> str:
         """
         Returns:
             a string representing this data source
         """
-        return self.bucket
+        return f"s3://{self.bucket}"
 
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
         """
         self.index.connect(force_reset=force_reset)
-        if not self.s3:
-            self.s3 = boto3.resource("s3")
 
+        session = Session(profile_name=self.s3_profile)
+        resource = session.resource("s3", endpoint_url=self.endpoint_url)
+
+        if not self.s3:
+            self.s3 = resource
             if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
                 raise Exception("Bucket not present on AWS: {}".format(self.bucket))
 
-            self.s3_bucket = self.s3.Bucket(self.bucket)
+            self.s3_bucket = resource.Bucket(self.bucket)
 
     def close(self):
         """
@@ -88,6 +104,16 @@ class AmazonS3Store(Store):
         # For now returns the index collection since that is what we would "search" on
         return self.index
 
+    def count(self, criteria: Optional[Dict] = None) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+        """
+
+        return self.index.count(criteria)
+
     def query(
         self,
         criteria: Optional[Dict] = None,
@@ -106,46 +132,49 @@ class AmazonS3Store(Store):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
+        prop_keys = set()
+        if isinstance(properties, dict):
+            prop_keys = set(properties.keys())
+        elif isinstance(properties, list):
+            prop_keys = set(properties)
+
         for doc in self.index.query(
             criteria=criteria, sort=sort, limit=limit, skip=skip
         ):
-            try:
-                # TODO: THis is ugly and unsafe, do some real checking before pulling data
-                data = self.s3_bucket.Object(doc[self.key]).get()["Body"].read()
-            except botocore.exceptions.ClientError as e:
-                # If a client error is thrown, then check that it was a 404 error.
-                # If it was a 404 error, then the object does not exist.
-                error_code = int(e.response["Error"]["Code"])
-                if error_code == 404:
-                    self.logger.error(
-                        "Could not find S3 object {}".format(doc[self.key])
-                    )
-                    break
-                else:
-                    raise e
+            if properties is not None and prop_keys.issubset(set(doc.keys())):
+                yield {p: doc[p] for p in properties if p in doc}
+            else:
+                try:
+                    # TODO: THis is ugly and unsafe, do some real checking before pulling data
+                    data = self.s3_bucket.Object(doc[self.key]).get()["Body"].read()
+                except botocore.exceptions.ClientError as e:
+                    # If a client error is thrown, then check that it was a 404 error.
+                    # If it was a 404 error, then the object does not exist.
+                    error_code = int(e.response["Error"]["Code"])
+                    if error_code == 404:
+                        self.logger.error(
+                            "Could not find S3 object {}".format(doc[self.key])
+                        )
+                        break
+                    else:
+                        raise e
 
-            if doc.get("compression", "") == "zlib":
-                data = zlib.decompress(data)
-            yield json.loads(data)
+                if doc.get("compression", "") == "zlib":
+                    data = zlib.decompress(data)
+                yield json.loads(data)
 
     def distinct(
-        self,
-        field: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-    ) -> Union[List[Dict], List]:
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
-        Get all distinct values for a field(s)
-        For a single field, this returns a list of values
-        For multiple fields, this return a list of of dictionaries for each unique combination
+        Get all distinct values for a field
 
         Args:
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
-            all_exist: ensure all fields exist for the distinct set
         """
         # Index is a store so it should have its own distinct function
-        return self.index.distinct(field, criteria=criteria, all_exist=all_exist)
+        return self.index.distinct(field, criteria=criteria)
 
     def groupby(
         self,
@@ -294,10 +323,10 @@ class AmazonS3Store(Store):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for AmazonS3Store
-        other: other AmazonS3Store to compare with
+        Check equality for S3Store
+        other: other S3Store to compare with
         """
-        if not isinstance(other, AmazonS3Store):
+        if not isinstance(other, S3Store):
             return False
 
         fields = ["index", "bucket", "last_updated_field"]
