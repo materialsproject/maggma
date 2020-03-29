@@ -11,6 +11,7 @@ from datetime import datetime
 def mongostore():
     store = MongoStore("maggma_test", "test")
     store.connect()
+    store.remove_docs({})
     yield store
     store.remove_docs({})
     store._collection.drop()
@@ -20,6 +21,7 @@ def mongostore():
 def reporting_store():
     store = MongoStore("maggma_test", "reporting")
     store.connect()
+    store.remove_docs({})
     yield store
     store.remove_docs({})
     store._collection.drop()
