@@ -56,7 +56,7 @@ class S3Store(Store):
         self.s3_profile = s3_profile
         self.compress = compress
         self.endpoint_url = endpoint_url
-        self.sub_dir = sub_dir.strip("/")+"/" if sub_dir else ""
+        self.sub_dir = sub_dir.strip("/") + "/" if sub_dir else ""
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         # Force the key to be the same as the index
@@ -149,8 +149,11 @@ class S3Store(Store):
             else:
                 try:
                     # TODO: THis is ugly and unsafe, do some real checking before pulling data
-                    data = self.s3_bucket.Object(self.sub_dir+doc[self.key]).get()[
-                        "Body"].read()
+                    data = (
+                        self.s3_bucket.Object(self.sub_dir + doc[self.key])
+                        .get()["Body"]
+                        .read()
+                    )
                 except botocore.exceptions.ClientError as e:
                     # If a client error is thrown, then check that it was a 404 error.
                     # If it was a 404 error, then the object does not exist.
@@ -262,8 +265,9 @@ class S3Store(Store):
                 search_doc["compression"] = "zlib"
                 data = zlib.compress(data)
 
-            self.s3_bucket.put_object(Key=self.sub_dir+d[self.key], Body=data,
-                                      Metadata=search_doc)
+            self.s3_bucket.put_object(
+                Key=self.sub_dir + d[self.key], Body=data, Metadata=search_doc
+            )
             search_docs.append(search_doc)
 
         # Use store's update to remove key clashes
@@ -286,7 +290,7 @@ class S3Store(Store):
             # Can remove up to 1000 items at a time via boto
             to_remove_chunks = list(grouper(to_remove, n=1000))
             for chunk_to_remove in to_remove_chunks:
-                objlist = [{"Key": self.sub_dir+obj} for obj in chunk_to_remove]
+                objlist = [{"Key": self.sub_dir + obj} for obj in chunk_to_remove]
                 self.s3_bucket.delete_objects(Delete={"Objects": objlist})
 
     @property
