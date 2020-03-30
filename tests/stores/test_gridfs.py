@@ -193,3 +193,7 @@ def test_eq(mongostore, gridfsstore):
     assert gridfsstore == gridfsstore
 
     assert mongostore != gridfsstore
+
+
+def test_index(gridfsstore):
+    assert gridfsstore.ensure_index("test_key")
