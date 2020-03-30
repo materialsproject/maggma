@@ -197,3 +197,5 @@ def test_eq(mongostore, gridfsstore):
 
 def test_index(gridfsstore):
     assert gridfsstore.ensure_index("test_key")
+    for field in gridfsstore.files_collection_fields:
+        assert gridfsstore.ensure_index(field)
