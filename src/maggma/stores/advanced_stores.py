@@ -253,11 +253,13 @@ class AliasingStore(Store):
             limit: limit on total number of documents returned
         """
 
-        if isinstance(properties, list):
-            properties = {p: 1 for p in properties}
-
         criteria = criteria if criteria else {}
-        substitute(properties, self.reverse_aliases)
+
+        if properties is not None:
+            if isinstance(properties, list):
+                properties = {p: 1 for p in properties}
+            substitute(properties, self.reverse_aliases)
+
         lazy_substitute(criteria, self.reverse_aliases)
         for d in self.store.query(
             properties=properties, criteria=criteria, sort=sort, limit=limit, skip=skip
@@ -313,7 +315,12 @@ class AliasingStore(Store):
 
         # Update criteria and properties based on aliases
         criteria = criteria if criteria else {}
-        substitute(properties, self.reverse_aliases)
+
+        if properties is not None:
+            if isinstance(properties, list):
+                properties = {p: 1 for p in properties}
+            substitute(properties, self.reverse_aliases)
+
         lazy_substitute(criteria, self.reverse_aliases)
 
         return self.store.groupby(
