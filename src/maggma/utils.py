@@ -56,7 +56,7 @@ class TqdmLoggingHandler(logging.Handler):
             self.handleError(record)
 
 
-def confirm_field_index(store, fields):
+def confirm_field_index(collection: Collection, field: str):
     """Confirm index on store for at least one of fields
 
     One can't simply ensure an index exists via
@@ -69,14 +69,9 @@ def confirm_field_index(store, fields):
         False if not
 
     """
-    if not isinstance(fields, list):
-        fields = [fields]
-    info = store.collection.index_information().values()
-    for spec in (index["key"] for index in info):
-        for field in fields:
-            if spec[0][0] == field:
-                return True
-    return False
+    info = list(collection.index_information().values())
+    keys = {spec[0] for index in info for spec in index["key"]}
+    return field in keys
 
 
 def to_isoformat_ceil_ms(dt):
