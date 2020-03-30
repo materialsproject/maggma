@@ -73,7 +73,7 @@ class MongograntStore(MongoStore):
             password=_auth_info["password"],
             collection_name=self.collection_name,
             **kwargs,
-        )  # noqa
+        )
 
     @property
     def name(self):
