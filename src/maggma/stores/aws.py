@@ -249,10 +249,11 @@ class S3Store(Store):
             search_keys = [key]
         else:
             search_keys = [self.key]
-
         for d in docs:
             search_doc = {k: d[k] for k in search_keys}
             search_doc[self.key] = d[self.key]  # Ensure key is in metadata
+            if self.sub_dir != "":
+                search_doc["sub_dir"] = self.sub_dir
 
             # Remove MongoDB _id from search
             if "_id" in search_doc:
