@@ -38,6 +38,7 @@ def s3store():
 
         yield store
 
+
 @pytest.fixture
 def s3store_w_subdir():
     with mock_s3():
@@ -45,20 +46,11 @@ def s3store_w_subdir():
         conn.create_bucket(Bucket="bucket1")
 
         index = MemoryStore("index'")
-        store = S3Store(index, "bucket1", sub_dir='subdir1')
+        store = S3Store(index, "bucket1", sub_dir="subdir1")
         store.connect()
 
-        check_doc = {"task_id": "mp-1", "data": "asd"}
-        store.index.update([{"task_id": "mp-1"}])
-        store.s3_bucket.put_object(Key="mp-1", Body=json.dumps(check_doc).encode())
-
-        check_doc2 = {"task_id": "mp-3", "data": "sdf"}
-        store.index.update([{"task_id": "mp-3", "compression": "zlib"}])
-        store.s3_bucket.put_object(
-            Key="mp-3", Body=zlib.compress(json.dumps(check_doc2).encode())
-        )
-
         yield store
+
 
 def test_count(s3store):
     assert s3store.count() == 2
@@ -135,10 +127,23 @@ def test_eq(mongostore, s3store):
 
 
 def test_count_subdir(s3store_w_subdir):
-    assert s3store_w_subdir.count() == 2
-    assert s3store_w_subdir.count({"task_id": "mp-3"}) == 1
+    s3store_w_subdir.update([{"task_id": "mp-1", "data": "asd"}])
+    s3store_w_subdir.update([{"task_id": "mp-2", "data": "asd"}])
 
-def test_remove(s3store_w_subdir):
+    assert s3store_w_subdir.count() == 2
+    assert s3store_w_subdir.count({"task_id": "mp-2"}) == 1
+
+
+def test_subdir_field(s3store_w_subdir):
+    s3store_w_subdir.update([{"task_id": "mp-1", "data": "asd"}])
+    s3store_w_subdir.update([{"task_id": "mp-2", "data": "asd"}])
+
+    for cc in s3store_w_subdir.index.query():
+        assert len(cc["sub_dir"]) > 0
+        assert cc["sub_dir"] == s3store_w_subdir.sub_dir
+
+
+def test_remove_subdir(s3store_w_subdir):
     s3store_w_subdir.update([{"task_id": "mp-2", "data": "asd"}])
     s3store_w_subdir.update([{"task_id": "mp-4", "data": "asd"}])
 
