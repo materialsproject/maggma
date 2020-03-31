@@ -145,6 +145,24 @@ def test_mgrant_differences():
         MongograntStore.from_collection("")
 
 
+def test_mgrant_equal(mgrant_server, mgrant_user):
+    config_path, mdport, dbname = mgrant_server
+    assert mgrant_user is not None
+    store1 = MongograntStore(
+        "ro:testhost/testdb", "tasks", mgclient_config_path=config_path
+    )
+    store1.connect()
+    store2 = MongograntStore(
+        "ro:testhost/testdb", "tasks", mgclient_config_path=config_path
+    )
+    store3 = MongograntStore(
+        "ro:testhost/testdb", "test", mgclient_config_path=config_path
+    )
+    store2.connect()
+    assert store1 == store2
+    assert store1 != store3
+
+
 def vault_store():
     with patch("hvac.Client") as mock:
         instance = mock.return_value
