@@ -50,31 +50,30 @@ class MongograntStore(MongoStore):
         self.collection_name = collection_name
         self.mgclient_config_path = mgclient_config_path
         self._collection = None
+
+        if self.mgclient_config_path:
+            config = Config(check=check, path=self.mgclient_config_path)
+            client = Client(config)
+        else:
+            client = Client()
+
         if set(("username", "password", "database", "host")) & set(kwargs):
             raise StoreError(
                 "MongograntStore does not accept "
                 "username, password, database, or host "
                 "arguments. Use `mongogrant_spec`."
             )
+
         self.kwargs = kwargs
-        super(MongoStore, self).__init__(**kwargs)  # noqa
-
-    def connect(self, force_reset: bool = False):
-        """
-        Connect to the mongogrant source
-
-        Args:
-            force_reset: forces the connection to reset rather than just
-                         ensuring the connection is present
-        """
-        if not self._collection or force_reset:
-            if self.mgclient_config_path:
-                config = Config(check=check, path=self.mgclient_config_path)
-                client = Client(config)
-            else:
-                client = Client()
-            db = client.db(self.mongogrant_spec)
-            self._collection = db[self.collection_name]
+        _auth_info = client.get_db_auth_from_spec(self.mongogrant_spec)
+        super(MongograntStore, self).__init__(
+            host=_auth_info["host"],
+            database=_auth_info["authSource"],
+            username=_auth_info["username"],
+            password=_auth_info["password"],
+            collection_name=self.collection_name,
+            **kwargs,
+        )
 
     @property
     def name(self):
