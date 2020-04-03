@@ -6,6 +6,7 @@ from datetime import datetime
 from maggma.core import StoreError
 from maggma.stores import MongoStore, MemoryStore, JSONStore, MongoURIStore
 from maggma.validators import JSONSchemaValidator
+from sshtunnel import open_tunnel
 
 
 @pytest.fixture
@@ -37,6 +38,18 @@ def test_mongostore_connect():
     mongostore = MongoStore("maggma_test", "test")
     assert mongostore._collection is None
     mongostore.connect()
+    assert isinstance(mongostore._collection, pymongo.collection.Collection)
+
+
+def test_mongostore_connect_via_ssh():
+    mongostore = MongoStore("maggma_test", "test")
+
+    class fake_pipe:
+        remote_bind_address = ("localhost", 27017)
+        local_bind_address = ("localhost", 37017)
+
+    server = fake_pipe()
+    mongostore.connect(ssh_tunnel=server)
     assert isinstance(mongostore._collection, pymongo.collection.Collection)
 
 

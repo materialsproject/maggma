@@ -60,7 +60,7 @@ class S3Store(Store):
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         # Force the key to be the same as the index
-        kwargs["key"] = index.key
+        kwargs["key"] = str(index.key)
         super(S3Store, self).__init__(**kwargs)
 
     def name(self) -> str:
@@ -267,7 +267,7 @@ class S3Store(Store):
                 data = zlib.compress(data)
 
             self.s3_bucket.put_object(
-                Key=self.sub_dir + d[self.key], Body=data, Metadata=search_doc
+                Key=self.sub_dir + str(d[self.key]), Body=data, Metadata=search_doc
             )
             search_docs.append(search_doc)
 

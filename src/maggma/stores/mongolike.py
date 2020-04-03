@@ -2,11 +2,12 @@
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
-various utillities
+various utilities
 """
 from __future__ import annotations
 
 import json
+import warnings
 
 from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
 
@@ -25,6 +26,7 @@ from monty.dev import deprecated
 from maggma.utils import confirm_field_index
 
 from maggma.core import Store, Sort, StoreError
+from sshtunnel import SSHTunnelForwarder  # type: ignore
 
 
 class MongoStore(Store):
@@ -68,12 +70,15 @@ class MongoStore(Store):
         """
         return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
-    def connect(self, force_reset: bool = False):
+    def connect(self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None):
         """
         Connect to the source data
         """
         if not self._collection or force_reset:
-            conn = MongoClient(self.host, self.port)
+            if ssh_tunnel is None:
+                conn = MongoClient(self.host, self.port)
+            else:
+                conn = MongoClient(*ssh_tunnel.local_bind_address)
             db = conn[self.database]
             if self.username != "":
                 db.authenticate(self.username, self.password)
@@ -346,10 +351,12 @@ class MongoURIStore(MongoStore):
         # TODO: This is not very safe since it exposes the username/password info
         return self.uri
 
-    def connect(self, force_reset: bool = False):
+    def connect(self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None):
         """
         Connect to the source data
         """
+        if ssh_tunnel is not None:
+            warnings.warn(f"SSH Tunnel not needed for {self.__name__}")
         if not self._collection or force_reset:
             conn = MongoClient(self.uri)
             db = conn[self.database]
@@ -373,10 +380,12 @@ class MemoryStore(MongoStore):
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)  # noqa
 
-    def connect(self, force_reset: bool = False):
+    def connect(self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None):
         """
         Connect to the source data
         """
+        if ssh_tunnel is not None:
+            warnings.warn(f"SSH Tunnel not needed for {self.__name__}")
         if not self._collection or force_reset:
             self._collection = mongomock.MongoClient().db[self.name]
 
@@ -456,10 +465,12 @@ class JSONStore(MemoryStore):
         self.kwargs = kwargs
         super().__init__(collection_name="collection", **kwargs)
 
-    def connect(self, force_reset=False):
+    def connect(self, force_reset=False, ssh_tunnel=None):
         """
         Loads the files into the collection in memory
         """
+        if ssh_tunnel is not None:
+            warnings.warn(f"SSH Tunnel not needed for {self.__name__}")
         super().connect(force_reset=force_reset)
         for path in self.paths:
             with zopen(path) as f:
