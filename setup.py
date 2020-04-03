@@ -39,6 +39,7 @@ setup(
         "fastapi>=0.42.0",
         "pynng>=0.5.0",
         "dnspython>=1.16.0",
+        "sshtunnel>=0.1.5",
     ],
     extras_require={"vault": ["hvac>=0.9.5"], "S3": ["boto3==1.12.34"]},
     classifiers=[

@@ -40,6 +40,18 @@ def test_mongostore_connect():
     assert isinstance(mongostore._collection, pymongo.collection.Collection)
 
 
+def test_mongostore_connect_via_ssh():
+    mongostore = MongoStore("maggma_test", "test")
+
+    class fake_pipe:
+        remote_bind_address = ("localhost", 27017)
+        local_bind_address = ("localhost", 37017)
+
+    server = fake_pipe()
+    mongostore.connect(ssh_tunnel=server)
+    assert isinstance(mongostore._collection, pymongo.collection.Collection)
+
+
 def test_mongostore_query(mongostore):
     mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert mongostore.query_one(properties=["a"])["a"] == 1
@@ -202,6 +214,15 @@ def test_memory_store_connect():
     memorystore.connect()
     assert isinstance(memorystore._collection, mongomock.collection.Collection)
 
+    with pytest.warns(UserWarning, match="SSH Tunnel not needed for MemoryStore"):
+
+        class fake_pipe:
+            remote_bind_address = ("localhost", 27017)
+            local_bind_address = ("localhost", 37017)
+
+        server = fake_pipe()
+        memorystore.connect(ssh_tunnel=server)
+
 
 def test_groupby(memorystore):
     memorystore.update(
@@ -266,3 +287,11 @@ def test_mongo_uri():
     is_name = store.name is uri
     # This is try and keep the secret safe
     assert is_name
+    with pytest.warns(UserWarning, match="SSH Tunnel not needed for MongoURIStore"):
+
+        class fake_pipe:
+            remote_bind_address = ("localhost", 27017)
+            local_bind_address = ("localhost", 37017)
+
+        server = fake_pipe()
+        store.connect(ssh_tunnel=server)
