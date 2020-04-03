@@ -156,7 +156,7 @@ class GridFSStore(Store):
     ) -> Iterator[Dict]:
         """
         Queries the GridFS Store for a set of documents.
-        Will check to see if data can be returned from 
+        Will check to see if data can be returned from
         files store first.
 
         Args:
