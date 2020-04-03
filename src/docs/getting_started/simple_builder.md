@@ -138,6 +138,18 @@ Finally, we have to put the processed item in to the target store:
         self.target.update(items)
 ```
 
+
+
+!!! note
+    Note that whatever `process_items` returns, `update_targets` takes a `List` of these:
+    For instance, if `process_items` returns `str`, then `update_targets` would look like:
+    ``` python
+
+        def update_target(self,items: List[str]):
+    ```
+
+
+
 Putting it all together we get:
 
 ``` python
