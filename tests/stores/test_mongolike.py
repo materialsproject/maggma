@@ -214,6 +214,15 @@ def test_memory_store_connect():
     memorystore.connect()
     assert isinstance(memorystore._collection, mongomock.collection.Collection)
 
+    with pytest.warns(UserWarning, match="SSH Tunnel not needed for MemoryStore"):
+
+        class fake_pipe:
+            remote_bind_address = ("localhost", 27017)
+            local_bind_address = ("localhost", 37017)
+
+        server = fake_pipe()
+        memorystore.connect(ssh_tunnel=server)
+
 
 def test_groupby(memorystore):
     memorystore.update(
@@ -278,3 +287,11 @@ def test_mongo_uri():
     is_name = store.name is uri
     # This is try and keep the secret safe
     assert is_name
+    with pytest.warns(UserWarning, match="SSH Tunnel not needed for MongoURIStore"):
+
+        class fake_pipe:
+            remote_bind_address = ("localhost", 27017)
+            local_bind_address = ("localhost", 37017)
+
+        server = fake_pipe()
+        store.connect(ssh_tunnel=server)
