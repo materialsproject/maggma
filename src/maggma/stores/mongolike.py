@@ -26,7 +26,7 @@ from monty.dev import deprecated
 from maggma.utils import confirm_field_index
 
 from maggma.core import Store, Sort, StoreError
-from sshtunnel import SSHTunnelForwarder  # type: ignore
+from sshtunnel import SSHTunnelForwarder
 
 
 class MongoStore(Store):
