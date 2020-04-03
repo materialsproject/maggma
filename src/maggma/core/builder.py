@@ -140,12 +140,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         for chunk in grouper(tqdm(cursor), self.chunk_size):
             self.logger.info("Processing batch of {} items".format(self.chunk_size))
             processed_chunk = [self.process_item(item) for item in chunk]
-            processed_items = []
-            for i in processed_chunk:
-                if isinstance(i, (list)):
-                    processed_items.extend(i)
-                else:
-                    processed_items.append(i)
+            processed_items = [item for item in processed_chunk if item is not None]
             self.update_targets(processed_items)
 
         self.finalize()

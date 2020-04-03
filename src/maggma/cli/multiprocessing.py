@@ -131,7 +131,8 @@ async def multi(builder, num_workers):
             },
         )
         chunk = await gather(*chunk)
-        processed_items = [c.result() for c in chunk if c is not None]
+        processed_chunk = [c.result() for c in chunk if c is not None]
+        processed_items = [item for item in processed_chunk if item is not None]
         builder.update_targets(processed_items)
         update_items.update(len(processed_items))
 
