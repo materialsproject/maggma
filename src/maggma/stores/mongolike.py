@@ -356,7 +356,7 @@ class MongoURIStore(MongoStore):
         Connect to the source data
         """
         if ssh_tunnel is not None:
-            warnings.warn(f"SSH Tunnel not needed for {self.__name__}")
+            warnings.warn(f"SSH Tunnel not needed for {self.__class__.__name__}")
         if not self._collection or force_reset:
             conn = MongoClient(self.uri)
             db = conn[self.database]
@@ -385,7 +385,7 @@ class MemoryStore(MongoStore):
         Connect to the source data
         """
         if ssh_tunnel is not None:
-            warnings.warn(f"SSH Tunnel not needed for {self.__name__}")
+            warnings.warn(f"SSH Tunnel not needed for {self.__class__.__name__}")
         if not self._collection or force_reset:
             self._collection = mongomock.MongoClient().db[self.name]
 
