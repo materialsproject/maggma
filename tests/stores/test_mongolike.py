@@ -6,7 +6,6 @@ from datetime import datetime
 from maggma.core import StoreError
 from maggma.stores import MongoStore, MemoryStore, JSONStore, MongoURIStore
 from maggma.validators import JSONSchemaValidator
-from sshtunnel import open_tunnel
 
 
 @pytest.fixture
