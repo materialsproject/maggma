@@ -266,10 +266,15 @@ class S3Store(Store):
                 search_doc["compression"] = "zlib"
                 data = zlib.compress(data)
 
+            search_docs.append(search_doc.copy())
+
+            search_doc[self.last_updated_field] = str(
+                search_doc[self.last_updated_field]
+            )
+
             self.s3_bucket.put_object(
                 Key=self.sub_dir + str(d[self.key]), Body=data, Metadata=search_doc
             )
-            search_docs.append(search_doc)
 
         # Use store's update to remove key clashes
         self.index.update(search_docs)
