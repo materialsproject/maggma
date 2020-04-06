@@ -16,7 +16,6 @@ from maggma.api.query_operator import (
 )
 from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends
 from maggma.api.models import Response, Meta
-from starlette.responses import RedirectResponse
 
 
 class Resource(MSONable):

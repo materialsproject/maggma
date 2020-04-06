@@ -3,8 +3,19 @@
 
 from logging import getLogger
 from types import GeneratorType
-from asyncio import BoundedSemaphore, get_running_loop, gather
-from aioitertools import zip_longest
+from asyncio import (
+    BoundedSemaphore,
+    get_running_loop,
+    Queue,
+    create_task,
+    Condition,
+    wait,
+    FIRST_COMPLETED,
+    Event,
+    gather,
+)
+
+from aioitertools import enumerate
 from concurrent.futures import ProcessPoolExecutor
 from maggma.utils import primed
 from tqdm import tqdm
@@ -13,19 +24,124 @@ from tqdm import tqdm
 logger = getLogger("MultiProcessor")
 
 
-class ProcessItemsSemaphore(BoundedSemaphore):
+class BackPressure:
     """
-    Modified BoundedSemaphore to update a TQDM bar
-    for process_items
+    Wrapper for an iterator to provide
+    async access with backpressure
     """
 
-    def __init__(self, total=None, *args, **kwargs):
-        self.tqdm = tqdm(total=total, desc="Process Items")
-        super().__init__(*args, **kwargs)
+    def __init__(self, iterator, n):
+        self.iterator = iter(iterator)
+        self.back_pressure = BoundedSemaphore(n)
 
-    def release(self):
-        self.tqdm.update(1)
-        super().release()
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        await self.back_pressure.acquire()
+
+        try:
+            return next(self.iterator)
+        except StopIteration:
+            raise StopAsyncIteration
+
+    async def release(self, async_iterator):
+        """
+        release iterator to pipeline the backpressure
+        """
+        async for item in async_iterator:
+            try:
+                self.back_pressure.release()
+            except ValueError:
+                pass
+
+            yield item
+
+
+class AsyncUnorderedMap:
+    """
+    Async iterator that maps a function to an async iterator
+    usign an executor and returns items as they are done
+    This does not guarantee order
+    """
+
+    def __init__(self, func, async_iterator, executor):
+        self.iterator = async_iterator
+        self.func = func
+        self.executor = executor
+        self.fill_task = create_task(self.get_from_iterator())
+
+        self.done_sentinel = object()
+        self.results = Queue()
+        self.tasks = {}
+
+    async def process_and_release(self, idx):
+        future = self.tasks[idx]
+        try:
+            item = await future
+            self.results.put_nowait(item)
+        except Exception:
+            pass
+        finally:
+            self.tasks.pop(idx)
+
+    async def get_from_iterator(self):
+        loop = get_running_loop()
+        async for idx, item in enumerate(self.iterator):
+            future = loop.run_in_executor(
+                self.executor, safe_dispatch, (self.func, item)
+            )
+
+            self.tasks[idx] = future
+
+            loop.create_task(self.process_and_release(idx))
+
+        await gather(*self.tasks.values())
+        self.results.put_nowait(self.done_sentinel)
+
+    def __aiter__(self):
+        return self
+
+    async def __anext__(self):
+        item = await self.results.get()
+
+        if item == self.done_sentinel:
+            raise StopAsyncIteration
+        else:
+            return item
+
+
+async def atqdm(async_iterator, *args, **kwargs):
+    """
+    Wrapper around tqdm for async generators
+    """
+    _tqdm = tqdm(*args, **kwargs)
+    async for item in async_iterator:
+        _tqdm.update()
+        yield item
+
+    _tqdm.close()
+
+
+async def grouper(async_iterator, n: int):
+    """
+    Collect data into fixed-length chunks or blocks.
+    >>> list(grouper(3, 'ABCDEFG'))
+    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
+
+    Updated from:
+    https://stackoverflow.com/questions/31164731/python-chunking-csv-file-multiproccessing/31170795#31170795
+
+    Modified for async
+    """
+    chunk = []
+    async for item in async_iterator:
+        chunk.append(item)
+        if len(chunk) >= n:
+            yield chunk
+            chunk.clear()
+    if chunk != []:
+        yield chunk
 
 
 def safe_dispatch(val):
@@ -35,53 +151,6 @@ def safe_dispatch(val):
     except Exception as e:
         logger.error(e)
         return None
-
-
-class AsyncBackPressuredMap:
-    """
-    Wrapper for an iterator to provide
-    async access with backpressure
-    """
-
-    def __init__(self, iterator, func, max_run, executor, total=None):
-        self.iterator = iter(iterator)
-        self.func = func
-        self.executor = executor
-        self.back_pressure = ProcessItemsSemaphore(value=max_run, total=total)
-
-    def __aiter__(self):
-        return self
-
-    async def __anext__(self):
-        await self.back_pressure.acquire()
-        loop = get_running_loop()
-
-        try:
-            item = next(self.iterator)
-        except StopIteration:
-            raise StopAsyncIteration
-
-        future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
-
-        async def process_and_release():
-            await future
-            self.back_pressure.release()
-            return future
-
-        return process_and_release()
-
-
-async def grouper(iterable, n, fillvalue=None):
-    """
-    Collect data into fixed-length chunks or blocks.
-    """
-    # grouper('ABCDEFG', 3, 'x') --> ABC DEF Gxx
-    args = [iterable] * n
-    iterator = zip_longest(*args, fillvalue=fillvalue)
-
-    async for group in iterator:
-        group = [g for g in group if g is not None]
-        yield group
 
 
 async def multi(builder, num_workers):
@@ -107,15 +176,6 @@ async def multi(builder, num_workers):
     elif hasattr(cursor, "count"):
         total = cursor.count()
 
-    mapper = AsyncBackPressuredMap(
-        iterator=tqdm(cursor, desc="Get", total=total),
-        func=builder.process_item,
-        max_run=builder.chunk_size,
-        executor=executor,
-        total=total,
-    )
-    update_items = tqdm(total=total, desc="Update Targets")
-
     logger.info(
         f"Starting multiprocessing: {builder.__class__.__name__}",
         extra={
@@ -128,9 +188,29 @@ async def multi(builder, num_workers):
             }
         },
     )
-    async for chunk in grouper(mapper, builder.chunk_size, fillvalue=None):
+
+    back_pressured_get = BackPressure(
+        iterator=tqdm(cursor, desc="Get", total=total), n=builder.chunk_size
+    )
+
+    processed_items = atqdm(
+        async_iterator=AsyncUnorderedMap(
+            func=builder.process_item,
+            async_iterator=back_pressured_get,
+            executor=executor,
+        ),
+        total=total,
+        desc="Process Items",
+    )
+
+    back_pressure_relief = back_pressured_get.release(processed_items)
+
+    update_items = tqdm(total=total, desc="Update Targets")
+
+    async for chunk in grouper(back_pressure_relief, n=builder.chunk_size):
+
         logger.info(
-            "Processing batch of {} items".format(builder.chunk_size),
+            "Processed batch of {} items".format(builder.chunk_size),
             extra={
                 "maggma": {
                     "event": "UPDATE",
@@ -141,9 +221,7 @@ async def multi(builder, num_workers):
                 }
             },
         )
-        chunk = await gather(*chunk)
-        processed_chunk = [c.result() for c in chunk if c is not None]
-        processed_items = [item for item in processed_chunk if item is not None]
+        processed_items = [item for item in chunk if item is not None]
         builder.update_targets(processed_items)
         update_items.update(len(processed_items))
 
@@ -158,4 +236,6 @@ async def multi(builder, num_workers):
             }
         },
     )
+
+    update_items.close()
     builder.finalize()
