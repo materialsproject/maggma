@@ -54,7 +54,7 @@ class APIManager(MSONable):
             class_name = endpoint.split(".")[-1]
             new_endpoint = dynamic_import(module_path, class_name)
             self.__setitem__(prefix, new_endpoint)
-            pass
+
         elif isclass(endpoint) and issubclass(endpoint, Resource):
             self.__setitem__(prefix, endpoint)
         else:
