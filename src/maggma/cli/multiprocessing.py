@@ -122,15 +122,6 @@ async def atqdm(async_iterator, *args, **kwargs):
     _tqdm.close()
 
 
-async def amap(func, async_iterator, executor):
-    """
-    Maps a function onto an async iterable using executor
-    """
-    loop = get_running_loop()
-    async for item in async_iterator:
-        yield loop.run_in_executor(executor, safe_dispatch, (func, item))
-
-
 async def grouper(async_iterator, n: int):
     """
     Collect data into fixed-length chunks or blocks.
