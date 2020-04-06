@@ -15,7 +15,7 @@ from asyncio import (
     gather,
 )
 
-from aioitertools import islice, enumerate
+from aioitertools import enumerate
 from concurrent.futures import ProcessPoolExecutor
 from maggma.utils import primed
 from tqdm import tqdm

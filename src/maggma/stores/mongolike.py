@@ -70,7 +70,9 @@ class MongoStore(Store):
         """
         return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
-    def connect(self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None):
+    def connect(
+        self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None
+    ):  # lgtm[py/conflicting-attributes]
         """
         Connect to the source data
         """
@@ -341,7 +343,7 @@ class MongoURIStore(MongoStore):
         self.collection_name = collection_name
         self.kwargs = kwargs
         self._collection = None
-        super(MongoStore, self).__init__(**kwargs)
+        super(self).__init__(**kwargs)
 
     @property
     def name(self) -> str:
@@ -351,7 +353,9 @@ class MongoURIStore(MongoStore):
         # TODO: This is not very safe since it exposes the username/password info
         return self.uri
 
-    def connect(self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None):
+    def connect(
+        self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None
+    ):  # lgtm[py/conflicting-attributes]
         """
         Connect to the source data
         """
@@ -380,7 +384,9 @@ class MemoryStore(MongoStore):
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)  # noqa
 
-    def connect(self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None):
+    def connect(
+        self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None
+    ):  # lgtm[py/conflicting-attributes]
         """
         Connect to the source data
         """
@@ -465,7 +471,9 @@ class JSONStore(MemoryStore):
         self.kwargs = kwargs
         super().__init__(collection_name="collection", **kwargs)
 
-    def connect(self, force_reset=False, ssh_tunnel=None):
+    def connect(
+        self, force_reset=False, ssh_tunnel=None
+    ):  # lgtm[py/conflicting-attributes]
         """
         Loads the files into the collection in memory
         """
