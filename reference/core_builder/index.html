@@ -976,12 +976,7 @@ Default behavior is to return the item.
 143
 144
 145
-146
-147
-148
-149
-150
-151</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+146</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the builder serially</span>
 <span class="sd">        This is only intended for diagnostic purposes</span>
@@ -1003,12 +998,7 @@ Default behavior is to return the item.
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">cursor</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing batch of </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">))</span>
             <span class="n">processed_chunk</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">process_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">]</span>
-            <span class="n">processed_items</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">processed_chunk</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">)):</span>
-                    <span class="n">processed_items</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">processed_items</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+            <span class="n">processed_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">processed_chunk</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_targets</span><span class="p">(</span><span class="n">processed_items</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>

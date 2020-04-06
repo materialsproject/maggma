@@ -699,6 +699,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 </code></pre></div>
 
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Note that whatever <code>process_items</code> returns, <code>update_targets</code> takes a <code>List</code> of these:
+For instance, if <code>process_items</code> returns <code>str</code>, then <code>update_targets</code> would look like:
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">update_target</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+</code></pre></div></p>
+</div>
 <p>Putting it all together we get:</p>
 <div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Builder</span>
