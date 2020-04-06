@@ -10,6 +10,9 @@ from maggma.utils import primed
 from tqdm import tqdm
 
 
+logger = getLogger("MultiProcessor")
+
+
 class ProcessItemsSemaphore(BoundedSemaphore):
     """
     Modified BoundedSemaphore to update a TQDM bar
@@ -23,6 +26,15 @@ class ProcessItemsSemaphore(BoundedSemaphore):
     def release(self):
         self.tqdm.update(1)
         super().release()
+
+
+def safe_dispatch(val):
+    func, item = val
+    try:
+        return func(item)
+    except Exception as e:
+        logger.error(e)
+        return None
 
 
 class AsyncBackPressuredMap:
@@ -49,7 +61,7 @@ class AsyncBackPressuredMap:
         except StopIteration:
             raise StopAsyncIteration
 
-        future = loop.run_in_executor(self.executor, self.func, item)
+        future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
 
         async def process_and_release():
             await future
@@ -73,7 +85,6 @@ async def grouper(iterable, n, fillvalue=None):
 
 
 async def multi(builder, num_workers):
-    logger = getLogger("MultiProcessor")
 
     builder.connect()
     cursor = builder.get_items()
