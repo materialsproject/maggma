@@ -58,10 +58,11 @@ class BackPressure:
             yield item
 
 
-class AsyncMap:
+class AsyncUnorderedMap:
     """
     Async iterator that maps a function to an async iterator
     usign an executor and returns items as they are done
+    This does not guarantee order
     """
 
     def __init__(self, func, async_iterator, executor):
@@ -193,7 +194,7 @@ async def multi(builder, num_workers):
     )
 
     processed_items = atqdm(
-        async_iterator=AsyncMap(
+        async_iterator=AsyncUnorderedMap(
             func=builder.process_item,
             async_iterator=back_pressured_get,
             executor=executor,
