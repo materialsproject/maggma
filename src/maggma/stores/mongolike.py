@@ -343,7 +343,7 @@ class MongoURIStore(MongoStore):
         self.collection_name = collection_name
         self.kwargs = kwargs
         self._collection = None
-        super(MongoStore).__init__(**kwargs)
+        super(MongoStore, self).__init__(**kwargs)  # lgtm
 
     @property
     def name(self) -> str:
