@@ -40,15 +40,26 @@ async def test_backpressure():
     backpressure = BackPressure(iterable, 2)
 
     # Put two items into the process queue
-    asyncio.gather(backpressure.__anext__(), backpressure.__anext__())
+    await backpressure.__anext__()
+    await backpressure.__anext__()
 
     # Ensure back_pressure enabled
     assert backpressure.back_pressure.locked()
 
+    # Release back pressure
     releaser = backpressure.release(arange(10))
     await releaser.__anext__()
     assert not backpressure.back_pressure.locked()
-    asyncio.gather(releaser.__anext__(), releaser.__anext__())
+
+    # Ensure can keep releasing backing pressure and won't error
+    await releaser.__anext__()
+    await releaser.__anext__()
+
+    # Ensure stop itteration works
+    with pytest.raises(StopAsyncIteration):
+        for i in range(10):
+            await releaser.__anext__()
+
     assert not backpressure.back_pressure.locked()
 
 
