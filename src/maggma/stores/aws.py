@@ -12,7 +12,7 @@ from monty.json import jsanitize
 from monty.dev import deprecated
 
 from maggma.core import Store, Sort
-from maggma.utils import grouper
+from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
     import botocore
@@ -269,7 +269,7 @@ class S3Store(Store):
             search_docs.append(search_doc.copy())
 
             search_doc[self.last_updated_field] = str(
-                search_doc[self.last_updated_field]
+                to_isoformat_ceil_ms(search_doc[self.last_updated_field])
             )
 
             self.s3_bucket.put_object(
