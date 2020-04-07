@@ -257,13 +257,13 @@ class S3Store(Store):
 
         for d in docs:
             print(d.keys())
-            search_doc = self.write_docs_to_s3(d, search_keys, write_to_s3=write_to_s3)
+            search_doc = self.write_doc_to_s3(d, search_keys, write_to_s3=write_to_s3)
             search_docs.append(search_doc)
 
         # Use store's update to remove key clashes
         self.index.update(search_docs)
 
-    def write_docs_to_s3(
+    def write_doc_to_s3(
         self, doc: Dict, search_keys: List[str], write_to_s3: bool = True
     ):
         """
