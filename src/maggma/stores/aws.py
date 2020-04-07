@@ -13,6 +13,7 @@ from monty.dev import deprecated
 
 from maggma.core import Store, Sort
 from maggma.utils import grouper
+from sshtunnel import SSHTunnelForwarder
 
 try:
     import botocore
@@ -36,6 +37,7 @@ class S3Store(Store):
         compress: bool = False,
         endpoint_url: str = None,
         sub_dir: str = None,
+        write_to_s3_in_process_items: bool = False,
         **kwargs,
     ):
         """
@@ -59,6 +61,7 @@ class S3Store(Store):
         self.sub_dir = sub_dir.strip("/") + "/" if sub_dir else ""
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
+        self.write_to_s3_in_process_items = write_to_s3_in_process_items
         # Force the key to be the same as the index
         kwargs["key"] = str(index.key)
         super(S3Store, self).__init__(**kwargs)
@@ -70,11 +73,11 @@ class S3Store(Store):
         """
         return f"s3://{self.bucket}"
 
-    def connect(self, force_reset: bool = False):
+    def connect(self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None):
         """
         Connect to the source data
         """
-        self.index.connect(force_reset=force_reset)
+        self.index.connect(force_reset=force_reset, ssh_tunnel=ssh_tunnel)
 
         session = Session(profile_name=self.s3_profile)
         resource = session.resource("s3", endpoint_url=self.endpoint_url)
@@ -242,6 +245,7 @@ class S3Store(Store):
         """
         search_docs = []
         search_keys = []
+        write_to_s3 = not self.write_to_s3_in_process_items
 
         if isinstance(key, list):
             search_keys = key
@@ -249,30 +253,50 @@ class S3Store(Store):
             search_keys = [key]
         else:
             search_keys = [self.key]
+
         for d in docs:
-            search_doc = {k: d[k] for k in search_keys}
-            search_doc[self.key] = d[self.key]  # Ensure key is in metadata
-            if self.sub_dir != "":
-                search_doc["sub_dir"] = self.sub_dir
+            search_doc = self.write_docs_to_s3(d, search_keys, write_to_s3=write_to_s3)
+            search_docs.append(search_doc)
 
-            # Remove MongoDB _id from search
-            if "_id" in search_doc:
-                del search_doc["_id"]
+        # Use store's update to remove key clashes
+        self.index.update(search_docs)
 
-            data = json.dumps(jsanitize(d)).encode()
+    def write_docs_to_s3(
+        self, doc: Dict, search_keys: List[str], write_to_s3: bool = True
+    ):
+        """
+        Write the data to s3 and return the metadata to be inserted into the index db
 
+        Args:
+            doc: the document
+            search_keys: list of keys to pull from the docs and be inserted into the
+            index db
+        """
+        search_doc = {k: doc[k] for k in search_keys}
+        search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
+        if self.sub_dir != "":
+            search_doc["sub_dir"] = self.sub_dir
+
+        # Remove MongoDB _id from search
+        if "_id" in search_doc:
+            del search_doc["_id"]
+
+        data = json.dumps(jsanitize(doc)).encode()
+
+        if write_to_s3:
             # Compress with zlib if chosen
             if self.compress:
                 search_doc["compression"] = "zlib"
                 data = zlib.compress(data)
 
             self.s3_bucket.put_object(
-                Key=self.sub_dir + str(d[self.key]), Body=data, Metadata=search_doc
+                Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
             )
-            search_docs.append(search_doc)
+        else:
+            if self.compress:
+                search_doc["compression"] = "zlib"
 
-        # Use store's update to remove key clashes
-        self.index.update(search_docs)
+        return search_doc
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
         """
