@@ -57,7 +57,8 @@ def serial(builder: Builder):
                 }
             },
         )
-        processed_items = [builder.process_item(item) for item in chunk]
+        processed_chunk = [builder.process_item(item) for item in chunk]
+        processed_items = [item for item in processed_chunk if item is not None]
         builder.update_targets(processed_items)
 
     logger.info(

@@ -8,8 +8,12 @@ import logging
 import uuid
 from bson import ObjectId
 
+from typing import Iterable, Union, Dict
+
 from importlib import import_module
 from datetime import datetime, timedelta
+
+from pymongo.collection import Collection
 
 from pydash.utilities import to_path
 from pydash.objects import set_, get, has
@@ -19,7 +23,7 @@ from pydash.objects import unset as _unset
 from tqdm.autonotebook import tqdm
 
 
-def primed(iterable):
+def primed(iterable: Iterable):
     """Preprimes an iterator so the first value is calculated immediately
        but not returned until the first iteration
     """
@@ -56,7 +60,7 @@ class TqdmLoggingHandler(logging.Handler):
             self.handleError(record)
 
 
-def confirm_field_index(store, fields):
+def confirm_field_index(collection: Collection, field: str):
     """Confirm index on store for at least one of fields
 
     One can't simply ensure an index exists via
@@ -69,17 +73,12 @@ def confirm_field_index(store, fields):
         False if not
 
     """
-    if not isinstance(fields, list):
-        fields = [fields]
-    info = store.collection.index_information().values()
-    for spec in (index["key"] for index in info):
-        for field in fields:
-            if spec[0][0] == field:
-                return True
-    return False
+    info = list(collection.index_information().values())
+    keys = {spec[0] for index in info for spec in index["key"]}
+    return field in keys
 
 
-def to_isoformat_ceil_ms(dt):
+def to_isoformat_ceil_ms(dt: Union[datetime, str]):
     """Helper to account for Mongo storing datetimes with only ms precision."""
     if isinstance(dt, datetime):
         return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
@@ -87,7 +86,7 @@ def to_isoformat_ceil_ms(dt):
         return dt
 
 
-def to_dt(s):
+def to_dt(s: Union[datetime, str]):
     """Convert an ISO 8601 string to a datetime."""
     if isinstance(s, str):
         try:
@@ -105,7 +104,7 @@ def to_dt(s):
 LU_KEY_ISOFORMAT = (to_dt, to_isoformat_ceil_ms)
 
 
-def recursive_update(d, u):
+def recursive_update(d: Dict, u: Dict):
     """
     Recursive updates d with values from u
 
@@ -124,7 +123,7 @@ def recursive_update(d, u):
             d[k] = v
 
 
-def grouper(iterable, n):
+def grouper(iterable: Iterable, n: int):
     """
     Collect data into fixed-length chunks or blocks.
     >>> list(grouper(3, 'ABCDEFG'))
@@ -137,7 +136,7 @@ def grouper(iterable, n):
     return iter(lambda: list(itertools.islice(iterable, n)), [])
 
 
-def lazy_substitute(d, aliases):
+def lazy_substitute(d: Dict, aliases: Dict):
     """
     Simple top level substitute that doesn't dive into mongo like strings
     """
@@ -147,7 +146,7 @@ def lazy_substitute(d, aliases):
             del d[key]
 
 
-def substitute(d, aliases):
+def substitute(d: Dict, aliases: Dict):
     """
     Substitutes keys in dictionary
     Accepts multilevel mongo like keys
@@ -158,7 +157,7 @@ def substitute(d, aliases):
             unset(d, key)
 
 
-def unset(d, key):
+def unset(d: Dict, key: str):
     """
     Unsets a key
     """

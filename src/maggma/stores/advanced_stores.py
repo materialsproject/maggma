@@ -21,7 +21,7 @@ except ImportError:
 
 
 class MongograntStore(MongoStore):
-    """Initialize a Store with a mongogrant "<role>:<host>/<db>." spec.
+    """Initialize a Store with a mongogrant "`<role>`:`<host>`/`<db>`." spec.
 
     Some class methods of MongoStore, e.g. from_db_file and from_collection,
     are not supported.
@@ -38,7 +38,7 @@ class MongograntStore(MongoStore):
     ):
         """
         Args:
-            mongogrant_spec: of the form <role>:<host>/<db>, where
+            mongogrant_spec: of the form `<role>`:`<host>`/`<db>`, where
                 role is one of {"read", "readWrite"} or aliases {"ro", "rw"};
                 host is a db host (w/ optional port) or alias; and db is a db
                 on that host, or alias. See mongogrant documentation.
@@ -252,11 +252,13 @@ class AliasingStore(Store):
             limit: limit on total number of documents returned
         """
 
-        if isinstance(properties, list):
-            properties = {p: 1 for p in properties}
-
         criteria = criteria if criteria else {}
-        substitute(properties, self.reverse_aliases)
+
+        if properties is not None:
+            if isinstance(properties, list):
+                properties = {p: 1 for p in properties}
+            substitute(properties, self.reverse_aliases)
+
         lazy_substitute(criteria, self.reverse_aliases)
         for d in self.store.query(
             properties=properties, criteria=criteria, sort=sort, limit=limit, skip=skip
@@ -312,7 +314,12 @@ class AliasingStore(Store):
 
         # Update criteria and properties based on aliases
         criteria = criteria if criteria else {}
-        substitute(properties, self.reverse_aliases)
+
+        if properties is not None:
+            if isinstance(properties, list):
+                properties = {p: 1 for p in properties}
+            substitute(properties, self.reverse_aliases)
+
         lazy_substitute(criteria, self.reverse_aliases)
 
         return self.store.groupby(

@@ -18,7 +18,6 @@ from pydash import get, has
 from pymongo import MongoClient
 from monty.json import jsanitize
 from monty.dev import deprecated
-from maggma.utils import confirm_field_index
 from maggma.core import Store, Sort
 from maggma.stores import MongoStore
 
@@ -276,16 +275,10 @@ class GridFSStore(Store):
         """
         # Transform key for gridfs first
         if key not in self.files_collection_fields:
-            key = "metadata.{}".format(key)
-
-        if confirm_field_index(self.collection, key):
-            return True
+            files_col_key = "metadata.{}".format(key)
+            return self._files_store.ensure_index(files_col_key, unique=unique)
         else:
-            try:
-                self._collection.create_index(key, unique=unique, background=True)
-                return True
-            except Exception:
-                return False
+            return self._files_store.ensure_index(key, unique=unique)
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """

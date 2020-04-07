@@ -337,9 +337,6 @@ class Store(MSONable, metaclass=ABCMeta):
     def __ne__(self, other):
         return not self == other
 
-    def __hash__(self):
-        return hash((self.last_updated_field,))
-
     def __getstate__(self):
         return self.as_dict()
 
