@@ -64,6 +64,17 @@ class S3Store(Store):
         self.write_to_s3_in_process_items = write_to_s3_in_process_items
         # Force the key to be the same as the index
         kwargs["key"] = str(index.key)
+
+        session = Session(profile_name=self.s3_profile)
+        resource = session.resource("s3", endpoint_url=self.endpoint_url)
+
+        if not self.s3:
+            self.s3 = resource
+            if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
+                raise Exception("Bucket not present on AWS: {}".format(self.bucket))
+
+            self.s3_bucket = resource.Bucket(self.bucket)
+
         super(S3Store, self).__init__(**kwargs)
 
     def name(self) -> str:
@@ -80,16 +91,6 @@ class S3Store(Store):
         Connect to the source data
         """
         self.index.connect(force_reset=force_reset, ssh_tunnel=ssh_tunnel)
-
-        session = Session(profile_name=self.s3_profile)
-        resource = session.resource("s3", endpoint_url=self.endpoint_url)
-
-        if not self.s3:
-            self.s3 = resource
-            if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
-                raise Exception("Bucket not present on AWS: {}".format(self.bucket))
-
-            self.s3_bucket = resource.Bucket(self.bucket)
 
     def close(self):
         """
