@@ -257,7 +257,6 @@ class S3Store(Store):
             search_keys = [self.key]
 
         for d in docs:
-            print(d.keys())
             search_doc = self.write_doc_to_s3(d, search_keys, write_to_s3=write_to_s3)
             search_docs.append(search_doc)
 
@@ -291,7 +290,6 @@ class S3Store(Store):
                 # Compress with zlib if chosen
                 search_doc["compression"] = "zlib"
                 data = zlib.compress(data)
-                print("Compress")
 
             self.s3_bucket.put_object(
                 Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
