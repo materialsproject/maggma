@@ -73,7 +73,9 @@ class S3Store(Store):
         """
         return f"s3://{self.bucket}"
 
-    def connect(self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None):
+    def connect(
+        self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None
+    ):  # lgtm[py/conflicting-attributes]
         """
         Connect to the source data
         """
@@ -244,7 +246,6 @@ class S3Store(Store):
                  field is to be used
         """
         search_docs = []
-        search_keys = []
         write_to_s3 = not self.write_to_s3_in_process_items
 
         if isinstance(key, list):
@@ -255,6 +256,7 @@ class S3Store(Store):
             search_keys = [self.key]
 
         for d in docs:
+            print(d.keys())
             search_doc = self.write_docs_to_s3(d, search_keys, write_to_s3=write_to_s3)
             search_docs.append(search_doc)
 
@@ -281,19 +283,21 @@ class S3Store(Store):
         if "_id" in search_doc:
             del search_doc["_id"]
 
-        data = json.dumps(jsanitize(doc)).encode()
-
         if write_to_s3:
-            # Compress with zlib if chosen
+            data = json.dumps(jsanitize(doc)).encode()
+
             if self.compress:
+                # Compress with zlib if chosen
                 search_doc["compression"] = "zlib"
                 data = zlib.compress(data)
+                print("Compress")
 
             self.s3_bucket.put_object(
                 Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
             )
         else:
             if self.compress:
+                # Compress with zlib if chosen
                 search_doc["compression"] = "zlib"
 
         return search_doc
