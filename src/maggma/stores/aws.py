@@ -11,8 +11,6 @@ from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
 from monty.dev import deprecated
 
 from maggma.core import Store, Sort
-from maggma.utils import grouper
-from sshtunnel import SSHTunnelForwarder
 
 from concurrent.futures import wait
 from concurrent.futures.process import ProcessPoolExecutor
@@ -297,17 +295,14 @@ class S3Store(Store):
             search_doc["compression"] = "zlib"
             data = zlib.compress(data)
 
-
-            search_docs.append(search_doc.copy())
-
-            if self.last_updated_field in search_doc:
-                search_doc[self.last_updated_field] = str(
-                    to_isoformat_ceil_ms(search_doc[self.last_updated_field])
-                )
-
-            self.s3_bucket.put_object(
-                Key=self.sub_dir + str(d[self.key]), Body=data, Metadata=search_doc
+        if self.last_updated_field in search_doc:
+            search_doc[self.last_updated_field] = str(
+                to_isoformat_ceil_ms(search_doc[self.last_updated_field])
             )
+
+        self.s3_bucket.put_object(
+            Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
+        )
 
         return search_doc
 
