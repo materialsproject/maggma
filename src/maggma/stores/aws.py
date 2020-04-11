@@ -15,6 +15,12 @@ from maggma.core import Store, Sort
 from maggma.utils import grouper
 from sshtunnel import SSHTunnelForwarder
 
+from concurrent.futures import wait
+from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures.process import ProcessPoolExecutor
+import msgpack
+from monty.msgpack import default as monty_default
+
 try:
     import botocore
     import boto3
@@ -37,7 +43,7 @@ class S3Store(Store):
         compress: bool = False,
         endpoint_url: str = None,
         sub_dir: str = None,
-        write_to_s3_in_process_items: bool = False,
+        s3_workers: int = 4,
         **kwargs,
     ):
         """
@@ -50,6 +56,7 @@ class S3Store(Store):
             compress: compress files inserted into the store
             endpoint_url: endpoint_url to allow interface to minio service
             sub_dir: (optional)  subdirectory of the s3 bucket to store the data
+            s3_workers: number of concurrent S3 puts to run
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for S3Store")
@@ -61,7 +68,7 @@ class S3Store(Store):
         self.sub_dir = sub_dir.strip("/") + "/" if sub_dir else ""
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
-        self.write_to_s3_in_process_items = write_to_s3_in_process_items
+        self.s3_workers = s3_workers
         # Force the key to be the same as the index
         kwargs["key"] = str(index.key)
 
@@ -174,7 +181,7 @@ class S3Store(Store):
 
                 if doc.get("compression", "") == "zlib":
                     data = zlib.decompress(data)
-                yield json.loads(data)
+                yield msgpack.unpackb(data, default=monty_default)
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
@@ -247,7 +254,6 @@ class S3Store(Store):
                  field is to be used
         """
         search_docs = []
-        write_to_s3 = not self.write_to_s3_in_process_items
 
         if isinstance(key, list):
             search_keys = key
@@ -256,16 +262,19 @@ class S3Store(Store):
         else:
             search_keys = [self.key]
 
-        for d in docs:
-            search_doc = self.write_doc_to_s3(d, search_keys, write_to_s3=write_to_s3)
-            search_docs.append(search_doc)
+        with ProcessPoolExecutor(max_workers=self.s3_workers) as pool:
+            fs = [
+                pool.submit(self.write_doc_to_s3, itr_doc, search_keys)
+                for itr_doc in docs
+            ]
+            fs, _ = wait(fs)
+            for sdoc in fs:
+                search_docs.append(sdoc.result())
 
         # Use store's update to remove key clashes
-        self.index.update(search_docs)
+        self.index.update(list(search_docs))
 
-    def write_doc_to_s3(
-        self, doc: Dict, search_keys: List[str], write_to_s3: bool = True
-    ):
+    def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
         Write the data to s3 and return the metadata to be inserted into the index db
 
@@ -283,21 +292,16 @@ class S3Store(Store):
         if "_id" in search_doc:
             del search_doc["_id"]
 
-        if write_to_s3:
-            data = json.dumps(jsanitize(doc)).encode()
+        data = msgpack.packb(doc, default=monty_default)
 
-            if self.compress:
-                # Compress with zlib if chosen
-                search_doc["compression"] = "zlib"
-                data = zlib.compress(data)
+        if self.compress:
+            # Compress with zlib if chosen
+            search_doc["compression"] = "zlib"
+            data = zlib.compress(data)
 
-            self.s3_bucket.put_object(
-                Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
-            )
-        else:
-            if self.compress:
-                # Compress with zlib if chosen
-                search_doc["compression"] = "zlib"
+        self.s3_bucket.put_object(
+            Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
+        )
 
         return search_doc
 
