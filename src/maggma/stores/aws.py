@@ -3,7 +3,6 @@
 Advanced Stores for connecting to AWS data
 """
 
-import json
 import zlib
 
 from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
@@ -13,7 +12,6 @@ from monty.dev import deprecated
 from maggma.core import Store, Sort
 
 from concurrent.futures import wait
-from concurrent.futures.process import ProcessPoolExecutor
 from concurrent.futures.thread import ThreadPoolExecutor
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
