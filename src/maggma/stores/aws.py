@@ -8,7 +8,6 @@ import zlib
 
 from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
 
-from monty.json import jsanitize
 from monty.dev import deprecated
 
 from maggma.core import Store, Sort
@@ -16,9 +15,8 @@ from maggma.utils import grouper
 from sshtunnel import SSHTunnelForwarder
 
 from concurrent.futures import wait
-from concurrent.futures.thread import ThreadPoolExecutor
 from concurrent.futures.process import ProcessPoolExecutor
-import msgpack
+import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
 
 try:
@@ -61,6 +59,7 @@ class S3Store(Store):
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for S3Store")
         self.index = index
+
         self.bucket = bucket
         self.s3_profile = s3_profile
         self.compress = compress
@@ -91,13 +90,11 @@ class S3Store(Store):
         """
         return f"s3://{self.bucket}"
 
-    def connect(
-        self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None
-    ):  # lgtm[py/conflicting-attributes]
+    def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
         """
         Connect to the source data
         """
-        self.index.connect(force_reset=force_reset, ssh_tunnel=ssh_tunnel)
+        self.index.connect(*args, **kwargs)
 
     def close(self):
         """
@@ -263,10 +260,10 @@ class S3Store(Store):
             search_keys = [self.key]
 
         with ProcessPoolExecutor(max_workers=self.s3_workers) as pool:
-            fs = [
+            fs = {
                 pool.submit(self.write_doc_to_s3, itr_doc, search_keys)
                 for itr_doc in docs
-            ]
+            }
             fs, _ = wait(fs)
             for sdoc in fs:
                 search_docs.append(sdoc.result())
