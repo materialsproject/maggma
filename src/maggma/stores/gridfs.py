@@ -154,10 +154,9 @@ class GridFSStore(Store):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the GridFS Store for a set of documents
-        Currently ignores properties
-
-        TODO: If properties wholy in metadata, just query that
+        Queries the GridFS Store for a set of documents.
+        Will check to see if data can be returned from
+        files store first.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -169,20 +168,38 @@ class GridFSStore(Store):
         if isinstance(criteria, dict):
             criteria = self.transform_criteria(criteria)
 
-        for f in self._collection.find(
-            filter=criteria, skip=skip, limit=limit, sort=sort
+        prop_keys = set()
+        if isinstance(properties, dict):
+            prop_keys = set(properties.keys())
+        elif isinstance(properties, list):
+            prop_keys = set(properties)
+
+        for doc in self._files_store.query(
+            criteria=criteria, sort=sort, limit=limit, skip=skip
         ):
-            data = f.read()
+            if properties is not None and prop_keys.issubset(set(doc.keys())):
+                yield {p: doc[p] for p in properties if p in doc}
+            else:
+                data = self._collection.find_one(
+                    filter={
+                        "metadata.{}".format(self._files_store.key): doc["metadata"][
+                            self._files_store.key
+                        ]
+                    },
+                    skip=skip,
+                    limit=limit,
+                    sort=sort,
+                ).read()
 
-            metadata = f.metadata
-            if metadata.get("compression", "") == "zlib":
-                data = zlib.decompress(data).decode("UTF-8")
+                metadata = doc["metadata"]
+                if metadata.get("compression", "") == "zlib":
+                    data = zlib.decompress(data).decode("UTF-8")
 
-            try:
-                data = json.loads(data)
-            except Exception:
-                pass
-            yield data
+                try:
+                    data = json.loads(data)
+                except Exception:
+                    pass
+                yield data
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
