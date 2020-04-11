@@ -14,8 +14,10 @@ from maggma.core import Store, Sort
 
 from concurrent.futures import wait
 from concurrent.futures.process import ProcessPoolExecutor
+from concurrent.futures.thread import ThreadPoolExecutor
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
+from monty.msgpack import object_hook as monty_object_hook
 from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
@@ -70,16 +72,6 @@ class S3Store(Store):
         # Force the key to be the same as the index
         kwargs["key"] = str(index.key)
 
-        session = Session(profile_name=self.s3_profile)
-        resource = session.resource("s3", endpoint_url=self.endpoint_url)
-
-        if not self.s3:
-            self.s3 = resource
-            if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
-                raise Exception("Bucket not present on AWS: {}".format(self.bucket))
-
-            self.s3_bucket = resource.Bucket(self.bucket)
-
         super(S3Store, self).__init__(**kwargs)
 
     def name(self) -> str:
@@ -93,6 +85,16 @@ class S3Store(Store):
         """
         Connect to the source data
         """
+
+        session = Session(profile_name=self.s3_profile)
+        resource = session.resource("s3", endpoint_url=self.endpoint_url)
+
+        if not self.s3:
+            self.s3 = resource
+            if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
+                raise Exception("Bucket not present on AWS: {}".format(self.bucket))
+
+            self.s3_bucket = resource.Bucket(self.bucket)
         self.index.connect(*args, **kwargs)
 
     def close(self):
@@ -177,7 +179,7 @@ class S3Store(Store):
 
                 if doc.get("compression", "") == "zlib":
                     data = zlib.decompress(data)
-                yield msgpack.unpackb(data, default=monty_default)
+                yield msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
@@ -257,18 +259,18 @@ class S3Store(Store):
             search_keys = [key]
         else:
             search_keys = [self.key]
-
-        with ProcessPoolExecutor(max_workers=self.s3_workers) as pool:
+        with ThreadPoolExecutor(max_workers=self.s3_workers) as pool:
             fs = {
-                pool.submit(self.write_doc_to_s3, itr_doc, search_keys)
+                pool.submit(
+                    fn=self.write_doc_to_s3, doc=itr_doc, search_keys=search_keys
+                )
                 for itr_doc in docs
             }
             fs, _ = wait(fs)
             for sdoc in fs:
                 search_docs.append(sdoc.result())
-
         # Use store's update to remove key clashes
-        self.index.update(list(search_docs))
+        self.index.update(search_docs)
 
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """

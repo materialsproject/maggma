@@ -1,5 +1,6 @@
 import pytest
-import json
+import msgpack
+from monty.msgpack import default, object_hook
 import boto3
 import zlib
 from moto import mock_s3
@@ -28,12 +29,14 @@ def s3store():
 
         check_doc = {"task_id": "mp-1", "data": "asd"}
         store.index.update([{"task_id": "mp-1"}])
-        store.s3_bucket.put_object(Key="mp-1", Body=json.dumps(check_doc).encode())
+        store.s3_bucket.put_object(
+            Key="mp-1", Body=msgpack.packb(check_doc, default=default)
+        )
 
         check_doc2 = {"task_id": "mp-3", "data": "sdf"}
         store.index.update([{"task_id": "mp-3", "compression": "zlib"}])
         store.s3_bucket.put_object(
-            Key="mp-3", Body=zlib.compress(json.dumps(check_doc2).encode())
+            Key="mp-3", Body=zlib.compress(msgpack.packb(check_doc2, default=default))
         )
 
         yield store
