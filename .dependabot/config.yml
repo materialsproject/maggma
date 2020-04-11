@@ -4,4 +4,8 @@ update_configs:
 
   - package_manager: "python"
     directory: "/"
-    update_schedule: "monthly"
+    update_schedule: "weekly"
+    automerged_updates:
+        - match:
+            dependency_type: "all"
+            update_type: "all"
