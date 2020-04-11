@@ -3,15 +3,19 @@
 Advanced Stores for connecting to AWS data
 """
 
-import json
 import zlib
 
 from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
 
-from monty.json import jsanitize
 from monty.dev import deprecated
 
 from maggma.core import Store, Sort
+
+from concurrent.futures import wait
+from concurrent.futures.thread import ThreadPoolExecutor
+import msgpack  # type: ignore
+from monty.msgpack import default as monty_default
+from monty.msgpack import object_hook as monty_object_hook
 from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
@@ -36,6 +40,7 @@ class S3Store(Store):
         compress: bool = False,
         endpoint_url: str = None,
         sub_dir: str = None,
+        s3_workers: int = 4,
         **kwargs,
     ):
         """
@@ -48,10 +53,12 @@ class S3Store(Store):
             compress: compress files inserted into the store
             endpoint_url: endpoint_url to allow interface to minio service
             sub_dir: (optional)  subdirectory of the s3 bucket to store the data
+            s3_workers: number of concurrent S3 puts to run
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for S3Store")
         self.index = index
+
         self.bucket = bucket
         self.s3_profile = s3_profile
         self.compress = compress
@@ -59,8 +66,10 @@ class S3Store(Store):
         self.sub_dir = sub_dir.strip("/") + "/" if sub_dir else ""
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
+        self.s3_workers = s3_workers
         # Force the key to be the same as the index
         kwargs["key"] = str(index.key)
+
         super(S3Store, self).__init__(**kwargs)
 
     def name(self) -> str:
@@ -70,11 +79,10 @@ class S3Store(Store):
         """
         return f"s3://{self.bucket}"
 
-    def connect(self, force_reset: bool = False):
+    def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
         """
         Connect to the source data
         """
-        self.index.connect(force_reset=force_reset)
 
         session = Session(profile_name=self.s3_profile)
         resource = session.resource("s3", endpoint_url=self.endpoint_url)
@@ -85,6 +93,7 @@ class S3Store(Store):
                 raise Exception("Bucket not present on AWS: {}".format(self.bucket))
 
             self.s3_bucket = resource.Bucket(self.bucket)
+        self.index.connect(*args, **kwargs)
 
     def close(self):
         """
@@ -168,7 +177,7 @@ class S3Store(Store):
 
                 if doc.get("compression", "") == "zlib":
                     data = zlib.decompress(data)
-                yield json.loads(data)
+                yield msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
@@ -241,7 +250,6 @@ class S3Store(Store):
                  field is to be used
         """
         search_docs = []
-        search_keys = []
 
         if isinstance(key, list):
             search_keys = key
@@ -249,36 +257,54 @@ class S3Store(Store):
             search_keys = [key]
         else:
             search_keys = [self.key]
-        for d in docs:
-            search_doc = {k: d[k] for k in search_keys}
-            search_doc[self.key] = d[self.key]  # Ensure key is in metadata
-            if self.sub_dir != "":
-                search_doc["sub_dir"] = self.sub_dir
-
-            # Remove MongoDB _id from search
-            if "_id" in search_doc:
-                del search_doc["_id"]
-
-            data = json.dumps(jsanitize(d)).encode()
-
-            # Compress with zlib if chosen
-            if self.compress:
-                search_doc["compression"] = "zlib"
-                data = zlib.compress(data)
-
-            search_docs.append(search_doc.copy())
-
-            if self.last_updated_field in search_doc:
-                search_doc[self.last_updated_field] = str(
-                    to_isoformat_ceil_ms(search_doc[self.last_updated_field])
+        with ThreadPoolExecutor(max_workers=self.s3_workers) as pool:
+            fs = {
+                pool.submit(
+                    fn=self.write_doc_to_s3, doc=itr_doc, search_keys=search_keys
                 )
-
-            self.s3_bucket.put_object(
-                Key=self.sub_dir + str(d[self.key]), Body=data, Metadata=search_doc
-            )
-
+                for itr_doc in docs
+            }
+            fs, _ = wait(fs)
+            for sdoc in fs:
+                search_docs.append(sdoc.result())
         # Use store's update to remove key clashes
         self.index.update(search_docs)
+
+    def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
+        """
+        Write the data to s3 and return the metadata to be inserted into the index db
+
+        Args:
+            doc: the document
+            search_keys: list of keys to pull from the docs and be inserted into the
+            index db
+        """
+        search_doc = {k: doc[k] for k in search_keys}
+        search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
+        if self.sub_dir != "":
+            search_doc["sub_dir"] = self.sub_dir
+
+        # Remove MongoDB _id from search
+        if "_id" in search_doc:
+            del search_doc["_id"]
+
+        data = msgpack.packb(doc, default=monty_default)
+
+        if self.compress:
+            # Compress with zlib if chosen
+            search_doc["compression"] = "zlib"
+            data = zlib.compress(data)
+
+        if self.last_updated_field in search_doc:
+            search_doc[self.last_updated_field] = str(
+                to_isoformat_ceil_ms(search_doc[self.last_updated_field])
+            )
+
+        self.s3_bucket.put_object(
+            Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
+        )
+
+        return search_doc
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
         """
