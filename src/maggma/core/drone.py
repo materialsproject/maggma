@@ -69,7 +69,7 @@ class Drone(Builder):
     Note: All embarrassingly parallel function should be in process_items
     Note: The steps of a Drone can be divided into roughly 5 steps
 
-     For sample usage, please see /docs/getting_started/drone.md
+     For sample usage, please see /docs/getting_started/core_drone.md
      and example implementation is available in tests/builders/test_simple_bibdrone.py
     """
 
@@ -82,8 +82,11 @@ class Drone(Builder):
     def compute_record_identifier_key(self, doc: Document) -> str:
         """
         Compute the RecordIdentifier key that this document correspond to
-        :param doc: document which the record identifier key will be inferred from
-        :return:
+
+        Args:
+            doc: document which the record identifier key will be inferred from
+
+        Returns:
             RecordIdentifiierKey
         """
         raise NotImplementedError
@@ -92,33 +95,36 @@ class Drone(Builder):
     def read(self, path: Path) -> List[RecordIdentifier]:
         """
         Given a folder path to a data folder, read all the files, and return a dictionary
-        that maps each RecordKey -> [File Paths]
+        that maps each RecordKey -> [RecordIdentifier]
 
         ** Note: require user to implement the function computeRecordIdentifierKey
 
-        :param path: Path object that indicate a path to a data folder
-        :return:
+        Args:
+            path: Path object that indicate a path to a data folder
 
+        Returns:
+            List of Record Identifiers
         """
-        raise NotImplementedError
+        pass
 
     @abstractmethod
     def compute_data(self, recordID: RecordIdentifier) -> Dict:
         """
         User can specify what raw data they want to save from the Documents that this recordID refers to
 
-        :param recordID: recordID that needs to be re-saved
-        :return:
-            Dictionary of NAME_OF_DATA -> DATA
-            ex:
-                for a recordID refering to 1,
-                {
-                    "citation": cite.bibtex ,
-                    "text": data.txt
-                }
+        Args:
+            recordID: recordID that needs to be re-saved
 
+        Returns:
+            Dictionary of NAME_OF_DATA -> DATA
+                        ex:
+                            for a recordID refering to 1,
+                            {
+                                "citation": cite.bibtex ,
+                                "text": data.txt
+                            }
         """
-        raise NotImplementedError
+        pass
 
     def should_update_records(
         self, record_identifiers: List[RecordIdentifier]
@@ -126,9 +132,11 @@ class Drone(Builder):
         """
         Batch query database by computing all the keys and send them at once
 
-        :param record_identifiers: all the record_identifiers that need to fetch from database
-        :return:
-            boolean mask of whether the record_identifier at that index require update
+        Args:
+            record_identifiers: all the record_identifiers that need to fetch from database
+
+        Returns:
+            List of recordIdentifiers representing data that needs to be updated
         """
         cursor = self.store.query(
             criteria={
@@ -152,18 +160,25 @@ class Drone(Builder):
     def assimilate(self, path: Path) -> List[RecordIdentifier]:
         """
         Function mainly for debugging purpose. It will
-        1. read file in the path specified
-        2. convert them into recordIdentifier
-        3. return the converted recordIdentifiers
+            1. read file in the path specified
+            2. convert them into recordIdentifier
+            3. return the converted recordIdentifiers
+        Args:
+            path: path in which files are read
 
-        :param path: path in which files are read
-        :return:
+        Returns:
             list of record Identifiers
         """
         record_identifiers: List[RecordIdentifier] = self.read(path=path)
         return record_identifiers
 
     def get_items(self) -> Iterable:
+        """
+        Read from the path that was given, compare against database files to find recordIDs that needs to be updated
+
+        Returns:
+            RecordIdentifiers that needs to be updated
+        """
         self.logger.debug(
             "Starting get_items in {} Builder".format(self.__class__.__name__)
         )
@@ -176,9 +191,10 @@ class Drone(Builder):
         Receive a list of items to update, update the items
 
         Assume that each item are in the correct format
+        Args:
+            items: List of items to update
 
-        :param items: List of items to update
-        :return:
+        Returns:
             None
         """
         if len(items) > 0:
@@ -191,8 +207,11 @@ class Drone(Builder):
         """
         compute the item to update
 
-        :param item: item to update
-        :return:
+        Args:
+            item: item to update
+
+        Returns:
             result from expanding the item
         """
+
         return {**self.compute_data(recordID=item), **item.dict()}
