@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 @pytest.fixture
-def init_drone():
+def init_drone(test_dir):
     """
     Initialize the drone, do not initialize the connection with the database
 
@@ -16,7 +16,7 @@ def init_drone():
     mongo_store = MongoStore(
         database="drone_test", collection_name="drone_test", key="record_key"
     )
-    simple_path = Path.cwd() / "test_files" / "simple_bib_example_data"
+    simple_path = test_dir / "simple_bib_example_data"
     assert simple_path.exists(), f"{simple_path} not found"
     simple_bib_drone = SimpleBibDrone(store=mongo_store, path=simple_path)
     return simple_bib_drone
