@@ -22,7 +22,7 @@ class SimpleBibDrone(Drone):
         super().__init__(store=store, path=path)
 
     def compute_record_identifier(
-            self, record_key: str, doc_list: List[Document]
+        self, record_key: str, doc_list: List[Document]
     ) -> RecordIdentifier:
         """
         Compute meta data for this list of documents, and generate a RecordIdentifier object
@@ -105,7 +105,7 @@ class SimpleBibDrone(Drone):
         return ID
 
     def organize_documents(
-            self, documents: List[Document]
+        self, documents: List[Document]
     ) -> Dict[str, List[Document]]:
         """
         a dictionary that maps RecordIdentifierKey -> [File Paths]

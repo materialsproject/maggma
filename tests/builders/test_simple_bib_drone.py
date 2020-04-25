@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 from datetime import datetime
 
+
 @pytest.fixture
 def init_drone():
     """
@@ -125,5 +126,3 @@ def test_compute_data(init_drone: SimpleBibDrone):
     data = init_drone.process_item(list_record_id[0])
     assert "citations" in data
     assert "text" in data
-
-
