@@ -42,7 +42,7 @@ setup(
         "sshtunnel>=0.1.5",
         "msgpack>=0.5.6",
     ],
-    extras_require={"vault": ["hvac>=0.9.5"], "S3": ["boto3==1.12.41"]},
+    extras_require={"vault": ["hvac>=0.9.5"], "S3": ["boto3==1.12.46"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.6",
