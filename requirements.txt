@@ -5,7 +5,7 @@ pydash==4.7.6
 jsonschema==3.2.0
 tqdm==4.45.0
 mongogrant==0.3.1
-aioitertools==0.6.0
+aioitertools==0.6.1
 pydantic==1.5
 fastapi==0.54.1
 numpy==1.18.3
