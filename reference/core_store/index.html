@@ -1,802 +1,620 @@
 
+<!DOCTYPE html>
 
-
-
-<!doctype html>
-<html lang="en" class="no-js">
-  <head>
-    
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width,initial-scale=1">
-      <meta http-equiv="x-ua-compatible" content="ie=edge">
-      
-        <meta name="description" content="Documentation for Maggma, a files-to-API data pipeline for scientific applications">
-      
-      
-      
-      
-        <meta name="lang:clipboard.copy" content="Copy to clipboard">
-      
-        <meta name="lang:clipboard.copied" content="Copied to clipboard">
-      
-        <meta name="lang:search.language" content="en">
-      
-        <meta name="lang:search.pipeline.stopwords" content="True">
-      
-        <meta name="lang:search.pipeline.trimmer" content="True">
-      
-        <meta name="lang:search.result.none" content="No matching documents">
-      
-        <meta name="lang:search.result.one" content="1 matching document">
-      
-        <meta name="lang:search.result.other" content="# matching documents">
-      
-        <meta name="lang:search.tokenizer" content="[\s\-]+">
-      
-      <link rel="shortcut icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1, mkdocs-material-4.6.3">
-    
-    
-      
-        <title>Store - Maggma Documentation</title>
-      
-    
-    
-      <link rel="stylesheet" href="../../assets/stylesheets/application.adb8469c.css">
-      
-      
-    
-    
-      <script src="../../assets/javascripts/modernizr.86422ebf.js"></script>
-    
-    
-      
-        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
-        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
-      
-    
-    <link rel="stylesheet" href="../../assets/fonts/material-icons.css">
-    
-    
-    
-      
-    
-    
-  </head>
-  
-    <body dir="ltr">
-  
-    <svg class="md-svg">
-      <defs>
-        
-        
-          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="__github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
-        
-      </defs>
-    </svg>
-    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
-    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
-    <label class="md-overlay" data-md-component="overlay" for="__drawer"></label>
-    
-      <a href="#maggma.core.store.DateTimeFormat" tabindex="0" class="md-skip">
-        Skip to content
-      </a>
-    
-    
-      <header class="md-header" data-md-component="header">
-  <nav class="md-header-nav md-grid">
-    <div class="md-flex">
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <a href="../.." title="Maggma Documentation" aria-label="Maggma Documentation" class="md-header-nav__button md-logo">
-          
-            <i class="md-icon"></i>
-          
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
+<link href="https://materialsproject.github.io/maggma/reference/core_store/" rel="canonical"/>
+<link href="../../assets/images/favicon.png" rel="shortcut icon"/>
+<meta content="mkdocs-1.1, mkdocs-material-5.1.3" name="generator"/>
+<title>Store - Maggma Documentation</title>
+<link href="../../assets/stylesheets/main.62d34fff.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
+<style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+</head>
+<body dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#maggma.core.store">
+          Skip to content
         </a>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        <label class="md-icon md-icon--menu md-header-nav__button" for="__drawer"></label>
-      </div>
-      <div class="md-flex__cell md-flex__cell--stretch">
-        <div class="md-flex__ellipsis md-header-nav__title" data-md-component="title">
-          
-            <span class="md-header-nav__topic">
-              Maggma Documentation
-            </span>
-            <span class="md-header-nav__topic">
-              
-                Store
-              
-            </span>
-          
-        </div>
-      </div>
-      <div class="md-flex__cell md-flex__cell--shrink">
-        
-          <label class="md-icon md-icon--search md-header-nav__button" for="__search"></label>
-          
-<div class="md-search" data-md-component="search" role="dialog">
-  <label class="md-search__overlay" for="__search"></label>
-  <div class="md-search__inner" role="search">
-    <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" aria-label="search" name="query" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query" data-md-state="active">
-      <label class="md-icon md-search__icon" for="__search"></label>
-      <button type="reset" class="md-icon md-search__icon" data-md-component="reset" tabindex="-1">
-        &#xE5CD;
-      </button>
-    </form>
-    <div class="md-search__output">
-      <div class="md-search__scrollwrap" data-md-scrollfix>
-        <div class="md-search-result" data-md-component="result">
-          <div class="md-search-result__meta">
-            Type to start searching
-          </div>
-          <ol class="md-search-result__list"></ol>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
-        
-      </div>
-      
-        <div class="md-flex__cell md-flex__cell--shrink">
-          <div class="md-header-nav__source">
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header-nav md-grid">
+<a aria-label="Maggma Documentation" class="md-header-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,8A3,3 0 0,0 15,5A3,3 0 0,0 12,2A3,3 0 0,0 9,5A3,3 0 0,0 12,8M12,11.54C9.64,9.35 6.5,8 3,8V19C6.5,19 9.64,20.35 12,22.54C14.36,20.35 17.5,19 21,19V8C17.5,8 14.36,9.35 12,11.54Z"></path></svg>
+</a>
+<label class="md-header-nav__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"></path></svg>
+</label>
+<div class="md-header-nav__title" data-md-component="header-title">
+<div class="md-header-nav__ellipsis">
+<span class="md-header-nav__topic md-ellipsis">
+            Maggma Documentation
+          </span>
+<span class="md-header-nav__topic md-ellipsis">
             
-
-
-  
-
-<a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-source="github">
-  
-    <div class="md-source__icon">
-      <svg viewBox="0 0 24 24" width="24" height="24">
-        <use xlink:href="#__github" width="24" height="24"></use>
-      </svg>
-    </div>
-  
-  <div class="md-source__repository">
+              Store
+            
+          </span>
+</div>
+</div>
+<label class="md-header-nav__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</label>
+<button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path></svg>
+</button>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header-nav__source">
+<a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
     GitHub
   </div>
 </a>
-          </div>
-        </div>
-      
-    </div>
-  </nav>
+</div>
+</nav>
 </header>
-    
-    <div class="md-container">
-      
-        
-      
-      
-      <main class="md-main" role="main">
-        <div class="md-main__inner md-grid" data-md-component="container">
-          
-            
-              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    <nav class="md-nav md-nav--primary" data-md-level="0">
-  <label class="md-nav__title md-nav__title--site" for="__drawer">
-    <a href="../.." title="Maggma Documentation" class="md-nav__button md-logo">
-      
-        <i class="md-icon"></i>
-      
-    </a>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Maggma Documentation" class="md-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,8A3,3 0 0,0 15,5A3,3 0 0,0 12,2A3,3 0 0,0 9,5A3,3 0 0,0 12,8M12,11.54C9.64,9.35 6.5,8 3,8V19C6.5,19 9.64,20.35 12,22.54C14.36,20.35 17.5,19 21,19V8C17.5,8 14.36,9.35 12,11.54Z"></path></svg>
+</a>
     Maggma Documentation
   </label>
-  
-    <div class="md-nav__source">
-      
-
-
-  
-
-<a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-source="github">
-  
-    <div class="md-source__icon">
-      <svg viewBox="0 0 24 24" width="24" height="24">
-        <use xlink:href="#__github" width="24" height="24"></use>
-      </svg>
-    </div>
-  
-  <div class="md-source__repository">
+<div class="md-nav__source">
+<a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
     GitHub
   </div>
 </a>
-    </div>
-  
-  <ul class="md-nav__list" data-md-scrollfix>
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../.." title="Home" class="md-nav__link">
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../.." title="Home">
       Home
     </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item">
-    <a href="../../concepts/" title="Core Concepts" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../concepts/" title="Core Concepts">
       Core Concepts
     </a>
-  </li>
-
-    
-      
-      
-      
-
-
-  <li class="md-nav__item md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
-    
-    <label class="md-nav__link" for="nav-3">
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" id="nav-3" type="checkbox"/>
+<label class="md-nav__link" for="nav-3">
       Getting Started
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-3">
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+</span>
+</label>
+<nav aria-label="Getting Started" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="nav-3">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
         Getting Started
       </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../getting_started/stores/" title="Using Stores" class="md-nav__link">
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting_started/stores/" title="Using Stores">
       Using Stores
     </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../getting_started/simple_builder/" title="Writing a Builder" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting_started/simple_builder/" title="Writing a Builder">
       Writing a Builder
     </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../getting_started/advanced_builder/" title="Advanced Builders" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting_started/advanced_builder/" title="Advanced Builders">
       Advanced Builders
     </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../getting_started/running_builders/" title="Running a Builder Pipeline" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting_started/running_builders/" title="Running a Builder Pipeline">
       Running a Builder Pipeline
     </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../getting_started/map_builder/" title="Working with MapBuilder" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting_started/map_builder/" title="Working with MapBuilder">
       Working with MapBuilder
     </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../../getting_started/group_builder/" title="Working with GroupBuilder" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting_started/group_builder/" title="Working with GroupBuilder">
       Working with GroupBuilder
     </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-      
-      
-      
-
-  
-
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
-    
-    <label class="md-nav__link" for="nav-4">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../getting_started/simple_drone/" title="Writing a Drone">
+      Writing a Drone
+    </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-4" id="nav-4" type="checkbox"/>
+<label class="md-nav__link" for="nav-4">
       Reference
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="1">
-      <label class="md-nav__title" for="nav-4">
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+</span>
+</label>
+<nav aria-label="Reference" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="nav-4">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
         Reference
       </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-  
-
-
-  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-    
-      <input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-1" type="checkbox" id="nav-4-1" checked>
-    
-    <label class="md-nav__link" for="nav-4-1">
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active md-nav__item--nested">
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-4-1" id="nav-4-1" type="checkbox"/>
+<label class="md-nav__link" for="nav-4-1">
       Core
-    </label>
-    <nav class="md-nav" data-md-component="collapsible" data-md-level="2">
-      <label class="md-nav__title" for="nav-4-1">
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+</span>
+</label>
+<nav aria-label="Core" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="nav-4-1">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
         Core
       </label>
-      <ul class="md-nav__list" data-md-scrollfix>
-        
-        
-          
-          
-          
-
-  
-
-
-  <li class="md-nav__item md-nav__item--active">
-    
-    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-    
-    
-      <label class="md-nav__link md-nav__link--active" for="__toc">
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
         Store
-      </label>
-    
-    <a href="./" title="Store" class="md-nav__link md-nav__link--active">
+        <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3,9H17V7H3V9M3,13H17V11H3V13M3,17H17V15H3V17M19,17H21V15H19V17M19,7V9H21V7H19M19,13H21V11H19V13Z"></path></svg>
+</span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./" title="Store">
       Store
     </a>
-    
-      
-<nav class="md-nav md-nav--secondary">
-  
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#maggma.core.store.DateTimeFormat" class="md-nav__link">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store">
+    maggma.core.store
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.DateTimeFormat">
     DateTimeFormat
   </a>
-  
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#maggma.core.store.Sort" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Sort">
     Sort
   </a>
-  
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#maggma.core.store.Store" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store">
     Store
   </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.last_updated" class="md-nav__link">
+<nav aria-label="Store" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.last_updated">
     last_updated
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.name" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.name">
     name
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.9595init9595" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.__init__">
     __init__()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.close" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.close">
     close()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.connect" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.connect">
     connect()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.count" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.count">
     count()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.distinct" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.distinct">
     distinct()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.ensure_index" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.ensure_index">
     ensure_index()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.groupby" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.groupby">
     groupby()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.newer_in" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.newer_in">
     newer_in()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.query" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.query">
     query()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.query_one" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.query_one">
     query_one()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.remove_docs" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.remove_docs">
     remove_docs()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.update" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.update">
     update()
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#maggma.core.store.StoreError" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.StoreError">
     StoreError
   </a>
-  
 </li>
-      
-      
-      
-      
-      
-    </ul>
-  
+</ul>
 </nav>
-    
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../core_builder/" title="Builder" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../core_builder/" title="Builder">
       Builder
     </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../core_validator/" title="Validator" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../core_validator/" title="Validator">
       Validator
     </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../stores/" title="Stores" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../core_drone/" title="Drone">
+      Drone
+    </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../stores/" title="Stores">
       Stores
     </a>
-  </li>
-
-        
-          
-          
-          
-
-
-  <li class="md-nav__item">
-    <a href="../builders/" title="Builders" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../builders/" title="Builders">
       Builders
     </a>
-  </li>
-
-        
-      </ul>
-    </nav>
-  </li>
-
-    
-  </ul>
+</li>
+</ul>
 </nav>
-                  </div>
-                </div>
-              </div>
-            
-            
-              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
-                <div class="md-sidebar__scrollwrap">
-                  <div class="md-sidebar__inner">
-                    
-<nav class="md-nav md-nav--secondary">
-  
-  
-  
-    <label class="md-nav__title" for="__toc">Table of contents</label>
-    <ul class="md-nav__list" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#maggma.core.store.DateTimeFormat" class="md-nav__link">
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../../CHANGELOG/" title="Changelog">
+      Changelog
+    </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store">
+    maggma.core.store
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.DateTimeFormat">
     DateTimeFormat
   </a>
-  
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#maggma.core.store.Sort" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Sort">
     Sort
   </a>
-  
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#maggma.core.store.Store" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store">
     Store
   </a>
-  
-    <nav class="md-nav">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.last_updated" class="md-nav__link">
+<nav aria-label="Store" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.last_updated">
     last_updated
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.name" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.name">
     name
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.9595init9595" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.__init__">
     __init__()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.close" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.close">
     close()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.connect" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.connect">
     connect()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.count" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.count">
     count()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.distinct" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.distinct">
     distinct()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.ensure_index" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.ensure_index">
     ensure_index()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.groupby" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.groupby">
     groupby()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.newer_in" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.newer_in">
     newer_in()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.query" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.query">
     query()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.query_one" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.query_one">
     query_one()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.remove_docs" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.remove_docs">
     remove_docs()
   </a>
-  
 </li>
-        
-          <li class="md-nav__item">
-  <a href="#maggma.core.store.Store.update" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.Store.update">
     update()
   </a>
-  
 </li>
-        
-      </ul>
-    </nav>
-  
+</ul>
+</nav>
 </li>
-      
-        <li class="md-nav__item">
-  <a href="#maggma.core.store.StoreError" class="md-nav__link">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.core.store.StoreError">
     StoreError
   </a>
-  
 </li>
-      
-      
-      
-      
-      
-    </ul>
-  
+</ul>
 </nav>
-                  </div>
-                </div>
-              </div>
-            
-          
-          <div class="md-content">
-            <article class="md-content__inner md-typeset">
-              
-                
-                  <a href="https://github.com/materialsproject/maggma/edit/master/docs/reference/core_store.md" title="Edit this page" class="md-icon md-content__icon">&#xE3C9;</a>
-                
-                
-                  <h1>Store</h1>
-                
-                <p>Module containing the core Store definition</p>
-<h2 id="maggma.core.store.DateTimeFormat"><code class="codehilite"><span class="n">DateTimeFormat</span></code><a class="headerlink" href="#maggma.core.store.DateTimeFormat" title="Permanent link">&para;</a></h2>
-<div class="autodoc">
+</div>
+</div>
+</div>
+<div class="md-content">
+<article class="md-content__inner md-typeset">
+<a class="md-content__button md-icon" href="https://github.com/materialsproject/maggma/edit/master/docs/reference/core_store.md" title="Edit this page">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"></path></svg>
+</a>
+<h1>Store</h1>
+<div class="doc doc-object doc-module">
+<h2 class="hidden-toc" href="#maggma.core.store" id="maggma.core.store" style="visibility: hidden; width: 0; height: 0;">
+<a class="headerlink" href="#maggma.core.store" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents first">
+<p>Module containing the core Store definition</p>
+<div class="doc doc-children">
+<div class="doc doc-object doc-class">
+<h2 class="doc doc-heading" id="maggma.core.store.DateTimeFormat">
+<code>DateTimeFormat</code>
+<a class="headerlink" href="#maggma.core.store.DateTimeFormat" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
 <p>Datetime format in store document </p>
+<div class="doc doc-children">
 </div>
-<h2 id="maggma.core.store.Sort"><code class="codehilite"><span class="n">Sort</span></code><a class="headerlink" href="#maggma.core.store.Sort" title="Permanent link">&para;</a></h2>
-<div class="autodoc">
+</div>
+</div>
+<div class="doc doc-object doc-class">
+<h2 class="doc doc-heading" id="maggma.core.store.Sort">
+<code>Sort</code>
+<a class="headerlink" href="#maggma.core.store.Sort" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
 <p>Enumeration for sorting order </p>
+<div class="doc doc-children">
 </div>
-<h2 id="maggma.core.store.Store"><code class="codehilite"><span class="n">Store</span></code><a class="headerlink" href="#maggma.core.store.Store" title="Permanent link">&para;</a></h2>
-<div class="autodoc">
+</div>
+</div>
+<div class="doc doc-object doc-class">
+<h2 class="doc doc-heading" id="maggma.core.store.Store">
+<code>Store</code>
+<a class="headerlink" href="#maggma.core.store.Store" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
 <p>Abstract class for a data Store
 Defines the interface for all data going in and out of a Builder</p>
-<h3 id="maggma.core.store.Store.last_updated"><code class="codehilite"><span class="n">last_updated</span><span class="p">:</span> <span class="n">datetime</span></code> <em>(property, readonly)</em><a class="headerlink" href="#maggma.core.store.Store.last_updated" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
+<div class="doc doc-children">
+<div class="doc doc-object doc-attribute">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.last_updated">
+<code class="highlight">
+last_updated: <span class="n">datetime</span> </code>
+<span class="doc doc-properties">
+<small class="doc doc-property doc-property-property"><code>property</code></small>
+<small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
+</span>
+<a class="headerlink" href="#maggma.core.store.Store.last_updated" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Provides the most recent last_updated date time stamp from
 the documents in this Store</p>
 </div>
-<h3 id="maggma.core.store.Store.name"><code class="codehilite"><span class="n">name</span><span class="p">:</span> <span class="nb">str</span></code> <em>(property, readonly)</em><a class="headerlink" href="#maggma.core.store.Store.name" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
+</div>
+<div class="doc doc-object doc-attribute">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.name">
+<code class="highlight">
+name: <span class="nb">str</span> </code>
+<span class="doc doc-properties">
+<small class="doc doc-property doc-property-property"><code>property</code></small>
+<small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
+</span>
+<a class="headerlink" href="#maggma.core.store.Store.name" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Return a string representing this data source</p>
 </div>
-<h3 id="maggma.core.store.Store.__init__"><code class="codehilite"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;task_id&#39;</span><span class="p">,</span> <span class="n">last_updated_field</span><span class="o">=</span><span class="s1">&#39;last_updated&#39;</span><span class="p">,</span> <span class="n">last_updated_type</span><span class="o">=&lt;</span><span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">DateTime</span><span class="p">:</span> <span class="s1">&#39;datetime&#39;</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.__init__" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>43
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.__init__">
+<code class="highlight language-python">
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">'task_id'</span><span class="p">,</span> <span class="n">last_updated_field</span><span class="o">=</span><span class="s1">'last_updated'</span><span class="p">,</span> <span class="n">last_updated_type</span><span class="o">=&lt;</span><span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">DateTime</span><span class="p">:</span> <span class="s1">'datetime'</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+<span class="doc doc-properties">
+<small class="doc doc-property doc-property-special"><code>special</code></small>
+</span>
+<a class="headerlink" href="#maggma.core.store.Store.__init__" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>key</code></td>
+<td><code>str</code></td>
+<td>
+<p>master key to index on</p>
+</td>
+<td><code>'task_id'</code></td>
+</tr>
+<tr>
+<td><code>last_updated_field</code></td>
+<td><code>str</code></td>
+<td>
+<p>field for date/time stamping the data</p>
+</td>
+<td><code>'last_updated'</code></td>
+</tr>
+<tr>
+<td><code>last_updated_type</code></td>
+<td><code>DateTimeFormat</code></td>
+<td>
+<p>the date/time format for the last_updated_field.
+                Can be "datetime" or "isoformat"</p>
+</td>
+<td><code>&lt;DateTimeFormat.DateTime: 'datetime'&gt;</code></td>
+</tr>
+<tr>
+<td><code>validator</code></td>
+<td><code>Optional[Validator]</code></td>
+<td>
+<p>Validator to validate documents going into the store</p>
+</td>
+<td><code>None</code></td>
+</tr>
+</tbody>
+</table>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>40
+41
+42
+43
 44
 45
 46
@@ -818,117 +636,88 @@ the documents in this Store</p>
 62
 63
 64
-65
-66
-67
-68</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;task_id&quot;</span><span class="p">,</span>
-        <span class="n">last_updated_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
-        <span class="n">last_updated_type</span><span class="p">:</span> <span class="n">DateTimeFormat</span> <span class="o">=</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="s2">&quot;datetime&quot;</span><span class="p">),</span>
-        <span class="n">validator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Validator</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Args:</span>
-<span class="sd">            key: master key to index on</span>
-<span class="sd">            last_updated_field: field for date/time stamping the data</span>
-<span class="sd">            last_updated_type: the date/time format for the last_updated_field.</span>
-<span class="sd">                                Can be &quot;datetime&quot; or &quot;isoformat&quot;</span>
-<span class="sd">            validator: Validator to validate documents going into the store</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">=</span> <span class="n">last_updated_field</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_type</span> <span class="o">=</span> <span class="n">last_updated_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">LU_KEY_ISOFORMAT</span>
-            <span class="k">if</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="n">last_updated_type</span><span class="p">)</span> <span class="o">==</span> <span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">IsoFormat</span>
-            <span class="k">else</span> <span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span>
-        <span class="p">)</span>  <span class="c1"># type: Tuple[Callable, Callable]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
-</code></pre></div>
-</td></tr></table>
-
-</details>
-<p><strong>Parameters</strong></p>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
+65</pre>
+</div>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"task_id"</span><span class="p">,</span>
+    <span class="n">last_updated_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"last_updated"</span><span class="p">,</span>
+    <span class="n">last_updated_type</span><span class="p">:</span> <span class="n">DateTimeFormat</span> <span class="o">=</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="s2">"datetime"</span><span class="p">),</span>
+    <span class="n">validator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Validator</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Args:</span>
+<span class="sd">        key: master key to index on</span>
+<span class="sd">        last_updated_field: field for date/time stamping the data</span>
+<span class="sd">        last_updated_type: the date/time format for the last_updated_field.</span>
+<span class="sd">                            Can be "datetime" or "isoformat"</span>
+<span class="sd">        validator: Validator to validate documents going into the store</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">=</span> <span class="n">last_updated_field</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_type</span> <span class="o">=</span> <span class="n">last_updated_type</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">LU_KEY_ISOFORMAT</span>
+        <span class="k">if</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="n">last_updated_type</span><span class="p">)</span> <span class="o">==</span> <span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">IsoFormat</span>
+        <span class="k">else</span> <span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span>
+    <span class="p">)</span>  <span class="c1"># type: Tuple[Callable, Callable]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
+</code></pre>
+</div>
+</td>
 </tr>
-</thead>
-<tbody>
-<tr>
-<td><code>key</code></td>
-<td><code>str</code></td>
-<td>master key to index on</td>
-<td><code>'task_id'</code></td>
-</tr>
-<tr>
-<td><code>last_updated_field</code></td>
-<td><code>str</code></td>
-<td>field for date/time stamping the data</td>
-<td><code>'last_updated'</code></td>
-</tr>
-<tr>
-<td><code>last_updated_type</code></td>
-<td><code>DateTimeFormat</code></td>
-<td>the date/time format for the last_updated_field. Can be "datetime" or "isoformat"</td>
-<td><code>&lt;DateTimeFormat.DateTime: 'datetime'&gt;</code></td>
-</tr>
-<tr>
-<td><code>validator</code></td>
-<td><code>Optional[Validator]</code></td>
-<td>Validator to validate documents going into the store</td>
-<td><code>None</code></td>
-</tr>
-</tbody>
 </table>
-</div>
-<h3 id="maggma.core.store.Store.close"><code class="codehilite"><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.close" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>93
-94
-95
-96
-97</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Closes any connections</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-</code></pre></div>
-</td></tr></table>
-
 </details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.close">
+<code class="highlight language-python">
+close<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.close" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Closes any connections</p>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>90
+91
+92
+93
+94</pre>
 </div>
-<h3 id="maggma.core.store.Store.connect"><code class="codehilite"><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.connect" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>84
-85
-86
-87
-88
-89
-90
-91</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Connect to the source data</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            force_reset: whether to reset the connection or not</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-</code></pre></div>
-</td></tr></table>
-
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Closes any connections</span>
+<span class="sd">    """</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.connect">
+<code class="highlight language-python">
+connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.connect" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Connect to the source data</p>
-<p><strong>Parameters</strong></p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -942,35 +731,55 @@ the documents in this Store</p>
 <tr>
 <td><code>force_reset</code></td>
 <td><code>bool</code></td>
-<td>whether to reset the connection or not</td>
+<td>
+<p>whether to reset the connection or not</p>
+</td>
 <td><code>False</code></td>
 </tr>
 </tbody>
 </table>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>81
+82
+83
+84
+85
+86
+87
+88</pre>
 </div>
-<h3 id="maggma.core.store.Store.count"><code class="codehilite"><span class="n">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.count" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span> 99
-100
-101
-102
-103
-104
-105
-106</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Counts the number of documents matching the query criteria</span>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Connect to the source data</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            criteria: PyMongo filter for documents to count in</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-</code></pre></div>
-</td></tr></table>
-
+<span class="sd">    Args:</span>
+<span class="sd">        force_reset: whether to reset the connection or not</span>
+<span class="sd">    """</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.count">
+<code class="highlight language-python">
+count<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.count" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Counts the number of documents matching the query criteria</p>
-<p><strong>Parameters</strong></p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -984,53 +793,55 @@ the documents in this Store</p>
 <tr>
 <td><code>criteria</code></td>
 <td><code>Optional[Dict]</code></td>
-<td>PyMongo filter for documents to count in</td>
+<td>
+<p>PyMongo filter for documents to count in</p>
+</td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span> 96
+ 97
+ 98
+ 99
+100
+101
+102
+103</pre>
 </div>
-<h3 id="maggma.core.store.Store.distinct"><code class="codehilite"><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.distinct" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>207
-208
-209
-210
-211
-212
-213
-214
-215
-216
-217
-218
-219
-220
-221
-222
-223</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get all distinct values for a field</span>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+    <span class="sd">"""</span>
+<span class="sd">    Counts the number of documents matching the query criteria</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            field: the field(s) to get distinct values for</span>
-<span class="sd">            criteria: PyMongo filter for documents to search in</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="ow">or</span> <span class="p">{}</span>
-
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">results</span>
-</code></pre></div>
-</td></tr></table>
-
+<span class="sd">    Args:</span>
+<span class="sd">        criteria: PyMongo filter for documents to count in</span>
+<span class="sd">    """</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.distinct">
+<code class="highlight language-python">
+distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.distinct" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Get all distinct values for a field</p>
-<p><strong>Parameters</strong></p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1044,49 +855,81 @@ the documents in this Store</p>
 <tr>
 <td><code>field</code></td>
 <td><code>str</code></td>
-<td>the field(s) to get distinct values for</td>
+<td>
+<p>the field(s) to get distinct values for</p>
+</td>
 <td><em>required</em></td>
 </tr>
 <tr>
 <td><code>criteria</code></td>
 <td><code>Optional[Dict]</code></td>
-<td>PyMongo filter for documents to search in</td>
+<td>
+<p>PyMongo filter for documents to search in</p>
+</td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220</pre>
 </div>
-<h3 id="maggma.core.store.Store.ensure_index"><code class="codehilite"><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.ensure_index" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>141
-142
-143
-144
-145
-146
-147
-148
-149
-150
-151
-152</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Tries to create an index and return true if it suceeded</span>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="sd">"""</span>
+<span class="sd">    Get all distinct values for a field</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            key: single key to index</span>
-<span class="sd">            unique: Whether or not this index contains only unique keys</span>
+<span class="sd">    Args:</span>
+<span class="sd">        field: the field(s) to get distinct values for</span>
+<span class="sd">        criteria: PyMongo filter for documents to search in</span>
+<span class="sd">    """</span>
+    <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="ow">or</span> <span class="p">{}</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            bool indicating if the index exists/was created</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-</code></pre></div>
-</td></tr></table>
-
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+    <span class="p">]</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">results</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.ensure_index">
+<code class="highlight language-python">
+ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.ensure_index" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Tries to create an index and return true if it suceeded</p>
-<p><strong>Parameters</strong></p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1100,18 +943,22 @@ the documents in this Store</p>
 <tr>
 <td><code>key</code></td>
 <td><code>str</code></td>
-<td>single key to index</td>
+<td>
+<p>single key to index</p>
+</td>
 <td><em>required</em></td>
 </tr>
 <tr>
 <td><code>unique</code></td>
 <td><code>bool</code></td>
-<td>Whether or not this index contains only unique keys</td>
+<td>
+<p>Whether or not this index contains only unique keys</p>
+</td>
 <td><code>False</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Returns</strong></p>
+<p><strong>Returns:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1122,14 +969,150 @@ the documents in this Store</p>
 <tbody>
 <tr>
 <td><code>bool</code></td>
-<td>bool indicating if the index exists/was created</td>
+<td>
+<p>bool indicating if the index exists/was created</p>
+</td>
 </tr>
 </tbody>
 </table>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149</pre>
 </div>
-<h3 id="maggma.core.store.Store.groupby"><code class="codehilite"><span class="n">groupby</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.groupby" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>154
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+    <span class="sd">"""</span>
+<span class="sd">    Tries to create an index and return true if it suceeded</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        key: single key to index</span>
+<span class="sd">        unique: Whether or not this index contains only unique keys</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        bool indicating if the index exists/was created</span>
+<span class="sd">    """</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.groupby">
+<code class="highlight language-python">
+groupby<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.groupby" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Simple grouping function that will group documents
+by keys.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>keys</code></td>
+<td><code>Union[List[str], str]</code></td>
+<td>
+<p>fields to group documents</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>criteria</code></td>
+<td><code>Optional[Dict]</code></td>
+<td>
+<p>PyMongo filter for documents to search in</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>properties</code></td>
+<td><code>Union[Dict, List, None]</code></td>
+<td>
+<p>properties to return in grouped documents</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>sort</code></td>
+<td><code>Optional[Dict[str, Sort]]</code></td>
+<td>
+<p>Dictionary of sort order for fields</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>skip</code></td>
+<td><code>int</code></td>
+<td>
+<p>number documents to skip</p>
+</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>limit</code></td>
+<td><code>int</code></td>
+<td>
+<p>limit on total number of documents returned</p>
+</td>
+<td><code>0</code></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Iterator[Tuple[Dict, List[Dict]]]</code></td>
+<td>
+<p>generator returning tuples of (dict, list of docs)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>151
+152
+153
+154
 155
 156
 157
@@ -1150,41 +1133,53 @@ the documents in this Store</p>
 172
 173
 174
-175
-176
-177
-178</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Simple grouping function that will group documents</span>
-<span class="sd">        by keys.</span>
+175</pre>
+</div>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
+    <span class="sd">"""</span>
+<span class="sd">    Simple grouping function that will group documents</span>
+<span class="sd">    by keys.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            keys: fields to group documents</span>
-<span class="sd">            criteria: PyMongo filter for documents to search in</span>
-<span class="sd">            properties: properties to return in grouped documents</span>
-<span class="sd">            sort: Dictionary of sort order for fields</span>
-<span class="sd">            skip: number documents to skip</span>
-<span class="sd">            limit: limit on total number of documents returned</span>
+<span class="sd">    Args:</span>
+<span class="sd">        keys: fields to group documents</span>
+<span class="sd">        criteria: PyMongo filter for documents to search in</span>
+<span class="sd">        properties: properties to return in grouped documents</span>
+<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        skip: number documents to skip</span>
+<span class="sd">        limit: limit on total number of documents returned</span>
 
-<span class="sd">        Returns:</span>
-<span class="sd">            generator returning tuples of (dict, list of docs)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-</code></pre></div>
-</td></tr></table>
-
+<span class="sd">    Returns:</span>
+<span class="sd">        generator returning tuples of (dict, list of docs)</span>
+<span class="sd">    """</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
-<p>Simple grouping function that will group documents
-by keys.</p>
-<p><strong>Parameters</strong></p>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.newer_in">
+<code class="highlight language-python">
+newer_in<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.newer_in" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Returns the keys of documents that are newer in the target
+Store than this Store.</p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1196,62 +1191,43 @@ by keys.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>keys</code></td>
-<td><code>Union[List[str], str]</code></td>
-<td>fields to group documents</td>
+<td><code>target</code></td>
+<td><code>Store</code></td>
+<td>
+<p>target Store to</p>
+</td>
 <td><em>required</em></td>
 </tr>
 <tr>
 <td><code>criteria</code></td>
 <td><code>Optional[Dict]</code></td>
-<td>PyMongo filter for documents to search in</td>
+<td>
+<p>PyMongo filter for documents to search in</p>
+</td>
 <td><code>None</code></td>
 </tr>
 <tr>
-<td><code>properties</code></td>
-<td><code>Union[Dict, List, None]</code></td>
-<td>properties to return in grouped documents</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>sort</code></td>
-<td><code>Optional[Dict[str, Sort]]</code></td>
-<td>Dictionary of sort order for fields</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>skip</code></td>
-<td><code>int</code></td>
-<td>number documents to skip</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>limit</code></td>
-<td><code>int</code></td>
-<td>limit on total number of documents returned</td>
-<td><code>0</code></td>
+<td><code>exhaustive</code></td>
+<td><code>bool</code></td>
+<td>
+<p>triggers an item-by-item check vs. checking
+        the last_updated of the target Store and using
+        that to filter out new items in</p>
+</td>
+<td><code>False</code></td>
 </tr>
 </tbody>
 </table>
-<p><strong>Returns</strong></p>
-<table>
-<thead>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
 <tr>
-<th>Type</th>
-<th>Description</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>Iterator[Tuple[Dict, List[Dict]]]</code></td>
-<td>generator returning tuples of (dict, list of docs)</td>
-</tr>
-</tbody>
-</table>
-</div>
-<h3 id="maggma.core.store.Store.newer_in"><code class="codehilite"><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.newer_in" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>251
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>248
+249
+250
+251
 252
 253
 254
@@ -1297,66 +1273,77 @@ by keys.</p>
 294
 295
 296
-297
-298
-299
-300</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns the keys of documents that are newer in the target</span>
-<span class="sd">        Store than this Store.</span>
+297</pre>
+</div>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="sd">"""</span>
+<span class="sd">    Returns the keys of documents that are newer in the target</span>
+<span class="sd">    Store than this Store.</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            target: target Store to</span>
-<span class="sd">            criteria: PyMongo filter for documents to search in</span>
-<span class="sd">            exhaustive: triggers an item-by-item check vs. checking</span>
-<span class="sd">                        the last_updated of the target Store and using</span>
-<span class="sd">                        that to filter out new items in</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">)</span>
+<span class="sd">    Args:</span>
+<span class="sd">        target: target Store to</span>
+<span class="sd">        criteria: PyMongo filter for documents to search in</span>
+<span class="sd">        exhaustive: triggers an item-by-item check vs. checking</span>
+<span class="sd">                    the last_updated of the target Store and using</span>
+<span class="sd">                    that to filter out new items in</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">exhaustive</span><span class="p">:</span>
-            <span class="c1"># Get our current last_updated dates for each key value</span>
-            <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
-            <span class="n">dates</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
-                    <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
-            <span class="p">}</span>
+    <span class="k">if</span> <span class="n">exhaustive</span><span class="p">:</span>
+        <span class="c1"># Get our current last_updated dates for each key value</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"_id"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">dates</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
+        <span class="p">}</span>
 
-            <span class="c1"># Get the last_updated for the store we&#39;re comparing with</span>
-            <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
-            <span class="n">target_dates</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">d</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="n">target</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
-                    <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
-            <span class="p">}</span>
+        <span class="c1"># Get the last_updated for the store we're comparing with</span>
+        <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">"_id"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+        <span class="n">target_dates</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="n">target</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
+        <span class="p">}</span>
 
-            <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_dates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">key</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">dates</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">target_dates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">date</span>
-            <span class="p">}</span>
+        <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_dates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">key</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">dates</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">target_dates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">date</span>
+        <span class="p">}</span>
 
-            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_keys</span> <span class="o">|</span> <span class="n">updated_keys</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_keys</span> <span class="o">|</span> <span class="n">updated_keys</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">criteria</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$gt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated</span><span class="p">)}</span>
-            <span class="p">}</span>
-            <span class="k">return</span> <span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
-</code></pre></div>
-</td></tr></table>
-
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">criteria</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="p">{</span><span class="s2">"$gt"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated</span><span class="p">)}</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
-<p>Returns the keys of documents that are newer in the target
-Store than this Store.</p>
-<p><strong>Parameters</strong></p>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.query">
+<code class="highlight language-python">
+query<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.query" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Queries the Store for a set of documents</p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1368,29 +1355,57 @@ Store than this Store.</p>
 </thead>
 <tbody>
 <tr>
-<td><code>target</code></td>
-<td><code>Store</code></td>
-<td>target Store to</td>
-<td><em>required</em></td>
-</tr>
-<tr>
 <td><code>criteria</code></td>
 <td><code>Optional[Dict]</code></td>
-<td>PyMongo filter for documents to search in</td>
+<td>
+<p>PyMongo filter for documents to search in</p>
+</td>
 <td><code>None</code></td>
 </tr>
 <tr>
-<td><code>exhaustive</code></td>
-<td><code>bool</code></td>
-<td>triggers an item-by-item check vs. checking the last_updated of the target Store and using that to filter out new items in</td>
-<td><code>False</code></td>
+<td><code>properties</code></td>
+<td><code>Union[Dict, List, None]</code></td>
+<td>
+<p>properties to return in grouped documents</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>sort</code></td>
+<td><code>Optional[Dict[str, Sort]]</code></td>
+<td>
+<p>Dictionary of sort order for fields</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>skip</code></td>
+<td><code>int</code></td>
+<td>
+<p>number documents to skip</p>
+</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>limit</code></td>
+<td><code>int</code></td>
+<td>
+<p>limit on total number of documents returned</p>
+</td>
+<td><code>0</code></td>
 </tr>
 </tbody>
 </table>
-</div>
-<h3 id="maggma.core.store.Store.query"><code class="codehilite"><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.query" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>108
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>105
+106
+107
+108
 109
 110
 111
@@ -1405,34 +1420,46 @@ Store than this Store.</p>
 120
 121
 122
-123
-124
-125
-126</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Queries the Store for a set of documents</span>
+123</pre>
+</div>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
+    <span class="sd">"""</span>
+<span class="sd">    Queries the Store for a set of documents</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            criteria: PyMongo filter for documents to search in</span>
-<span class="sd">            properties: properties to return in grouped documents</span>
-<span class="sd">            sort: Dictionary of sort order for fields</span>
-<span class="sd">            skip: number documents to skip</span>
-<span class="sd">            limit: limit on total number of documents returned</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-</code></pre></div>
-</td></tr></table>
-
+<span class="sd">    Args:</span>
+<span class="sd">        criteria: PyMongo filter for documents to search in</span>
+<span class="sd">        properties: properties to return in grouped documents</span>
+<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        skip: number documents to skip</span>
+<span class="sd">        limit: limit on total number of documents returned</span>
+<span class="sd">    """</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
-<p>Queries the Store for a set of documents</p>
-<p><strong>Parameters</strong></p>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.query_one">
+<code class="highlight language-python">
+query_one<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.query_one" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Queries the Store for a single document</p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1446,39 +1473,39 @@ Store than this Store.</p>
 <tr>
 <td><code>criteria</code></td>
 <td><code>Optional[Dict]</code></td>
-<td>PyMongo filter for documents to search in</td>
+<td>
+<p>PyMongo filter for documents to search</p>
+</td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>properties</code></td>
 <td><code>Union[Dict, List, None]</code></td>
-<td>properties to return in grouped documents</td>
+<td>
+<p>properties to return in the document</p>
+</td>
 <td><code>None</code></td>
 </tr>
 <tr>
 <td><code>sort</code></td>
 <td><code>Optional[Dict[str, Sort]]</code></td>
-<td>Dictionary of sort order for fields</td>
+<td>
+<p>Dictionary of sort order for fields</p>
+</td>
 <td><code>None</code></td>
-</tr>
-<tr>
-<td><code>skip</code></td>
-<td><code>int</code></td>
-<td>number documents to skip</td>
-<td><code>0</code></td>
-</tr>
-<tr>
-<td><code>limit</code></td>
-<td><code>int</code></td>
-<td>limit on total number of documents returned</td>
-<td><code>0</code></td>
 </tr>
 </tbody>
 </table>
-</div>
-<h3 id="maggma.core.store.Store.query_one"><code class="codehilite"><span class="n">query_one</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.query_one" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>189
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>186
+187
+188
+189
 190
 191
 192
@@ -1491,86 +1518,44 @@ Store than this Store.</p>
 199
 200
 201
-202
-203
-204
-205</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">query_one</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Queries the Store for a single document</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            criteria: PyMongo filter for documents to search</span>
-<span class="sd">            properties: properties to return in the document</span>
-<span class="sd">            sort: Dictionary of sort order for fields</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">),</span> <span class="kc">None</span>
-        <span class="p">)</span>
-</code></pre></div>
-</td></tr></table>
-
-</details>
-<p>Queries the Store for a single document</p>
-<p><strong>Parameters</strong></p>
-<table>
-<thead>
-<tr>
-<th>Name</th>
-<th>Type</th>
-<th>Description</th>
-<th>Default</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td><code>criteria</code></td>
-<td><code>Optional[Dict]</code></td>
-<td>PyMongo filter for documents to search</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>properties</code></td>
-<td><code>Union[Dict, List, None]</code></td>
-<td>properties to return in the document</td>
-<td><code>None</code></td>
-</tr>
-<tr>
-<td><code>sort</code></td>
-<td><code>Optional[Dict[str, Sort]]</code></td>
-<td>Dictionary of sort order for fields</td>
-<td><code>None</code></td>
-</tr>
-</tbody>
-</table>
+202</pre>
 </div>
-<h3 id="maggma.core.store.Store.remove_docs"><code class="codehilite"><span class="n">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.remove_docs" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>180
-181
-182
-183
-184
-185
-186
-187</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove docs matching the query dictionary</span>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">query_one</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Queries the Store for a single document</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            criteria: query dictionary to match</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-</code></pre></div>
-</td></tr></table>
-
+<span class="sd">    Args:</span>
+<span class="sd">        criteria: PyMongo filter for documents to search</span>
+<span class="sd">        properties: properties to return in the document</span>
+<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">),</span> <span class="kc">None</span>
+    <span class="p">)</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.remove_docs">
+<code class="highlight language-python">
+remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.remove_docs" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Remove docs matching the query dictionary</p>
-<p><strong>Parameters</strong></p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1584,43 +1569,55 @@ Store than this Store.</p>
 <tr>
 <td><code>criteria</code></td>
 <td><code>Dict</code></td>
-<td>query dictionary to match</td>
+<td>
+<p>query dictionary to match</p>
+</td>
 <td><em>required</em></td>
 </tr>
 </tbody>
 </table>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>177
+178
+179
+180
+181
+182
+183
+184</pre>
 </div>
-<h3 id="maggma.core.store.Store.update"><code class="codehilite"><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code><a class="headerlink" href="#maggma.core.store.Store.update" title="Permanent link">&para;</a></h3>
-<div class="autodoc">
-<details class="note"><summary>Show source code in <code>core/store.py</code></summary><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span>128
-129
-130
-131
-132
-133
-134
-135
-136
-137
-138
-139</pre></div></td><td class="code"><div class="codehilite"><pre><span></span><code>    <span class="nd">@abstractmethod</span>
-    <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update documents into the Store</span>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Remove docs matching the query dictionary</span>
 
-<span class="sd">        Args:</span>
-<span class="sd">            docs: the document or list of documents to update</span>
-<span class="sd">            key: field name(s) to determine uniqueness for a</span>
-<span class="sd">                 document, can be a list of multiple fields,</span>
-<span class="sd">                 a single field, or None if the Store&#39;s key</span>
-<span class="sd">                 field is to be used</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-</code></pre></div>
-</td></tr></table>
-
+<span class="sd">    Args:</span>
+<span class="sd">        criteria: query dictionary to match</span>
+<span class="sd">    """</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
 </details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.core.store.Store.update">
+<code class="highlight language-python">
+update<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.core.store.Store.update" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
 <p>Update documents into the Store</p>
-<p><strong>Parameters</strong></p>
+<p><strong>Parameters:</strong></p>
 <table>
 <thead>
 <tr>
@@ -1634,101 +1631,143 @@ Store than this Store.</p>
 <tr>
 <td><code>docs</code></td>
 <td><code>Union[List[Dict], Dict]</code></td>
-<td>the document or list of documents to update</td>
+<td>
+<p>the document or list of documents to update</p>
+</td>
 <td><em>required</em></td>
 </tr>
 <tr>
 <td><code>key</code></td>
 <td><code>Union[List, str, None]</code></td>
-<td>field name(s) to determine uniqueness for a document, can be a list of multiple fields, a single field, or None if the Store's key field is to be used</td>
+<td>
+<p>field name(s) to determine uniqueness for a
+ document, can be a list of multiple fields,
+ a single field, or None if the Store's key
+ field is to be used</p>
+</td>
 <td><code>None</code></td>
 </tr>
 </tbody>
 </table>
+<details class="quote">
+<summary>Source code in <code>maggma/core/store.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136</pre>
+</div>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Update documents into the Store</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        docs: the document or list of documents to update</span>
+<span class="sd">        key: field name(s) to determine uniqueness for a</span>
+<span class="sd">             document, can be a list of multiple fields,</span>
+<span class="sd">             a single field, or None if the Store's key</span>
+<span class="sd">             field is to be used</span>
+<span class="sd">    """</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
+</details>
 </div>
 </div>
-<h2 id="maggma.core.store.StoreError"><code class="codehilite"><span class="n">StoreError</span></code><a class="headerlink" href="#maggma.core.store.StoreError" title="Permanent link">&para;</a></h2>
-<div class="autodoc">
+</div>
+</div>
+</div>
+<div class="doc doc-object doc-class">
+<h2 class="doc doc-heading" id="maggma.core.store.StoreError">
+<code>StoreError</code>
+<a class="headerlink" href="#maggma.core.store.StoreError" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
 <p>General Store-related error </p>
+<div class="doc doc-children">
 </div>
-                
-                  
-                
-                
-              
-              
-                
-
-
-              
-            </article>
-          </div>
-        </div>
-      </main>
-      
-        
+</div>
+</div>
+</div>
+</div>
+</div>
+</article>
+</div>
+</div>
+</main>
 <footer class="md-footer">
-  
-    <div class="md-footer-nav">
-      <nav class="md-footer-nav__inner md-grid">
-        
-          <a href="../../getting_started/group_builder/" title="Working with GroupBuilder" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
-            </div>
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
+<div class="md-footer-nav">
+<nav aria-label="Footer" class="md-footer-nav__inner md-grid">
+<a class="md-footer-nav__link md-footer-nav__link--prev" href="../../getting_started/simple_drone/" rel="prev" title="Writing a Drone">
+<div class="md-footer-nav__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</div>
+<div class="md-footer-nav__title">
+<div class="md-ellipsis">
+<span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Working with GroupBuilder
-              </span>
-            </div>
-          </a>
-        
-        
-          <a href="../core_builder/" title="Builder" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
-            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-              <span class="md-flex__ellipsis">
-                <span class="md-footer-nav__direction">
+                Writing a Drone
+              </div>
+</div>
+</a>
+<a class="md-footer-nav__link md-footer-nav__link--next" href="../core_builder/" rel="next" title="Builder">
+<div class="md-footer-nav__title">
+<div class="md-ellipsis">
+<span class="md-footer-nav__direction">
                   Next
                 </span>
                 Builder
-              </span>
-            </div>
-            <div class="md-flex__cell md-flex__cell--shrink">
-              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
-            </div>
-          </a>
-        
-      </nav>
-    </div>
-  
-  <div class="md-footer-meta md-typeset">
-    <div class="md-footer-meta__inner md-grid">
-      <div class="md-footer-copyright">
-        
-          <div class="md-footer-copyright__highlight">
+              </div>
+</div>
+<div class="md-footer-nav__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"></path></svg>
+</div>
+</a>
+</nav>
+</div>
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-footer-copyright">
+<div class="md-footer-copyright__highlight">
             Built by The Materials Project
           </div>
         
-        powered by
-        <a href="https://www.mkdocs.org" target="_blank" rel="noopener">MkDocs</a>
-        and
-        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-          Material for MkDocs</a>
-      </div>
-      
-    </div>
-  </div>
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+          Material for MkDocs
+        </a>
+</div>
+</div>
+</div>
 </footer>
-      
-    </div>
-    
-      <script src="../../assets/javascripts/application.c33a9706.js"></script>
-      
-      <script>app.initialize({version:"1.1",url:{base:"../.."}})</script>
-      
-    
-  </body>
+</div>
+<script src="../../assets/javascripts/vendor.f81b9e8b.min.js"></script>
+<script src="../../assets/javascripts/bundle.23546af0.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+<script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.58d22e8e.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+</body>
 </html>

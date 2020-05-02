@@ -1,0 +1,908 @@
+
+<!DOCTYPE html>
+
+<html class="no-js" lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width,initial-scale=1" name="viewport"/>
+<meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
+<link href="https://materialsproject.github.io/maggma/CHANGELOG/" rel="canonical"/>
+<link href="../assets/images/favicon.png" rel="shortcut icon"/>
+<meta content="mkdocs-1.1, mkdocs-material-5.1.3" name="generator"/>
+<title>Changelog - Maggma Documentation</title>
+<link href="../assets/stylesheets/main.62d34fff.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
+<style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+</head>
+<body dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#changelog">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
+<header class="md-header" data-md-component="header">
+<nav aria-label="Header" class="md-header-nav md-grid">
+<a aria-label="Maggma Documentation" class="md-header-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,8A3,3 0 0,0 15,5A3,3 0 0,0 12,2A3,3 0 0,0 9,5A3,3 0 0,0 12,8M12,11.54C9.64,9.35 6.5,8 3,8V19C6.5,19 9.64,20.35 12,22.54C14.36,20.35 17.5,19 21,19V8C17.5,8 14.36,9.35 12,11.54Z"></path></svg>
+</a>
+<label class="md-header-nav__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"></path></svg>
+</label>
+<div class="md-header-nav__title" data-md-component="header-title">
+<div class="md-header-nav__ellipsis">
+<span class="md-header-nav__topic md-ellipsis">
+            Maggma Documentation
+          </span>
+<span class="md-header-nav__topic md-ellipsis">
+            
+              Changelog
+            
+          </span>
+</div>
+</div>
+<label class="md-header-nav__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg>
+</label>
+<div class="md-search" data-md-component="search" role="dialog">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
+<form class="md-search__form" name="search">
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</label>
+<button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path></svg>
+</button>
+</form>
+<div class="md-search__output">
+<div class="md-search__scrollwrap" data-md-scrollfix="">
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
+          </div>
+<ol class="md-search-result__list"></ol>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="md-header-nav__source">
+<a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+</nav>
+</header>
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
+<div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Maggma Documentation" class="md-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,8A3,3 0 0,0 15,5A3,3 0 0,0 12,2A3,3 0 0,0 9,5A3,3 0 0,0 12,8M12,11.54C9.64,9.35 6.5,8 3,8V19C6.5,19 9.64,20.35 12,22.54C14.36,20.35 17.5,19 21,19V8C17.5,8 14.36,9.35 12,11.54Z"></path></svg>
+</a>
+    Maggma Documentation
+  </label>
+<div class="md-nav__source">
+<a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+</div>
+<div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+</div>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href=".." title="Home">
+      Home
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../concepts/" title="Core Concepts">
+      Core Concepts
+    </a>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" id="nav-3" type="checkbox"/>
+<label class="md-nav__link" for="nav-3">
+      Getting Started
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+</span>
+</label>
+<nav aria-label="Getting Started" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="nav-3">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
+        Getting Started
+      </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting_started/stores/" title="Using Stores">
+      Using Stores
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting_started/simple_builder/" title="Writing a Builder">
+      Writing a Builder
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting_started/advanced_builder/" title="Advanced Builders">
+      Advanced Builders
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting_started/running_builders/" title="Running a Builder Pipeline">
+      Running a Builder Pipeline
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting_started/map_builder/" title="Working with MapBuilder">
+      Working with MapBuilder
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting_started/group_builder/" title="Working with GroupBuilder">
+      Working with GroupBuilder
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../getting_started/simple_drone/" title="Writing a Drone">
+      Writing a Drone
+    </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" id="nav-4" type="checkbox"/>
+<label class="md-nav__link" for="nav-4">
+      Reference
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+</span>
+</label>
+<nav aria-label="Reference" class="md-nav" data-md-level="1">
+<label class="md-nav__title" for="nav-4">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
+        Reference
+      </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item md-nav__item--nested">
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-4-1" id="nav-4-1" type="checkbox"/>
+<label class="md-nav__link" for="nav-4-1">
+      Core
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+</span>
+</label>
+<nav aria-label="Core" class="md-nav" data-md-level="2">
+<label class="md-nav__title" for="nav-4-1">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
+        Core
+      </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/core_store/" title="Store">
+      Store
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/core_builder/" title="Builder">
+      Builder
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/core_validator/" title="Validator">
+      Validator
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/core_drone/" title="Drone">
+      Drone
+    </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/stores/" title="Stores">
+      Stores
+    </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../reference/builders/" title="Builders">
+      Builders
+    </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item md-nav__item--active">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
+        Changelog
+        <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3,9H17V7H3V9M3,13H17V11H3V13M3,17H17V15H3V17M19,17H21V15H19V17M19,7V9H21V7H19M19,13H21V11H19V13Z"></path></svg>
+</span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./" title="Changelog">
+      Changelog
+    </a>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#unreleased">
+    Unreleased
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0191-2020-04-06">
+    v0.19.1 (2020-04-06)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0190-2020-04-06">
+    v0.19.0 (2020-04-06)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0180-2020-03-23">
+    v0.18.0 (2020-03-23)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0173-2020-03-18">
+    v0.17.3 (2020-03-18)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0172-2020-03-13">
+    v0.17.2 (2020-03-13)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0171-2020-03-12">
+    v0.17.1 (2020-03-12)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0161-2020-01-28">
+    v0.16.1 (2020-01-28)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0160-2020-01-28">
+    v0.16.0 (2020-01-28)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0150-2020-01-23">
+    v0.15.0 (2020-01-23)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0141-2020-01-10">
+    v0.14.1 (2020-01-10)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0140-2020-01-10">
+    v0.14.0 (2020-01-10)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0130-2019-03-29">
+    v0.13.0 (2019-03-29)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0120-2018-11-19">
+    v0.12.0 (2018-11-19)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0110-2018-11-01">
+    v0.11.0 (2018-11-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v090-2018-10-01">
+    v0.9.0 (2018-10-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v080-2018-08-22">
+    v0.8.0 (2018-08-22)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v065-2018-06-07">
+    v0.6.5 (2018-06-07)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v064-2018-06-07">
+    v0.6.4 (2018-06-07)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v063-2018-06-07">
+    v0.6.3 (2018-06-07)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v062-2018-06-01">
+    v0.6.2 (2018-06-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v061-2018-06-01">
+    v0.6.1 (2018-06-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v060-2018-05-01">
+    v0.6.0 (2018-05-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v050-2018-03-31">
+    v0.5.0 (2018-03-31)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#040-2018-02-28">
+    0.4.0 (2018-02-28)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#030-2018-02-01">
+    0.3.0 (2018-02-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v020-2018-01-01">
+    v0.2.0 (2018-01-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v010-2017-11-08">
+    v0.1.0 (2017-11-08)
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+<div class="md-sidebar__scrollwrap">
+<div class="md-sidebar__inner">
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</span>
+      Table of contents
+    </label>
+<ul class="md-nav__list" data-md-scrollfix="">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#unreleased">
+    Unreleased
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0191-2020-04-06">
+    v0.19.1 (2020-04-06)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0190-2020-04-06">
+    v0.19.0 (2020-04-06)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0180-2020-03-23">
+    v0.18.0 (2020-03-23)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0173-2020-03-18">
+    v0.17.3 (2020-03-18)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0172-2020-03-13">
+    v0.17.2 (2020-03-13)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0171-2020-03-12">
+    v0.17.1 (2020-03-12)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0161-2020-01-28">
+    v0.16.1 (2020-01-28)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0160-2020-01-28">
+    v0.16.0 (2020-01-28)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0150-2020-01-23">
+    v0.15.0 (2020-01-23)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0141-2020-01-10">
+    v0.14.1 (2020-01-10)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0140-2020-01-10">
+    v0.14.0 (2020-01-10)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0130-2019-03-29">
+    v0.13.0 (2019-03-29)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0120-2018-11-19">
+    v0.12.0 (2018-11-19)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v0110-2018-11-01">
+    v0.11.0 (2018-11-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v090-2018-10-01">
+    v0.9.0 (2018-10-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v080-2018-08-22">
+    v0.8.0 (2018-08-22)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v065-2018-06-07">
+    v0.6.5 (2018-06-07)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v064-2018-06-07">
+    v0.6.4 (2018-06-07)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v063-2018-06-07">
+    v0.6.3 (2018-06-07)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v062-2018-06-01">
+    v0.6.2 (2018-06-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v061-2018-06-01">
+    v0.6.1 (2018-06-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v060-2018-05-01">
+    v0.6.0 (2018-05-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v050-2018-03-31">
+    v0.5.0 (2018-03-31)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#040-2018-02-28">
+    0.4.0 (2018-02-28)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#030-2018-02-01">
+    0.3.0 (2018-02-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v020-2018-01-01">
+    v0.2.0 (2018-01-01)
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#v010-2017-11-08">
+    v0.1.0 (2017-11-08)
+  </a>
+</li>
+</ul>
+</nav>
+</div>
+</div>
+</div>
+<div class="md-content">
+<article class="md-content__inner md-typeset">
+<a class="md-content__button md-icon" href="https://github.com/materialsproject/maggma/edit/master/docs/CHANGELOG.md" title="Edit this page">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"></path></svg>
+</a>
+<h1 id="changelog">Changelog<a class="headerlink" href="#changelog" title="Permanent link">¶</a></h1>
+<h2 id="unreleased"><a href="https://github.com/materialsproject/maggma/tree/HEAD">Unreleased</a><a class="headerlink" href="#unreleased" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.19.1...HEAD">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Bump mkdocs-material-components from 1.10.11 to 1.10.14 <a href="https://github.com/materialsproject/maggma/pull/153">#153</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pydantic from 1.5 to 1.5.1 <a href="https://github.com/materialsproject/maggma/pull/152">#152</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocstrings from 0.10.3 to 0.11.0 <a href="https://github.com/materialsproject/maggma/pull/151">#151</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump aioitertools from 0.6.0 to 0.6.1 <a href="https://github.com/materialsproject/maggma/pull/150">#150</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pytest-asyncio from 0.10.0 to 0.11.0 <a href="https://github.com/materialsproject/maggma/pull/149">#149</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocs-material from 5.1.1 to 5.1.3 <a href="https://github.com/materialsproject/maggma/pull/148">#148</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump boto3 from 1.12.41 to 1.12.46 <a href="https://github.com/materialsproject/maggma/pull/147">#147</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pre-commit from 2.2.0 to 2.3.0 <a href="https://github.com/materialsproject/maggma/pull/146">#146</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Initial Drone Implementation <a href="https://github.com/materialsproject/maggma/pull/145">#145</a> (<a href="https://github.com/wuxiaohua1011">wuxiaohua1011</a>)</li>
+<li>Bump boto3 from 1.12.39 to 1.12.41 <a href="https://github.com/materialsproject/maggma/pull/144">#144</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump numpy from 1.18.2 to 1.18.3 <a href="https://github.com/materialsproject/maggma/pull/143">#143</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pydantic from 1.4 to 1.5 <a href="https://github.com/materialsproject/maggma/pull/142">#142</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pytest-mock from 3.0.0 to 3.1.0 <a href="https://github.com/materialsproject/maggma/pull/141">#141</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocs-material from 5.1.0 to 5.1.1 <a href="https://github.com/materialsproject/maggma/pull/140">#140</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump hvac from 0.10.0 to 0.10.1 <a href="https://github.com/materialsproject/maggma/pull/139">#139</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocs-minify-plugin from 0.2.3 to 0.3.0 <a href="https://github.com/materialsproject/maggma/pull/138">#138</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump tqdm from 4.44.1 to 4.45.0 <a href="https://github.com/materialsproject/maggma/pull/137">#137</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocs-material from 4.6.3 to 5.1.0 <a href="https://github.com/materialsproject/maggma/pull/136">#136</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocstrings from 0.8.0 to 0.10.3 <a href="https://github.com/materialsproject/maggma/pull/135">#135</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump boto3 from 1.12.34 to 1.12.39 <a href="https://github.com/materialsproject/maggma/pull/134">#134</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump fastapi from 0.53.2 to 0.54.1 <a href="https://github.com/materialsproject/maggma/pull/133">#133</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump msgpack from 0.5.6 to 1.0.0 <a href="https://github.com/materialsproject/maggma/pull/132">#132</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump aioitertools from 0.5.1 to 0.6.0 <a href="https://github.com/materialsproject/maggma/pull/131">#131</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>parallel s3 store wrting <a href="https://github.com/materialsproject/maggma/pull/130">#130</a> (<a href="https://github.com/jmmshn">jmmshn</a>)</li>
+<li>Fix async <a href="https://github.com/materialsproject/maggma/pull/129">#129</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Make GridFSStore query check files store first. <a href="https://github.com/materialsproject/maggma/pull/128">#128</a> (<a href="https://github.com/munrojm">munrojm</a>)</li>
+</ul>
+<h2 id="v0191-2020-04-06"><a href="https://github.com/materialsproject/maggma/tree/v0.19.1">v0.19.1</a> (2020-04-06)<a class="headerlink" href="#v0191-2020-04-06" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.19.0...v0.19.1">Full Changelog</a></p>
+<h2 id="v0190-2020-04-06"><a href="https://github.com/materialsproject/maggma/tree/v0.19.0">v0.19.0</a> (2020-04-06)<a class="headerlink" href="#v0190-2020-04-06" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.18.0...v0.19.0">Full Changelog</a></p>
+<p><strong>Closed issues:</strong></p>
+<ul>
+<li>ISSUE: newer_in method incompatible with GridFSStore <a href="https://github.com/materialsproject/maggma/issues/113">#113</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Bump boto3 from 1.12.11 to 1.12.34 <a href="https://github.com/materialsproject/maggma/pull/127">#127</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mypy from 0.761 to 0.770 <a href="https://github.com/materialsproject/maggma/pull/126">#126</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pytest from 5.3.5 to 5.4.1 <a href="https://github.com/materialsproject/maggma/pull/125">#125</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pytest-mock from 2.0.0 to 3.0.0 <a href="https://github.com/materialsproject/maggma/pull/124">#124</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump uvicorn from 0.10.8 to 0.11.3 <a href="https://github.com/materialsproject/maggma/pull/123">#123</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pydantic from 1.3 to 1.4 <a href="https://github.com/materialsproject/maggma/pull/122">#122</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump tqdm from 4.43.0 to 4.44.1 <a href="https://github.com/materialsproject/maggma/pull/121">#121</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pre-commit from 2.1.1 to 2.2.0 <a href="https://github.com/materialsproject/maggma/pull/119">#119</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump fastapi from 0.46.0 to 0.53.2 <a href="https://github.com/materialsproject/maggma/pull/118">#118</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocstrings from 0.8.0 to 0.10.0 <a href="https://github.com/materialsproject/maggma/pull/117">#117</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump numpy from 1.18.1 to 1.18.2 <a href="https://github.com/materialsproject/maggma/pull/116">#116</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>small fixes <a href="https://github.com/materialsproject/maggma/pull/115">#115</a> (<a href="https://github.com/jmmshn">jmmshn</a>)</li>
+<li>Store updates <a href="https://github.com/materialsproject/maggma/pull/114">#114</a> (<a href="https://github.com/jmmshn">jmmshn</a>)</li>
+<li>[WIP] Add EndpointCluster and ClusterManager to maggma <a href="https://github.com/materialsproject/maggma/pull/66">#66</a> (<a href="https://github.com/wuxiaohua1011">wuxiaohua1011</a>)</li>
+</ul>
+<h2 id="v0180-2020-03-23"><a href="https://github.com/materialsproject/maggma/tree/v0.18.0">v0.18.0</a> (2020-03-23)<a class="headerlink" href="#v0180-2020-03-23" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.17.3...v0.18.0">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Amazon S3 store update <a href="https://github.com/materialsproject/maggma/pull/110">#110</a> (<a href="https://github.com/munrojm">munrojm</a>)</li>
+</ul>
+<h2 id="v0173-2020-03-18"><a href="https://github.com/materialsproject/maggma/tree/v0.17.3">v0.17.3</a> (2020-03-18)<a class="headerlink" href="#v0173-2020-03-18" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.17.2...v0.17.3">Full Changelog</a></p>
+<h2 id="v0172-2020-03-13"><a href="https://github.com/materialsproject/maggma/tree/v0.17.2">v0.17.2</a> (2020-03-13)<a class="headerlink" href="#v0172-2020-03-13" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.17.1...v0.17.2">Full Changelog</a></p>
+<h2 id="v0171-2020-03-12"><a href="https://github.com/materialsproject/maggma/tree/v0.17.1">v0.17.1</a> (2020-03-12)<a class="headerlink" href="#v0171-2020-03-12" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.16.1...v0.17.1">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Various Bug Fixes <a href="https://github.com/materialsproject/maggma/pull/109">#109</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Bump mongomock from 3.18.0 to 3.19.0 <a href="https://github.com/materialsproject/maggma/pull/108">#108</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocs from 1.0.4 to 1.1 <a href="https://github.com/materialsproject/maggma/pull/107">#107</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump hvac from 0.9.6 to 0.10.0 <a href="https://github.com/materialsproject/maggma/pull/106">#106</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pre-commit from 2.0.1 to 2.1.1 <a href="https://github.com/materialsproject/maggma/pull/105">#105</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocs-minify-plugin from 0.2.1 to 0.2.3 <a href="https://github.com/materialsproject/maggma/pull/104">#104</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocstrings from 0.7.0 to 0.7.1 <a href="https://github.com/materialsproject/maggma/pull/103">#103</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump tqdm from 4.42.0 to 4.43.0 <a href="https://github.com/materialsproject/maggma/pull/102">#102</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocs-material from 4.6.0 to 4.6.3 <a href="https://github.com/materialsproject/maggma/pull/101">#101</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump boto3 from 1.11.9 to 1.12.11 <a href="https://github.com/materialsproject/maggma/pull/100">#100</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Addition of Projection Builder <a href="https://github.com/materialsproject/maggma/pull/99">#99</a> (<a href="https://github.com/acrutt">acrutt</a>)</li>
+<li>Fix issues with last_updated in MapBuilder <a href="https://github.com/materialsproject/maggma/pull/98">#98</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>autonotebook for tqdm <a href="https://github.com/materialsproject/maggma/pull/97">#97</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Bump pytest from 5.3.4 to 5.3.5 <a href="https://github.com/materialsproject/maggma/pull/96">#96</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pre-commit from 1.21.0 to 2.0.1 <a href="https://github.com/materialsproject/maggma/pull/95">#95</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pydocstyle from 5.0.1 to 5.0.2 <a href="https://github.com/materialsproject/maggma/pull/94">#94</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+</ul>
+<h2 id="v0161-2020-01-28"><a href="https://github.com/materialsproject/maggma/tree/v0.16.1">v0.16.1</a> (2020-01-28)<a class="headerlink" href="#v0161-2020-01-28" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.16.0...v0.16.1">Full Changelog</a></p>
+<h2 id="v0160-2020-01-28"><a href="https://github.com/materialsproject/maggma/tree/v0.16.0">v0.16.0</a> (2020-01-28)<a class="headerlink" href="#v0160-2020-01-28" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.15.0...v0.16.0">Full Changelog</a></p>
+<p><strong>Closed issues:</strong></p>
+<ul>
+<li>Onotology generation from builder <a href="https://github.com/materialsproject/maggma/issues/59">#59</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Add MongoURIStore <a href="https://github.com/materialsproject/maggma/pull/93">#93</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Update distinct to be more like mongo distinct <a href="https://github.com/materialsproject/maggma/pull/92">#92</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Bump tqdm from 4.41.1 to 4.42.0 <a href="https://github.com/materialsproject/maggma/pull/91">#91</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump mkdocstrings from 0.6.1 to 0.7.0 <a href="https://github.com/materialsproject/maggma/pull/90">#90</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump boto3 from 1.10.10 to 1.11.9 <a href="https://github.com/materialsproject/maggma/pull/89">#89</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pre-commit from 1.20.0 to 1.21.0 <a href="https://github.com/materialsproject/maggma/pull/88">#88</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pytest-mock from 1.13.0 to 2.0.0 <a href="https://github.com/materialsproject/maggma/pull/87">#87</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Add count to maggma store <a href="https://github.com/materialsproject/maggma/pull/86">#86</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+</ul>
+<h2 id="v0150-2020-01-23"><a href="https://github.com/materialsproject/maggma/tree/v0.15.0">v0.15.0</a> (2020-01-23)<a class="headerlink" href="#v0150-2020-01-23" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.14.1...v0.15.0">Full Changelog</a></p>
+<p><strong>Closed issues:</strong></p>
+<ul>
+<li>Builder Reporting <a href="https://github.com/materialsproject/maggma/issues/78">#78</a></li>
+<li>ZeroMQ based multi-node processing <a href="https://github.com/materialsproject/maggma/issues/76">#76</a></li>
+<li>Add time limits to process_item? (Possibly just in MapBuilder?) <a href="https://github.com/materialsproject/maggma/issues/45">#45</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Bump hvac from 0.9.5 to 0.9.6 <a href="https://github.com/materialsproject/maggma/pull/85">#85</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pydash from 4.7.5 to 4.7.6 <a href="https://github.com/materialsproject/maggma/pull/84">#84</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump numpy from 1.18.0 to 1.18.1 <a href="https://github.com/materialsproject/maggma/pull/83">#83</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pytest from 5.3.2 to 5.3.4 <a href="https://github.com/materialsproject/maggma/pull/82">#82</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump pymongo from 3.9.0 to 3.10.1 <a href="https://github.com/materialsproject/maggma/pull/81">#81</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>[WIP] Builder Reporting <a href="https://github.com/materialsproject/maggma/pull/80">#80</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Updated GroupBuilder <a href="https://github.com/materialsproject/maggma/pull/79">#79</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>New Distributed Processor <a href="https://github.com/materialsproject/maggma/pull/77">#77</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+</ul>
+<h2 id="v0141-2020-01-10"><a href="https://github.com/materialsproject/maggma/tree/v0.14.1">v0.14.1</a> (2020-01-10)<a class="headerlink" href="#v0141-2020-01-10" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.14.0...v0.14.1">Full Changelog</a></p>
+<h2 id="v0140-2020-01-10"><a href="https://github.com/materialsproject/maggma/tree/v0.14.0">v0.14.0</a> (2020-01-10)<a class="headerlink" href="#v0140-2020-01-10" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.13.0...v0.14.0">Full Changelog</a></p>
+<p><strong>Closed issues:</strong></p>
+<ul>
+<li>Preserve last_updated for MapBuilder <a href="https://github.com/materialsproject/maggma/issues/58">#58</a></li>
+<li>Move away from mpi4py <a href="https://github.com/materialsproject/maggma/issues/51">#51</a></li>
+<li>Run serial processor directly from builder <a href="https://github.com/materialsproject/maggma/issues/48">#48</a></li>
+<li>Update while processing <a href="https://github.com/materialsproject/maggma/issues/42">#42</a></li>
+<li>Running JSONStore.connect() multiple times leads to undefined behavior <a href="https://github.com/materialsproject/maggma/issues/40">#40</a></li>
+<li>get_criteria directly invokes mongo commands <a href="https://github.com/materialsproject/maggma/issues/38">#38</a></li>
+<li>Cursor timeouts common <a href="https://github.com/materialsproject/maggma/issues/35">#35</a></li>
+<li>Possible solution to "stalled" Runner.run ? <a href="https://github.com/materialsproject/maggma/issues/29">#29</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Release Workflow for Github <a href="https://github.com/materialsproject/maggma/pull/75">#75</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Documentation <a href="https://github.com/materialsproject/maggma/pull/74">#74</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Bump jsonschema from 3.1.1 to 3.2.0 <a href="https://github.com/materialsproject/maggma/pull/73">#73</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump moto from 1.3.13 to 1.3.14 <a href="https://github.com/materialsproject/maggma/pull/72">#72</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump tqdm from 4.37.0 to 4.41.1 <a href="https://github.com/materialsproject/maggma/pull/71">#71</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Bump numpy from 1.17.3 to 1.18.0 <a href="https://github.com/materialsproject/maggma/pull/70">#70</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Reorg code <a href="https://github.com/materialsproject/maggma/pull/69">#69</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Bump pytest from 5.3.1 to 5.3.2 <a href="https://github.com/materialsproject/maggma/pull/68">#68</a> (<a href="https://github.com/apps/dependabot-preview">dependabot-preview[bot]</a>)</li>
+<li>Updates for new monitoring services <a href="https://github.com/materialsproject/maggma/pull/67">#67</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>fix GridFSStore <a href="https://github.com/materialsproject/maggma/pull/64">#64</a> (<a href="https://github.com/gpetretto">gpetretto</a>)</li>
+<li>Massive refactoring to get ready for v1.0 <a href="https://github.com/materialsproject/maggma/pull/62">#62</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>Bug Fixes <a href="https://github.com/materialsproject/maggma/pull/61">#61</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>GridFSStore bug fix <a href="https://github.com/materialsproject/maggma/pull/60">#60</a> (<a href="https://github.com/munrojm">munrojm</a>)</li>
+<li>Fix Store serialization with @version <a href="https://github.com/materialsproject/maggma/pull/57">#57</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+<li>Update builder to work with new monty <a href="https://github.com/materialsproject/maggma/pull/56">#56</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+</ul>
+<h2 id="v0130-2019-03-29"><a href="https://github.com/materialsproject/maggma/tree/v0.13.0">v0.13.0</a> (2019-03-29)<a class="headerlink" href="#v0130-2019-03-29" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.12.0...v0.13.0">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Add timeout to MapBuilder, store process time <a href="https://github.com/materialsproject/maggma/pull/54">#54</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+<li>Can update pyyaml req? <a href="https://github.com/materialsproject/maggma/pull/50">#50</a> (<a href="https://github.com/dwinston">dwinston</a>)</li>
+<li>Concat store <a href="https://github.com/materialsproject/maggma/pull/47">#47</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+</ul>
+<h2 id="v0120-2018-11-19"><a href="https://github.com/materialsproject/maggma/tree/v0.12.0">v0.12.0</a> (2018-11-19)<a class="headerlink" href="#v0120-2018-11-19" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.11.0...v0.12.0">Full Changelog</a></p>
+<h2 id="v0110-2018-11-01"><a href="https://github.com/materialsproject/maggma/tree/v0.11.0">v0.11.0</a> (2018-11-01)<a class="headerlink" href="#v0110-2018-11-01" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.9.0...v0.11.0">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Better printing of validation erorrs <a href="https://github.com/materialsproject/maggma/pull/46">#46</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+<li>Updates to JointStore and MapBuilder <a href="https://github.com/materialsproject/maggma/pull/44">#44</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+</ul>
+<h2 id="v090-2018-10-01"><a href="https://github.com/materialsproject/maggma/tree/v0.9.0">v0.9.0</a> (2018-10-01)<a class="headerlink" href="#v090-2018-10-01" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.8.0...v0.9.0">Full Changelog</a></p>
+<p><strong>Closed issues:</strong></p>
+<ul>
+<li>Non-obvious error message when trying to query a Store that hasn't been connected <a href="https://github.com/materialsproject/maggma/issues/41">#41</a></li>
+<li>Criteria/properties order of MongoStore.query <a href="https://github.com/materialsproject/maggma/issues/37">#37</a></li>
+<li>tqdm in Jupyter <a href="https://github.com/materialsproject/maggma/issues/33">#33</a></li>
+<li>query args order <a href="https://github.com/materialsproject/maggma/issues/31">#31</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Simplification of Validator class + tests <a href="https://github.com/materialsproject/maggma/pull/39">#39</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+<li>Fix for Jupyter detection for tqdm <a href="https://github.com/materialsproject/maggma/pull/36">#36</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+<li>Add tqdm widget inside Jupyter <a href="https://github.com/materialsproject/maggma/pull/34">#34</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+<li>Change update_targets log level from debug to exception <a href="https://github.com/materialsproject/maggma/pull/32">#32</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+<li>Jointstore <a href="https://github.com/materialsproject/maggma/pull/23">#23</a> (<a href="https://github.com/montoyjh">montoyjh</a>)</li>
+</ul>
+<h2 id="v080-2018-08-22"><a href="https://github.com/materialsproject/maggma/tree/v0.8.0">v0.8.0</a> (2018-08-22)<a class="headerlink" href="#v080-2018-08-22" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.6.5...v0.8.0">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>[WIP] Improve/refactor examples and move inside maggma namespace <a href="https://github.com/materialsproject/maggma/pull/30">#30</a> (<a href="https://github.com/dwinston">dwinston</a>)</li>
+<li>Fix mrun with default num_workers. Add test. <a href="https://github.com/materialsproject/maggma/pull/28">#28</a> (<a href="https://github.com/dwinston">dwinston</a>)</li>
+</ul>
+<h2 id="v065-2018-06-07"><a href="https://github.com/materialsproject/maggma/tree/v0.6.5">v0.6.5</a> (2018-06-07)<a class="headerlink" href="#v065-2018-06-07" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.6.4...v0.6.5">Full Changelog</a></p>
+<h2 id="v064-2018-06-07"><a href="https://github.com/materialsproject/maggma/tree/v0.6.4">v0.6.4</a> (2018-06-07)<a class="headerlink" href="#v064-2018-06-07" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.6.3...v0.6.4">Full Changelog</a></p>
+<h2 id="v063-2018-06-07"><a href="https://github.com/materialsproject/maggma/tree/v0.6.3">v0.6.3</a> (2018-06-07)<a class="headerlink" href="#v063-2018-06-07" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.6.2...v0.6.3">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Add MongograntStore <a href="https://github.com/materialsproject/maggma/pull/27">#27</a> (<a href="https://github.com/dwinston">dwinston</a>)</li>
+</ul>
+<h2 id="v062-2018-06-01"><a href="https://github.com/materialsproject/maggma/tree/v0.6.2">v0.6.2</a> (2018-06-01)<a class="headerlink" href="#v062-2018-06-01" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.6.1...v0.6.2">Full Changelog</a></p>
+<h2 id="v061-2018-06-01"><a href="https://github.com/materialsproject/maggma/tree/v0.6.1">v0.6.1</a> (2018-06-01)<a class="headerlink" href="#v061-2018-06-01" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.6.0...v0.6.1">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Help user if e.g. target store built without lu_field <a href="https://github.com/materialsproject/maggma/pull/26">#26</a> (<a href="https://github.com/dwinston">dwinston</a>)</li>
+</ul>
+<h2 id="v060-2018-05-01"><a href="https://github.com/materialsproject/maggma/tree/v0.6.0">v0.6.0</a> (2018-05-01)<a class="headerlink" href="#v060-2018-05-01" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.5.0...v0.6.0">Full Changelog</a></p>
+<p><strong>Implemented enhancements:</strong></p>
+<ul>
+<li>Progress Bar <a href="https://github.com/materialsproject/maggma/issues/21">#21</a></li>
+<li>Query Engine equivalent <a href="https://github.com/materialsproject/maggma/issues/9">#9</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Progress Bars for Multiprocess Runner <a href="https://github.com/materialsproject/maggma/pull/24">#24</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>GridFS Store update: use metadata field, update removes old file(s) <a href="https://github.com/materialsproject/maggma/pull/20">#20</a> (<a href="https://github.com/dwinston">dwinston</a>)</li>
+</ul>
+<h2 id="v050-2018-03-31"><a href="https://github.com/materialsproject/maggma/tree/v0.5.0">v0.5.0</a> (2018-03-31)<a class="headerlink" href="#v050-2018-03-31" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/0.4.0...v0.5.0">Full Changelog</a></p>
+<p><strong>Closed issues:</strong></p>
+<ul>
+<li>Need from pymongo collection <a href="https://github.com/materialsproject/maggma/issues/18">#18</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Useability updates <a href="https://github.com/materialsproject/maggma/pull/19">#19</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+</ul>
+<h2 id="040-2018-02-28"><a href="https://github.com/materialsproject/maggma/tree/0.4.0">0.4.0</a> (2018-02-28)<a class="headerlink" href="#040-2018-02-28" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/0.3.0...0.4.0">Full Changelog</a></p>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>New Multiprocessor and MPI Processor <a href="https://github.com/materialsproject/maggma/pull/17">#17</a> (<a href="https://github.com/shyamd">shyamd</a>)</li>
+<li>groupby change for memory/jsonstore <a href="https://github.com/materialsproject/maggma/pull/16">#16</a> (<a href="https://github.com/montoyjh">montoyjh</a>)</li>
+<li>Rename Schema to Validator <a href="https://github.com/materialsproject/maggma/pull/15">#15</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+</ul>
+<h2 id="030-2018-02-01"><a href="https://github.com/materialsproject/maggma/tree/0.3.0">0.3.0</a> (2018-02-01)<a class="headerlink" href="#030-2018-02-01" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.2.0...0.3.0">Full Changelog</a></p>
+<p><strong>Implemented enhancements:</strong></p>
+<ul>
+<li>Vault enabled Store <a href="https://github.com/materialsproject/maggma/issues/8">#8</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>PR for generic Schema class <a href="https://github.com/materialsproject/maggma/pull/14">#14</a> (<a href="https://github.com/mkhorton">mkhorton</a>)</li>
+<li>Issue 8 vault store <a href="https://github.com/materialsproject/maggma/pull/13">#13</a> (<a href="https://github.com/shreddd">shreddd</a>)</li>
+<li>adds grouping function and test to make aggregation-based builds <a href="https://github.com/materialsproject/maggma/pull/12">#12</a> (<a href="https://github.com/montoyjh">montoyjh</a>)</li>
+</ul>
+<h2 id="v020-2018-01-01"><a href="https://github.com/materialsproject/maggma/tree/v0.2.0">v0.2.0</a> (2018-01-01)<a class="headerlink" href="#v020-2018-01-01" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/v0.1.0...v0.2.0">Full Changelog</a></p>
+<p><strong>Closed issues:</strong></p>
+<ul>
+<li>LU translation functions don't serialize <a href="https://github.com/materialsproject/maggma/issues/11">#11</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Mongolike mixin <a href="https://github.com/materialsproject/maggma/pull/10">#10</a> (<a href="https://github.com/montoyjh">montoyjh</a>)</li>
+</ul>
+<h2 id="v010-2017-11-08"><a href="https://github.com/materialsproject/maggma/tree/v0.1.0">v0.1.0</a> (2017-11-08)<a class="headerlink" href="#v010-2017-11-08" title="Permanent link">¶</a></h2>
+<p><a href="https://github.com/materialsproject/maggma/compare/78ef2e8eacc051207350dc6abe886a403982aef8...v0.1.0">Full Changelog</a></p>
+<p><strong>Closed issues:</strong></p>
+<ul>
+<li>ditch python 2 and support only 3? <a href="https://github.com/materialsproject/maggma/issues/3">#3</a></li>
+<li>Seeking clarifications <a href="https://github.com/materialsproject/maggma/issues/1">#1</a></li>
+</ul>
+<p><strong>Merged pull requests:</strong></p>
+<ul>
+<li>Do not wait until all items are processed to update targets <a href="https://github.com/materialsproject/maggma/pull/7">#7</a> (<a href="https://github.com/dwinston">dwinston</a>)</li>
+<li>Run builder with either MPI or multiprocessing <a href="https://github.com/materialsproject/maggma/pull/6">#6</a> (<a href="https://github.com/matk86">matk86</a>)</li>
+<li>add lava code and tool execution script <a href="https://github.com/materialsproject/maggma/pull/5">#5</a> (<a href="https://github.com/gilbertozp">gilbertozp</a>)</li>
+<li>Add eclipse project files to .gitignore <a href="https://github.com/materialsproject/maggma/pull/2">#2</a> (<a href="https://github.com/gilbertozp">gilbertozp</a>)</li>
+</ul>
+<p>* <em>This Changelog was automatically generated by <a href="https://github.com/github-changelog-generator/github-changelog-generator">github_changelog_generator</a></em></p>
+</article>
+</div>
+</div>
+</main>
+<footer class="md-footer">
+<div class="md-footer-nav">
+<nav aria-label="Footer" class="md-footer-nav__inner md-grid">
+<a class="md-footer-nav__link md-footer-nav__link--prev" href="../reference/builders/" rel="prev" title="Builders">
+<div class="md-footer-nav__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+</div>
+<div class="md-footer-nav__title">
+<div class="md-ellipsis">
+<span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Builders
+              </div>
+</div>
+</a>
+</nav>
+</div>
+<div class="md-footer-meta md-typeset">
+<div class="md-footer-meta__inner md-grid">
+<div class="md-footer-copyright">
+<div class="md-footer-copyright__highlight">
+            Built by The Materials Project
+          </div>
+        
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+          Material for MkDocs
+        </a>
+</div>
+</div>
+</div>
+</footer>
+</div>
+<script src="../assets/javascripts/vendor.f81b9e8b.min.js"></script>
+<script src="../assets/javascripts/bundle.23546af0.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+<script>
+        app = initialize({
+          base: "..",
+          features: [],
+          search: Object.assign({
+            worker: "../assets/javascripts/worker/search.58d22e8e.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
+</body>
+</html>
