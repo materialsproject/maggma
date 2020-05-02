@@ -106,4 +106,4 @@ jobs:
         pip install -e .
 
     - name: Build
-      run: mkdocs build -d docs
+      run: mkdocs build
