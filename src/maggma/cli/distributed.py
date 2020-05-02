@@ -34,7 +34,7 @@ async def master(url: str, builders: List[Builder], num_chunks: int):
             try:
 
                 builder.connect()
-                chunks_dicts = builder.prechunk(num_chunks)
+                chunks_dicts = list(builder.prechunk(num_chunks))
 
                 logger.info(f"Distributing {len(chunks_dicts)} chunks to workers")
                 for chunk_dict in tqdm(chunks_dicts, desc="Chunks"):
