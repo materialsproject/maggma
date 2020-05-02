@@ -1,5 +1,5 @@
 # Simple Drone
-Let's implement a Simple Drone example. 
+Let's implement a Simple Drone example.
 
 The simple drone will sync database with a local file structure like below. You may find sample files [here](https://github.com/materialsproject/maggma/tree/master/tests/test_files)
 ```
@@ -24,7 +24,7 @@ Notice that the pattern here for computing the key is the number between `-` and
         ID, ftype = postfix.split(sep=".", maxsplit=1)
         return ID
 
-Notice that these files are all in one single directory, we can simply read all these files and generate a list of `Document`. 
+Notice that these files are all in one single directory, we can simply read all these files and generate a list of `Document`.
 A `Document` represent a FILE, a file that contains data, not a directory.
 
     def generate_documents(self, folder_path: Path) -> List[Document]:
@@ -32,19 +32,19 @@ A `Document` represent a FILE, a file that contains data, not a directory.
         return [Document(path=fp, name=fp.name) for fp in files_paths]
 
 Now we need to organize these documents, or aka to build an association. So let's define a helper function called `organize_documents`
-    
+
     def organize_documents(self, documents: List[Document]) -> Dict[str, List[Document]]:
         log: Dict = dict()
         for doc in documents:
             key = self.compute_record_identifier_key(doc)
             log[key] = log.get(key, []) + [doc]
-        return log  
+        return log
 
 We also want to have a way to compute `RecordIdentifier` when given a list of documents, so we overwrite the `compute_record_identifier`
-Please note that `RecordIdentifier` comes with a `state_hash` field. This field is used to compare against the `state_hash` in the database 
-so that we can efficiently know which file has changed without compare byte by byte. `RecordIdentifier` comes with a default method of 
+Please note that `RecordIdentifier` comes with a `state_hash` field. This field is used to compare against the `state_hash` in the database
+so that we can efficiently know which file has changed without compare byte by byte. `RecordIdentifier` comes with a default method of
 computing `state_hash` using md5sum. You may modify it or simply use it by calling `recordIdentifier.compute_state_hash()`
-    
+
     def compute_record_identifier(self, record_key: str, doc_list: List[Document]) -> RecordIdentifier:
         """
         Compute meta data for this list of documents, and generate a RecordIdentifier object
@@ -58,8 +58,8 @@ computing `state_hash` using md5sum. You may modify it or simply use it by calli
         )
         recordIdentifier.state_hash = recordIdentifier.compute_state_hash()
         return recordIdentifier
-        
-At this point, we have all the necessary components to overwrite the `read` function from the base `Drone` class. 
+
+At this point, we have all the necessary components to overwrite the `read` function from the base `Drone` class.
 We basically generate a list of documents, organize them, and then generate a list of `RecordIdentifier`
 
     def read(self, path: Path) -> List[RecordIdentifier]:
@@ -72,7 +72,7 @@ We basically generate a list of documents, organize them, and then generate a li
         return record_identifiers
 
 Lastly, if there's a file that needs to be updated, we want to extract the data and append some meta data. In our case, this is very simple.
-    
+
     def compute_data(self, recordID: RecordIdentifier) -> Dict:
         record = dict()
 

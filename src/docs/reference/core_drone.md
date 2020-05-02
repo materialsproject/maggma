@@ -1,1 +1,0 @@
-::: maggma.core.drone
