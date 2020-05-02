@@ -1,8 +1,8 @@
 # Changelog
 
-## [Unreleased](https://github.com/materialsproject/maggma/tree/HEAD)
+## [v0.20.0](https://github.com/materialsproject/maggma/tree/v0.20.0) (2020-05-02)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.19.1...HEAD)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.19.1...v0.20.0)
 
 **Merged pull requests:**
 
@@ -30,7 +30,6 @@
 - Bump msgpack from 0.5.6 to 1.0.0 [\#132](https://github.com/materialsproject/maggma/pull/132) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump aioitertools from 0.5.1 to 0.6.0 [\#131](https://github.com/materialsproject/maggma/pull/131) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - parallel s3 store wrting [\#130](https://github.com/materialsproject/maggma/pull/130) ([jmmshn](https://github.com/jmmshn))
-- Fix async [\#129](https://github.com/materialsproject/maggma/pull/129) ([shyamd](https://github.com/shyamd))
 - Make GridFSStore query check files store first. [\#128](https://github.com/materialsproject/maggma/pull/128) ([munrojm](https://github.com/munrojm))
 
 ## [v0.19.1](https://github.com/materialsproject/maggma/tree/v0.19.1) (2020-04-06)
@@ -47,6 +46,7 @@
 
 **Merged pull requests:**
 
+- Fix async [\#129](https://github.com/materialsproject/maggma/pull/129) ([shyamd](https://github.com/shyamd))
 - Bump boto3 from 1.12.11 to 1.12.34 [\#127](https://github.com/materialsproject/maggma/pull/127) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump mypy from 0.761 to 0.770 [\#126](https://github.com/materialsproject/maggma/pull/126) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump pytest from 5.3.5 to 5.4.1 [\#125](https://github.com/materialsproject/maggma/pull/125) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
