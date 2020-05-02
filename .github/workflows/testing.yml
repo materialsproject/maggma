@@ -4,8 +4,8 @@ on:
   push:
     branches:
       - master
-  paths-ignore:
-    - 'CHANGELOG.md'
+    paths-ignore:
+      - 'CHANGELOG.md'
 
   pull_request:
     branches:
