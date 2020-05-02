@@ -10,12 +10,11 @@ from datetime import datetime
 from enum import Enum
 from typing import Callable, Dict, Iterator, List, Optional, Tuple, Union
 
+from maggma.core.validator import Validator
+from maggma.utils import LU_KEY_ISOFORMAT
 from monty.dev import deprecated
 from monty.json import MontyDecoder, MSONable
 from pydash import get, has, identity
-
-from maggma.core import Validator
-from maggma.utils import LU_KEY_ISOFORMAT
 
 
 class Sort(Enum):

@@ -8,10 +8,9 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import Any, Dict, Iterable, List, Optional, Union
 
-from monty.json import MontyDecoder, MSONable
-
-from maggma.core import Store
+from maggma.core.store import Store
 from maggma.utils import TqdmLoggingHandler, grouper, tqdm
+from monty.json import MontyDecoder, MSONable
 
 
 class Builder(MSONable, metaclass=ABCMeta):

@@ -3,12 +3,11 @@ from datetime import datetime
 from itertools import groupby
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
+from maggma.core import Sort, Store
+from maggma.stores.mongolike import MongoStore
 from monty.dev import deprecated
 from pydash import set_
 from pymongo import MongoClient
-
-from maggma.core import Sort, Store
-from maggma.stores import MongoStore
 
 
 class JointStore(Store):

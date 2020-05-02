@@ -13,13 +13,12 @@ from datetime import datetime
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import gridfs
+from maggma.core import Sort, Store
+from maggma.stores.mongolike import MongoStore
 from monty.dev import deprecated
 from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient
-
-from maggma.core import Sort, Store
-from maggma.stores import MongoStore
 
 
 class GridFSStore(Store):

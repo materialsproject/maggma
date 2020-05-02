@@ -8,11 +8,10 @@ from datetime import datetime
 from time import time
 from typing import Dict, Iterable, Iterator, List, Set, Tuple
 
-from pydash import get
-
-from maggma.builders import MapBuilder
+from maggma.builders.map_builder import MapBuilder
 from maggma.core import Store
 from maggma.utils import Timeout, grouper
+from pydash import get
 
 
 class GroupBuilder(MapBuilder, metaclass=ABCMeta):
