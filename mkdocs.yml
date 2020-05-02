@@ -24,6 +24,7 @@ nav:
         Drone: reference/core_drone.md
       Stores: reference/stores.md
       Builders: reference/builders.md
+  - Changelog: CHANGELOG.md
 
 site_url: https://materialsproject.github.io/maggma/
 repo_url: https://github.com/materialsproject/maggma/
