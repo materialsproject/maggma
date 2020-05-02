@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 
 
-from setuptools import setup, find_packages
 from pathlib import Path
+
+from setuptools import find_packages, setup
 
 module_dir = Path(__file__).resolve().parent
 

@@ -1,10 +1,12 @@
-import pytest
 import asyncio
 import json
+
+import pytest
 from pynng import Pair1
 from pynng.exceptions import Timeout
-from maggma.core import Builder
+
 from maggma.cli.distributed import master, worker
+from maggma.core import Builder
 
 
 class DummyBuilderWithNoPrechunk(Builder):

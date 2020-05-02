@@ -1,12 +1,13 @@
-import pytest
-import msgpack
-from monty.msgpack import default, object_hook
-import boto3
 import zlib
-from moto import mock_s3
-from maggma.stores import MemoryStore, S3Store
+
+import boto3
+import msgpack
+import pytest
 from botocore.exceptions import ClientError
-from maggma.stores import MongoStore
+from monty.msgpack import default, object_hook
+from moto import mock_s3
+
+from maggma.stores import MemoryStore, MongoStore, S3Store
 
 
 @pytest.fixture

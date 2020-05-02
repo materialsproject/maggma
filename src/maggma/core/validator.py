@@ -6,8 +6,9 @@ that Store.
 """
 
 from abc import ABCMeta, abstractmethod
-from monty.json import MSONable
 from typing import Dict, List
+
+from monty.json import MSONable
 
 
 class Validator(MSONable, metaclass=ABCMeta):

@@ -2,11 +2,12 @@
 """
 Tests for MapBuilder
 """
-import pytest
 from datetime import datetime, timedelta
 
-from maggma.stores import MemoryStore
+import pytest
+
 from maggma.builders import CopyBuilder
+from maggma.stores import MemoryStore
 
 
 @pytest.fixture

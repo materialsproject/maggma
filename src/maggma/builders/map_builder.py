@@ -4,12 +4,13 @@ One-to-One Map Builder and a simple CopyBuilder implementation
 """
 import traceback
 from abc import ABCMeta, abstractmethod
-from time import time
-from math import ceil
 from datetime import datetime
-from maggma.utils import grouper, Timeout
+from math import ceil
+from time import time
+from typing import Dict, Iterator, List, Optional
+
 from maggma.core import Builder, Store
-from typing import Optional, Dict, List, Iterator
+from maggma.utils import Timeout, grouper
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):

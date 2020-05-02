@@ -1,14 +1,16 @@
-import pytest
-from pydantic import BaseModel, Field
 from enum import Enum
-from random import randint, choice
-from maggma.stores import MemoryStore
-from maggma.api.resource import Resource
-from maggma.api.APIManager import APIManager
-from starlette.testclient import TestClient
-from fastapi.encoders import jsonable_encoder
+from random import choice, randint
 from urllib.parse import urlencode
+
+import pytest
+from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel, Field
 from requests import Response
+from starlette.testclient import TestClient
+
+from maggma.api.APIManager import APIManager
+from maggma.api.resource import Resource
+from maggma.stores import MemoryStore
 
 
 class PetType(str, Enum):

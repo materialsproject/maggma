@@ -1,7 +1,8 @@
 import inspect
-from typing import List, Dict, Callable, Any, Optional
-from typing_extensions import Literal
 from importlib import import_module
+from typing import Any, Callable, Dict, List, Optional
+
+from typing_extensions import Literal
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
 STORE_PARAMS = Dict[Literal["criteria", "properties", "skip", "limit"], Any]

@@ -1,10 +1,12 @@
 import os
-import pytest
+from datetime import datetime
+
 import mongomock.collection
 import pymongo.collection
-from datetime import datetime
+import pytest
+
 from maggma.core import StoreError
-from maggma.stores import MongoStore, MemoryStore, JSONStore, MongoURIStore
+from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore
 from maggma.validators import JSONSchemaValidator
 
 

@@ -1,11 +1,13 @@
 """ Special stores that combine underlying Stores together """
-from typing import List, Iterator, Tuple, Optional, Union, Dict, Any
 from datetime import datetime
 from itertools import groupby
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+
+from monty.dev import deprecated
 from pydash import set_
 from pymongo import MongoClient
-from monty.dev import deprecated
-from maggma.core import Store, Sort
+
+from maggma.core import Sort, Store
 from maggma.stores import MongoStore
 
 

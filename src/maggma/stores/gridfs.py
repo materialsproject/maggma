@@ -6,19 +6,19 @@ various utillities
 """
 from __future__ import annotations
 
-from typing import Union, Optional, Dict, List, Iterator, Tuple, Set, Any
-
 import copy
-from datetime import datetime
 import json
 import zlib
-import gridfs
-from pydash import get, has
+from datetime import datetime
+from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
-from pymongo import MongoClient
-from monty.json import jsanitize
+import gridfs
 from monty.dev import deprecated
-from maggma.core import Store, Sort
+from monty.json import jsanitize
+from pydash import get, has
+from pymongo import MongoClient
+
+from maggma.core import Sort, Store
 from maggma.stores import MongoStore
 
 

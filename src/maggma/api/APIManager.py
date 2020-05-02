@@ -1,9 +1,11 @@
+from inspect import isclass
+from typing import Dict
+
 import uvicorn
 from fastapi import FastAPI
-from typing import Dict
 from monty.json import MSONable
+
 from maggma.api.resource import Resource
-from inspect import isclass
 from maggma.api.util import dynamic_import
 
 

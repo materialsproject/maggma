@@ -5,10 +5,12 @@ of a Validator subclass to a Store .schema variable to enable validation on
 that Store.
 """
 
-from jsonschema import validate, ValidationError
-from jsonschema.validators import validator_for
-from maggma.core import Validator
 from typing import Dict, List
+
+from jsonschema import ValidationError, validate
+from jsonschema.validators import validator_for
+
+from maggma.core import Validator
 
 
 class JSONSchemaValidator(Validator):

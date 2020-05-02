@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 # coding utf-8
 
+import json
+from asyncio import wait
 from logging import getLogger
 from typing import List
-import json
-
-from asyncio import wait
-from pynng import Pair1
 
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
-
-from maggma.core import Builder
-from maggma.utils import tqdm
+from pynng import Pair1
 
 from maggma.cli.multiprocessing import multi
+from maggma.core import Builder
+from maggma.utils import tqdm
 
 
 async def master(url: str, builders: List[Builder], num_chunks: int):

@@ -4,13 +4,15 @@ Many-to-Many GroupBuilder
 """
 import traceback
 from abc import ABCMeta, abstractmethod
-from time import time
 from datetime import datetime
-from maggma.core import Store
-from maggma.utils import grouper, Timeout
-from maggma.builders import MapBuilder
-from typing import Dict, List, Iterator, Iterable, Set, Tuple
+from time import time
+from typing import Dict, Iterable, Iterator, List, Set, Tuple
+
 from pydash import get
+
+from maggma.builders import MapBuilder
+from maggma.core import Store
+from maggma.utils import Timeout, grouper
 
 
 class GroupBuilder(MapBuilder, metaclass=ABCMeta):

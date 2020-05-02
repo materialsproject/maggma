@@ -1,5 +1,5 @@
-from maggma.core import Builder
 from maggma.cli.serial import serial
+from maggma.core import Builder
 
 
 class TestBuilder(Builder):

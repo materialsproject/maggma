@@ -1,12 +1,14 @@
-from typing import List, Dict, Optional, Any, Mapping
-from pydantic import BaseModel
-from fastapi import Query
-from monty.json import MSONable
-from maggma.core import Store
-from maggma.api.util import STORE_PARAMS, dynamic_import
-from pydantic.fields import ModelField
 import inspect
 import warnings
+from typing import Any, Dict, List, Mapping, Optional
+
+from fastapi import Query
+from monty.json import MSONable
+from pydantic import BaseModel
+from pydantic.fields import ModelField
+
+from maggma.api.util import STORE_PARAMS, dynamic_import
+from maggma.core import Store
 
 
 class QueryOperator(MSONable):

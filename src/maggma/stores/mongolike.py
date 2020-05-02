@@ -8,25 +8,20 @@ from __future__ import annotations
 
 import json
 import warnings
-
-from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
+from itertools import groupby
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
-
-from itertools import groupby
-from pymongo import MongoClient
-from pydash import set_, get, has
-
-from pymongo import ReplaceOne
-
-from monty.json import jsanitize
-from monty.io import zopen
-from monty.serialization import loadfn
 from monty.dev import deprecated
-from maggma.utils import confirm_field_index
-
-from maggma.core import Store, Sort, StoreError
+from monty.io import zopen
+from monty.json import jsanitize
+from monty.serialization import loadfn
+from pydash import get, has, set_
+from pymongo import MongoClient, ReplaceOne
 from sshtunnel import SSHTunnelForwarder
+
+from maggma.core import Sort, Store, StoreError
+from maggma.utils import confirm_field_index
 
 
 class MongoStore(Store):

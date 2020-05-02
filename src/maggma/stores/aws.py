@@ -4,18 +4,16 @@ Advanced Stores for connecting to AWS data
 """
 
 import zlib
-
-from typing import Union, Optional, Dict, List, Iterator, Tuple, Any
-
-from monty.dev import deprecated
-
-from maggma.core import Store, Sort
-
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+
 import msgpack  # type: ignore
+from monty.dev import deprecated
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
+
+from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
