@@ -30,36 +30,10 @@ jobs:
         user: __token__
         password: ${{ secrets.PYPY_API_TOKEN }}
 
-
-
-
-  changelog:
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v2
-      - name: Generate changelog
-        uses: charmixer/auto-changelog-action@v1
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-      - name: Commit files
-        run: |
-          git config --local user.email "feedback@materialsproject.org"
-          git config --local user.name "materialsproject"
-          mv CHANGELOG.md docs/
-          git add docs/CHANGELOG.md && git commit -m 'Updated CHANGELOG.md' && echo ::set-env name=push::1 || echo "No changes to CHANGELOG.md"
-
-      - name: Push changes
-        uses: ad-m/github-push-action@master
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-
-
   docs:
     runs-on: ubuntu-latest
     needs:
     - deploy
-    - changelog
 
     steps:
     - uses: actions/checkout@v2
@@ -73,6 +47,23 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements-docs.txt
         pip install -e .
+
+    - name: Generate changelog
+      uses: charmixer/auto-changelog-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Commit files
+      run: |
+        git config --local user.email "feedback@materialsproject.org"
+        git config --local user.name "materialsproject"
+        mv CHANGELOG.md docs/
+        git add docs/CHANGELOG.md && git commit -m 'Updated CHANGELOG.md' && echo ::set-env name=push::1 || echo "No changes to CHANGELOG.md"
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Build
       run: mkdocs build
