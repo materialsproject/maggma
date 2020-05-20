@@ -110,7 +110,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
         if self.retry_failed:
             failed_keys = self.target.distinct(
-                self.target.key, criteria={"state": {"$ne": "failed"}}
+                self.target.key, criteria={"state": "failed"}
             )
             keys = list(set(keys + failed_keys))
 
