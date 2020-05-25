@@ -214,7 +214,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             failed_keys = self.target.distinct(
                 self._target_keys_field, criteria={"state": "failed", **query}
             )
-            unprocessed_ids = all_ids - set(processed_ids) + set(failed_keys)
+            unprocessed_ids = all_ids - (set(processed_ids) - set(failed_keys))
             self.logger.debug(f"Found {len(failed_keys)} failed IDs in target")
         else:
             unprocessed_ids = all_ids - set(processed_ids)
