@@ -361,25 +361,28 @@ class S3Store(Store):
 
         self.index.update(index_docs)
 
-    def rebuild_metadata_from_index(self, index_query: dict=None):
+    def rebuild_metadata_from_index(self, index_query: dict = None):
         """
         Read data from the index store and populate the metadata of the S3 bucket
         Force all of the keys to be lower case to be Minio compatible
         Args:
             index_query: query on the index store
         """
+
         qq = {} if index_query is None else index_query
         for index_doc in self.index.query(qq):
             key_ = self.sub_dir + index_doc[self.key]
             s3_object = self.s3_bucket.Object(key_)
             # make sure the keys all all lower case
-            new_meta = {str(k).lower():v for k, v in s3_object.metadata.items()}
+            new_meta = {str(k).lower(): v for k, v in s3_object.metadata.items()}
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             s3_object.metadata.update(index_query)
             s3_object.copy_from(
-                CopySource={'Bucket': self.s3_bucket.name, 'Key': key_},
-                Metadata=new_meta, MetadataDirective='REPLACE')
+                CopySource={"Bucket": self.s3_bucket.name, "Key": key_},
+                Metadata=new_meta,
+                MetadataDirective="REPLACE",
+            )
 
     def __eq__(self, other: object) -> bool:
         """
