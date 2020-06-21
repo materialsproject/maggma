@@ -377,7 +377,7 @@ class S3Store(Store):
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
-            s3_object.metadata.update(new_meta)
+            # s3_object.metadata.update(new_meta)
             s3_object.copy_from(
                 CopySource={"Bucket": self.s3_bucket.name, "Key": key_},
                 Metadata=new_meta,
