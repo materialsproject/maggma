@@ -12,6 +12,7 @@ import msgpack  # type: ignore
 from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
 from monty.dev import deprecated
+from monty.json import MontyDecoder
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
 
@@ -174,6 +175,8 @@ class S3Store(Store):
 
                 if doc.get("compression", "") == "zlib":
                     data = zlib.decompress(data)
+                # requires msgpack-python to be installed to fix string encoding problem
+                # https://github.com/msgpack/msgpack/issues/121
                 yield msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
 
     def distinct(
