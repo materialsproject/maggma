@@ -109,9 +109,11 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
         if self.retry_failed:
-            failed_keys = self.target.distinct(
-                self.target.key, criteria={"state": "failed"}
-            )
+            if isinstance(self.query, (dict)):
+                failed_query = {"$and": [self.query, {"state": "failed"}]}
+            else:
+                failed_query = {"state": "failed"}
+            failed_keys = self.target.distinct(self.target.key, criteria=failed_query)
             keys = list(set(keys + failed_keys))
 
         self.logger.info("Processing {} items".format(len(keys)))
