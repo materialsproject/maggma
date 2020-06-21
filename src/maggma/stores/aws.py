@@ -9,12 +9,11 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
+from maggma.core import Sort, Store
+from maggma.utils import grouper, to_isoformat_ceil_ms
 from monty.dev import deprecated
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
-
-from maggma.core import Sort, Store
-from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
     import botocore
@@ -377,7 +376,8 @@ class S3Store(Store):
             new_meta = {str(k).lower(): v for k, v in s3_object.metadata.items()}
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
-            s3_object.metadata.update(index_query)
+            new_meta.pop("_id")
+            s3_object.metadata.update(new_meta)
             s3_object.copy_from(
                 CopySource={"Bucket": self.s3_bucket.name, "Key": key_},
                 Metadata=new_meta,
