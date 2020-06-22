@@ -13,7 +13,6 @@ import msgpack  # type: ignore
 from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
 from monty.dev import deprecated
-from monty.json import MontyDecoder
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
 
