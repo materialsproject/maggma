@@ -2,12 +2,12 @@ import zlib
 
 import boto3
 import msgpack
-import pytest
 from botocore.exceptions import ClientError
+from maggma.stores import MemoryStore, MongoStore, S3Store
 from monty.msgpack import default, object_hook
 from moto import mock_s3
 
-from maggma.stores import MemoryStore, MongoStore, S3Store
+import pytest
 
 
 @pytest.fixture
@@ -78,6 +78,14 @@ def test_update(s3store):
     assert s3store.index.query_one({"task_id": "mp-4"})["compression"] == "zlib"
     assert s3store.query_one({"task_id": "mp-4"}) is not None
     assert s3store.query_one({"task_id": "mp-4"})["data"] == "asd"
+
+
+def test_rebuild_meta_from_index(s3store):
+    s3store.update([{"task_id": "mp-2", "data": "asd"}])
+    s3store.index.update({"task_id": "mp-2", "add_meta": "hello"})
+    s3store.rebuild_metadata_from_index()
+    s3_object = s3store.s3_bucket.Object("mp-2")
+    assert s3_object.metadata["add_meta"] == "hello"
 
 
 def test_remove(s3store):
