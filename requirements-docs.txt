@@ -1,5 +1,5 @@
 mkdocs==1.1.2
-mkdocs-material==5.3.0
+mkdocs-material==5.3.2
 mkdocs-material-components==1.10.14
 mkdocs-minify-plugin==0.3.0
-mkdocstrings==0.11.4
+mkdocstrings==0.12.0
