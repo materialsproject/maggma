@@ -15,16 +15,19 @@ nav:
     - Running a Builder Pipeline: getting_started/running_builders.md
     - Working with MapBuilder: getting_started/map_builder.md
     - Working with GroupBuilder: getting_started/group_builder.md
+    - Writing a Drone: getting_started/simple_drone.md
   - Reference:
       Core:
         Store: reference/core_store.md
         Builder: reference/core_builder.md
         Validator: reference/core_validator.md
+        Drone: reference/core_drone.md
       Stores: reference/stores.md
       Builders: reference/builders.md
+  - Changelog: CHANGELOG.md
 
+site_url: https://materialsproject.github.io/maggma/
 repo_url: https://github.com/materialsproject/maggma/
-docs_dir: ./src/docs
 markdown_extensions:
   - admonition
   - codehilite

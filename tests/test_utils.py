@@ -2,21 +2,20 @@
 """
 Tests for builders
 """
+from datetime import datetime
+from time import sleep
+
 import pytest
 
+from maggma.utils import Timeout  # dt_to_isoformat_ceil_ms,; isostr_to_dt,
 from maggma.utils import (
-    recursive_update,
-    Timeout,
-    primed,
-    # dt_to_isoformat_ceil_ms,
-    # isostr_to_dt,
     dynamic_import,
-    to_isoformat_ceil_ms,
-    to_dt,
     grouper,
+    primed,
+    recursive_update,
+    to_dt,
+    to_isoformat_ceil_ms,
 )
-from time import sleep
-from datetime import datetime
 
 
 def test_recursiveupdate():

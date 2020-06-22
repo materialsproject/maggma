@@ -4,12 +4,13 @@ One-to-One Map Builder and a simple CopyBuilder implementation
 """
 import traceback
 from abc import ABCMeta, abstractmethod
-from time import time
-from math import ceil
 from datetime import datetime
-from maggma.utils import grouper, Timeout
+from math import ceil
+from time import time
+from typing import Dict, Iterator, List, Optional
+
 from maggma.core import Builder, Store
-from typing import Optional, Dict, List, Iterator
+from maggma.utils import Timeout, grouper
 
 
 class MapBuilder(Builder, metaclass=ABCMeta):
@@ -108,9 +109,11 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
         if self.retry_failed:
-            failed_keys = self.target.distinct(
-                self.target.key, criteria={"state": {"$ne": "failed"}}
-            )
+            if isinstance(self.query, (dict)):
+                failed_query = {"$and": [self.query, {"state": "failed"}]}
+            else:
+                failed_query = {"state": "failed"}
+            failed_keys = self.target.distinct(self.target.key, criteria=failed_query)
             keys = list(set(keys + failed_keys))
 
         self.logger.info("Processing {} items".format(len(keys)))

@@ -3,10 +3,11 @@
 
 import logging
 from types import GeneratorType
+
 from tqdm import tqdm
 
-from maggma.utils import grouper, primed
 from maggma.core import Builder
+from maggma.utils import grouper, primed
 
 
 def serial(builder: Builder):

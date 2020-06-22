@@ -1,12 +1,14 @@
-import pytest
-import msgpack
-from monty.msgpack import default, object_hook
-import boto3
 import zlib
-from moto import mock_s3
-from maggma.stores import MemoryStore, S3Store
+
+import boto3
+import msgpack
 from botocore.exceptions import ClientError
-from maggma.stores import MongoStore
+from maggma.stores import MemoryStore, MongoStore, S3Store
+from monty.msgpack import default, object_hook
+from moto import mock_s3
+
+import pytest
+from pymatgen import Structure
 
 
 @pytest.fixture
@@ -77,6 +79,44 @@ def test_update(s3store):
     assert s3store.index.query_one({"task_id": "mp-4"})["compression"] == "zlib"
     assert s3store.query_one({"task_id": "mp-4"}) is not None
     assert s3store.query_one({"task_id": "mp-4"})["data"] == "asd"
+
+
+def test_rebuild_meta_from_index(s3store):
+    s3store.update([{"task_id": "mp-2", "data": "asd"}])
+    s3store.index.update({"task_id": "mp-2", "add_meta": "hello"})
+    s3store.rebuild_metadata_from_index()
+    s3_object = s3store.s3_bucket.Object("mp-2")
+    assert s3_object.metadata["add_meta"] == "hello"
+
+
+def tests_msonable_read_write(s3store):
+    dd = {
+        "@module": "pymatgen.core.structure",
+        "@class": "Structure",
+        "charge": None,
+        "lattice": {
+            "matrix": [[4.256, 0, 0], [0, 4.256, 0], [0, 0, 4.256]],
+            "a": 4.256,
+            "b": 4.256,
+            "c": 4.256,
+            "alpha": 90,
+            "beta": 90,
+            "gamma": 90,
+            "volume": 77.07,
+        },
+        "sites": [
+            {
+                "species": [{"element": "Ba", "occu": 1}],
+                "abc": [0, 0, 0],
+                "xyz": [0, 0, 0],
+                "label": "Ba",
+                "properties": {},
+            }
+        ],
+    }
+    s3store.update([{"task_id": "mp-2", "data": dd}])
+    res = s3store.query_one({"task_id": "mp-2"})
+    assert isinstance(res["data"], Structure)
 
 
 def test_remove(s3store):

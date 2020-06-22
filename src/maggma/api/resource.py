@@ -1,21 +1,23 @@
-from typing import List, Dict, Union, Optional, Any
-from pydantic import BaseModel
+from typing import Any, Dict, List, Optional, Union
+
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path
 from monty.json import MSONable
+from pydantic import BaseModel
+
+from maggma.api.models import Meta, Response
+from maggma.api.query_operator import (
+    DefaultDynamicQuery,
+    PaginationQuery,
+    QueryOperator,
+    SparseFieldsQuery,
+)
 from maggma.api.util import (
-    dynamic_import,
     STORE_PARAMS,
-    merge_queries,
     attach_signature,
+    dynamic_import,
+    merge_queries,
 )
 from maggma.core import Store
-from maggma.api.query_operator import (
-    QueryOperator,
-    PaginationQuery,
-    SparseFieldsQuery,
-    DefaultDynamicQuery,
-)
-from fastapi import FastAPI, APIRouter, Path, HTTPException, Depends
-from maggma.api.models import Response, Meta
 
 
 class Resource(MSONable):

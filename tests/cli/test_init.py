@@ -1,10 +1,12 @@
+from datetime import datetime
+
 import pytest
 from click.testing import CliRunner
-from maggma.cli import run
-from maggma.stores import MongoStore, MemoryStore
-from maggma.builders import CopyBuilder
 from monty.serialization import dumpfn
-from datetime import datetime
+
+from maggma.builders import CopyBuilder
+from maggma.cli import run
+from maggma.stores import MemoryStore, MongoStore
 
 
 @pytest.fixture

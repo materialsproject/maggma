@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - uses: actions/setup-python@v1
       with:
@@ -36,7 +36,7 @@ jobs:
     - deploy
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - uses: actions/setup-python@v1
       with:
@@ -48,12 +48,29 @@ jobs:
         pip install -r requirements-docs.txt
         pip install -e .
 
+    - name: Generate changelog
+      uses: charmixer/auto-changelog-action@v1
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Commit files
+      run: |
+        git config --local user.email "feedback@materialsproject.org"
+        git config --local user.name "materialsproject"
+        mv CHANGELOG.md docs/
+        git add docs/CHANGELOG.md && git commit -m 'Updated CHANGELOG.md' && echo ::set-env name=push::1 || echo "No changes to CHANGELOG.md"
+
+    - name: Push changes
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+
     - name: Build
-      run: mkdocs build -d docs
+      run: mkdocs build
 
     - name: Deploy
       uses: peaceiris/actions-gh-pages@v2
       env:
         ACTIONS_DEPLOY_KEY: ${{ secrets.ACTIONS_DEPLOY_KEY }}
         PUBLISH_BRANCH: gh-pages
-        PUBLISH_DIR: ./docs
+        PUBLISH_DIR: ./site

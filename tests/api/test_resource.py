@@ -1,12 +1,14 @@
-import pytest
 from random import randint
-from pydantic import BaseModel, Field
-from maggma.stores import MemoryStore
-from maggma.api.resource import Resource
-from starlette.testclient import TestClient
-from fastapi import FastAPI
 from urllib.parse import urlencode
+
+import pytest
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
 from requests import Response
+from starlette.testclient import TestClient
+
+from maggma.api.resource import Resource
+from maggma.stores import MemoryStore
 
 
 class Owner(BaseModel):

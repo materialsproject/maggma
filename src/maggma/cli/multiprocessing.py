@@ -1,25 +1,25 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from logging import getLogger
-from types import GeneratorType
 from asyncio import (
+    FIRST_COMPLETED,
     BoundedSemaphore,
-    get_running_loop,
+    Condition,
+    Event,
     Queue,
     create_task,
-    Condition,
-    wait,
-    FIRST_COMPLETED,
-    Event,
     gather,
+    get_running_loop,
+    wait,
 )
+from concurrent.futures import ProcessPoolExecutor
+from logging import getLogger
+from types import GeneratorType
 
 from aioitertools import enumerate
-from concurrent.futures import ProcessPoolExecutor
-from maggma.utils import primed
 from tqdm import tqdm
 
+from maggma.utils import primed
 
 logger = getLogger("MultiProcessor")
 

@@ -2,15 +2,17 @@
 # coding utf-8
 
 
-import logging
-import click
 import asyncio
+import logging
 from itertools import chain
+
+import click
 from monty.serialization import loadfn
-from maggma.utils import TqdmLoggingHandler, ReportingHandler
-from maggma.cli.serial import serial
-from maggma.cli.multiprocessing import multi
+
 from maggma.cli.distributed import master, worker
+from maggma.cli.multiprocessing import multi
+from maggma.cli.serial import serial
+from maggma.utils import ReportingHandler, TqdmLoggingHandler
 
 
 @click.command()

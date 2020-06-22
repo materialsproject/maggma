@@ -3,8 +3,9 @@
 Tests the validators
 """
 import pytest
-from maggma.validators import JSONSchemaValidator, msonable_schema, ValidationError
 from monty.json import MSONable
+
+from maggma.validators import JSONSchemaValidator, ValidationError, msonable_schema
 
 
 class LatticeMock(MSONable):

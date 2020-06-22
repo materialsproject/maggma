@@ -1,9 +1,10 @@
 from datetime import datetime
-from maggma import __version__
+from typing import Generic, List, Optional, TypeVar
+
 from pydantic import BaseModel, Field, validator
-from typing import Generic, TypeVar, Optional, List
 from pydantic.generics import GenericModel
 
+from maggma import __version__
 
 """ Describes the Materials API Response """
 

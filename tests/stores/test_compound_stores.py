@@ -1,8 +1,10 @@
-import pytest
-from pydash import get
 from datetime import datetime
 from itertools import chain
-from maggma.stores import MongoStore, MemoryStore, JointStore, ConcatStore
+
+import pytest
+from pydash import get
+
+from maggma.stores import ConcatStore, JointStore, MemoryStore, MongoStore
 
 
 @pytest.fixture

@@ -4,6 +4,8 @@ on:
   push:
     branches:
       - master
+    paths-ignore:
+      - 'docs/CHANGELOG.md'
 
   pull_request:
     branches:
@@ -14,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - name: Set up Python 3.7
       uses: actions/setup-python@v1
@@ -61,7 +63,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v1
@@ -91,7 +93,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v1
+    - uses: actions/checkout@v2
 
     - uses: actions/setup-python@v1
       with:
@@ -104,4 +106,4 @@ jobs:
         pip install -e .
 
     - name: Build
-      run: mkdocs build -d docs
+      run: mkdocs build

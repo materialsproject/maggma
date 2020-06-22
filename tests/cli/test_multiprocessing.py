@@ -1,13 +1,15 @@
-import pytest
-import time
 import asyncio
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+import pytest
+
 from maggma.cli.multiprocessing import (
-    grouper,
-    BackPressure,
     AsyncUnorderedMap,
+    BackPressure,
+    grouper,
     safe_dispatch,
 )
-from concurrent.futures import ThreadPoolExecutor
 
 
 @pytest.mark.asyncio

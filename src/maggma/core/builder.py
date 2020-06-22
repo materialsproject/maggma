@@ -6,11 +6,11 @@ from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Union, Optional, Dict, List, Iterable, Any
+from typing import Any, Dict, Iterable, List, Optional, Union
 
-from monty.json import MSONable, MontyDecoder
-from maggma.utils import grouper, tqdm, TqdmLoggingHandler
-from maggma.core import Store
+from maggma.core.store import Store
+from maggma.utils import TqdmLoggingHandler, grouper, tqdm
+from monty.json import MontyDecoder, MSONable
 
 
 class Builder(MSONable, metaclass=ABCMeta):

@@ -1,9 +1,10 @@
-import pytest
+from datetime import datetime
+
 import numpy as np
 import numpy.testing.utils as nptu
-from datetime import datetime
-from maggma.stores import GridFSStore
-from maggma.stores import MongoStore
+import pytest
+
+from maggma.stores import GridFSStore, MongoStore
 
 
 @pytest.fixture

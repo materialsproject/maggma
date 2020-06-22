@@ -2,12 +2,14 @@
 """
 Tests for group builder
 """
-import pytest
-from maggma.stores import MemoryStore
-from maggma.builders import GroupBuilder
 from datetime import datetime
 from random import randint
-from typing import List, Dict
+from typing import Dict, List
+
+import pytest
+
+from maggma.builders import GroupBuilder
+from maggma.stores import MemoryStore
 
 
 @pytest.fixture("module")

@@ -3,21 +3,18 @@
 Utilities to help with maggma functions
 """
 import itertools
-import signal
 import logging
+import signal
 import uuid
-from bson import ObjectId
-
-from typing import Iterable, Union, Dict
-
-from importlib import import_module
 from datetime import datetime, timedelta
+from importlib import import_module
+from typing import Dict, Iterable, Union
 
-from pymongo.collection import Collection
-
-from pydash.utilities import to_path
-from pydash.objects import set_, get, has
+from bson import ObjectId
+from pydash.objects import get, has, set_
 from pydash.objects import unset as _unset
+from pydash.utilities import to_path
+from pymongo.collection import Collection
 
 # import tqdm Jupyter widget if running inside Jupyter
 from tqdm.autonotebook import tqdm

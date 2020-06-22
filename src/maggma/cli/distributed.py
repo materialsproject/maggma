@@ -1,20 +1,18 @@
 #!/usr/bin/env python
 # coding utf-8
 
+import json
+from asyncio import wait
 from logging import getLogger
 from typing import List
-import json
-
-from asyncio import wait
-from pynng import Pair1
 
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
-
-from maggma.core import Builder
-from maggma.utils import tqdm
+from pynng import Pair1
 
 from maggma.cli.multiprocessing import multi
+from maggma.core import Builder
+from maggma.utils import tqdm
 
 
 async def master(url: str, builders: List[Builder], num_chunks: int):
@@ -34,15 +32,16 @@ async def master(url: str, builders: List[Builder], num_chunks: int):
             try:
 
                 builder.connect()
-                chunks_dicts = builder.prechunk(num_chunks)
+                chunks_dicts = list(builder.prechunk(num_chunks))
 
-                logger.info(f"Distributing {num_chunks} chunks to workers")
+                logger.info(f"Distributing {len(chunks_dicts)} chunks to workers")
                 for chunk_dict in tqdm(chunks_dicts, desc="Chunks"):
                     temp_builder_dict = dict(**builder_dict)
                     temp_builder_dict.update(chunk_dict)
                     temp_builder_dict = jsanitize(temp_builder_dict)
 
                     # Wait for client connection that announces client and says it is ready to do work
+                    logger.debug("Waiting for a worker")
                     worker = await workers.arecv_msg()
                     logger.debug(
                         f"Got connection from worker: {worker.pipe.remote_address}"
@@ -57,7 +56,9 @@ async def master(url: str, builders: List[Builder], num_chunks: int):
                 )
 
         # Clean up and tell workers to shut down
-        await wait([pipe.asend("{}".encode("utf-8")) for pipe in workers.pipes])
+        await wait(
+            [pipe.asend(json.dumps({}).encode("utf-8")) for pipe in workers.pipes]
+        )
 
 
 async def worker(url: str, num_workers: int):
