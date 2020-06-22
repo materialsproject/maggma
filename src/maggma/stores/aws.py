@@ -17,8 +17,6 @@ from monty.json import MontyDecoder
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
 
-thread_local = threading.local()
-
 try:
     import botocore
     import boto3
@@ -70,6 +68,8 @@ class S3Store(Store):
         self.s3_workers = s3_workers
         # Force the key to be the same as the index
         kwargs["key"] = str(index.key)
+
+        self._thread_local = threading.local()
 
         super(S3Store, self).__init__(**kwargs)
 
@@ -276,11 +276,11 @@ class S3Store(Store):
     def get_bucket(self):
         if threading.current_thread().name == "MainThread":
             return self.s3_bucket
-        if not hasattr(thread_local, "s3_bucket"):
+        if not hasattr(self._thread_local, "s3_bucket"):
             session = Session(profile_name=self.s3_profile)
             resource = session.resource("s3", endpoint_url=self.endpoint_url)
-            thread_local.s3_bucket = resource.Bucket(self.bucket)
-        return thread_local.s3_bucket
+            self._thread_local.s3_bucket = resource.Bucket(self.bucket)
+        return self._thread_local.s3_bucket
 
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
