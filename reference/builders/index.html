@@ -8,9 +8,9 @@
 <meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
 <link href="https://materialsproject.github.io/maggma/reference/builders/" rel="canonical"/>
 <link href="../../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1, mkdocs-material-5.1.3" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-5.3.2" name="generator"/>
 <title>Builders - Maggma Documentation</title>
-<link href="../../assets/stylesheets/main.62d34fff.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/main.fe0cca5b.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
 <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
@@ -29,10 +29,10 @@
 <header class="md-header" data-md-component="header">
 <nav aria-label="Header" class="md-header-nav md-grid">
 <a aria-label="Maggma Documentation" class="md-header-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,8A3,3 0 0,0 15,5A3,3 0 0,0 12,2A3,3 0 0,0 9,5A3,3 0 0,0 12,8M12,11.54C9.64,9.35 6.5,8 3,8V19C6.5,19 9.64,20.35 12,22.54C14.36,20.35 17.5,19 21,19V8C17.5,8 14.36,9.35 12,11.54Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
 </a>
 <label class="md-header-nav__button md-icon" for="__drawer">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3,6H21V8H3V6M3,11H21V13H3V11M3,16H21V18H3V16Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"></path></svg>
 </label>
 <div class="md-header-nav__title" data-md-component="header-title">
 <div class="md-header-nav__ellipsis">
@@ -47,7 +47,7 @@
 </div>
 </div>
 <label class="md-header-nav__button md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
 </label>
 <div class="md-search" data-md-component="search" role="dialog">
 <label class="md-search__overlay" for="__search"></label>
@@ -55,11 +55,11 @@
 <form class="md-search__form" name="search">
 <input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" spellcheck="false" type="text"/>
 <label class="md-search__icon md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5,3A6.5,6.5 0 0,1 16,9.5C16,11.11 15.41,12.59 14.44,13.73L14.71,14H15.5L20.5,19L19,20.5L14,15.5V14.71L13.73,14.44C12.59,15.41 11.11,16 9.5,16A6.5,6.5 0 0,1 3,9.5A6.5,6.5 0 0,1 9.5,3M9.5,5C7,5 5,7 5,9.5C5,12 7,14 9.5,14C12,14 14,12 14,9.5C14,7 12,5 9.5,5Z"></path></svg>
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </label>
 <button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
 </button>
 </form>
 <div class="md-search__output">
@@ -77,7 +77,7 @@
 <div class="md-header-nav__source">
 <a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
 <div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
 </div>
 <div class="md-source__repository">
     GitHub
@@ -95,14 +95,14 @@
 <nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
 <label class="md-nav__title" for="__drawer">
 <a aria-label="Maggma Documentation" class="md-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12,8A3,3 0 0,0 15,5A3,3 0 0,0 12,2A3,3 0 0,0 9,5A3,3 0 0,0 12,8M12,11.54C9.64,9.35 6.5,8 3,8V19C6.5,19 9.64,20.35 12,22.54C14.36,20.35 17.5,19 21,19V8C17.5,8 14.36,9.35 12,11.54Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
 </a>
     Maggma Documentation
   </label>
 <div class="md-nav__source">
 <a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
 <div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"></path></svg>
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
 </div>
 <div class="md-source__repository">
     GitHub
@@ -125,13 +125,13 @@
 <label class="md-nav__link" for="nav-3">
       Getting Started
       <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
 </span>
 </label>
 <nav aria-label="Getting Started" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="nav-3">
 <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </span>
         Getting Started
       </label>
@@ -179,13 +179,13 @@
 <label class="md-nav__link" for="nav-4">
       Reference
       <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
 </span>
 </label>
 <nav aria-label="Reference" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="nav-4">
 <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </span>
         Reference
       </label>
@@ -195,13 +195,13 @@
 <label class="md-nav__link" for="nav-4-1">
       Core
       <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
 </span>
 </label>
 <nav aria-label="Core" class="md-nav" data-md-level="2">
 <label class="md-nav__title" for="nav-4-1">
 <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </span>
         Core
       </label>
@@ -239,7 +239,7 @@
 <label class="md-nav__link md-nav__link--active" for="__toc">
         Builders
         <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3,9H17V7H3V9M3,13H17V11H3V13M3,17H17V15H3V17M19,17H21V15H19V17M19,7V9H21V7H19M19,13H21V11H19V13Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"></path></svg>
 </span>
 </label>
 <a class="md-nav__link md-nav__link--active" href="./" title="Builders">
@@ -248,7 +248,7 @@
 <nav aria-label="Table of contents" class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="__toc">
 <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </span>
       Table of contents
     </label>
@@ -333,6 +333,11 @@
 <nav aria-label="GroupBuilder" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.builders.group_builder.GroupBuilder.__init__">
+    __init__()
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#maggma.builders.group_builder.GroupBuilder.ensure_indexes">
     ensure_indexes()
   </a>
@@ -365,6 +370,11 @@
 <li class="md-nav__item">
 <a class="md-nav__link" href="#maggma.builders.group_builder.GroupBuilder.unary_function">
     unary_function()
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.builders.group_builder.GroupBuilder.update_targets">
+    update_targets()
   </a>
 </li>
 </ul>
@@ -392,7 +402,7 @@
 <nav aria-label="Table of contents" class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="__toc">
 <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </span>
       Table of contents
     </label>
@@ -477,6 +487,11 @@
 <nav aria-label="GroupBuilder" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.builders.group_builder.GroupBuilder.__init__">
+    __init__()
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#maggma.builders.group_builder.GroupBuilder.ensure_indexes">
     ensure_indexes()
   </a>
@@ -511,6 +526,11 @@
     unary_function()
   </a>
 </li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.builders.group_builder.GroupBuilder.update_targets">
+    update_targets()
+  </a>
+</li>
 </ul>
 </nav>
 </li>
@@ -522,7 +542,7 @@
 <div class="md-content">
 <article class="md-content__inner md-typeset">
 <a class="md-content__button md-icon" href="https://github.com/materialsproject/maggma/edit/master/docs/reference/builders.md" title="Edit this page">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71,7.04C21.1,6.65 21.1,6 20.71,5.63L18.37,3.29C18,2.9 17.35,2.9 16.96,3.29L15.12,5.12L18.87,8.87M3,17.25V21H6.75L17.81,9.93L14.06,6.18L3,17.25Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"></path></svg>
 </a>
 <h1>Builders</h1>
 <div class="doc doc-object doc-module">
@@ -551,13 +571,13 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>221
-222
-223
+<pre><span></span>223
 224
 225
 226
-227</pre>
+227
+228
+229</pre>
 </div>
 </td>
 <td class="code">
@@ -858,9 +878,7 @@ finalize<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>190
-191
-192
+<pre><span></span>192
 193
 194
 195
@@ -871,7 +889,9 @@ finalize<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 200
 201
 202
-203</pre>
+203
+204
+205</pre>
 </div>
 </td>
 <td class="code">
@@ -947,7 +967,9 @@ incremental building</p>
 132
 133
 134
-135</pre>
+135
+136
+137</pre>
 </div>
 </td>
 <td class="code">
@@ -964,9 +986,11 @@ incremental building</p>
 
     <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed</span><span class="p">:</span>
-        <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">"state"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"$ne"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">}}</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="p">(</span><span class="nb">dict</span><span class="p">)):</span>
+            <span class="n">failed_query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"$and"</span><span class="p">:</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">,</span> <span class="p">{</span><span class="s2">"state"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">}]}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">failed_query</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"state"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">}</span>
+        <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">failed_query</span><span class="p">)</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">keys</span> <span class="o">+</span> <span class="n">failed_keys</span><span class="p">))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">"Processing </span><span class="si">{}</span><span class="s2"> items"</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)))</span>
@@ -1058,9 +1082,7 @@ a map function</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>137
-138
-139
+<pre><span></span>139
 140
 141
 142
@@ -1096,7 +1118,9 @@ a map function</p>
 172
 173
 174
-175</pre>
+175
+176
+177</pre>
 </div>
 </td>
 <td class="code">
@@ -1168,9 +1192,7 @@ in the target document.</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>205
-206
-207
+<pre><span></span>207
 208
 209
 210
@@ -1178,7 +1200,9 @@ in the target document.</p>
 212
 213
 214
-215</pre>
+215
+216
+217</pre>
 </div>
 </td>
 <td class="code">
@@ -1215,9 +1239,7 @@ update_targets<span class="p">(</span><span class="bp">self</span><span class="p
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>177
-178
-179
+<pre><span></span>179
 180
 181
 182
@@ -1226,7 +1248,9 @@ update_targets<span class="p">(</span><span class="bp">self</span><span class="p
 185
 186
 187
-188</pre>
+188
+189
+190</pre>
 </div>
 </td>
 <td class="code">
@@ -1271,9 +1295,200 @@ update_targets<span class="p">(</span><span class="bp">self</span><span class="p
 <p>Group source docs and produces merged documents for each group
 Supports incremental building, where a source group gets (re)built only if
 it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.</p>
-<p>This is a Many-to-One Builder. As a result, this builder can't determined when a source document
+<p>This is a Many-to-One or Many-to-Many Builder. As a result, this builder can't determine when a source document
 is orphaned.</p>
 <div class="doc doc-children">
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.builders.group_builder.GroupBuilder.__init__">
+<code class="highlight language-python">
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">grouping_keys</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">store_process_time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">retry_failed</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
+<span class="doc doc-properties">
+<small class="doc doc-property doc-property-special"><code>special</code></small>
+</span>
+<a class="headerlink" href="#maggma.builders.group_builder.GroupBuilder.__init__" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>source</code></td>
+<td><code>Store</code></td>
+<td>
+<p>source store</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>target</code></td>
+<td><code>Store</code></td>
+<td>
+<p>target store</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>query</code></td>
+<td><code>Optional[Dict]</code></td>
+<td>
+<p>optional query to filter source store</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>projection</code></td>
+<td><code>Optional[List]</code></td>
+<td>
+<p>list of keys to project from the source for
+processing. Limits data transfer to improve efficiency.</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>delete_orphans</code></td>
+<td><code></code></td>
+<td>
+<p>Whether to delete documents on target store
+with key values not present in source store. Deletion happens
+after all updates, during Builder.finalize.</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>timeout</code></td>
+<td><code>int</code></td>
+<td>
+<p>maximum running time per item in seconds</p>
+</td>
+<td><code>0</code></td>
+</tr>
+<tr>
+<td><code>store_process_time</code></td>
+<td><code>bool</code></td>
+<td>
+<p>If True, add "_process_time" key to
+document for profiling purposes</p>
+</td>
+<td><code>True</code></td>
+</tr>
+<tr>
+<td><code>retry_failed</code></td>
+<td><code>bool</code></td>
+<td>
+<p>If True, will retry building documents that
+previously failed</p>
+</td>
+<td><code>False</code></td>
+</tr>
+</tbody>
+</table>
+<details class="quote">
+<summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67</pre>
+</div>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
+    <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
+    <span class="n">grouping_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">projection</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">timeout</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">store_process_time</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">retry_failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Args:</span>
+<span class="sd">        source: source store</span>
+<span class="sd">        target: target store</span>
+<span class="sd">        query: optional query to filter source store</span>
+<span class="sd">        projection: list of keys to project from the source for</span>
+<span class="sd">            processing. Limits data transfer to improve efficiency.</span>
+<span class="sd">        delete_orphans: Whether to delete documents on target store</span>
+<span class="sd">            with key values not present in source store. Deletion happens</span>
+<span class="sd">            after all updates, during Builder.finalize.</span>
+<span class="sd">        timeout: maximum running time per item in seconds</span>
+<span class="sd">        store_process_time: If True, add "_process_time" key to</span>
+<span class="sd">            document for profiling purposes</span>
+<span class="sd">        retry_failed: If True, will retry building documents that</span>
+<span class="sd">            previously failed</span>
+<span class="sd">    """</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">grouping_keys</span> <span class="o">=</span> <span class="n">grouping_keys</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="o">=</span> <span class="n">query</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">=</span> <span class="n">projection</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">timeout</span> <span class="o">=</span> <span class="n">timeout</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">store_process_time</span> <span class="o">=</span> <span class="n">store_process_time</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed</span> <span class="o">=</span> <span class="n">retry_failed</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2">s"</span>
+
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="n">source</span><span class="p">],</span> <span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="n">target</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
+</details>
+</div>
+</div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.builders.group_builder.GroupBuilder.ensure_indexes">
 <code class="highlight language-python">
@@ -1288,15 +1503,28 @@ which include the plural version of the target's key field</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>35
-36
-37
-38
-39
-40
-41
-42
-43</pre>
+<pre><span></span>69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90</pre>
 </div>
 </td>
 <td class="code">
@@ -1306,10 +1534,23 @@ which include the plural version of the target's key field</p>
 <span class="sd">    Ensures indicies on critical fields for GroupBuilder</span>
 <span class="sd">    which include the plural version of the target's key field</span>
 <span class="sd">    """</span>
+    <span class="n">index_checks</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="s2">"state"</span><span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">),</span>
+    <span class="p">]</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2">s"</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">()</span>
-    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">index_checks</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="s2">"Missing one or more important indices on stores. "</span>
+            <span class="s2">"Performance for large stores may be severely degraded. "</span>
+            <span class="s2">"Ensure indices on target.key and "</span>
+            <span class="s2">"[(store.last_updated_field, -1), (store.key, 1)] "</span>
+            <span class="s2">"for each of source and target."</span>
+        <span class="p">)</span>
 </code></pre>
 </div>
 </td>
@@ -1331,32 +1572,32 @@ get_groups_from_keys<span class="p">(</span><span class="bp">self</span><span cl
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span> 88
- 89
- 90
- 91
- 92
- 93
- 94
- 95
- 96
- 97
- 98
- 99
-100
-101
-102
-103
-104
-105
-106
-107
-108
-109
-110
-111
-112
-113</pre>
+<pre><span></span>231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252
+253
+254
+255
+256</pre>
 </div>
 </td>
 <td class="code">
@@ -1408,35 +1649,45 @@ get_ids_to_process<span class="p">(</span><span class="bp">self</span><span clas
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>58
-59
-60
-61
-62
-63
-64
-65
-66
-67
-68
-69
-70
-71
-72
-73
-74
-75
-76
-77
-78
-79
-80
-81
-82
-83
-84
-85
-86</pre>
+<pre><span></span>191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229</pre>
 </div>
 </td>
 <td class="code">
@@ -1449,7 +1700,7 @@ get_ids_to_process<span class="p">(</span><span class="bp">self</span><span clas
     <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="n">distinct_from_target</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2">s"</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">processed_ids</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># Not always gauranteed that MongoDB will unpack the list so we</span>
@@ -1461,14 +1712,24 @@ get_ids_to_process<span class="p">(</span><span class="bp">self</span><span clas
             <span class="n">processed_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
     <span class="n">all_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">))</span>
-    <span class="n">unprocessed_ids</span> <span class="o">=</span> <span class="n">all_ids</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">processed_ids</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> total docs in source"</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed</span><span class="p">:</span>
+        <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">"state"</span><span class="p">:</span> <span class="s2">"failed"</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">unprocessed_ids</span> <span class="o">=</span> <span class="n">all_ids</span> <span class="o">-</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">processed_ids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed IDs in target"</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">unprocessed_ids</span> <span class="o">=</span> <span class="n">all_ids</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">processed_ids</span><span class="p">)</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unprocessed_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> IDs to process"</span><span class="p">)</span>
 
     <span class="n">new_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="p">)</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated IDs to process"</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_ids</span> <span class="o">|</span> <span class="n">unprocessed_ids</span><span class="p">)</span>
 </code></pre>
 </div>
@@ -1484,15 +1745,40 @@ get_ids_to_process<span class="p">(</span><span class="bp">self</span><span clas
 get_items<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
 <a class="headerlink" href="#maggma.builders.group_builder.GroupBuilder.get_items" title="Permanent link">¶</a></h3>
 <div class="doc doc-contents">
-<p>Generic get items for Map Builder designed to perform
-incremental building</p>
+<p>Returns all the items to process.</p>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code></code></td>
+<td>
+<p>generator or list of items to process</p>
+</td>
+</tr>
+</tbody>
+</table>
 <details class="quote">
 <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
 <table class="highlighttable">
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>115
+<pre><span></span>106
+107
+108
+109
+110
+111
+112
+113
+114
+115
 116
 117
 118
@@ -1505,16 +1791,7 @@ incremental building</p>
 125
 126
 127
-128
-129
-130
-131
-132
-133
-134
-135
-136
-137</pre>
+128</pre>
 </div>
 </td>
 <td class="code">
@@ -1564,18 +1841,19 @@ by the grouping keys</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>45
-46
-47
-48
-49
-50
-51
-52
-53
-54
-55
-56</pre>
+<pre><span></span> 92
+ 93
+ 94
+ 95
+ 96
+ 97
+ 98
+ 99
+100
+101
+102
+103
+104</pre>
 </div>
 </td>
 <td class="code">
@@ -1590,7 +1868,8 @@ by the grouping keys</p>
     <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ids_to_process</span><span class="p">()</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_groups_from_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">groups</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">):</span>
+    <span class="n">N</span> <span class="o">=</span> <span class="n">ceil</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span> <span class="o">/</span> <span class="n">number_splits</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">split</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">N</span><span class="p">):</span>
         <span class="k">yield</span> <span class="p">{</span><span class="s2">"query"</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grouping_keys</span><span class="p">,</span> <span class="n">split</span><span class="p">))}</span>
 </code></pre>
 </div>
@@ -1606,15 +1885,60 @@ by the grouping keys</p>
 process_item<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span> </code>
 <a class="headerlink" href="#maggma.builders.group_builder.GroupBuilder.process_item" title="Permanent link">¶</a></h3>
 <div class="doc doc-contents">
-<p>Generic process items to process a dictionary using
-a map function</p>
+<p>Process an item. There should be no database operations in this method.
+Default behavior is to return the item.</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>item</code></td>
+<td><code>List[Dict]</code></td>
+<td></td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Returns:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>Dict[Tuple, Dict]</code></td>
+<td>
+<p>item: an item to update</p>
+</td>
+</tr>
+</tbody>
+</table>
 <details class="quote">
 <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
 <table class="highlighttable">
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>139
+<pre><span></span>130
+131
+132
+133
+134
+135
+136
+137
+138
+139
 140
 141
 142
@@ -1638,17 +1962,7 @@ a map function</p>
 160
 161
 162
-163
-164
-165
-166
-167
-168
-169
-170
-171
-172
-173</pre>
+163</pre>
 </div>
 </td>
 <td class="code">
@@ -1675,14 +1989,13 @@ a map function</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span>
     <span class="p">]</span>
 
-    <span class="n">processed</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
-        <span class="p">{</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
-            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2">s"</span><span class="p">:</span> <span class="n">keys</span><span class="p">,</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">last_updated</span><span class="p">),</span>
-            <span class="s2">"_bt"</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">(),</span>
-        <span class="p">}</span>
-    <span class="p">)</span>
+    <span class="n">update_doc</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s2">s"</span><span class="p">:</span> <span class="n">keys</span><span class="p">,</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="nb">max</span><span class="p">(</span><span class="n">last_updated</span><span class="p">),</span>
+        <span class="s2">"_bt"</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">(),</span>
+    <span class="p">}</span>
+    <span class="n">processed</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">update_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">processed</span><span class="p">})</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_process_time</span><span class="p">:</span>
         <span class="n">processed</span><span class="p">[</span><span class="s2">"_process_time"</span><span class="p">]</span> <span class="o">=</span> <span class="n">time_end</span> <span class="o">-</span> <span class="n">time_start</span>
@@ -1703,6 +2016,27 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
 <a class="headerlink" href="#maggma.builders.group_builder.GroupBuilder.unary_function" title="Permanent link">¶</a></h3>
 <div class="doc doc-contents">
 <p>Processing function for GroupBuilder</p>
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>items</code></td>
+<td><code>List[Dict]</code></td>
+<td>
+<p>list of of documents with matching grouping keys</p>
+</td>
+<td><em>required</em></td>
+</tr>
+</tbody>
+</table>
 <p><strong>Returns:</strong></p>
 <table>
 <thead>
@@ -1717,8 +2051,7 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
 <td>
 <p>Dictionary mapping:
     tuple of source document keys that are in the grouped document
-    to
-    the grouped and processed document</p>
+    to the grouped and processed document</p>
 </td>
 </tr>
 </tbody>
@@ -1729,9 +2062,7 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>175
-176
-177
+<pre><span></span>177
 178
 179
 180
@@ -1740,7 +2071,10 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
 183
 184
 185
-186</pre>
+186
+187
+188
+189</pre>
 </div>
 </td>
 <td class="code">
@@ -1750,13 +2084,61 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
     <span class="sd">"""</span>
 <span class="sd">    Processing function for GroupBuilder</span>
 
+<span class="sd">    Arguments:</span>
+<span class="sd">        items: list of of documents with matching grouping keys</span>
+
 <span class="sd">    Returns:</span>
 <span class="sd">        Dictionary mapping:</span>
 <span class="sd">            tuple of source document keys that are in the grouped document</span>
-<span class="sd">            to</span>
-<span class="sd">            the grouped and processed document</span>
+<span class="sd">            to the grouped and processed document</span>
 <span class="sd">    """</span>
-    <span class="k">pass</span>
+</code></pre>
+</div>
+</td>
+</tr>
+</table>
+</details>
+</div>
+</div>
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.builders.group_builder.GroupBuilder.update_targets">
+<code class="highlight language-python">
+update_targets<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">)</span> </code>
+<a class="headerlink" href="#maggma.builders.group_builder.GroupBuilder.update_targets" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p>Generic update targets for Group Builder</p>
+<details class="quote">
+<summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
+<table class="highlighttable">
+<tr>
+<td class="linenos">
+<div class="linenodiv">
+<pre><span></span>165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175</pre>
+</div>
+</td>
+<td class="code">
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Generic update targets for Group Builder</span>
+<span class="sd">    """</span>
+    <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
+    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">items</span><span class="p">:</span>
+        <span class="k">if</span> <span class="s2">"_id"</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">item</span><span class="p">[</span><span class="s2">"_id"</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 </code></pre>
 </div>
 </td>
@@ -1780,7 +2162,7 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
 <nav aria-label="Footer" class="md-footer-nav__inner md-grid">
 <a class="md-footer-nav__link md-footer-nav__link--prev" href="../stores/" rel="prev" title="Stores">
 <div class="md-footer-nav__button md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20,11V13H8L13.5,18.5L12.08,19.92L4.16,12L12.08,4.08L13.5,5.5L8,11H20Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </div>
 <div class="md-footer-nav__title">
 <div class="md-ellipsis">
@@ -1801,7 +2183,7 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
               </div>
 </div>
 <div class="md-footer-nav__button md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4,11V13H16L10.5,18.5L11.92,19.92L19.84,12L11.92,4.08L10.5,5.5L16,11H4Z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"></path></svg>
 </div>
 </a>
 </nav>
@@ -1822,14 +2204,14 @@ unary_function<span class="p">(</span><span class="bp">self</span><span class="p
 </div>
 </footer>
 </div>
-<script src="../../assets/javascripts/vendor.f81b9e8b.min.js"></script>
-<script src="../../assets/javascripts/bundle.23546af0.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+<script src="../../assets/javascripts/vendor.d710d30a.min.js"></script>
+<script src="../../assets/javascripts/bundle.7f4f3c92.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
 <script>
         app = initialize({
           base: "../..",
           features: [],
           search: Object.assign({
-            worker: "../../assets/javascripts/worker/search.58d22e8e.min.js"
+            worker: "../../assets/javascripts/worker/search.9b3611bd.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
