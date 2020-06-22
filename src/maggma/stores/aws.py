@@ -68,7 +68,6 @@ class S3Store(Store):
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
-        self._resources = None
         # Force the key to be the same as the index
         kwargs["key"] = str(index.key)
 
@@ -88,7 +87,6 @@ class S3Store(Store):
 
         session = Session(profile_name=self.s3_profile)
         resource = session.resource("s3", endpoint_url=self.endpoint_url)
-        self._resources = resource
 
         if not self.s3:
             self.s3 = resource
