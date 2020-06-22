@@ -12,11 +12,14 @@ from monty.dev import deprecated
 from maggma.core import Store, Sort
 
 from concurrent.futures import wait
-from concurrent.futures.thread import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
 from maggma.utils import grouper, to_isoformat_ceil_ms
+import threading
+
+thread_local = threading.local()
 
 try:
     import botocore
@@ -67,6 +70,7 @@ class S3Store(Store):
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
+        self._resources = None
         # Force the key to be the same as the index
         kwargs["key"] = str(index.key)
 
@@ -86,6 +90,7 @@ class S3Store(Store):
 
         session = Session(profile_name=self.s3_profile)
         resource = session.resource("s3", endpoint_url=self.endpoint_url)
+        self._resources = resource
 
         if not self.s3:
             self.s3 = resource
@@ -270,6 +275,17 @@ class S3Store(Store):
         # Use store's update to remove key clashes
         self.index.update(search_docs)
 
+    def get_bucket(self):
+        if threading.current_thread().name == 'MainThread':
+            return self.s3_bucket
+        if not hasattr(thread_local, "s3_bucket"):
+            print("STARTED")
+            session = Session(profile_name=self.s3_profile)
+            resource = session.resource("s3", endpoint_url=self.endpoint_url)
+            thread_local.s3_bucket = resource.Bucket(self.bucket)
+        return thread_local.s3_bucket
+
+
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
         Write the data to s3 and return the metadata to be inserted into the index db
@@ -279,6 +295,9 @@ class S3Store(Store):
             search_keys: list of keys to pull from the docs and be inserted into the
             index db
         """
+        s3_bucket = self.get_bucket()
+        print("RUNNING")
+
         search_doc = {k: doc[k] for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
         if self.sub_dir != "":
@@ -300,7 +319,7 @@ class S3Store(Store):
                 to_isoformat_ceil_ms(search_doc[self.last_updated_field])
             )
 
-        self.s3_bucket.put_object(
+        s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
         )
 
