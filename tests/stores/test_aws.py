@@ -1,3 +1,4 @@
+import time
 import zlib
 
 import boto3
@@ -50,10 +51,48 @@ def s3store_w_subdir():
         conn.create_bucket(Bucket="bucket1")
 
         index = MemoryStore("index'")
-        store = S3Store(index, "bucket1", sub_dir="subdir1")
+        store = S3Store(index, "bucket1", sub_dir="subdir1", s3_workers=1)
         store.connect()
 
         yield store
+
+
+@pytest.fixture
+def s3store_multi():
+    with mock_s3():
+        conn = boto3.client("s3")
+        conn.create_bucket(Bucket="bucket1")
+
+        index = MemoryStore("index'")
+        store = S3Store(index, "bucket1", s3_workers=4)
+        store.connect()
+
+        yield store
+
+
+def test_multi_update(s3store, s3store_multi):
+    data = [{"task_id": str(j), "data": "DATA"} for j in range(32)]
+
+    def fake_writing(doc, search_keys):
+        time.sleep(0.20)
+        search_doc = {k: doc[k] for k in search_keys}
+        return search_doc
+
+    s3store.write_doc_to_s3 = fake_writing
+    s3store_multi.write_doc_to_s3 = fake_writing
+
+    start = time.time()
+    s3store_multi.update(data, key=["task_id"])
+    end = time.time()
+    time_multi = end - start
+
+    start = time.time()
+    s3store.update(data, key=["task_id"])
+    end = time.time()
+    time_single = end - start
+    assert time_single > time_multi * (s3store_multi.s3_workers - 1) / (
+        s3store.s3_workers
+    )
 
 
 def test_count(s3store):

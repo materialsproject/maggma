@@ -3,10 +3,12 @@
 Advanced Stores for connecting to AWS data
 """
 
+import threading
 import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+
 import msgpack  # type: ignore
 from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
@@ -14,8 +16,6 @@ from monty.dev import deprecated
 from monty.json import MontyDecoder
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
-from maggma.utils import grouper, to_isoformat_ceil_ms
-import threading
 
 thread_local = threading.local()
 
@@ -41,7 +41,7 @@ class S3Store(Store):
         compress: bool = False,
         endpoint_url: str = None,
         sub_dir: str = None,
-        s3_workers: int = 4,
+        s3_workers: int = 1,
         **kwargs,
     ):
         """
@@ -276,15 +276,13 @@ class S3Store(Store):
         self.index.update(search_docs)
 
     def get_bucket(self):
-        if threading.current_thread().name == 'MainThread':
+        if threading.current_thread().name == "MainThread":
             return self.s3_bucket
         if not hasattr(thread_local, "s3_bucket"):
-            print("STARTED")
             session = Session(profile_name=self.s3_profile)
             resource = session.resource("s3", endpoint_url=self.endpoint_url)
             thread_local.s3_bucket = resource.Bucket(self.bucket)
         return thread_local.s3_bucket
-
 
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
@@ -296,7 +294,6 @@ class S3Store(Store):
             index db
         """
         s3_bucket = self.get_bucket()
-        print("RUNNING")
 
         search_doc = {k: doc[k] for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
