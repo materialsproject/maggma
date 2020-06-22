@@ -5,7 +5,6 @@ Tests for MapBuilder
 from datetime import datetime, timedelta
 
 import pytest
-
 from maggma.builders import CopyBuilder
 from maggma.stores import MemoryStore
 
@@ -46,9 +45,10 @@ def new_docs(now):
 
 @pytest.fixture
 def some_failed_old_docs(now):
-    docs = [{"lu": now, "k": k, "v": "old", "state":"failed"} for k in range(3)]
-    docs.extend([{"lu": now, "k": k, "v": "old", "state":"successful"} for k in range(3, 18)])
-    docs.extend([{"lu": now, "k": k, "v": "old", "state":"failed"} for k in range(18, 20)])
+    docs = [{"lu": now, "k": k, "v": "old", "state": "failed"} for k in range(3)]
+    docs.extend(
+        [{"lu": now, "k": k, "v": "old", "state": "failed"} for k in range(18, 20)]
+    )
     return docs
 
 
@@ -65,14 +65,15 @@ def test_get_items(source, target, old_docs, some_failed_old_docs):
     assert len(list(builder.get_items())) == len(old_docs)
     assert all("v" not in d for d in builder.get_items())
 
-    source.remove_docs({})
     source.update(some_failed_old_docs)
+    target.update(old_docs)
     target.update(some_failed_old_docs)
     builder = CopyBuilder(source, target)
+
     assert len(list(builder.get_items())) == 0
 
     builder = CopyBuilder(source, target, retry_failed=True)
-    assert len(list(builder.get_items())) == 5
+    assert len(list(builder.get_items())) == len(some_failed_old_docs)
 
     builder = CopyBuilder(source, target, query={"k": {"$lt": 11}})
     assert len(list(builder.get_items())) == 0
