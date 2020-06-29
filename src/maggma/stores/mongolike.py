@@ -12,16 +12,16 @@ from itertools import groupby
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
+from maggma.core import Sort, Store, StoreError
+from maggma.utils import confirm_field_index
 from monty.dev import deprecated
 from monty.io import zopen
 from monty.json import jsanitize
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne
+from pymongo.errors import OperationFailure
 from sshtunnel import SSHTunnelForwarder
-
-from maggma.core import Sort, Store, StoreError
-from maggma.utils import confirm_field_index
 
 
 class MongoStore(Store):
@@ -110,7 +110,13 @@ class MongoStore(Store):
         """
 
         criteria = criteria or {}
-        distinct_vals = self._collection.distinct(field, criteria)
+        try:
+            distinct_vals = self._collection.distinct(field, criteria)
+        except OperationFailure:
+            distinct_vals = [
+                d["_id"]
+                for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])
+            ]
 
         return distinct_vals if distinct_vals is not None else []
 
