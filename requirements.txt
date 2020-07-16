@@ -14,3 +14,4 @@ dnspython==1.16.0
 uvicorn==0.11.5
 sshtunnel==0.1.5
 msgpack==1.0.0
+msgpack-python==0.5.6
