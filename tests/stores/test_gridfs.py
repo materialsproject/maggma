@@ -1,9 +1,9 @@
+import json
 from datetime import datetime
 
 import numpy as np
 import numpy.testing.utils as nptu
 import pytest
-
 from maggma.stores import GridFSStore, MongoStore
 
 
@@ -200,3 +200,24 @@ def test_index(gridfsstore):
     assert gridfsstore.ensure_index("test_key")
     for field in gridfsstore.files_collection_fields:
         assert gridfsstore.ensure_index(field)
+
+
+def test_gfs_metadata(gridfsstore):
+    """
+    Ensure metadata is put back in the docuemnt
+    """
+    tic = datetime(2018, 4, 12, 16)
+
+    gridfsstore.ensure_metadata = True
+    for i in range(3):
+        data = {
+            "a": 1,
+        }
+        metadata = {"task_id": f"mp-{i}", "a": 1, gridfsstore.last_updated_field: tic}
+        data = json.dumps(data).encode("UTF-8")
+
+        gridfsstore._collection.put(data, metadata=metadata)
+
+    for d in gridfsstore.query():
+        assert "task_id" in d
+        assert gridfsstore.last_updated_field in d

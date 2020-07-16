@@ -12,11 +12,12 @@ import zlib
 from datetime import datetime
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
+from monty.dev import deprecated
+from monty.json import jsanitize
+
 import gridfs
 from maggma.core import Sort, Store
 from maggma.stores.mongolike import MongoStore
-from monty.dev import deprecated
-from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient
 
@@ -50,6 +51,7 @@ class GridFSStore(Store):
         username: str = "",
         password: str = "",
         compression: bool = False,
+        ensure_metadata: bool = False,
         **kwargs,
     ):
         """
@@ -62,6 +64,8 @@ class GridFSStore(Store):
             port: port to connec to
             username: username to connect as
             password: password to authenticate as
+            compression: compress the data as it goes into GridFS
+            ensure_metadata: ensure returned documents have the metadata fields
         """
 
         self.database = database
@@ -72,6 +76,7 @@ class GridFSStore(Store):
         self.password = password
         self._collection = None  # type: Any
         self.compression = compression
+        self.ensure_metadata = ensure_metadata
         self.kwargs = kwargs
         self.meta_keys = set()  # type: Set[str]
 
@@ -193,11 +198,14 @@ class GridFSStore(Store):
                 metadata = doc["metadata"]
                 if metadata.get("compression", "") == "zlib":
                     data = zlib.decompress(data).decode("UTF-8")
-
                 try:
                     data = json.loads(data)
                 except Exception:
                     pass
+
+                if self.ensure_metadata:
+                    data.update(metadata)
+
                 yield data
 
     def distinct(
