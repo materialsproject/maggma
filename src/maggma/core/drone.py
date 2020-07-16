@@ -1,10 +1,12 @@
-from pydantic import BaseModel, Field
-from pathlib import PosixPath, Path
-from datetime import datetime
-from typing import Dict, List, Optional, Iterable
 import hashlib
-from abc import abstractmethod
 import os
+from abc import abstractmethod
+from datetime import datetime
+from pathlib import Path, PosixPath
+from typing import Dict, Iterable, List, Optional
+
+from pydantic import BaseModel, Field
+
 from maggma.core import Builder
 
 

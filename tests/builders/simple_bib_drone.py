@@ -1,8 +1,9 @@
-from maggma.core.drone import Drone, RecordIdentifier, Document
-from typing import Dict, List
-from pathlib import Path
 import os
 from datetime import datetime
+from pathlib import Path
+from typing import Dict, List
+
+from maggma.core.drone import Document, Drone, RecordIdentifier
 
 
 class SimpleBibDrone(Drone):

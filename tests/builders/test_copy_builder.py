@@ -5,6 +5,7 @@ Tests for MapBuilder
 from datetime import datetime, timedelta
 
 import pytest
+
 from maggma.builders import CopyBuilder
 from maggma.stores import MemoryStore
 

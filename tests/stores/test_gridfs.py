@@ -4,6 +4,7 @@ from datetime import datetime
 import numpy as np
 import numpy.testing.utils as nptu
 import pytest
+
 from maggma.stores import GridFSStore, MongoStore
 
 

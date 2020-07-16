@@ -119,6 +119,6 @@ async def test_no_prechunk(caplog):
     )
     await asyncio.sleep(1)
     assert (
-        f"Can't distributed process DummyBuilderWithNoPrechunk. Skipping for now"
+        "Can't distributed process DummyBuilderWithNoPrechunk. Skipping for now"
         in caplog.text
     )

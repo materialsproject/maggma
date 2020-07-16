@@ -1,11 +1,12 @@
 from copy import deepcopy
 from datetime import datetime
+from itertools import chain
 from typing import Dict, Iterable, List, Set, Union
+
+from pydash import get
 
 from maggma.core import Builder, Store
 from maggma.utils import grouper
-from pydash import get
-from itertools import chain
 
 
 class Projection_Builder(Builder):

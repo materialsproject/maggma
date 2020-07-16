@@ -12,8 +12,6 @@ from itertools import groupby
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
-from maggma.core import Sort, Store, StoreError
-from maggma.utils import confirm_field_index
 from monty.dev import deprecated
 from monty.io import zopen
 from monty.json import jsanitize
@@ -22,6 +20,9 @@ from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne
 from pymongo.errors import OperationFailure
 from sshtunnel import SSHTunnelForwarder
+
+from maggma.core import Sort, Store, StoreError
+from maggma.utils import confirm_field_index
 
 
 class MongoStore(Store):
