@@ -33,7 +33,7 @@ setup(
         "pydash>=4.1.0",
         "jsonschema>=3.1.1",
         "tqdm>=4.19.6",
-        "mongogrant>=0.2.2",
+        "mongogrant>=0.3.1",
         "aioitertools>=0.5.1",
         "numpy>=1.17.3",
         "pydantic>=0.32.2",
