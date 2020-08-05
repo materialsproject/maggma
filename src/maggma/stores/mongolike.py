@@ -211,7 +211,7 @@ class MongoStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[str, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -221,14 +221,26 @@ class MongoStore(Store):
         Args:
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values may "Ascending" or 1 for ascending or "Descending" or -1
+                for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
 
-        sort_list = [(k, v.value) for k, v in sort.items()] if sort else None
+        sort_list = None
+        if sort:
+            sort_list = []
+            for k, v in sort.items():
+                if v == "Ascending" or v == "ascending" or v == 1:
+                    sort_list.append((k, 1))
+                elif v == "Descending" or v == "descending" or v == -1:
+                    sort_list.append((k, -1))
+                else:
+                    raise ValueError("Invalid sort key {} for field {}".format(v, k))
+
         for d in self._collection.find(
             filter=criteria,
             projection=properties,
