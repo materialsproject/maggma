@@ -230,7 +230,7 @@ class JointStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, int]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -246,7 +246,7 @@ class JointStore(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, int]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -432,7 +432,7 @@ class ConcatStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, int]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -442,7 +442,8 @@ class ConcatStore(Store):
         Args:
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
@@ -456,7 +457,7 @@ class ConcatStore(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, int]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -468,7 +469,8 @@ class ConcatStore(Store):
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
 
