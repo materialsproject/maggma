@@ -18,7 +18,7 @@ from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient
 
-from maggma.core import Sort, Store
+from maggma.core import Store
 from maggma.stores.mongolike import MongoStore
 
 

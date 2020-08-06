@@ -11,7 +11,7 @@ from mongogrant.client import check
 from mongogrant.config import Config
 from monty.dev import requires
 
-from maggma.core import Sort, Store, StoreError
+from maggma.core import Store, StoreError
 from maggma.stores.mongolike import MongoStore
 from maggma.utils import lazy_substitute, substitute
 

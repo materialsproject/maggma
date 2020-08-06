@@ -7,7 +7,7 @@ from monty.dev import deprecated
 from pydash import set_
 from pymongo import MongoClient
 
-from maggma.core import Sort, Store
+from maggma.core import Store
 from maggma.stores.mongolike import MongoStore
 
 
