@@ -126,7 +126,7 @@ class MongoStore(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -138,7 +138,8 @@ class MongoStore(Store):
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
 
@@ -211,7 +212,7 @@ class MongoStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -221,14 +222,17 @@ class MongoStore(Store):
         Args:
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
 
-        sort_list = [(k, v.value) for k, v in sort.items()] if sort else None
+        sort_list = [(k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                     for k, v in sort.items()] if sort else None
+
         for d in self._collection.find(
             filter=criteria,
             projection=properties,
@@ -411,7 +415,7 @@ class MemoryStore(MongoStore):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -423,7 +427,8 @@ class MemoryStore(MongoStore):
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
 

@@ -108,7 +108,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -118,7 +118,8 @@ class Store(MSONable, metaclass=ABCMeta):
         Args:
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
@@ -155,7 +156,7 @@ class Store(MSONable, metaclass=ABCMeta):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -167,7 +168,8 @@ class Store(MSONable, metaclass=ABCMeta):
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
 
@@ -188,7 +190,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
     ):
         """
         Queries the Store for a single document
@@ -196,7 +198,8 @@ class Store(MSONable, metaclass=ABCMeta):
         Args:
             criteria: PyMongo filter for documents to search
             properties: properties to return in the document
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
         """
         return next(
             self.query(criteria=criteria, properties=properties, sort=sort), None
@@ -229,7 +232,7 @@ class Store(MSONable, metaclass=ABCMeta):
         doc = next(
             self.query(
                 properties=[self.last_updated_field],
-                sort={self.last_updated_field: Sort.Descending},
+                sort={self.last_updated_field: -1},
                 limit=1,
             ),
             None,
