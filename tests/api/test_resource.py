@@ -17,7 +17,7 @@ class Owner(BaseModel):
     weight: float = Field(None, title="Owner's weight")
 
 
-@pytest.fixture("session")
+@pytest.fixture(scope="session")
 def owners():
     return (
         [

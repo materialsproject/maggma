@@ -15,7 +15,7 @@ def mongostore():
     store._collection.drop()
 
 
-@pytest.fixture("module")
+@pytest.fixture(scope="module")
 def jointstore_test1():
     store = MongoStore("maggma_test", "test1")
     store.connect()
@@ -23,7 +23,7 @@ def jointstore_test1():
     store._collection.drop()
 
 
-@pytest.fixture("module")
+@pytest.fixture(scope="module")
 def jointstore_test2():
     store = MongoStore("maggma_test", "test2")
     store.connect()
@@ -31,7 +31,7 @@ def jointstore_test2():
     store._collection.drop()
 
 
-@pytest.fixture("module")
+@pytest.fixture(scope="module")
 def jointstore(jointstore_test1, jointstore_test2):
 
     jointstore_test1.update(
