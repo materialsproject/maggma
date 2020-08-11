@@ -5,73 +5,68 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width,initial-scale=1" name="viewport"/>
-<meta content="ie=edge" http-equiv="x-ua-compatible"/>
 <meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
 <link href="https://materialsproject.github.io/maggma/reference/stores/" rel="canonical"/>
 <link href="../../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-components-1.10.11" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-5.5.3" name="generator"/>
 <title>Stores - Maggma Documentation</title>
-<script src="../../assets/javascripts/modernizr-e826f8942a.js"></script>
-<link href="../../assets/stylesheets/application-2cd7d9ab0f.css" rel="stylesheet"/>
-<link href="../../assets/stylesheets/material-components-web.min.css" rel="stylesheet"/>
-<link href="../../assets/stylesheets/mdc-web.css" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css?family=Open Sans:300,300i,400,400i,600,600i,700,700i,800,800i|Ubuntu+Mono" rel="stylesheet"/>
-<style>body,input{font-family:"Open Sans","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Ubuntu Mono","Courier New",Courier,monospace}</style>
-<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
-<link href="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.20/jquery.fancybox.min.css" rel="stylesheet"/>
-<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/fancybox/3.1.20/jquery.fancybox.min.js"></script>
+<link href="../../assets/stylesheets/main.947af8d5.min.css" rel="stylesheet"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
+<style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
 </head>
-<body>
-<svg class="md-svg">
-<defs>
-<svg height="448" id="github" viewbox="0 0 416 448" width="416" xmlns="http://www.w3.org/2000/svg"><path d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z" fill="currentColor"></path></svg>
-</defs>
-</svg>
-<input class="md-toggle" data-md-toggle="drawer" id="drawer" type="checkbox"/>
-<input class="md-toggle" data-md-toggle="search" id="search" type="checkbox"/>
-<label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+<body dir="ltr">
+<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
+<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
+<label class="md-overlay" for="__drawer"></label>
+<div data-md-component="skip">
+<a class="md-skip" href="#maggma.stores.mongolike">
+          Skip to content
+        </a>
+</div>
+<div data-md-component="announce">
+</div>
 <header class="md-header" data-md-component="header">
-<nav class="md-header-nav md-grid">
-<div class="md-flex">
-<div class="md-flex__cell md-flex__cell--shrink md-flex__cell--vmiddle">
-<a class="md-header-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
-<img height="36" src="../../assets/images/logo_white.png" width="36"/>
+<nav aria-label="Header" class="md-header-nav md-grid">
+<a aria-label="Maggma Documentation" class="md-header-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
 </a>
-</div>
-<div class="md-flex__cell md-flex__cell--shrink">
-<label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
-</div>
-<div class="md-flex__cell md-flex__cell--stretch">
-<span class="md-flex__ellipsis md-header-nav__title">
-          
-            Maggma Documentation -
+<label class="md-header-nav__button md-icon" for="__drawer">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"></path></svg>
+</label>
+<div class="md-header-nav__title" data-md-component="header-title">
+<div class="md-header-nav__ellipsis">
+<span class="md-header-nav__topic md-ellipsis">
+            Maggma Documentation
+          </span>
+<span class="md-header-nav__topic md-ellipsis">
             
-              
-                <span class="md-header-nav__parent">
-                  Reference
-                </span>
-              
+              Stores
             
-            Stores
-          
-        </span>
+          </span>
 </div>
-<div class="md-flex__cell md-flex__cell--shrink">
-<label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+</div>
+<label class="md-header-nav__button md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
+</label>
 <div class="md-search" data-md-component="search" role="dialog">
-<label class="md-search__overlay" for="search"></label>
-<div class="md-search__inner">
+<label class="md-search__overlay" for="__search"></label>
+<div class="md-search__inner" role="search">
 <form class="md-search__form" name="search">
-<input autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="query" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
-<label class="md-icon md-search__icon" for="search"></label>
-<button class="md-icon md-search__icon" data-md-component="reset" type="reset"></button>
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" spellcheck="false" type="text"/>
+<label class="md-search__icon md-icon" for="__search">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
+</label>
+<button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
+</button>
 </form>
 <div class="md-search__output">
 <div class="md-search__scrollwrap" data-md-scrollfix="">
-<div class="md-search-result" data-md-component="result" data-md-lang-search="" data-md-lang-tokenizer="[\s\-]+">
-<div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
-            Type to start searching
+<div class="md-search-result" data-md-component="search-result">
+<div class="md-search-result__meta">
+            Initializing search
           </div>
 <ol class="md-search-result__list"></ol>
 </div>
@@ -79,102 +74,100 @@
 </div>
 </div>
 </div>
-</div>
-<div class="md-flex__cell md-flex__cell--shrink">
 <div class="md-header-nav__source">
-<a class="md-source" data-md-source="github" href="https://github.com/materialsproject/maggma/" title="Go to repository">
-<div class="md-source__icon">
-<svg height="24" viewbox="0 0 24 24" width="24">
-<use height="24" width="24" xlink:href="#github"></use>
-</svg>
+<a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
 </div>
 <div class="md-source__repository">
-      GitHub
-    </div>
+    GitHub
+  </div>
 </a>
-</div>
-</div>
 </div>
 </nav>
 </header>
-<div class="md-container">
-<main class="md-main">
-<div class="md-main__inner md-grid" data-md-component="container">
+<div class="md-container" data-md-component="container">
+<main class="md-main" data-md-component="main">
+<div class="md-main__inner md-grid">
 <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
 <div class="md-sidebar__scrollwrap">
 <div class="md-sidebar__inner">
-<nav class="md-nav md-nav--primary" data-md-level="0">
-<label class="md-nav__title md-nav__title--site" for="drawer">
-<div class="md-nav__button md-logo">
-<i class="md-icon md-icon--home"></i>
-</div>
+<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
+<label class="md-nav__title" for="__drawer">
+<a aria-label="Maggma Documentation" class="md-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
+</a>
     Maggma Documentation
   </label>
 <div class="md-nav__source">
-<a class="md-source" data-md-source="github" href="https://github.com/materialsproject/maggma/" title="Go to repository">
-<div class="md-source__icon">
-<svg height="24" viewbox="0 0 24 24" width="24">
-<use height="24" width="24" xlink:href="#github"></use>
-</svg>
+<a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
+<div class="md-source__icon md-icon">
+<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
 </div>
 <div class="md-source__repository">
-      GitHub
-    </div>
+    GitHub
+  </div>
 </a>
 </div>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="" title="Home">
+<a class="md-nav__link" href="../.." title="Home">
       Home
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="concepts/" title="Core Concepts">
+<a class="md-nav__link" href="../../concepts/" title="Core Concepts">
       Core Concepts
     </a>
 </li>
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-toggle md-nav__toggle" data-md-toggle="nav-3" id="nav-3" type="checkbox"/>
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" id="nav-3" type="checkbox"/>
 <label class="md-nav__link" for="nav-3">
       Getting Started
-    </label>
-<nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
+</span>
+</label>
+<nav aria-label="Getting Started" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="nav-3">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
+</span>
         Getting Started
       </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="getting_started/stores/" title="Using Stores">
+<a class="md-nav__link" href="../../getting_started/stores/" title="Using Stores">
       Using Stores
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="getting_started/simple_builder/" title="Writing a Builder">
+<a class="md-nav__link" href="../../getting_started/simple_builder/" title="Writing a Builder">
       Writing a Builder
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="getting_started/advanced_builder/" title="Advanced Builders">
+<a class="md-nav__link" href="../../getting_started/advanced_builder/" title="Advanced Builders">
       Advanced Builders
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="getting_started/running_builders/" title="Running a Builder Pipeline">
+<a class="md-nav__link" href="../../getting_started/running_builders/" title="Running a Builder Pipeline">
       Running a Builder Pipeline
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="getting_started/map_builder/" title="Working with MapBuilder">
+<a class="md-nav__link" href="../../getting_started/map_builder/" title="Working with MapBuilder">
       Working with MapBuilder
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="getting_started/group_builder/" title="Working with GroupBuilder">
+<a class="md-nav__link" href="../../getting_started/group_builder/" title="Working with GroupBuilder">
       Working with GroupBuilder
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="getting_started/simple_drone/" title="Writing a Drone">
+<a class="md-nav__link" href="../../getting_started/simple_drone/" title="Writing a Drone">
       Writing a Drone
     </a>
 </li>
@@ -182,42 +175,54 @@
 </nav>
 </li>
 <li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-toggle md-nav__toggle" data-md-toggle="nav-4" id="nav-4" type="checkbox"/>
+<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-4" id="nav-4" type="checkbox"/>
 <label class="md-nav__link" for="nav-4">
       Reference
-    </label>
-<nav class="md-nav" data-md-component="collapsible" data-md-level="1">
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
+</span>
+</label>
+<nav aria-label="Reference" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="nav-4">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
+</span>
         Reference
       </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item md-nav__item--nested">
-<input class="md-toggle md-nav__toggle" data-md-toggle="nav-4-1" id="nav-4-1" type="checkbox"/>
+<input class="md-nav__toggle md-toggle" data-md-toggle="nav-4-1" id="nav-4-1" type="checkbox"/>
 <label class="md-nav__link" for="nav-4-1">
       Core
-    </label>
-<nav class="md-nav" data-md-component="collapsible" data-md-level="2">
+      <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
+</span>
+</label>
+<nav aria-label="Core" class="md-nav" data-md-level="2">
 <label class="md-nav__title" for="nav-4-1">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
+</span>
         Core
       </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="reference/core_store/" title="Store">
+<a class="md-nav__link" href="../core_store/" title="Store">
       Store
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="reference/core_builder/" title="Builder">
+<a class="md-nav__link" href="../core_builder/" title="Builder">
       Builder
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="reference/core_validator/" title="Validator">
+<a class="md-nav__link" href="../core_validator/" title="Validator">
       Validator
     </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="reference/core_drone/" title="Drone">
+<a class="md-nav__link" href="../core_drone/" title="Drone">
       Drone
     </a>
 </li>
@@ -225,39 +230,47 @@
 </nav>
 </li>
 <li class="md-nav__item md-nav__item--active">
-<input class="md-toggle md-nav__toggle" data-md-toggle="toc" id="toc" type="checkbox"/>
-<label class="md-nav__link md-nav__link--active" for="toc">
+<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
+<label class="md-nav__link md-nav__link--active" for="__toc">
         Stores
-      </label>
-<a class="md-nav__link md-nav__link--active" href="reference/stores/" title="Stores">
+        <span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"></path></svg>
+</span>
+</label>
+<a class="md-nav__link md-nav__link--active" href="./" title="Stores">
       Stores
     </a>
-<nav class="md-nav md-nav--secondary">
-<label class="md-nav__title md-nav__toc" for="toc">Table of contents</label>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
+</span>
+      Table of contents
+    </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike" title="maggma.stores.mongolike">
+<a class="md-nav__link" href="#maggma.stores.mongolike">
     maggma.stores.mongolike
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore" title="JSONStore">
+<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore">
     JSONStore
   </a>
-<nav class="md-nav">
+<nav aria-label="JSONStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.connect">
     connect()
   </a>
 </li>
@@ -265,38 +278,38 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore" title="MemoryStore">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore">
     MemoryStore
   </a>
-<nav class="md-nav">
+<nav aria-label="MemoryStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.name" title="name">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.name">
     name
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__hash__" title="__hash__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__hash__">
     __hash__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.groupby">
     groupby()
   </a>
 </li>
@@ -304,83 +317,83 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore" title="MongoStore">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore">
     MongoStore
   </a>
-<nav class="md-nav">
+<nav aria-label="MongoStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.name" title="name">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.name">
     name
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__hash__" title="__hash__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__hash__">
     __hash__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.from_collection" title="from_collection()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.from_collection">
     from_collection()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.from_db_file" title="from_db_file()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.from_db_file">
     from_db_file()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.update">
     update()
   </a>
 </li>
@@ -388,23 +401,23 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore" title="MongoURIStore">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore">
     MongoURIStore
   </a>
-<nav class="md-nav">
+<nav aria-label="MongoURIStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.name" title="name">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.name">
     name
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.connect">
     connect()
   </a>
 </li>
@@ -412,83 +425,83 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs" title="maggma.stores.gridfs">
+<a class="md-nav__link" href="#maggma.stores.gridfs">
     maggma.stores.gridfs
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore" title="GridFSStore">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore">
     GridFSStore
   </a>
-<nav class="md-nav">
+<nav aria-label="GridFSStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.last_updated" title="last_updated">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.last_updated">
     last_updated
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.transform_criteria" title="transform_criteria()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.transform_criteria">
     transform_criteria()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.update">
     update()
   </a>
 </li>
@@ -496,93 +509,93 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws" title="maggma.stores.aws">
+<a class="md-nav__link" href="#maggma.stores.aws">
     maggma.stores.aws
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store" title="S3Store">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store">
     S3Store
   </a>
-<nav class="md-nav">
+<nav aria-label="S3Store" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.newer_in" title="newer_in()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.newer_in">
     newer_in()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.rebuild_index_from_s3_data" title="rebuild_index_from_s3_data()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.rebuild_index_from_s3_data">
     rebuild_index_from_s3_data()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.rebuild_metadata_from_index" title="rebuild_metadata_from_index()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.rebuild_metadata_from_index">
     rebuild_metadata_from_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.update">
     update()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.write_doc_to_s3" title="write_doc_to_s3()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.write_doc_to_s3">
     write_doc_to_s3()
   </a>
 </li>
@@ -590,73 +603,73 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores" title="maggma.stores.advanced_stores">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores">
     maggma.stores.advanced_stores
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore" title="AliasingStore">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore">
     AliasingStore
   </a>
-<nav class="md-nav">
+<nav aria-label="AliasingStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.update">
     update()
   </a>
 </li>
@@ -664,28 +677,28 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore" title="MongograntStore">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore">
     MongograntStore
   </a>
-<nav class="md-nav">
+<nav aria-label="MongograntStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.from_collection" title="from_collection()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.from_collection">
     from_collection()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.from_db_file" title="from_db_file()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.from_db_file">
     from_db_file()
   </a>
 </li>
@@ -693,68 +706,68 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore" title="SandboxStore">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore">
     SandboxStore
   </a>
-<nav class="md-nav">
+<nav aria-label="SandboxStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.sbx_criteria" title="sbx_criteria">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.sbx_criteria">
     sbx_criteria
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.update">
     update()
   </a>
 </li>
@@ -762,18 +775,18 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore" title="VaultStore">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore">
     VaultStore
   </a>
-<nav class="md-nav">
+<nav aria-label="VaultStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore.__init__">
     __init__()
   </a>
 </li>
@@ -781,78 +794,78 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores" title="maggma.stores.compound_stores">
+<a class="md-nav__link" href="#maggma.stores.compound_stores">
     maggma.stores.compound_stores
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore" title="ConcatStore">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore">
     ConcatStore
   </a>
-<nav class="md-nav">
+<nav aria-label="ConcatStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.last_updated" title="last_updated">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.last_updated">
     last_updated
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.update">
     update()
   </a>
 </li>
@@ -860,78 +873,78 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore" title="JointStore">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore">
     JointStore
   </a>
-<nav class="md-nav">
+<nav aria-label="JointStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.last_updated" title="last_updated">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.last_updated">
     last_updated
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.nonmaster_names" title="nonmaster_names">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.nonmaster_names">
     nonmaster_names
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.query_one" title="query_one()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.query_one">
     query_one()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.update">
     update()
   </a>
 </li>
@@ -942,7 +955,7 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="reference/builders/" title="Builders">
+<a class="md-nav__link" href="../builders/" title="Builders">
       Builders
     </a>
 </li>
@@ -950,7 +963,7 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="CHANGELOG/" title="Changelog">
+<a class="md-nav__link" href="../../CHANGELOG/" title="Changelog">
       Changelog
     </a>
 </li>
@@ -962,32 +975,37 @@
 <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
 <div class="md-sidebar__scrollwrap">
 <div class="md-sidebar__inner">
-<nav class="md-nav md-nav--secondary">
-<label class="md-nav__title md-nav__toc" for="toc">Table of contents</label>
+<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
+<label class="md-nav__title" for="__toc">
+<span class="md-nav__icon md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
+</span>
+      Table of contents
+    </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike" title="maggma.stores.mongolike">
+<a class="md-nav__link" href="#maggma.stores.mongolike">
     maggma.stores.mongolike
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore" title="JSONStore">
+<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore">
     JSONStore
   </a>
-<nav class="md-nav">
+<nav aria-label="JSONStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.JSONStore.connect">
     connect()
   </a>
 </li>
@@ -995,38 +1013,38 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore" title="MemoryStore">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore">
     MemoryStore
   </a>
-<nav class="md-nav">
+<nav aria-label="MemoryStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.name" title="name">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.name">
     name
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__hash__" title="__hash__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__hash__">
     __hash__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MemoryStore.groupby">
     groupby()
   </a>
 </li>
@@ -1034,83 +1052,83 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore" title="MongoStore">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore">
     MongoStore
   </a>
-<nav class="md-nav">
+<nav aria-label="MongoStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.name" title="name">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.name">
     name
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__hash__" title="__hash__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__hash__">
     __hash__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.from_collection" title="from_collection()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.from_collection">
     from_collection()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.from_db_file" title="from_db_file()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.from_db_file">
     from_db_file()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoStore.update">
     update()
   </a>
 </li>
@@ -1118,23 +1136,23 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore" title="MongoURIStore">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore">
     MongoURIStore
   </a>
-<nav class="md-nav">
+<nav aria-label="MongoURIStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.name" title="name">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.name">
     name
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.connect">
     connect()
   </a>
 </li>
@@ -1142,83 +1160,83 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs" title="maggma.stores.gridfs">
+<a class="md-nav__link" href="#maggma.stores.gridfs">
     maggma.stores.gridfs
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore" title="GridFSStore">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore">
     GridFSStore
   </a>
-<nav class="md-nav">
+<nav aria-label="GridFSStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.last_updated" title="last_updated">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.last_updated">
     last_updated
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.transform_criteria" title="transform_criteria()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.transform_criteria">
     transform_criteria()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.gridfs.GridFSStore.update">
     update()
   </a>
 </li>
@@ -1226,93 +1244,93 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws" title="maggma.stores.aws">
+<a class="md-nav__link" href="#maggma.stores.aws">
     maggma.stores.aws
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store" title="S3Store">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store">
     S3Store
   </a>
-<nav class="md-nav">
+<nav aria-label="S3Store" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.newer_in" title="newer_in()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.newer_in">
     newer_in()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.rebuild_index_from_s3_data" title="rebuild_index_from_s3_data()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.rebuild_index_from_s3_data">
     rebuild_index_from_s3_data()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.rebuild_metadata_from_index" title="rebuild_metadata_from_index()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.rebuild_metadata_from_index">
     rebuild_metadata_from_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.update">
     update()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.aws.S3Store.write_doc_to_s3" title="write_doc_to_s3()">
+<a class="md-nav__link" href="#maggma.stores.aws.S3Store.write_doc_to_s3">
     write_doc_to_s3()
   </a>
 </li>
@@ -1320,73 +1338,73 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores" title="maggma.stores.advanced_stores">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores">
     maggma.stores.advanced_stores
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore" title="AliasingStore">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore">
     AliasingStore
   </a>
-<nav class="md-nav">
+<nav aria-label="AliasingStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.AliasingStore.update">
     update()
   </a>
 </li>
@@ -1394,28 +1412,28 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore" title="MongograntStore">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore">
     MongograntStore
   </a>
-<nav class="md-nav">
+<nav aria-label="MongograntStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.from_collection" title="from_collection()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.from_collection">
     from_collection()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.from_db_file" title="from_db_file()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.MongograntStore.from_db_file">
     from_db_file()
   </a>
 </li>
@@ -1423,68 +1441,68 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore" title="SandboxStore">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore">
     SandboxStore
   </a>
-<nav class="md-nav">
+<nav aria-label="SandboxStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.sbx_criteria" title="sbx_criteria">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.sbx_criteria">
     sbx_criteria
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.SandboxStore.update">
     update()
   </a>
 </li>
@@ -1492,18 +1510,18 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore" title="VaultStore">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore">
     VaultStore
   </a>
-<nav class="md-nav">
+<nav aria-label="VaultStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.advanced_stores.VaultStore.__init__">
     __init__()
   </a>
 </li>
@@ -1511,78 +1529,78 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores" title="maggma.stores.compound_stores">
+<a class="md-nav__link" href="#maggma.stores.compound_stores">
     maggma.stores.compound_stores
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore" title="ConcatStore">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore">
     ConcatStore
   </a>
-<nav class="md-nav">
+<nav aria-label="ConcatStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.last_updated" title="last_updated">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.last_updated">
     last_updated
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.distinct" title="distinct()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.distinct">
     distinct()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.ConcatStore.update">
     update()
   </a>
 </li>
@@ -1590,78 +1608,78 @@
 </nav>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore" title="JointStore">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore">
     JointStore
   </a>
-<nav class="md-nav">
+<nav aria-label="JointStore" class="md-nav">
 <ul class="md-nav__list">
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.last_updated" title="last_updated">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.last_updated">
     last_updated
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.nonmaster_names" title="nonmaster_names">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.nonmaster_names">
     nonmaster_names
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.__eq__" title="__eq__()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.__eq__">
     __eq__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.__init__" title="__init__()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.__init__">
     __init__()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.close" title="close()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.close">
     close()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.connect" title="connect()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.connect">
     connect()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.count" title="count()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.count">
     count()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.ensure_index" title="ensure_index()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.ensure_index">
     ensure_index()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.groupby" title="groupby()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.groupby">
     groupby()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.name" title="name()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.name">
     name()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.query" title="query()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.query">
     query()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.query_one" title="query_one()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.query_one">
     query_one()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.remove_docs" title="remove_docs()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.remove_docs">
     remove_docs()
   </a>
 </li>
 <li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.update" title="update()">
+<a class="md-nav__link" href="#maggma.stores.compound_stores.JointStore.update">
     update()
   </a>
 </li>
@@ -1673,9 +1691,11 @@
 </div>
 </div>
 </div>
-<div class="md-content" id="article-content">
+<div class="md-content">
 <article class="md-content__inner md-typeset">
-<a class="md-icon md-content__icon" href="https://github.com/materialsproject/maggma/edit/master/docs/reference/stores.md" title="Edit this page"></a>
+<a class="md-content__button md-icon" href="https://github.com/materialsproject/maggma/edit/master/docs/reference/stores.md" title="Edit this page">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"></path></svg>
+</a>
 <h1>Stores</h1>
 <div class="doc doc-object doc-module">
 <h2 class="hidden-toc" href="#maggma.stores.mongolike" id="maggma.stores.mongolike" style="visibility: hidden; width: 0; height: 0;">
@@ -1729,18 +1749,18 @@ __eq__<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>496
-497
-498
-499
-500
-501
+<pre><span></span>501
 502
 503
 504
 505
 506
-507</pre>
+507
+508
+509
+510
+511
+512</pre>
 </div>
 </td>
 <td class="code">
@@ -1801,15 +1821,15 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>466
-467
-468
-469
-470
-471
+<pre><span></span>471
 472
 473
-474</pre>
+474
+475
+476
+477
+478
+479</pre>
 </div>
 </td>
 <td class="code">
@@ -1844,12 +1864,7 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>476
-477
-478
-479
-480
-481
+<pre><span></span>481
 482
 483
 484
@@ -1859,7 +1874,12 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 488
 489
 490
-491</pre>
+491
+492
+493
+494
+495
+496</pre>
 </div>
 </td>
 <td class="code">
@@ -1929,16 +1949,16 @@ other: other MemoryStore to compare with</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>449
-450
-451
-452
-453
-454
+<pre><span></span>454
 455
 456
 457
-458</pre>
+458
+459
+460
+461
+462
+463</pre>
 </div>
 </td>
 <td class="code">
@@ -1977,9 +1997,9 @@ __hash__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>405
-406
-407</pre>
+<pre><span></span>409
+410
+411</pre>
 </div>
 </td>
 <td class="code">
@@ -2032,16 +2052,16 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>378
-379
-380
-381
-382
+<pre><span></span>382
 383
 384
 385
 386
-387</pre>
+387
+388
+389
+390
+391</pre>
 </div>
 </td>
 <td class="code">
@@ -2077,16 +2097,16 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>389
-390
-391
-392
-393
+<pre><span></span>393
 394
 395
 396
 397
-398</pre>
+398
+399
+400
+401
+402</pre>
 </div>
 </td>
 <td class="code">
@@ -2154,9 +2174,10 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -2201,11 +2222,7 @@ by keys.</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>409
-410
-411
-412
-413
+<pre><span></span>413
 414
 415
 416
@@ -2239,7 +2256,12 @@ by keys.</p>
 444
 445
 446
-447</pre>
+447
+448
+449
+450
+451
+452</pre>
 </div>
 </td>
 <td class="code">
@@ -2249,7 +2271,7 @@ by keys.</p>
     <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
@@ -2261,7 +2283,8 @@ by keys.</p>
 <span class="sd">        keys: fields to group documents</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 
@@ -2331,16 +2354,16 @@ other: other mongostore to compare with</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>317
-318
-319
-320
-321
+<pre><span></span>321
 322
 323
 324
 325
-326</pre>
+326
+327
+328
+329
+330</pre>
 </div>
 </td>
 <td class="code">
@@ -2554,9 +2577,9 @@ close<span class="p">(</span><span class="bp">self</span><span class="p">)</span
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>313
-314
-315</pre>
+<pre><span></span>317
+318
+319</pre>
 </div>
 </td>
 <td class="code">
@@ -2661,8 +2684,7 @@ count<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>199
-200
+<pre><span></span>200
 201
 202
 203
@@ -2670,7 +2692,8 @@ count<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 205
 206
 207
-208</pre>
+208
+209</pre>
 </div>
 </td>
 <td class="code">
@@ -2848,11 +2871,7 @@ ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>241
-242
-243
-244
-245
+<pre><span></span>245
 246
 247
 248
@@ -2866,7 +2885,11 @@ ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">
 256
 257
 258
-259</pre>
+259
+260
+261
+262
+263</pre>
 </div>
 </td>
 <td class="code">
@@ -2937,8 +2960,7 @@ As a result, this will not serialize and can not reset its connection</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>173
-174
+<pre><span></span>174
 175
 176
 177
@@ -2953,7 +2975,8 @@ As a result, this will not serialize and can not reset its connection</p>
 186
 187
 188
-189</pre>
+189
+190</pre>
 </div>
 </td>
 <td class="code">
@@ -3081,9 +3104,10 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -3175,7 +3199,8 @@ by keys.</p>
 168
 169
 170
-171</pre>
+171
+172</pre>
 </div>
 </td>
 <td class="code">
@@ -3185,7 +3210,7 @@ by keys.</p>
     <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
@@ -3197,7 +3222,8 @@ by keys.</p>
 <span class="sd">        keys: fields to group documents</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 
@@ -3272,9 +3298,10 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -3302,8 +3329,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>210
-211
+<pre><span></span>211
 212
 213
 214
@@ -3331,7 +3357,11 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 236
 237
 238
-239</pre>
+239
+240
+241
+242
+243</pre>
 </div>
 </td>
 <td class="code">
@@ -3340,7 +3370,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -3350,14 +3380,17 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">}</span>
 
-    <span class="n">sort_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sort</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span> <span class="k">if</span> <span class="n">sort</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">sort_list</span> <span class="o">=</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">Sort</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+                 <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sort</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span> <span class="k">if</span> <span class="n">sort</span> <span class="k">else</span> <span class="kc">None</span>
+
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
         <span class="nb">filter</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span>
         <span class="n">projection</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
@@ -3408,14 +3441,14 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>304
-305
-306
-307
-308
+<pre><span></span>308
 309
 310
-311</pre>
+311
+312
+313
+314
+315</pre>
 </div>
 </td>
 <td class="code">
@@ -3481,11 +3514,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>261
-262
-263
-264
-265
+<pre><span></span>265
 266
 267
 268
@@ -3522,7 +3551,11 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 299
 300
 301
-302</pre>
+302
+303
+304
+305
+306</pre>
 </div>
 </td>
 <td class="code">
@@ -3654,11 +3687,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>336
-337
-338
-339
-340
+<pre><span></span>340
 341
 342
 343
@@ -3666,7 +3695,11 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 345
 346
 347
-348</pre>
+348
+349
+350
+351
+352</pre>
 </div>
 </td>
 <td class="code">
@@ -3705,18 +3738,18 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>358
-359
-360
-361
-362
+<pre><span></span>362
 363
 364
 365
 366
 367
 368
-369</pre>
+369
+370
+371
+372
+373</pre>
 </div>
 </td>
 <td class="code">
@@ -3793,16 +3826,16 @@ other: other GridFSStore to compare with</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>366
-367
-368
+<pre><span></span>368
 369
 370
 371
 372
 373
 374
-375</pre>
+375
+376
+377</pre>
 </div>
 </td>
 <td class="code">
@@ -4026,8 +4059,8 @@ close<span class="p">(</span><span class="bp">self</span><span class="p">)</span
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>363
-364</pre>
+<pre><span></span>365
+366</pre>
 </div>
 </td>
 <td class="code">
@@ -4207,8 +4240,7 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>211
-212
+<pre><span></span>212
 213
 214
 215
@@ -4230,7 +4262,8 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 231
 232
 233
-234</pre>
+234
+235</pre>
 </div>
 </td>
 <td class="code">
@@ -4327,9 +4360,7 @@ Currently operators on the GridFS files collection</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>289
-290
-291
+<pre><span></span>291
 292
 293
 294
@@ -4343,7 +4374,9 @@ Currently operators on the GridFS files collection</p>
 302
 303
 304
-305</pre>
+305
+306
+307</pre>
 </div>
 </td>
 <td class="code">
@@ -4419,9 +4452,10 @@ collection for GridFS</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -4466,8 +4500,7 @@ collection for GridFS</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>236
-237
+<pre><span></span>237
 238
 239
 240
@@ -4517,7 +4550,9 @@ collection for GridFS</p>
 284
 285
 286
-287</pre>
+287
+288
+289</pre>
 </div>
 </td>
 <td class="code">
@@ -4527,7 +4562,7 @@ collection for GridFS</p>
     <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
@@ -4540,7 +4575,8 @@ collection for GridFS</p>
 <span class="sd">        keys: fields to group documents</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 
@@ -4655,9 +4691,10 @@ files store first.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -4742,7 +4779,8 @@ files store first.</p>
 206
 207
 208
-209</pre>
+209
+210</pre>
 </div>
 </td>
 <td class="code">
@@ -4751,7 +4789,7 @@ files store first.</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -4763,7 +4801,8 @@ files store first.</p>
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 <span class="sd">    """</span>
@@ -4847,9 +4886,7 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>349
-350
-351
+<pre><span></span>351
 352
 353
 354
@@ -4859,7 +4896,9 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 358
 359
 360
-361</pre>
+361
+362
+363</pre>
 </div>
 </td>
 <td class="code">
@@ -5013,9 +5052,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>307
-308
-309
+<pre><span></span>309
 310
 311
 312
@@ -5053,7 +5090,9 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 344
 345
 346
-347</pre>
+347
+348
+349</pre>
 </div>
 </td>
 <td class="code">
@@ -5144,16 +5183,16 @@ other: other S3Store to compare with</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>404
-405
-406
+<pre><span></span>406
 407
 408
 409
 410
 411
 412
-413</pre>
+413
+414
+415</pre>
 </div>
 </td>
 <td class="code">
@@ -5555,8 +5594,7 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>185
-186
+<pre><span></span>186
 187
 188
 189
@@ -5566,7 +5604,8 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 193
 194
 195
-196</pre>
+196
+197</pre>
 </div>
 </td>
 <td class="code">
@@ -5650,9 +5689,7 @@ ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>231
-232
-233
+<pre><span></span>233
 234
 235
 236
@@ -5661,7 +5698,9 @@ ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">
 239
 240
 241
-242</pre>
+242
+243
+244</pre>
 </div>
 </td>
 <td class="code">
@@ -5731,9 +5770,10 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -5778,8 +5818,7 @@ by keys.</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>198
-199
+<pre><span></span>199
 200
 201
 202
@@ -5809,7 +5848,9 @@ by keys.</p>
 226
 227
 228
-229</pre>
+229
+230
+231</pre>
 </div>
 </td>
 <td class="code">
@@ -5819,7 +5860,7 @@ by keys.</p>
     <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
@@ -5831,7 +5872,8 @@ by keys.</p>
 <span class="sd">        keys: fields to group documents</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 
@@ -5960,9 +6002,7 @@ Store than this Store.</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>347
-348
-349
+<pre><span></span>349
 350
 351
 352
@@ -5976,7 +6016,9 @@ Store than this Store.</p>
 360
 361
 362
-363</pre>
+363
+364
+365</pre>
 </div>
 </td>
 <td class="code">
@@ -6042,9 +6084,10 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -6125,7 +6168,8 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 180
 181
 182
-183</pre>
+183
+184</pre>
 </div>
 </td>
 <td class="code">
@@ -6134,7 +6178,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -6144,7 +6188,8 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 <span class="sd">    """</span>
@@ -6206,9 +6251,7 @@ Relies on the index document being stores as the metadata for the file</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>368
-369
-370
+<pre><span></span>370
 371
 372
 373
@@ -6216,7 +6259,9 @@ Relies on the index document being stores as the metadata for the file</p>
 375
 376
 377
-378</pre>
+378
+379
+380</pre>
 </div>
 </td>
 <td class="code">
@@ -6275,9 +6320,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>380
-381
-382
+<pre><span></span>382
 383
 384
 385
@@ -6297,7 +6340,9 @@ Force all of the keys to be lower case to be Minio compatible</p>
 399
 400
 401
-402</pre>
+402
+403
+404</pre>
 </div>
 </td>
 <td class="code">
@@ -6375,9 +6420,7 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>323
-324
-325
+<pre><span></span>325
 326
 327
 328
@@ -6393,7 +6436,9 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 338
 339
 340
-341</pre>
+341
+342
+343</pre>
 </div>
 </td>
 <td class="code">
@@ -6470,9 +6515,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>244
-245
-246
+<pre><span></span>246
 247
 248
 249
@@ -6500,7 +6543,9 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 271
 272
 273
-274</pre>
+274
+275
+276</pre>
 </div>
 </td>
 <td class="code">
@@ -6586,9 +6631,7 @@ write_doc_to_s3<span class="p">(</span><span class="bp">self</span><span class="
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>285
-286
-287
+<pre><span></span>287
 288
 289
 290
@@ -6622,7 +6665,9 @@ write_doc_to_s3<span class="p">(</span><span class="bp">self</span><span class="
 318
 319
 320
-321</pre>
+321
+322
+323</pre>
 </div>
 </td>
 <td class="code">
@@ -6728,9 +6773,7 @@ __eq__<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>377
-378
-379
+<pre><span></span>379
 380
 381
 382
@@ -6739,7 +6782,9 @@ __eq__<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 385
 386
 387
-388</pre>
+388
+389
+390</pre>
 </div>
 </td>
 <td class="code">
@@ -6873,8 +6918,8 @@ close<span class="p">(</span><span class="bp">self</span><span class="p">)</span
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>367
-368</pre>
+<pre><span></span>369
+370</pre>
 </div>
 </td>
 <td class="code">
@@ -6923,8 +6968,8 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>374
-375</pre>
+<pre><span></span>376
+377</pre>
 </div>
 </td>
 <td class="code">
@@ -7047,8 +7092,7 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>270
-271
+<pre><span></span>271
 272
 273
 274
@@ -7061,7 +7105,8 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 281
 282
 283
-284</pre>
+284
+285</pre>
 </div>
 </td>
 <td class="code">
@@ -7148,10 +7193,10 @@ ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>362
-363
-364
-365</pre>
+<pre><span></span>364
+365
+366
+367</pre>
 </div>
 </td>
 <td class="code">
@@ -7213,9 +7258,10 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -7260,8 +7306,7 @@ by keys.</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>286
-287
+<pre><span></span>287
 288
 289
 290
@@ -7302,7 +7347,9 @@ by keys.</p>
 325
 326
 327
-328</pre>
+328
+329
+330</pre>
 </div>
 </td>
 <td class="code">
@@ -7312,7 +7359,7 @@ by keys.</p>
     <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
@@ -7324,7 +7371,8 @@ by keys.</p>
 <span class="sd">        keys: fields to group documents</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 
@@ -7429,9 +7477,10 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -7490,7 +7539,8 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 265
 266
 267
-268</pre>
+268
+269</pre>
 </div>
 </td>
 <td class="code">
@@ -7499,7 +7549,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -7509,7 +7559,8 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 <span class="sd">    """</span>
@@ -7569,16 +7620,16 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>351
-352
-353
+<pre><span></span>353
 354
 355
 356
 357
 358
 359
-360</pre>
+360
+361
+362</pre>
 </div>
 </td>
 <td class="code">
@@ -7646,9 +7697,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>330
-331
-332
+<pre><span></span>332
 333
 334
 335
@@ -7665,7 +7714,9 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 346
 347
 348
-349</pre>
+349
+350
+351</pre>
 </div>
 </td>
 <td class="code">
@@ -7707,13 +7758,9 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <a class="headerlink" href="#maggma.stores.advanced_stores.MongograntStore" title="Permanent link">¶</a></h2>
 <div class="doc doc-contents">
 <p>Initialize a Store with a mongogrant "<code>&lt;role&gt;</code>:<code>&lt;host&gt;</code>/<code>&lt;db&gt;</code>." spec.</p>
-<div class="codehilite">
-<pre><span></span><code><span class="k">Some</span> <span class="k">class</span> <span class="n">methods</span> <span class="k">of</span> <span class="n">MongoStore</span><span class="p">,</span> <span class="n">e</span><span class="p">.</span><span class="k">g</span><span class="p">.</span> <span class="n">from_db_file</span> <span class="k">and</span> <span class="n">from_collection</span><span class="p">,</span>
-<span class="k">are</span> <span class="k">not</span> <span class="n">supported</span><span class="p">.</span>
-
-<span class="n">mongogrant</span> <span class="n">documentation</span><span class="p">:</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="p">.</span><span class="n">com</span><span class="o">/</span><span class="n">materialsproject</span><span class="o">/</span><span class="n">mongogrant</span>
-</code></pre>
-</div>
+<p>Some class methods of MongoStore, e.g. from_db_file and from_collection,
+are not supported.</p>
+<p>mongogrant documentation: https://github.com/materialsproject/mongogrant</p>
 <div class="doc doc-children">
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.advanced_stores.MongograntStore.__eq__">
@@ -8112,18 +8159,18 @@ __eq__<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>547
-548
-549
-550
-551
+<pre><span></span>551
 552
 553
 554
 555
 556
 557
-558</pre>
+558
+559
+560
+561
+562</pre>
 </div>
 </td>
 <td class="code">
@@ -8200,9 +8247,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>396
-397
-398
+<pre><span></span>398
 399
 400
 401
@@ -8215,7 +8260,9 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 408
 409
 410
-411</pre>
+411
+412
+413</pre>
 </div>
 </td>
 <td class="code">
@@ -8257,8 +8304,8 @@ close<span class="p">(</span><span class="bp">self</span><span class="p">)</span
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>537
-538</pre>
+<pre><span></span>541
+542</pre>
 </div>
 </td>
 <td class="code">
@@ -8307,8 +8354,8 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>544
-545</pre>
+<pre><span></span>548
+549</pre>
 </div>
 </td>
 <td class="code">
@@ -8357,9 +8404,7 @@ count<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>433
-434
-435
+<pre><span></span>435
 436
 437
 438
@@ -8367,7 +8412,9 @@ count<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 440
 441
 442
-443</pre>
+443
+444
+445</pre>
 </div>
 </td>
 <td class="code">
@@ -8450,8 +8497,8 @@ ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>534
-535</pre>
+<pre><span></span>538
+539</pre>
 </div>
 </td>
 <td class="code">
@@ -8511,9 +8558,10 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -8558,10 +8606,7 @@ by keys.</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>470
-471
-472
-473
+<pre><span></span>473
 474
 475
 476
@@ -8588,7 +8633,11 @@ by keys.</p>
 497
 498
 499
-500</pre>
+500
+501
+502
+503
+504</pre>
 </div>
 </td>
 <td class="code">
@@ -8598,7 +8647,7 @@ by keys.</p>
     <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
@@ -8610,7 +8659,8 @@ by keys.</p>
 <span class="sd">        keys: fields to group documents</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 
@@ -8661,12 +8711,12 @@ name<span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>413
-414
-415
+<pre><span></span>415
 416
 417
-418</pre>
+418
+419
+420</pre>
 </div>
 </td>
 <td class="code">
@@ -8721,9 +8771,10 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -8751,9 +8802,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>445
-446
-447
+<pre><span></span>447
 448
 449
 450
@@ -8774,7 +8823,10 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 465
 466
 467
-468</pre>
+468
+469
+470
+471</pre>
 </div>
 </td>
 <td class="code">
@@ -8783,7 +8835,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -8793,7 +8845,8 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 <span class="sd">    """</span>
@@ -8845,18 +8898,18 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>521
-522
-523
-524
-525
+<pre><span></span>525
 526
 527
 528
 529
 530
 531
-532</pre>
+532
+533
+534
+535
+536</pre>
 </div>
 </td>
 <td class="code">
@@ -8926,11 +8979,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>502
-503
-504
-505
-506
+<pre><span></span>506
 507
 508
 509
@@ -8943,7 +8992,11 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 516
 517
 518
-519</pre>
+519
+520
+521
+522
+523</pre>
 </div>
 </td>
 <td class="code">
@@ -9296,9 +9349,7 @@ __eq__<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>515
-516
-517
+<pre><span></span>517
 518
 519
 520
@@ -9307,7 +9358,9 @@ __eq__<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 523
 524
 525
-526</pre>
+526
+527
+528</pre>
 </div>
 </td>
 <td class="code">
@@ -9795,9 +9848,10 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -9842,8 +9896,7 @@ by keys.</p>
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>454
-455
+<pre><span></span>455
 456
 457
 458
@@ -9892,7 +9945,9 @@ by keys.</p>
 501
 502
 503
-504</pre>
+504
+505
+506</pre>
 </div>
 </td>
 <td class="code">
@@ -9902,7 +9957,7 @@ by keys.</p>
     <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
@@ -9914,7 +9969,8 @@ by keys.</p>
 <span class="sd">        keys: fields to group documents</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 
@@ -10029,9 +10085,10 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -10080,7 +10137,8 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 449
 450
 451
-452</pre>
+452
+453</pre>
 </div>
 </td>
 <td class="code">
@@ -10089,7 +10147,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -10099,7 +10157,8 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
 <span class="sd">        properties: properties to return in grouped documents</span>
-<span class="sd">        sort: Dictionary of sort order for fields</span>
+<span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
+<span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 <span class="sd">    """</span>
@@ -10149,14 +10208,14 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 <tr>
 <td class="linenos">
 <div class="linenodiv">
-<pre><span></span>506
-507
-508
+<pre><span></span>508
 509
 510
 511
 512
-513</pre>
+513
+514
+515</pre>
 </div>
 </td>
 <td class="code">
@@ -10817,9 +10876,10 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -10896,7 +10956,7 @@ by keys.</p>
     <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
@@ -10995,9 +11055,10 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, maggma.core.store.Sort]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
-<p>Dictionary of sort order for fields</p>
+<p>Dictionary of sort order for fields. Keys are field names and
+values are 1 for ascending or -1 for descending.</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -11047,7 +11108,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Sort</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -11298,31 +11359,31 @@ Not Implemented for JointStore</p>
 </main>
 <footer class="md-footer">
 <div class="md-footer-nav">
-<nav class="md-footer-nav__inner md-grid">
-<a class="md-flex md-footer-nav__link md-footer-nav__link--prev" href="reference/core_drone/" rel="prev" title="Drone">
-<div class="md-flex__cell md-flex__cell--shrink">
-<i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+<nav aria-label="Footer" class="md-footer-nav__inner md-grid">
+<a class="md-footer-nav__link md-footer-nav__link--prev" href="../core_drone/" rel="prev" title="Drone">
+<div class="md-footer-nav__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </div>
-<div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-<span class="md-flex__ellipsis">
+<div class="md-footer-nav__title">
+<div class="md-ellipsis">
 <span class="md-footer-nav__direction">
                   Previous
                 </span>
                 Drone
-              </span>
+              </div>
 </div>
 </a>
-<a class="md-flex md-footer-nav__link md-footer-nav__link--next" href="reference/builders/" rel="next" title="Builders">
-<div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
-<span class="md-flex__ellipsis">
+<a class="md-footer-nav__link md-footer-nav__link--next" href="../builders/" rel="next" title="Builders">
+<div class="md-footer-nav__title">
+<div class="md-ellipsis">
 <span class="md-footer-nav__direction">
                   Next
                 </span>
                 Builders
-              </span>
+              </div>
 </div>
-<div class="md-flex__cell md-flex__cell--shrink">
-<i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+<div class="md-footer-nav__button md-icon">
+<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"></path></svg>
 </div>
 </a>
 </nav>
@@ -11334,23 +11395,25 @@ Not Implemented for JointStore</p>
             Built by The Materials Project
           </div>
         
-        powered by
-        <a href="http://www.mkdocs.org" title="MkDocs">MkDocs</a>
-        and
-        <a href="http://yakworks.github.io/mkdocs-material-components/" title="Material Components for MkDocs">
-          Material Components for MkDocs</a>
+        Made with
+        <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+          Material for MkDocs
+        </a>
 </div>
 </div>
 </div>
 </footer>
 </div>
-<script src="../../assets/javascripts/application-68832431b5.js"></script>
-<script src="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.js"></script>
-<script>window.mdc.autoInit()</script>
-<script src="../../assets/javascripts/headroom.min.js"></script>
-<script src="../../assets/javascripts/jQuery.headroom.min.js"></script>
-<script src="../../assets/javascripts/jq-mdc-web.js"></script>
-<script src="https://cdn.jsdelivr.net/jquery.loadingoverlay/latest/loadingoverlay.min.js"></script>
-<script>app.initialize({version:"1.1.2",url:{base:"../.."}})</script>
+<script src="../../assets/javascripts/vendor.c3dc8c49.min.js"></script>
+<script src="../../assets/javascripts/bundle.f9edbbd5.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+<script>
+        app = initialize({
+          base: "../..",
+          features: [],
+          search: Object.assign({
+            worker: "../../assets/javascripts/worker/search.8e2cddea.min.js"
+          }, typeof search !== "undefined" && search)
+        })
+      </script>
 </body>
 </html>
