@@ -30,7 +30,7 @@ class Pet(BaseModel):
     owner_name: str = Field(..., title="Owner's name")
 
 
-@pytest.fixture("session")
+@pytest.fixture(scope="session")
 def owners():
     return [
         Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
@@ -38,7 +38,7 @@ def owners():
     ]
 
 
-@pytest.fixture("session")
+@pytest.fixture(scope="session")
 def pets(owners):
     return [
         Pet(
