@@ -28,7 +28,7 @@ def target():
     return store
 
 
-@pytest.fixture("module")
+@pytest.fixture(scope="module")
 def now():
     return datetime.utcnow()
 
