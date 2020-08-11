@@ -26,7 +26,7 @@ def owners():
             )
             for i in list(range(10)[1:])
         ]  # there are 8 owners here
-        + [Owner(name="PersonAge9", age=9, weight=float(randint(100, 200)))]
+        + [Owner(name="PersonAge9", age=9, weight=float(randint(155, 195)))]
         + [Owner(name="PersonWeight150", age=randint(10, 15), weight=float(150))]
         + [Owner(name="PersonAge20Weight200", age=20, weight=float(200))]
     )
