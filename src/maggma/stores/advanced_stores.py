@@ -11,7 +11,7 @@ from mongogrant.client import check
 from mongogrant.config import Config
 from monty.dev import requires
 
-from maggma.core import Store, StoreError
+from maggma.core import Sort, Store, StoreError
 from maggma.stores.mongolike import MongoStore
 from maggma.utils import lazy_substitute, substitute
 
@@ -238,7 +238,7 @@ class AliasingStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -289,7 +289,7 @@ class AliasingStore(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -448,7 +448,7 @@ class SandboxStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -475,7 +475,7 @@ class SandboxStore(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:

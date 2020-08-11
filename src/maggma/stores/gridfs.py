@@ -18,7 +18,7 @@ from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient
 
-from maggma.core import Store
+from maggma.core import Sort, Store
 from maggma.stores.mongolike import MongoStore
 
 
@@ -153,7 +153,7 @@ class GridFSStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -239,7 +239,7 @@ class GridFSStore(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:

@@ -108,7 +108,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -156,7 +156,7 @@ class Store(MSONable, metaclass=ABCMeta):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -190,7 +190,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
     ):
         """
         Queries the Store for a single document

@@ -14,7 +14,7 @@ from monty.dev import deprecated
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
 
-from maggma.core import Store
+from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
@@ -131,7 +131,7 @@ class S3Store(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -201,7 +201,7 @@ class S3Store(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:

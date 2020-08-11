@@ -126,7 +126,7 @@ class MongoStore(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -212,7 +212,7 @@ class MongoStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -230,7 +230,8 @@ class MongoStore(Store):
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
 
-        sort_list = [(k, Sort(v).value) for k, v in sort.items()] if sort else None
+        sort_list = [(k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                     for k, v in sort.items()] if sort else None
 
         for d in self._collection.find(
             filter=criteria,
@@ -414,7 +415,7 @@ class MemoryStore(MongoStore):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, int]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
