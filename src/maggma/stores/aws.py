@@ -10,9 +10,11 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
+
 from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
 from monty.dev import deprecated
+from monty.json import MontyDecoder
 from monty.msgpack import default as monty_default
 from monty.msgpack import object_hook as monty_object_hook
 
@@ -179,7 +181,12 @@ class S3Store(Store):
                     data = zlib.decompress(data)
                 # requires msgpack-python to be installed to fix string encoding problem
                 # https://github.com/msgpack/msgpack/issues/121
-                yield msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
+                unpacked_data_ = msgpack.unpackb(data, raw=False)
+                # During recursion
+                # msgpack.unpackb goes as deep as possible during reconstruction
+                # MontyDecoder().process_decode only goes until it finds a from_dict
+                # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
+                yield MontyDecoder().process_decode(unpacked_data_)
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
@@ -252,6 +259,8 @@ class S3Store(Store):
                  field is to be used
         """
         search_docs = []
+        if not isinstance(docs, list):
+            docs = [docs]
 
         if isinstance(key, list):
             search_keys = key
