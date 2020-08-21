@@ -131,12 +131,13 @@ def tests_msonable_read_write(s3store):
     dd = s3store.as_dict()
     s3store.update([{"task_id": "mp-2", "data": dd}])
     res = s3store.query_one({"task_id": "mp-2"})
-    assert isinstance(res["data"], S3Store)
+    assert res["data"]["@module"] == "maggma.stores.aws"
 
 
 def test_remove(s3store):
     s3store.update([{"task_id": "mp-2", "data": "asd"}])
     s3store.update([{"task_id": "mp-4", "data": "asd"}])
+    s3store.update([{"task_id": "mp-5", "data": "aaa"}])
 
     assert s3store.query_one({"task_id": "mp-2"}) is not None
     assert s3store.query_one({"task_id": "mp-4"}) is not None
@@ -145,6 +146,7 @@ def test_remove(s3store):
 
     assert s3store.query_one({"task_id": "mp-2"}) is None
     assert s3store.query_one({"task_id": "mp-4"}) is not None
+    assert s3store.query_one({"task_id": "mp-5"}) is not None
 
 
 def test_close(s3store):
