@@ -4,11 +4,11 @@ import zlib
 import boto3
 import msgpack
 from botocore.exceptions import ClientError
-from maggma.stores import MemoryStore, MongoStore, S3Store
-from monty.msgpack import default, object_hook
 from moto import mock_s3
 
 import pytest
+from maggma.stores import MemoryStore, MongoStore, S3Store
+from monty.msgpack import default, object_hook
 
 
 @pytest.fixture
@@ -131,7 +131,7 @@ def tests_msonable_read_write(s3store):
     dd = s3store.as_dict()
     s3store.update([{"task_id": "mp-2", "data": dd}])
     res = s3store.query_one({"task_id": "mp-2"})
-    assert isinstance(res["data"], S3Store)
+    assert res["data"]["@module"] == "maggma.stores.aws"
 
 
 def test_remove(s3store):
