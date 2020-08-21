@@ -1,5 +1,15 @@
 # Changelog
 
+## [v0.22.2](https://github.com/materialsproject/maggma/tree/v0.22.2) (2020-08-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.22.1...v0.22.2)
+
+**Merged pull requests:**
+
+- Minor bug fixes to S3Store [\#253](https://github.com/materialsproject/maggma/pull/253) ([jmmshn](https://github.com/jmmshn))
+- Bump mkdocs-material from 5.5.3 to 5.5.7 [\#250](https://github.com/materialsproject/maggma/pull/250) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest-cov from 2.10.0 to 2.10.1 [\#249](https://github.com/materialsproject/maggma/pull/249) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v0.22.1](https://github.com/materialsproject/maggma/tree/v0.22.1) (2020-08-11)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.22.0...v0.22.1)
@@ -111,7 +121,6 @@
 - Bump uvicorn from 0.11.3 to 0.11.5 [\#157](https://github.com/materialsproject/maggma/pull/157) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump mkdocs-material from 5.1.3 to 5.1.5 [\#156](https://github.com/materialsproject/maggma/pull/156) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump tqdm from 4.45.0 to 4.46.0 [\#155](https://github.com/materialsproject/maggma/pull/155) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
-- Bump pytest-asyncio from 0.10.0 to 0.11.0 [\#149](https://github.com/materialsproject/maggma/pull/149) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - MapBuilder retry\_failed bug [\#111](https://github.com/materialsproject/maggma/pull/111) ([acrutt](https://github.com/acrutt))
 
 ## [v0.20.0](https://github.com/materialsproject/maggma/tree/v0.20.0) (2020-05-02)
@@ -124,6 +133,7 @@
 - Bump pydantic from 1.5 to 1.5.1 [\#152](https://github.com/materialsproject/maggma/pull/152) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump mkdocstrings from 0.10.3 to 0.11.0 [\#151](https://github.com/materialsproject/maggma/pull/151) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump aioitertools from 0.6.0 to 0.6.1 [\#150](https://github.com/materialsproject/maggma/pull/150) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
+- Bump pytest-asyncio from 0.10.0 to 0.11.0 [\#149](https://github.com/materialsproject/maggma/pull/149) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump mkdocs-material from 5.1.1 to 5.1.3 [\#148](https://github.com/materialsproject/maggma/pull/148) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump boto3 from 1.12.41 to 1.12.46 [\#147](https://github.com/materialsproject/maggma/pull/147) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
 - Bump pre-commit from 2.2.0 to 2.3.0 [\#146](https://github.com/materialsproject/maggma/pull/146) ([dependabot-preview[bot]](https://github.com/apps/dependabot-preview))
