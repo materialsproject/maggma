@@ -12,7 +12,7 @@ from maggma.builders import GroupBuilder
 from maggma.stores import MemoryStore
 
 
-@pytest.fixture("module")
+@pytest.fixture(scope="module")
 def now():
     return datetime.utcnow()
 

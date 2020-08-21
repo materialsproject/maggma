@@ -1,10 +1,12 @@
 from copy import deepcopy
 from datetime import datetime
+from itertools import chain
 from typing import Dict, Iterable, List, Set, Union
+
+from pydash import get
 
 from maggma.core import Builder, Store
 from maggma.utils import grouper
-from pydash import get
 
 
 class Projection_Builder(Builder):
@@ -245,6 +247,7 @@ class Projection_Builder(Builder):
                 all the information from the source_stores
                 corresponding to a single key value
         """
+        items = list(filter(None, chain.from_iterable(items)))
         num_items = len(items)
         self.logger.info("Updating target with {} items...".format(num_items))
         target = self.target

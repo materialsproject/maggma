@@ -1,8 +1,11 @@
-from .simple_bib_drone import SimpleBibDrone
-from maggma.stores import MongoStore
-from pathlib import Path
-import pytest
 from datetime import datetime
+from pathlib import Path
+
+import pytest
+
+from maggma.stores import MongoStore
+
+from .simple_bib_drone import SimpleBibDrone
 
 
 @pytest.fixture

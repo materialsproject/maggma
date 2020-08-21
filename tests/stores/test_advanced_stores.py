@@ -38,7 +38,7 @@ def mongostore():
     store._collection.drop()
 
 
-@pytest.fixture("module")
+@pytest.fixture(scope="module")
 def mgrant_server():
     # TODO: This is whacked code that starts a mongo server. How do we fix this?
     _, config_path = tempfile.mkstemp()
@@ -78,7 +78,7 @@ def mgrant_server():
     os.remove(mdlogpath)
 
 
-@pytest.fixture("module")
+@pytest.fixture(scope="module")
 def mgrant_user(mgrant_server):
     config_path, mdport, dbname = mgrant_server
 

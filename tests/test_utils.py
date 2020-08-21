@@ -7,7 +7,6 @@ from time import sleep
 
 import pytest
 
-from maggma.utils import Timeout  # dt_to_isoformat_ceil_ms,; isostr_to_dt,
 from maggma.utils import (
     dynamic_import,
     grouper,
@@ -16,6 +15,8 @@ from maggma.utils import (
     to_dt,
     to_isoformat_ceil_ms,
 )
+
+from maggma.utils import Timeout  # dt_to_isoformat_ceil_ms,; isostr_to_dt,
 
 
 def test_recursiveupdate():

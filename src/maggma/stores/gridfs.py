@@ -13,12 +13,13 @@ from datetime import datetime
 from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
 
 import gridfs
-from maggma.core import Sort, Store
-from maggma.stores.mongolike import MongoStore
 from monty.dev import deprecated
 from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient
+
+from maggma.core import Sort, Store
+from maggma.stores.mongolike import MongoStore
 
 
 class GridFSStore(Store):
@@ -50,6 +51,7 @@ class GridFSStore(Store):
         username: str = "",
         password: str = "",
         compression: bool = False,
+        ensure_metadata: bool = False,
         **kwargs,
     ):
         """
@@ -62,6 +64,8 @@ class GridFSStore(Store):
             port: port to connec to
             username: username to connect as
             password: password to authenticate as
+            compression: compress the data as it goes into GridFS
+            ensure_metadata: ensure returned documents have the metadata fields
         """
 
         self.database = database
@@ -72,6 +76,7 @@ class GridFSStore(Store):
         self.password = password
         self._collection = None  # type: Any
         self.compression = compression
+        self.ensure_metadata = ensure_metadata
         self.kwargs = kwargs
         self.meta_keys = set()  # type: Set[str]
 
@@ -148,7 +153,7 @@ class GridFSStore(Store):
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -160,7 +165,8 @@ class GridFSStore(Store):
         Args:
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
@@ -193,11 +199,14 @@ class GridFSStore(Store):
                 metadata = doc["metadata"]
                 if metadata.get("compression", "") == "zlib":
                     data = zlib.decompress(data).decode("UTF-8")
-
                 try:
                     data = json.loads(data)
                 except Exception:
                     pass
+
+                if self.ensure_metadata:
+                    data.update(metadata)
+
                 yield data
 
     def distinct(
@@ -230,7 +239,7 @@ class GridFSStore(Store):
         keys: Union[List[str], str],
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Sort]] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
@@ -243,7 +252,8 @@ class GridFSStore(Store):
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
             properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
 

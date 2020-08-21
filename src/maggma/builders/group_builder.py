@@ -9,9 +9,10 @@ from math import ceil
 from time import time
 from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple
 
+from pydash import get
+
 from maggma.core import Builder, Store
 from maggma.utils import Timeout, grouper
-from pydash import get
 
 
 class GroupBuilder(Builder, metaclass=ABCMeta):

@@ -38,7 +38,7 @@ class DummyBuilder(DummyBuilderWithNoPrechunk):
 SERVER_URL = "tcp://127.0.0.1:8234"
 
 
-@pytest.fixture("function")
+@pytest.fixture(scope="function")
 async def master_server(event_loop, log_to_stdout):
 
     task = asyncio.create_task(
@@ -119,6 +119,6 @@ async def test_no_prechunk(caplog):
     )
     await asyncio.sleep(1)
     assert (
-        f"Can't distributed process DummyBuilderWithNoPrechunk. Skipping for now"
+        "Can't distributed process DummyBuilderWithNoPrechunk. Skipping for now"
         in caplog.text
     )
