@@ -186,7 +186,7 @@ class S3Store(Store):
                 # msgpack.unpackb goes as deep as possible during reconstruction
                 # MontyDecoder().process_decode only goes until it finds a from_dict
                 # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
-                yield MontyDecoder().process_decode(unpacked_data_)
+                yield MontyDecoder().process_decoded(unpacked_data_)
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
