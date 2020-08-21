@@ -180,12 +180,12 @@ class S3Store(Store):
                     data = zlib.decompress(data)
                 # requires msgpack-python to be installed to fix string encoding problem
                 # https://github.com/msgpack/msgpack/issues/121
-                unpacked_data_ = msgpack.unpackb(data, raw=False)
                 # During recursion
                 # msgpack.unpackb goes as deep as possible during reconstruction
                 # MontyDecoder().process_decode only goes until it finds a from_dict
                 # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
-                yield MontyDecoder().process_decoded(unpacked_data_)
+                # Should just return the unpacked object then let the user run process_decoded
+                yield msgpack.unpackb(data, raw=False)
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
