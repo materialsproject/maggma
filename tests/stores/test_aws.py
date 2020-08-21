@@ -137,7 +137,7 @@ def tests_msonable_read_write(s3store):
 def test_remove(s3store):
     s3store.update([{"task_id": "mp-2", "data": "asd"}])
     s3store.update([{"task_id": "mp-4", "data": "asd"}])
-    s3store.update([{"task_id": "mp-5", "data": "aaa"}])
+    s3store.update({"task_id": "mp-5", "data": "aaa"})
 
     assert s3store.query_one({"task_id": "mp-2"}) is not None
     assert s3store.query_one({"task_id": "mp-4"}) is not None
