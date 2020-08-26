@@ -74,12 +74,16 @@ def test_keys():
     with mock_s3():
         conn = boto3.client("s3")
         conn.create_bucket(Bucket="bucket1")
-        index = MemoryStore("index")
-        store = S3Store(index, "bucket1", s3_workers=4, key="key1")
+        index = MemoryStore("index", key=1)
+        with pytest.raises(AssertionError, match=r"Since we are.*"):
+            store = S3Store(index, "bucket1", s3_workers=4, key=1)
+        index = MemoryStore("index", key="key1")
+        with pytest.warns(UserWarning, match=r"The desired S3Store.*$"):
+            store = S3Store(index, "bucket1", s3_workers=4, key="key2")
         store.connect()
-        with pytest.raises(KeyError, match=r".*key1.*"):
-            store.update({"task_id": "mp-1", "data": "1234"})
-        store.update({"key1": "mp-2", "data": "1234"})
+        store.update({"key1": "mp-1", "data": "1234"})
+        with pytest.raises(KeyError):
+            store.update({"key2": "mp-2", "data": "1234"})
         assert store.key == store.index.key == "key1"
 
 
@@ -151,7 +155,6 @@ def test_remove(s3store):
     s3store.update([{"task_id": "mp-2", "data": "asd"}])
     s3store.update([{"task_id": "mp-4", "data": "asd"}])
     s3store.update({"task_id": "mp-5", "data": "aaa"})
-
     assert s3store.query_one({"task_id": "mp-2"}) is not None
     assert s3store.query_one({"task_id": "mp-4"}) is not None
 

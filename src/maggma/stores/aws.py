@@ -7,6 +7,7 @@ import threading
 import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
+import warnings
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
@@ -67,7 +68,14 @@ class S3Store(Store):
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
         # Force the key to be the same as the index
-        self.index.key = key
+        assert isinstance(
+            index.key, str
+        ), "Since we are using the key as a file name in S3, they key must be a string"
+        if key != index.key:
+            warnings.warn(
+                f'The desired S3Store key "{key}" does not match the index key "{index.key}", the index key will be used',
+                UserWarning,
+            )
         kwargs["key"] = str(index.key)
 
         self._thread_local = threading.local()
