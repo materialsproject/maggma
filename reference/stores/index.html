@@ -8,9 +8,9 @@
 <meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
 <link href="https://materialsproject.github.io/maggma/reference/stores/" rel="canonical"/>
 <link href="../../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-5.5.7" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-5.5.8" name="generator"/>
 <title>Stores - Maggma Documentation</title>
-<link href="../../assets/stylesheets/main.b8ac9624.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/main.01afc2df.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
 <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
@@ -4115,7 +4115,7 @@ other: other S3Store to compare with</p>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.aws.S3Store.__init__">
 <code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">s3_profile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">endpoint_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s3_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">s3_profile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">endpoint_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s3_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">'task_id'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
@@ -4203,6 +4203,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sub_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">s3_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"task_id"</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">"""</span>
@@ -4230,10 +4231,18 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">s3_workers</span> <span class="o">=</span> <span class="n">s3_workers</span>
     <span class="c1"># Force the key to be the same as the index</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
+        <span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span>
+    <span class="p">),</span> <span class="s2">"Since we are using the key as a file name in S3, they key must be a string"</span>
+    <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">'The desired S3Store key "</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">" does not match the index key "</span><span class="si">{</span><span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s1">,"'</span>
+            <span class="s2">"the index key will be used"</span><span class="p">,</span>
+            <span class="ne">UserWarning</span><span class="p">,</span>
+        <span class="p">)</span>
     <span class="n">kwargs</span><span class="p">[</span><span class="s2">"key"</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">_thread_local</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">local</span><span class="p">()</span>
-
     <span class="nb">super</span><span class="p">(</span><span class="n">S3Store</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre>
 </div>
@@ -5056,7 +5065,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
         <span class="k">for</span> <span class="n">sdoc</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
             <span class="n">search_docs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sdoc</span><span class="o">.</span><span class="n">result</span><span class="p">())</span>
     <span class="c1"># Use store's update to remove key clashes</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">search_docs</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">search_docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
 </code></pre>
 </div>
 </details>
@@ -8501,8 +8510,8 @@ Not Implemented for JointStore</p>
 </div>
 </footer>
 </div>
-<script src="../../assets/javascripts/vendor.d1f5a259.min.js"></script>
-<script src="../../assets/javascripts/bundle.d5fec882.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+<script src="../../assets/javascripts/vendor.df0def68.min.js"></script>
+<script src="../../assets/javascripts/bundle.ba57d267.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
 <script>
         app = initialize({
           base: "../..",
