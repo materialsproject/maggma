@@ -73,7 +73,8 @@ class S3Store(Store):
         ), "Since we are using the key as a file name in S3, they key must be a string"
         if key != index.key:
             warnings.warn(
-                f'The desired S3Store key "{key}" does not match the index key "{index.key}", the index key will be used',
+                f'The desired S3Store key "{key}" does not match the index key "{index.key},"'
+                "the index key will be used",
                 UserWarning,
             )
         kwargs["key"] = str(index.key)
