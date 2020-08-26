@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.22.3](https://github.com/materialsproject/maggma/tree/v0.22.3) (2020-08-26)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.22.2...v0.22.3)
+
+**Merged pull requests:**
+
+- added context manager for stores [\#258](https://github.com/materialsproject/maggma/pull/258) ([jmmshn](https://github.com/jmmshn))
+- Bump pre-commit from 2.6.0 to 2.7.1 [\#257](https://github.com/materialsproject/maggma/pull/257) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pydocstyle from 5.0.2 to 5.1.0 [\#256](https://github.com/materialsproject/maggma/pull/256) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest-mock from 3.2.0 to 3.3.0 [\#255](https://github.com/materialsproject/maggma/pull/255) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v0.22.2](https://github.com/materialsproject/maggma/tree/v0.22.2) (2020-08-21)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.22.1...v0.22.2)
