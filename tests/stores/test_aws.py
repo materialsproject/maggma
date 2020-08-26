@@ -63,11 +63,24 @@ def s3store_multi():
         conn = boto3.client("s3")
         conn.create_bucket(Bucket="bucket1")
 
-        index = MemoryStore("index'")
+        index = MemoryStore("index")
         store = S3Store(index, "bucket1", s3_workers=4)
         store.connect()
 
         yield store
+
+
+def test_keys():
+    with mock_s3():
+        conn = boto3.client("s3")
+        conn.create_bucket(Bucket="bucket1")
+        index = MemoryStore("index")
+        store = S3Store(index, "bucket1", s3_workers=4, key="key1")
+        store.connect()
+        with pytest.raises(KeyError, match=r".*key1.*"):
+            store.update({"task_id": "mp-1", "data": "1234"})
+        store.update({"key1": "mp-2", "data": "1234"})
+        assert store.key == store.index.key == "key1"
 
 
 def test_multi_update(s3store, s3store_multi):

@@ -39,6 +39,7 @@ class S3Store(Store):
         endpoint_url: str = None,
         sub_dir: str = None,
         s3_workers: int = 1,
+        key: str = "task_id",
         **kwargs,
     ):
         """
@@ -66,10 +67,10 @@ class S3Store(Store):
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
         # Force the key to be the same as the index
+        self.index.key = key
         kwargs["key"] = str(index.key)
 
         self._thread_local = threading.local()
-
         super(S3Store, self).__init__(**kwargs)
 
     def name(self) -> str:
@@ -279,7 +280,7 @@ class S3Store(Store):
             for sdoc in fs:
                 search_docs.append(sdoc.result())
         # Use store's update to remove key clashes
-        self.index.update(search_docs)
+        self.index.update(search_docs, key=self.key)
 
     def get_bucket(self):
         if threading.current_thread().name == "MainThread":
