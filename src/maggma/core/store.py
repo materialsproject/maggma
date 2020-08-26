@@ -346,6 +346,13 @@ class Store(MSONable, metaclass=ABCMeta):
         d = MontyDecoder().process_decoded(d)
         self.__init__(**d)
 
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, exception_type, exception_value, traceback):
+        self.close()
+
 
 class StoreError(Exception):
     """ General Store-related error """
