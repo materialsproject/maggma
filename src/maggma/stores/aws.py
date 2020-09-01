@@ -41,6 +41,7 @@ class S3Store(Store):
         sub_dir: str = None,
         s3_workers: int = 1,
         key: str = "task_id",
+        searchable_fields: List[str] = [],
         **kwargs,
     ):
         """
@@ -54,6 +55,7 @@ class S3Store(Store):
             endpoint_url: endpoint_url to allow interface to minio service
             sub_dir: (optional)  subdirectory of the s3 bucket to store the data
             s3_workers: number of concurrent S3 puts to run
+            searchable_fields: fields to keep in the index store
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for S3Store")
@@ -67,6 +69,8 @@ class S3Store(Store):
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
+        self.searchable_fields = searchable_fields
+
         # Force the key to be the same as the index
         assert isinstance(
             index.key, str
@@ -257,7 +261,12 @@ class S3Store(Store):
         """
         return self.index.ensure_index(key, unique=unique)
 
-    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
+    def update(
+        self,
+        docs: Union[List[Dict], Dict],
+        key: Union[List, str, None] = None,
+        additional_metadata: Union[str, List[str], None] = None,
+    ):
         """
         Update documents into the Store
 
@@ -267,27 +276,36 @@ class S3Store(Store):
                  document, can be a list of multiple fields,
                  a single field, or None if the Store's key
                  field is to be used
+            additional_metadata: field(s) to include in the s3 store's metadata
         """
-        search_docs = []
         if not isinstance(docs, list):
             docs = [docs]
 
-        if isinstance(key, list):
-            search_keys = key
-        elif key:
-            search_keys = [key]
+        if isinstance(key, str):
+            key = [key]
+        elif not key:
+            key = [self.key]
+
+        if additional_metadata is None:
+            additional_metadata = []
+        elif isinstance(additional_metadata, str):
+            additional_metadata = [additional_metadata]
         else:
-            search_keys = [self.key]
+            additional_metadata = list(additional_metadata)
+
         with ThreadPoolExecutor(max_workers=self.s3_workers) as pool:
             fs = {
                 pool.submit(
-                    fn=self.write_doc_to_s3, doc=itr_doc, search_keys=search_keys
+                    fn=self.write_doc_to_s3,
+                    doc=itr_doc,
+                    search_keys=key + additional_metadata,
                 )
                 for itr_doc in docs
             }
             fs, _ = wait(fs)
-            for sdoc in fs:
-                search_docs.append(sdoc.result())
+
+            search_docs = [sdoc.result() for sdoc in fs]
+
         # Use store's update to remove key clashes
         self.index.update(search_docs, key=self.key)
 
@@ -311,7 +329,7 @@ class S3Store(Store):
         """
         s3_bucket = self.get_bucket()
 
-        search_doc = {k: doc[k] for k in search_keys}
+        search_doc = {k: str(doc[k]) for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
         if self.sub_dir != "":
             search_doc["sub_dir"] = self.sub_dir
