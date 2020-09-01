@@ -82,7 +82,6 @@ class GridFSStore(Store):
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = searchable_fields
         self.kwargs = kwargs
-        self.meta_keys = set()  # type: Set[str]
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
@@ -342,7 +341,7 @@ class GridFSStore(Store):
         elif not key:
             key = [self.key]
 
-        key = list(set(key) | self.meta_keys - set(files_collection_fields))
+        key = list(set(key) - set(files_collection_fields))
 
         if additional_metadata is None:
             additional_metadata = []
