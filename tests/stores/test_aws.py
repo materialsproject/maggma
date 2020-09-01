@@ -8,6 +8,7 @@ from botocore.exceptions import ClientError
 from monty.msgpack import default, object_hook
 from moto import mock_s3
 
+from datetime import datetime
 from maggma.stores import MemoryStore, MongoStore, S3Store
 
 
@@ -230,3 +231,34 @@ def test_remove_subdir(s3store_w_subdir):
 
     assert s3store_w_subdir.query_one({"task_id": "mp-2"}) is None
     assert s3store_w_subdir.query_one({"task_id": "mp-4"}) is not None
+
+
+def test_searchable_fields(s3store):
+
+    tic = datetime(2018, 4, 12, 16)
+
+    data = [
+        {"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic}
+        for i in range(4)
+    ]
+
+    s3store.searchable_fields = ["task_id"]
+    s3store.update(data, key="a")
+
+    # This should only work if the searchable field was put into the index store
+    assert set(s3store.distinct("task_id")) == {"mp-0", "mp-1", "mp-2", "mp-3"}
+
+
+def test_additional_metadata(s3store):
+
+    tic = datetime(2018, 4, 12, 16)
+
+    data = [
+        {"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic}
+        for i in range(4)
+    ]
+
+    s3store.update(data, key="a", additional_metadata="task_id")
+
+    # This should only work if the searchable field was put into the index store
+    assert set(s3store.distinct("task_id")) == {"mp-0", "mp-1", "mp-2", "mp-3"}
