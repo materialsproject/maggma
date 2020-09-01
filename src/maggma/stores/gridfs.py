@@ -22,25 +22,26 @@ from maggma.core import Sort, Store
 from maggma.stores.mongolike import MongoStore
 
 
+# https://github.com/mongodb/specifications/
+#   blob/master/source/gridfs/gridfs-spec.rst#terms
+#   (Under "Files collection document")
+files_collection_fields = (
+    "_id",
+    "length",
+    "chunkSize",
+    "uploadDate",
+    "md5",
+    "filename",
+    "contentType",
+    "aliases",
+    "metadata",
+)
+
+
 class GridFSStore(Store):
     """
     A Store for GrdiFS backend. Provides a common access method consistent with other stores
     """
-
-    # https://github.com/mongodb/specifications/
-    #   blob/master/source/gridfs/gridfs-spec.rst#terms
-    #   (Under "Files collection document")
-    files_collection_fields = (
-        "_id",
-        "length",
-        "chunkSize",
-        "uploadDate",
-        "md5",
-        "filename",
-        "contentType",
-        "aliases",
-        "metadata",
-    )
 
     def __init__(
         self,
@@ -52,6 +53,7 @@ class GridFSStore(Store):
         password: str = "",
         compression: bool = False,
         ensure_metadata: bool = False,
+        searchable_fields: List[str] = [],
         **kwargs,
     ):
         """
@@ -66,6 +68,7 @@ class GridFSStore(Store):
             password: password to authenticate as
             compression: compress the data as it goes into GridFS
             ensure_metadata: ensure returned documents have the metadata fields
+            searchable_fields: fields to keep in the index store
         """
 
         self.database = database
@@ -77,8 +80,8 @@ class GridFSStore(Store):
         self._collection = None  # type: Any
         self.compression = compression
         self.ensure_metadata = ensure_metadata
+        self.searchable_fields = searchable_fields
         self.kwargs = kwargs
-        self.meta_keys = set()  # type: Set[str]
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
@@ -128,7 +131,7 @@ class GridFSStore(Store):
         """
         new_criteria = dict()
         for field in criteria:
-            if field not in cls.files_collection_fields and not field.startswith(
+            if field not in files_collection_fields and not field.startswith(
                 "metadata."
             ):
                 new_criteria["metadata." + field] = copy.copy(criteria[field])
@@ -172,6 +175,8 @@ class GridFSStore(Store):
         """
         if isinstance(criteria, dict):
             criteria = self.transform_criteria(criteria)
+        elif criteria is not None:
+            raise ValueError("Criteria must be a dictionary or None")
 
         prop_keys = set()
         if isinstance(properties, dict):
@@ -185,9 +190,12 @@ class GridFSStore(Store):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
+
+                metadata = doc["metadata"]
+
                 data = self._collection.find_one(
                     filter={
-                        "metadata.{}".format(self._files_store.key): doc["metadata"][
+                        "metadata.{}".format(self._files_store.key): metadata[
                             self._files_store.key
                         ]
                     },
@@ -196,15 +204,15 @@ class GridFSStore(Store):
                     sort=sort,
                 ).read()
 
-                metadata = doc["metadata"]
                 if metadata.get("compression", "") == "zlib":
                     data = zlib.decompress(data).decode("UTF-8")
+
                 try:
                     data = json.loads(data)
                 except Exception:
                     pass
 
-                if self.ensure_metadata:
+                if self.ensure_metadata and isinstance(data, dict):
                     data.update(metadata)
 
                 yield data
@@ -213,7 +221,8 @@ class GridFSStore(Store):
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
     ) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field. This function only operates
+        on the metadata in the files collection
 
         Args:
             field: the field(s) to get distinct values for
@@ -227,7 +236,7 @@ class GridFSStore(Store):
 
         field = (
             f"metadata.{field}"
-            if field not in self.files_collection_fields
+            if field not in files_collection_fields
             and not field.startswith("metadata.")
             else field
         )
@@ -269,7 +278,7 @@ class GridFSStore(Store):
         keys = [keys] if not isinstance(keys, list) else keys
         keys = [
             f"metadata.{k}"
-            if k not in self.files_collection_fields and not k.startswith("metadata.")
+            if k not in files_collection_fields and not k.startswith("metadata.")
             else k
             for k in keys
         ]
@@ -300,13 +309,18 @@ class GridFSStore(Store):
             bool indicating if the index exists/was created
         """
         # Transform key for gridfs first
-        if key not in self.files_collection_fields:
+        if key not in files_collection_fields:
             files_col_key = "metadata.{}".format(key)
             return self._files_store.ensure_index(files_col_key, unique=unique)
         else:
             return self._files_store.ensure_index(key, unique=unique)
 
-    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
+    def update(
+        self,
+        docs: Union[List[Dict], Dict],
+        key: Union[List, str, None] = None,
+        additional_metadata: Union[str, List[str], None] = None,
+    ):
         """
         Update documents into the Store
 
@@ -316,6 +330,7 @@ class GridFSStore(Store):
                  document, can be a list of multiple fields,
                  a single field, or None if the Store's key
                  field is to be used
+            additional_metadata: field(s) to include in the gridfs metadata
         """
 
         if not isinstance(docs, list):
@@ -326,11 +341,25 @@ class GridFSStore(Store):
         elif not key:
             key = [self.key]
 
-        key = list(set(key) | self.meta_keys - set(self.files_collection_fields))
+        key = list(set(key) - set(files_collection_fields))
+
+        if additional_metadata is None:
+            additional_metadata = []
+        elif isinstance(additional_metadata, str):
+            additional_metadata = [additional_metadata]
+        else:
+            additional_metadata = list(additional_metadata)
+
         for d in docs:
             search_doc = {k: d[k] for k in key}
 
-            metadata = {k: d[k] for k in [self.last_updated_field] if k in d}
+            metadata = {
+                k: get(d, k)
+                for k in [self.last_updated_field]
+                + additional_metadata
+                + self.searchable_fields
+                if has(d, k)
+            }
             metadata.update(search_doc)
             data = json.dumps(jsanitize(d)).encode("UTF-8")
             if self.compression:
@@ -359,8 +388,8 @@ class GridFSStore(Store):
             criteria = self.transform_criteria(criteria)
         ids = [cursor._id for cursor in self._collection.find(criteria)]
 
-        for id in ids:
-            self._collection.delete(id)
+        for _id in ids:
+            self._collection.delete(_id)
 
     def close(self):
         self._collection.database.client.close()

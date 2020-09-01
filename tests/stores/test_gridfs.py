@@ -6,6 +6,7 @@ import numpy.testing.utils as nptu
 import pytest
 
 from maggma.stores import GridFSStore, MongoStore
+from maggma.stores.gridfs import files_collection_fields
 
 
 @pytest.fixture
@@ -199,7 +200,7 @@ def test_eq(mongostore, gridfsstore):
 
 def test_index(gridfsstore):
     assert gridfsstore.ensure_index("test_key")
-    for field in gridfsstore.files_collection_fields:
+    for field in files_collection_fields:
         assert gridfsstore.ensure_index(field)
 
 
@@ -222,3 +223,33 @@ def test_gfs_metadata(gridfsstore):
     for d in gridfsstore.query():
         assert "task_id" in d
         assert gridfsstore.last_updated_field in d
+
+
+def test_searchable_fields(gridfsstore):
+
+    tic = datetime(2018, 4, 12, 16)
+
+    data = [
+        {"task_id": f"mp-{i}", "a": i, gridfsstore.last_updated_field: tic}
+        for i in range(3)
+    ]
+    gridfsstore.searchable_fields = ["task_id"]
+    gridfsstore.update(data, key="a")
+
+    # This should only work if the searchable field was put into the index store
+    assert set(gridfsstore.distinct("task_id")) == {"mp-0", "mp-1", "mp-2"}
+
+
+def test_additional_metadata(gridfsstore):
+
+    tic = datetime(2018, 4, 12, 16)
+
+    data = [
+        {"task_id": f"mp-{i}", "a": i, gridfsstore.last_updated_field: tic}
+        for i in range(3)
+    ]
+
+    gridfsstore.update(data, key="a", additional_metadata="task_id")
+
+    # This should only work if the searchable field was put into the index store
+    assert set(gridfsstore.distinct("task_id")) == {"mp-0", "mp-1", "mp-2"}
