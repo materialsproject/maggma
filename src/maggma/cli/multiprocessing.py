@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding utf-8
 
+import multiprocessing
 from asyncio import (
     FIRST_COMPLETED,
     BoundedSemaphore,
@@ -157,7 +158,9 @@ async def multi(builder, num_workers):
 
     builder.connect()
     cursor = builder.get_items()
-    executor = ProcessPoolExecutor(num_workers)
+    executor = ProcessPoolExecutor(
+        num_workers, mp_context=multiprocessing.get_context("spawn")
+    )
 
     # Gets the total number of items to process by priming
     # the cursor

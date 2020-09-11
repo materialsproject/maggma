@@ -21,7 +21,6 @@ from pymongo import MongoClient
 from maggma.core import Sort, Store
 from maggma.stores.mongolike import MongoStore
 
-
 # https://github.com/mongodb/specifications/
 #   blob/master/source/gridfs/gridfs-spec.rst#terms
 #   (Under "Files collection document")
