@@ -1,4 +1,6 @@
+import shutil
 from datetime import datetime
+from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
@@ -99,3 +101,17 @@ def test_reporting(mongostore, reporting_store):
 
         update_doc = next(d for d in report_docs if d["event"] == "UPDATE")
         assert "items" in update_doc
+
+
+def test_builder_py():
+
+    runner = CliRunner()
+
+    with runner.isolated_filesystem():
+        shutil.copy2(
+            src=Path(__file__).parent / "builder_for_test.py", dst=Path(".").resolve()
+        )
+        result = runner.invoke(run, ["-v", "-n", "2", "builder_for_test.py"])
+
+    assert result.exit_code == 0
+    assert "Ended multiprocessing: TestBuilder" in result.output
