@@ -16,7 +16,7 @@ from maggma.cli.serial import serial
 from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
 
-sys.meta_path.append(ScriptFinder)
+sys.meta_path.append(ScriptFinder())
 
 
 @click.command()

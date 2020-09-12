@@ -1,5 +1,4 @@
-import importlib
-import pickle
+import importlib.util
 import sys
 import types
 from glob import glob
@@ -88,12 +87,12 @@ def spec_from_source(file_path: str) -> ModuleSpec:
     Specialized for loading python source files and notebooks into
     a temporary maggma cli package to run as a builder
     """
-    file_path = Path(file_path).resolve().relative_to(Path(".").resolve())
-    file_path_str = str(file_path)
+    file_path_obj = Path(file_path).resolve().relative_to(Path(".").resolve())
+    file_path_str = str(file_path_obj)
 
-    if file_path.parts[-1][-3:] == ".py":
+    if file_path_obj.parts[-1][-3:] == ".py":
         # Gets module name from the filename without the .py extension
-        module_name = "_".join(file_path.parts).replace(" ", "_").replace(".py", "")
+        module_name = "_".join(file_path_obj.parts).replace(" ", "_").replace(".py", "")
 
         spec = ModuleSpec(
             name=f"{_BASENAME}.{module_name}",
@@ -103,9 +102,11 @@ def spec_from_source(file_path: str) -> ModuleSpec:
             origin=file_path_str,
         )
         # spec._set_fileattr = True
-    elif file_path.parts[-1][-6:] == ".ipynb":
+    elif file_path_obj.parts[-1][-6:] == ".ipynb":
         # Gets module name from the filename without the .ipnb extension
-        module_name = "_".join(file_path.parts).replace(" ", "_").replace(".ipynb", "")
+        module_name = (
+            "_".join(file_path_obj.parts).replace(" ", "_").replace(".ipynb", "")
+        )
 
         spec = ModuleSpec(
             name=f"{_BASENAME}.{module_name}",
@@ -130,14 +131,14 @@ def load_builder_from_source(file_path: str) -> List[Builder]:
     file_path = str(Path(file_path).resolve())
     spec = spec_from_source(file_path)
     module_object = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(module_object)
+    spec.loader.exec_module(module_object)  # type: ignore
 
     sys.modules[spec.name] = module_object
 
     if hasattr(module_object, "__builders__"):
-        return module_object.__builders__
+        return getattr(module_object, "__builders__")
     elif hasattr(module_object, "__builder__"):
-        return module_object.__builder__
+        return getattr(module_object, "__builder__")
     else:
         raise Exception(
             f"No __builders__ or __builder__ attribute found in {file_path}"
