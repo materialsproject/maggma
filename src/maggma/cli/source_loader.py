@@ -8,8 +8,6 @@ from importlib.machinery import ModuleSpec, SourceFileLoader
 from pathlib import Path
 from typing import List
 
-from IPython import get_ipython
-from IPython.core.interactiveshell import InteractiveShell
 from nbformat import read
 from regex import match
 
@@ -44,7 +42,11 @@ class NotebookLoader(Loader):
     """Module Loader for Jupyter Notebooks or Source Files"""
 
     def __init__(self, name=None, path=None):
+
+        from IPython.core.interactiveshell import InteractiveShell
+
         self.shell = InteractiveShell.instance()
+
         self.name = name
         self.path = path
 
@@ -52,13 +54,13 @@ class NotebookLoader(Loader):
         return None
 
     def exec_module(self, module):
-        path = self.path
+        from IPython import get_ipython
 
         module.__dict__["get_ipython"] = get_ipython
-        module.__path__ = path
+        module.__path__ = self.path
 
         # load the notebook object
-        with open(path, "r", encoding="utf-8") as f:
+        with open(self.path, "r", encoding="utf-8") as f:
             nb = read(f, 4)
 
         # extra work to ensure that magics that would affect the user_ns
