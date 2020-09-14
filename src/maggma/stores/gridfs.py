@@ -10,7 +10,7 @@ import copy
 import json
 import zlib
 from datetime import datetime
-from typing import Any, Dict, Iterator, List, Optional, Set, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import gridfs
 from monty.dev import deprecated

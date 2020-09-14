@@ -1,13 +1,11 @@
 import importlib.util
 import sys
-import types
 from glob import glob
 from importlib.abc import Loader, MetaPathFinder
 from importlib.machinery import ModuleSpec, SourceFileLoader
 from pathlib import Path
 from typing import List
-from nbformat import read
-from regex import match
+
 
 from maggma.core import Builder
 
@@ -15,6 +13,7 @@ try:
     import nbformat
     from IPython import get_ipython
     from IPython.core.interactiveshell import InteractiveShell
+    from regex import match
 except ModuleNotFoundError:
     pass
 
