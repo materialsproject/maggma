@@ -1,7 +1,7 @@
 from maggma.core import Builder
 
 
-class TestBuilder(Builder):
+class DummyBuilder(Builder):
     def __init__(self, total=10):
         self.get_called = 0
         self.process_called = 0
@@ -22,4 +22,4 @@ class TestBuilder(Builder):
         self.update_called += 1
 
 
-__builder__ = TestBuilder()
+__builder__ = DummyBuilder()

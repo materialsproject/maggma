@@ -114,7 +114,7 @@ def test_python_source():
         result = runner.invoke(run, ["-v", "-n", "2", "builder_for_test.py"])
 
     assert result.exit_code == 0
-    assert "Ended multiprocessing: TestBuilder" in result.output
+    assert "Ended multiprocessing: DummyBuilder" in result.output
 
 
 def test_python_notebook_source():
@@ -131,4 +131,4 @@ def test_python_notebook_source():
         )
 
     assert result.exit_code == 0
-    assert "Ended multiprocessing: TestBuilder" in result.output
+    assert "Ended multiprocessing: DummyBuilder" in result.output
