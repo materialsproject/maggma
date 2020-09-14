@@ -45,7 +45,7 @@ setup(
     ],
     extras_require={
         "vault": ["hvac>=0.9.5"],
-        "S3": ["boto3==1.14.56"],
+        "S3": ["boto3>=1.14.56"],
         "notebook_runner": ["IPython>=7.16", "nbformat>=5.0"],
     },
     classifiers=[
