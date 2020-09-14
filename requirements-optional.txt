@@ -3,3 +3,4 @@ boto3==1.14.60
 hvac==0.10.5
 IPython==7.16.1
 nbformat==5.0.7
+regex==2020.6.8
