@@ -78,7 +78,7 @@ async def test_master_give_out_chunks(master_server, log_to_stdout):
 
 @pytest.mark.asyncio
 async def test_worker():
-    with Pair1(listen=SERVER_URL, polyamorous=True, recv_timeout=100) as worker_socket:
+    with Pair1(listen=SERVER_URL, polyamorous=True, recv_timeout=500) as worker_socket:
 
         worker_task = asyncio.create_task(worker(SERVER_URL, num_workers=1))
 

@@ -70,6 +70,46 @@ There are progress bars for each of the three steps, which lets you understand w
 The `url` argument takes a fully qualified url including protocol. `tcp` is recommended:
 Example: `tcp://127.0.0.1:8080`
 
+
+## Running Scripts
+
+`mrun` has the ability to run Builders defined in python scripts or in jupyter-notebooks.
+
+The only requirements are:
+
+1. The builder file has to be in a sub-directory from where `mrun` is called.
+2. The builders you want to run are in a variable called `__builder__` or `__builders__`
+
+`mrun` will run the whole python/jupyter file, grab the builders in these variables and adds these builders to the builder queue.
+
+Assuming you have a builder in a python file: `my_builder.py`
+``` python
+class MultiplyBuilder(Builder):
+    """
+    Simple builder that multiplies the "a" sub-document by pre-set value
+    """
+
+    ...
+
+__builder__ = MultiplyBuilder(source_store,target_store,multiplier=3)
+```
+
+You can use `mrun` to run this builder and parallelize for you:
+``` shell
+mrun -n 2 -v my_builder.py
+```
+
+
+## Running multiple builders
+
+`mrun` can run multiple builders. You can have multiple builders in a single file: `json`, `python`, or `jupyter-notebook`. Or you can chain multiple files in the order you want to run them:
+``` shell
+mrun -n 32 -vv my_first_builder.json builder_2_and_3.py last_builder.ipynb
+```
+
+`mrun` will then execute the builders in these files in order.
+
+
 ## Reporting Build State
 
 `mrun` has the ability to report the status of the build pipeline to a user-provided `Store`. To do this, you first have to save the `Store` as a JSON or YAML file. Then you can use the `-r` option to give this to `mrun`. It will then periodicially add documents to the `Store` for one of 3 different events:
