@@ -11,8 +11,8 @@ nav:
   - Getting Started:
     - Using Stores: getting_started/stores.md
     - Writing a Builder: getting_started/simple_builder.md
-    - Advanced Builders: getting_started/advanced_builder.md
     - Running a Builder Pipeline: getting_started/running_builders.md
+    - Advanced Builders: getting_started/advanced_builder.md
     - Working with MapBuilder: getting_started/map_builder.md
     - Working with GroupBuilder: getting_started/group_builder.md
     - Writing a Drone: getting_started/simple_drone.md
