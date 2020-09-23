@@ -8,9 +8,9 @@
 <meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
 <link href="https://materialsproject.github.io/maggma/getting_started/running_builders/" rel="canonical"/>
 <link href="../../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-5.5.8" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-5.5.13" name="generator"/>
 <title>Running a Builder Pipeline - Maggma Documentation</title>
-<link href="../../assets/stylesheets/main.01afc2df.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/main.077507d7.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
 <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
@@ -124,15 +124,11 @@
 <input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-3" id="nav-3" type="checkbox"/>
 <label class="md-nav__link" for="nav-3">
       Getting Started
-      <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
-</span>
+      <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Getting Started" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="nav-3">
-<span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</span>
+<span class="md-nav__icon md-icon"></span>
         Getting Started
       </label>
 <ul class="md-nav__list" data-md-scrollfix="">
@@ -146,27 +142,18 @@
       Writing a Builder
     </a>
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../advanced_builder/" title="Advanced Builders">
-      Advanced Builders
-    </a>
-</li>
 <li class="md-nav__item md-nav__item--active">
 <input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
 <label class="md-nav__link md-nav__link--active" for="__toc">
         Running a Builder Pipeline
-        <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 9h14V7H3v2m0 4h14v-2H3v2m0 4h14v-2H3v2m16 0h2v-2h-2v2m0-10v2h2V7h-2m0 6h2v-2h-2v2z"></path></svg>
-</span>
+        <span class="md-nav__icon md-icon"></span>
 </label>
 <a class="md-nav__link md-nav__link--active" href="./" title="Running a Builder Pipeline">
       Running a Builder Pipeline
     </a>
 <nav aria-label="Table of contents" class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</span>
+<span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
 <ul class="md-nav__list" data-md-scrollfix="">
@@ -176,12 +163,27 @@
   </a>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#running-scripts">
+    Running Scripts
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#running-multiple-builders">
+    Running multiple builders
+  </a>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#reporting-build-state">
     Reporting Build State
   </a>
 </li>
 </ul>
 </nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="../advanced_builder/" title="Advanced Builders">
+      Advanced Builders
+    </a>
 </li>
 <li class="md-nav__item">
 <a class="md-nav__link" href="../map_builder/" title="Working with MapBuilder">
@@ -205,15 +207,11 @@
 <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" id="nav-4" type="checkbox"/>
 <label class="md-nav__link" for="nav-4">
       Reference
-      <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
-</span>
+      <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Reference" class="md-nav" data-md-level="1">
 <label class="md-nav__title" for="nav-4">
-<span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</span>
+<span class="md-nav__icon md-icon"></span>
         Reference
       </label>
 <ul class="md-nav__list" data-md-scrollfix="">
@@ -221,15 +219,11 @@
 <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4-1" id="nav-4-1" type="checkbox"/>
 <label class="md-nav__link" for="nav-4-1">
       Core
-      <span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M8.59 16.58L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.42z"></path></svg>
-</span>
+      <span class="md-nav__icon md-icon"></span>
 </label>
 <nav aria-label="Core" class="md-nav" data-md-level="2">
 <label class="md-nav__title" for="nav-4-1">
-<span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</span>
+<span class="md-nav__icon md-icon"></span>
         Core
       </label>
 <ul class="md-nav__list" data-md-scrollfix="">
@@ -284,15 +278,23 @@
 <div class="md-sidebar__inner">
 <nav aria-label="Table of contents" class="md-nav md-nav--secondary">
 <label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</span>
+<span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
 <ul class="md-nav__list" data-md-scrollfix="">
 <li class="md-nav__item">
 <a class="md-nav__link" href="#running-distributed">
     Running Distributed
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#running-scripts">
+    Running Scripts
+  </a>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#running-multiple-builders">
+    Running multiple builders
   </a>
 </li>
 <li class="md-nav__item">
@@ -361,6 +363,32 @@ Process Items: <span class="m">100</span>%<span class="p">|</span>████�
 </ol>
 <p>The <code>url</code> argument takes a fully qualified url including protocol. <code>tcp</code> is recommended:
 Example: <code>tcp://127.0.0.1:8080</code></p>
+<h2 id="running-scripts">Running Scripts<a class="headerlink" href="#running-scripts" title="Permanent link">¶</a></h2>
+<p><code>mrun</code> has the ability to run Builders defined in python scripts or in jupyter-notebooks.</p>
+<p>The only requirements are:</p>
+<ol>
+<li>The builder file has to be in a sub-directory from where <code>mrun</code> is called.</li>
+<li>The builders you want to run are in a variable called <code>__builder__</code> or <code>__builders__</code></li>
+</ol>
+<p><code>mrun</code> will run the whole python/jupyter file, grab the builders in these variables and adds these builders to the builder queue.</p>
+<p>Assuming you have a builder in a python file: <code>my_builder.py</code>
+<div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Simple builder that multiplies the "a" sub-document by pre-set value</span>
+<span class="sd">    """</span>
+
+    <span class="o">...</span>
+
+<span class="n">__builder__</span> <span class="o">=</span> <span class="n">MultiplyBuilder</span><span class="p">(</span><span class="n">source_store</span><span class="p">,</span><span class="n">target_store</span><span class="p">,</span><span class="n">multiplier</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</code></pre></div></p>
+<p>You can use <code>mrun</code> to run this builder and parallelize for you:
+<div class="highlight"><pre><span></span><code>mrun -n <span class="m">2</span> -v my_builder.py
+</code></pre></div></p>
+<h2 id="running-multiple-builders">Running multiple builders<a class="headerlink" href="#running-multiple-builders" title="Permanent link">¶</a></h2>
+<p><code>mrun</code> can run multiple builders. You can have multiple builders in a single file: <code>json</code>, <code>python</code>, or <code>jupyter-notebook</code>. Or you can chain multiple files in the order you want to run them:
+<div class="highlight"><pre><span></span><code>mrun -n <span class="m">32</span> -vv my_first_builder.json builder_2_and_3.py last_builder.ipynb
+</code></pre></div></p>
+<p><code>mrun</code> will then execute the builders in these files in order.</p>
 <h2 id="reporting-build-state">Reporting Build State<a class="headerlink" href="#reporting-build-state" title="Permanent link">¶</a></h2>
 <p><code>mrun</code> has the ability to report the status of the build pipeline to a user-provided <code>Store</code>. To do this, you first have to save the <code>Store</code> as a JSON or YAML file. Then you can use the <code>-r</code> option to give this to <code>mrun</code>. It will then periodicially add documents to the <code>Store</code> for one of 3 different events:</p>
 <ul>
@@ -376,7 +404,7 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
 <footer class="md-footer">
 <div class="md-footer-nav">
 <nav aria-label="Footer" class="md-footer-nav__inner md-grid">
-<a class="md-footer-nav__link md-footer-nav__link--prev" href="../advanced_builder/" rel="prev" title="Advanced Builders">
+<a class="md-footer-nav__link md-footer-nav__link--prev" href="../simple_builder/" rel="prev" title="Writing a Builder">
 <div class="md-footer-nav__button md-icon">
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
 </div>
@@ -385,17 +413,17 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Advanced Builders
+                Writing a Builder
               </div>
 </div>
 </a>
-<a class="md-footer-nav__link md-footer-nav__link--next" href="../map_builder/" rel="next" title="Working with MapBuilder">
+<a class="md-footer-nav__link md-footer-nav__link--next" href="../advanced_builder/" rel="next" title="Advanced Builders">
 <div class="md-footer-nav__title">
 <div class="md-ellipsis">
 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Working with MapBuilder
+                Advanced Builders
               </div>
 </div>
 <div class="md-footer-nav__button md-icon">
@@ -420,14 +448,14 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
 </div>
 </footer>
 </div>
-<script src="../../assets/javascripts/vendor.df0def68.min.js"></script>
-<script src="../../assets/javascripts/bundle.ba57d267.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
+<script src="../../assets/javascripts/vendor.2d1db4bd.min.js"></script>
+<script src="../../assets/javascripts/bundle.6627ddf3.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
 <script>
         app = initialize({
           base: "../..",
           features: [],
           search: Object.assign({
-            worker: "../../assets/javascripts/worker/search.fae956e7.min.js"
+            worker: "../../assets/javascripts/worker/search.5eca75d3.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
