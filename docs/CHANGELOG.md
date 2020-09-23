@@ -1,5 +1,52 @@
 # Changelog
 
+## [v0.23.1](https://github.com/materialsproject/maggma/tree/v0.23.1) (2020-09-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.23.0...v0.23.1)
+
+**Closed issues:**
+
+- FEATURE: Python file runner [\#277](https://github.com/materialsproject/maggma/issues/277)
+
+**Merged pull requests:**
+
+- Bump regex from 2020.6.8 to 2020.7.14 [\#288](https://github.com/materialsproject/maggma/pull/288) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump boto3 from 1.14.60 to 1.15.1 [\#287](https://github.com/materialsproject/maggma/pull/287) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump numpy from 1.19.1 to 1.19.2 [\#286](https://github.com/materialsproject/maggma/pull/286) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump mkdocs-material from 5.5.12 to 5.5.13 [\#285](https://github.com/materialsproject/maggma/pull/285) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump ipython from 7.16.1 to 7.18.1 [\#284](https://github.com/materialsproject/maggma/pull/284) ([dependabot[bot]](https://github.com/apps/dependabot))
+
+## [v0.23.0](https://github.com/materialsproject/maggma/tree/v0.23.0) (2020-09-14)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.22.3...v0.23.0)
+
+**Closed issues:**
+
+- Separate out S3 Object reference keys from search keys [\#206](https://github.com/materialsproject/maggma/issues/206)
+
+**Merged pull requests:**
+
+- Bump moto from 1.3.14 to 1.3.16 [\#283](https://github.com/materialsproject/maggma/pull/283) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump boto3 from 1.14.56 to 1.14.60 [\#282](https://github.com/materialsproject/maggma/pull/282) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pytest from 6.0.1 to 6.0.2 [\#281](https://github.com/materialsproject/maggma/pull/281) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump mkdocstrings from 0.13.1 to 0.13.2 [\#280](https://github.com/materialsproject/maggma/pull/280) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump tqdm from 4.48.2 to 4.49.0 [\#279](https://github.com/materialsproject/maggma/pull/279) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Add custom source loading [\#278](https://github.com/materialsproject/maggma/pull/278) ([shyamd](https://github.com/shyamd))
+- Bump monty from 3.0.4 to 4.0.0 [\#273](https://github.com/materialsproject/maggma/pull/273) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump boto3 from 1.14.52 to 1.14.56 [\#272](https://github.com/materialsproject/maggma/pull/272) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump mkdocstrings from 0.13.0 to 0.13.1 [\#271](https://github.com/materialsproject/maggma/pull/271) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump boto3 from 1.14.51 to 1.14.52 [\#270](https://github.com/materialsproject/maggma/pull/270) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump mkdocs-material from 5.5.11 to 5.5.12 [\#268](https://github.com/materialsproject/maggma/pull/268) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump peaceiris/actions-gh-pages from v2 to v3.6.4 [\#267](https://github.com/materialsproject/maggma/pull/267) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump actions/setup-python from v1 to v2.1.2 [\#266](https://github.com/materialsproject/maggma/pull/266) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Inject metadata via fields rather than by indicies [\#265](https://github.com/materialsproject/maggma/pull/265) ([shyamd](https://github.com/shyamd))
+- Bump pytest-mock from 3.3.0 to 3.3.1 [\#264](https://github.com/materialsproject/maggma/pull/264) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump mkdocs-material from 5.5.9 to 5.5.11 [\#263](https://github.com/materialsproject/maggma/pull/263) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump fastapi from 0.61.0 to 0.61.1 [\#262](https://github.com/materialsproject/maggma/pull/262) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump boto3 from 1.14.47 to 1.14.51 [\#261](https://github.com/materialsproject/maggma/pull/261) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump pydocstyle from 5.1.0 to 5.1.1 [\#260](https://github.com/materialsproject/maggma/pull/260) ([dependabot[bot]](https://github.com/apps/dependabot))
+- Bump mkdocs-material from 5.5.8 to 5.5.9 [\#259](https://github.com/materialsproject/maggma/pull/259) ([dependabot[bot]](https://github.com/apps/dependabot))
+
 ## [v0.22.3](https://github.com/materialsproject/maggma/tree/v0.22.3) (2020-08-26)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.22.2...v0.22.3)
