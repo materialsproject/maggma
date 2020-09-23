@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.23.2](https://github.com/materialsproject/maggma/tree/v0.23.2) (2020-09-23)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.23.1...v0.23.2)
+
 ## [v0.23.1](https://github.com/materialsproject/maggma/tree/v0.23.1) (2020-09-21)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.23.0...v0.23.1)
