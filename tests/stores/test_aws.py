@@ -1,5 +1,6 @@
 import time
 import zlib
+from datetime import datetime
 
 import boto3
 import msgpack
@@ -8,7 +9,6 @@ from botocore.exceptions import ClientError
 from monty.msgpack import default, object_hook
 from moto import mock_s3
 
-from datetime import datetime
 from maggma.stores import MemoryStore, MongoStore, S3Store
 
 

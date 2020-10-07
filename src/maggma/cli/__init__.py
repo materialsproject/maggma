@@ -4,6 +4,7 @@
 
 import asyncio
 import logging
+import sys
 from itertools import chain
 
 import click
@@ -12,7 +13,10 @@ from monty.serialization import loadfn
 from maggma.cli.distributed import master, worker
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
+from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
+
+sys.meta_path.append(ScriptFinder())
 
 
 @click.command()
@@ -56,9 +60,16 @@ def run(builders, verbosity, reporting_store, num_workers, url, num_chunks):
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
-    builders = [loadfn(b) for b in builders]
-    builders = [b if isinstance(b, list) else [b] for b in builders]
-    builders = list(chain.from_iterable(builders))
+    builder_objects = []
+
+    for b in builders:
+        if str(b).endswith(".py") or str(b).endswith(".ipynb"):
+            builder_objects.append(load_builder_from_source(b))
+        else:
+            builder_objects.append(loadfn(b))
+
+    builder_objects = [b if isinstance(b, list) else [b] for b in builder_objects]
+    builder_objects = list(chain.from_iterable(builder_objects))
 
     if reporting_store:
         reporting_store = loadfn(reporting_store)
@@ -67,14 +78,14 @@ def run(builders, verbosity, reporting_store, num_workers, url, num_chunks):
     if url:
         if num_chunks > 0:
             # Master
-            asyncio.run(master(url, builders, num_chunks))
+            asyncio.run(master(url, builder_objects, num_chunks))
         else:
             # worker
             asyncio.run(worker(url, num_workers))
     else:
         if num_workers == 1:
-            for builder in builders:
+            for builder in builder_objects:
                 serial(builder)
         else:
-            for builder in builders:
+            for builder in builder_objects:
                 asyncio.run(multi(builder, num_workers))

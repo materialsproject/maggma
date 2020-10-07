@@ -4,10 +4,10 @@ Advanced Stores for connecting to AWS data
 """
 
 import threading
+import warnings
 import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
-import warnings
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
