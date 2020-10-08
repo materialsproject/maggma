@@ -309,7 +309,10 @@ class S3Store(Store):
         # Use store's update to remove key clashes
         self.index.update(search_docs, key=self.key)
 
-    def get_bucket(self):
+    def _get_bucket(self):
+        """
+        If on the main thread return the bucket created above, else create a new bucket on each thread
+        """
         if threading.current_thread().name == "MainThread":
             return self.s3_bucket
         if not hasattr(self._thread_local, "s3_bucket"):
@@ -327,7 +330,7 @@ class S3Store(Store):
             search_keys: list of keys to pull from the docs and be inserted into the
             index db
         """
-        s3_bucket = self.get_bucket()
+        s3_bucket = self._get_bucket()
 
         search_doc = {k: str(doc[k]) for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
