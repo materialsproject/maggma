@@ -41,7 +41,7 @@ class S3Store(Store):
         sub_dir: str = None,
         s3_workers: int = 1,
         key: str = "task_id",
-        searchable_fields: List[str] = [],
+        searchable_fields: List[str] = None,
         **kwargs,
     ):
         """
@@ -69,7 +69,7 @@ class S3Store(Store):
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
-        self.searchable_fields = searchable_fields
+        self.searchable_fields = searchable_fields if searchable_fields else []
 
         # Force the key to be the same as the index
         assert isinstance(
@@ -298,7 +298,7 @@ class S3Store(Store):
                 pool.submit(
                     fn=self.write_doc_to_s3,
                     doc=itr_doc,
-                    search_keys=key + additional_metadata,
+                    search_keys=key + additional_metadata + self.searchable_fields,
                 )
                 for itr_doc in docs
             }
