@@ -397,9 +397,14 @@ class S3Store(Store):
                         the last_updated of the target Store and using
                         that to filter out new items in
         """
-        return self.index.newer_in(
-            target=target, criteria=criteria, exhaustive=exhaustive
-        )
+        if hasattr(target, "index"):
+            return self.index.newer_in(
+                target=target.index, criteria=criteria, exhaustive=exhaustive
+            )
+        else:
+            return self.index.newer_in(
+                target=target, criteria=criteria, exhaustive=exhaustive
+            )
 
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
