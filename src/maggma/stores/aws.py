@@ -41,7 +41,7 @@ class S3Store(Store):
         sub_dir: str = None,
         s3_workers: int = 1,
         key: str = "task_id",
-        searchable_fields: List[str] = [],
+        searchable_fields: Optional[List[str]] = None,
         **kwargs,
     ):
         """
@@ -69,7 +69,7 @@ class S3Store(Store):
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
-        self.searchable_fields = searchable_fields
+        self.searchable_fields = searchable_fields if searchable_fields else []
 
         # Force the key to be the same as the index
         assert isinstance(
@@ -199,7 +199,12 @@ class S3Store(Store):
                 # MontyDecoder().process_decode only goes until it finds a from_dict
                 # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
                 # Should just return the unpacked object then let the user run process_decoded
-                yield msgpack.unpackb(data, raw=False)
+                unpacked_data = msgpack.unpackb(data, raw=False)
+                if self.last_updated_field in doc:
+                    unpacked_data[self.last_updated_field] = doc[
+                        self.last_updated_field
+                    ]
+                yield unpacked_data
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
@@ -298,7 +303,7 @@ class S3Store(Store):
                 pool.submit(
                     fn=self.write_doc_to_s3,
                     doc=itr_doc,
-                    search_keys=key + additional_metadata,
+                    search_keys=key + additional_metadata + self.searchable_fields,
                 )
                 for itr_doc in docs
             }
@@ -309,7 +314,10 @@ class S3Store(Store):
         # Use store's update to remove key clashes
         self.index.update(search_docs, key=self.key)
 
-    def get_bucket(self):
+    def _get_bucket(self):
+        """
+        If on the main thread return the bucket created above, else create a new bucket on each thread
+        """
         if threading.current_thread().name == "MainThread":
             return self.s3_bucket
         if not hasattr(self._thread_local, "s3_bucket"):
@@ -327,7 +335,7 @@ class S3Store(Store):
             search_keys: list of keys to pull from the docs and be inserted into the
             index db
         """
-        s3_bucket = self.get_bucket()
+        s3_bucket = self._get_bucket()
 
         search_doc = {k: str(doc[k]) for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
@@ -345,14 +353,18 @@ class S3Store(Store):
             search_doc["compression"] = "zlib"
             data = zlib.compress(data)
 
-        if self.last_updated_field in search_doc:
+        if self.last_updated_field in doc:
+            # need this conversion for aws metadata insert
             search_doc[self.last_updated_field] = str(
-                to_isoformat_ceil_ms(search_doc[self.last_updated_field])
+                to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
         )
+
+        if self.last_updated_field in doc:
+            search_doc[self.last_updated_field] = doc[self.last_updated_field]
 
         return search_doc
 
@@ -394,9 +406,14 @@ class S3Store(Store):
                         the last_updated of the target Store and using
                         that to filter out new items in
         """
-        return self.index.newer_in(
-            target=target, criteria=criteria, exhaustive=exhaustive
-        )
+        if hasattr(target, "index"):
+            return self.index.newer_in(
+                target=target.index, criteria=criteria, exhaustive=exhaustive
+            )
+        else:
+            return self.index.newer_in(
+                target=target, criteria=criteria, exhaustive=exhaustive
+            )
 
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
@@ -405,6 +422,7 @@ class S3Store(Store):
         """
         Rebuilds the index Store from the data in S3
         Relies on the index document being stores as the metadata for the file
+        This can help recover lost databases
         """
         index_docs = []
         for file in self.s3_bucket.objects.all():
@@ -430,6 +448,10 @@ class S3Store(Store):
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
+            if self.last_updated_field in new_meta:
+                new_meta[self.last_updated_field] = str(
+                    to_isoformat_ceil_ms(new_meta[self.last_updated_field])
+                )
             # s3_object.metadata.update(new_meta)
             s3_object.copy_from(
                 CopySource={"Bucket": self.s3_bucket.name, "Key": key_},
