@@ -199,7 +199,12 @@ class S3Store(Store):
                 # MontyDecoder().process_decode only goes until it finds a from_dict
                 # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
                 # Should just return the unpacked object then let the user run process_decoded
-                yield msgpack.unpackb(data, raw=False)
+                unpacked_data = msgpack.unpackb(data, raw=False)
+                if self.last_updated_field in doc:
+                    unpacked_data[self.last_updated_field] = doc[
+                        self.last_updated_field
+                    ]
+                yield unpacked_data
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
@@ -348,14 +353,18 @@ class S3Store(Store):
             search_doc["compression"] = "zlib"
             data = zlib.compress(data)
 
-        if self.last_updated_field in search_doc:
+        if self.last_updated_field in doc:
+            # need this conversion for aws metadata insert
             search_doc[self.last_updated_field] = str(
-                to_isoformat_ceil_ms(search_doc[self.last_updated_field])
+                to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
         )
+
+        if self.last_updated_field in doc:
+            search_doc[self.last_updated_field] = doc[self.last_updated_field]
 
         return search_doc
 
@@ -413,6 +422,7 @@ class S3Store(Store):
         """
         Rebuilds the index Store from the data in S3
         Relies on the index document being stores as the metadata for the file
+        This can help recover lost databases
         """
         index_docs = []
         for file in self.s3_bucket.objects.all():
@@ -438,6 +448,10 @@ class S3Store(Store):
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
+            if self.last_updated_field in new_meta:
+                new_meta[self.last_updated_field] = str(
+                    to_isoformat_ceil_ms(new_meta[self.last_updated_field])
+                )
             # s3_object.metadata.update(new_meta)
             s3_object.copy_from(
                 CopySource={"Bucket": self.s3_bucket.name, "Key": key_},

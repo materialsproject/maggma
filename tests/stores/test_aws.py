@@ -26,20 +26,27 @@ def s3store():
         conn = boto3.client("s3")
         conn.create_bucket(Bucket="bucket1")
 
-        index = MemoryStore("index'")
+        index = MemoryStore("index")
         store = S3Store(index, "bucket1")
         store.connect()
 
-        check_doc = {"task_id": "mp-1", "data": "asd"}
-        store.index.update([{"task_id": "mp-1"}])
-        store.s3_bucket.put_object(
-            Key="mp-1", Body=msgpack.packb(check_doc, default=default)
+        store.update(
+            [
+                {
+                    "task_id": "mp-1",
+                    "data": "asd",
+                    store.last_updated_field: datetime.utcnow(),
+                }
+            ]
         )
-
-        check_doc2 = {"task_id": "mp-3", "data": "sdf"}
-        store.index.update([{"task_id": "mp-3", "compression": "zlib"}])
-        store.s3_bucket.put_object(
-            Key="mp-3", Body=zlib.compress(msgpack.packb(check_doc2, default=default))
+        store.update(
+            [
+                {
+                    "task_id": "mp-3",
+                    "data": "sdf",
+                    store.last_updated_field: datetime.utcnow(),
+                }
+            ]
         )
 
         yield store
@@ -51,7 +58,7 @@ def s3store_w_subdir():
         conn = boto3.client("s3")
         conn.create_bucket(Bucket="bucket1")
 
-        index = MemoryStore("index'")
+        index = MemoryStore("index")
         store = S3Store(index, "bucket1", sub_dir="subdir1", s3_workers=1)
         store.connect()
 
@@ -89,7 +96,14 @@ def test_keys():
 
 
 def test_multi_update(s3store, s3store_multi):
-    data = [{"task_id": str(j), "data": "DATA"} for j in range(32)]
+    data = [
+        {
+            "task_id": str(j),
+            "data": "DATA",
+            s3store_multi.last_updated_field: datetime.utcnow(),
+        }
+        for j in range(32)
+    ]
 
     def fake_writing(doc, search_keys):
         time.sleep(0.20)
@@ -127,8 +141,16 @@ def test_qeuery(s3store):
 
 
 def test_update(s3store):
-    s3store.update([{"task_id": "mp-2", "data": "asd"}])
-    assert s3store.query_one({"task_id": "mp-2"}) is not None
+    s3store.update(
+        [
+            {
+                "task_id": "mp-199999",
+                "data": "asd",
+                s3store.last_updated_field: datetime.utcnow(),
+            }
+        ]
+    )
+    assert s3store.query_one({"task_id": "mp-199999"}) is not None
 
     s3store.compress = True
     s3store.update([{"task_id": "mp-4", "data": "asd"}])
@@ -176,7 +198,7 @@ def test_close(s3store):
 def test_bad_import(mocker):
     mocker.patch("maggma.stores.aws.boto3", None)
     with pytest.raises(RuntimeError):
-        index = MemoryStore("index'")
+        index = MemoryStore("index")
         S3Store(index, "bucket1")
 
 
@@ -247,6 +269,33 @@ def test_searchable_fields(s3store):
 
     # This should only work if the searchable field was put into the index store
     assert set(s3store.distinct("task_id")) == {"mp-0", "mp-1", "mp-2", "mp-3"}
+
+
+def test_newer_in(s3store):
+    with mock_s3():
+        tic = datetime.utcnow()
+        tic2 = datetime.utcnow()
+        conn = boto3.client("s3")
+        conn.create_bucket(Bucket="bucket")
+
+        index_old = MemoryStore("index_old")
+        old_store = S3Store(index_old, "bucket")
+        old_store.connect()
+        old_store.update([{"task_id": "mp-1", "last_updated": tic}])
+        old_store.update([{"task_id": "mp-2", "last_updated": tic}])
+
+        index_new = MemoryStore("index_new")
+        new_store = S3Store(index_new, "bucket")
+        new_store.connect()
+        new_store.update([{"task_id": "mp-1", "last_updated": tic2}])
+        new_store.update([{"task_id": "mp-2", "last_updated": tic2}])
+        print(new_store.query_one())
+        print(new_store.index.query_one())
+        # assert len(old_store.newer_in(new_store)) == 2
+        # assert len(new_store.newer_in(old_store)) == 0
+        #
+        # assert len(old_store.newer_in(new_store.index)) == 2
+        # assert len(new_store.newer_in(old_store.index)) == 0
 
 
 def test_additional_metadata(s3store):
