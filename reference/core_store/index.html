@@ -1,546 +1,914 @@
 
-<!DOCTYPE html>
-
-<html class="no-js" lang="en">
-<head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1" name="viewport"/>
-<meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
-<link href="https://materialsproject.github.io/maggma/reference/core_store/" rel="canonical"/>
-<link href="../../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-5.5.13" name="generator"/>
-<title>Store - Maggma Documentation</title>
-<link href="../../assets/stylesheets/main.077507d7.min.css" rel="stylesheet"/>
-<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
-<style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
-</head>
-<body dir="ltr">
-<input autocomplete="off" class="md-toggle" data-md-toggle="drawer" id="__drawer" type="checkbox"/>
-<input autocomplete="off" class="md-toggle" data-md-toggle="search" id="__search" type="checkbox"/>
-<label class="md-overlay" for="__drawer"></label>
-<div data-md-component="skip">
-<a class="md-skip" href="#maggma.core.store">
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for Maggma, a files-to-API data pipeline for scientific applications">
+      
+      
+        <link rel="canonical" href="https://materialsproject.github.io/maggma/reference/core_store/">
+      
+      
+      <link rel="shortcut icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-6.0.2">
+    
+    
+      
+        <title>Store - Maggma Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.38780c08.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.3f72e892.min.css">
+        
+      
+    
+    
+    
+      
+        
+        <link href="https://fonts.gstatic.com" rel="preconnect" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
+      
+    
+    
+    
+    
+      
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+      
+  
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#maggma.core.store" class="md-skip">
           Skip to content
         </a>
-</div>
-<div data-md-component="announce">
-</div>
-<header class="md-header" data-md-component="header">
-<nav aria-label="Header" class="md-header-nav md-grid">
-<a aria-label="Maggma Documentation" class="md-header-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
-</a>
-<label class="md-header-nav__button md-icon" for="__drawer">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"></path></svg>
-</label>
-<div class="md-header-nav__title" data-md-component="header-title">
-<div class="md-header-nav__ellipsis">
-<span class="md-header-nav__topic md-ellipsis">
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid" aria-label="Header">
+    <a href="https://materialsproject.github.io/maggma/" title="Maggma Documentation" class="md-header-nav__button md-logo" aria-label="Maggma Documentation">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header-nav__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header-nav__title" data-md-component="header-title">
+      
+        <div class="md-header-nav__ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
             Maggma Documentation
           </span>
-<span class="md-header-nav__topic md-ellipsis">
+          <span class="md-header-nav__topic md-ellipsis">
             
               Store
             
           </span>
-</div>
-</div>
-<label class="md-header-nav__button md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
-</label>
+        </div>
+      
+    </div>
+    
+      <label class="md-header-nav__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
 <div class="md-search" data-md-component="search" role="dialog">
-<label class="md-search__overlay" for="__search"></label>
-<div class="md-search__inner" role="search">
-<form class="md-search__form" name="search">
-<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" spellcheck="false" type="text"/>
-<label class="md-search__icon md-icon" for="__search">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</label>
-<button aria-label="Clear" class="md-search__icon md-icon" data-md-component="search-reset" tabindex="-1" type="reset">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"></path></svg>
-</button>
-</form>
-<div class="md-search__output">
-<div class="md-search__scrollwrap" data-md-scrollfix="">
-<div class="md-search-result" data-md-component="search-result">
-<div class="md-search-result__meta">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active">
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" data-md-component="search-reset" tabindex="-1">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+      </button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
             Initializing search
           </div>
-<ol class="md-search-result__list"></ol>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="md-header-nav__source">
-<a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
-</div>
-<div class="md-source__repository">
+    
+    
+      <div class="md-header-nav__source">
+        
+<a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
     GitHub
   </div>
 </a>
-</div>
-</nav>
+      </div>
+    
+  </nav>
 </header>
-<div class="md-container" data-md-component="container">
-<main class="md-main" data-md-component="main">
-<div class="md-main__inner md-grid">
-<div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Navigation" class="md-nav md-nav--primary" data-md-level="0">
-<label class="md-nav__title" for="__drawer">
-<a aria-label="Maggma Documentation" class="md-nav__button md-logo" href="https://materialsproject.github.io/maggma/" title="Maggma Documentation">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"></path></svg>
-</a>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="https://materialsproject.github.io/maggma/" title="Maggma Documentation" class="md-nav__button md-logo" aria-label="Maggma Documentation">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 003-3 3 3 0 00-3-3 3 3 0 00-3 3 3 3 0 003 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
     Maggma Documentation
   </label>
-<div class="md-nav__source">
-<a class="md-source" href="https://github.com/materialsproject/maggma/" title="Go to repository">
-<div class="md-source__icon md-icon">
-<svg viewbox="0 0 448 512" xmlns="http://www.w3.org/2000/svg"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"></path></svg>
-</div>
-<div class="md-source__repository">
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05L244 40.45a28.87 28.87 0 00-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 01-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 000 40.81l195.61 195.6a28.86 28.86 0 0040.8 0l194.69-194.69a28.86 28.86 0 000-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
     GitHub
   </div>
 </a>
-</div>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../.." title="Home">
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../.." class="md-nav__link">
       Home
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../concepts/" title="Core Concepts">
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../concepts/" class="md-nav__link">
       Core Concepts
     </a>
-</li>
-<li class="md-nav__item md-nav__item--nested">
-<input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" id="nav-3" type="checkbox"/>
-<label class="md-nav__link" for="nav-3">
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-3" type="checkbox" id="nav-3">
+    
+    <label class="md-nav__link" for="nav-3">
       Getting Started
       <span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-label="Getting Started" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="nav-3">
-<span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
+      <label class="md-nav__title" for="nav-3">
+        <span class="md-nav__icon md-icon"></span>
         Getting Started
       </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../getting_started/stores/" title="Using Stores">
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/stores/" class="md-nav__link">
       Using Stores
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../getting_started/simple_builder/" title="Writing a Builder">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/simple_builder/" class="md-nav__link">
       Writing a Builder
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../getting_started/running_builders/" title="Running a Builder Pipeline">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/running_builders/" class="md-nav__link">
       Running a Builder Pipeline
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../getting_started/advanced_builder/" title="Advanced Builders">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/advanced_builder/" class="md-nav__link">
       Advanced Builders
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../getting_started/map_builder/" title="Working with MapBuilder">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/map_builder/" class="md-nav__link">
       Working with MapBuilder
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../getting_started/group_builder/" title="Working with GroupBuilder">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/group_builder/" class="md-nav__link">
       Working with GroupBuilder
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../getting_started/simple_drone/" title="Writing a Drone">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../../getting_started/simple_drone/" class="md-nav__link">
       Writing a Drone
     </a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-4" id="nav-4" type="checkbox"/>
-<label class="md-nav__link" for="nav-4">
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4" type="checkbox" id="nav-4" checked>
+    
+    <label class="md-nav__link" for="nav-4">
       Reference
       <span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-label="Reference" class="md-nav" data-md-level="1">
-<label class="md-nav__title" for="nav-4">
-<span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Reference" data-md-level="1">
+      <label class="md-nav__title" for="nav-4">
+        <span class="md-nav__icon md-icon"></span>
         Reference
       </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item md-nav__item--active md-nav__item--nested">
-<input checked="" class="md-nav__toggle md-toggle" data-md-toggle="nav-4-1" id="nav-4-1" type="checkbox"/>
-<label class="md-nav__link" for="nav-4-1">
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    
+      <input class="md-nav__toggle md-toggle" data-md-toggle="nav-4-1" type="checkbox" id="nav-4-1" checked>
+    
+    <label class="md-nav__link" for="nav-4-1">
       Core
       <span class="md-nav__icon md-icon"></span>
-</label>
-<nav aria-label="Core" class="md-nav" data-md-level="2">
-<label class="md-nav__title" for="nav-4-1">
-<span class="md-nav__icon md-icon"></span>
+    </label>
+    <nav class="md-nav" aria-label="Core" data-md-level="2">
+      <label class="md-nav__title" for="nav-4-1">
+        <span class="md-nav__icon md-icon"></span>
         Core
       </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item md-nav__item--active">
-<input class="md-nav__toggle md-toggle" data-md-toggle="toc" id="__toc" type="checkbox"/>
-<label class="md-nav__link md-nav__link--active" for="__toc">
+      <ul class="md-nav__list" data-md-scrollfix>
+        
+        
+          
+          
+          
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="__toc">
         Store
         <span class="md-nav__icon md-icon"></span>
-</label>
-<a class="md-nav__link md-nav__link--active" href="./" title="Store">
+      </label>
+    
+    <a href="./" class="md-nav__link md-nav__link--active">
       Store
     </a>
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
+    
+      
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store">
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store" class="md-nav__link">
     maggma.core.store
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.DateTimeFormat">
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store.DateTimeFormat" class="md-nav__link">
     DateTimeFormat
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Sort">
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store.Sort" class="md-nav__link">
     Sort
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store">
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store.Store" class="md-nav__link">
     Store
   </a>
-<nav aria-label="Store" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.last_updated">
+  
+    <nav class="md-nav" aria-label="Store">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.last_updated" class="md-nav__link">
     last_updated
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.name">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.name" class="md-nav__link">
     name
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.__init__">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.__init__" class="md-nav__link">
     __init__()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.close">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.close" class="md-nav__link">
     close()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.connect">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.connect" class="md-nav__link">
     connect()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.count">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.count" class="md-nav__link">
     count()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.distinct">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.distinct" class="md-nav__link">
     distinct()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.ensure_index">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.ensure_index" class="md-nav__link">
     ensure_index()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.groupby">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.groupby" class="md-nav__link">
     groupby()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.newer_in">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.newer_in" class="md-nav__link">
     newer_in()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.query">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.query" class="md-nav__link">
     query()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.query_one">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.query_one" class="md-nav__link">
     query_one()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.remove_docs">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.remove_docs" class="md-nav__link">
     remove_docs()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.update">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.update" class="md-nav__link">
     update()
   </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.StoreError">
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store.StoreError" class="md-nav__link">
     StoreError
   </a>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../core_builder/" title="Builder">
+    
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../core_builder/" class="md-nav__link">
       Builder
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../core_validator/" title="Validator">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../core_validator/" class="md-nav__link">
       Validator
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../core_drone/" title="Drone">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../core_drone/" class="md-nav__link">
       Drone
     </a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../stores/" title="Stores">
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../stores/" class="md-nav__link">
       Stores
     </a>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../builders/" title="Builders">
+  </li>
+
+        
+          
+          
+          
+
+
+  <li class="md-nav__item">
+    <a href="../builders/" class="md-nav__link">
       Builders
     </a>
-</li>
-</ul>
-</nav>
-</li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="../../CHANGELOG/" title="Changelog">
+  </li>
+
+        
+      </ul>
+    </nav>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../../CHANGELOG/" class="md-nav__link">
       Changelog
     </a>
-</li>
-</ul>
+  </li>
+
+    
+  </ul>
 </nav>
-</div>
-</div>
-</div>
-<div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
-<div class="md-sidebar__scrollwrap">
-<div class="md-sidebar__inner">
-<nav aria-label="Table of contents" class="md-nav md-nav--secondary">
-<label class="md-nav__title" for="__toc">
-<span class="md-nav__icon md-icon"></span>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
       Table of contents
     </label>
-<ul class="md-nav__list" data-md-scrollfix="">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store">
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store" class="md-nav__link">
     maggma.core.store
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.DateTimeFormat">
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store.DateTimeFormat" class="md-nav__link">
     DateTimeFormat
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Sort">
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store.Sort" class="md-nav__link">
     Sort
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store">
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store.Store" class="md-nav__link">
     Store
   </a>
-<nav aria-label="Store" class="md-nav">
-<ul class="md-nav__list">
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.last_updated">
+  
+    <nav class="md-nav" aria-label="Store">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.last_updated" class="md-nav__link">
     last_updated
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.name">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.name" class="md-nav__link">
     name
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.__init__">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.__init__" class="md-nav__link">
     __init__()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.close">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.close" class="md-nav__link">
     close()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.connect">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.connect" class="md-nav__link">
     connect()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.count">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.count" class="md-nav__link">
     count()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.distinct">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.distinct" class="md-nav__link">
     distinct()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.ensure_index">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.ensure_index" class="md-nav__link">
     ensure_index()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.groupby">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.groupby" class="md-nav__link">
     groupby()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.newer_in">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.newer_in" class="md-nav__link">
     newer_in()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.query">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.query" class="md-nav__link">
     query()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.query_one">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.query_one" class="md-nav__link">
     query_one()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.remove_docs">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.remove_docs" class="md-nav__link">
     remove_docs()
   </a>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.Store.update">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.core.store.Store.update" class="md-nav__link">
     update()
   </a>
+  
 </li>
-</ul>
-</nav>
+        
+      </ul>
+    </nav>
+  
 </li>
-<li class="md-nav__item">
-<a class="md-nav__link" href="#maggma.core.store.StoreError">
+      
+        <li class="md-nav__item">
+  <a href="#maggma.core.store.StoreError" class="md-nav__link">
     StoreError
   </a>
+  
 </li>
-</ul>
+      
+    </ul>
+  
 </nav>
-</div>
-</div>
-</div>
-<div class="md-content">
-<article class="md-content__inner md-typeset">
-<a class="md-content__button md-icon" href="https://github.com/materialsproject/maggma/edit/master/docs/reference/core_store.md" title="Edit this page">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"></path></svg>
-</a>
-<h1>Store</h1>
-<div class="doc doc-object doc-module">
-<h2 class="hidden-toc" href="#maggma.core.store" id="maggma.core.store" style="visibility: hidden; width: 0; height: 0;">
-<a class="headerlink" href="#maggma.core.store" title="Permanent link">¶</a></h2>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/materialsproject/maggma/edit/master/docs/reference/core_store.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                  <h1>Store</h1>
+                
+                <div class="doc doc-object doc-module">
+<h2 class="hidden-toc" href="#maggma.core.store" id="maggma.core.store" style="visibility: hidden; position: absolute;">
+        <a class="headerlink" href="#maggma.core.store" title="Permanent link">&para;</a></h2>
 <div class="doc doc-contents first">
 <p>Module containing the core Store definition</p>
 <div class="doc doc-children">
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="maggma.core.store.DateTimeFormat">
-<code>DateTimeFormat</code>
-<a class="headerlink" href="#maggma.core.store.DateTimeFormat" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+        <code>DateTimeFormat</code>
+
+
+      <a class="headerlink" href="#maggma.core.store.DateTimeFormat" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Datetime format in store document </p>
 <div class="doc doc-children">
-</div>
+
+
+
+
+
+
+
+
+
+
+
+  </div>
 </div>
 </div>
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="maggma.core.store.Sort">
-<code>Sort</code>
-<a class="headerlink" href="#maggma.core.store.Sort" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+        <code>Sort</code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Sort" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Enumeration for sorting order </p>
 <div class="doc doc-children">
-</div>
+
+
+
+
+
+
+
+
+
+
+
+  </div>
 </div>
 </div>
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="maggma.core.store.Store">
-<code>Store</code>
-<a class="headerlink" href="#maggma.core.store.Store" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+        <code>Store</code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>Abstract class for a data Store
 Defines the interface for all data going in and out of a Builder</p>
 <div class="doc doc-children">
 <div class="doc doc-object doc-attribute">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.last_updated">
-<code class="highlight">
-last_updated: <span class="n">datetime</span> </code>
-<span class="doc doc-properties">
-<small class="doc doc-property doc-property-property"><code>property</code></small>
-<small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
-</span>
-<a class="headerlink" href="#maggma.core.store.Store.last_updated" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight">
+last_updated: <span class="n">datetime</span>        </code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-property"><code>property</code></small>
+      <small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
+  </span>
+
+      <a class="headerlink" href="#maggma.core.store.Store.last_updated" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Provides the most recent last_updated date time stamp from
 the documents in this Store</p>
 </div>
 </div>
 <div class="doc doc-object doc-attribute">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.name">
-<code class="highlight">
-name: <span class="nb">str</span> </code>
-<span class="doc doc-properties">
-<small class="doc doc-property doc-property-property"><code>property</code></small>
-<small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
-</span>
-<a class="headerlink" href="#maggma.core.store.Store.name" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight">
+name: <span class="nb">str</span>        </code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-property"><code>property</code></small>
+      <small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
+  </span>
+
+      <a class="headerlink" href="#maggma.core.store.Store.name" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Return a string representing this data source</p>
 </div>
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.__init__">
-<code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">'task_id'</span><span class="p">,</span> <span class="n">last_updated_field</span><span class="o">=</span><span class="s1">'last_updated'</span><span class="p">,</span> <span class="n">last_updated_type</span><span class="o">=&lt;</span><span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">DateTime</span><span class="p">:</span> <span class="s1">'datetime'</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<span class="doc doc-properties">
-<small class="doc doc-property doc-property-special"><code>special</code></small>
-</span>
-<a class="headerlink" href="#maggma.core.store.Store.__init__" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">'task_id'</span><span class="p">,</span> <span class="n">last_updated_field</span><span class="o">=</span><span class="s1">'last_updated'</span><span class="p">,</span> <span class="n">last_updated_type</span><span class="o">=&lt;</span><span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">DateTime</span><span class="p">:</span> <span class="s1">'datetime'</span><span class="o">&gt;</span><span class="p">,</span> <span class="n">validator</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>        </code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+      <a class="headerlink" href="#maggma.core.store.Store.__init__" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p><strong>Parameters:</strong></p>
 <table>
 <thead>
@@ -588,8 +956,8 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"task_id"</span><span class="p">,</span>
@@ -623,14 +991,17 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.close">
-<code class="highlight language-python">
-close<span class="p">(</span><span class="bp">self</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.close" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+close<span class="p">(</span><span class="bp">self</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.close" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Closes any connections</p>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">"""</span>
@@ -643,10 +1014,13 @@ close<span class="p">(</span><span class="bp">self</span><span class="p">)</span
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.connect">
-<code class="highlight language-python">
-connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.connect" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.connect" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Connect to the source data</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -670,8 +1044,8 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">"""</span>
@@ -687,10 +1061,13 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.count">
-<code class="highlight language-python">
-count<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.count" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+count<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.count" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Counts the number of documents matching the query criteria</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -714,8 +1091,8 @@ count<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
     <span class="sd">"""</span>
@@ -731,10 +1108,13 @@ count<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.distinct">
-<code class="highlight language-python">
-distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.distinct" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.distinct" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Get all distinct values for a field</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -766,8 +1146,8 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
@@ -792,10 +1172,13 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.ensure_index">
-<code class="highlight language-python">
-ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.ensure_index" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">unique</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.ensure_index" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Tries to create an index and return true if it suceeded</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -844,8 +1227,8 @@ ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="sd">"""</span>
@@ -865,10 +1248,13 @@ ensure_index<span class="p">(</span><span class="bp">self</span><span class="p">
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.groupby">
-<code class="highlight language-python">
-groupby<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.groupby" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+groupby<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.groupby" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Simple grouping function that will group documents
 by keys.</p>
 <p><strong>Parameters:</strong></p>
@@ -951,8 +1337,8 @@ values are 1 for ascending or -1 for descending.</p>
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
@@ -986,10 +1372,13 @@ values are 1 for ascending or -1 for descending.</p>
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.newer_in">
-<code class="highlight language-python">
-newer_in<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.newer_in" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+newer_in<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.newer_in" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Returns the keys of documents that are newer in the target
 Store than this Store.</p>
 <p><strong>Parameters:</strong></p>
@@ -1032,8 +1421,8 @@ Store than this Store.</p>
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -1091,10 +1480,13 @@ Store than this Store.</p>
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.query">
-<code class="highlight language-python">
-query<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.query" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+query<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.query" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Queries the Store for a set of documents</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1151,8 +1543,8 @@ values are 1 for ascending or -1 for descending.</p>
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
@@ -1180,10 +1572,13 @@ values are 1 for ascending or -1 for descending.</p>
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.query_one">
-<code class="highlight language-python">
-query_one<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.query_one" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+query_one<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.query_one" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Queries the Store for a single document</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1224,8 +1619,8 @@ values are 1 for ascending or -1 for descending.</p>
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">query_one</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1251,10 +1646,13 @@ values are 1 for ascending or -1 for descending.</p>
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.remove_docs">
-<code class="highlight language-python">
-remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.remove_docs" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.remove_docs" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Remove docs matching the query dictionary</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1278,8 +1676,8 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
     <span class="sd">"""</span>
@@ -1295,10 +1693,13 @@ remove_docs<span class="p">(</span><span class="bp">self</span><span class="p">,
 </div>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.core.store.Store.update">
-<code class="highlight language-python">
-update<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
-<a class="headerlink" href="#maggma.core.store.Store.update" title="Permanent link">¶</a></h3>
-<div class="doc doc-contents">
+
+        <code class="highlight language-python">
+update<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>        </code>
+
+
+      <a class="headerlink" href="#maggma.core.store.Store.update" title="Permanent link">&para;</a></h3>
+<div class="doc doc-contents ">
 <p>Update documents into the Store</p>
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1333,8 +1734,8 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 </tbody>
 </table>
 <details class="quote">
-<summary>Source code in <code>maggma/core/store.py</code></summary>
-<div class="highlight">
+          <summary>Source code in <code>maggma/core/store.py</code></summary>
+          <div class="highlight">
 <pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">"""</span>
@@ -1357,78 +1758,114 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 </div>
 <div class="doc doc-object doc-class">
 <h2 class="doc doc-heading" id="maggma.core.store.StoreError">
-<code>StoreError</code>
-<a class="headerlink" href="#maggma.core.store.StoreError" title="Permanent link">¶</a></h2>
-<div class="doc doc-contents">
+
+        <code>StoreError</code>
+
+
+      <a class="headerlink" href="#maggma.core.store.StoreError" title="Permanent link">&para;</a></h2>
+<div class="doc doc-contents ">
 <p>General Store-related error </p>
 <div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+  </div>
 </div>
 </div>
 </div>
 </div>
 </div>
-</div>
-</article>
-</div>
-</div>
-</main>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
 <footer class="md-footer">
-<div class="md-footer-nav">
-<nav aria-label="Footer" class="md-footer-nav__inner md-grid">
-<a class="md-footer-nav__link md-footer-nav__link--prev" href="../../getting_started/simple_drone/" rel="prev" title="Writing a Drone">
-<div class="md-footer-nav__button md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
-</div>
-<div class="md-footer-nav__title">
-<div class="md-ellipsis">
-<span class="md-footer-nav__direction">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid" aria-label="Footer">
+        
+          <a href="../../getting_started/simple_drone/" class="md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+            </div>
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
                   Previous
                 </span>
                 Writing a Drone
               </div>
-</div>
-</a>
-<a class="md-footer-nav__link md-footer-nav__link--next" href="../core_builder/" rel="next" title="Builder">
-<div class="md-footer-nav__title">
-<div class="md-ellipsis">
-<span class="md-footer-nav__direction">
+            </div>
+          </a>
+        
+        
+          <a href="../core_builder/" class="md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-footer-nav__title">
+              <div class="md-ellipsis">
+                <span class="md-footer-nav__direction">
                   Next
                 </span>
                 Builder
               </div>
-</div>
-<div class="md-footer-nav__button md-icon">
-<svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"></path></svg>
-</div>
-</a>
-</nav>
-</div>
-<div class="md-footer-meta md-typeset">
-<div class="md-footer-meta__inner md-grid">
-<div class="md-footer-copyright">
-<div class="md-footer-copyright__highlight">
+            </div>
+            <div class="md-footer-nav__button md-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+          <div class="md-footer-copyright__highlight">
             Built by The Materials Project
           </div>
         
         Made with
-        <a href="https://squidfunk.github.io/mkdocs-material/" rel="noopener" target="_blank">
+        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
           Material for MkDocs
         </a>
-</div>
-</div>
-</div>
+      </div>
+      
+    </div>
+  </div>
 </footer>
-</div>
-<script src="../../assets/javascripts/vendor.2d1db4bd.min.js"></script>
-<script src="../../assets/javascripts/bundle.6627ddf3.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents"}</script>
-<script>
+      
+    </div>
+    
+      <script src="../../assets/javascripts/vendor.77e55a48.min.js"></script>
+      <script src="../../assets/javascripts/bundle.9554a270.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+      
+      <script>
         app = initialize({
           base: "../..",
           features: [],
           search: Object.assign({
-            worker: "../../assets/javascripts/worker/search.5eca75d3.min.js"
+            worker: "../../assets/javascripts/worker/search.4ac00218.min.js"
           }, typeof search !== "undefined" && search)
         })
       </script>
-</body>
+      
+    
+  </body>
 </html>
