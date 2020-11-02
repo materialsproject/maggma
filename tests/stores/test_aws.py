@@ -273,7 +273,7 @@ def test_searchable_fields(s3store):
 
 def test_newer_in(s3store):
     with mock_s3():
-        tic = datetime.utcnow()
+        tic = datetime(2018, 4, 12, 16)
         tic2 = datetime.utcnow()
         conn = boto3.client("s3")
         conn.create_bucket(Bucket="bucket")
@@ -289,13 +289,12 @@ def test_newer_in(s3store):
         new_store.connect()
         new_store.update([{"task_id": "mp-1", "last_updated": tic2}])
         new_store.update([{"task_id": "mp-2", "last_updated": tic2}])
-        print(new_store.query_one())
-        print(new_store.index.query_one())
-        # assert len(old_store.newer_in(new_store)) == 2
-        # assert len(new_store.newer_in(old_store)) == 0
-        #
-        # assert len(old_store.newer_in(new_store.index)) == 2
-        # assert len(new_store.newer_in(old_store.index)) == 0
+
+        assert len(old_store.newer_in(new_store)) == 2
+        assert len(new_store.newer_in(old_store)) == 0
+
+        assert len(old_store.newer_in(new_store.index)) == 2
+        assert len(new_store.newer_in(old_store.index)) == 0
 
 
 def test_additional_metadata(s3store):
