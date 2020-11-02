@@ -41,7 +41,7 @@ class S3Store(Store):
         sub_dir: str = None,
         s3_workers: int = 1,
         key: str = "task_id",
-        searchable_fields: List[str] = None,
+        searchable_fields: Optional[List[str]] = None,
         **kwargs,
     ):
         """
