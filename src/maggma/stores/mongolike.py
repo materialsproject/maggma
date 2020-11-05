@@ -327,7 +327,7 @@ class MongoStore(Store):
     def close(self):
         """ Close up all collections """
         self._collection.database.client.close()
-        if self.ssh_tunnel:
+        if self.ssh_tunnel is not None:
             self.ssh_tunnel.stop()
 
     def __eq__(self, other: object) -> bool:
@@ -395,6 +395,7 @@ class MemoryStore(MongoStore):
         """
         self.collection_name = collection_name
         self._collection = None
+        self.ssh_tunnel = None  # This is to fix issues with the tunnel on close
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)  # noqa
 

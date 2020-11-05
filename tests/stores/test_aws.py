@@ -26,7 +26,7 @@ def s3store():
         conn = boto3.client("s3")
         conn.create_bucket(Bucket="bucket1")
 
-        index = MemoryStore("index'")
+        index = MemoryStore("index")
         store = S3Store(index, "bucket1")
         store.connect()
 
