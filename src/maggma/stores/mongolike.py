@@ -79,7 +79,8 @@ class MongoStore(Store):
                 conn = MongoClient(self.host, self.port)
             else:
                 self.ssh_tunnel.start()
-                conn = MongoClient(*self.ssh_tunnel.tunnel.local_bind_address)
+                host, port = self.ssh_tunnel.local_address
+                conn = MongoClient(host=host, port=port)
             db = conn[self.database]
             if self.username != "":
                 db.authenticate(self.username, self.password)
@@ -514,7 +515,7 @@ class JSONStore(MemoryStore):
 
 class SSHTunnel(MSONable):
 
-    __TUNNELS = {}
+    __TUNNELS: Dict[str, SSHTunnelForwarder] = {}
 
     def __init__(
         self,
@@ -549,11 +550,11 @@ class SSHTunnel(MSONable):
             open_port = _find_free_port()
             local_bind_address = ("0.0.0.0", open_port)
 
-            ssh_address_or_host = tunnel_server_address.split(":")
-            ssh_address_or_host[1] = int(ssh_address_or_host[1])
+            ssh_address, ssh_port = tunnel_server_address.split(":")
+            ssh_port = int(ssh_port)  # type: ignore
 
-            remote_bind_address = remote_server_address.split(":")
-            remote_bind_address[1] = int(remote_bind_address[1])
+            remote_bind_address, remote_bind_port = remote_server_address.split(":")
+            remote_bind_port = int(remote_bind_port)  # type: ignore
 
             if private_key is not None:
                 ssh_password = None
@@ -563,9 +564,9 @@ class SSHTunnel(MSONable):
                 ssh_private_key_password = None
 
             self.tunnel = SSHTunnelForwarder(
-                ssh_address_or_host=tuple(ssh_address_or_host),
+                ssh_address_or_host=(ssh_address, ssh_port),
                 local_bind_address=local_bind_address,
-                remote_bind_address=tuple(remote_bind_address),
+                remote_bind_address=(remote_bind_address, remote_bind_port),
                 ssh_username=username,
                 ssh_password=ssh_password,
                 ssh_private_key_password=ssh_private_key_password,
@@ -580,6 +581,10 @@ class SSHTunnel(MSONable):
     def stop(self):
         if self.tunnel.tunnel_is_up:
             self.tunnel.stop()
+
+    @property
+    def local_address(self) -> Tuple[str, int]:
+        return self.tunnel.local_bind_address
 
 
 def _find_free_port():
