@@ -91,11 +91,11 @@ class APIManager(MSONable):
 
     def pprint(self):
         """
-            pretty print an list of endpoints in the following order:
-            1. By lexicographical
-            2. By inheritance
-            Example: if we have ["/temp", "/main","/main/temp"], this function would return the list in the order of
-            ["/main","/main/temp","/temp"]
+        pretty print an list of endpoints in the following order:
+        1. By lexicographical
+        2. By inheritance
+        Example: if we have ["/temp", "/main","/main/temp"], this function would return the list in the order of
+        ["/main","/main/temp","/temp"]
 
 
         """

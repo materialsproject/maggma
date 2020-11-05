@@ -168,7 +168,9 @@ class SparseFieldsQuery(QueryOperator):
 
 class DefaultDynamicQuery(QueryOperator):
     def __init__(
-        self, model: BaseModel, additional_signature_fields: Mapping[str, List] = None,
+        self,
+        model: BaseModel,
+        additional_signature_fields: Mapping[str, List] = None,
     ):
         """
         This function will take query, parse it, and output the mongo criteria.
@@ -203,9 +205,11 @@ class DefaultDynamicQuery(QueryOperator):
         }
         mapping: dict = default_mapping
 
-        self.additional_signature_fields: Mapping[
-            str, List
-        ] = dict() if additional_signature_fields is None else additional_signature_fields
+        self.additional_signature_fields: Mapping[str, List] = (
+            dict()
+            if additional_signature_fields is None
+            else additional_signature_fields
+        )
 
         # construct fields
         # find all fields in data_object

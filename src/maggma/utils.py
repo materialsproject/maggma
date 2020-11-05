@@ -22,7 +22,7 @@ from tqdm.autonotebook import tqdm
 
 def primed(iterable: Iterable):
     """Preprimes an iterator so the first value is calculated immediately
-       but not returned until the first iteration
+    but not returned until the first iteration
     """
     itr = iter(iterable)
     try:
