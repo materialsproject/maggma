@@ -9,17 +9,19 @@ from __future__ import annotations
 import json
 import warnings
 from itertools import groupby
+from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
 from monty.dev import deprecated
 from monty.io import zopen
-from monty.json import jsanitize
+from monty.json import jsanitize, MSONable
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne
 from pymongo.errors import OperationFailure
 from sshtunnel import SSHTunnelForwarder
+
 
 from maggma.core import Sort, Store, StoreError
 from maggma.utils import confirm_field_index
@@ -38,6 +40,7 @@ class MongoStore(Store):
         port: int = 27017,
         username: str = "",
         password: str = "",
+        ssh_tunnel: Optional[SSHTunnel] = None,
         **kwargs,
     ):
         """
@@ -55,6 +58,7 @@ class MongoStore(Store):
         self.port = port
         self.username = username
         self.password = password
+        self.ssh_tunnel = ssh_tunnel
         self._collection = None  # type: Any
         self.kwargs = kwargs
         super().__init__(**kwargs)
@@ -66,17 +70,16 @@ class MongoStore(Store):
         """
         return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
-    def connect(
-        self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None
-    ):  # lgtm[py/conflicting-attributes]
+    def connect(self, force_reset: bool = False):
         """
         Connect to the source data
         """
         if not self._collection or force_reset:
-            if ssh_tunnel is None:
+            if self.ssh_tunnel is None:
                 conn = MongoClient(self.host, self.port)
             else:
-                conn = MongoClient(*ssh_tunnel.local_bind_address)
+                self.ssh_tunnel.start()
+                conn = MongoClient(*self.ssh_tunnel.tunnel.local_bind_address)
             db = conn[self.database]
             if self.username != "":
                 db.authenticate(self.username, self.password)
@@ -323,6 +326,8 @@ class MongoStore(Store):
     def close(self):
         """ Close up all collections """
         self._collection.database.client.close()
+        if self.ssh_tunnel:
+            self.ssh_tunnel.stop()
 
     def __eq__(self, other: object) -> bool:
         """
@@ -365,14 +370,10 @@ class MongoURIStore(MongoStore):
         # TODO: This is not very safe since it exposes the username/password info
         return self.uri
 
-    def connect(
-        self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None
-    ):  # lgtm[py/conflicting-attributes]
+    def connect(self, force_reset: bool = False):
         """
         Connect to the source data
         """
-        if ssh_tunnel is not None:
-            warnings.warn(f"SSH Tunnel not needed for {self.__class__.__name__}")
         if not self._collection or force_reset:
             conn = MongoClient(self.uri)
             db = conn[self.database]
@@ -396,14 +397,11 @@ class MemoryStore(MongoStore):
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)  # noqa
 
-    def connect(
-        self, force_reset: bool = False, ssh_tunnel: SSHTunnelForwarder = None
-    ):  # lgtm[py/conflicting-attributes]
+    def connect(self, force_reset: bool = False):
         """
         Connect to the source data
         """
-        if ssh_tunnel is not None:
-            warnings.warn(f"SSH Tunnel not needed for {self.__class__.__name__}")
+
         if not self._collection or force_reset:
             self._collection = mongomock.MongoClient().db[self.name]
 
@@ -484,14 +482,10 @@ class JSONStore(MemoryStore):
         self.kwargs = kwargs
         super().__init__(collection_name="collection", **kwargs)
 
-    def connect(
-        self, force_reset=False, ssh_tunnel=None
-    ):  # lgtm[py/conflicting-attributes]
+    def connect(self, force_reset=False):
         """
         Loads the files into the collection in memory
         """
-        if ssh_tunnel is not None:
-            warnings.warn(f"SSH Tunnel not needed for {self.__name__}")
         super().connect(force_reset=force_reset)
         for path in self.paths:
             with zopen(path) as f:
@@ -516,3 +510,79 @@ class JSONStore(MemoryStore):
 
         fields = ["paths", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
+
+
+class SSHTunnel(MSONable):
+
+    __TUNNELS = {}
+
+    def __init__(
+        self,
+        tunnel_server_address: str,
+        remote_server_address: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        private_key: Optional[str] = None,
+        **kwargs,
+    ):
+        """
+        Args:
+            tunnel_server_address: string address with port for the SSH tunnel server
+            remote_server_address: string address with port for the server to connect to
+            username: optional username for the ssh tunnel server
+            password: optional password for the ssh tunnel server; If a private_key is
+                supplied this password is assumed to be the private key password
+            private_key: ssh private key to authenticate to the tunnel server
+            kwargs: any extra args passed to the SSHTunnelForwarder
+        """
+
+        self.tunnel_server_address = tunnel_server_address
+        self.remote_server_address = remote_server_address
+        self.username = username
+        self.password = password
+        self.private_key = private_key
+        self.kwargs = kwargs
+
+        if remote_server_address in SSHTunnel.__TUNNELS:
+            self.tunnel = SSHTunnel.__TUNNELS[remote_server_address]
+        else:
+            open_port = _find_free_port()
+            local_bind_address = ("0.0.0.0", open_port)
+
+            ssh_address_or_host = tunnel_server_address.split(":")
+            ssh_address_or_host[1] = int(ssh_address_or_host[1])
+
+            remote_bind_address = remote_server_address.split(":")
+            remote_bind_address[1] = int(remote_bind_address[1])
+
+            if private_key is not None:
+                ssh_password = None
+                ssh_private_key_password = password
+            else:
+                ssh_password = password
+                ssh_private_key_password = None
+
+            self.tunnel = SSHTunnelForwarder(
+                ssh_address_or_host=tuple(ssh_address_or_host),
+                local_bind_address=local_bind_address,
+                remote_bind_address=tuple(remote_bind_address),
+                ssh_username=username,
+                ssh_password=ssh_password,
+                ssh_private_key_password=ssh_private_key_password,
+                ssh_pkey=private_key,
+                **kwargs,
+            )
+
+    def start(self):
+        if not self.tunnel.is_active:
+            self.tunnel.start()
+
+    def stop(self):
+        if self.tunnel.tunnel_is_up:
+            self.tunnel.stop()
+
+
+def _find_free_port():
+    s = socket()
+    s.bind(("", 0))  # Bind to a free port provided by the host.
+    return s.getsockname()[1]  # Return the port number assigned.
