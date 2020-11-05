@@ -3,7 +3,11 @@ import pytest
 import pymongo
 from maggma.stores.mongolike import MongoStore, SSHTunnel
 import paramiko
-from paramiko.ssh_exception import AuthenticationException, NoValidConnectionsError
+from paramiko.ssh_exception import (
+    AuthenticationException,
+    NoValidConnectionsError,
+    SSHException,
+)
 from monty.serialization import dumpfn, loadfn
 
 
@@ -18,7 +22,7 @@ def ssh_server_available():
     try:
         client.connect("127.0.0.1", 22)
         client.close()
-    except (AuthenticationException, NoValidConnectionsError):
+    except (AuthenticationException, NoValidConnectionsError, SSHException):
         pytest.skip("No SSH server to test tunnel against")
 
 
