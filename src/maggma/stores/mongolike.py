@@ -7,7 +7,6 @@ various utilities
 from __future__ import annotations
 
 import json
-import warnings
 from itertools import groupby
 from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
@@ -548,8 +547,8 @@ class SSHTunnel(MSONable):
         if remote_server_address in SSHTunnel.__TUNNELS:
             self.tunnel = SSHTunnel.__TUNNELS[remote_server_address]
         else:
-            open_port = _find_free_port()
-            local_bind_address = ("0.0.0.0", open_port)
+            open_port = _find_free_port("127.0.0.1")
+            local_bind_address = ("127.0.0.1", open_port)
 
             ssh_address, ssh_port = tunnel_server_address.split(":")
             ssh_port = int(ssh_port)  # type: ignore
@@ -588,7 +587,7 @@ class SSHTunnel(MSONable):
         return self.tunnel.local_bind_address
 
 
-def _find_free_port():
+def _find_free_port(address="0.0.0.0"):
     s = socket()
-    s.bind(("", 0))  # Bind to a free port provided by the host.
+    s.bind((address, 0))  # Bind to a free port provided by the host.
     return s.getsockname()[1]  # Return the port number assigned.
