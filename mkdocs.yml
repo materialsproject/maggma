@@ -29,6 +29,7 @@ nav:
 site_url: https://materialsproject.github.io/maggma/
 repo_url: https://github.com/materialsproject/maggma/
 markdown_extensions:
+  - pymdownx.tabbed
   - admonition
   - codehilite
   - attr_list
