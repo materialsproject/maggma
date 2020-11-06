@@ -42,7 +42,7 @@ def test_mongostore_connect_via_ssh(ssh_server_available):
     mongostore.close()
 
 
-def test_serialization(tmpdir):
+def test_serialization(tmpdir, ssh_server_available):
 
     tunnel = SSHTunnel("127.0.0.1:22", "127.0.0.1:27017")
     dumpfn(tunnel, tmpdir / "tunnel.json")
