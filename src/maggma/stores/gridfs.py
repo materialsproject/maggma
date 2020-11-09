@@ -106,6 +106,7 @@ class GridFSStore(Store):
             self._files_collection = db["{}.files".format(self.collection_name)]
             self._files_store = MongoStore.from_collection(self._files_collection)
             self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
+            self._files_store.key = self.key
             self._chunks_collection = db["{}.chunks".format(self.collection_name)]
 
     @property  # type: ignore
@@ -190,13 +191,11 @@ class GridFSStore(Store):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
 
-                metadata = doc["metadata"]
+                metadata = doc.get("metadata", {})
 
                 data = self._collection.find_one(
                     filter={
-                        "metadata.{}".format(self._files_store.key): metadata[
-                            self._files_store.key
-                        ]
+                        "_id": doc["_id"]
                     },
                     skip=skip,
                     limit=limit,
