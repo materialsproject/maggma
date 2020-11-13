@@ -35,7 +35,7 @@ class S3Store(Store):
         self,
         index: Store,
         bucket: str,
-        s3_profile: str = None,
+        s3_profile: Union[str, dict] = None,
         compress: bool = False,
         endpoint_url: str = None,
         sub_dir: str = None,
@@ -50,7 +50,12 @@ class S3Store(Store):
         Args:
             index: a store to use to index the S3 Bucket
             bucket: name of the bucket
-            s3_profile: name of aws profile containing credentials for role
+            s3_profile: name of aws profile containing credentials for role.
+                Alternatively you can pass in a dictionary with the full credentials:
+                    aws_access_key_id (string) -- AWS access key ID
+                    aws_secret_access_key (string) -- AWS secret access key
+                    aws_session_token (string) -- AWS temporary session token
+                    region_name (string) -- Default region when creating new connections
             compress: compress files inserted into the store
             endpoint_url: endpoint_url to allow interface to minio service
             sub_dir: (optional)  subdirectory of the s3 bucket to store the data
@@ -98,7 +103,7 @@ class S3Store(Store):
         Connect to the source data
         """
 
-        session = Session(profile_name=self.s3_profile)
+        session = self._get_session()
         resource = session.resource("s3", endpoint_url=self.endpoint_url)
 
         if not self.s3:
@@ -314,6 +319,13 @@ class S3Store(Store):
         # Use store's update to remove key clashes
         self.index.update(search_docs, key=self.key)
 
+    def _get_session(self):
+        if not hasattr(self._thread_local, "s3_bucket"):
+            if isinstance(self.s3_profile, dict):
+                return Session(**self.s3_profile)
+            else:
+                return Session(profile_name=self.s3_profile)
+
     def _get_bucket(self):
         """
         If on the main thread return the bucket created above, else create a new bucket on each thread
@@ -321,7 +333,7 @@ class S3Store(Store):
         if threading.current_thread().name == "MainThread":
             return self.s3_bucket
         if not hasattr(self._thread_local, "s3_bucket"):
-            session = Session(profile_name=self.s3_profile)
+            session = self._get_session()
             resource = session.resource("s3", endpoint_url=self.endpoint_url)
             self._thread_local.s3_bucket = resource.Bucket(self.bucket)
         return self._thread_local.s3_bucket
