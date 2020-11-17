@@ -1,6 +1,7 @@
 uvicorn==0.12.1
 boto3==1.16.18
 hvac==0.10.5
-IPython==7.19.0
+IPython==7.16.1;python_version<"3.7"
+IPython==7.19.0;python_version>"3.6"
 nbformat==5.0.7
 regex==2020.11.13
