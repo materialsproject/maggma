@@ -78,9 +78,12 @@ def test_mongostore_distinct(mongostore):
     mongostore._collection.insert_one({"i": None})
     assert mongostore.distinct("i") == [None]
 
-    # Test to make sure DocumentTooLarge errors get dealt with properly
-    mongostore._collection.insert_many([{"a": f"mp-{i}"} for i in range(1000000)])
-    mongostore.distinct("a")
+    # Test to make sure DocumentTooLarge errors get dealt with properly using built in distinct
+    mongostore._collection.insert_many([{"key": [f"mp-{i}"]} for i in range(1000000)])
+    vals = mongostore.distinct("key")
+    # Test to make sure distinct on array field is unraveled when using manual distinct
+    assert len(vals) == len(list(range(1000000)))
+    assert all([isinstance(v, str) for v in vals])
 
 
 def test_mongostore_update(mongostore):
