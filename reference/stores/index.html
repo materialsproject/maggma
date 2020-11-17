@@ -8,10 +8,10 @@
 <meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
 <link href="https://materialsproject.github.io/maggma/reference/stores/" rel="canonical"/>
 <link href="../../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-6.0.2" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-6.1.5" name="generator"/>
 <title>Stores - Maggma Documentation</title>
-<link href="../../assets/stylesheets/main.38780c08.min.css" rel="stylesheet"/>
-<link href="../../assets/stylesheets/palette.3f72e892.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/main.21aed14c.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/palette.196e0c26.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
 <style>body,input{font-family:"Roboto",-apple-system,BlinkMacSystemFont,Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono",SFMono-Regular,Consolas,Menlo,monospace}</style>
@@ -54,7 +54,7 @@
 <label class="md-search__overlay" for="__search"></label>
 <div class="md-search__inner" role="search">
 <form class="md-search__form" name="search">
-<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" spellcheck="false" type="text"/>
+<input aria-label="Search" autocapitalize="off" autocomplete="off" autocorrect="off" class="md-search__input" data-md-component="search-query" data-md-state="active" name="query" placeholder="Search" required="" spellcheck="false" type="text"/>
 <label class="md-search__icon md-icon" for="__search">
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M9.5 3A6.5 6.5 0 0116 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 019.5 16 6.5 6.5 0 013 9.5 6.5 6.5 0 019.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"></path></svg>
 <svg viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"></path></svg>
@@ -404,6 +404,20 @@
 <li class="md-nav__item">
 <a class="md-nav__link" href="#maggma.stores.mongolike.MongoURIStore.connect">
     connect()
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.stores.mongolike.SSHTunnel">
+    SSHTunnel
+  </a>
+<nav aria-label="SSHTunnel" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.stores.mongolike.SSHTunnel.__init__">
+    __init__()
   </a>
 </li>
 </ul>
@@ -1143,6 +1157,20 @@
 </nav>
 </li>
 <li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.stores.mongolike.SSHTunnel">
+    SSHTunnel
+  </a>
+<nav aria-label="SSHTunnel" class="md-nav">
+<ul class="md-nav__list">
+<li class="md-nav__item">
+<a class="md-nav__link" href="#maggma.stores.mongolike.SSHTunnel.__init__">
+    __init__()
+  </a>
+</li>
+</ul>
+</nav>
+</li>
+<li class="md-nav__item">
 <a class="md-nav__link" href="#maggma.stores.gridfs">
     maggma.stores.gridfs
   </a>
@@ -1796,21 +1824,17 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.JSONStore.connect">
 <code class="highlight language-python">
-connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
 <a class="headerlink" href="#maggma.stores.mongolike.JSONStore.connect" title="Permanent link">¶</a></h3>
 <div class="doc doc-contents">
 <p>Loads the files into the collection in memory</p>
 <details class="quote">
 <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
 <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span>
-<span class="p">):</span>  <span class="c1"># lgtm[py/conflicting-attributes]</span>
+<pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Loads the files into the collection in memory</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SSH Tunnel not needed for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="n">force_reset</span><span class="o">=</span><span class="n">force_reset</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">path</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">:</span>
         <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="n">path</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -1940,6 +1964,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># This is to fix issues with the tunnel on close</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">MongoStore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># noqa</span>
 </code></pre>
@@ -1950,21 +1975,18 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.MemoryStore.connect">
 <code class="highlight language-python">
-connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
 <a class="headerlink" href="#maggma.stores.mongolike.MemoryStore.connect" title="Permanent link">¶</a></h3>
 <div class="doc doc-contents">
 <p>Connect to the source data</p>
 <details class="quote">
 <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
 <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">SSHTunnelForwarder</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">):</span>  <span class="c1"># lgtm[py/conflicting-attributes]</span>
+<pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SSH Tunnel not needed for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">mongomock</span><span class="o">.</span><span class="n">MongoClient</span><span class="p">()</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
 </code></pre>
@@ -2183,7 +2205,7 @@ __hash__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.MongoStore.__init__">
 <code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
@@ -2261,6 +2283,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="n">port</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">27017</span><span class="p">,</span>
     <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
     <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+    <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHTunnel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">"""</span>
@@ -2278,6 +2301,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="n">ssh_tunnel</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -2299,6 +2323,8 @@ close<span class="p">(</span><span class="bp">self</span><span class="p">)</span
 <pre><span></span><code><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">""" Close up all collections """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </code></pre>
 </div>
 </details>
@@ -2307,24 +2333,24 @@ close<span class="p">(</span><span class="bp">self</span><span class="p">)</span
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.MongoStore.connect">
 <code class="highlight language-python">
-connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
 <a class="headerlink" href="#maggma.stores.mongolike.MongoStore.connect" title="Permanent link">¶</a></h3>
 <div class="doc doc-contents">
 <p>Connect to the source data</p>
 <details class="quote">
 <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
 <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">SSHTunnelForwarder</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">):</span>  <span class="c1"># lgtm[py/conflicting-attributes]</span>
+<pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="o">*</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">local_bind_address</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">host</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">local_address</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">""</span><span class="p">:</span>
             <span class="n">db</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
@@ -2433,11 +2459,13 @@ distinct<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">distinct_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">criteria</span><span class="p">)</span>
-    <span class="k">except</span> <span class="n">OperationFailure</span><span class="p">:</span>
+    <span class="k">except</span> <span class="p">(</span><span class="n">OperationFailure</span><span class="p">,</span> <span class="n">DocumentTooLarge</span><span class="p">):</span>
         <span class="n">distinct_vals</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">d</span><span class="p">[</span><span class="s2">"_id"</span><span class="p">]</span>
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">aggregate</span><span class="p">([{</span><span class="s2">"$group"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"$</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">"</span><span class="p">}}])</span>
         <span class="p">]</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">distinct_vals</span><span class="p">)):</span>  <span class="c1"># type: ignore</span>
+            <span class="n">distinct_vals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">distinct_vals</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">distinct_vals</span> <span class="k">if</span> <span class="n">distinct_vals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[]</span>
 </code></pre>
@@ -3094,25 +3122,165 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.MongoURIStore.connect">
 <code class="highlight language-python">
-connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span> </code>
+connect<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> </code>
 <a class="headerlink" href="#maggma.stores.mongolike.MongoURIStore.connect" title="Permanent link">¶</a></h3>
 <div class="doc doc-contents">
 <p>Connect to the source data</p>
 <details class="quote">
 <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
 <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">SSHTunnelForwarder</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">):</span>  <span class="c1"># lgtm[py/conflicting-attributes]</span>
+<pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SSH Tunnel not needed for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+</code></pre>
+</div>
+</details>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="doc doc-object doc-class">
+<h2 class="doc doc-heading" id="maggma.stores.mongolike.SSHTunnel">
+<code>SSHTunnel</code>
+<a class="headerlink" href="#maggma.stores.mongolike.SSHTunnel" title="Permanent link">¶</a></h2>
+<div class="doc doc-contents">
+<div class="doc doc-children">
+<div class="doc doc-object doc-method">
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.SSHTunnel.__init__">
+<code class="highlight language-python">
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tunnel_server_address</span><span class="p">,</span> <span class="n">remote_server_address</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">private_key</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
+<span class="doc doc-properties">
+<small class="doc doc-property doc-property-special"><code>special</code></small>
+</span>
+<a class="headerlink" href="#maggma.stores.mongolike.SSHTunnel.__init__" title="Permanent link">¶</a></h3>
+<div class="doc doc-contents">
+<p><strong>Parameters:</strong></p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Description</th>
+<th>Default</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>tunnel_server_address</code></td>
+<td><code>str</code></td>
+<td>
+<p>string address with port for the SSH tunnel server</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>remote_server_address</code></td>
+<td><code>str</code></td>
+<td>
+<p>string address with port for the server to connect to</p>
+</td>
+<td><em>required</em></td>
+</tr>
+<tr>
+<td><code>username</code></td>
+<td><code>Optional[str]</code></td>
+<td>
+<p>optional username for the ssh tunnel server</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>password</code></td>
+<td><code>Optional[str]</code></td>
+<td>
+<p>optional password for the ssh tunnel server; If a private_key is
+supplied this password is assumed to be the private key password</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>private_key</code></td>
+<td><code>Optional[str]</code></td>
+<td>
+<p>ssh private key to authenticate to the tunnel server</p>
+</td>
+<td><code>None</code></td>
+</tr>
+<tr>
+<td><code>kwargs</code></td>
+<td><code></code></td>
+<td>
+<p>any extra args passed to the SSHTunnelForwarder</p>
+</td>
+<td><code>{}</code></td>
+</tr>
+</tbody>
+</table>
+<details class="quote">
+<summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
+<div class="highlight">
+<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">tunnel_server_address</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">remote_server_address</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">username</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">password</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">private_key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">"""</span>
+<span class="sd">    Args:</span>
+<span class="sd">        tunnel_server_address: string address with port for the SSH tunnel server</span>
+<span class="sd">        remote_server_address: string address with port for the server to connect to</span>
+<span class="sd">        username: optional username for the ssh tunnel server</span>
+<span class="sd">        password: optional password for the ssh tunnel server; If a private_key is</span>
+<span class="sd">            supplied this password is assumed to be the private key password</span>
+<span class="sd">        private_key: ssh private key to authenticate to the tunnel server</span>
+<span class="sd">        kwargs: any extra args passed to the SSHTunnelForwarder</span>
+<span class="sd">    """</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">tunnel_server_address</span> <span class="o">=</span> <span class="n">tunnel_server_address</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">remote_server_address</span> <span class="o">=</span> <span class="n">remote_server_address</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">private_key</span> <span class="o">=</span> <span class="n">private_key</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+    <span class="k">if</span> <span class="n">remote_server_address</span> <span class="ow">in</span> <span class="n">SSHTunnel</span><span class="o">.</span><span class="n">__TUNNELS</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tunnel</span> <span class="o">=</span> <span class="n">SSHTunnel</span><span class="o">.</span><span class="n">__TUNNELS</span><span class="p">[</span><span class="n">remote_server_address</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">open_port</span> <span class="o">=</span> <span class="n">_find_free_port</span><span class="p">(</span><span class="s2">"127.0.0.1"</span><span class="p">)</span>
+        <span class="n">local_bind_address</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"127.0.0.1"</span><span class="p">,</span> <span class="n">open_port</span><span class="p">)</span>
+
+        <span class="n">ssh_address</span><span class="p">,</span> <span class="n">ssh_port</span> <span class="o">=</span> <span class="n">tunnel_server_address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+        <span class="n">ssh_port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ssh_port</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="n">remote_bind_address</span><span class="p">,</span> <span class="n">remote_bind_port</span> <span class="o">=</span> <span class="n">remote_server_address</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+        <span class="n">remote_bind_port</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">remote_bind_port</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+
+        <span class="k">if</span> <span class="n">private_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ssh_password</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">ssh_private_key_password</span> <span class="o">=</span> <span class="n">password</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ssh_password</span> <span class="o">=</span> <span class="n">password</span>
+            <span class="n">ssh_private_key_password</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">tunnel</span> <span class="o">=</span> <span class="n">SSHTunnelForwarder</span><span class="p">(</span>
+            <span class="n">ssh_address_or_host</span><span class="o">=</span><span class="p">(</span><span class="n">ssh_address</span><span class="p">,</span> <span class="n">ssh_port</span><span class="p">),</span>
+            <span class="n">local_bind_address</span><span class="o">=</span><span class="n">local_bind_address</span><span class="p">,</span>
+            <span class="n">remote_bind_address</span><span class="o">=</span><span class="p">(</span><span class="n">remote_bind_address</span><span class="p">,</span> <span class="n">remote_bind_port</span><span class="p">),</span>
+            <span class="n">ssh_username</span><span class="o">=</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">ssh_password</span><span class="o">=</span><span class="n">ssh_password</span><span class="p">,</span>
+            <span class="n">ssh_private_key_password</span><span class="o">=</span><span class="n">ssh_private_key_password</span><span class="p">,</span>
+            <span class="n">ssh_pkey</span><span class="o">=</span><span class="n">private_key</span><span class="p">,</span>
+            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="p">)</span>
 </code></pre>
 </div>
 </details>
@@ -4185,9 +4353,14 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 </tr>
 <tr>
 <td><code>s3_profile</code></td>
-<td><code>str</code></td>
+<td><code>Union[str, dict]</code></td>
 <td>
-<p>name of aws profile containing credentials for role</p>
+<p>name of aws profile containing credentials for role.
+Alternatively you can pass in a dictionary with the full credentials:
+    aws_access_key_id (string) -- AWS access key ID
+    aws_secret_access_key (string) -- AWS secret access key
+    aws_session_token (string) -- AWS temporary session token
+    region_name (string) -- Default region when creating new connections</p>
 </td>
 <td><code>None</code></td>
 </tr>
@@ -4240,7 +4413,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">index</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
     <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">s3_profile</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">s3_profile</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">compress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sub_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -4255,7 +4428,12 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <span class="sd">    Args:</span>
 <span class="sd">        index: a store to use to index the S3 Bucket</span>
 <span class="sd">        bucket: name of the bucket</span>
-<span class="sd">        s3_profile: name of aws profile containing credentials for role</span>
+<span class="sd">        s3_profile: name of aws profile containing credentials for role.</span>
+<span class="sd">            Alternatively you can pass in a dictionary with the full credentials:</span>
+<span class="sd">                aws_access_key_id (string) -- AWS access key ID</span>
+<span class="sd">                aws_secret_access_key (string) -- AWS secret access key</span>
+<span class="sd">                aws_session_token (string) -- AWS temporary session token</span>
+<span class="sd">                region_name (string) -- Default region when creating new connections</span>
 <span class="sd">        compress: compress files inserted into the store</span>
 <span class="sd">        endpoint_url: endpoint_url to allow interface to minio service</span>
 <span class="sd">        sub_dir: (optional)  subdirectory of the s3 bucket to store the data</span>
@@ -4332,7 +4510,7 @@ connect<span class="p">(</span><span class="bp">self</span><span class="p">,</sp
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    """</span>
 
-    <span class="n">session</span> <span class="o">=</span> <span class="n">Session</span><span class="p">(</span><span class="n">profile_name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">s3_profile</span><span class="p">)</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span>
     <span class="n">resource</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">"s3"</span><span class="p">,</span> <span class="n">endpoint_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint_url</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3</span><span class="p">:</span>
@@ -8598,8 +8776,8 @@ Not Implemented for JointStore</p>
 </div>
 </footer>
 </div>
-<script src="../../assets/javascripts/vendor.77e55a48.min.js"></script>
-<script src="../../assets/javascripts/bundle.9554a270.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+<script src="../../assets/javascripts/vendor.7e0ee788.min.js"></script>
+<script src="../../assets/javascripts/bundle.b3a72adc.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
 <script>
         app = initialize({
           base: "../..",
