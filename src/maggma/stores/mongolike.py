@@ -7,7 +7,7 @@ various utilities
 from __future__ import annotations
 
 import json
-from itertools import groupby
+from itertools import groupby, chain
 from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
@@ -121,6 +121,8 @@ class MongoStore(Store):
                 d["_id"]
                 for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])
             ]
+            if all(isinstance(d, list) for d in filter(None, distinct_vals)):
+                distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
 
         return distinct_vals if distinct_vals is not None else []
 
