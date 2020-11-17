@@ -18,7 +18,7 @@ from monty.json import jsanitize, MSONable
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne
-from pymongo.errors import OperationFailure
+from pymongo.errors import OperationFailure, DocumentTooLarge
 from sshtunnel import SSHTunnelForwarder
 
 
@@ -116,7 +116,7 @@ class MongoStore(Store):
         criteria = criteria or {}
         try:
             distinct_vals = self._collection.distinct(field, criteria)
-        except OperationFailure:
+        except (OperationFailure, DocumentTooLarge):
             distinct_vals = [
                 d["_id"]
                 for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])
