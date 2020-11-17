@@ -78,6 +78,10 @@ def test_mongostore_distinct(mongostore):
     mongostore._collection.insert_one({"i": None})
     assert mongostore.distinct("i") == [None]
 
+    # Test to make sure DocumentTooLarge errors get dealt with properly
+    mongostore._collection.insert_many([{"a": f"mp-{i}"} for i in range(1000000)])
+    mongostore.distinct("a")
+
 
 def test_mongostore_update(mongostore):
     mongostore.update({"e": 6, "d": 4}, key="e")
