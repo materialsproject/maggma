@@ -66,8 +66,11 @@ def test_process_item(init_drone: SimpleBibDrone):
     :return:
         None
     """
-    list_record_id = init_drone.read(init_drone.path)
-    data = init_drone.process_item(list_record_id[0])
+    list_record_id = list(init_drone.read(init_drone.path))
+    text_record = next(
+        d for d in list_record_id if any("text" in f.name for f in d.documents)
+    )
+    data = init_drone.process_item(text_record)
     assert "citations" in data
     assert "text" in data
     assert "record_key" in data
@@ -125,7 +128,10 @@ def test_compute_data(init_drone: SimpleBibDrone):
     :return:
         None
     """
-    list_record_id = init_drone.read(init_drone.path)
-    data = init_drone.process_item(list_record_id[0])
+    list_record_id = list(init_drone.read(init_drone.path))
+    text_record = next(
+        d for d in list_record_id if any("text" in f.name for f in d.documents)
+    )
+    data = init_drone.process_item(text_record)
     assert "citations" in data
     assert "text" in data
