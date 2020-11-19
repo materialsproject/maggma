@@ -45,7 +45,11 @@ class RecordIdentifier(BaseModel):
         :return:
         """
         paths = [doc.path.as_posix() for doc in self.documents]
-        return Path(os.path.commonprefix(paths))
+        parent_path = Path(os.path.commonprefix(paths))
+        if not parent_path.is_dir():
+            return parent_path.parent
+
+        return parent_path
 
     def compute_state_hash(self) -> str:
         """

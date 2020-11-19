@@ -40,6 +40,7 @@ class MongoStore(Store):
         username: str = "",
         password: str = "",
         ssh_tunnel: Optional[SSHTunnel] = None,
+        safe_update: bool = False,
         **kwargs,
     ):
         """
@@ -50,6 +51,7 @@ class MongoStore(Store):
             port: TCP port to connect to
             username: Username for the collection
             password: Password to connect with
+            safe_update: fail gracefully on DocumentTooLarge errors on update
         """
         self.database = database
         self.collection_name = collection_name
@@ -58,6 +60,7 @@ class MongoStore(Store):
         self.username = username
         self.password = password
         self.ssh_tunnel = ssh_tunnel
+        self.safe_update = safe_update
         self._collection = None  # type: Any
         self.kwargs = kwargs
         super().__init__(**kwargs)
@@ -314,7 +317,20 @@ class MongoStore(Store):
                 requests.append(ReplaceOne(search_doc, d, upsert=True))
 
         if len(requests) > 0:
-            self._collection.bulk_write(requests, ordered=False)
+            try:
+                self._collection.bulk_write(requests, ordered=False)
+            except (OperationFailure, DocumentTooLarge) as e:
+                if self.safe_update:
+                    for req in requests:
+                        req._filter
+                        try:
+                            self._collection.bulk_write([req], ordered=False)
+                        except (OperationFailure, DocumentTooLarge):
+                            self.logger.error(
+                                f"Could not upload document for {req._filter} as it was too large for Mongo"
+                            )
+                else:
+                    raise e
 
     def remove_docs(self, criteria: Dict):
         """
