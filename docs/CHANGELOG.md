@@ -1,5 +1,28 @@
 # Changelog
 
+## [v0.24.2](https://github.com/materialsproject/maggma/tree/v0.24.2) (2020-11-17)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.24.1...v0.24.2)
+
+**Merged pull requests:**
+
+- Fix array unwrapping in distinct [\#335](https://github.com/materialsproject/maggma/pull/335) ([shyamd](https://github.com/shyamd))
+
+## [v0.24.1](https://github.com/materialsproject/maggma/tree/v0.24.1) (2020-11-17)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.24.0...v0.24.1)
+
+**Closed issues:**
+
+- mrun failure with 'dict' object has no attribute 'connect' [\#316](https://github.com/materialsproject/maggma/issues/316)
+- FEATURE: Serialized SSH Tunnel [\#290](https://github.com/materialsproject/maggma/issues/290)
+
+**Merged pull requests:**
+
+- Fix Distinct in MongoStore [\#332](https://github.com/materialsproject/maggma/pull/332) ([shyamd](https://github.com/shyamd))
+- Direct passing of AWS login to S3Store [\#326](https://github.com/materialsproject/maggma/pull/326) ([jmmshn](https://github.com/jmmshn))
+- Wrap SSHTunnelForward and make it MSONable [\#320](https://github.com/materialsproject/maggma/pull/320) ([shyamd](https://github.com/shyamd))
+
 ## [v0.24.0](https://github.com/materialsproject/maggma/tree/v0.24.0) (2020-11-02)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.23.3...v0.24.0)
@@ -227,7 +250,6 @@
 
 - Better printing of validation erorrs [\#46](https://github.com/materialsproject/maggma/pull/46) ([mkhorton](https://github.com/mkhorton))
 - Updates to JointStore and MapBuilder [\#44](https://github.com/materialsproject/maggma/pull/44) ([shyamd](https://github.com/shyamd))
-- \[WIP\] Improve/refactor examples and move inside maggma namespace [\#30](https://github.com/materialsproject/maggma/pull/30) ([dwinston](https://github.com/dwinston))
 
 ## [v0.9.0](https://github.com/materialsproject/maggma/tree/v0.9.0) (2018-10-01)
 
@@ -254,6 +276,7 @@
 
 **Merged pull requests:**
 
+- \[WIP\] Improve/refactor examples and move inside maggma namespace [\#30](https://github.com/materialsproject/maggma/pull/30) ([dwinston](https://github.com/dwinston))
 - Fix mrun with default num\_workers. Add test. [\#28](https://github.com/materialsproject/maggma/pull/28) ([dwinston](https://github.com/dwinston))
 
 ## [v0.6.5](https://github.com/materialsproject/maggma/tree/v0.6.5) (2018-06-07)
