@@ -3,6 +3,7 @@ from datetime import datetime
 
 import mongomock.collection
 import pymongo.collection
+from pymongo.errors import OperationFailure, DocumentTooLarge
 import pytest
 
 from maggma.core import StoreError
@@ -109,9 +110,13 @@ def test_mongostore_update(mongostore):
     # Continue to update doc when validator is not set to strict mode
     mongostore.update({"e": "abc", "d": 3}, key="e")
 
-    # Fail softly when document too large and ensure other docs get updated
+    # ensure safe_update works to not throw DocumentTooLarge errors
     large_doc = {f"mp-{i}": f"mp-{i}" for i in range(1000000)}
     large_doc["e"] = 999
+    with pytest.raises((OperationFailure, DocumentTooLarge)):
+        mongostore.update([large_doc, {"e": 1001}], key="e")
+
+    mongostore.safe_update = True
     mongostore.update([large_doc, {"e": 1001}], key="e")
     assert mongostore.query_one({"e": 1001}) is not None
 
