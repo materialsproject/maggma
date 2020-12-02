@@ -17,8 +17,8 @@ from monty.io import zopen
 from monty.json import jsanitize, MSONable
 from monty.serialization import loadfn
 from pydash import get, has, set_
-from pymongo import MongoClient, ReplaceOne
-from pymongo.errors import OperationFailure, DocumentTooLarge
+from pymongo import MongoClient, ReplaceOne, uri_parser
+from pymongo.errors import OperationFailure, DocumentTooLarge, ConfigurationError
 from sshtunnel import SSHTunnelForwarder
 
 
@@ -366,7 +366,7 @@ class MongoURIStore(MongoStore):
     client parameters via TXT records
     """
 
-    def __init__(self, uri: str, database: str, collection_name: str, **kwargs):
+    def __init__(self, uri: str, collection_name: str, database: str = None, **kwargs):
         """
         Args:
             uri: MongoDB+SRV URI
@@ -374,7 +374,18 @@ class MongoURIStore(MongoStore):
             collection_name: The collection name
         """
         self.uri = uri
-        self.database = database
+
+        # parse the dbname from the uri
+        if database is None:
+            d_uri = uri_parser.parse_uri(uri)
+            if d_uri["database"] is None:
+                raise ConfigurationError(
+                    "If database name is not supplied, a database must be set in the uri"
+                )
+            self.database = d_uri["database"]
+        else:
+            self.database = database
+
         self.collection_name = collection_name
         self.kwargs = kwargs
         self._collection = None
