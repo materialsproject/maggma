@@ -3,7 +3,7 @@ from datetime import datetime
 
 import mongomock.collection
 import pymongo.collection
-from pymongo.errors import OperationFailure, DocumentTooLarge
+from pymongo.errors import OperationFailure, DocumentTooLarge, ConfigurationError
 import pytest
 
 from maggma.core import StoreError
@@ -286,3 +286,18 @@ def test_mongo_uri():
     is_name = store.name is uri
     # This is try and keep the secret safe
     assert is_name
+
+
+def test_mongo_uri_dbname_parse():
+    # test parsing dbname from uri
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = MongoURIStore(uri_with_db, "test")
+    assert store.database == "fake_db"
+
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = MongoURIStore(uri_with_db, "test", database="fake_db2")
+    assert store.database == "fake_db2"
+
+    uri_with_db = "mongodb://uuu:xxxx@host:27017"
+    with pytest.raises(ConfigurationError):
+        MongoURIStore(uri_with_db, "test")
