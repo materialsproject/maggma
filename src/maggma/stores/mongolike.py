@@ -18,7 +18,7 @@ from monty.json import jsanitize
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne
-from pymongo.errors import OperationFailure
+from pymongo.errors import OperationFailure, ConfigurationError
 from sshtunnel import SSHTunnelForwarder
 
 from maggma.core import Sort, Store, StoreError
@@ -343,7 +343,7 @@ class MongoURIStore(MongoStore):
     client parameters via TXT records
     """
 
-    def __init__(self, uri: str, database: str, collection_name: str, **kwargs):
+    def __init__(self, uri: str, collection_name: str, database: str = None, **kwargs):
         """
         Args:
             uri: MongoDB+SRV URI
@@ -351,7 +351,20 @@ class MongoURIStore(MongoStore):
             collection_name: The collection name
         """
         self.uri = uri
-        self.database = database
+
+        # parse the dbname from the uri
+        if database is None:
+            with MongoClient(self.uri) as conn:
+                try:
+                    db = conn.get_default_database()
+                except ConfigurationError:
+                    raise ConfigurationError(
+                        "If database name is not supplied, a database must be set in the uri"
+                    )
+            self.database = db.name
+        else:
+            self.database = database
+
         self.collection_name = collection_name
         self.kwargs = kwargs
         self._collection = None
