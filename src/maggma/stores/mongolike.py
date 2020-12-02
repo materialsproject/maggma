@@ -17,7 +17,7 @@ from monty.io import zopen
 from monty.json import jsanitize, MSONable
 from monty.serialization import loadfn
 from pydash import get, has, set_
-from pymongo import MongoClient, ReplaceOne
+from pymongo import MongoClient, ReplaceOne, uri_parser
 from pymongo.errors import OperationFailure, DocumentTooLarge, ConfigurationError
 from sshtunnel import SSHTunnelForwarder
 
@@ -377,14 +377,12 @@ class MongoURIStore(MongoStore):
 
         # parse the dbname from the uri
         if database is None:
-            with MongoClient(self.uri) as conn:
-                try:
-                    db = conn.get_default_database()
-                except ConfigurationError:
-                    raise ConfigurationError(
-                        "If database name is not supplied, a database must be set in the uri"
-                    )
-            self.database = db.name
+            d_uri = uri_parser.parse_uri(uri)
+            if d_uri["database"] is None:
+                raise ConfigurationError(
+                    "If database name is not supplied, a database must be set in the uri"
+                )
+            self.database = d_uri["database"]
         else:
             self.database = database
 
