@@ -11,7 +11,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - uses: actions/setup-python@v2.1.3
+    - uses: actions/setup-python@v2.1.4
       with:
         python-version: 3.7
 
@@ -38,7 +38,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - uses: actions/setup-python@v2.1.3
+    - uses: actions/setup-python@v2.1.4
       with:
         python-version: 3.7
 
@@ -52,13 +52,14 @@ jobs:
       uses: charmixer/auto-changelog-action@v1
       with:
         token: ${{ secrets.GITHUB_TOKEN }}
+        exclude_labels: dependencies
 
     - name: Commit files
       run: |
         git config --local user.email "feedback@materialsproject.org"
         git config --local user.name "materialsproject"
         mv CHANGELOG.md docs/
-        git add docs/CHANGELOG.md && git commit -m 'Updated CHANGELOG.md' && echo ::set-env name=push::1 || echo "No changes to CHANGELOG.md"
+        git add docs/CHANGELOG.md && git commit -m 'Updated CHANGELOG.md'
 
     - name: Push changes
       uses: ad-m/github-push-action@master

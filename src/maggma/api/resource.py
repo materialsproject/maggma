@@ -22,11 +22,11 @@ from maggma.core import Store
 
 class Resource(MSONable):
     """
-        Implements a REST Compatible Resource as a URL endpoint
-        This class provides a number of convenience features
-        including full pagination, field projection, and the
-        MAPI query lanaugage
-        """
+    Implements a REST Compatible Resource as a URL endpoint
+    This class provides a number of convenience features
+    including full pagination, field projection, and the
+    MAPI query lanaugage
+    """
 
     def __init__(
         self,

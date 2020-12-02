@@ -3,6 +3,7 @@ from datetime import datetime
 
 import mongomock.collection
 import pymongo.collection
+from pymongo.errors import OperationFailure, DocumentTooLarge
 import pytest
 
 from maggma.core import StoreError
@@ -42,18 +43,6 @@ def test_mongostore_connect():
     assert isinstance(mongostore._collection, pymongo.collection.Collection)
 
 
-def test_mongostore_connect_via_ssh():
-    mongostore = MongoStore("maggma_test", "test")
-
-    class fake_pipe:
-        remote_bind_address = ("localhost", 27017)
-        local_bind_address = ("localhost", 37017)
-
-    server = fake_pipe()
-    mongostore.connect(ssh_tunnel=server)
-    assert isinstance(mongostore._collection, pymongo.collection.Collection)
-
-
 def test_mongostore_query(mongostore):
     mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert mongostore.query_one(properties=["a"])["a"] == 1
@@ -90,6 +79,13 @@ def test_mongostore_distinct(mongostore):
     mongostore._collection.insert_one({"i": None})
     assert mongostore.distinct("i") == [None]
 
+    # Test to make sure DocumentTooLarge errors get dealt with properly using built in distinct
+    mongostore._collection.insert_many([{"key": [f"mp-{i}"]} for i in range(1000000)])
+    vals = mongostore.distinct("key")
+    # Test to make sure distinct on array field is unraveled when using manual distinct
+    assert len(vals) == len(list(range(1000000)))
+    assert all([isinstance(v, str) for v in vals])
+
 
 def test_mongostore_update(mongostore):
     mongostore.update({"e": 6, "d": 4}, key="e")
@@ -111,8 +107,18 @@ def test_mongostore_update(mongostore):
     mongostore.validator = JSONSchemaValidator(schema=test_schema)
     mongostore.update({"e": 100, "d": 3}, key="e")
 
-    # Non strict update
+    # Continue to update doc when validator is not set to strict mode
     mongostore.update({"e": "abc", "d": 3}, key="e")
+
+    # ensure safe_update works to not throw DocumentTooLarge errors
+    large_doc = {f"mp-{i}": f"mp-{i}" for i in range(1000000)}
+    large_doc["e"] = 999
+    with pytest.raises((OperationFailure, DocumentTooLarge)):
+        mongostore.update([large_doc, {"e": 1001}], key="e")
+
+    mongostore.safe_update = True
+    mongostore.update([large_doc, {"e": 1001}], key="e")
+    assert mongostore.query_one({"e": 1001}) is not None
 
 
 def test_mongostore_groupby(mongostore):
@@ -216,15 +222,6 @@ def test_memory_store_connect():
     memorystore.connect()
     assert isinstance(memorystore._collection, mongomock.collection.Collection)
 
-    with pytest.warns(UserWarning, match="SSH Tunnel not needed for MemoryStore"):
-
-        class fake_pipe:
-            remote_bind_address = ("localhost", 27017)
-            local_bind_address = ("localhost", 37017)
-
-        server = fake_pipe()
-        memorystore.connect(ssh_tunnel=server)
-
 
 def test_groupby(memorystore):
     memorystore.update(
@@ -289,11 +286,3 @@ def test_mongo_uri():
     is_name = store.name is uri
     # This is try and keep the secret safe
     assert is_name
-    with pytest.warns(UserWarning, match="SSH Tunnel not needed for MongoURIStore"):
-
-        class fake_pipe:
-            remote_bind_address = ("localhost", 27017)
-            local_bind_address = ("localhost", 37017)
-
-        server = fake_pipe()
-        store.connect(ssh_tunnel=server)

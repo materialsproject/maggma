@@ -24,12 +24,15 @@ pip install --upgrade maggma
 
 You can install Maggma directly from a clone of the [Git repository](https://github.com/materialsproject/maggma).  This can be done either by cloning the repo and installing from the local clone, or simply installing directly via **git**.
 
-``` shell tab="Local Clone"
-git clone https://github.com//materialsproject/maggma
-cd maggma
-python setup.py install
-```
+=== "Local Clone"
 
-``` shell tab="Direct Git"
-pip install git+https://github.com/materialsproject/maggma
-```
+    ``` shell
+    git clone https://github.com//materialsproject/maggma
+    cd maggma
+    python setup.py install
+    ```
+
+=== "Direct Git"
+    ``` shell
+    pip install git+https://github.com/materialsproject/maggma
+    ```
