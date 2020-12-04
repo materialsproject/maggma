@@ -8,9 +8,9 @@
 <meta content="Documentation for Maggma, a files-to-API data pipeline for scientific applications" name="description"/>
 <link href="https://materialsproject.github.io/maggma/reference/stores/" rel="canonical"/>
 <link href="../../assets/images/favicon.png" rel="shortcut icon"/>
-<meta content="mkdocs-1.1.2, mkdocs-material-6.1.5" name="generator"/>
+<meta content="mkdocs-1.1.2, mkdocs-material-6.1.6" name="generator"/>
 <title>Stores - Maggma Documentation</title>
-<link href="../../assets/stylesheets/main.21aed14c.min.css" rel="stylesheet"/>
+<link href="../../assets/stylesheets/main.6910b76c.min.css" rel="stylesheet"/>
 <link href="../../assets/stylesheets/palette.196e0c26.min.css" rel="stylesheet"/>
 <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
 <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&amp;display=fallback" rel="stylesheet"/>
@@ -2031,7 +2031,7 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>properties</code></td>
-<td><code>Union[Dict, List, None]</code></td>
+<td><code>Union[Dict, List]</code></td>
 <td>
 <p>properties to return in grouped documents</p>
 </td>
@@ -2039,7 +2039,7 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
 <p>Dictionary of sort order for fields. Keys are field names and
 values are 1 for ascending or -1 for descending.</p>
@@ -2205,7 +2205,7 @@ __hash__<span class="p">(</span><span class="bp">self</span><span class="p">)</s
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.MongoStore.__init__">
 <code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">'localhost'</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">''</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">safe_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
@@ -2270,6 +2270,14 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 </td>
 <td><code>''</code></td>
 </tr>
+<tr>
+<td><code>safe_update</code></td>
+<td><code>bool</code></td>
+<td>
+<p>fail gracefully on DocumentTooLarge errors on update</p>
+</td>
+<td><code>False</code></td>
+</tr>
 </tbody>
 </table>
 <details class="quote">
@@ -2284,6 +2292,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="n">username</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
     <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
     <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHTunnel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">safe_update</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">"""</span>
@@ -2294,6 +2303,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <span class="sd">        port: TCP port to connect to</span>
 <span class="sd">        username: Username for the collection</span>
 <span class="sd">        password: Password to connect with</span>
+<span class="sd">        safe_update: fail gracefully on DocumentTooLarge errors on update</span>
 <span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
@@ -2302,6 +2312,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
     <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="n">ssh_tunnel</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">safe_update</span> <span class="o">=</span> <span class="n">safe_update</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
@@ -2679,7 +2690,7 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>properties</code></td>
-<td><code>Union[Dict, List, None]</code></td>
+<td><code>Union[Dict, List]</code></td>
 <td>
 <p>properties to return in grouped documents</p>
 </td>
@@ -2687,7 +2698,7 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
 <p>Dictionary of sort order for fields. Keys are field names and
 values are 1 for ascending or -1 for descending.</p>
@@ -2814,7 +2825,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tr>
 <tr>
 <td><code>properties</code></td>
-<td><code>Union[Dict, List, None]</code></td>
+<td><code>Union[Dict, List]</code></td>
 <td>
 <p>properties to return in grouped documents</p>
 </td>
@@ -2822,7 +2833,7 @@ query<span class="p">(</span><span class="bp">self</span><span class="p">,</span
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
 <p>Dictionary of sort order for fields. Keys are field names and
 values are 1 for ascending or -1 for descending.</p>
@@ -2966,7 +2977,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 </tr>
 <tr>
 <td><code>key</code></td>
-<td><code>Union[List, str, None]</code></td>
+<td><code>Union[List, str]</code></td>
 <td>
 <p>field name(s) to determine uniqueness for a
  document, can be a list of multiple fields,
@@ -3021,7 +3032,20 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
             <span class="n">requests</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ReplaceOne</span><span class="p">(</span><span class="n">search_doc</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">upsert</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">requests</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">bulk_write</span><span class="p">(</span><span class="n">requests</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">bulk_write</span><span class="p">(</span><span class="n">requests</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="n">OperationFailure</span><span class="p">,</span> <span class="n">DocumentTooLarge</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">safe_update</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">req</span> <span class="ow">in</span> <span class="n">requests</span><span class="p">:</span>
+                    <span class="n">req</span><span class="o">.</span><span class="n">_filter</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">bulk_write</span><span class="p">([</span><span class="n">req</span><span class="p">],</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="p">(</span><span class="n">OperationFailure</span><span class="p">,</span> <span class="n">DocumentTooLarge</span><span class="p">):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">"Could not upload document for </span><span class="si">{</span><span class="n">req</span><span class="o">.</span><span class="n">_filter</span><span class="si">}</span><span class="s2"> as it was too large for Mongo"</span>
+                        <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">e</span>
 </code></pre>
 </div>
 </details>
@@ -3055,7 +3079,7 @@ name: <span class="nb">str</span> </code>
 <div class="doc doc-object doc-method">
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.MongoURIStore.__init__">
 <code class="highlight language-python">
-__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
+__init__<span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> </code>
 <span class="doc doc-properties">
 <small class="doc doc-property doc-property-special"><code>special</code></small>
 </span>
@@ -3086,7 +3110,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <td>
 <p>database to connect to</p>
 </td>
-<td><em>required</em></td>
+<td><code>None</code></td>
 </tr>
 <tr>
 <td><code>collection_name</code></td>
@@ -3101,7 +3125,7 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <details class="quote">
 <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
 <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Args:</span>
 <span class="sd">        uri: MongoDB+SRV URI</span>
@@ -3109,7 +3133,18 @@ __init__<span class="p">(</span><span class="bp">self</span><span class="p">,</s
 <span class="sd">        collection_name: The collection name</span>
 <span class="sd">    """</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">uri</span> <span class="o">=</span> <span class="n">uri</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
+
+    <span class="c1"># parse the dbname from the uri</span>
+    <span class="k">if</span> <span class="n">database</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">d_uri</span> <span class="o">=</span> <span class="n">uri_parser</span><span class="o">.</span><span class="n">parse_uri</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">d_uri</span><span class="p">[</span><span class="s2">"database"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
+                <span class="s2">"If database name is not supplied, a database must be set in the uri"</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">d_uri</span><span class="p">[</span><span class="s2">"database"</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
+
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>
@@ -3778,7 +3813,7 @@ collection for GridFS</p>
 </tr>
 <tr>
 <td><code>properties</code></td>
-<td><code>Union[Dict, List, None]</code></td>
+<td><code>Union[Dict, List]</code></td>
 <td>
 <p>properties to return in grouped documents</p>
 </td>
@@ -3786,7 +3821,7 @@ collection for GridFS</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
 <p>Dictionary of sort order for fields. Keys are field names and
 values are 1 for ascending or -1 for descending.</p>
@@ -3939,7 +3974,7 @@ files store first.</p>
 </tr>
 <tr>
 <td><code>properties</code></td>
-<td><code>Union[Dict, List, None]</code></td>
+<td><code>Union[Dict, List]</code></td>
 <td>
 <p>properties to return in grouped documents</p>
 </td>
@@ -3947,7 +3982,7 @@ files store first.</p>
 </tr>
 <tr>
 <td><code>sort</code></td>
-<td><code>Optional[Dict[str, Union[Sort, int]]]</code></td>
+<td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
 <td>
 <p>Dictionary of sort order for fields. Keys are field names and
 values are 1 for ascending or -1 for descending.</p>
@@ -4177,7 +4212,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 </tr>
 <tr>
 <td><code>key</code></td>
-<td><code>Union[List, str, None]</code></td>
+<td><code>Union[List, str]</code></td>
 <td>
 <p>field name(s) to determine uniqueness for a
  document, can be a list of multiple fields,
@@ -4188,7 +4223,7 @@ update<span class="p">(</span><span class="bp">self</span><span class="p">,</spa
 </tr>
 <tr>
 <td><code>additional_metadata</code></td>
-<td><code>Union[str, List[str], None]</code></td>
+<td><code>Union[str, List[str]]</code></td>
 <td>
 <p>field(s) to include in the gridfs metadata</p>
 </td>
@@ -8776,8 +8811,8 @@ Not Implemented for JointStore</p>
 </div>
 </footer>
 </div>
-<script src="../../assets/javascripts/vendor.7e0ee788.min.js"></script>
-<script src="../../assets/javascripts/bundle.b3a72adc.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
+<script src="../../assets/javascripts/vendor.fd16492e.min.js"></script>
+<script src="../../assets/javascripts/bundle.7836ba4d.min.js"></script><script id="__lang" type="application/json">{"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing"}</script>
 <script>
         app = initialize({
           base: "../..",
