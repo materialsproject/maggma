@@ -1,5 +1,20 @@
 # Changelog
 
+## [v0.25.0](https://github.com/materialsproject/maggma/tree/v0.25.0) (2020-12-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.24.2...v0.25.0)
+
+**Closed issues:**
+
+- FEATURE: Jupyter Commands [\#276](https://github.com/materialsproject/maggma/issues/276)
+
+**Merged pull requests:**
+
+- Python 3.6 Compatibility [\#352](https://github.com/materialsproject/maggma/pull/352) ([shyamd](https://github.com/shyamd))
+- Automatically parse the dbname from the URI [\#350](https://github.com/materialsproject/maggma/pull/350) ([jmmshn](https://github.com/jmmshn))
+- Setup: msgpack-python was renamed to msgpack [\#344](https://github.com/materialsproject/maggma/pull/344) ([jan-janssen](https://github.com/jan-janssen))
+- Ensure MongoStore can safely continue updating when documents are too large [\#338](https://github.com/materialsproject/maggma/pull/338) ([shyamd](https://github.com/shyamd))
+
 ## [v0.24.2](https://github.com/materialsproject/maggma/tree/v0.24.2) (2020-11-17)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.24.1...v0.24.2)
