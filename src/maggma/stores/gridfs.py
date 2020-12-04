@@ -4,7 +4,6 @@ Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
 various utillities
 """
-from __future__ import annotations
 
 import copy
 import json

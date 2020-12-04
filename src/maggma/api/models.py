@@ -25,17 +25,13 @@ class Meta(BaseModel):
     )
 
     time_stamp: datetime = Field(
-        None,
         description="a string containing the date and time at which the query was executed",
+        default_factory=datetime.utcnow(),
     )
 
     total_doc: Optional[int] = Field(
         None, description="the total number of documents available for this query", ge=0
     )
-
-    @validator("time_stamp", pre=True, always=True)
-    def default_timestamp(cls, v):
-        return v or datetime.utcnow()
 
 
 class Error(BaseModel):
