@@ -26,7 +26,7 @@ class Meta(BaseModel):
 
     time_stamp: datetime = Field(
         description="a string containing the date and time at which the query was executed",
-        default_factory=datetime.utcnow(),
+        default_factory=datetime.utcnow,
     )
 
     total_doc: Optional[int] = Field(
