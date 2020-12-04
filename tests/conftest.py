@@ -51,4 +51,5 @@ def pytest_itemcollected(item):
 
 if sys.version_info < (3, 7):
     # Ignore API tests on python 3.6
+    collect_ignore = ["cli/test_distributed.py"]
     collect_ignore_glob = ["api/*"]
