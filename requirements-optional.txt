@@ -1,5 +1,5 @@
 uvicorn==0.12.3
-boto3==1.16.25
+boto3==1.16.30
 hvac==0.10.5
 IPython==7.16.1
 nbformat==5.0.8
