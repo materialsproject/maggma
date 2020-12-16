@@ -47,3 +47,9 @@ def pytest_itemcollected(item):
     doc = item.obj.__doc__.strip() if item.obj.__doc__ else ""
     if doc:
         item._nodeid = item._nodeid.split("::")[0] + "::" + doc
+
+
+if sys.version_info < (3, 7):
+    # Ignore API tests on python 3.6
+    collect_ignore = ["cli/test_distributed.py"]
+    collect_ignore_glob = ["api/*"]

@@ -76,16 +76,18 @@ def run(builders, verbosity, reporting_store, num_workers, url, num_chunks):
         root.addHandler(ReportingHandler(reporting_store))
 
     if url:
+        loop = asyncio.get_event_loop()
         if num_chunks > 0:
             # Master
-            asyncio.run(master(url, builder_objects, num_chunks))
+            loop.run_until_complete(master(url, builder_objects, num_chunks))
         else:
             # worker
-            asyncio.run(worker(url, num_workers))
+            loop.run_until_complete(worker(url, num_workers))
     else:
         if num_workers == 1:
             for builder in builder_objects:
                 serial(builder)
         else:
+            loop = asyncio.get_event_loop()
             for builder in builder_objects:
-                asyncio.run(multi(builder, num_workers))
+                loop.run_until_complete(multi(builder, num_workers))

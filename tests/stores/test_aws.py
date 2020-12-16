@@ -310,3 +310,17 @@ def test_additional_metadata(s3store):
 
     # This should only work if the searchable field was put into the index store
     assert set(s3store.distinct("task_id")) == {"mp-0", "mp-1", "mp-2", "mp-3"}
+
+
+def test_get_session(s3store):
+    index = MemoryStore("index")
+    store = S3Store(
+        index,
+        "bucket1",
+        s3_profile={
+            "aws_access_key_id": "ACCESS_KEY",
+            "aws_secret_access_key": "SECRET_KEY",
+        },
+    )
+    assert store._get_session().get_credentials().access_key == "ACCESS_KEY"
+    assert store._get_session().get_credentials().secret_key == "SECRET_KEY"

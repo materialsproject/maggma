@@ -4,10 +4,9 @@ Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
 various utilities
 """
-from __future__ import annotations
 
 import json
-from itertools import groupby
+from itertools import groupby, chain
 from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
@@ -17,13 +16,87 @@ from monty.io import zopen
 from monty.json import jsanitize, MSONable
 from monty.serialization import loadfn
 from pydash import get, has, set_
-from pymongo import MongoClient, ReplaceOne
-from pymongo.errors import OperationFailure
+from pymongo import MongoClient, ReplaceOne, uri_parser
+from pymongo.errors import OperationFailure, DocumentTooLarge, ConfigurationError
 from sshtunnel import SSHTunnelForwarder
 
 
 from maggma.core import Sort, Store, StoreError
 from maggma.utils import confirm_field_index
+
+
+class SSHTunnel(MSONable):
+
+    __TUNNELS: Dict[str, SSHTunnelForwarder] = {}
+
+    def __init__(
+        self,
+        tunnel_server_address: str,
+        remote_server_address: str,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        private_key: Optional[str] = None,
+        **kwargs,
+    ):
+        """
+        Args:
+            tunnel_server_address: string address with port for the SSH tunnel server
+            remote_server_address: string address with port for the server to connect to
+            username: optional username for the ssh tunnel server
+            password: optional password for the ssh tunnel server; If a private_key is
+                supplied this password is assumed to be the private key password
+            private_key: ssh private key to authenticate to the tunnel server
+            kwargs: any extra args passed to the SSHTunnelForwarder
+        """
+
+        self.tunnel_server_address = tunnel_server_address
+        self.remote_server_address = remote_server_address
+        self.username = username
+        self.password = password
+        self.private_key = private_key
+        self.kwargs = kwargs
+
+        if remote_server_address in SSHTunnel.__TUNNELS:
+            self.tunnel = SSHTunnel.__TUNNELS[remote_server_address]
+        else:
+            open_port = _find_free_port("127.0.0.1")
+            local_bind_address = ("127.0.0.1", open_port)
+
+            ssh_address, ssh_port = tunnel_server_address.split(":")
+            ssh_port = int(ssh_port)  # type: ignore
+
+            remote_bind_address, remote_bind_port = remote_server_address.split(":")
+            remote_bind_port = int(remote_bind_port)  # type: ignore
+
+            if private_key is not None:
+                ssh_password = None
+                ssh_private_key_password = password
+            else:
+                ssh_password = password
+                ssh_private_key_password = None
+
+            self.tunnel = SSHTunnelForwarder(
+                ssh_address_or_host=(ssh_address, ssh_port),
+                local_bind_address=local_bind_address,
+                remote_bind_address=(remote_bind_address, remote_bind_port),
+                ssh_username=username,
+                ssh_password=ssh_password,
+                ssh_private_key_password=ssh_private_key_password,
+                ssh_pkey=private_key,
+                **kwargs,
+            )
+
+    def start(self):
+        if not self.tunnel.is_active:
+            self.tunnel.start()
+
+    def stop(self):
+        if self.tunnel.tunnel_is_up:
+            self.tunnel.stop()
+
+    @property
+    def local_address(self) -> Tuple[str, int]:
+        return self.tunnel.local_bind_address
 
 
 class MongoStore(Store):
@@ -40,6 +113,7 @@ class MongoStore(Store):
         username: str = "",
         password: str = "",
         ssh_tunnel: Optional[SSHTunnel] = None,
+        safe_update: bool = False,
         **kwargs,
     ):
         """
@@ -50,6 +124,7 @@ class MongoStore(Store):
             port: TCP port to connect to
             username: Username for the collection
             password: Password to connect with
+            safe_update: fail gracefully on DocumentTooLarge errors on update
         """
         self.database = database
         self.collection_name = collection_name
@@ -58,6 +133,7 @@ class MongoStore(Store):
         self.username = username
         self.password = password
         self.ssh_tunnel = ssh_tunnel
+        self.safe_update = safe_update
         self._collection = None  # type: Any
         self.kwargs = kwargs
         super().__init__(**kwargs)
@@ -116,11 +192,13 @@ class MongoStore(Store):
         criteria = criteria or {}
         try:
             distinct_vals = self._collection.distinct(field, criteria)
-        except OperationFailure:
+        except (OperationFailure, DocumentTooLarge):
             distinct_vals = [
                 d["_id"]
                 for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])
             ]
+            if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
+                distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
 
         return distinct_vals if distinct_vals is not None else []
 
@@ -312,7 +390,20 @@ class MongoStore(Store):
                 requests.append(ReplaceOne(search_doc, d, upsert=True))
 
         if len(requests) > 0:
-            self._collection.bulk_write(requests, ordered=False)
+            try:
+                self._collection.bulk_write(requests, ordered=False)
+            except (OperationFailure, DocumentTooLarge) as e:
+                if self.safe_update:
+                    for req in requests:
+                        req._filter
+                        try:
+                            self._collection.bulk_write([req], ordered=False)
+                        except (OperationFailure, DocumentTooLarge):
+                            self.logger.error(
+                                f"Could not upload document for {req._filter} as it was too large for Mongo"
+                            )
+                else:
+                    raise e
 
     def remove_docs(self, criteria: Dict):
         """
@@ -348,7 +439,7 @@ class MongoURIStore(MongoStore):
     client parameters via TXT records
     """
 
-    def __init__(self, uri: str, database: str, collection_name: str, **kwargs):
+    def __init__(self, uri: str, collection_name: str, database: str = None, **kwargs):
         """
         Args:
             uri: MongoDB+SRV URI
@@ -356,7 +447,18 @@ class MongoURIStore(MongoStore):
             collection_name: The collection name
         """
         self.uri = uri
-        self.database = database
+
+        # parse the dbname from the uri
+        if database is None:
+            d_uri = uri_parser.parse_uri(uri)
+            if d_uri["database"] is None:
+                raise ConfigurationError(
+                    "If database name is not supplied, a database must be set in the uri"
+                )
+            self.database = d_uri["database"]
+        else:
+            self.database = database
+
         self.collection_name = collection_name
         self.kwargs = kwargs
         self._collection = None
@@ -511,80 +613,6 @@ class JSONStore(MemoryStore):
 
         fields = ["paths", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
-
-
-class SSHTunnel(MSONable):
-
-    __TUNNELS: Dict[str, SSHTunnelForwarder] = {}
-
-    def __init__(
-        self,
-        tunnel_server_address: str,
-        remote_server_address: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        private_key: Optional[str] = None,
-        **kwargs,
-    ):
-        """
-        Args:
-            tunnel_server_address: string address with port for the SSH tunnel server
-            remote_server_address: string address with port for the server to connect to
-            username: optional username for the ssh tunnel server
-            password: optional password for the ssh tunnel server; If a private_key is
-                supplied this password is assumed to be the private key password
-            private_key: ssh private key to authenticate to the tunnel server
-            kwargs: any extra args passed to the SSHTunnelForwarder
-        """
-
-        self.tunnel_server_address = tunnel_server_address
-        self.remote_server_address = remote_server_address
-        self.username = username
-        self.password = password
-        self.private_key = private_key
-        self.kwargs = kwargs
-
-        if remote_server_address in SSHTunnel.__TUNNELS:
-            self.tunnel = SSHTunnel.__TUNNELS[remote_server_address]
-        else:
-            open_port = _find_free_port("127.0.0.1")
-            local_bind_address = ("127.0.0.1", open_port)
-
-            ssh_address, ssh_port = tunnel_server_address.split(":")
-            ssh_port = int(ssh_port)  # type: ignore
-
-            remote_bind_address, remote_bind_port = remote_server_address.split(":")
-            remote_bind_port = int(remote_bind_port)  # type: ignore
-
-            if private_key is not None:
-                ssh_password = None
-                ssh_private_key_password = password
-            else:
-                ssh_password = password
-                ssh_private_key_password = None
-
-            self.tunnel = SSHTunnelForwarder(
-                ssh_address_or_host=(ssh_address, ssh_port),
-                local_bind_address=local_bind_address,
-                remote_bind_address=(remote_bind_address, remote_bind_port),
-                ssh_username=username,
-                ssh_password=ssh_password,
-                ssh_private_key_password=ssh_private_key_password,
-                ssh_pkey=private_key,
-                **kwargs,
-            )
-
-    def start(self):
-        if not self.tunnel.is_active:
-            self.tunnel.start()
-
-    def stop(self):
-        if self.tunnel.tunnel_is_up:
-            self.tunnel.stop()
-
-    @property
-    def local_address(self) -> Tuple[str, int]:
-        return self.tunnel.local_bind_address
 
 
 def _find_free_port(address="0.0.0.0"):

@@ -59,7 +59,7 @@ jobs:
         git config --local user.email "feedback@materialsproject.org"
         git config --local user.name "materialsproject"
         mv CHANGELOG.md docs/
-        git add docs/CHANGELOG.md && git commit -m 'Updated CHANGELOG.md' && echo ::set-env name=push::1 || echo "No changes to CHANGELOG.md"
+        git add docs/CHANGELOG.md && git commit -m 'Updated CHANGELOG.md'
 
     - name: Push changes
       uses: ad-m/github-push-action@master

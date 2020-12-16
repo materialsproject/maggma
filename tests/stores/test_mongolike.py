@@ -3,6 +3,7 @@ from datetime import datetime
 
 import mongomock.collection
 import pymongo.collection
+from pymongo.errors import OperationFailure, DocumentTooLarge, ConfigurationError
 import pytest
 
 from maggma.core import StoreError
@@ -78,6 +79,13 @@ def test_mongostore_distinct(mongostore):
     mongostore._collection.insert_one({"i": None})
     assert mongostore.distinct("i") == [None]
 
+    # Test to make sure DocumentTooLarge errors get dealt with properly using built in distinct
+    mongostore._collection.insert_many([{"key": [f"mp-{i}"]} for i in range(1000000)])
+    vals = mongostore.distinct("key")
+    # Test to make sure distinct on array field is unraveled when using manual distinct
+    assert len(vals) == len(list(range(1000000)))
+    assert all([isinstance(v, str) for v in vals])
+
 
 def test_mongostore_update(mongostore):
     mongostore.update({"e": 6, "d": 4}, key="e")
@@ -99,8 +107,18 @@ def test_mongostore_update(mongostore):
     mongostore.validator = JSONSchemaValidator(schema=test_schema)
     mongostore.update({"e": 100, "d": 3}, key="e")
 
-    # Non strict update
+    # Continue to update doc when validator is not set to strict mode
     mongostore.update({"e": "abc", "d": 3}, key="e")
+
+    # ensure safe_update works to not throw DocumentTooLarge errors
+    large_doc = {f"mp-{i}": f"mp-{i}" for i in range(1000000)}
+    large_doc["e"] = 999
+    with pytest.raises((OperationFailure, DocumentTooLarge)):
+        mongostore.update([large_doc, {"e": 1001}], key="e")
+
+    mongostore.safe_update = True
+    mongostore.update([large_doc, {"e": 1001}], key="e")
+    assert mongostore.query_one({"e": 1001}) is not None
 
 
 def test_mongostore_groupby(mongostore):
@@ -268,3 +286,18 @@ def test_mongo_uri():
     is_name = store.name is uri
     # This is try and keep the secret safe
     assert is_name
+
+
+def test_mongo_uri_dbname_parse():
+    # test parsing dbname from uri
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = MongoURIStore(uri_with_db, "test")
+    assert store.database == "fake_db"
+
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = MongoURIStore(uri_with_db, "test", database="fake_db2")
+    assert store.database == "fake_db2"
+
+    uri_with_db = "mongodb://uuu:xxxx@host:27017"
+    with pytest.raises(ConfigurationError):
+        MongoURIStore(uri_with_db, "test")
