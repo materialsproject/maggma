@@ -8,9 +8,8 @@ from asyncio import (
     Condition,
     Event,
     Queue,
-    create_task,
     gather,
-    get_running_loop,
+    get_event_loop,
     wait,
 )
 from concurrent.futures import ProcessPoolExecutor
@@ -70,7 +69,10 @@ class AsyncUnorderedMap:
         self.iterator = async_iterator
         self.func = func
         self.executor = executor
-        self.fill_task = create_task(self.get_from_iterator())
+
+        loop = get_event_loop()
+
+        self.fill_task = loop.create_task(self.get_from_iterator())
 
         self.done_sentinel = object()
         self.results = Queue()
@@ -87,7 +89,7 @@ class AsyncUnorderedMap:
             self.tasks.pop(idx)
 
     async def get_from_iterator(self):
-        loop = get_running_loop()
+        loop = get_event_loop()
         async for idx, item in enumerate(self.iterator):
             future = loop.run_in_executor(
                 self.executor, safe_dispatch, (self.func, item)
@@ -158,9 +160,7 @@ async def multi(builder, num_workers):
 
     builder.connect()
     cursor = builder.get_items()
-    executor = ProcessPoolExecutor(
-        num_workers, mp_context=multiprocessing.get_context("spawn")
-    )
+    executor = ProcessPoolExecutor(num_workers)
 
     # Gets the total number of items to process by priming
     # the cursor

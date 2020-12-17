@@ -2,7 +2,6 @@
 """
 Module containing the core Store definition
 """
-from __future__ import annotations
 
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
@@ -250,7 +249,7 @@ class Store(MSONable, metaclass=ABCMeta):
             return self._lu_func[0](get(doc, self.last_updated_field))
 
     def newer_in(
-        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
+        self, target: "Store", criteria: Optional[Dict] = None, exhaustive: bool = False
     ) -> List[str]:
         """
         Returns the keys of documents that are newer in the target

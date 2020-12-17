@@ -41,7 +41,7 @@ setup(
         "pynng>=0.5.0",
         "dnspython>=1.16.0",
         "sshtunnel>=0.1.5",
-        "msgpack-python>=0.5.6",
+        "msgpack>=0.5.6",
     ],
     extras_require={
         "vault": ["hvac>=0.9.5"],
@@ -62,5 +62,5 @@ setup(
     ],
     entry_points={"console_scripts": ["mrun = maggma.cli:run"]},
     tests_require=["pytest"],
-    python_requires=">=3.7",
+    python_requires=">=3.6",
 )
