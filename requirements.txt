@@ -6,7 +6,7 @@ jsonschema==3.2.0
 tqdm==4.56.0
 mongogrant==0.3.1
 aioitertools==0.7.1
-pydantic==1.7.2
+pydantic==1.7.3
 fastapi==0.63.0
 numpy==1.19.5
 pynng==0.5.0
