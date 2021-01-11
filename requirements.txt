@@ -10,7 +10,7 @@ pydantic==1.7.2
 fastapi==0.63.0
 numpy==1.19.5
 pynng==0.5.0
-dnspython==2.0.0
+dnspython==2.1.0
 uvicorn==0.13.3
 sshtunnel==0.3.1
 msgpack==1.0.2
