@@ -1,4 +1,4 @@
-uvicorn==0.13.2
+uvicorn==0.13.3
 boto3==1.16.30
 hvac==0.10.6
 IPython==7.16.1
