@@ -66,6 +66,13 @@ def test_run_builder(mongostore):
         assert "CopyBuilder" in result.output
         assert "MultiProcessor" in result.output
 
+        result = runner.invoke(
+            run, ["-vvv", "-n", "2", "--no_bars", "test_builder.json"]
+        )
+        assert result.exit_code == 0
+        assert "Get" not in result.output
+        assert "Update" not in result.output
+
 
 def test_reporting(mongostore, reporting_store):
 
