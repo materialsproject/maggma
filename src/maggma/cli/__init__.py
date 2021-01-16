@@ -89,7 +89,7 @@ def run(builders, verbosity, reporting_store, num_workers, url, num_chunks, no_b
     else:
         if num_workers == 1:
             for builder in builder_objects:
-                serial(builder)
+                serial(builder, no_bars)
         else:
             loop = asyncio.get_event_loop()
             for builder in builder_objects:
