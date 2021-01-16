@@ -147,7 +147,7 @@ def safe_dispatch(val):
         return None
 
 
-async def multi(builder, num_workers, no_bars):
+async def multi(builder, num_workers, no_bars=False):
 
     builder.connect()
     cursor = builder.get_items()

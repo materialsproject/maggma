@@ -10,7 +10,7 @@ from maggma.core import Builder
 from maggma.utils import grouper, primed
 
 
-def serial(builder: Builder, no_bars):
+def serial(builder: Builder, no_bars=False):
     """
     Runs the builders using a single process
     """
