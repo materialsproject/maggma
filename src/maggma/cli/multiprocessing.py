@@ -2,16 +2,7 @@
 # coding utf-8
 
 import multiprocessing
-from asyncio import (
-    FIRST_COMPLETED,
-    BoundedSemaphore,
-    Condition,
-    Event,
-    Queue,
-    gather,
-    get_event_loop,
-    wait,
-)
+from asyncio import BoundedSemaphore, Queue, gather, get_event_loop, wait
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
@@ -156,7 +147,7 @@ def safe_dispatch(val):
         return None
 
 
-async def multi(builder, num_workers):
+async def multi(builder, num_workers, no_bars=False):
 
     builder.connect()
     cursor = builder.get_items()
@@ -193,7 +184,8 @@ async def multi(builder, num_workers):
     )
 
     back_pressured_get = BackPressure(
-        iterator=tqdm(cursor, desc="Get", total=total), n=builder.chunk_size
+        iterator=tqdm(cursor, desc="Get", total=total, disable=no_bars),
+        n=builder.chunk_size,
     )
 
     processed_items = atqdm(
@@ -204,11 +196,12 @@ async def multi(builder, num_workers):
         ),
         total=total,
         desc="Process Items",
+        disable=no_bars,
     )
 
     back_pressure_relief = back_pressured_get.release(processed_items)
 
-    update_items = tqdm(total=total, desc="Update Targets")
+    update_items = tqdm(total=total, desc="Update Targets", disable=no_bars)
 
     async for chunk in grouper(back_pressure_relief, n=builder.chunk_size):
 

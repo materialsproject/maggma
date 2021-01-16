@@ -10,7 +10,7 @@ from maggma.core import Builder
 from maggma.utils import grouper, primed
 
 
-def serial(builder: Builder):
+def serial(builder: Builder, no_bars=False):
     """
     Runs the builders using a single process
     """
@@ -47,7 +47,9 @@ def serial(builder: Builder):
             }
         },
     )
-    for chunk in grouper(tqdm(cursor, total=total), builder.chunk_size):
+    for chunk in grouper(
+        tqdm(cursor, total=total, disable=no_bars), builder.chunk_size
+    ):
         logger.info(
             "Processing batch of {} items".format(builder.chunk_size),
             extra={

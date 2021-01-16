@@ -6,20 +6,19 @@ various utilities
 """
 
 import json
-from itertools import groupby, chain
+from itertools import chain, groupby
 from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
 from monty.dev import deprecated
 from monty.io import zopen
-from monty.json import jsanitize, MSONable
+from monty.json import MSONable, jsanitize
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne, uri_parser
-from pymongo.errors import OperationFailure, DocumentTooLarge, ConfigurationError
+from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 from sshtunnel import SSHTunnelForwarder
-
 
 from maggma.core import Sort, Store, StoreError
 from maggma.utils import confirm_field_index
