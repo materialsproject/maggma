@@ -1,5 +1,21 @@
 # Changelog
 
+## [Unreleased](https://github.com/materialsproject/maggma/tree/HEAD)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.26.0...HEAD)
+
+**Closed issues:**
+
+- Python 3.6 compatability [\#336](https://github.com/materialsproject/maggma/issues/336)
+
+## [v0.26.0](https://github.com/materialsproject/maggma/tree/v0.26.0) (2021-01-16)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.25.0...v0.26.0)
+
+**Merged pull requests:**
+
+- No Progress bars  [\#382](https://github.com/materialsproject/maggma/pull/382) ([shyamd](https://github.com/shyamd))
+
 ## [v0.25.0](https://github.com/materialsproject/maggma/tree/v0.25.0) (2020-12-04)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.24.2...v0.25.0)
