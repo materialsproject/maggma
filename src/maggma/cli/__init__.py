@@ -46,7 +46,10 @@ sys.meta_path.append(ScriptFinder())
 )
 @click.option("-u", "--url", "url", default=None, type=str)
 @click.option("-N", "--num-chunks", "num_chunks", default=0, type=int)
-def run(builders, verbosity, reporting_store, num_workers, url, num_chunks):
+@click.option(
+    "--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations"
+)
+def run(builders, verbosity, reporting_store, num_workers, url, num_chunks, no_bars):
 
     # Set Logging
     levels = [logging.WARNING, logging.INFO, logging.DEBUG]
@@ -90,4 +93,4 @@ def run(builders, verbosity, reporting_store, num_workers, url, num_chunks):
         else:
             loop = asyncio.get_event_loop()
             for builder in builder_objects:
-                loop.run_until_complete(multi(builder, num_workers))
+                loop.run_until_complete(multi(builder, num_workers, no_bars))
