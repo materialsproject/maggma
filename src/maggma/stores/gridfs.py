@@ -163,6 +163,10 @@ class GridFSStore(Store):
         Queries the GridFS Store for a set of documents.
         Will check to see if data can be returned from
         files store first.
+        If the data from the gridfs is not a json serialized string
+        a dict will be returned with the data in the "data" key
+        plus the self.key and self.last_updated_field.
+       
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -207,7 +211,9 @@ class GridFSStore(Store):
                 try:
                     data = json.loads(data)
                 except Exception:
-                    pass
+                    if not isinstance(data, dict):
+                        data = {"data": data, self.key: doc.get(self.key),
+                                self.last_updated_field: doc.get(self.last_updated_field)}
 
                 if self.ensure_metadata and isinstance(data, dict):
                     data.update(metadata)
