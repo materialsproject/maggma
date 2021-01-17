@@ -166,7 +166,6 @@ class GridFSStore(Store):
         If the data from the gridfs is not a json serialized string
         a dict will be returned with the data in the "data" key
         plus the self.key and self.last_updated_field.
-       
 
         Args:
             criteria: PyMongo filter for documents to search in
