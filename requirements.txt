@@ -1,6 +1,6 @@
 pymongo==3.11.2
 monty==4.0.2
-mongomock==3.21.0
+mongomock==3.22.1
 pydash==4.9.2
 jsonschema==3.2.0
 tqdm==4.56.0
