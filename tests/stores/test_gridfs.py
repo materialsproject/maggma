@@ -119,6 +119,15 @@ def test_query(gridfsstore):
     assert gridfsstore.query_one(criteria={"task_id": "mp-3"}) is None
 
 
+def test_query_gridfs_file(gridfsstore):
+    # put the data directly in gridfs, mimicking an existing gridfs collection
+    # generated without the store
+    gridfsstore._collection.put(b"hello world", task_id="mp-1")
+    doc = gridfsstore.query_one()
+    assert doc["data"].decode() == "hello world"
+    assert doc[gridfsstore.key] == "mp-1"
+
+
 def test_last_updated(gridfsstore):
     data1 = np.random.rand(256)
     data2 = np.random.rand(256)
