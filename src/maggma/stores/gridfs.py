@@ -105,6 +105,7 @@ class GridFSStore(Store):
             self._files_collection = db["{}.files".format(self.collection_name)]
             self._files_store = MongoStore.from_collection(self._files_collection)
             self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
+            self._files_store.key = self.key
             self._chunks_collection = db["{}.chunks".format(self.collection_name)]
 
     @property  # type: ignore
@@ -162,6 +163,9 @@ class GridFSStore(Store):
         Queries the GridFS Store for a set of documents.
         Will check to see if data can be returned from
         files store first.
+        If the data from the gridfs is not a json serialized string
+        a dict will be returned with the data in the "data" key
+        plus the self.key and self.last_updated_field.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -189,13 +193,11 @@ class GridFSStore(Store):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
 
-                metadata = doc["metadata"]
+                metadata = doc.get("metadata", {})
 
                 data = self._collection.find_one(
                     filter={
-                        "metadata.{}".format(self._files_store.key): metadata[
-                            self._files_store.key
-                        ]
+                        "_id": doc["_id"]
                     },
                     skip=skip,
                     limit=limit,
@@ -208,7 +210,9 @@ class GridFSStore(Store):
                 try:
                     data = json.loads(data)
                 except Exception:
-                    pass
+                    if not isinstance(data, dict):
+                        data = {"data": data, self.key: doc.get(self.key),
+                                self.last_updated_field: doc.get(self.last_updated_field)}
 
                 if self.ensure_metadata and isinstance(data, dict):
                     data.update(metadata)

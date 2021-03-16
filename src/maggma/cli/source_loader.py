@@ -6,7 +6,6 @@ from importlib.machinery import ModuleSpec, SourceFileLoader
 from pathlib import Path
 from typing import List
 
-
 from maggma.core import Builder
 
 try:

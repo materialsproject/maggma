@@ -1,6 +1,6 @@
-uvicorn==0.13.1
-boto3==1.16.30
-hvac==0.10.5
+uvicorn==0.13.4
+boto3==1.17.17
+hvac==0.10.6
 IPython==7.16.1
-nbformat==5.0.8
+nbformat==5.1.2
 regex==2020.11.13
