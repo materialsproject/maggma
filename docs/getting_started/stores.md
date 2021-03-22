@@ -23,7 +23,7 @@ Current working and tested Stores include:
 
 ### Initializing a Store
 
-All `Store`s have a few basic arguments that are critical to understand. Every `Store` has two attributes that the user should customize based on the data contained in that store: `key` and `last_updated_field`. The `key` defines how the `Store` tells documents part. Typically this is `_id` in MongoDB, but you could use your own field (be sure all values under the key field can be used to uniquely identify documents). `last_updated_field` tells `Store` how to order the documents by a date, which is typically in the `datetime` format, but can also be an ISO 8601-format (ex: `2009-05-28T16:15:00`) `Store`s can also take a `Validator` object to make sure the data going into obeys some schema.
+All `Store`s have a few basic arguments that are critical for basic usage. Every `Store` has two attributes that the user should customize based on the data contained in that store: `key` and `last_updated_field`. The `key` defines how the `Store` tells documents apart. Typically this is `_id` in MongoDB, but you could use your own field (be sure all values under the key field can be used to uniquely identify documents). `last_updated_field` tells `Store` how to order the documents by a date, which is typically in the `datetime` format, but can also be an ISO 8601-format (ex: `2009-05-28T16:15:00`) `Store`s can also take a `Validator` object to make sure the data going into obeys some schema.
 
 ### Using a Store
 
