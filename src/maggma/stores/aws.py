@@ -40,7 +40,7 @@ class S3Store(Store):
         endpoint_url: str = None,
         sub_dir: str = None,
         s3_workers: int = 1,
-        key: str = "task_id",
+        key: str = "fs_id",
         searchable_fields: Optional[List[str]] = None,
         **kwargs,
     ):

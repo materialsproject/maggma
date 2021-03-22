@@ -15,7 +15,7 @@ Current working and tested Stores include:
 - VaulStore: uses Vault to get credentials for a MongoDB database
 - AliasingStore: aliases keys from the underlying store to new names
 - SandboxStore: provides permission control to documents via a `_sbxn` sandbox key
-- S3Store: provides an interface to an S3 Bucket either on AWS or self-hosted solutions
+- S3Store: provides an interface to an S3 Bucket either on AWS or self-hosted solutions ([additional documentation](advanced_stores.md))
 - JointStore: joins several MongoDB collections together, merging documents with the same `key`, so they look like one collection
 - ConcatStore: concatenates several MongoDB collections in series so they look like one collection
 
@@ -23,7 +23,7 @@ Current working and tested Stores include:
 
 ### Initializing a Store
 
-All `Store`s have a few basic arguments that are critical to understand. Every `Store` has two attributes that the user should customize based on the data contained in that store: `key` and `last_updated_field`. The `key` defines how the `Store` tells documents part. Typically this is `_id` in MongoDB, but you could use your own field (be sure all values under the key field can be used to uniquely identify documents). `last_updated_field` tells `Store` how to order the documents by a date, which is typically in the `datetime` format, but can also be an ISO 8601-format (ex: `2009-05-28T16:15:00`) `Store`s can also take a `Validator` object to make sure the data going into obeys some schema.
+All `Store`s have a few basic arguments that are critical for basic usage. Every `Store` has two attributes that the user should customize based on the data contained in that store: `key` and `last_updated_field`. The `key` defines how the `Store` tells documents apart. Typically this is `_id` in MongoDB, but you could use your own field (be sure all values under the key field can be used to uniquely identify documents). `last_updated_field` tells `Store` how to order the documents by a date, which is typically in the `datetime` format, but can also be an ISO 8601-format (ex: `2009-05-28T16:15:00`) `Store`s can also take a `Validator` object to make sure the data going into obeys some schema.
 
 ### Using a Store
 
@@ -40,7 +40,7 @@ Stores provide a number of basic methods that make easy to use:
 - query: Standard mongo style `find` method that lets you search the store.
 - query_one: Same as above but limits returned results to just the first document that matches your query.
 - update: Update the documents into the collection. This will override documents if the key field matches.
-- ensure_index: This creates an index the underlying data-source for fast querying.
+- ensure_index: This creates an index for the underlying data-source for fast querying.
 - distinct: Gets distinct values of a field.
 - groupby: Similar to query but performs a grouping operation and returns sets of documents.
 - remove_docs: Removes documents from the underlying data source.
