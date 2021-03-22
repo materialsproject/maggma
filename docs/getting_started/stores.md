@@ -40,7 +40,7 @@ Stores provide a number of basic methods that make easy to use:
 - query: Standard mongo style `find` method that lets you search the store.
 - query_one: Same as above but limits returned results to just the first document that matches your query.
 - update: Update the documents into the collection. This will override documents if the key field matches.
-- ensure_index: This creates an index the underlying data-source for fast querying.
+- ensure_index: This creates an index for the underlying data-source for fast querying.
 - distinct: Gets distinct values of a field.
 - groupby: Similar to query but performs a grouping operation and returns sets of documents.
 - remove_docs: Removes documents from the underlying data source.
