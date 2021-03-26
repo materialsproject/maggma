@@ -2,7 +2,7 @@ import inspect
 import warnings
 from typing import Dict, Optional
 
-from fastapi import Query
+from fastapi import Query, HTTPException
 from maggma.api.util import STORE_PARAMS
 from maggma.api.query_operator import QueryOperator
 
@@ -37,9 +37,10 @@ class PaginationQuery(QueryOperator):
             Pagination parameters for the API Endpoint
             """
             if limit > max_limit:
-                raise Exception(
-                    "Requested more data per query than allowed by this endpoint."
-                    f"The max limit is {max_limit} entries"
+                raise HTTPException(
+                    status_code=400,
+                    detail="Requested more data per query than allowed by this endpoint."
+                    f"The max limit is {max_limit} entries",
                 )
             return {"skip": skip, "limit": limit}
 

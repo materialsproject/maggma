@@ -20,36 +20,31 @@ class SparseFieldsQuery(QueryOperator):
 
         self.model = model
 
+        model_name = self.model.__name__  # type: ignore
         model_fields = list(self.model.__fields__.keys())
+
         self.default_fields = (
             model_fields if default_fields is None else list(default_fields)
         )
 
-        assert set(self.default_fields).issubset(
-            model_fields
-        ), "default projection contains some fields that are not in the model fields"
-
-        default_fields_string = ",".join(self.default_fields)  # type: ignore
-
         def query(
             fields: str = Query(
-                default_fields_string,
-                description=f"Fields to project from {model.__name__} "  # type: ignore
-                f"as a list of comma seperated strings",
+                None,
+                description=f"Fields to project from {str(model_name)} as a list of comma seperated strings",
             ),
             all_fields: bool = Query(False, description="Include all fields."),
         ) -> STORE_PARAMS:
             """
-            Projection parameters for the API Endpoint
+            Pagination parameters for the API Endpoint
             """
 
-            projection_fields: List[str] = [s.strip() for s in fields.split(",")]
-
-            # need to strip to avoid input such as "name, weight" to be parsed into ["name", " weight"]
-            # we need ["name", "weight"]
+            properties = (
+                fields.split(",") if isinstance(fields, str) else self.default_fields
+            )
             if all_fields:
-                projection_fields = model_fields
-            return {"properties": projection_fields}
+                properties = model_fields
+
+            return {"properties": properties}
 
         self.query = query  # type: ignore
 
