@@ -1,9 +1,10 @@
 import inspect
 import warnings
-from typing import Any, Dict, List, Mapping, Optional
+from abc import abstractmethod
+from typing import Any, Dict, List, Mapping, Optional, Callable, Tuple
 
 from fastapi import Query
-from monty.json import MSONable
+from monty.json import MontyDecoder
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 
@@ -13,166 +14,214 @@ from maggma.utils import dynamic_import
 from maggma.api.query_operator import QueryOperator
 
 
-class DefaultDynamicQuery(QueryOperator):
+class DynamicQueryOperator(QueryOperator):
+    """Abstract Base class for dynamic query operators"""
+
     def __init__(
         self,
         model: BaseModel,
-        additional_signature_fields: Mapping[str, List] = None,
+        fields: Optional[List[str]] = None,
+        excluded_fields: Optional[List[str]] = None,
     ):
-        """
-        This function will take query, parse it, and output the mongo criteria.
 
-        About the query:
-        The format of the input query will come from two sources: the data model (which we will sometimes refer to as
-        default values, and the additional paremeters that users can choose to pass in)
-        additional_signature_field must be int the shape of NAME_OF_THE_QUERY -> [DEFAULT_VALUE, QUERY]
-        where QUERY is a FastAPI params.Query object
-
-        About how does this script parse the query:
-        it will first generate default queries from input data model
-        Then it will merge with the optional additional_signature_fields
-
-        About mongo criteria output:
-        current implementation only supports 6 operations, namely equal, not equal, less than, greater than, in,
-        and not in. Therefore, the criteria output will be also limited to those operations.
-
-
-        Args:
-            model: PyDantic Model to base the query language on
-            additional_signature_fields: mapping of NAME_OF_THE_FIELD -> [DEFAULT_VALUE, QUERY]
-        """
         self.model = model
-        default_mapping = {
-            "eq": "$eq",
-            "not_eq": "$ne",
-            "lt": "$lt",
-            "gt": "$gt",
-            "in": "$in",
-            "not_in": "$nin",
-        }
-        mapping: dict = default_mapping
+        self.fields = fields
+        self.excluded_fields = excluded_fields
 
-        self.additional_signature_fields: Mapping[str, List] = (
-            dict()
-            if additional_signature_fields is None
-            else additional_signature_fields
+        all_fields: Dict[str, ModelField] = model.__fields__
+        param_fields = fields or list(
+            set(all_fields.keys()) - set(excluded_fields or [])
         )
 
-        # construct fields
-        # find all fields in data_object
-        all_fields: Dict[str, ModelField] = model.__fields__
+        # Convert the fields into operator tuples
+        ops = [
+            op
+            for name, field in all_fields.items()
+            if name in param_fields
+            for op in self.field_to_operator(name, field)
+        ]
 
-        # turn fields into operators, also do type checking
-        params = self.fields_to_operator(all_fields)
-
-        # combine with additional_fields
-        # user's input always have higher priority than the the default data model's
-        params.update(self.additional_signature_fields)
+        # Dictionary to make converting the API query names to function that generates
+        # Maggma criteria dictionaries
+        self.mapping = {op[0]: op[3] for op in ops}
 
         def query(**kwargs) -> STORE_PARAMS:
-            crit = dict()
+            criteria = []
             for k, v in kwargs.items():
                 if v is not None:
-                    if "_" not in k:
-                        k = k + "_eq"
-                    name, operator = k.split("_", 1)
                     try:
-                        crit[name] = {mapping[operator]: v}
+                        criteria.append(self.mapping[k](v))
                     except KeyError:
                         raise KeyError(
                             f"Cannot find key {k} in current query to database mapping"
                         )
 
-            return {"criteria": crit}
+            return {"criteria": {k: v for crit in criteria for k, v in crit.items()}}
 
         # building the signatures for FastAPI Swagger UI
-        signatures: List[Any] = []
-        signatures.extend(
+        signatures: List = [
             inspect.Parameter(
-                param,
+                op[0],
                 inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                default=query[1],
-                annotation=query[0],
+                default=op[2],
+                annotation=op[1],
             )
-            for param, query in params.items()
-        )
+            for op in ops
+        ]
+
         setattr(query, "__signature__", inspect.Signature(signatures))
 
         self.query = query  # type: ignore
 
-    def fields_to_operator(self, all_fields: Dict[str, ModelField]) -> Dict[str, list]:
+    @abstractmethod
+    def field_to_operator(
+        self, name: str, field: ModelField
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
-        Getting a list of tuple of fields
-
-        turn them into a mapping of
-
-        FIELD_[operator] -> query
-
-
-        Args:
-            all_fields: dictionary of str -> ModelField
-
-        Returns:
-            a dictionary of FIELD_[operator] -> query
+        Converts a PyDantic ModelField into a Tuple with the
+            - query param name,
+            - query param type
+            - FastAPI Query object,
+            - and callable to convert the value into a query dict
         """
-        params = dict()
-        for name, model_field in all_fields.items():
-            if model_field.type_ in [str, int, float]:
-                t: Any = model_field.type_
-                name = model_field.name
-                params[f"{name}"] = [
-                    t,
-                    Query(
-                        default=model_field.default,
-                        description=f"Querying if {model_field.name} is equal to another",
-                    ),
-                ]  # supporting both with and with out explicit _eq
-                params[f"{name}_eq"] = [
-                    t,
-                    Query(
-                        default=model_field.default,
-                        description=f"Querying if {model_field.name} is equal to another",
-                    ),
-                ]
-                params[f"{name}_not_eq"] = [
-                    t,
-                    Query(
-                        default=model_field.default,
-                        description=f"Querying if {model_field.name} is not equal to another",
-                    ),
-                ]
-                params[f"{name}_in"] = [
-                    List[t],
-                    Query(
-                        default=model_field.default,
-                        description=f"Querying if item is in {model_field.name}",
-                    ),
-                ]
-                params[f"{name}_not_in"] = [
-                    List[t],
-                    Query(
-                        default=model_field.default,
-                        description=f"Querying if item is not in {model_field.name} ",
-                    ),
-                ]
+        pass
 
-                if model_field.type_ == int or model_field == float:
-                    params[f"{name}_lt"] = [
-                        model_field.type_,
-                        Query(
-                            model_field.default,
-                            description=f"Querying if {model_field.name} is less than to another",
-                        ),
-                    ]
-                    params[f"{name}_gt"] = [
-                        model_field.type_,
-                        Query(
-                            model_field.default,
-                            description=f"Querying if {model_field.name} is greater than to another",
-                        ),
-                    ]
-            else:
-                warnings.warn(
-                    f"Field name {name} with {model_field.type_} not implemented"
-                )
-        return params
+    @classmethod
+    def from_dict(cls, d):
+        if isinstance(d["model"], str):
+            d["model"] = dynamic_import(d["model"])
+
+        decoder = MontyDecoder()
+        return cls(**{k: decoder.process_decoded(v) for k, v in d.items()})
+
+    def as_dict(self) -> Dict:
+        """
+        Special as_dict implemented to convert pydantic models into strings
+        """
+        d = super().as_dict()  # Ensures sub-classes serialize correctly
+        d["model"] = f"{self.model.__module__}.{self.model.__name__}"
+        return d
+
+
+class NumericQuery(DynamicQueryOperator):
+    " Query Operator to enable searching on numeric fields"
+
+    def field_to_operator(
+        self, name: str, field: ModelField
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+
+        """
+        Converts a PyDantic ModelField into a Tuple with the
+        query_param name,
+        default value,
+        Query object,
+        and callable to convert it into a query dict
+        """
+
+        ops = []
+
+        if field.type_ in [int, float]:
+            title: str = field.field_info.title or field.name
+
+            ops = [
+                (
+                    f"{field.name}",
+                    field.type_,
+                    Query(
+                        default=None,
+                        description=f"Querying if {title} is equal to another",
+                    ),
+                    lambda val: {f"{field.name}": val},
+                ),
+                (
+                    f"{field.name}_lt",
+                    field.type_,
+                    Query(
+                        default=None,
+                        description=f"Querying if {title} is equal to another",
+                    ),
+                    lambda val: {f"{field.name}": {"$lt": val}},
+                ),
+                (
+                    f"{field.name}_gt",
+                    field.type_,
+                    Query(
+                        default=None,
+                        description=f"Querying if {title} is equal to another",
+                    ),
+                    lambda val: {f"{field.name}": {"$gt": val}},
+                ),
+                (
+                    f"{field.name}_eq_any",
+                    List[field.type_],
+                    Query(
+                        default=None,
+                        description=f"Querying if {title} is any of these values",
+                    ),
+                    lambda val: {f"{field.name}": {"$in": val}},
+                ),
+                (
+                    f"{field.name}_neq_any",
+                    List[field.type_],
+                    Query(
+                        default=None,
+                        description=f"Querying if {title} is not any of these values",
+                    ),
+                    lambda val: {f"{field.name}": {"$nin": val}},
+                ),
+            ]
+
+        return ops
+
+
+class StringQueryOperator(DynamicQueryOperator):
+    " Query Operator to enable searching on numeric fields"
+
+    def field_to_operator(
+        self, name: str, field: ModelField
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+
+        """
+        Converts a PyDantic ModelField into a Tuple with the
+        query_param name,
+        default value,
+        Query object,
+        and callable to convert it into a query dict
+        """
+
+        ops = []
+
+        if field.type_ in [str]:
+            title: str = field.field_info.title or field.name
+
+            ops = [
+                (
+                    f"{field.name}",
+                    field.type_,
+                    Query(
+                        default=None,
+                        description=f"Querying if {title} is equal to another",
+                    ),
+                    lambda val: {f"{field.name}": val},
+                ),
+                (
+                    f"{field.name}_eq_any",
+                    List[field.type_],
+                    Query(
+                        default=None,
+                        description=f"Querying if {title} is any of these values",
+                    ),
+                    lambda val: {f"{field.name}": {"$in": val}},
+                ),
+                (
+                    f"{field.name}_neq_any",
+                    List[field.type_],
+                    Query(
+                        default=None,
+                        description=f"Querying if {title} is not any of these values",
+                    ),
+                    lambda val: {f"{field.name}": {"$nin": val}},
+                ),
+            ]
+
+        return ops
