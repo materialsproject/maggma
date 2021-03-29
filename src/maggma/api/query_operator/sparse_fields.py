@@ -5,7 +5,7 @@ from typing import Dict, List, Optional
 from fastapi import Query
 from pydantic import BaseModel
 
-from maggma.api.util import STORE_PARAMS
+from maggma.api.utils import STORE_PARAMS
 from maggma.utils import dynamic_import
 from maggma.api.query_operator import QueryOperator
 

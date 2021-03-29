@@ -3,7 +3,7 @@ from typing import Dict
 from monty.json import MSONable
 
 
-from maggma.api.util import STORE_PARAMS
+from maggma.api.utils import STORE_PARAMS
 
 
 class QueryOperator(MSONable):

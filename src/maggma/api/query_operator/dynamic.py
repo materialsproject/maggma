@@ -8,7 +8,7 @@ from monty.json import MontyDecoder
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 
-from maggma.api.util import STORE_PARAMS
+from maggma.api.utils import STORE_PARAMS
 from maggma.core import Store
 from maggma.utils import dynamic_import
 from maggma.api.query_operator import QueryOperator

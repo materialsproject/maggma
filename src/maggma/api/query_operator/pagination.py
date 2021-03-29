@@ -3,7 +3,7 @@ import warnings
 from typing import Dict, Optional
 
 from fastapi import Query, HTTPException
-from maggma.api.util import STORE_PARAMS
+from maggma.api.utils import STORE_PARAMS
 from maggma.api.query_operator import QueryOperator
 
 
