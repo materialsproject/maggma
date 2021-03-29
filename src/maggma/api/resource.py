@@ -1,8 +1,10 @@
+from inspect import signature
 from typing import Any, Dict, List, Optional, Union
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path
-from monty.json import MSONable
+from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path, Request
+from monty.json import MSONable, MontyDecoder
 from pydantic import BaseModel
+from starlette.responses import RedirectResponse
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import (
@@ -10,13 +12,9 @@ from maggma.api.query_operator import (
     QueryOperator,
     SparseFieldsQuery,
 )
-from maggma.api.util import (
-    STORE_PARAMS,
-    attach_signature,
-    dynamic_import,
-    merge_queries,
-)
+from maggma.api.utils import STORE_PARAMS, attach_signature, merge_queries
 from maggma.core import Store
+from maggma.utils import dynamic_import
 
 
 class Resource(MSONable):
