@@ -172,11 +172,19 @@ class Resource(MSONable):
         app.include_router(self.router, prefix="")
         uvicorn.run(app)
 
+    @classmethod
+    def from_dict(cls, d):
+
+        if isinstance(d["model"], str):
+            d["model"] = dynamic_import(d["model"])
+
+        return MontyDecoder().process_decoded(d)
+
     def as_dict(self) -> Dict:
         """
         Special as_dict implemented to convert pydantic models into strings
         """
 
         d = super().as_dict()  # Ensures sub-classes serialize correctly
-        d["model"] = f"{self.model.__module__}.{self.model.__name__}"  # type: ignore
+        d["model"] = f"{self.model.__module__}.{self.model.__name__}"
         return d
