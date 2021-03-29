@@ -1,12 +1,17 @@
+import os
+from datetime import datetime
 from inspect import isclass
 from typing import Dict
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.openapi.utils import get_openapi
 from monty.json import MSONable
+from starlette.responses import RedirectResponse
 
+from maggma import __version__
 from maggma.api.resource import Resource
-from maggma.api.util import dynamic_import
+from maggma.utils import dynamic_import
 
 
 class APIManager(MSONable):
