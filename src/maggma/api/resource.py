@@ -6,7 +6,6 @@ from pydantic import BaseModel
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import (
-    DefaultDynamicQuery,
     PaginationQuery,
     QueryOperator,
     SparseFieldsQuery,
@@ -64,8 +63,10 @@ class Resource(MSONable):
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(self.model, default_fields=[self.store.key]),
-                DefaultDynamicQuery(self.model),
+                SparseFieldsQuery(
+                    self.model,
+                    default_fields=[self.store.key, self.store.last_updated_field],
+                ),
             ]
         )
 
