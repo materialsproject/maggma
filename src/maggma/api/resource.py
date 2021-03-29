@@ -160,6 +160,16 @@ class Resource(MSONable):
             response_model_exclude_unset=True,
         )(search)
 
+        @self.router.get("$", include_in_schema=False)
+        def redirect_unslashed():
+            """
+            Redirects unforward slashed url to resource
+            url with the forward slash
+            """
+
+            url = self.router.url_path_for("/")
+            return RedirectResponse(url=url, status_code=301)
+
     def run(self):  # pragma: no cover
         """
         Runs the Endpoint cluster locally
