@@ -1,12 +1,12 @@
-from abc import abstractmethod
+from abc import ABCMeta, abstractmethod
 from typing import Dict
-from monty.json import MSONable
 
+from monty.json import MSONable
 
 from maggma.api.utils import STORE_PARAMS
 
 
-class QueryOperator(MSONable):
+class QueryOperator(MSONable, metaclass=ABCMeta):
     """
     Base Query Operator class for defining powerfull query language
     in the Materials API

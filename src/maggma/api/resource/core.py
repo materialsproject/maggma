@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Dict, List, Optional, Union
 
 from fastapi import APIRouter, FastAPI
-from monty.json import MSONable
+from monty.json import MSONable, MontyDecoder
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 
@@ -40,13 +40,7 @@ class Resource(MSONable, metaclass=ABCMeta):
         self.tags = tags or []
         self.query_operators = query_operators or []
 
-        if isinstance(model, str):
-            class_model = dynamic_import(model)
-            assert issubclass(
-                class_model, BaseModel
-            ), "The resource model has to be a PyDantic Model"
-            self.model = class_model
-        elif isinstance(model, type) and issubclass(model, BaseModel):
+        if isinstance(model, type) and issubclass(model, BaseModel):
             self.model = model
         else:
             raise ValueError("The resource model has to be a PyDantic Model")
@@ -94,3 +88,11 @@ class Resource(MSONable, metaclass=ABCMeta):
         d = super().as_dict()  # Ensures sub-classes serialize correctly
         d["model"] = f"{self.model.__module__}.{self.model.__name__}"
         return d
+
+    @classmethod
+    def from_dict(cls, d):
+
+        if isinstance(d["model"], str):
+            d["model"] = dynamic_import(d["model"])
+
+        return cls(**MontyDecoder().process_decoded(d))
