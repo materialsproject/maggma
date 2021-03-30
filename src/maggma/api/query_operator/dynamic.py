@@ -1,17 +1,17 @@
 import inspect
 import warnings
 from abc import abstractmethod
-from typing import Any, Dict, List, Mapping, Optional, Callable, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
 
 from fastapi import Query
 from monty.json import MontyDecoder
 from pydantic import BaseModel
 from pydantic.fields import ModelField
 
+from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
 from maggma.core import Store
 from maggma.utils import dynamic_import
-from maggma.api.query_operator import QueryOperator
 
 
 class DynamicQueryOperator(QueryOperator):

@@ -2,7 +2,7 @@ from abc import ABCMeta, abstractmethod
 from typing import Dict, List, Optional, Union
 
 from fastapi import APIRouter, FastAPI
-from monty.json import MSONable, MontyDecoder
+from monty.json import MontyDecoder, MSONable
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 

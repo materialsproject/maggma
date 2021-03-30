@@ -2,9 +2,10 @@ import inspect
 import warnings
 from typing import Dict, Optional
 
-from fastapi import Query, HTTPException
-from maggma.api.utils import STORE_PARAMS
+from fastapi import HTTPException, Query
+
 from maggma.api.query_operator import QueryOperator
+from maggma.api.utils import STORE_PARAMS
 
 
 class PaginationQuery(QueryOperator):

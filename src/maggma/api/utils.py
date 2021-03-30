@@ -1,12 +1,11 @@
 import inspect
 from copy import deepcopy
 from importlib import import_module
-from typing import Any, Callable, Dict, List, Optional, Union, Type
-
-from pydantic import BaseModel, create_model
-from typing_extensions import Literal
+from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from monty.json import MSONable
+from pydantic import BaseModel, create_model
+from typing_extensions import Literal
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
 STORE_PARAMS = Dict[Literal["criteria", "properties", "skip", "limit"], Any]
