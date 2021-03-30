@@ -5,9 +5,9 @@ from typing import Dict, List, Optional
 from fastapi import Query
 from pydantic import BaseModel
 
+from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
 from maggma.utils import dynamic_import
-from maggma.api.query_operator import QueryOperator
 
 
 class SparseFieldsQuery(QueryOperator):
@@ -77,4 +77,4 @@ class SparseFieldsQuery(QueryOperator):
         ), "The resource model has to be a PyDantic Model"
         d["model"] = model
 
-        cls(**d)
+        return cls(**d)
