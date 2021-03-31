@@ -8,7 +8,7 @@ from starlette.responses import RedirectResponse
 
 from maggma.api.models import Response
 from maggma.api.query_operator import QueryOperator
-from maggma.api.utils import STORE_PARAMS, attach_signature, merge_queries
+from maggma.api.utils import STORE_PARAMS, api_sanitize, attach_signature, merge_queries
 from maggma.core import Store
 from maggma.utils import dynamic_import
 
@@ -20,47 +20,31 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     def __init__(
         self,
-        store: Store,
-        model: Union[BaseModel, str] = None,
-        tags: Optional[List[str]] = None,
-        query_operators: Optional[List[QueryOperator]] = None,
+        model: BaseModel,
     ):
         """
         Args:
-            store: The Maggma Store to get data from
-            model: the pydantic model to apply to the documents from the Store
-                This can be a string with a full python path to a model or
-                an actual pydantic Model if this is being instantiated in python
-                code. Serializing this via Monty will auto-convert the pydantic model
-                into a python path string
-            tags: list of tags for the Endpoint
-            query_operators: operators for the query language
+            model: the pydantic model this Resource represents
         """
-        self.store = store
-        self.tags = tags or []
-        self.query_operators = query_operators or []
-
         if isinstance(model, type) and issubclass(model, BaseModel):
-            self.model = model
+            self.model = api_sanitize(model, allow_dict_msonable=True)
         else:
             raise ValueError("The resource model has to be a PyDantic Model")
-
         self.router = APIRouter()
-        self.response_model = Response[self.model]  # type: ignore
-        self.setup_redirect()
         self.prepare_endpoint()
+        self.setup_redirect()
 
     @abstractmethod
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
         pass
 
     def setup_redirect(self):
-        @self.router.get("", include_in_schema=False)
-        def redirect_unslashes():
+        @self.router.get("$", include_in_schema=False)
+        def redirect_unslashed():
             """
             Redirects unforward slashed url to resource
             url with the forward slash
@@ -94,5 +78,5 @@ class Resource(MSONable, metaclass=ABCMeta):
 
         if isinstance(d["model"], str):
             d["model"] = dynamic_import(d["model"])
-
-        return cls(**MontyDecoder().process_decoded(d))
+        d = {k: MontyDecoder().process_decoded(v) for k, v in d.items()}
+        return cls(**d)
