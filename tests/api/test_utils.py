@@ -6,6 +6,14 @@ from monty.json import MSONable
 from pydantic import BaseModel, Field
 from datetime import datetime
 
+from enum import Enum
+
+
+class SomeEnum(Enum):
+    A = 1
+    B = 2
+    C = 3
+
 
 class Pet(MSONable):
     def __init__(self, name, age):
@@ -19,6 +27,7 @@ class Owner(BaseModel):
     weight: float = Field(..., title="Owner's weight")
     last_updated: datetime = Field(..., title="Last updated date for this record")
     pet: Pet = Field(..., title="Owner's Pet")
+    other: SomeEnum = Field(..., title="A enum?")
 
 
 def test_api_sanitize():

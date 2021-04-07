@@ -90,15 +90,24 @@ def api_sanitize(
         fields_to_leave: list of strings for model fields as "model__name__.field"
     """
 
-    models = get_flat_models_from_model(pydantic_model)
+    models = [
+        model
+        for model in get_flat_models_from_model(pydantic_model)
+        if lenient_issubclass(model, BaseModel)
+    ]
+
     fields_to_leave = fields_to_leave or []
     fields_tuples = [f.split(".") for f in fields_to_leave]
     assert all(len(f) == 2 for f in fields_tuples)
 
     for model in models:
         model_fields_to_leave = {f[1] for f in fields_tuples if model.__name__ == f[0]}
-        for name, field in pydantic_model.__fields__.items():
+        for name, field in model.__fields__.items():
             field_type = field.type_
+
+            if name not in model_fields_to_leave:
+                field.required = False
+                field.field_info.default = None
 
             if (
                 field_type is not None
@@ -107,10 +116,6 @@ def api_sanitize(
             ):
                 field.type_ = allow_msonable_dict(field_type)
                 field.populate_validators()
-
-            if name not in model_fields_to_leave:
-                field.required = False
-                field.field_info.default = None
 
     return pydantic_model
 
