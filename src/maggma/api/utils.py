@@ -4,7 +4,9 @@ from importlib import import_module
 from typing import Any, Callable, Dict, List, Optional, Type, Union
 
 from monty.json import MSONable
-from pydantic import BaseModel, create_model
+from pydantic import BaseModel
+from pydantic.utils import lenient_issubclass
+from pydantic.schema import get_flat_models_from_model
 from typing_extensions import Literal
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
@@ -81,56 +83,42 @@ def api_sanitize(
     Function to clean up pydantic models for the API by:
         1.) Making fields optional
         2.) Allowing dictionaries in-place of the objects for MSONable quantities
+
+    WARNING: This works in place, so it mutates the model and all sub-models
+
+    Args:
+        fields_to_leave: list of strings for model fields as "model__name__.field"
     """
+
+    models = get_flat_models_from_model(pydantic_model)
     fields_to_leave = fields_to_leave or []
-    fields_to_leave = set(tuple(field.split(".")) for field in fields_to_leave)
+    fields_tuples = [f.split(".") for f in fields_to_leave]
+    assert all(len(f) == 2 for f in fields_tuples)
 
-    props = {}
-    for name, field in pydantic_model.__fields__.items():
-        field_type = field.type_
-        field_info = deepcopy(field.field_info)
+    for model in models:
+        model_fields_to_leave = {f[1] for f in fields_tuples if model.__name__ == f[0]}
+        for name, field in pydantic_model.__fields__.items():
+            field_type = field.type_
 
-        sub_fields_to_leave = [
-            sub_field[1:] for sub_field in fields_to_leave if sub_field[0] == name
-        ]
-        sub_fields_to_leave = [
-            sub_field for sub_field in sub_fields_to_leave if len(sub_field) > 0
-        ]
+            if (
+                field_type is not None
+                and lenient_issubclass(field_type, MSONable)
+                and allow_dict_msonable
+            ):
+                field.type_ = allow_msonable_dict(field_type)
+                field.populate_validators()
 
-        if field_type is not None:
-            if issubclass(field_type, BaseModel):
-                field_type = api_sanitize(
-                    pydantic_model=field_type,
-                    fields_to_leave=sub_fields_to_leave,
-                    allow_dict_msonable=allow_dict_msonable,
-                )
-            elif issubclass(field_type, MSONable) and allow_dict_msonable:
-                field_type = allow_msonable_dict(deepcopy(field_type))
-            elif hasattr(field_type, "__pydantic_model__"):
-                field_type.__pydantic_model__ = api_sanitize(
-                    pydantic_model=deepcopy(field_type.__pydantic_model__),
-                    fields_to_leave=sub_fields_to_leave,
-                    allow_dict_msonable=allow_dict_msonable,
-                )
+            if name not in model_fields_to_leave:
+                field.required = False
+                field.field_info.default = None
 
-        if name not in {fields[0] for fields in fields_to_leave}:
-            field_info.default = None
-
-        props[name] = (field_type, field_info)
-
-    model = create_model(pydantic_model.__name__, **props)
-    model.__doc__ = pydantic_model.__doc__
-
-    return model
+    return pydantic_model
 
 
 def allow_msonable_dict(monty_cls: Type[MSONable]):
     """
     Patch Monty to allow for dict values for MSONable
     """
-
-    def __get_validators__(cls):
-        yield cls.validate_monty
 
     def validate_monty(cls, v):
         """
@@ -157,6 +145,5 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
             raise ValueError(f"Must provide {cls.__name__} or MSONable dictionary")
 
     setattr(monty_cls, "validate_monty", classmethod(validate_monty))
-    setattr(monty_cls, "__get_validators__", classmethod(__get_validators__))
 
     return monty_cls
