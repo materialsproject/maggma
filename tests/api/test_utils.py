@@ -23,22 +23,43 @@ class Owner(BaseModel):
 
 def test_api_sanitize():
 
+    # Ensure model validation fails
     with pytest.raises(ValueError):
         Owner()
 
-    new_owner = api_sanitize(Owner)
-
-    # This will fail if non-optional fields are not turned off
-    new_owner()
-
-    new_owner2 = api_sanitize(Owner, fields_to_leave=["name"])
+    # This should still fail validation
+    new_owner = api_sanitize(Owner, fields_to_leave=["Owner.name"])
     with pytest.raises(ValueError):
-        new_owner2()
+        new_owner()
+
+    new_owner(name="owner")
+
+    # These will fail if non-optional fields are not turned off
+    new_owner2 = api_sanitize(Owner)
+    new_owner()  # api_sanitize is in-place
+    new_owner2()
+    Owner()
+
+    # This should fail type validation for pet
+    with pytest.raises(Exception):
+        Owner(pet="fido")
 
     temp_pet_dict = Pet(name="fido", age=3).as_dict()
-    with pytest.raises(ValueError):
-        new_owner2(pet=temp_pet_dict)
+    bad_pet_dict = dict(temp_pet_dict)
+    del bad_pet_dict["@module"]
+    del bad_pet_dict["@class"]
 
-    new_owner3 = api_sanitize(Owner, allow_dict_msonable=True)
+    # This should fail because of bad data type
+    with pytest.raises(Exception):
+        Owner(pet=bad_pet_dict)
 
-    new_owner3(pet=temp_pet_dict)
+    assert isinstance(Owner(pet=temp_pet_dict).pet, Pet)
+
+    api_sanitize(Owner, allow_dict_msonable=True)
+
+    # This should still fail because of bad data type
+    with pytest.raises(Exception):
+        Owner(pet=bad_pet_dict)
+
+    # This should work
+    assert isinstance(Owner(pet=temp_pet_dict).pet, dict)
