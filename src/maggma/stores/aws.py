@@ -359,7 +359,6 @@ class S3Store(Store):
             del search_doc["_id"]
 
         data = msgpack.packb(doc, default=monty_default)
-        msgback_hash = hash(data)
 
         if self.compress:
             # Compress with zlib if chosen
@@ -372,6 +371,7 @@ class S3Store(Store):
                 to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
+        obj_hash = hash(data)
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
         )
@@ -379,7 +379,7 @@ class S3Store(Store):
         if self.last_updated_field in doc:
             search_doc[self.last_updated_field] = doc[self.last_updated_field]
 
-        search_doc["msgback_hash"] = msgback_hash
+        search_doc["obj_hash"] = obj_hash
         return search_doc
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
