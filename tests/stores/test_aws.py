@@ -182,9 +182,6 @@ def test_rebuild_index(s3store):
         == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
     )
 
-    # s3_object = s3store.s3_bucket.Object("mp-2")
-    # assert s3_object.metadata["add_meta"] == "hello"
-
 
 def tests_msonable_read_write(s3store):
     dd = s3store.as_dict()
