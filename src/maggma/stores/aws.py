@@ -458,18 +458,6 @@ class S3Store(Store):
             unpacked_data = msgpack.unpackb(data, raw=False)
             self.update(unpacked_data, **kwargs)
 
-    # for obj in objects:
-    #     path, filename = os.path.split(obj.key)
-    #     my_bucket.download_file(obj.key, filename)
-
-    # for file in self.s3_bucket.objects.all():
-    #     # TODO: Transform the data back from strings and remove AWS S3 specific keys
-    #     print(dir(file))
-    #     print(file.load())
-    #     index_docs.append(file.metadata)
-    #
-    # self.index.update(index_docs)
-
     def rebuild_metadata_from_index(self, index_query: dict = None):
         """
         Read data from the index store and populate the metadata of the S3 bucket
