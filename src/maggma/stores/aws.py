@@ -108,7 +108,7 @@ class S3Store(Store):
 
         if not self.s3:
             self.s3 = resource
-            if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
+            if self.bucket.creation_date is None:
                 raise Exception("Bucket not present on AWS: {}".format(self.bucket))
 
             self.s3_bucket = resource.Bucket(self.bucket)
