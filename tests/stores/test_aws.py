@@ -26,8 +26,8 @@ def s3store():
         conn = boto3.client("s3")
         conn.create_bucket(Bucket="bucket1")
 
-        index = MemoryStore("index")
-        store = S3Store(index, "bucket1")
+        index = MemoryStore("index", key="task_id")
+        store = S3Store(index, "bucket1", key="task_id")
         store.connect()
 
         store.update(
@@ -154,8 +154,9 @@ def test_update(s3store):
 
     s3store.compress = True
     s3store.update([{"task_id": "mp-4", "data": "asd"}])
-    assert s3store.index.query_one({"task_id": "mp-4"})["compression"] == "zlib"
-    assert s3store.query_one({"task_id": "mp-4"}) is not None
+    obj = s3store.index.query_one({"task_id": "mp-4"})
+    assert obj["compression"] == "zlib"
+    assert obj["obj_hash"] == "be74de5ac71f00ec9e96441a3c325b0592c07f4c"
     assert s3store.query_one({"task_id": "mp-4"})["data"] == "asd"
 
 
@@ -165,6 +166,21 @@ def test_rebuild_meta_from_index(s3store):
     s3store.rebuild_metadata_from_index()
     s3_object = s3store.s3_bucket.Object("mp-2")
     assert s3_object.metadata["add_meta"] == "hello"
+
+
+def test_rebuild_index(s3store):
+    s3store.update([{"task_id": "mp-2", "data": "asd"}])
+    assert (
+        s3store.index.query_one({"task_id": "mp-2"})["obj_hash"]
+        == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
+    )
+    s3store.index.remove_docs({})
+    assert s3store.index.query_one({"task_id": "mp-2"}) is None
+    s3store.rebuild_index_from_s3_data()
+    assert (
+        s3store.index.query_one({"task_id": "mp-2"})["obj_hash"]
+        == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
+    )
 
 
 def tests_msonable_read_write(s3store):

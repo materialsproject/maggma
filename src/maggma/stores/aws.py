@@ -8,6 +8,7 @@ import warnings
 import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
+from hashlib import sha1
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
@@ -42,6 +43,7 @@ class S3Store(Store):
         sub_dir: str = None,
         s3_workers: int = 1,
         key: str = "fs_id",
+        store_hash: bool = True,
         searchable_fields: Optional[List[str]] = None,
         **kwargs,
     ):
@@ -61,6 +63,7 @@ class S3Store(Store):
             endpoint_url: endpoint_url to allow interface to minio service
             sub_dir: (optional)  subdirectory of the s3 bucket to store the data
             s3_workers: number of concurrent S3 puts to run
+            store_hash: store the sha1 hash right before insertion to the database.
             searchable_fields: fields to keep in the index store
         """
         if boto3 is None:
@@ -76,6 +79,7 @@ class S3Store(Store):
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
         self.searchable_fields = searchable_fields if searchable_fields else []
+        self.store_hash = store_hash
 
         # Force the key to be the same as the index
         assert isinstance(
@@ -309,7 +313,7 @@ class S3Store(Store):
         with ThreadPoolExecutor(max_workers=self.s3_workers) as pool:
             fs = {
                 pool.submit(
-                    fn=self.write_doc_to_s3,
+                    self.write_doc_to_s3,
                     doc=itr_doc,
                     search_keys=key + additional_metadata + self.searchable_fields,
                 )
@@ -361,6 +365,8 @@ class S3Store(Store):
         if "_id" in search_doc:
             del search_doc["_id"]
 
+        # to make hashing more meaningful, make sure last updated field is removed
+        lu_info = doc.pop(self.last_updated_field, None)
         data = msgpack.packb(doc, default=monty_default)
 
         if self.compress:
@@ -378,9 +384,14 @@ class S3Store(Store):
             Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
         )
 
-        if self.last_updated_field in doc:
-            search_doc[self.last_updated_field] = doc[self.last_updated_field]
+        if lu_info is not None:
+            search_doc[self.last_updated_field] = lu_info
 
+        if self.store_hash:
+            hasher = sha1()
+            hasher.update(data)
+            obj_hash = hasher.hexdigest()
+            search_doc["obj_hash"] = obj_hash
         return search_doc
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
@@ -433,18 +444,22 @@ class S3Store(Store):
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
 
-    def rebuild_index_from_s3_data(self):
+    def rebuild_index_from_s3_data(self, **kwargs):
         """
         Rebuilds the index Store from the data in S3
         Relies on the index document being stores as the metadata for the file
         This can help recover lost databases
         """
-        index_docs = []
-        for file in self.s3_bucket.objects.all():
-            # TODO: Transform the data back from strings and remove AWS S3 specific keys
-            index_docs.append(file.metadata)
+        bucket = self.s3_bucket
+        objects = bucket.objects.filter(Prefix=self.sub_dir)
+        for obj in objects:
+            key_ = self.sub_dir + obj.key
+            data = self.s3_bucket.Object(key_).get()["Body"].read()
 
-        self.index.update(index_docs)
+            if self.compress:
+                data = zlib.decompress(data)
+            unpacked_data = msgpack.unpackb(data, raw=False)
+            self.update(unpacked_data, **kwargs)
 
     def rebuild_metadata_from_index(self, index_query: dict = None):
         """
