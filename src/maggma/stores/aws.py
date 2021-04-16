@@ -116,7 +116,7 @@ class S3Store(Store):
             try:
                 self.s3.meta.client.head_bucket(Bucket=self.bucket)
             except ClientError:
-                raise Exception("Bucket not present on AWS: {}".format(self.bucket))
+                raise RuntimeError("Bucket not present on AWS: {}".format(self.bucket))
 
             self.s3_bucket = resource.Bucket(self.bucket)
         self.index.connect(*args, **kwargs)

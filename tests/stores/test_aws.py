@@ -340,3 +340,14 @@ def test_get_session(s3store):
     )
     assert store._get_session().get_credentials().access_key == "ACCESS_KEY"
     assert store._get_session().get_credentials().secret_key == "SECRET_KEY"
+
+
+def test_no_bucket():
+    with mock_s3():
+        conn = boto3.client("s3")
+        conn.create_bucket(Bucket="bucket1")
+
+        index = MemoryStore("index")
+        store = S3Store(index, "bucket2")
+        with pytest.raises(RuntimeError, match=r".*Bucket not present.*"):
+            store.connect()
