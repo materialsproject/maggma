@@ -11,6 +11,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
+from botocore.exceptions import ClientError
 from monty.dev import deprecated
 from monty.msgpack import default as monty_default
 
