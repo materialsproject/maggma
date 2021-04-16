@@ -11,6 +11,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
+from botocore.exceptions import ClientError
 from monty.dev import deprecated
 from monty.msgpack import default as monty_default
 
@@ -108,7 +109,9 @@ class S3Store(Store):
 
         if not self.s3:
             self.s3 = resource
-            if self.bucket not in [bucket.name for bucket in self.s3.buckets.all()]:
+            try:
+                self.s3.meta.client.head_bucket(Bucket=self.bucket)
+            except ClientError:
                 raise Exception("Bucket not present on AWS: {}".format(self.bucket))
 
             self.s3_bucket = resource.Bucket(self.bucket)
