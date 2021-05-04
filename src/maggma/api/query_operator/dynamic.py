@@ -1,9 +1,9 @@
 import inspect
 import warnings
 from abc import abstractmethod
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple
+from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Type
 
-from fastapi import Query
+from fastapi.params import Query
 from monty.json import MontyDecoder
 from pydantic import BaseModel
 from pydantic.fields import ModelField
@@ -99,7 +99,7 @@ class DynamicQueryOperator(QueryOperator):
         Special as_dict implemented to convert pydantic models into strings
         """
         d = super().as_dict()  # Ensures sub-classes serialize correctly
-        d["model"] = f"{self.model.__module__}.{self.model.__name__}"
+        d["model"] = f"{self.model.__module__}.{self.model.__name__}"  # type: ignore
         return d
 
 
@@ -119,14 +119,15 @@ class NumericQuery(DynamicQueryOperator):
         """
 
         ops = []
+        field_type = field.type_
 
-        if field.type_ in [int, float]:
+        if field_type in [int, float]:
             title: str = field.field_info.title or field.name
 
             ops = [
                 (
                     f"{field.name}",
-                    field.type_,
+                    field_type,
                     Query(
                         default=None,
                         description=f"Querying if {title} is equal to another",
@@ -135,7 +136,7 @@ class NumericQuery(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_lt",
-                    field.type_,
+                    field_type,
                     Query(
                         default=None,
                         description=f"Querying if {title} is equal to another",
@@ -144,7 +145,7 @@ class NumericQuery(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_gt",
-                    field.type_,
+                    field_type,
                     Query(
                         default=None,
                         description=f"Querying if {title} is equal to another",
@@ -153,7 +154,7 @@ class NumericQuery(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_eq_any",
-                    List[field.type_],
+                    List[field_type],
                     Query(
                         default=None,
                         description=f"Querying if {title} is any of these values",
@@ -162,7 +163,7 @@ class NumericQuery(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_neq_any",
-                    List[field.type_],
+                    List[field_type],
                     Query(
                         default=None,
                         description=f"Querying if {title} is not any of these values",
@@ -190,14 +191,15 @@ class StringQueryOperator(DynamicQueryOperator):
         """
 
         ops = []
+        field_type: type = field.type_
 
-        if field.type_ in [str]:
+        if field_type in [str]:
             title: str = field.field_info.title or field.name
 
             ops = [
                 (
                     f"{field.name}",
-                    field.type_,
+                    field_type,
                     Query(
                         default=None,
                         description=f"Querying if {title} is equal to another",
@@ -206,7 +208,7 @@ class StringQueryOperator(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_eq_any",
-                    List[field.type_],
+                    List[field_type],
                     Query(
                         default=None,
                         description=f"Querying if {title} is any of these values",
@@ -215,7 +217,7 @@ class StringQueryOperator(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_neq_any",
-                    List[field.type_],
+                    List[field_type],
                     Query(
                         default=None,
                         description=f"Querying if {title} is not any of these values",
