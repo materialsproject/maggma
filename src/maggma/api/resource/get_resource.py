@@ -1,10 +1,8 @@
-from inspect import signature
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional, List, Dict, Any, Callable, Type
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path, Request
-from monty.json import MontyDecoder, MSONable
+from fastapi import Depends, HTTPException, Path
 from pydantic import BaseModel
-from starlette.responses import RedirectResponse
+
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
@@ -24,7 +22,7 @@ class GetResource(Resource):
     def __init__(
         self,
         store: Store,
-        model: BaseModel,
+        model: Type[BaseModel],
         tags: Optional[List[str]] = None,
         query_operators: Optional[List[QueryOperator]] = None,
         query: Optional[Dict] = None,
@@ -60,7 +58,7 @@ class GetResource(Resource):
             ]
         )
 
-        self.response_model = Response[self.model]
+        self.response_model = Response[self.model]  # type: ignore
 
     def prepare_endpoint(self):
         """
@@ -71,7 +69,7 @@ class GetResource(Resource):
             self.build_get_by_key()
 
         if self.enable_default_search:
-            self.set_dynamic_model_search()
+            self.build_dynamic_model_search()
 
     def build_get_by_key(self):
         key_name = self.store.key
@@ -118,33 +116,22 @@ class GetResource(Resource):
             tags=self.tags,
         )(get_by_key)
 
-    def set_dynamic_model_search(self):
+    def build_dynamic_model_search(self):
 
         model_name = self.model.__name__
 
-        async def search(**queries: STORE_PARAMS):
+        @attach_query_ops(self.query_operators)
+        async def search(**queries: Dict[STORE_PARAMS]) -> Dict:
             self.store.connect()
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))
             query["criteria"].update(self.query)
 
-            count_query = query["criteria"]
-            count = self.store.count(count_query)
+            count = self.store.count(query["criteria"])
             data = list(self.store.query(**query))
             meta = Meta(total=count)
             response = {"data": data, "meta": meta.dict()}
             return response
-
-        attach_signature(
-            search,
-            annotations={
-                f"dep{i}": STORE_PARAMS for i, _ in enumerate(self.query_operators)
-            },
-            defaults={
-                f"dep{i}": Depends(dep.query)
-                for i, dep in enumerate(self.query_operators)
-            },
-        )
 
         self.router.get(
             "/",
@@ -154,3 +141,21 @@ class GetResource(Resource):
             response_description=f"Search for a {model_name}",
             response_model_exclude_unset=True,
         )(search)
+
+
+def attach_query_ops(
+    function: Callable[[List[STORE_PARAMS]], Dict], query_ops: List[QueryOperator]
+) -> Callable[[List[STORE_PARAMS]], Dict]:
+    """
+    Attach query operators to API compliant function
+    The function has to take a list of STORE_PARAMs as the only argument
+
+    Args:
+        function: the function to decorate
+    """
+    attach_signature(
+        function,
+        annotations={f"dep{i}": STORE_PARAMS for i, _ in enumerate(query_ops)},
+        defaults={f"dep{i}": Depends(dep.query) for i, dep in enumerate(query_ops)},
+    )
+    return function

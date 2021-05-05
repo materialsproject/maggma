@@ -93,8 +93,8 @@ def api_sanitize(
     models = [
         model
         for model in get_flat_models_from_model(pydantic_model)
-        if lenient_issubclass(model, BaseModel)
-    ]
+        if issubclass(model, BaseModel)
+    ]  # type: List[Type[BaseModel]]
 
     fields_to_leave = fields_to_leave or []
     fields_tuples = [f.split(".") for f in fields_to_leave]

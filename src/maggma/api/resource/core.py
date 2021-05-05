@@ -1,14 +1,13 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List, Optional, Union
+from typing import Dict, Type
+import logging
 
 from fastapi import APIRouter, FastAPI
 from monty.json import MontyDecoder, MSONable
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 
-from maggma.api.models import Response
-from maggma.api.query_operator import QueryOperator
-from maggma.api.utils import STORE_PARAMS, api_sanitize, attach_signature, merge_queries
+from maggma.api.utils import api_sanitize
 from maggma.core import Store
 from maggma.utils import dynamic_import
 
@@ -20,16 +19,18 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     def __init__(
         self,
-        model: BaseModel,
+        model: Type[BaseModel],
     ):
         """
         Args:
             model: the pydantic model this Resource represents
         """
-        if isinstance(model, type) and issubclass(model, BaseModel):
-            self.model = api_sanitize(model, allow_dict_msonable=True)
-        else:
+        if not issubclass(model, BaseModel):
             raise ValueError("The resource model has to be a PyDantic Model")
+
+        self.model = api_sanitize(model, allow_dict_msonable=True)
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
         self.router = APIRouter()
         self.prepare_endpoint()
         self.setup_redirect()
@@ -74,7 +75,7 @@ class Resource(MSONable, metaclass=ABCMeta):
         return d
 
     @classmethod
-    def from_dict(cls, d):
+    def from_dict(cls, d: Dict):
 
         if isinstance(d["model"], str):
             d["model"] = dynamic_import(d["model"])
