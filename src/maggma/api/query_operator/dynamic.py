@@ -154,7 +154,7 @@ class NumericQuery(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_eq_any",
-                    List[field_type],
+                    List[field_type],  # type: ignore
                     Query(
                         default=None,
                         description=f"Querying if {title} is any of these values",
@@ -163,7 +163,7 @@ class NumericQuery(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_neq_any",
-                    List[field_type],
+                    List[field_type],  # type: ignore
                     Query(
                         default=None,
                         description=f"Querying if {title} is not any of these values",
@@ -208,7 +208,7 @@ class StringQueryOperator(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_eq_any",
-                    List[field_type],
+                    List[field_type],  # type: ignore
                     Query(
                         default=None,
                         description=f"Querying if {title} is any of these values",
@@ -217,7 +217,7 @@ class StringQueryOperator(DynamicQueryOperator):
                 ),
                 (
                     f"{field.name}_neq_any",
-                    List[field_type],
+                    List[field_type],  # type: ignore
                     Query(
                         default=None,
                         description=f"Querying if {title} is not any of these values",
