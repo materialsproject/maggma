@@ -7,6 +7,8 @@ from pydantic import BaseModel, Field
 from requests import Response
 from starlette.testclient import TestClient
 
+from datetime import datetime
+
 from maggma.api.resource import Resource
 from maggma.stores import MemoryStore
 
@@ -15,6 +17,7 @@ class Owner(BaseModel):
     name: str = Field(..., title="Owner's name")
     age: int = Field(None, title="Owne'r Age")
     weight: float = Field(None, title="Owner's weight")
+    last_updated: datetime = Field(None, title="Last updated date for this record")
 
 
 @pytest.fixture(scope="session")

@@ -196,9 +196,7 @@ class GridFSStore(Store):
                 metadata = doc.get("metadata", {})
 
                 data = self._collection.find_one(
-                    filter={
-                        "_id": doc["_id"]
-                    },
+                    filter={"_id": doc["_id"]},
                     skip=skip,
                     limit=limit,
                     sort=sort,
@@ -211,8 +209,11 @@ class GridFSStore(Store):
                     data = json.loads(data)
                 except Exception:
                     if not isinstance(data, dict):
-                        data = {"data": data, self.key: doc.get(self.key),
-                                self.last_updated_field: doc.get(self.last_updated_field)}
+                        data = {
+                            "data": data,
+                            self.key: doc.get(self.key),
+                            self.last_updated_field: doc.get(self.last_updated_field),
+                        }
 
                 if self.ensure_metadata and isinstance(data, dict):
                     data.update(metadata)

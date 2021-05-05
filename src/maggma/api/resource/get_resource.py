@@ -1,85 +1,75 @@
-from typing import Any, Dict, List, Optional, Union
+from typing import Optional, List, Dict, Any, Callable, Type
 
-from fastapi import APIRouter, Depends, FastAPI, HTTPException, Path
-from monty.json import MSONable
+from fastapi import Depends, HTTPException, Path
 from pydantic import BaseModel
 
+
 from maggma.api.models import Meta, Response
-from maggma.api.query_operator import (
-    DefaultDynamicQuery,
-    PaginationQuery,
-    QueryOperator,
-    SparseFieldsQuery,
-)
-from maggma.api.util import (
-    STORE_PARAMS,
-    attach_signature,
-    dynamic_import,
-    merge_queries,
-)
+from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
+from maggma.api.resource import Resource
+from maggma.api.utils import STORE_PARAMS, attach_signature, merge_queries
 from maggma.core import Store
+from maggma.utils import dynamic_import
 
 
-class Resource(MSONable):
+class GetResource(Resource):
     """
-    Implements a REST Compatible Resource as a URL endpoint
+    Implements a REST Compatible Resource as a GET URL endpoint
     This class provides a number of convenience features
-    including full pagination, field projection, and the
-    MAPI query lanaugage
+    including full pagination, field projection
     """
 
     def __init__(
         self,
         store: Store,
-        model: Union[BaseModel, str],
+        model: Type[BaseModel],
         tags: Optional[List[str]] = None,
         query_operators: Optional[List[QueryOperator]] = None,
-        description: str = None,
+        query: Optional[Dict] = None,
+        enable_get_by_key: bool = True,
+        enable_default_search: bool = True,
     ):
         """
         Args:
             store: The Maggma Store to get data from
-            model: the pydantic model to apply to the documents from the Store
-                This can be a string with a full python path to a model or
-                an actuall pydantic Model if this is being instantied in python
-                code. Serializing this via Monty will autoconvert the pydantic model
-                into a python path string
+            model: the pydantic model this Resource represents
             tags: list of tags for the Endpoint
             query_operators: operators for the query language
             description: an explanation of wht does this resource do
         """
+
+        super().__init__(model)
+
         self.store = store
         self.tags = tags or []
-        self.description = description
-        self.model: BaseModel = BaseModel()
-        if isinstance(model, str):
-            module_path = ".".join(model.split(".")[:-1])
-            class_name = model.split(".")[-1]
-            self.model = dynamic_import(module_path, class_name)
-        else:
-            self.model = model
+        self.query = query or {}
+        self.enable_get_by_key = enable_get_by_key
+        self.enable_default_search = enable_default_search
 
         self.query_operators = (
             query_operators
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(self.model, default_fields=[self.store.key]),
-                DefaultDynamicQuery(self.model),
+                SparseFieldsQuery(
+                    self.model,
+                    default_fields=[self.store.key, self.store.last_updated_field],
+                ),
             ]
         )
 
         self.response_model = Response[self.model]  # type: ignore
-        self.router = APIRouter()
-        self.prepare_endpoint()
 
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
         for routes
         """
-        self.build_get_by_key()
-        self.set_dynamic_model_search()
+        if self.enable_get_by_key:
+            self.build_get_by_key()
+
+        if self.enable_default_search:
+            self.build_dynamic_model_search()
 
     def build_get_by_key(self):
         key_name = self.store.key
@@ -105,7 +95,8 @@ class Resource(MSONable):
             self.store.connect()
 
             item = self.store.query_one(
-                criteria={self.store.key: key}, properties=fields["properties"]
+                criteria={self.store.key: key, **self.query},
+                properties=fields["properties"],
             )
 
             if item is None:
@@ -114,7 +105,7 @@ class Resource(MSONable):
                     detail=f"Item with {self.store.key} = {key} not found",
                 )
 
-            response = {"data": [item]}  # , "meta": Meta()}
+            response = {"data": [item]}
             return response
 
         self.router.get(
@@ -125,32 +116,22 @@ class Resource(MSONable):
             tags=self.tags,
         )(get_by_key)
 
-    def set_dynamic_model_search(self):
+    def build_dynamic_model_search(self):
 
         model_name = self.model.__name__
 
-        async def search(**queries: STORE_PARAMS):
+        @attach_query_ops(self.query_operators)
+        async def search(**queries: Dict[STORE_PARAMS]) -> Dict:
             self.store.connect()
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))
+            query["criteria"].update(self.query)
 
-            count_query = query["criteria"]
-            count = self.store.count(count_query)
+            count = self.store.count(query["criteria"])
             data = list(self.store.query(**query))
             meta = Meta(total=count)
             response = {"data": data, "meta": meta.dict()}
             return response
-
-        attach_signature(
-            search,
-            annotations={
-                f"dep{i}": STORE_PARAMS for i, _ in enumerate(self.query_operators)
-            },
-            defaults={
-                f"dep{i}": Depends(dep.query)
-                for i, dep in enumerate(self.query_operators)
-            },
-        )
 
         self.router.get(
             "/",
@@ -161,22 +142,20 @@ class Resource(MSONable):
             response_model_exclude_unset=True,
         )(search)
 
-    def run(self):  # pragma: no cover
-        """
-        Runs the Endpoint cluster locally
-        This is intended for testing not production
-        """
-        import uvicorn
 
-        app = FastAPI()
-        app.include_router(self.router, prefix="")
-        uvicorn.run(app)
+def attach_query_ops(
+    function: Callable[[List[STORE_PARAMS]], Dict], query_ops: List[QueryOperator]
+) -> Callable[[List[STORE_PARAMS]], Dict]:
+    """
+    Attach query operators to API compliant function
+    The function has to take a list of STORE_PARAMs as the only argument
 
-    def as_dict(self) -> Dict:
-        """
-        Special as_dict implemented to convert pydantic models into strings
-        """
-
-        d = super().as_dict()  # Ensures sub-classes serialize correctly
-        d["model"] = f"{self.model.__module__}.{self.model.__name__}"  # type: ignore
-        return d
+    Args:
+        function: the function to decorate
+    """
+    attach_signature(
+        function,
+        annotations={f"dep{i}": STORE_PARAMS for i, _ in enumerate(query_ops)},
+        defaults={f"dep{i}": Depends(dep.query) for i, dep in enumerate(query_ops)},
+    )
+    return function
