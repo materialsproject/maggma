@@ -75,7 +75,7 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
 
 
 def api_sanitize(
-    pydantic_model: BaseModel,
+    pydantic_model: Type[BaseModel],
     fields_to_leave: Optional[List[str]] = None,
     allow_dict_msonable=False,
 ):
