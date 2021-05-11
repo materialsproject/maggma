@@ -73,6 +73,10 @@ class DynamicQueryOperator(QueryOperator):
 
         self.query = query  # type: ignore
 
+    def query(self):
+        " Stub query function for abstract class "
+        pass
+
     @abstractmethod
     def field_to_operator(
         self, name: str, field: ModelField
@@ -126,20 +130,11 @@ class NumericQuery(DynamicQueryOperator):
 
             ops = [
                 (
-                    f"{field.name}",
-                    field_type,
-                    Query(
-                        default=None,
-                        description=f"Querying if {title} is equal to another",
-                    ),
-                    lambda val: {f"{field.name}": val},
-                ),
-                (
                     f"{field.name}_lt",
                     field_type,
                     Query(
                         default=None,
-                        description=f"Querying if {title} is equal to another",
+                        description=f"Querying for {title} is less than a value",
                     ),
                     lambda val: {f"{field.name}": {"$lt": val}},
                 ),
@@ -148,29 +143,53 @@ class NumericQuery(DynamicQueryOperator):
                     field_type,
                     Query(
                         default=None,
-                        description=f"Querying if {title} is equal to another",
+                        description=f"Querying for {title} is greater than a value",
                     ),
                     lambda val: {f"{field.name}": {"$gt": val}},
                 ),
-                (
-                    f"{field.name}_eq_any",
-                    List[field_type],  # type: ignore
-                    Query(
-                        default=None,
-                        description=f"Querying if {title} is any of these values",
-                    ),
-                    lambda val: {f"{field.name}": {"$in": val}},
-                ),
-                (
-                    f"{field.name}_neq_any",
-                    List[field_type],  # type: ignore
-                    Query(
-                        default=None,
-                        description=f"Querying if {title} is not any of these values",
-                    ),
-                    lambda val: {f"{field.name}": {"$nin": val}},
-                ),
             ]
+
+        if field_type is int:
+            ops.extend(
+                [
+                    (
+                        f"{field.name}",
+                        field_type,
+                        Query(
+                            default=None,
+                            description=f"Querying for {title} is equal to a value",
+                        ),
+                        lambda val: {f"{field.name}": val},
+                    ),
+                    (
+                        f"{field.name}_not_eq",
+                        field_type,
+                        Query(
+                            default=None,
+                            description=f"Querying for {title} is not equal to a value",
+                        ),
+                        lambda val: {f"{field.name}": {"$ne": val}},
+                    ),
+                    (
+                        f"{field.name}_eq_any",
+                        List[field_type],  # type: ignore
+                        Query(
+                            default=None,
+                            description=f"Querying for {title} is any of these values",
+                        ),
+                        lambda val: {f"{field.name}": {"$in": val}},
+                    ),
+                    (
+                        f"{field.name}_neq_any",
+                        List[field_type],  # type: ignore
+                        Query(
+                            default=None,
+                            description=f"Querying for {title} is not any of these values",
+                        ),
+                        lambda val: {f"{field.name}": {"$nin": val}},
+                    ),
+                ]
+            )
 
         return ops
 
@@ -202,16 +221,25 @@ class StringQueryOperator(DynamicQueryOperator):
                     field_type,
                     Query(
                         default=None,
-                        description=f"Querying if {title} is equal to another",
+                        description=f"Query for {title} is equal to a value",
                     ),
                     lambda val: {f"{field.name}": val},
+                ),
+                (
+                    f"{field.name}_not_eq",
+                    field_type,
+                    Query(
+                        default=None,
+                        description=f"Querying for {title} is not equal to a value",
+                    ),
+                    lambda val: {f"{field.name}": {"$ne": val}},
                 ),
                 (
                     f"{field.name}_eq_any",
                     List[field_type],  # type: ignore
                     Query(
                         default=None,
-                        description=f"Querying if {title} is any of these values",
+                        description=f"Querying for {title} is any of these values",
                     ),
                     lambda val: {f"{field.name}": {"$in": val}},
                 ),
@@ -220,7 +248,7 @@ class StringQueryOperator(DynamicQueryOperator):
                     List[field_type],  # type: ignore
                     Query(
                         default=None,
-                        description=f"Querying if {title} is not any of these values",
+                        description=f"Querying for {title} is not any of these values",
                     ),
                     lambda val: {f"{field.name}": {"$nin": val}},
                 ),

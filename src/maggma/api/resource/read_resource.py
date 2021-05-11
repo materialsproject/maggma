@@ -121,7 +121,7 @@ class ReadOnlyResource(Resource):
         async def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
             self.store.connect()
 
-            query: Dict[Any, Any] = merge_queries(list(queries.values()))
+            query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
             query["criteria"].update(self.query)
 
             count = self.store.count(query["criteria"])

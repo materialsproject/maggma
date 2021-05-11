@@ -1,6 +1,6 @@
 import inspect
 import warnings
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Type
 
 from fastapi import Query
 from pydantic import BaseModel
@@ -11,7 +11,9 @@ from maggma.utils import dynamic_import
 
 
 class SparseFieldsQuery(QueryOperator):
-    def __init__(self, model: BaseModel, default_fields: Optional[List[str]] = None):
+    def __init__(
+        self, model: Type[BaseModel], default_fields: Optional[List[str]] = None
+    ):
         """
         Args:
             model: PyDantic Model that represents the underlying data source
@@ -47,6 +49,10 @@ class SparseFieldsQuery(QueryOperator):
             return {"properties": properties}
 
         self.query = query  # type: ignore
+
+    def query(self):
+        " Stub query function for abstract class "
+        pass
 
     def meta(self) -> Dict:
         """
