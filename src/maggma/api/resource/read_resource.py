@@ -12,7 +12,7 @@ from maggma.core import Store
 from maggma.utils import dynamic_import
 
 
-class GetResource(Resource):
+class ReadOnlyResource(Resource):
     """
     Implements a REST Compatible Resource as a GET URL endpoint
     This class provides a number of convenience features
@@ -37,14 +37,12 @@ class GetResource(Resource):
             query_operators: operators for the query language
             description: an explanation of wht does this resource do
         """
-
-        super().__init__(model)
-
         self.store = store
         self.tags = tags or []
         self.query = query or {}
         self.enable_get_by_key = enable_get_by_key
         self.enable_default_search = enable_default_search
+        self.response_model = Response[model]  # type: ignore
 
         self.query_operators = (
             query_operators
@@ -52,13 +50,13 @@ class GetResource(Resource):
             else [
                 PaginationQuery(),
                 SparseFieldsQuery(
-                    self.model,
+                    model,
                     default_fields=[self.store.key, self.store.last_updated_field],
                 ),
             ]
         )
 
-        self.response_model = Response[self.model]  # type: ignore
+        super().__init__(model)
 
     def prepare_endpoint(self):
         """
@@ -120,8 +118,7 @@ class GetResource(Resource):
 
         model_name = self.model.__name__
 
-        @attach_query_ops(self.query_operators)
-        async def search(**queries: Dict[STORE_PARAMS]) -> Dict:
+        async def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
             self.store.connect()
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))
@@ -140,7 +137,7 @@ class GetResource(Resource):
             response_model=self.response_model,
             response_description=f"Search for a {model_name}",
             response_model_exclude_unset=True,
-        )(search)
+        )(attach_query_ops(search, self.query_operators))
 
 
 def attach_query_ops(
