@@ -1,7 +1,6 @@
 import inspect
-import warnings
 from abc import abstractmethod
-from typing import Any, Callable, Dict, List, Mapping, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 from fastapi.params import Query
 from monty.json import MontyDecoder
@@ -10,7 +9,6 @@ from pydantic.fields import ModelField
 
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
-from maggma.core import Store
 from maggma.utils import dynamic_import
 
 

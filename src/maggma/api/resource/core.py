@@ -1,6 +1,6 @@
+import logging
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Type
-import logging
 
 from fastapi import APIRouter, FastAPI
 from monty.json import MontyDecoder, MSONable
@@ -8,7 +8,6 @@ from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 
 from maggma.api.utils import api_sanitize
-from maggma.core import Store
 from maggma.utils import dynamic_import
 
 

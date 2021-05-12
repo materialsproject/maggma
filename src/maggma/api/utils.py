@@ -1,12 +1,10 @@
 import inspect
-from copy import deepcopy
-from importlib import import_module
-from typing import Any, Callable, Dict, List, Optional, Type, Union
+from typing import Any, Callable, Dict, List, Optional, Type
 
 from monty.json import MSONable
 from pydantic import BaseModel
-from pydantic.utils import lenient_issubclass
 from pydantic.schema import get_flat_models_from_model
+from pydantic.utils import lenient_issubclass
 from typing_extensions import Literal
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]

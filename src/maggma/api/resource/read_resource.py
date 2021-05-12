@@ -1,15 +1,13 @@
-from typing import Optional, List, Dict, Any, Callable, Type
+from typing import Any, Callable, Dict, List, Optional, Type
 
 from fastapi import Depends, HTTPException, Path
 from pydantic import BaseModel
-
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
 from maggma.api.resource import Resource
 from maggma.api.utils import STORE_PARAMS, attach_signature, merge_queries
 from maggma.core import Store
-from maggma.utils import dynamic_import
 
 
 class ReadOnlyResource(Resource):

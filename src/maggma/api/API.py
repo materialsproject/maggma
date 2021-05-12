@@ -3,13 +3,11 @@ from typing import Dict
 
 import uvicorn
 from fastapi import FastAPI
-
 from monty.json import MSONable
 from starlette.responses import RedirectResponse
 
 from maggma import __version__
 from maggma.api.resource import Resource
-from maggma.utils import dynamic_import
 
 
 class API(MSONable):
