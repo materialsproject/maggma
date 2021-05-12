@@ -35,6 +35,12 @@ class Resource(MSONable, metaclass=ABCMeta):
         self.prepare_endpoint()
         self.setup_redirect()
 
+    def on_startup(self):
+        """
+        Callback to perform some work on resource initialization
+        """
+        pass
+
     @abstractmethod
     def prepare_endpoint(self):
         """
