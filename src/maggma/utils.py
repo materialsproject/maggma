@@ -8,7 +8,7 @@ import signal
 import uuid
 from datetime import datetime, timedelta
 from importlib import import_module
-from typing import Dict, Iterable, Union
+from typing import Dict, Iterable, Optional, Union
 
 from bson import ObjectId
 from pydash.objects import get, has, set_
@@ -20,7 +20,7 @@ from pymongo.collection import Collection
 from tqdm.autonotebook import tqdm
 
 
-def primed(iterable: Iterable):
+def primed(iterable: Iterable) -> Iterable:
     """Preprimes an iterator so the first value is calculated immediately
     but not returned until the first iteration
     """
@@ -57,7 +57,7 @@ class TqdmLoggingHandler(logging.Handler):
             self.handleError(record)
 
 
-def confirm_field_index(collection: Collection, field: str):
+def confirm_field_index(collection: Collection, field: str) -> bool:
     """Confirm index on store for at least one of fields
 
     One can't simply ensure an index exists via
@@ -75,7 +75,7 @@ def confirm_field_index(collection: Collection, field: str):
     return field in keys
 
 
-def to_isoformat_ceil_ms(dt: Union[datetime, str]):
+def to_isoformat_ceil_ms(dt: Union[datetime, str]) -> str:
     """Helper to account for Mongo storing datetimes with only ms precision."""
     if isinstance(dt, datetime):
         return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
@@ -83,7 +83,7 @@ def to_isoformat_ceil_ms(dt: Union[datetime, str]):
         return dt
 
 
-def to_dt(s: Union[datetime, str]):
+def to_dt(s: Union[datetime, str]) -> datetime:
     """Convert an ISO 8601 string to a datetime."""
     if isinstance(s, str):
         try:
@@ -120,7 +120,7 @@ def recursive_update(d: Dict, u: Dict):
             d[k] = v
 
 
-def grouper(iterable: Iterable, n: int):
+def grouper(iterable: Iterable, n: int) -> Iterable:
     """
     Collect data into fixed-length chunks or blocks.
     >>> list(grouper(3, 'ABCDEFG'))
@@ -205,10 +205,15 @@ class Timeout:
             signal.alarm(0)
 
 
-def dynamic_import(abs_module_path, class_name):
+def dynamic_import(abs_module_path: str, class_name: Optional[str] = None):
     """
     Dynamic class importer from: https://www.bnmetrics.com/blog/dynamic-import-in-python3
     """
+
+    if class_name is None:
+        class_name = abs_module_path.split(".")[-1]
+        abs_module_path = ".".join(abs_module_path.split(".")[:-1])
+
     module_object = import_module(abs_module_path)
     target_class = getattr(module_object, class_name)
     return target_class

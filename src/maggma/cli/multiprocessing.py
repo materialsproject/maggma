@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # coding utf-8
 
-import multiprocessing
 from asyncio import BoundedSemaphore, Queue, gather, get_event_loop, wait
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
