@@ -11,14 +11,14 @@
       
       
       
-        <link rel="canonical" href="https://materialsproject.github.io/maggma/getting_started/map_builder/">
+        <link rel="canonical" href="https://materialsproject.github.io/maggma/getting_started/advanced_stores/">
       
       <link rel="shortcut icon" href="../../assets/images/favicon.png">
       <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.0.5">
     
     
       
-        <title>Working with MapBuilder - Maggma Documentation</title>
+        <title>Configurations and Usage of Advanced `store`'s - Maggma Documentation</title>
       
     
     
@@ -62,7 +62,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#map-builder" class="md-skip">
+        <a href="#configurations-and-usage-of-advanced-stores" class="md-skip">
           Skip to content
         </a>
       
@@ -94,7 +94,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Working with MapBuilder
+              Configurations and Usage of Advanced `store`'s
             
           </span>
         </div>
@@ -231,14 +231,12 @@
 
   
   
-    
-  
   
     
-    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+    <li class="md-nav__item md-nav__item--nested">
       
       
-        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
       
       <label class="md-nav__link" for="__nav_3">
         Getting Started
@@ -302,20 +300,11 @@
             
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-        
-      
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../map_builder/" class="md-nav__link">
         Working with MapBuilder
       </a>
-      
     </li>
   
 
@@ -512,6 +501,48 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#s3store" class="md-nav__link">
+    S3Store
+  </a>
+  
+    <nav class="md-nav" aria-label="S3Store">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#configuration" class="md-nav__link">
+    Configuration
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#basic-usage" class="md-nav__link">
+    Basic Usage
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#parallelism" class="md-nav__link">
+    Parallelism
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -522,59 +553,61 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/materialsproject/maggma/edit/master/docs/getting_started/map_builder.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/materialsproject/maggma/edit/master/docs/getting_started/advanced_stores.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="map-builder">Map Builder<a class="headerlink" href="#map-builder" title="Permanent link">&para;</a></h1>
-<p><code>maggma</code> has a built in builder called the <code>MapBuilder</code> which handles a number of tedious tasks in writing a builder. This class is designed to be used similar to a map operator in any other framework in even the map function in python. <code>MapBuilder</code> will take each document in the source store, apply the function you give it, and then store that in the target store. It handles incremental building, keeping track of errors, getting only the data you need, managing timeouts, and deleting orphaned documents through configurational options.</p>
-<p>Let's create the same <code>MultiplierBuilder</code> we wrote earlier using <code>MapBuilder</code>:</p>
-<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">maggma.builders</span> <span class="kn">import</span> <span class="n">MapBuilder</span>
-<span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
-
-<span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">MapBuilder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+                <h1 id="configurations-and-usage-of-advanced-stores">Configurations and Usage of Advanced <code>store</code>'s<a class="headerlink" href="#configurations-and-usage-of-advanced-stores" title="Permanent link">&para;</a></h1>
+<h2 id="s3store">S3Store<a class="headerlink" href="#s3store" title="Permanent link">&para;</a></h2>
+<h3 id="configuration">Configuration<a class="headerlink" href="#configuration" title="Permanent link">&para;</a></h3>
+<p>The S3Store interfaces with S3 object storage via <a href="https://pypi.org/project/boto3/">boto3</a>.
+For this to work properly, you have to set your basic configuration in <code>~/.aws/config</code>
+<div class="highlight"><pre><span></span><code>[default]
+source_profile = default
+</code></pre></div></p>
+<p>Then, you have to set up your credentials in <code>~/.aws/credentials</code>
+<div class="highlight"><pre><span></span><code>[default]
+aws_access_key_id = YOUR_KEY
+aws_secret_access_key = YOUR_SECRET
+</code></pre></div></p>
+<p>For more information on the configuration please see the following <a href="https://docs.aws.amazon.com/credref/latest/refdocs/settings-global.html">documentation</a>.
+Note that while these configurations are in the <code>~/.aws</code> folder, they are shared by other similar services like the self-hosted <a href="https://min.io/">minio</a> service.</p>
+<h3 id="basic-usage">Basic Usage<a class="headerlink" href="#basic-usage" title="Permanent link">&para;</a></h3>
+<p>MongoDB is not designed to handle large object storage.
+As such, we created an abstract object that combines the large object storage capabilities of Amazon S3 and the easy, python-friendly query language of MongoDB.
+These <code>S3Store</code>s all include an <code>index</code> store that only stores specific queryable data and the object key for retrieving the data from an S3 bucket using the <code>key</code> attribute (called <code>'fs_id'</code> by default).</p>
+<p>An entry of in the <code>index</code> may look something like this:
+<div class="highlight"><pre><span></span><code>{
+    fs_id : &quot;5fc6b87e99071dfdf04ca871&quot;
+    task_id : &quot;mp-12345&quot;
+}
 </code></pre></div>
-<p>Just like before we define a new class, but this time it should inherit from <code>MapBuilder</code>.</p>
-<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Arguments:</span>
-<span class="sd">            source: the source store</span>
-<span class="sd">            target: the target store</span>
-<span class="sd">            multiplier: the multiplier to apply to &quot;a&quot; sub-document</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span> <span class="o">=</span> <span class="n">multiplier</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
-
-        <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">,</span><span class="n">v</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;projection&quot;</span><span class="p">,</span><span class="s2">&quot;delete_orphans&quot;</span><span class="p">,</span><span class="s2">&quot;timeout&quot;</span><span class="p">,</span><span class="s2">&quot;store_process_time&quot;</span><span class="p">,</span><span class="s2">&quot;retry_failed&quot;</span><span class="p">]}</span>
-
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">source</span><span class="p">,</span>
-                         <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span>
-                         <span class="n">projection</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">],</span>
-                         <span class="n">delete_orphans</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-                         <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                         <span class="n">store_process_time</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                         <span class="n">retry_failed</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+Please note that since we are giving users the ability to reconstruct the index store using the object metadata, the object size in the <code>index</code> is limited by the metadata and not MongoDB.
+Different S3 services might have different rules, but the limit is typically smaller: 8 KB for <a href="https://docs.aws.amazon.com/AmazonS3/latest/userguide/UsingMetadata.html">aws</a></p>
+<p>The <code>S3Store</code> should be constructed as follows:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">maggma.stores</span> <span class="kn">import</span> <span class="n">MongograntStore</span><span class="p">,</span> <span class="n">S3Store</span>
+<span class="n">index</span> <span class="o">=</span> <span class="n">MongograntStore</span><span class="p">(</span><span class="s2">&quot;ro:mongodb03/js_cathodes&quot;</span><span class="p">,</span>
+                        <span class="s2">&quot;atomate_aeccar0_fs_index&quot;</span><span class="p">,</span>
+                        <span class="n">key</span><span class="o">=</span><span class="s2">&quot;fs_id&quot;</span><span class="p">)</span>
+<span class="n">s3store</span> <span class="o">=</span> <span class="n">S3Store</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
+        <span class="n">bucket</span><span class="o">=</span><span class="s2">&quot;&lt;&lt;BUCKET_NAME&gt;&gt;&quot;</span><span class="p">,</span>
+        <span class="n">s3_profile</span><span class="o">=</span><span class="s2">&quot;&lt;&lt;S3_PROFILE_NAME&gt;&gt;&quot;</span><span class="p">,</span>
+        <span class="n">compress</span><span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">endpoint_url</span><span class="o">=</span> <span class="s2">&quot;&lt;&lt;S3_URL&gt;&gt;&quot;</span><span class="p">,</span>
+        <span class="n">sub_dir</span><span class="o">=</span> <span class="s2">&quot;atomate_aeccar0_fs&quot;</span><span class="p">,</span>
+        <span class="n">s3_workers</span><span class="o">=</span><span class="mi">4</span>
+       <span class="p">)</span>
 </code></pre></div>
-<p>MapBuilder has a number of configurational options that you can hardcode as above or expose as properties for the user through **kwargs:</p>
-<ul>
-<li>projection: list of the fields you want to project. This can reduce the data transfer load if you only need certain fields or sub-documents from the source documents</li>
-<li>delete_orphans: this will delete documents in the target which don't have a corresponding document in the source</li>
-<li>timeout: optional timeout on the process function</li>
-<li>store_process_timeout: adds the process time into the target document for profiling</li>
-<li>retry_failed: retries running the process function on previously failed documents</li>
-</ul>
-<p>Finally let's get to the hard part which is running our function. We do this by defining <code>unary_function</code></p>
-<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">item</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;a&quot;</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="s2">&quot;a&quot;</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span><span class="p">}</span>
-</code></pre></div>
-<p>Note that we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source <code>key</code> and convert it to the target <code>key</code>. Same goes for the <code>last_updated_field</code>. <code>MapBuilder</code> takes care of this, while also recording errors, processing time, and the Builder version.</p>
+<p>The <code>subdir</code> field creates subdirectories in the bucket to help the user organize their data.</p>
+<h3 id="parallelism">Parallelism<a class="headerlink" href="#parallelism" title="Permanent link">&para;</a></h3>
+<p>Once you start working with large quantities of data, the speed at which you process this data will often be limited by database I/O.
+For the most time-consuming upload part of the process, we have implemented thread-level parallelism in the <code>update</code> member function.
+The <code>update</code> function received an entire chunk of processed data as defined by <code>chunk_size</code>,
+however since <code>Store.update</code> is typically called in the <code>update_targets</code> part of a builder, where builder execution is not longer multi-threaded.
+As such, we multithread the execution inside of <code>update</code> using <code>s3_workers</code> threads to perform the database write operation.
+As a general rule of thumb, if you notice that your update step is taking too long, you should change the <code>s3_worker</code> field which is
+optimized differently based on server-side resources.</p>
                 
               
               
@@ -589,39 +622,6 @@
       
         
 <footer class="md-footer">
-  
-    <nav class="md-footer__inner md-grid" aria-label="Footer">
-      
-        <a href="../advanced_builder/" class="md-footer__link md-footer__link--prev" rel="prev">
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
-          </div>
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Previous
-              </span>
-              Advanced Builders
-            </div>
-          </div>
-        </a>
-      
-      
-        <a href="../group_builder/" class="md-footer__link md-footer__link--next" rel="next">
-          <div class="md-footer__title">
-            <div class="md-ellipsis">
-              <span class="md-footer__direction">
-                Next
-              </span>
-              Working with GroupBuilder
-            </div>
-          </div>
-          <div class="md-footer__button md-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4z"/></svg>
-          </div>
-        </a>
-      
-    </nav>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
