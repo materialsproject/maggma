@@ -1,12 +1,23 @@
 # Changelog
 
-## [Unreleased](https://github.com/materialsproject/maggma/tree/HEAD)
+## [v0.27.0](https://github.com/materialsproject/maggma/tree/v0.27.0) (2021-05-12)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.26.0...HEAD)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.26.0...v0.27.0)
 
 **Closed issues:**
 
 - Python 3.6 compatability [\#336](https://github.com/materialsproject/maggma/issues/336)
+
+**Merged pull requests:**
+
+- Fix aws module import [\#435](https://github.com/materialsproject/maggma/pull/435) ([utf](https://github.com/utf))
+- coverage [\#430](https://github.com/materialsproject/maggma/pull/430) ([jmmshn](https://github.com/jmmshn))
+- Update AWS Bucket Detection [\#429](https://github.com/materialsproject/maggma/pull/429) ([jmmshn](https://github.com/jmmshn))
+- Add Object Hash to S3Store [\#427](https://github.com/materialsproject/maggma/pull/427) ([jmmshn](https://github.com/jmmshn))
+- Rebuild API module [\#423](https://github.com/materialsproject/maggma/pull/423) ([shyamd](https://github.com/shyamd))
+- updated documentaion. [\#419](https://github.com/materialsproject/maggma/pull/419) ([jmmshn](https://github.com/jmmshn))
+- Revert "Bump ipython from 7.16.1 to 7.21.0" [\#406](https://github.com/materialsproject/maggma/pull/406) ([shyamd](https://github.com/shyamd))
+- update gridfs store [\#381](https://github.com/materialsproject/maggma/pull/381) ([gpetretto](https://github.com/gpetretto))
 
 ## [v0.26.0](https://github.com/materialsproject/maggma/tree/v0.26.0) (2021-01-16)
 
