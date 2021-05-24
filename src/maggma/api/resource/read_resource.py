@@ -113,17 +113,17 @@ class ReadOnlyResource(Resource):
                 """
                 self.store.connect()
 
-                item = self.store.query_one(
-                    criteria={self.store.key: key, **self.query}, properties=fields["properties"],
-                )
+                item = [
+                    self.store.query_one(criteria={self.store.key: key, **self.query}, properties=fields["properties"],)
+                ]
 
-                if item is None:
+                if item == [None]:
                     raise HTTPException(
                         status_code=404, detail=f"Item with {self.store.key} = {key} not found",
                     )
 
                 for operator in self.query_operators:
-                    item = operator.post_process([item])
+                    item = operator.post_process(item)
 
                 response = {"data": item}
                 return response
@@ -158,17 +158,17 @@ class ReadOnlyResource(Resource):
 
                 self.store.connect()
 
-                item = self.store.query_one(
-                    criteria={self.store.key: key, **self.query}, properties=fields["properties"],
-                )
+                item = [
+                    self.store.query_one(criteria={self.store.key: key, **self.query}, properties=fields["properties"],)
+                ]
 
-                if item is None:
+                if item == [None]:
                     raise HTTPException(
                         status_code=404, detail=f"Item with {self.store.key} = {key} not found",
                     )
 
                 for operator in self.query_operators:
-                    item = operator.post_process([item])
+                    item = operator.post_process(item)
 
                 response = {"data": item}
                 return response
