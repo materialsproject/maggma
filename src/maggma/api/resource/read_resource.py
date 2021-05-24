@@ -123,9 +123,9 @@ class ReadOnlyResource(Resource):
                     )
 
                 for operator in self.query_operators:
-                    item = operator.post_process(item)
+                    item = operator.post_process([item])
 
-                response = {"data": [item]}
+                response = {"data": item}
                 return response
 
             self.router.get(
@@ -168,9 +168,9 @@ class ReadOnlyResource(Resource):
                     )
 
                 for operator in self.query_operators:
-                    item = operator.post_process(item)
+                    item = operator.post_process([item])
 
-                response = {"data": [item]}
+                response = {"data": item}
                 return response
 
             self.router.get(
@@ -211,6 +211,10 @@ class ReadOnlyResource(Resource):
 
             count = self.store.count(query["criteria"])
             data = list(self.store.query(**query))
+
+            for operator in self.query_operators:
+                data = operator.post_process(data)
+
             meta = Meta(total=count)
             response = {"data": data, "meta": meta.dict()}
             return response
