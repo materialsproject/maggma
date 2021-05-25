@@ -5,7 +5,12 @@ from fastapi import Depends, HTTPException, Path, Query, Request
 from pydantic import BaseModel
 
 from maggma.api.models import Meta, Response
-from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery, VersionQuery
+from maggma.api.query_operator import (
+    PaginationQuery,
+    QueryOperator,
+    SparseFieldsQuery,
+    VersionQuery,
+)
 from maggma.api.resource import Resource
 from maggma.api.utils import STORE_PARAMS, attach_signature, merge_queries
 from maggma.core import Store
@@ -60,7 +65,10 @@ class ReadOnlyResource(Resource):
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(model, default_fields=[self.store.key, self.store.last_updated_field],),
+                SparseFieldsQuery(
+                    model,
+                    default_fields=[self.store.key, self.store.last_updated_field],
+                ),
             ]
         )
 
@@ -92,7 +100,9 @@ class ReadOnlyResource(Resource):
         model_name = self.model.__name__
 
         if self.key_fields is None:
-            field_input = SparseFieldsQuery(self.model, [self.store.key, self.store.last_updated_field]).query
+            field_input = SparseFieldsQuery(
+                self.model, [self.store.key, self.store.last_updated_field]
+            ).query
         else:
 
             def field_input():
@@ -101,7 +111,11 @@ class ReadOnlyResource(Resource):
         if not self.versioned:
 
             async def get_by_key(
-                key: str = Path(..., alias=key_name, title=f"The {key_name} of the {model_name} to get"),
+                key: str = Path(
+                    ...,
+                    alias=key_name,
+                    title=f"The {key_name} of the {model_name} to get",
+                ),
                 fields: STORE_PARAMS = Depends(field_input),
             ):
                 f"""
@@ -116,12 +130,16 @@ class ReadOnlyResource(Resource):
                 self.store.connect()
 
                 item = [
-                    self.store.query_one(criteria={self.store.key: key, **self.query}, properties=fields["properties"],)
+                    self.store.query_one(
+                        criteria={self.store.key: key, **self.query},
+                        properties=fields["properties"],
+                    )
                 ]
 
                 if item == [None]:
                     raise HTTPException(
-                        status_code=404, detail=f"Item with {self.store.key} = {key} not found",
+                        status_code=404,
+                        detail=f"Item with {self.store.key} = {key} not found",
                     )
 
                 for operator in self.query_operators:
@@ -142,10 +160,15 @@ class ReadOnlyResource(Resource):
         else:
 
             async def get_by_key_versioned(
-                key: str = Path(..., alias=key_name, title=f"The {key_name} of the {model_name} to get"),
+                key: str = Path(
+                    ...,
+                    alias=key_name,
+                    title=f"The {key_name} of the {model_name} to get",
+                ),
                 fields: STORE_PARAMS = Depends(field_input),
                 version: str = Query(
-                    self.default_version, description="Database version to query on formatted as YYYY_MM_DD",
+                    self.default_version,
+                    description="Database version to query on formatted as YYYY_MM_DD",
                 ),
             ):
                 f"""
@@ -163,12 +186,16 @@ class ReadOnlyResource(Resource):
                 self.store.connect()
 
                 item = [
-                    self.store.query_one(criteria={self.store.key: key, **self.query}, properties=fields["properties"],)
+                    self.store.query_one(
+                        criteria={self.store.key: key, **self.query},
+                        properties=fields["properties"],
+                    )
                 ]
 
                 if item == [None]:
                     raise HTTPException(
-                        status_code=404, detail=f"Item with {self.store.key} = {key} not found",
+                        status_code=404,
+                        detail=f"Item with {self.store.key} = {key} not found",
                     )
 
                 for operator in self.query_operators:
@@ -194,21 +221,29 @@ class ReadOnlyResource(Resource):
             request: Request = queries.pop("request")  # type: ignore
 
             query_params = [
-                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
+                entry
+                for _, i in enumerate(self.query_operators)
+                for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [
+                key for key in request.query_params.keys() if key not in query_params
+            ]
             if any(overlap):
                 raise HTTPException(
                     status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
+                    detail="Request contains query parameters which cannot be used: {}".format(
+                        ", ".join(overlap)
+                    ),
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
             query["criteria"].update(self.query)
 
             if self.versioned:
-                self.store = VersionQuery().versioned_store_setup(self.store, query["criteria"].get("version", None))
+                self.store = VersionQuery().versioned_store_setup(
+                    self.store, query["criteria"].get("version", None)
+                )
                 query["criteria"].pop("version")
 
             self.store.connect()
@@ -245,7 +280,10 @@ def attach_query_ops(
     """
     attach_signature(
         function,
-        annotations={**{f"dep{i}": STORE_PARAMS for i, _ in enumerate(query_ops)}, "request": Request},
+        annotations={
+            **{f"dep{i}": STORE_PARAMS for i, _ in enumerate(query_ops)},
+            "request": Request,
+        },
         defaults={f"dep{i}": Depends(dep.query) for i, dep in enumerate(query_ops)},
     )
     return function
