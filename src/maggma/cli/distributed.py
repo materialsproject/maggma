@@ -23,14 +23,14 @@ def find_port():
     return sock.getsockname()[1]
 
 
-async def master(url: str, port: int, builders: List[Builder], num_chunks: int):
+async def manager(url: str, port: int, builders: List[Builder], num_chunks: int):
     """
-    Really simple master for distributed processing that uses a builder prechunk to modify
+    Really simple manager for distributed processing that uses a builder prechunk to modify
     the builder and send out modified builders for each worker to run
     """
-    logger = getLogger("Master")
+    logger = getLogger("Manager")
 
-    logger.info(f"Binding to Master URL {url}:{port}")
+    logger.info(f"Binding to Manager URL {url}:{port}")
     with Pair1(listen=f"{url}:{port}", polyamorous=True) as workers:
 
         for builder in builders:
@@ -71,19 +71,19 @@ async def master(url: str, port: int, builders: List[Builder], num_chunks: int):
 
 async def worker(url: str, port: int, num_workers: int):
     """
-    Simple distributed worker that connects to a master asks for work and deploys
+    Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
     """
     # Should this have some sort of unique ID?
     logger = getLogger("Worker")
 
-    logger.info(f"Connnecting to Master at {url}:{port}")
-    with Pair1(dial=f"{url}:{port}", polyamorous=True) as master:
-        logger.info(f"Connected to Master at {url}:{port}")
+    logger.info(f"Connnecting to Manager at {url}:{port}")
+    with Pair1(dial=f"{url}:{port}", polyamorous=True) as manager:
+        logger.info(f"Connected to Manager at {url}:{port}")
         running = True
         while running:
-            await master.asend(b"Ready")
-            message = await master.arecv()
+            await manager.asend(b"Ready")
+            message = await manager.arecv()
             work = json.loads(message.decode("utf-8"))
             if "@class" in work and "@module" in work:
                 # We have a valid builder

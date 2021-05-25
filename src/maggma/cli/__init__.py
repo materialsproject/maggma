@@ -10,7 +10,7 @@ from itertools import chain
 import click
 from monty.serialization import loadfn
 
-from maggma.cli.distributed import master, worker, find_port
+from maggma.cli.distributed import manager, worker, find_port
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
 from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
@@ -94,11 +94,11 @@ def run(
     if url:
         loop = asyncio.get_event_loop()
         if num_chunks > 0:
-            # Master
+            # Manager
             if port is None:
                 port = find_port()
                 root.critical(f"Using random port for mrun manager: {port}")
-            loop.run_until_complete(master(url, builder_objects, num_chunks))
+            loop.run_until_complete(manager(url, builder_objects, num_chunks))
         else:
             # worker
             loop.run_until_complete(worker(url, num_workers))

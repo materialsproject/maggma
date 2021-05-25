@@ -5,7 +5,7 @@ import pytest
 from pynng import Pair1
 from pynng.exceptions import Timeout
 
-from maggma.cli.distributed import master, worker, find_port
+from maggma.cli.distributed import manager, worker, find_port
 from maggma.core import Builder
 
 
@@ -40,10 +40,10 @@ SERVER_PORT = 8234
 
 
 @pytest.fixture(scope="function")
-async def master_server(event_loop, log_to_stdout):
+async def manager_server(event_loop, log_to_stdout):
 
     task = asyncio.create_task(
-        master(
+        manager(
             SERVER_URL, SERVER_PORT, [DummyBuilder(dummy_prechunk=False)], num_chunks=10
         )
     )
@@ -52,24 +52,24 @@ async def master_server(event_loop, log_to_stdout):
 
 
 @pytest.mark.asyncio
-async def test_master_wait_for_ready(master_server):
+async def test_manager_wait_for_ready(manager_server):
     with Pair1(
         dial=f"{SERVER_URL}:{SERVER_PORT}", polyamorous=True, recv_timeout=100
-    ) as master:
+    ) as manager:
         with pytest.raises(Timeout):
-            master.recv()
+            manager.recv()
 
 
 @pytest.mark.asyncio
-async def test_master_give_out_chunks(master_server, log_to_stdout):
+async def test_manager_give_out_chunks(manager_server, log_to_stdout):
     with Pair1(
         dial=f"{SERVER_URL}:{SERVER_PORT}", polyamorous=True, recv_timeout=500
-    ) as master_socket:
+    ) as manager_socket:
 
         for i in range(0, 10):
-            log_to_stdout.debug(f"Going to ask Master for work: {i}")
-            await master_socket.asend(b"Ready")
-            message = await master_socket.arecv()
+            log_to_stdout.debug(f"Going to ask Manager for work: {i}")
+            await manager_socket.asend(b"Ready")
+            message = await manager_socket.arecv()
             print(message)
             work = json.loads(message.decode("utf-8"))
 
@@ -77,8 +77,8 @@ async def test_master_give_out_chunks(master_server, log_to_stdout):
             assert work["@module"] == "tests.cli.test_distributed"
             assert work["val"] == i
 
-        await master_socket.asend(b"Ready")
-        message = await master_socket.arecv()
+        await manager_socket.asend(b"Ready")
+        message = await manager_socket.arecv()
         work = json.loads(message.decode("utf-8"))
         assert work == {}
 
@@ -122,7 +122,7 @@ async def test_worker():
 async def test_no_prechunk(caplog):
 
     asyncio.create_task(
-        master(
+        manager(
             SERVER_URL,
             SERVER_PORT,
             [DummyBuilderWithNoPrechunk(dummy_prechunk=False)],
