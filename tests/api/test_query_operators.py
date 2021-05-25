@@ -3,12 +3,15 @@ from maggma.api.query_operator import (
     SparseFieldsQuery,
     NumericQuery,
     StringQueryOperator,
+    SortQuery,
+    VersionQuery,
+    version,
 )
 from datetime import datetime
 import pytest
 
 from pydantic import BaseModel, Field
-from fastapi import HTTPException
+from fastapi import HTTPException, Query
 
 
 from monty.serialization import loadfn, dumpfn
@@ -57,9 +60,7 @@ def test_sparse_query_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query() == {
-            "properties": ["name", "age", "weight", "last_updated"]
-        }
+        assert new_op.query() == {"properties": ["name", "age", "weight", "last_updated"]}
 
 
 def test_numeric_query_functionality():
@@ -78,3 +79,40 @@ def test_numeric_query_serialization():
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
         assert new_op.query(age_lt=10) == {"criteria": {"age": {"$lt": 10}}}
+
+
+def test_sort_query_functionality():
+
+    op = SortQuery()
+
+    assert op.query(field="volume", ascending=True) == {"sort": {"volume": 1}}
+    assert op.query(field="density", ascending=False) == {"sort": {"density": -1}}
+
+
+def test_sort_serialization():
+
+    op = SortQuery()
+
+    with ScratchDir("."):
+        dumpfn(op, "temp.json")
+        new_op = loadfn("temp.json")
+        assert new_op.query(field="volume", ascending=True) == {"sort": {"volume": 1}}
+
+
+def test_version_query_functionality():
+
+    op = VersionQuery(default_version="1111_11_11")
+
+    assert op.query()["criteria"]["version"].default == "1111_11_11"
+    assert op.query(version="2222_22_22") == {"criteria": {"version": "2222_22_22"}}
+
+
+def test_version_serialization():
+
+    op = VersionQuery(default_version="1111_11_11")
+
+    with ScratchDir("."):
+        dumpfn(op, "temp.json")
+        new_op = loadfn("temp.json")
+        assert new_op.query(version="2222_22_22") == {"criteria": {"version": "2222_22_22"}}
+
