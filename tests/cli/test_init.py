@@ -37,8 +37,9 @@ def test_basic_run():
     result = runner.invoke(run, ["--help"])
     assert result.exit_code == 0
 
+    # Ensure running without any builders fail
     result = runner.invoke(run)
-    assert result.exit_code == 0
+    assert result.exit_code != 0
 
 
 def test_run_builder(mongostore):
