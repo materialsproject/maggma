@@ -17,6 +17,8 @@ from maggma.api.query_operator import (
 )
 from maggma.stores import MemoryStore
 
+import inspect
+
 
 class Owner(BaseModel):
     name: str = Field(..., title="Owner's name")
@@ -50,9 +52,7 @@ def test_init(owner_store):
     resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=False)
     assert len(resource.router.routes) == 2
 
-    resource = ReadOnlyResource(
-        store=owner_store, model=Owner, enable_default_search=False
-    )
+    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False)
     assert len(resource.router.routes) == 2
 
 
@@ -100,16 +100,14 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
     endpoint = ReadOnlyResource(
         store,
         Owner,
-        query_operators=[
-            StringQueryOperator(model=Owner),
-            NumericQuery(model=Owner),
-            SparseFieldsQuery(model=Owner),
-        ],
+        query_operators=[StringQueryOperator(model=Owner), NumericQuery(model=Owner), SparseFieldsQuery(model=Owner),],
     )
     app = FastAPI()
     app.include_router(endpoint.router)
 
     client = TestClient(app)
+
+    print(inspect.signature(NumericQuery(model=Owner).query))
 
     url = base + urlencode(payload)
     if debug:
@@ -162,7 +160,8 @@ def test_resource_compound():
     payload = {
         "name": "PersonAge20Weight200",
         "all_fields": True,
-        "weight": 200,
+        "weight_gt": 199.1,
+        "weight_lt": 201.4,
         "age": 20,
     }
     res, data = search_helper(payload=payload, base="/?", debug=True)
@@ -174,7 +173,8 @@ def test_resource_compound():
         "name": "PersonAge20Weight200",
         "all_fields": False,
         "fields": "name,age",
-        "weight": 200,
+        "weight_gt": 199.3,
+        "weight_lt": 201.9,
         "age": 20,
     }
     res, data = search_helper(payload=payload, base="/?", debug=True)
