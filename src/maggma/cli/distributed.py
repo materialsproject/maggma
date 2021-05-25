@@ -14,16 +14,24 @@ from maggma.cli.multiprocessing import multi
 from maggma.core import Builder
 from maggma.utils import tqdm
 
+from socket import socket
 
-async def master(url: str, builders: List[Builder], num_chunks: int):
+
+def find_port():
+    sock = socket()
+    sock.bind(("", 0))
+    return sock.getsockname()[1]
+
+
+async def master(url: str, port: int, builders: List[Builder], num_chunks: int):
     """
     Really simple master for distributed processing that uses a builder prechunk to modify
     the builder and send out modified builders for each worker to run
     """
     logger = getLogger("Master")
 
-    logger.info(f"Binding to Master URL {url}")
-    with Pair1(listen=url, polyamorous=True) as workers:
+    logger.info(f"Binding to Master URL {url}:{port}")
+    with Pair1(listen=f"{url}:{port}", polyamorous=True) as workers:
 
         for builder in builders:
             logger.info(f"Working on {builder.__class__.__name__}")
@@ -61,7 +69,7 @@ async def master(url: str, builders: List[Builder], num_chunks: int):
         )
 
 
-async def worker(url: str, num_workers: int):
+async def worker(url: str, port: int, num_workers: int):
     """
     Simple distributed worker that connects to a master asks for work and deploys
     using multiprocessing
@@ -69,9 +77,9 @@ async def worker(url: str, num_workers: int):
     # Should this have some sort of unique ID?
     logger = getLogger("Worker")
 
-    logger.info(f"Connnecting to Master at {url}")
-    with Pair1(dial=url, polyamorous=True) as master:
-        logger.info(f"Connected to Master at {url}")
+    logger.info(f"Connnecting to Master at {url}:{port}")
+    with Pair1(dial=f"{url}:{port}", polyamorous=True) as master:
+        logger.info(f"Connected to Master at {url}:{port}")
         running = True
         while running:
             await master.asend(b"Ready")
