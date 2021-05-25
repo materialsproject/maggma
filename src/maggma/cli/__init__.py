@@ -20,7 +20,7 @@ sys.meta_path.append(ScriptFinder())
 
 
 @click.command()
-@click.argument("builders", nargs=-1, type=click.Path(exists=True))
+@click.argument("builders", nargs=-1, type=click.Path(exists=True), required=True)
 @click.option(
     "-v",
     "--verbose",
