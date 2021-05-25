@@ -10,7 +10,7 @@ from itertools import chain
 import click
 from monty.serialization import loadfn
 
-from maggma.cli.distributed import master, worker
+from maggma.cli.distributed import master, worker, find_port
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
 from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
@@ -44,12 +44,25 @@ sys.meta_path.append(ScriptFinder())
     help="Store in JSON/YAML form to send reporting data to",
     type=click.Path(exists=True),
 )
-@click.option("-u", "--url", "url", default=None, type=str)
+@click.option(
+    "-u", "--url", "url", default=None, type=str, help="URL for the distributed manager"
+)
+@click.option(
+    "-p",
+    "--port",
+    "port",
+    default=None,
+    type=int,
+    help="Port for distributed communication."
+    " mrun will find an open port if None is provided to the manager",
+)
 @click.option("-N", "--num-chunks", "num_chunks", default=0, type=int)
 @click.option(
     "--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations"
 )
-def run(builders, verbosity, reporting_store, num_workers, url, num_chunks, no_bars):
+def run(
+    builders, verbosity, reporting_store, num_workers, url, port, num_chunks, no_bars
+):
 
     # Set Logging
     levels = [logging.WARNING, logging.INFO, logging.DEBUG]
@@ -82,6 +95,9 @@ def run(builders, verbosity, reporting_store, num_workers, url, num_chunks, no_b
         loop = asyncio.get_event_loop()
         if num_chunks > 0:
             # Master
+            if port is None:
+                port = find_port()
+                root.critical(f"Using random port for mrun manager: {port}")
             loop.run_until_complete(master(url, builder_objects, num_chunks))
         else:
             # worker
