@@ -5,7 +5,7 @@ import pytest
 from pynng import Pair1
 from pynng.exceptions import Timeout
 
-from maggma.cli.distributed import master, worker
+from maggma.cli.distributed import master, worker, find_port
 from maggma.core import Builder
 
 
@@ -35,14 +35,17 @@ class DummyBuilder(DummyBuilderWithNoPrechunk):
         return [{"val": i} for i in range(num_chunks)]
 
 
-SERVER_URL = "tcp://127.0.0.1:8234"
+SERVER_URL = "tcp://127.0.0.1"
+SERVER_PORT = 8234
 
 
 @pytest.fixture(scope="function")
 async def master_server(event_loop, log_to_stdout):
 
     task = asyncio.create_task(
-        master(SERVER_URL, [DummyBuilder(dummy_prechunk=False)], num_chunks=10)
+        master(
+            SERVER_URL, SERVER_PORT, [DummyBuilder(dummy_prechunk=False)], num_chunks=10
+        )
     )
     yield task
     task.cancel()
@@ -50,14 +53,18 @@ async def master_server(event_loop, log_to_stdout):
 
 @pytest.mark.asyncio
 async def test_master_wait_for_ready(master_server):
-    with Pair1(dial=SERVER_URL, polyamorous=True, recv_timeout=100) as master:
+    with Pair1(
+        dial=f"{SERVER_URL}:{SERVER_PORT}", polyamorous=True, recv_timeout=100
+    ) as master:
         with pytest.raises(Timeout):
             master.recv()
 
 
 @pytest.mark.asyncio
 async def test_master_give_out_chunks(master_server, log_to_stdout):
-    with Pair1(dial=SERVER_URL, polyamorous=True, recv_timeout=500) as master_socket:
+    with Pair1(
+        dial=f"{SERVER_URL}:{SERVER_PORT}", polyamorous=True, recv_timeout=500
+    ) as master_socket:
 
         for i in range(0, 10):
             log_to_stdout.debug(f"Going to ask Master for work: {i}")
@@ -78,9 +85,13 @@ async def test_master_give_out_chunks(master_server, log_to_stdout):
 
 @pytest.mark.asyncio
 async def test_worker():
-    with Pair1(listen=SERVER_URL, polyamorous=True, recv_timeout=500) as worker_socket:
+    with Pair1(
+        listen=f"{SERVER_URL}:{SERVER_PORT}", polyamorous=True, recv_timeout=500
+    ) as worker_socket:
 
-        worker_task = asyncio.create_task(worker(SERVER_URL, num_workers=1))
+        worker_task = asyncio.create_task(
+            worker(SERVER_URL, SERVER_PORT, num_workers=1)
+        )
 
         message = await worker_socket.arecv()
         assert message == b"Ready"
@@ -113,6 +124,7 @@ async def test_no_prechunk(caplog):
     asyncio.create_task(
         master(
             SERVER_URL,
+            SERVER_PORT,
             [DummyBuilderWithNoPrechunk(dummy_prechunk=False)],
             num_chunks=10,
         )
@@ -122,3 +134,7 @@ async def test_no_prechunk(caplog):
         "Can't distributed process DummyBuilderWithNoPrechunk. Skipping for now"
         in caplog.text
     )
+
+
+def test_find_port():
+    assert find_port() > 0
