@@ -11,7 +11,7 @@ class VersionQuery(QueryOperator):
     Method to generate a query on a specific collection version
     """
 
-    def __init__(self, default_version):
+    def __init__(self, default_version=None):
         """
         Args:
             default_version: the default collection version
@@ -37,7 +37,7 @@ class VersionQuery(QueryOperator):
         " Stub query function for abstract class "
         pass
 
-    def versioned_store_setup(store: MongoStore, version: str):
+    def versioned_store_setup(self, store: MongoStore, version: str):
         prefix = "_".join(store.collection_name.split("_")[0:-3])
         versioned_collection = f"{prefix}_{version}"
         store.connect()

@@ -64,8 +64,10 @@ class ReadOnlyResource(Resource):
             ]
         )
 
-        if any(isinstance(qop_entry, VersionQuery) for qop_entry in self.query_operators):
-            self.versioned = True
+        for qop_entry in self.query_operators:
+            if isinstance(qop_entry, VersionQuery):
+                self.versioned = True
+                self.default_version = qop_entry.default_version
 
         super().__init__(model)
 
@@ -142,7 +144,9 @@ class ReadOnlyResource(Resource):
             async def get_by_key_versioned(
                 key: str = Path(..., alias=key_name, title=f"The {key_name} of the {model_name} to get"),
                 fields: STORE_PARAMS = Depends(field_input),
-                version: str = Query(None, description="Database version to query on formatted as YYYY_MM_DD",),
+                version: str = Query(
+                    self.default_version, description="Database version to query on formatted as YYYY_MM_DD",
+                ),
             ):
                 f"""
                 Get's a document by the primary key in the store
@@ -154,7 +158,7 @@ class ReadOnlyResource(Resource):
                     a single {model_name} document
                 """
 
-                self.store = VersionQuery.versioned_store_setup(self.store, version)
+                self.store = VersionQuery().versioned_store_setup(self.store, version)
 
                 self.store.connect()
 
@@ -204,7 +208,7 @@ class ReadOnlyResource(Resource):
             query["criteria"].update(self.query)
 
             if self.versioned:
-                self.store = VersionQuery.versioned_store_setup(self.store, query["criteria"].get("version", None))
+                self.store = VersionQuery().versioned_store_setup(self.store, query["criteria"].get("version", None))
                 query["criteria"].pop("version")
 
             self.store.connect()
