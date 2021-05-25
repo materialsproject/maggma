@@ -3,8 +3,8 @@ from datetime import datetime
 
 import mongomock.collection
 import pymongo.collection
-from pymongo.errors import OperationFailure, DocumentTooLarge, ConfigurationError
 import pytest
+from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
 from maggma.core import StoreError
 from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore

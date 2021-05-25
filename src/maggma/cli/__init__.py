@@ -10,7 +10,7 @@ from itertools import chain
 import click
 from monty.serialization import loadfn
 
-from maggma.cli.distributed import manager, worker, find_port
+from maggma.cli.distributed import find_port, manager, worker
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
 from maggma.cli.source_loader import ScriptFinder, load_builder_from_source

@@ -4,6 +4,7 @@
 import json
 from asyncio import wait
 from logging import getLogger
+from socket import socket
 from typing import List
 
 from monty.json import jsanitize
@@ -13,8 +14,6 @@ from pynng import Pair1
 from maggma.cli.multiprocessing import multi
 from maggma.core import Builder
 from maggma.utils import tqdm
-
-from socket import socket
 
 
 def find_port():

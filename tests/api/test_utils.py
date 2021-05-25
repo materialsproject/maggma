@@ -1,12 +1,11 @@
-import pytest
-
-from maggma.api.utils import merge_queries, api_sanitize
-from monty.json import MSONable
-
-from pydantic import BaseModel, Field
 from datetime import datetime
-
 from enum import Enum
+
+import pytest
+from monty.json import MSONable
+from pydantic import BaseModel, Field
+
+from maggma.api.utils import api_sanitize, merge_queries
 
 
 class SomeEnum(Enum):

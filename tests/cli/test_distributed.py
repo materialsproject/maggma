@@ -5,7 +5,7 @@ import pytest
 from pynng import Pair1
 from pynng.exceptions import Timeout
 
-from maggma.cli.distributed import manager, worker, find_port
+from maggma.cli.distributed import find_port, manager, worker
 from maggma.core import Builder
 
 
