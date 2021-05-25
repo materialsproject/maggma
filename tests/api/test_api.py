@@ -1,6 +1,7 @@
 from enum import Enum
 from random import choice, randint
 from urllib.parse import urlencode
+from typing import Tuple, Any
 
 import pytest
 from fastapi.encoders import jsonable_encoder
@@ -65,7 +66,7 @@ def test_msonable(owner_store, pet_store):
         assert k in api_dict
 
 
-def search_helper(payload, base: str = "/?", debug=True) -> Response:
+def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]:
     """
     Helper function to directly query search endpoints
     Args:
@@ -91,8 +92,8 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
             owner_store,
             Owner,
             query_operators=[
-                StringQueryOperator(model=Owner),
-                NumericQuery(model=Owner),
+                StringQueryOperator(model=Owner),  # type: ignore
+                NumericQuery(model=Owner),  # type: ignore
                 SparseFieldsQuery(model=Owner),
                 PaginationQuery(),
             ],

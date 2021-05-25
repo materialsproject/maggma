@@ -1,4 +1,5 @@
 import inspect
+from typing import Type
 from abc import abstractmethod
 from typing import Any, Callable, Dict, List, Optional, Tuple
 
@@ -16,10 +17,7 @@ class DynamicQueryOperator(QueryOperator):
     """Abstract Base class for dynamic query operators"""
 
     def __init__(
-        self,
-        model: BaseModel,
-        fields: Optional[List[str]] = None,
-        excluded_fields: Optional[List[str]] = None,
+        self, model: Type[BaseModel], fields: Optional[List[str]] = None, excluded_fields: Optional[List[str]] = None,
     ):
 
         self.model = model
@@ -27,9 +25,7 @@ class DynamicQueryOperator(QueryOperator):
         self.excluded_fields = excluded_fields
 
         all_fields: Dict[str, ModelField] = model.__fields__
-        param_fields = fields or list(
-            set(all_fields.keys()) - set(excluded_fields or [])
-        )
+        param_fields = fields or list(set(all_fields.keys()) - set(excluded_fields or []))
 
         # Convert the fields into operator tuples
         ops = [
@@ -50,20 +46,13 @@ class DynamicQueryOperator(QueryOperator):
                     try:
                         criteria.append(self.mapping[k](v))
                     except KeyError:
-                        raise KeyError(
-                            f"Cannot find key {k} in current query to database mapping"
-                        )
+                        raise KeyError(f"Cannot find key {k} in current query to database mapping")
 
             return {"criteria": {k: v for crit in criteria for k, v in crit.items()}}
 
         # building the signatures for FastAPI Swagger UI
         signatures: List = [
-            inspect.Parameter(
-                op[0],
-                inspect.Parameter.POSITIONAL_OR_KEYWORD,
-                default=op[2],
-                annotation=op[1],
-            )
+            inspect.Parameter(op[0], inspect.Parameter.POSITIONAL_OR_KEYWORD, default=op[2], annotation=op[1],)
             for op in ops
         ]
 
@@ -76,9 +65,7 @@ class DynamicQueryOperator(QueryOperator):
         pass
 
     @abstractmethod
-    def field_to_operator(
-        self, name: str, field: ModelField
-    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
         Converts a PyDantic ModelField into a Tuple with the
             - query param name,
@@ -108,9 +95,7 @@ class DynamicQueryOperator(QueryOperator):
 class NumericQuery(DynamicQueryOperator):
     " Query Operator to enable searching on numeric fields"
 
-    def field_to_operator(
-        self, name: str, field: ModelField
-    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
 
         """
         Converts a PyDantic ModelField into a Tuple with the
@@ -130,19 +115,13 @@ class NumericQuery(DynamicQueryOperator):
                 (
                     f"{field.name}_lt",
                     field_type,
-                    Query(
-                        default=None,
-                        description=f"Querying for {title} is less than a value",
-                    ),
+                    Query(default=None, description=f"Querying for {title} is less than a value",),
                     lambda val: {f"{field.name}": {"$lt": val}},
                 ),
                 (
                     f"{field.name}_gt",
                     field_type,
-                    Query(
-                        default=None,
-                        description=f"Querying for {title} is greater than a value",
-                    ),
+                    Query(default=None, description=f"Querying for {title} is greater than a value",),
                     lambda val: {f"{field.name}": {"$gt": val}},
                 ),
             ]
@@ -153,37 +132,25 @@ class NumericQuery(DynamicQueryOperator):
                     (
                         f"{field.name}",
                         field_type,
-                        Query(
-                            default=None,
-                            description=f"Querying for {title} is equal to a value",
-                        ),
+                        Query(default=None, description=f"Querying for {title} is equal to a value",),
                         lambda val: {f"{field.name}": val},
                     ),
                     (
                         f"{field.name}_not_eq",
                         field_type,
-                        Query(
-                            default=None,
-                            description=f"Querying for {title} is not equal to a value",
-                        ),
+                        Query(default=None, description=f"Querying for {title} is not equal to a value",),
                         lambda val: {f"{field.name}": {"$ne": val}},
                     ),
                     (
                         f"{field.name}_eq_any",
                         List[field_type],  # type: ignore
-                        Query(
-                            default=None,
-                            description=f"Querying for {title} is any of these values",
-                        ),
+                        Query(default=None, description=f"Querying for {title} is any of these values",),
                         lambda val: {f"{field.name}": {"$in": val}},
                     ),
                     (
                         f"{field.name}_neq_any",
                         List[field_type],  # type: ignore
-                        Query(
-                            default=None,
-                            description=f"Querying for {title} is not any of these values",
-                        ),
+                        Query(default=None, description=f"Querying for {title} is not any of these values",),
                         lambda val: {f"{field.name}": {"$nin": val}},
                     ),
                 ]
@@ -195,9 +162,7 @@ class NumericQuery(DynamicQueryOperator):
 class StringQueryOperator(DynamicQueryOperator):
     " Query Operator to enable searching on numeric fields"
 
-    def field_to_operator(
-        self, name: str, field: ModelField
-    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
 
         """
         Converts a PyDantic ModelField into a Tuple with the
@@ -217,37 +182,25 @@ class StringQueryOperator(DynamicQueryOperator):
                 (
                     f"{field.name}",
                     field_type,
-                    Query(
-                        default=None,
-                        description=f"Query for {title} is equal to a value",
-                    ),
+                    Query(default=None, description=f"Query for {title} is equal to a value",),
                     lambda val: {f"{field.name}": val},
                 ),
                 (
                     f"{field.name}_not_eq",
                     field_type,
-                    Query(
-                        default=None,
-                        description=f"Querying for {title} is not equal to a value",
-                    ),
+                    Query(default=None, description=f"Querying for {title} is not equal to a value",),
                     lambda val: {f"{field.name}": {"$ne": val}},
                 ),
                 (
                     f"{field.name}_eq_any",
                     List[field_type],  # type: ignore
-                    Query(
-                        default=None,
-                        description=f"Querying for {title} is any of these values",
-                    ),
+                    Query(default=None, description=f"Querying for {title} is any of these values",),
                     lambda val: {f"{field.name}": {"$in": val}},
                 ),
                 (
                     f"{field.name}_neq_any",
                     List[field_type],  # type: ignore
-                    Query(
-                        default=None,
-                        description=f"Querying for {title} is not any of these values",
-                    ),
+                    Query(default=None, description=f"Querying for {title} is not any of these values",),
                     lambda val: {f"{field.name}": {"$nin": val}},
                 ),
             ]
