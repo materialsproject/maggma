@@ -98,10 +98,14 @@ def run(
             if port is None:
                 port = find_port()
                 root.critical(f"Using random port for mrun manager: {port}")
-            loop.run_until_complete(manager(url, builder_objects, num_chunks))
+            loop.run_until_complete(
+                manager(
+                    url=url, port=port, builders=builder_objects, num_chunks=num_chunks
+                )
+            )
         else:
             # worker
-            loop.run_until_complete(worker(url, num_workers))
+            loop.run_until_complete(worker(url=url, port=port, num_workers=num_workers))
     else:
         if num_workers == 1:
             for builder in builder_objects:
@@ -109,4 +113,6 @@ def run(
         else:
             loop = asyncio.get_event_loop()
             for builder in builder_objects:
-                loop.run_until_complete(multi(builder, num_workers, no_bars))
+                loop.run_until_complete(
+                    multi(builder=builder, num_workers=num_workers, no_bars=no_bars)
+                )
