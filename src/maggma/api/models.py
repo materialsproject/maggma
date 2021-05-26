@@ -82,7 +82,7 @@ class Response(GenericModel, Generic[DataT]):
 
 class UserSubmissionDataStatus(Enum):
     """
-    Submission status for Materials API
+    Submission status for user data
     """
 
     submitted = "SUBMITTED"
@@ -94,7 +94,7 @@ class UserSubmissionDataStatus(Enum):
 
 class UserSubmissionDataModel(BaseModel):
     """
-    Base submission model for Materials API
+    Base submission model for user submitted data
     """
 
     submission_id: str = Field(..., description="Unique submission ID")
