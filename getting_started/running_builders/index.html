@@ -659,8 +659,8 @@ Process Items: <span class="m">100</span>%<span class="p">|</span>████�
 <h2 id="running-distributed">Running Distributed<a class="headerlink" href="#running-distributed" title="Permanent link">&para;</a></h2>
 <p><code>maggma</code> can distribute work across multiple computers. There are two steps to this:</p>
 <ol>
-<li>Run a <code>mrun</code> master by providing it with a <code>--url</code> to listen for workers on and <code>--num-chunks</code>(<code>-N</code>) which tells <code>mrun</code> how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause <code>mrun</code> to call the builder's <code>prechunk</code> to get the distribution of work and run distributd work on all workers</li>
-<li>Run <code>mrun</code> workers b y providing it with a <code>--url</code> to listen for a master and <code>--num-workers</code> (<code>-n</code>) to tell it how many processes to run in this worker.</li>
+<li>Run a <code>mrun</code> manager by providing it with a <code>--url</code> to listen for workers on and <code>--num-chunks</code>(<code>-N</code>) which tells <code>mrun</code> how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause <code>mrun</code> to call the builder's <code>prechunk</code> to get the distribution of work and run distributd work on all workers</li>
+<li>Run <code>mrun</code> workers b y providing it with a <code>--url</code> to listen for a manager and <code>--num-workers</code> (<code>-n</code>) to tell it how many processes to run in this worker.</li>
 </ol>
 <p>The <code>url</code> argument takes a fully qualified url including protocol. <code>tcp</code> is recommended:
 Example: <code>tcp://127.0.0.1:8080</code></p>

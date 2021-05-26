@@ -962,7 +962,7 @@ the documents in this Store</p>
 <td><code>key</code></td>
 <td><code>str</code></td>
 <td>
-<p>master key to index on</p>
+<p>main key to index on</p>
 </td>
 <td><code>'task_id'</code></td>
 </tr>
@@ -1005,7 +1005,7 @@ the documents in this Store</p>
 <span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Args:</span>
-<span class="sd">        key: master key to index on</span>
+<span class="sd">        key: main key to index on</span>
 <span class="sd">        last_updated_field: field for date/time stamping the data</span>
 <span class="sd">        last_updated_type: the date/time format for the last_updated_field.</span>
 <span class="sd">                            Can be "datetime" or "isoformat"</span>
@@ -1318,7 +1318,7 @@ by keys.</p>
 </tr>
 <tr>
 <td><code>properties</code></td>
-<td><code>Optional[Union[Dict, List]]</code></td>
+<td><code>Union[Dict, List]</code></td>
 <td>
 <p>properties to return in grouped documents</p>
 </td>
@@ -1539,7 +1539,7 @@ Store than this Store.</p>
 </tr>
 <tr>
 <td><code>properties</code></td>
-<td><code>Optional[Union[Dict, List]]</code></td>
+<td><code>Union[Dict, List]</code></td>
 <td>
 <p>properties to return in grouped documents</p>
 </td>
@@ -1630,7 +1630,7 @@ values are 1 for ascending or -1 for descending.</p>
 </tr>
 <tr>
 <td><code>properties</code></td>
-<td><code>Optional[Union[Dict, List]]</code></td>
+<td><code>Union[Dict, List]</code></td>
 <td>
 <p>properties to return in the document</p>
 </td>
@@ -1749,7 +1749,7 @@ values are 1 for ascending or -1 for descending.</p>
 </tr>
 <tr>
 <td><code>key</code></td>
-<td><code>Optional[Union[List, str]]</code></td>
+<td><code>Union[List, str]</code></td>
 <td>
 <p>field name(s) to determine uniqueness for a
  document, can be a list of multiple fields,

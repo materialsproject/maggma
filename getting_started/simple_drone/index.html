@@ -529,7 +529,7 @@
                 
                 <h1 id="simple-drone">Simple Drone<a class="headerlink" href="#simple-drone" title="Permanent link">&para;</a></h1>
 <p>Let's implement a Simple Drone example.</p>
-<p>The simple drone will sync database with a local file structure like below. You may find sample files <a href="https://github.com/materialsproject/maggma/tree/master/tests/test_files">here</a>
+<p>The simple drone will sync database with a local file structure like below. You may find sample files <a href="https://github.com/materialsproject/maggma/tree/main/tests/test_files">here</a>
 <div class="highlight"><pre><span></span><code>- data
     - citation-1.bibtex
     - citation-2.bibtex
@@ -544,10 +544,10 @@
     - text-5.txt
 </code></pre></div></p>
 <p>Notice that the pattern here for computing the key is the number between <code>-</code> and its file extension. So we can go ahead and define the <code>compute_record_identifier_key</code> function that does exactly that</p>
-<div class="codehilite"><pre><span></span><code><span class="err">def compute_record_identifier_key(self, doc: Document) -&gt; str:</span>
-<span class="err">    prefix, postfix = doc.name.split(sep=&quot;-&quot;, maxsplit=1)</span>
-<span class="err">    ID, ftype = postfix.split(sep=&quot;.&quot;, maxsplit=1)</span>
-<span class="err">    return ID</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">compute_record_identifier_key</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span> <span class="n">doc</span><span class="o">:</span> <span class="n">Document</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">str</span><span class="o">:</span>
+    <span class="n">prefix</span><span class="p">,</span> <span class="n">postfix</span> <span class="o">=</span> <span class="n">doc</span><span class="p">.</span><span class="n">name</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s">&quot;-&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">ID</span><span class="p">,</span> <span class="n">ftype</span> <span class="o">=</span> <span class="n">postfix</span><span class="p">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="o">=</span><span class="s">&quot;.&quot;</span><span class="p">,</span> <span class="n">maxsplit</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="kr">return</span> <span class="n">ID</span>
 </code></pre></div>
 
 <p>Notice that these files are all in one single directory, we can simply read all these files and generate a list of <code>Document</code>.
@@ -598,33 +598,33 @@ We basically generate a list of documents, organize them, and then generate a li
 </code></pre></div>
 
 <p>Lastly, if there's a file that needs to be updated, we want to extract the data and append some meta data. In our case, this is very simple.</p>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">compute_data</span><span class="p">(</span><span class="k">self</span><span class="p">,</span> <span class="n">recordID</span><span class="p">:</span> <span class="n">RecordIdentifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="n">record</span> <span class="o">=</span> <span class="n">dict</span><span class="p">()</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">compute_data</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span> <span class="kd">recordI</span><span class="n">D</span><span class="o">:</span> <span class="kd">RecordI</span><span class="n">dentifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="o">:</span>
+    <span class="kd">record </span><span class="o">=</span> <span class="n">dict</span><span class="p">()</span>
 
-    <span class="k">for</span> <span class="n">document</span> <span class="k">in</span> <span class="n">recordID</span><span class="p">.</span><span class="n">documents</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ss">&quot;citations&quot;</span> <span class="k">in</span> <span class="n">document</span><span class="p">.</span><span class="n">name</span><span class="p">:</span>
-            <span class="k">with</span> <span class="k">open</span><span class="p">(</span><span class="n">document</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="ss">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-                <span class="n">s</span> <span class="o">=</span> <span class="n">file</span><span class="p">.</span><span class="k">read</span><span class="p">()</span>
-                <span class="n">record</span><span class="p">[</span><span class="ss">&quot;citations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="n">for</span> <span class="n">document</span> <span class="kr">in</span> <span class="kd">recordI</span><span class="n">D</span><span class="p">.</span><span class="n">documents</span><span class="o">:</span>
+        <span class="nf">if</span> <span class="s">&quot;citations&quot;</span> <span class="kr">in</span> <span class="n">document</span><span class="p">.</span><span class="n">name</span><span class="o">:</span>
+            <span class="n">with</span> <span class="n">open</span><span class="p">(</span><span class="n">document</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="kr">as</span> <span class="n">file</span><span class="o">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">file</span><span class="p">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="kd">record[</span><span class="s">&quot;citations&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
 
-        <span class="k">if</span> <span class="ss">&quot;text&quot;</span> <span class="k">in</span> <span class="n">document</span><span class="p">.</span><span class="n">name</span><span class="p">:</span>
-            <span class="k">with</span> <span class="k">open</span><span class="p">(</span><span class="n">document</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="ss">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-                <span class="n">s</span> <span class="o">=</span> <span class="n">file</span><span class="p">.</span><span class="k">read</span><span class="p">()</span>
-                <span class="n">record</span><span class="p">[</span><span class="ss">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
-    <span class="k">return</span> <span class="n">record</span>
+        <span class="nf">if</span> <span class="s">&quot;text&quot;</span> <span class="kr">in</span> <span class="n">document</span><span class="p">.</span><span class="n">name</span><span class="o">:</span>
+            <span class="n">with</span> <span class="n">open</span><span class="p">(</span><span class="n">document</span><span class="p">.</span><span class="n">path</span><span class="p">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="s">&quot;r&quot;</span><span class="p">)</span> <span class="kr">as</span> <span class="n">file</span><span class="o">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">file</span><span class="p">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="kd">record[</span><span class="s">&quot;text&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+    <span class="kr">return</span> <span class="kd">record</span>
 </code></pre></div>
 
 <p>Now, you have a working SimpleBibDrone! You can use it like this:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">mongo_store</span> <span class="o">=</span> <span class="n">MongoStore</span><span class="p">(</span>
-    <span class="k">database</span><span class="o">=</span><span class="ss">&quot;drone_test&quot;</span><span class="p">,</span> <span class="n">collection_name</span><span class="o">=</span><span class="ss">&quot;drone_test&quot;</span><span class="p">,</span> <span class="k">key</span><span class="o">=</span><span class="ss">&quot;record_key&quot;</span>
-<span class="p">)</span>
-<span class="n">simple_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">.</span><span class="n">cwd</span><span class="p">()</span> <span class="o">/</span> <span class="ss">&quot;data&quot;</span>
-<span class="n">simple_bib_drone</span> <span class="o">=</span> <span class="n">SimpleBibDrone</span><span class="p">(</span><span class="n">store</span><span class="o">=</span><span class="n">mongo_store</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">simple_path</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code>mongo_store = MongoStore(
+    database=&quot;drone_test&quot;, collection_name=&quot;drone_test&quot;, key=&quot;record_key&quot;
+)
+simple_path = Path.cwd() / &quot;data&quot;
+simple_bib_drone = SimpleBibDrone(store=mongo_store, path=simple_path)
 
-<span class="n">simple_bib_drone</span><span class="p">.</span><span class="n">run</span><span class="p">()</span>
+simple_bib_drone.run()
 </code></pre></div>
 
-<p>For complete code, please visit <a href="https://github.com/materialsproject/maggma/tree/master/tests/builders">here</a></p>
+<p>For complete code, please visit <a href="https://github.com/materialsproject/maggma/tree/main/tests/builders">here</a></p>
                 
               
               
