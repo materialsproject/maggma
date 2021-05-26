@@ -4,3 +4,4 @@ from maggma.api.query_operator.pagination import PaginationQuery
 from maggma.api.query_operator.sparse_fields import SparseFieldsQuery
 from maggma.api.query_operator.sorting import SortQuery
 from maggma.api.query_operator.version import VersionQuery
+from maggma.api.query_operator.user_data import UserSubmissionQuery

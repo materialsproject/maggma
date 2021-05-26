@@ -8,7 +8,9 @@ from pydantic.utils import lenient_issubclass
 from typing_extensions import Literal
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
-STORE_PARAMS = Dict[Literal["criteria", "properties", "sort", "skip", "limit", "request"], Any]
+STORE_PARAMS = Dict[
+    Literal["criteria", "properties", "sort", "skip", "limit", "request"], Any
+]
 
 
 def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
@@ -22,7 +24,12 @@ def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
         if "properties" in sub_query:
             properties.extend(sub_query["properties"])
 
-    remainder = {k: v for query in queries for k, v in query.items() if k not in ["criteria", "properties"]}
+    remainder = {
+        k: v
+        for query in queries
+        for k, v in query.items()
+        if k not in ["criteria", "properties"]
+    }
 
     return {
         "criteria": criteria,
@@ -62,11 +69,15 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
         for param in defaults.keys()
     ]
 
-    setattr(function, "__signature__", inspect.Signature(required_params + optional_params))
+    setattr(
+        function, "__signature__", inspect.Signature(required_params + optional_params)
+    )
 
 
 def api_sanitize(
-    pydantic_model: Type[BaseModel], fields_to_leave: Optional[List[str]] = None, allow_dict_msonable=False,
+    pydantic_model: Type[BaseModel],
+    fields_to_leave: Optional[List[str]] = None,
+    allow_dict_msonable=False,
 ):
     """
     Function to clean up pydantic models for the API by:
@@ -80,7 +91,9 @@ def api_sanitize(
     """
 
     models = [
-        model for model in get_flat_models_from_model(pydantic_model) if issubclass(model, BaseModel)
+        model
+        for model in get_flat_models_from_model(pydantic_model)
+        if issubclass(model, BaseModel)
     ]  # type: List[Type[BaseModel]]
 
     fields_to_leave = fields_to_leave or []
@@ -96,7 +109,11 @@ def api_sanitize(
                 field.required = False
                 field.field_info.default = None
 
-            if field_type is not None and lenient_issubclass(field_type, MSONable) and allow_dict_msonable:
+            if (
+                field_type is not None
+                and lenient_issubclass(field_type, MSONable)
+                and allow_dict_msonable
+            ):
                 field.type_ = allow_msonable_dict(field_type)
                 field.populate_validators()
 
@@ -124,7 +141,9 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
                 errors.append("@class")
 
             if len(errors) > 0:
-                raise ValueError("Missing Monty seriailzation fields in dictionary: {errors}")
+                raise ValueError(
+                    "Missing Monty seriailzation fields in dictionary: {errors}"
+                )
 
             return v
         else:

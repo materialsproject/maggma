@@ -4,6 +4,8 @@ from typing import Generic, List, Optional, TypeVar
 from pydantic import BaseModel, Field, validator
 from pydantic.generics import GenericModel
 
+from enum import Enum
+
 from maggma import __version__
 
 """ Describes the Materials API Response """
@@ -76,3 +78,28 @@ class Response(GenericModel, Generic[DataT]):
             else:
                 v["total_doc"] = 0
         return v
+
+
+class UserSubmissionDataStatus(Enum):
+    """
+    Submission status for Materials API
+    """
+
+    submitted = "SUBMITTED"
+    pending = "PENDING"
+    running = "RUNNING"
+    error = "ERROR"
+    complete = "COMPLETE"
+
+
+class UserSubmissionDataModel(BaseModel):
+    """
+    Base submission model for Materials API
+    """
+
+    submission_id: str = Field(..., description="Unique submission ID")
+    status: List[UserSubmissionDataStatus] = Field(
+        ..., description="List of status update descriptions"
+    )
+    updated: List[datetime] = Field(..., description="List of status update datetimes")
+    comments: List[str] = Field(..., description="List of status update comments")
