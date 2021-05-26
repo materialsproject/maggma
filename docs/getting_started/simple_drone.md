@@ -1,7 +1,7 @@
 # Simple Drone
 Let's implement a Simple Drone example.
 
-The simple drone will sync database with a local file structure like below. You may find sample files [here](https://github.com/materialsproject/maggma/tree/master/tests/test_files)
+The simple drone will sync database with a local file structure like below. You may find sample files [here](https://github.com/materialsproject/maggma/tree/main/tests/test_files)
 ```
 - data
     - citation-1.bibtex
@@ -96,4 +96,4 @@ Now, you have a working SimpleBibDrone! You can use it like this:
     simple_bib_drone = SimpleBibDrone(store=mongo_store, path=simple_path)
 
     simple_bib_drone.run()
-For complete code, please visit [here](https://github.com/materialsproject/maggma/tree/master/tests/builders)
+For complete code, please visit [here](https://github.com/materialsproject/maggma/tree/main/tests/builders)
