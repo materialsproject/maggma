@@ -12,7 +12,11 @@ from maggma.api.query_operator import (
     VersionQuery,
 )
 from maggma.api.resource import Resource
-from maggma.api.utils import STORE_PARAMS, attach_signature, merge_queries
+from maggma.api.resource.utils import attach_query_ops
+from maggma.api.utils import (
+    STORE_PARAMS,
+    merge_queries,
+)
 from maggma.core import Store
 
 
@@ -254,7 +258,7 @@ class ReadOnlyResource(Resource):
             for operator in self.query_operators:
                 data = operator.post_process(data)
 
-            meta = Meta(total=count)
+            meta = Meta(total_doc=count)
             response = {"data": data, "meta": meta.dict()}
             return response
 
@@ -266,24 +270,3 @@ class ReadOnlyResource(Resource):
             response_description=f"Search for a {model_name}",
             response_model_exclude_unset=True,
         )(attach_query_ops(search, self.query_operators))
-
-
-def attach_query_ops(
-    function: Callable[[List[STORE_PARAMS]], Dict], query_ops: List[QueryOperator]
-) -> Callable[[List[STORE_PARAMS]], Dict]:
-    """
-    Attach query operators to API compliant function
-    The function has to take a list of STORE_PARAMs as the only argument
-
-    Args:
-        function: the function to decorate
-    """
-    attach_signature(
-        function,
-        annotations={
-            **{f"dep{i}": STORE_PARAMS for i, _ in enumerate(query_ops)},
-            "request": Request,
-        },
-        defaults={f"dep{i}": Depends(dep.query) for i, dep in enumerate(query_ops)},
-    )
-    return function
