@@ -140,8 +140,7 @@ class NumericQuery(DynamicQueryOperator):
                     f"{field.name}_max",
                     field_type,
                     Query(
-                        default=None,
-                        description=f"Querying for maximum value of {title}",
+                        default=None, description=f"Query for maximum value of {title}",
                     ),
                     lambda val: {f"{field.name}": {"$lte": val}},
                 ),
@@ -149,8 +148,7 @@ class NumericQuery(DynamicQueryOperator):
                     f"{field.name}_min",
                     field_type,
                     Query(
-                        default=None,
-                        description=f"Querying for minimum value of {title}",
+                        default=None, description=f"Query for minimum value of {title}",
                     ),
                     lambda val: {f"{field.name}": {"$gte": val}},
                 ),
@@ -164,7 +162,7 @@ class NumericQuery(DynamicQueryOperator):
                         field_type,
                         Query(
                             default=None,
-                            description=f"Querying for {title} is equal to a value",
+                            description=f"Query for {title} begin equal to an exact value",
                         ),
                         lambda val: {f"{field.name}": val},
                     ),
@@ -173,27 +171,35 @@ class NumericQuery(DynamicQueryOperator):
                         field_type,
                         Query(
                             default=None,
-                            description=f"Querying for {title} is not equal to a value",
+                            description=f"Query for {title} being not equal to an exact value",
                         ),
                         lambda val: {f"{field.name}": {"$ne": val}},
                     ),
                     (
                         f"{field.name}_eq_any",
-                        List[field_type],  # type: ignore
+                        str,  # type: ignore
                         Query(
                             default=None,
-                            description=f"Querying for {title} is any of these values",
+                            description=f"Query for {title} being any of these values. Provide a comma separated list.",
                         ),
-                        lambda val: {f"{field.name}": {"$in": val}},
+                        lambda val: {
+                            f"{field.name}": {
+                                "$in": [int(entry.strip()) for entry in val.split(",")]
+                            }
+                        },
                     ),
                     (
                         f"{field.name}_neq_any",
-                        List[field_type],  # type: ignore
+                        str,  # type: ignore
                         Query(
                             default=None,
-                            description=f"Querying for {title} is not any of these values",
+                            description=f"Query for {title} being not any of these values. Provide a comma separated list.",
                         ),
-                        lambda val: {f"{field.name}": {"$nin": val}},
+                        lambda val: {
+                            f"{field.name}": {
+                                "$nin": [int(entry.strip()) for entry in val.split(",")]
+                            }
+                        },
                     ),
                 ]
             )
@@ -228,7 +234,7 @@ class StringQueryOperator(DynamicQueryOperator):
                     field_type,
                     Query(
                         default=None,
-                        description=f"Query for {title} is equal to a value",
+                        description=f"Query for {title} being equal to a value",
                     ),
                     lambda val: {f"{field.name}": val},
                 ),
@@ -237,27 +243,35 @@ class StringQueryOperator(DynamicQueryOperator):
                     field_type,
                     Query(
                         default=None,
-                        description=f"Querying for {title} is not equal to a value",
+                        description=f"Query for {title} being not equal to a value",
                     ),
                     lambda val: {f"{field.name}": {"$ne": val}},
                 ),
                 (
                     f"{field.name}_eq_any",
-                    List[field_type],  # type: ignore
+                    str,  # type: ignore
                     Query(
                         default=None,
-                        description=f"Querying for {title} is any of these values",
+                        description=f"Query for {title} being any of these values. Provide a comma separated list.",
                     ),
-                    lambda val: {f"{field.name}": {"$in": val}},
+                    lambda val: {
+                        f"{field.name}": {
+                            "$in": [entry.strip() for entry in val.split(",")]
+                        }
+                    },
                 ),
                 (
                     f"{field.name}_neq_any",
-                    List[field_type],  # type: ignore
+                    str,  # type: ignore
                     Query(
                         default=None,
-                        description=f"Querying for {title} is not any of these values",
+                        description=f"Query for {title} being not any of these values. Provide a comma separated list",
                     ),
-                    lambda val: {f"{field.name}": {"$nin": val}},
+                    lambda val: {
+                        f"{field.name}": {
+                            "$nin": [entry.strip() for entry in val.split(",")]
+                        }
+                    },
                 ),
             ]
 
