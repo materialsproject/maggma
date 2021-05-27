@@ -41,11 +41,7 @@ class UserSubmissionResource(Resource):
         """
         Args:
             store: The Maggma Store to get data from
-            model: The pydantic model to apply to the documents from the Store
-                This can be a string with a full python path to a model or
-                an actual pydantic Model if this is being instantiated in python
-                code. Serializing this via Monty will auto-convert the pydantic model
-                into a python path string
+            model: The pydantic model this resource represents
             tags: List of tags for the Endpoint
             post_query_operators: Operators for the query language for post data
             get_query_operators: Operators for the query language for get data
