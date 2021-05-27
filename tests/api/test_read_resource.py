@@ -52,7 +52,9 @@ def test_init(owner_store):
     resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=False)
     assert len(resource.router.routes) == 2
 
-    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False)
+    resource = ReadOnlyResource(
+        store=owner_store, model=Owner, enable_default_search=False
+    )
     assert len(resource.router.routes) == 2
 
 
@@ -100,7 +102,11 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
     endpoint = ReadOnlyResource(
         store,
         Owner,
-        query_operators=[StringQueryOperator(model=Owner), NumericQuery(model=Owner), SparseFieldsQuery(model=Owner),],
+        query_operators=[
+            StringQueryOperator(model=Owner),
+            NumericQuery(model=Owner),
+            SparseFieldsQuery(model=Owner),
+        ],
     )
     app = FastAPI()
     app.include_router(endpoint.router)
@@ -131,12 +137,12 @@ def test_numeric_query_operator():
     assert res.status_code == 200
     assert len(data) == 11
 
-    payload = {"age_lt": 10}
+    payload = {"age_max": 9}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 8
 
-    payload = {"age_gt": 0}
+    payload = {"age_min": 0}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 13
@@ -160,8 +166,8 @@ def test_resource_compound():
     payload = {
         "name": "PersonAge20Weight200",
         "all_fields": True,
-        "weight_gt": 199.1,
-        "weight_lt": 201.4,
+        "weight_min": 199.1,
+        "weight_max": 201.4,
         "age": 20,
     }
     res, data = search_helper(payload=payload, base="/?", debug=True)
@@ -173,8 +179,8 @@ def test_resource_compound():
         "name": "PersonAge20Weight200",
         "all_fields": False,
         "fields": "name,age",
-        "weight_gt": 199.3,
-        "weight_lt": 201.9,
+        "weight_min": 199.3,
+        "weight_max": 201.9,
         "age": 20,
     }
     res, data = search_helper(payload=payload, base="/?", debug=True)

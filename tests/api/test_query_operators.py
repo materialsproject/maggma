@@ -60,7 +60,9 @@ def test_sparse_query_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query() == {"properties": ["name", "age", "weight", "last_updated"]}
+        assert new_op.query() == {
+            "properties": ["name", "age", "weight", "last_updated"]
+        }
 
 
 def test_numeric_query_functionality():
@@ -68,7 +70,12 @@ def test_numeric_query_functionality():
     op = NumericQuery(model=Owner)
 
     assert op.meta() == {}
-    assert op.query(age_lt=10) == {"criteria": {"age": {"$lt": 10}}}
+    assert op.query(age_max=10, age_min=1, age_not_eq=[2, 3], weight_min=120) == {
+        "criteria": {
+            "age": {"$lte": 10, "$gte": 1, "$ne": [2, 3]},
+            "weight": {"$gte": 120},
+        }
+    }
 
 
 def test_numeric_query_serialization():
@@ -78,7 +85,7 @@ def test_numeric_query_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query(age_lt=10) == {"criteria": {"age": {"$lt": 10}}}
+        assert new_op.query(age_max=10) == {"criteria": {"age": {"$lte": 10}}}
 
 
 def test_sort_query_functionality():
@@ -114,5 +121,6 @@ def test_version_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query(version="2222_22_22") == {"criteria": {"version": "2222_22_22"}}
-
+        assert new_op.query(version="2222_22_22") == {
+            "criteria": {"version": "2222_22_22"}
+        }
