@@ -121,10 +121,8 @@ class UserSubmissionResource(Resource):
 
             return response
 
-        path = self.get_path.strip("/")
-
         self.router.get(
-            f"/{path}/{{submission_id}}/",
+            f"{self.get_path}{{submission_id}}/",
             response_description=f"Get an {model_name} by submission ID",
             response_model=self.response_model,
             response_model_exclude_unset=False,

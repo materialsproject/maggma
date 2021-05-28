@@ -156,7 +156,7 @@ class ReadOnlyResource(Resource):
                 return response
 
             self.router.get(
-                f"/{{{key_name}}}/",
+                f"{self.path}{{{key_name}}}/",
                 response_description=f"Get an {model_name} by {key_name}",
                 response_model=self.response_model,
                 response_model_exclude_unset=True,
@@ -212,7 +212,7 @@ class ReadOnlyResource(Resource):
                 return response
 
             self.router.get(
-                f"/{{{key_name}}}/",
+                f"{self.path}{{{key_name}}}/",
                 response_description=f"Get an {model_name} by {key_name}",
                 response_model=self.response_model,
                 response_model_exclude_unset=True,
