@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List
 
 import uvicorn
 from fastapi import FastAPI
@@ -17,7 +17,7 @@ class API(MSONable):
 
     def __init__(
         self,
-        resources: Dict[str, Resource],
+        resources: Dict[str, List[Resource]],
         title="Generic API",
         version="v0.0.0",
         debug=False,
@@ -42,8 +42,9 @@ class API(MSONable):
         """
         Basic startup that runs the resource startup functions
         """
-        for resource in self.resources.values():
-            resource.on_startup()
+        for resource_list in self.resources.values():
+            for resource in resource_list:
+                resource.on_startup()
 
     @property
     def app(self):
@@ -56,8 +57,12 @@ class API(MSONable):
             on_startup=[self.on_startup],
             debug=self.debug,
         )
-        for prefix, resource in self.resources.items():
-            app.include_router(resource.router, prefix=f"/{prefix}")
+        for prefix, resource_list in self.resources.items():
+            main_resource = resource_list.pop(0)
+            for resource in resource_list:
+                main_resource.router.include_router(resource.router)
+
+            app.include_router(main_resource.router, prefix=f"/{prefix}")
 
         @app.get("/heartbeat", include_in_schema=False)
         def heartbeat():
