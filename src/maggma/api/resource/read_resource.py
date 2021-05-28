@@ -39,6 +39,7 @@ class ReadOnlyResource(Resource):
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
         include_in_schema: Optional[bool] = True,
+        path: Optional[str] = "/",
     ):
         """
         Args:
@@ -52,6 +53,7 @@ class ReadOnlyResource(Resource):
             enable_get_by_key: Enable default key route for endpoint.
             enable_default_search: Enable default endpoint search behavior.
             include_in_schema: Whether the endpoint should be shown in the documented schema.
+            path: URL path for the resource.
         """
         self.store = store
         self.tags = tags or []
@@ -62,6 +64,7 @@ class ReadOnlyResource(Resource):
         self.enable_get_by_key = enable_get_by_key
         self.enable_default_search = enable_default_search
         self.include_in_schema = include_in_schema
+        self.path = path
         self.response_model = Response[model]  # type: ignore
 
         self.query_operators = (
@@ -263,7 +266,7 @@ class ReadOnlyResource(Resource):
             return response
 
         self.router.get(
-            "/",
+            self.path,
             tags=self.tags,
             summary=f"Get {model_name} documents",
             response_model=self.response_model,

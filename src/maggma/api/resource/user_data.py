@@ -37,6 +37,8 @@ class UserSubmissionResource(Resource):
         get_query_operators: Optional[List[QueryOperator]] = None,
         include_in_schema: Optional[bool] = True,
         duplicate_fields_check: Optional[List[str]] = None,
+        get_path: Optional[str] = "/",
+        post_path: Optional[str] = "/",
     ):
         """
         Args:
@@ -49,7 +51,8 @@ class UserSubmissionResource(Resource):
             duplicate_fields_check: Fields in model used to check for duplicates for POST data
             enable_status: Whether the data has a defined status
             status_enum: Enum defining data status values. Defaults to SubmissionStatus.
-
+            get_path: GET URL path for the resource.
+            post_path: POST URL path for the resource.
         """
 
         self.store = store
@@ -60,6 +63,8 @@ class UserSubmissionResource(Resource):
         ] + [UserSubmissionQuery()]
         self.include_in_schema = include_in_schema
         self.duplicate_fields_check = duplicate_fields_check
+        self.get_path = get_path
+        self.post_path = post_path
         self.response_model = Response[model]  # type: ignore
 
         super().__init__(model)
@@ -116,8 +121,10 @@ class UserSubmissionResource(Resource):
 
             return response
 
+        path = self.get_path.strip("/")
+
         self.router.get(
-            "/{submission_id}/",
+            f"/{path}/{{submission_id}}/",
             response_description=f"Get an {model_name} by submission ID",
             response_model=self.response_model,
             response_model_exclude_unset=False,
@@ -166,7 +173,7 @@ class UserSubmissionResource(Resource):
             return response
 
         self.router.get(
-            "/",
+            self.get_path,
             tags=self.tags,
             summary=f"Get {model_name} submission IDs",
             response_model=self.response_model,
@@ -241,7 +248,7 @@ class UserSubmissionResource(Resource):
             return response
 
         self.router.post(
-            "/",
+            self.post_path,
             tags=self.tags,
             summary=f"Post {model_name} data",
             response_model=None,
