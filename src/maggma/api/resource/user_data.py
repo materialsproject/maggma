@@ -173,9 +173,9 @@ class UserSubmissionResource(Resource):
         self.router.get(
             self.get_path,
             tags=self.tags,
-            summary=f"Get {model_name} submission IDs",
+            summary=f"Get {model_name} data",
             response_model=self.response_model,
-            response_description="Search for submission IDs",
+            response_description="Search for {model_name} data",
             response_model_exclude_unset=True,
             include_in_schema=self.include_in_schema,
         )(attach_query_ops(search, self.get_query_operators))
