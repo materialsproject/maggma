@@ -63,6 +63,7 @@ class UserSubmissionResource(Resource):
         ] + [UserSubmissionQuery()]
         self.include_in_schema = include_in_schema
         self.duplicate_fields_check = duplicate_fields_check
+        self.enable_default_search = enable_default_search
         self.get_path = get_path
         self.post_path = post_path
         self.response_model = Response[model]  # type: ignore
