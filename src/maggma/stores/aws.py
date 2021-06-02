@@ -96,6 +96,7 @@ class S3Store(Store):
         self._thread_local = threading.local()
         super(S3Store, self).__init__(**kwargs)
 
+    @property
     def name(self) -> str:
         """
         Returns:
