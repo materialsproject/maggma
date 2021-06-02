@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import uvicorn
 from fastapi import FastAPI
 from monty.json import MSONable
 from starlette.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from maggma import __version__
 from maggma.api.resource import Resource
@@ -18,9 +19,10 @@ class API(MSONable):
     def __init__(
         self,
         resources: Dict[str, List[Resource]],
-        title="Generic API",
-        version="v0.0.0",
-        debug=False,
+        title: str = "Generic API",
+        version: str = "v0.0.0",
+        debug: bool = False,
+        additional_meta: Optional[Dict] = None,
     ):
         """
         Args:
@@ -28,10 +30,12 @@ class API(MSONable):
             title: a string title for this API
             version: the version for this API
             debug: turns debug on in FastAPI
+            additional_meta: dictionary of additional metadata
         """
         self.title = title
         self.version = version
         self.debug = debug
+        self.additional_meta = additional_meta
 
         if len(resources) == 0:
             raise RuntimeError("ERROR: There are no endpoints provided")
@@ -57,18 +61,32 @@ class API(MSONable):
             on_startup=[self.on_startup],
             debug=self.debug,
         )
+
+        if self.debug:
+            app.add_middleware(
+                CORSMiddleware,
+                allow_origins=["*"],
+                allow_methods=["GET"],
+                allow_headers=["*"],
+            )
+
         for prefix, resource_list in self.resources.items():
             main_resource = resource_list.pop(0)
             for resource in resource_list:
                 main_resource.router.include_router(resource.router)
 
-            app.include_router(main_resource.router, prefix=f"/{prefix}")
+            app.include_router(main_resource.router, prefix=f"/{self.version}/{prefix}")
 
-        @app.get("/heartbeat", include_in_schema=False)
+        @app.get(f"/{self.version}/heartbeat", include_in_schema=False)
         def heartbeat():
             """ API Heartbeat for Load Balancing """
 
-            return {"status": "OK", "time": datetime.utcnow()}
+            return {
+                "status": "OK",
+                "time": datetime.utcnow(),
+                "version": self.version,
+                **self.additional_meta,
+            }
 
         @app.get("/", include_in_schema=False)
         def redirect_docs():
