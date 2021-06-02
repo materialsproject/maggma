@@ -37,6 +37,7 @@ class UserSubmissionResource(Resource):
         get_query_operators: Optional[List[QueryOperator]] = None,
         include_in_schema: Optional[bool] = True,
         duplicate_fields_check: Optional[List[str]] = None,
+        enable_default_search: bool = True,
         get_path: Optional[str] = "/",
         post_path: Optional[str] = "/",
     ):
@@ -49,8 +50,7 @@ class UserSubmissionResource(Resource):
             get_query_operators: Operators for the query language for get data
             include_in_schema: Whether to include the submission resource in the documented schema
             duplicate_fields_check: Fields in model used to check for duplicates for POST data
-            enable_status: Whether the data has a defined status
-            status_enum: Enum defining data status values. Defaults to SubmissionStatus.
+            enable_default_search: Enable default endpoint search behavior.
             get_path: GET URL path for the resource.
             post_path: POST URL path for the resource.
         """
@@ -75,7 +75,8 @@ class UserSubmissionResource(Resource):
         for routes
         """
 
-        self.build_search_data()
+        if self.enable_default_search:
+            self.build_search_data()
 
         self.build_get_by_key()
 
