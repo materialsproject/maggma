@@ -85,6 +85,7 @@ class GridFSStore(Store):
             kwargs["key"] = "_id"
         super().__init__(**kwargs)
 
+    @property
     def name(self) -> str:
         """
         Return a string representing this data source
