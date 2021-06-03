@@ -1,17 +1,13 @@
-from typing import List, Optional, Type
+from typing import Any, List, Optional, Type
 from inspect import signature
 from datetime import datetime
 from uuid import uuid4
 
 from fastapi import HTTPException, Path, Request
 
-from maggma.api.models import (
-    Response,
-    UserSubmissionDataModel,
-    UserSubmissionDataStatus,
-    Meta,
-)
-from maggma.api.query_operator import QueryOperator, UserSubmissionQuery
+from maggma.api.models import Response, Meta
+
+from maggma.api.query_operator import QueryOperator, SubmissionQuery
 
 from maggma.api.resource import Resource
 from maggma.api.resource.utils import attach_query_ops
@@ -20,24 +16,29 @@ from maggma.api.utils import (
     merge_queries,
 )
 from maggma.core import Store
+from enum import Enum
+from pydantic import create_model, Field, BaseModel
 
 
-class UserSubmissionResource(Resource):
+class SubmissionResource(Resource):
     """
     Implements a REST Compatible Resource as POST and/or GET URL endpoints
-    for user submitted data.
+    for submitted data.
     """
 
     def __init__(
         self,
         store: Store,
-        model: Type[UserSubmissionDataModel],
+        model: Type[BaseModel],
         tags: Optional[List[str]] = None,
         post_query_operators: Optional[List[QueryOperator]] = None,
         get_query_operators: Optional[List[QueryOperator]] = None,
         include_in_schema: Optional[bool] = True,
         duplicate_fields_check: Optional[List[str]] = None,
-        enable_default_search: bool = True,
+        enable_default_search: Optional[bool] = True,
+        state_enum: Optional[Enum] = None,
+        default_state: Optional[Any] = None,
+        calculate_submission_id: Optional[bool] = False,
         get_path: Optional[str] = "/",
         post_path: Optional[str] = "/",
     ):
@@ -51,21 +52,62 @@ class UserSubmissionResource(Resource):
             include_in_schema: Whether to include the submission resource in the documented schema
             duplicate_fields_check: Fields in model used to check for duplicates for POST data
             enable_default_search: Enable default endpoint search behavior.
+            state_enum: State Enum defining possible data states
+            default_state: Default state value in provided state Enum
+            calculate_submission_id: Whether to calculate and use a submission ID as primary data key.
+                If False, the store key is used instead.
             get_path: GET URL path for the resource.
             post_path: POST URL path for the resource.
         """
 
+        if isinstance(state_enum, Enum) and default_state not in [
+            entry.value for entry in state_enum  # type: ignore
+        ]:
+            raise RuntimeError(
+                "If data is stateful a state enum and valid default value must be provided"
+            )
+
+        self.state_enum = state_enum
+        self.default_state = default_state
         self.store = store
         self.tags = tags or []
         self.post_query_operators = post_query_operators
-        self.get_query_operators = [
-            op for op in get_query_operators if op is not None  # type: ignore
-        ] + [UserSubmissionQuery()]
+        self.get_query_operators = (
+            [
+                op for op in get_query_operators if op is not None  # type: ignore
+            ]
+            + [SubmissionQuery(state_enum)]
+            if state_enum is not None
+            else get_query_operators
+        )
         self.include_in_schema = include_in_schema
         self.duplicate_fields_check = duplicate_fields_check
         self.enable_default_search = enable_default_search
+        self.calculate_submission_id = calculate_submission_id
         self.get_path = get_path
         self.post_path = post_path
+
+        new_fields = {}  # type: dict
+        if self.calculate_submission_id:
+            new_fields["submission_id"] = (
+                str,
+                Field(..., description="Unique submission ID"),
+            )
+
+        if state_enum is not None:
+            new_fields["state"] = (
+                List[state_enum],  # type: ignore
+                Field(..., description="List of data status descriptions"),
+            )
+
+            new_fields["updated"] = (
+                List[datetime],
+                Field(..., description="List of status update datetimes"),
+            )
+
+        if new_fields:
+            model = create_model(model.__name__, __base__=model, **new_fields)
+
         self.response_model = Response[model]  # type: ignore
 
         super().__init__(model)
@@ -86,19 +128,20 @@ class UserSubmissionResource(Resource):
     def build_get_by_key(self):
         model_name = self.model.__name__
 
+        key_name = "submission_id" if self.calculate_submission_id else self.store.key
+
         async def get_by_key(
             key: str = Path(
                 ...,
-                alias="submission_id",
-                title=f"The submission ID of the {model_name} to get",
+                alias=key_name,
+                description=f"The {key_name} of the {model_name} to get",
             ),
         ):
             f"""
-            Get a document using the submission ID
+            Get a document using the {key_name}
 
             Args:
-                submission_id: the submission ID of a single {model_name}
-                status_update: the status update for the retrieved {model_name}
+                {key_name}: the id of a single {model_name}
 
             Returns:
                 a single {model_name} document
@@ -106,7 +149,7 @@ class UserSubmissionResource(Resource):
 
             self.store.connect()
 
-            crit = {"submission_id": key}
+            crit = {key_name: key}
 
             item = [self.store.query_one(criteria=crit)]
 
@@ -124,10 +167,10 @@ class UserSubmissionResource(Resource):
             return response
 
         self.router.get(
-            f"{self.get_path}{{submission_id}}/",
-            response_description=f"Get an {model_name} by submission ID",
+            f"{self.get_path}{{{key_name}}}/",
+            response_description=f"Get an {model_name} by {key_name}",
             response_model=self.response_model,
-            response_model_exclude_unset=False,
+            response_model_exclude_unset=True,
             tags=self.tags,
             include_in_schema=self.include_in_schema,
         )(get_by_key)
@@ -144,7 +187,7 @@ class UserSubmissionResource(Resource):
 
             query_params = [
                 entry
-                for _, i in enumerate(self.get_query_operators)
+                for _, i in enumerate(self.get_query_operators)  # type: ignore
                 for entry in signature(i.query).parameters
             ]
 
@@ -227,11 +270,12 @@ class UserSubmissionResource(Resource):
                         ),
                     )
 
-            query["criteria"]["submission_id"] = str(uuid4())
-            query["criteria"]["status"] = [UserSubmissionDataStatus.submitted.value]
-            query["criteria"]["updated"] = [datetime.utcnow()]
+            if self.calculate_submission_id:
+                query["criteria"]["submission_id"] = str(uuid4())
 
-            print(query)
+            if self.state_enum is not None:
+                query["criteria"]["state"] = [self.default_state]
+                query["criteria"]["updated"] = [datetime.utcnow()]
 
             try:
                 self.store.update(docs=query["criteria"])  # type: ignore
@@ -242,7 +286,7 @@ class UserSubmissionResource(Resource):
 
             response = {
                 "data": query["criteria"],
-                "meta": "Submission successful!",
+                "meta": "Submission successful",
             }
 
             return response
