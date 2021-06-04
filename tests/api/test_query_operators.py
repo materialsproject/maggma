@@ -1,12 +1,11 @@
 from enum import Enum
 from maggma.api.query_operator import (
+    NumericQuery,
     PaginationQuery,
     SparseFieldsQuery,
     NumericQuery,
     SortQuery,
 )
-from datetime import datetime
-import pytest
 
 from pydantic import BaseModel, Field
 from fastapi import HTTPException, Query

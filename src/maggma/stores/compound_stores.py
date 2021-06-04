@@ -25,7 +25,7 @@ class JointStore(Store):
         port: int = 27017,
         username: str = "",
         password: str = "",
-        master: Optional[str] = None,
+        main: Optional[str] = None,
         merge_at_root: bool = False,
         **kwargs,
     ):
@@ -38,7 +38,7 @@ class JointStore(Store):
             port: TCP port to connect to
             username: Username for the collection
             password: Password to connect with
-            master: name for the master collection
+            main: name for the main collection
                 if not specified this defaults to the first
                 in collection_names list
         """
@@ -49,11 +49,12 @@ class JointStore(Store):
         self.username = username
         self.password = password
         self._collection = None  # type: Any
-        self.master = master or collection_names[0]
+        self.main = main or collection_names[0]
         self.merge_at_root = merge_at_root
         self.kwargs = kwargs
         super(JointStore, self).__init__(**kwargs)
 
+    @property
     def name(self) -> str:
         """
         Return a string representing this data source
@@ -73,7 +74,7 @@ class JointStore(Store):
         db = conn[self.database]
         if self.username != "":
             db.authenticate(self.username, self.password)
-        self._collection = db[self.master]
+        self._collection = db[self.main]
         self._has_merge_objects = (
             self._collection.database.client.server_info()["version"] > "3.6"
         )
@@ -93,11 +94,11 @@ class JointStore(Store):
         return self._collection
 
     @property
-    def nonmaster_names(self) -> List:
+    def nonmain_names(self) -> List:
         """
-        alll non-master collection names
+        alll non-main collection names
         """
-        return list(set(self.collection_names) - {self.master})
+        return list(set(self.collection_names) - {self.main})
 
     @property
     def last_updated(self) -> datetime:
@@ -148,7 +149,7 @@ class JointStore(Store):
             list of aggregation operators
         """
         pipeline = []
-        collection_names = list(set(self.collection_names) - set(self.master))
+        collection_names = list(set(self.collection_names) - set(self.main))
         for cname in collection_names:
             pipeline.append(
                 {
@@ -310,7 +311,7 @@ class JointStore(Store):
             "collection_names",
             "host",
             "port",
-            "master",
+            "main",
             "merge_at_root",
         ]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
@@ -331,6 +332,7 @@ class ConcatStore(Store):
         self.kwargs = kwargs
         super(ConcatStore, self).__init__(**kwargs)
 
+    @property
     def name(self) -> str:
         """
         A string representing this data source

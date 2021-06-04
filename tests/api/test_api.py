@@ -10,14 +10,13 @@ from requests import Response
 from starlette.testclient import TestClient
 
 from maggma.api.API import API
-from maggma.api.resource import ReadOnlyResource
-from maggma.stores import MemoryStore
 from maggma.api.query_operator import (
-    StringQueryOperator,
     NumericQuery,
     SparseFieldsQuery,
     PaginationQuery,
 )
+from maggma.api.resource import ReadOnlyResource
+from maggma.stores import MemoryStore
 
 
 class PetType(str, Enum):

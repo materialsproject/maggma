@@ -1,14 +1,16 @@
 import asyncio
-import pytest
-import pymongo
-from maggma.stores.mongolike import MongoStore, SSHTunnel
+
 import paramiko
+import pymongo
+import pytest
+from monty.serialization import dumpfn, loadfn
 from paramiko.ssh_exception import (
     AuthenticationException,
     NoValidConnectionsError,
     SSHException,
 )
-from monty.serialization import dumpfn, loadfn
+
+from maggma.stores.mongolike import MongoStore, SSHTunnel
 
 
 @pytest.fixture

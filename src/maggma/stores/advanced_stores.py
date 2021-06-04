@@ -217,6 +217,7 @@ class AliasingStore(Store):
         )
         super(AliasingStore, self).__init__(**kwargs)
 
+    @property
     def name(self) -> str:
         """
         Return a string representing this data source
@@ -412,6 +413,7 @@ class SandboxStore(Store):
             validator=self.store.validator,
         )
 
+    @property
     def name(self) -> str:
         """
         Returns:

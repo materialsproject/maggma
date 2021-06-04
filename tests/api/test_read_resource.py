@@ -1,3 +1,4 @@
+from datetime import datetime
 from random import randint
 from urllib.parse import urlencode
 
@@ -7,14 +8,12 @@ from pydantic import BaseModel, Field
 from requests import Response
 from starlette.testclient import TestClient
 
-from datetime import datetime
-
-from maggma.api.resource import ReadOnlyResource
 from maggma.api.query_operator import (
-    StringQueryOperator,
     NumericQuery,
     SparseFieldsQuery,
+    StringQueryOperator,
 )
+from maggma.api.resource import ReadOnlyResource
 from maggma.stores import MemoryStore
 
 import inspect
