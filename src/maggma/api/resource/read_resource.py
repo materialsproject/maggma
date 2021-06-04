@@ -33,7 +33,6 @@ class ReadOnlyResource(Resource):
         tags: Optional[List[str]] = None,
         query_operators: Optional[List[QueryOperator]] = None,
         key_fields: Optional[List[str]] = None,
-        custom_endpoint_funcs: Optional[List[Callable]] = None,
         query: Optional[Dict] = None,
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
@@ -48,7 +47,6 @@ class ReadOnlyResource(Resource):
             query_operators: Operators for the query language
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
-            custom_endpoint_funcs: Custom endpoint preparation functions to be used
             enable_get_by_key: Enable default key route for endpoint.
             enable_default_search: Enable default endpoint search behavior.
             include_in_schema: Whether the endpoint should be shown in the documented schema.
@@ -59,7 +57,6 @@ class ReadOnlyResource(Resource):
         self.query = query or {}
         self.key_fields = key_fields
         self.versioned = False
-        self.custom_endpoint_funcs = custom_endpoint_funcs
         self.enable_get_by_key = enable_get_by_key
         self.enable_default_search = enable_default_search
         self.include_in_schema = include_in_schema
@@ -85,10 +82,6 @@ class ReadOnlyResource(Resource):
         Internal method to prepare the endpoint by setting up default handlers
         for routes
         """
-
-        if self.custom_endpoint_funcs is not None:
-            for func in self.custom_endpoint_funcs:
-                func(self)
 
         if self.enable_get_by_key:
             self.build_get_by_key()
