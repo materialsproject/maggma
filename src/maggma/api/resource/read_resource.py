@@ -9,7 +9,6 @@ from maggma.api.query_operator import (
     PaginationQuery,
     QueryOperator,
     SparseFieldsQuery,
-    VersionQuery,
 )
 from maggma.api.resource import Resource
 from maggma.api.resource.utils import attach_query_ops
