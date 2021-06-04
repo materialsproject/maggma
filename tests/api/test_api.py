@@ -12,7 +12,12 @@ from starlette.testclient import TestClient
 from maggma.api.API import API
 from maggma.api.resource import ReadOnlyResource
 from maggma.stores import MemoryStore
-from maggma.api.query_operator import StringQueryOperator, NumericQuery, SparseFieldsQuery, PaginationQuery
+from maggma.api.query_operator import (
+    StringQueryOperator,
+    NumericQuery,
+    SparseFieldsQuery,
+    PaginationQuery,
+)
 
 
 class PetType(str, Enum):
@@ -32,10 +37,16 @@ class Pet(BaseModel):
     owner_name: str = Field(..., title="Owner's name")
 
 
-owners = [Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200)) for i in list(range(10))]
+owners = [
+    Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
+    for i in list(range(10))
+]
 
 
-pets = [Pet(name=f"Pet{i}", pet_type=choice(list(PetType)), owner_name=choice(owners).name,) for i in list(range(40))]
+pets = [
+    Pet(name=f"Pet{i}", pet_type=choice(list(PetType)), owner_name=choice(owners).name,)
+    for i in list(range(40))
+]
 
 
 @pytest.fixture
@@ -88,26 +99,30 @@ def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]
     pets_store.update([jsonable_encoder(d) for d in pets])
 
     resources = {
-        "owners": ReadOnlyResource(
-            owner_store,
-            Owner,
-            query_operators=[
-                StringQueryOperator(model=Owner),  # type: ignore
-                NumericQuery(model=Owner),  # type: ignore
-                SparseFieldsQuery(model=Owner),
-                PaginationQuery(),
-            ],
-        ),
-        "pets": ReadOnlyResource(
-            pets_store,
-            Owner,
-            query_operators=[
-                StringQueryOperator(model=Pet),
-                NumericQuery(model=Pet),
-                SparseFieldsQuery(model=Pet),
-                PaginationQuery(),
-            ],
-        ),
+        "owners": [
+            ReadOnlyResource(
+                owner_store,
+                Owner,
+                query_operators=[
+                    StringQueryOperator(model=Owner),  # type: ignore
+                    NumericQuery(model=Owner),  # type: ignore
+                    SparseFieldsQuery(model=Owner),
+                    PaginationQuery(),
+                ],
+            )
+        ],
+        "pets": [
+            ReadOnlyResource(
+                pets_store,
+                Owner,
+                query_operators=[
+                    StringQueryOperator(model=Pet),
+                    NumericQuery(model=Pet),
+                    SparseFieldsQuery(model=Pet),
+                    PaginationQuery(),
+                ],
+            )
+        ],
     }
     api = API(resources=resources)
 

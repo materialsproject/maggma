@@ -120,7 +120,7 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
         print(url)
     res = client.get(url)
     json = res.json()
-    return res, json.get("data", [])
+    return res, json.get("data", [])  # type: ignore
 
 
 def test_numeric_query_operator():

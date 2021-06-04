@@ -1,11 +1,9 @@
+from enum import Enum
 from maggma.api.query_operator import (
     PaginationQuery,
     SparseFieldsQuery,
     NumericQuery,
-    StringQueryOperator,
     SortQuery,
-    VersionQuery,
-    version,
 )
 from datetime import datetime
 import pytest
@@ -16,6 +14,8 @@ from fastapi import HTTPException, Query
 
 from monty.serialization import loadfn, dumpfn
 from monty.tempfile import ScratchDir
+
+from maggma.api.query_operator.submission import SubmissionQuery
 
 
 class Owner(BaseModel):
@@ -106,21 +106,26 @@ def test_sort_serialization():
         assert new_op.query(field="volume", ascending=True) == {"sort": {"volume": 1}}
 
 
-def test_version_query_functionality():
+@pytest.fixture
+def status_enum():
+    class StatusEnum(Enum):
+        state_A = "A"
+        state_B = "B"
 
-    op = VersionQuery(default_version="1111_11_11")
-
-    assert op.query()["criteria"]["version"].default == "1111_11_11"
-    assert op.query(version="2222_22_22") == {"criteria": {"version": "2222_22_22"}}
+    return StatusEnum
 
 
-def test_version_serialization():
+def test_submission_functionality(status_enum):
 
-    op = VersionQuery(default_version="1111_11_11")
+    op = SubmissionQuery(status_enum)
+    dt = datetime.utcnow()
 
-    with ScratchDir("."):
-        dumpfn(op, "temp.json")
-        new_op = loadfn("temp.json")
-        assert new_op.query(version="2222_22_22") == {
-            "criteria": {"version": "2222_22_22"}
+    assert op.query(state=status_enum.state_A, last_updated=dt) == {
+        "criteria": {
+            "$and": [
+                {"$expr": {"$eq": [{"$arrayElemAt": ["$state", -1]}, "A"]}},
+                {"$expr": {"$gt": [{"$arrayElemAt": ["$last_updated", -1]}, dt]}},
+            ]
         }
+    }
+
