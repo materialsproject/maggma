@@ -81,6 +81,28 @@ def test_get_by_key(owner_store):
     assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
 
 
+def test_key_fields(owner_store):
+    endpoint = ReadOnlyResource(owner_store, Owner, key_fields=["name"])
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    assert client.get("/Person1/").status_code == 200
+    assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
+
+
+@pytest.mark.xfail
+def test_problem_query_params(owner_store):
+    endpoint = ReadOnlyResource(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    client.get("/?param=test").status_code
+
+
 def search_helper(payload, base: str = "/?", debug=True) -> Response:
     """
     Helper function to directly query search endpoints

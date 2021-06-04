@@ -81,6 +81,7 @@ def test_submission_search(owner_store, post_query_op):
         store=owner_store,
         get_query_operators=[PaginationQuery()],
         post_query_operators=[post_query_op],
+        calculate_submission_id=True,
         model=Owner,
     )
     app = FastAPI()
@@ -90,3 +91,20 @@ def test_submission_search(owner_store, post_query_op):
 
     assert client.get("/").status_code == 200
     assert client.post("/?name=test_name").status_code == 200
+
+
+def test_key_fields(owner_store, post_query_op):
+    endpoint = SubmissionResource(
+        store=owner_store,
+        get_query_operators=[PaginationQuery()],
+        post_query_operators=[post_query_op],
+        calculate_submission_id=False,
+        model=Owner,
+    )
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    assert client.get("/Person1/").status_code == 200
+    assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"

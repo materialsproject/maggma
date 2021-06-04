@@ -96,6 +96,14 @@ def test_sort_query_functionality():
     assert op.query(field="density", ascending=False) == {"sort": {"density": -1}}
 
 
+@pytest.mark.xfail
+def test_sort_error():
+
+    op = SortQuery()
+
+    op.query(field="volume")
+
+
 def test_sort_serialization():
 
     op = SortQuery()

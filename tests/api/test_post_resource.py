@@ -64,3 +64,14 @@ def test_post_to_search(owner_store):
 
     assert client.post("/").status_code == 200
 
+
+@pytest.mark.xfail
+def test_problem_query_params(owner_store):
+    endpoint = PostOnlyResource(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    client.get("/?param=test").status_code
+
