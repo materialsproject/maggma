@@ -1,7 +1,7 @@
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 from inspect import signature
 
-from fastapi import Depends, HTTPException, Path, Query, Request
+from fastapi import Depends, HTTPException, Path, Request
 from pydantic import BaseModel
 
 from maggma.api.models import Meta, Response

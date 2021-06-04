@@ -1,10 +1,8 @@
 from random import randint
-from urllib.parse import urlencode
 
 import pytest
-from fastapi import FastAPI, Body
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
-from requests import Response
 from starlette.testclient import TestClient
 
 from datetime import datetime
@@ -74,4 +72,3 @@ def test_problem_query_params(owner_store):
     client = TestClient(app)
 
     client.get("/?param=test").status_code
-
