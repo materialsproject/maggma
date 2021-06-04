@@ -1,5 +1,6 @@
 from random import randint
 from urllib.parse import urlencode
+from pydantic.utils import get_model
 
 import pytest
 from fastapi import FastAPI, Body
@@ -43,8 +44,8 @@ def owner_store():
 @pytest.fixture
 def post_query_op():
     class PostQuery(QueryOperator):
-        def query(self):
-            return {"test": "test"}
+        def query(self, name):
+            return {"criteria": {"name": name}}
 
     return PostQuery()
 
@@ -75,7 +76,7 @@ def test_msonable(owner_store, post_query_op):
     assert endpoint_dict["model"] == "tests.api.test_submission_resource.Owner"
 
 
-def test_aggregation_search(owner_store, post_query_op):
+def test_submission_search(owner_store, post_query_op):
     endpoint = SubmissionResource(
         store=owner_store,
         get_query_operators=[PaginationQuery()],
@@ -88,4 +89,4 @@ def test_aggregation_search(owner_store, post_query_op):
     client = TestClient(app)
 
     assert client.get("/").status_code == 200
-
+    assert client.post("/?name=test_name").status_code == 200
