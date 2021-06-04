@@ -79,11 +79,6 @@ class ReadOnlyResource(Resource):
             ]
         )
 
-        for qop_entry in self.query_operators:
-            if isinstance(qop_entry, VersionQuery):
-                self.versioned = True
-                self.default_version = qop_entry.default_version
-
         super().__init__(model)
 
     def prepare_endpoint(self):
@@ -115,110 +110,50 @@ class ReadOnlyResource(Resource):
             def field_input():
                 return {"properties": self.key_fields}
 
-        if not self.versioned:
+        async def get_by_key(
+            key: str = Path(
+                ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
+            ),
+            fields: STORE_PARAMS = Depends(field_input),
+        ):
+            f"""
+            Get's a document by the primary key in the store
 
-            async def get_by_key(
-                key: str = Path(
-                    ...,
-                    alias=key_name,
-                    title=f"The {key_name} of the {model_name} to get",
-                ),
-                fields: STORE_PARAMS = Depends(field_input),
-            ):
-                f"""
-                Get's a document by the primary key in the store
+            Args:
+                {key_name}: the id of a single {model_name}
 
-                Args:
-                    {key_name}: the id of a single {model_name}
+            Returns:
+                a single {model_name} document
+            """
+            self.store.connect()
 
-                Returns:
-                    a single {model_name} document
-                """
-                self.store.connect()
+            item = [
+                self.store.query_one(
+                    criteria={self.store.key: key, **self.query},
+                    properties=fields["properties"],
+                )
+            ]
 
-                item = [
-                    self.store.query_one(
-                        criteria={self.store.key: key, **self.query},
-                        properties=fields["properties"],
-                    )
-                ]
+            if item == [None]:
+                raise HTTPException(
+                    status_code=404,
+                    detail=f"Item with {self.store.key} = {key} not found",
+                )
 
-                if item == [None]:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Item with {self.store.key} = {key} not found",
-                    )
+            for operator in self.query_operators:
+                item = operator.post_process(item)
 
-                for operator in self.query_operators:
-                    item = operator.post_process(item)
+            response = {"data": item}
+            return response
 
-                response = {"data": item}
-                return response
-
-            self.router.get(
-                f"{self.path}{{{key_name}}}/",
-                response_description=f"Get an {model_name} by {key_name}",
-                response_model=self.response_model,
-                response_model_exclude_unset=True,
-                tags=self.tags,
-                include_in_schema=self.include_in_schema,
-            )(get_by_key)
-
-        else:
-
-            async def get_by_key_versioned(
-                key: str = Path(
-                    ...,
-                    alias=key_name,
-                    title=f"The {key_name} of the {model_name} to get",
-                ),
-                fields: STORE_PARAMS = Depends(field_input),
-                version: str = Query(
-                    self.default_version,
-                    description="Database version to query on formatted as YYYY_MM_DD",
-                ),
-            ):
-                f"""
-                Get's a document by the primary key in the store
-
-                Args:
-                    {key_name}: the id of a single {model_name}
-
-                Returns:
-                    a single {model_name} document
-                """
-
-                self.store = VersionQuery().versioned_store_setup(self.store, version)
-
-                self.store.connect()
-
-                item = [
-                    self.store.query_one(
-                        criteria={self.store.key: key, **self.query},
-                        properties=fields["properties"],
-                    )
-                ]
-
-                if item == [None]:
-                    raise HTTPException(
-                        status_code=404,
-                        detail=f"Item with {self.store.key} = {key} not found",
-                    )
-
-                for operator in self.query_operators:
-                    item = operator.post_process(item)
-
-                response = {"data": item}
-                return response
-
-            self.router.get(
-                f"{self.path}{{{key_name}}}/",
-                response_description=f"Get an {model_name} by {key_name}",
-                response_model=self.response_model,
-                response_model_exclude_unset=True,
-                tags=self.tags,
-                include_in_schema=self.include_in_schema,
-            )(get_by_key_versioned)
+        self.router.get(
+            f"{self.path}{{{key_name}}}/",
+            response_description=f"Get an {model_name} by {key_name}",
+            response_model=self.response_model,
+            response_model_exclude_unset=True,
+            tags=self.tags,
+            include_in_schema=self.include_in_schema,
+        )(get_by_key)
 
     def build_dynamic_model_search(self):
 
@@ -246,12 +181,6 @@ class ReadOnlyResource(Resource):
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
             query["criteria"].update(self.query)
-
-            if self.versioned:
-                self.store = VersionQuery().versioned_store_setup(
-                    self.store, query["criteria"].get("version", None)
-                )
-                query["criteria"].pop("version")
 
             self.store.connect()
 

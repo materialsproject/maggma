@@ -69,11 +69,6 @@ class PostOnlyResource(Resource):
             ]
         )
 
-        for qop_entry in self.query_operators:
-            if isinstance(qop_entry, VersionQuery):
-                self.versioned = True
-                self.default_version = qop_entry.default_version
-
         super().__init__(model)
 
     def prepare_endpoint(self):
@@ -110,12 +105,6 @@ class PostOnlyResource(Resource):
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
             query["criteria"].update(self.query)
-
-            if self.versioned:
-                self.store = VersionQuery().versioned_store_setup(
-                    self.store, query["criteria"].get("version", None)
-                )
-                query["criteria"].pop("version")
 
             self.store.connect()
 

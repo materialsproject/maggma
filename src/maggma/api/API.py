@@ -75,9 +75,9 @@ class API(MSONable):
             for resource in resource_list:
                 main_resource.router.include_router(resource.router)
 
-            app.include_router(main_resource.router, prefix=f"/{self.version}/{prefix}")
+            app.include_router(main_resource.router, prefix=f"/{prefix}")
 
-        @app.get(f"/{self.version}/heartbeat", include_in_schema=False)
+        @app.get(f"/heartbeat", include_in_schema=False)
         def heartbeat():
             """ API Heartbeat for Load Balancing """
 
