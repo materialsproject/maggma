@@ -11,6 +11,7 @@ from starlette.testclient import TestClient
 
 from maggma.api.API import API
 from maggma.api.query_operator import (
+    StringQueryOperator,
     NumericQuery,
     SparseFieldsQuery,
     PaginationQuery,
