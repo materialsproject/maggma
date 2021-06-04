@@ -193,7 +193,8 @@ class NumericQuery(DynamicQueryOperator):
                         str,  # type: ignore
                         Query(
                             default=None,
-                            description=f"Query for {title} being not any of these values. Provide a comma separated list.",
+                            description=f"Query for {title} being not any of these values. \
+                            Provide a comma separated list.",
                         ),
                         lambda val: {
                             f"{field.name}": {

@@ -1,3 +1,4 @@
+import pytest
 from enum import Enum
 from maggma.api.query_operator import (
     NumericQuery,
@@ -9,7 +10,7 @@ from maggma.api.query_operator import (
 
 from pydantic import BaseModel, Field
 from fastapi import HTTPException, Query
-
+from datetime import datetime
 
 from monty.serialization import loadfn, dumpfn
 from monty.tempfile import ScratchDir
