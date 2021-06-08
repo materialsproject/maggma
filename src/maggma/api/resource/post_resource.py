@@ -33,7 +33,7 @@ class PostOnlyResource(Resource):
         key_fields: Optional[List[str]] = None,
         query: Optional[Dict] = None,
         include_in_schema: Optional[bool] = True,
-        path: Optional[str] = "/",
+        sub_path: Optional[str] = "/",
     ):
         """
         Args:
@@ -44,7 +44,7 @@ class PostOnlyResource(Resource):
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
             include_in_schema: Whether the endpoint should be shown in the documented schema.
-            path: URL path for the resource.
+            sub_path: sub-URL path for the resource.
         """
         self.store = store
         self.tags = tags or []
@@ -53,7 +53,7 @@ class PostOnlyResource(Resource):
         self.versioned = False
 
         self.include_in_schema = include_in_schema
-        self.path = path
+        self.sub_path = sub_path
         self.response_model = Response[model]  # type: ignore
 
         self.query_operators = (
@@ -118,7 +118,7 @@ class PostOnlyResource(Resource):
             return response
 
         self.router.post(
-            self.path,
+            self.sub_path,
             tags=self.tags,
             summary=f"Post {model_name} documents",
             response_model=self.response_model,

@@ -26,7 +26,7 @@ class AggregationResource(Resource):
         pipeline_query_operator: QueryOperator,
         tags: Optional[List[str]] = None,
         include_in_schema: Optional[bool] = True,
-        path: Optional[str] = "/",
+        sub_path: Optional[str] = "/",
     ):
         """
         Args:
@@ -35,13 +35,13 @@ class AggregationResource(Resource):
             tags: List of tags for the Endpoint
             pipeline_query_operator: Operator for the aggregation pipeline
             include_in_schema: Whether the endpoint should be shown in the documented schema.
-            path: URL path for the resource.
+            sub_path: sub-URL path for the resource.
         """
         self.store = store
         self.tags = tags or []
 
         self.include_in_schema = include_in_schema
-        self.path = path
+        self.sub_path = sub_path
         self.response_model = Response[model]  # type: ignore
 
         self.pipeline_query_operator = pipeline_query_operator
@@ -83,7 +83,7 @@ class AggregationResource(Resource):
             return response
 
         self.router.get(
-            self.path,
+            self.sub_path,
             tags=self.tags,
             summary=f"Post {model_name} documents",
             response_model=self.response_model,

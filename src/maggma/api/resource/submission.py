@@ -39,8 +39,8 @@ class SubmissionResource(Resource):
         state_enum: Optional[Enum] = None,
         default_state: Optional[Any] = None,
         calculate_submission_id: Optional[bool] = False,
-        get_path: Optional[str] = "/",
-        post_path: Optional[str] = "/",
+        get_sub_path: Optional[str] = "/",
+        post_sub_path: Optional[str] = "/",
     ):
         """
         Args:
@@ -56,8 +56,8 @@ class SubmissionResource(Resource):
             default_state: Default state value in provided state Enum
             calculate_submission_id: Whether to calculate and use a submission ID as primary data key.
                 If False, the store key is used instead.
-            get_path: GET URL path for the resource.
-            post_path: POST URL path for the resource.
+            get_sub_path: GET sub-URL path for the resource.
+            post_sub_path: POST sub-URL path for the resource.
         """
 
         if isinstance(state_enum, Enum) and default_state not in [
@@ -84,8 +84,8 @@ class SubmissionResource(Resource):
         self.duplicate_fields_check = duplicate_fields_check
         self.enable_default_search = enable_default_search
         self.calculate_submission_id = calculate_submission_id
-        self.get_path = get_path
-        self.post_path = post_path
+        self.get_sub_path = get_sub_path
+        self.post_sub_path = post_sub_path
 
         new_fields = {}  # type: dict
         if self.calculate_submission_id:
@@ -167,7 +167,7 @@ class SubmissionResource(Resource):
             return response
 
         self.router.get(
-            f"{self.get_path}{{{key_name}}}/",
+            f"{self.get_sub_path}{{{key_name}}}/",
             response_description=f"Get an {model_name} by {key_name}",
             response_model=self.response_model,
             response_model_exclude_unset=True,
@@ -216,7 +216,7 @@ class SubmissionResource(Resource):
             return response
 
         self.router.get(
-            self.get_path,
+            self.get_sub_path,
             tags=self.tags,
             summary=f"Get {model_name} data",
             response_model=self.response_model,
@@ -292,7 +292,7 @@ class SubmissionResource(Resource):
             return response
 
         self.router.post(
-            self.post_path,
+            self.post_sub_path,
             tags=self.tags,
             summary=f"Post {model_name} data",
             response_model=None,
