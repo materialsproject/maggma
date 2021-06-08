@@ -1,10 +1,11 @@
 from datetime import datetime
-from typing import Dict
+from typing import Dict, List, Optional
 
 import uvicorn
 from fastapi import FastAPI
 from monty.json import MSONable
 from starlette.responses import RedirectResponse
+from fastapi.middleware.cors import CORSMiddleware
 
 from maggma import __version__
 from maggma.api.resource import Resource
@@ -17,10 +18,11 @@ class API(MSONable):
 
     def __init__(
         self,
-        resources: Dict[str, Resource],
-        title="Generic API",
-        version="v0.0.0",
-        debug=False,
+        resources: Dict[str, List[Resource]],
+        title: str = "Generic API",
+        version: str = "v0.0.0",
+        debug: bool = False,
+        heartbeat_meta: Optional[Dict] = None,
     ):
         """
         Args:
@@ -28,10 +30,12 @@ class API(MSONable):
             title: a string title for this API
             version: the version for this API
             debug: turns debug on in FastAPI
+            heartbeat_meta: dictionary of additional metadata to include in the heartbeat response
         """
         self.title = title
         self.version = version
         self.debug = debug
+        self.heartbeat_meta = heartbeat_meta
 
         if len(resources) == 0:
             raise RuntimeError("ERROR: There are no endpoints provided")
@@ -42,8 +46,9 @@ class API(MSONable):
         """
         Basic startup that runs the resource startup functions
         """
-        for resource in self.resources.values():
-            resource.on_startup()
+        for resource_list in self.resources.values():
+            for resource in resource_list:
+                resource.on_startup()
 
     @property
     def app(self):
@@ -56,14 +61,35 @@ class API(MSONable):
             on_startup=[self.on_startup],
             debug=self.debug,
         )
-        for prefix, resource in self.resources.items():
-            app.include_router(resource.router, prefix=f"/{prefix}")
+
+        # Allow requests from other domains in debug mode. This allows
+        # testing with local deployments of other services. For production
+        # deployment, this will be taken care of by nginx.
+        if self.debug:
+            app.add_middleware(
+                CORSMiddleware,
+                allow_origins=["*"],
+                allow_methods=["GET"],
+                allow_headers=["*"],
+            )
+
+        for prefix, resource_list in self.resources.items():
+            main_resource = resource_list.pop(0)
+            for resource in resource_list:
+                main_resource.router.include_router(resource.router)
+
+            app.include_router(main_resource.router, prefix=f"/{prefix}")
 
         @app.get("/heartbeat", include_in_schema=False)
         def heartbeat():
             """ API Heartbeat for Load Balancing """
 
-            return {"status": "OK", "time": datetime.utcnow()}
+            return {
+                "status": "OK",
+                "time": datetime.utcnow(),
+                "version": self.version,
+                **self.heartbeat_meta,
+            }
 
         @app.get("/", include_in_schema=False)
         def redirect_docs():

@@ -1,17 +1,21 @@
-from datetime import datetime
-
 import pytest
-from fastapi import HTTPException
-from monty.serialization import dumpfn, loadfn
-from monty.tempfile import ScratchDir
-from pydantic import BaseModel, Field
-
+from enum import Enum
 from maggma.api.query_operator import (
     NumericQuery,
     PaginationQuery,
     SparseFieldsQuery,
-    StringQueryOperator,
+    NumericQuery,
+    SortQuery,
 )
+
+from pydantic import BaseModel, Field
+from fastapi import HTTPException, Query
+from datetime import datetime
+
+from monty.serialization import loadfn, dumpfn
+from monty.tempfile import ScratchDir
+
+from maggma.api.query_operator.submission import SubmissionQuery
 
 
 class Owner(BaseModel):
@@ -66,7 +70,12 @@ def test_numeric_query_functionality():
     op = NumericQuery(model=Owner)
 
     assert op.meta() == {}
-    assert op.query(age_lt=10) == {"criteria": {"age": {"$lt": 10}}}
+    assert op.query(age_max=10, age_min=1, age_not_eq=[2, 3], weight_min=120) == {
+        "criteria": {
+            "age": {"$lte": 10, "$gte": 1, "$ne": [2, 3]},
+            "weight": {"$gte": 120},
+        }
+    }
 
 
 def test_numeric_query_serialization():
@@ -76,4 +85,55 @@ def test_numeric_query_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query(age_lt=10) == {"criteria": {"age": {"$lt": 10}}}
+        assert new_op.query(age_max=10) == {"criteria": {"age": {"$lte": 10}}}
+
+
+def test_sort_query_functionality():
+
+    op = SortQuery()
+
+    assert op.query(field="volume", ascending=True) == {"sort": {"volume": 1}}
+    assert op.query(field="density", ascending=False) == {"sort": {"density": -1}}
+
+
+@pytest.mark.xfail
+def test_sort_error():
+
+    op = SortQuery()
+
+    op.query(field="volume")
+
+
+def test_sort_serialization():
+
+    op = SortQuery()
+
+    with ScratchDir("."):
+        dumpfn(op, "temp.json")
+        new_op = loadfn("temp.json")
+        assert new_op.query(field="volume", ascending=True) == {"sort": {"volume": 1}}
+
+
+@pytest.fixture
+def status_enum():
+    class StatusEnum(Enum):
+        state_A = "A"
+        state_B = "B"
+
+    return StatusEnum
+
+
+def test_submission_functionality(status_enum):
+
+    op = SubmissionQuery(status_enum)
+    dt = datetime.utcnow()
+
+    assert op.query(state=status_enum.state_A, last_updated=dt) == {
+        "criteria": {
+            "$and": [
+                {"$expr": {"$eq": [{"$arrayElemAt": ["$state", -1]}, "A"]}},
+                {"$expr": {"$gt": [{"$arrayElemAt": ["$last_updated", -1]}, dt]}},
+            ]
+        }
+    }
+

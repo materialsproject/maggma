@@ -177,9 +177,7 @@ class MongoStore(Store):
         kwargs.pop("aliases", None)
         return cls(**kwargs)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -192,10 +190,7 @@ class MongoStore(Store):
         try:
             distinct_vals = self._collection.distinct(field, criteria)
         except (OperationFailure, DocumentTooLarge):
-            distinct_vals = [
-                d["_id"]
-                for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])
-            ]
+            distinct_vals = [d["_id"] for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])]
             if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
                 distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
 
@@ -311,21 +306,10 @@ class MongoStore(Store):
             properties = {p: 1 for p in properties}
 
         sort_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in sort.items()
-            ]
-            if sort
-            else None
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in sort.items()] if sort else None
         )
 
-        for d in self._collection.find(
-            filter=criteria,
-            projection=properties,
-            skip=skip,
-            limit=limit,
-            sort=sort_list,
-        ):
+        for d in self._collection.find(filter=criteria, projection=properties, skip=skip, limit=limit, sort=sort_list,):
             yield d
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
@@ -438,7 +422,9 @@ class MongoURIStore(MongoStore):
     client parameters via TXT records
     """
 
-    def __init__(self, uri: str, collection_name: str, database: str = None, **kwargs):
+    def __init__(
+        self, uri: str, collection_name: str, database: str = None, ssh_tunnel: Optional[SSHTunnel] = None, **kwargs
+    ):
         """
         Args:
             uri: MongoDB+SRV URI
@@ -446,14 +432,13 @@ class MongoURIStore(MongoStore):
             collection_name: The collection name
         """
         self.uri = uri
+        self.ssh_tunnel = ssh_tunnel
 
         # parse the dbname from the uri
         if database is None:
             d_uri = uri_parser.parse_uri(uri)
             if d_uri["database"] is None:
-                raise ConfigurationError(
-                    "If database name is not supplied, a database must be set in the uri"
-                )
+                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
             self.database = d_uri["database"]
         else:
             self.database = database
@@ -542,11 +527,7 @@ class MemoryStore(MongoStore):
             generator returning tuples of (key, list of elemnts)
         """
         keys = keys if isinstance(keys, list) else [keys]
-        data = [
-            doc
-            for doc in self.query(properties=keys, criteria=criteria)
-            if all(has(doc, k) for k in keys)
-        ]
+        data = [doc for doc in self.query(properties=keys, criteria=criteria) if all(has(doc, k) for k in keys)]
 
         def grouping_keys(doc):
             return tuple(get(doc, k) for k in keys)

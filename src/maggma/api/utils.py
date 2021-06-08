@@ -8,7 +8,10 @@ from pydantic.utils import lenient_issubclass
 from typing_extensions import Literal
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
-STORE_PARAMS = Dict[Literal["criteria", "properties", "skip", "limit"], Any]
+STORE_PARAMS = Dict[
+    Literal["criteria", "properties", "sort", "skip", "limit", "request", "pipeline"],
+    Any,
+]
 
 
 def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
