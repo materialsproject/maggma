@@ -119,5 +119,17 @@ jobs:
       - name: Merge me!
         uses: ridedott/merge-me-action@master
         with:
-          GITHUB_LOGIN: dependabot[bot]
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  auto-gen-release:
+    needs:
+      - lint
+      - test
+      - docs
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.EMMET_SEMVER_BUMP_TOKEN }}
+    steps:
+      - uses: rymndhng/release-on-push-action@v0.20.0
+        with:
+          bump_version_scheme: norelease
