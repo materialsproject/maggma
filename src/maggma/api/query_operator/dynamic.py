@@ -162,7 +162,7 @@ class NumericQuery(DynamicQueryOperator):
                         field_type,
                         Query(
                             default=None,
-                            description=f"Query for {title} begin equal to an exact value",
+                            description=f"Query for {title} being equal to an exact value",
                         ),
                         lambda val: {f"{field.name}": val},
                     ),
