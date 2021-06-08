@@ -1,5 +1,19 @@
 # Changelog
 
+## [v0.28.1](https://github.com/materialsproject/maggma/tree/v0.28.1) (2021-06-08)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.28.0...v0.28.1)
+
+**Closed issues:**
+
+- Indescriptive error when not specifying any builders in CLI [\#446](https://github.com/materialsproject/maggma/issues/446)
+- Add port auto-negotiation  [\#445](https://github.com/materialsproject/maggma/issues/445)
+
+**Merged pull requests:**
+
+- New release wflow [\#450](https://github.com/materialsproject/maggma/pull/450) ([shyamd](https://github.com/shyamd))
+- Ensure Store.name is a property [\#449](https://github.com/materialsproject/maggma/pull/449) ([utf](https://github.com/utf))
+
 ## [v0.28.0](https://github.com/materialsproject/maggma/tree/v0.28.0) (2021-05-26)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.27.0...v0.28.0)
