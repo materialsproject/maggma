@@ -122,6 +122,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   auto-gen-release:
+    if: github.repository_owner == 'materialsproject'
     needs:
       - lint
       - test
