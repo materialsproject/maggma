@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.28.0](https://github.com/materialsproject/maggma/tree/v0.28.0) (2021-05-26)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.27.0...v0.28.0)
+
+**Merged pull requests:**
+
+- Updates the CLI Runner [\#447](https://github.com/materialsproject/maggma/pull/447) ([shyamd](https://github.com/shyamd))
+
 ## [v0.27.0](https://github.com/materialsproject/maggma/tree/v0.27.0) (2021-05-12)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.26.0...v0.27.0)

@@ -21,8 +21,8 @@ from maggma.utils import grouper, to_isoformat_ceil_ms
 try:
     import boto3
     import botocore
-    from botocore.exceptions import ClientError
     from boto3.session import Session
+    from botocore.exceptions import ClientError
 except (ImportError, ModuleNotFoundError):
     boto3 = None  # type: ignore
 
@@ -96,6 +96,7 @@ class S3Store(Store):
         self._thread_local = threading.local()
         super(S3Store, self).__init__(**kwargs)
 
+    @property
     def name(self) -> str:
         """
         Returns:

@@ -46,7 +46,7 @@ class Store(MSONable, metaclass=ABCMeta):
     ):
         """
         Args:
-            key: master key to index on
+            key: main key to index on
             last_updated_field: field for date/time stamping the data
             last_updated_type: the date/time format for the last_updated_field.
                                 Can be "datetime" or "isoformat"
