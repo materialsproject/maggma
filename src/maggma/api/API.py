@@ -62,6 +62,9 @@ class API(MSONable):
             debug=self.debug,
         )
 
+        # Allow requests from other domains in debug mode. This allows
+        # testing with local deployments of other services. For production
+        # deployment, this will be taken care of by nginx.
         if self.debug:
             app.add_middleware(
                 CORSMiddleware,
