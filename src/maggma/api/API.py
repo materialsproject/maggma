@@ -22,7 +22,7 @@ class API(MSONable):
         title: str = "Generic API",
         version: str = "v0.0.0",
         debug: bool = False,
-        additional_meta: Optional[Dict] = None,
+        heartbeat_meta: Optional[Dict] = None,
     ):
         """
         Args:
@@ -30,12 +30,12 @@ class API(MSONable):
             title: a string title for this API
             version: the version for this API
             debug: turns debug on in FastAPI
-            additional_meta: dictionary of additional metadata
+            heartbeat_meta: dictionary of additional metadata to include in the heartbeat response
         """
         self.title = title
         self.version = version
         self.debug = debug
-        self.additional_meta = additional_meta
+        self.heartbeat_meta = heartbeat_meta
 
         if len(resources) == 0:
             raise RuntimeError("ERROR: There are no endpoints provided")
@@ -85,7 +85,7 @@ class API(MSONable):
                 "status": "OK",
                 "time": datetime.utcnow(),
                 "version": self.version,
-                **self.additional_meta,
+                **self.heartbeat_meta,
             }
 
         @app.get("/", include_in_schema=False)
