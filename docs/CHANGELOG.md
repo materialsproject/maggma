@@ -1,5 +1,21 @@
 # Changelog
 
+## [v0.29.1](https://github.com/materialsproject/maggma/tree/v0.29.1) (2021-06-15)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.0...v0.29.1)
+
+**Merged pull requests:**
+
+- Switch from classic bson to pymongo bson [\#452](https://github.com/materialsproject/maggma/pull/452) ([shyamd](https://github.com/shyamd))
+
+## [v0.29.0](https://github.com/materialsproject/maggma/tree/v0.29.0) (2021-06-08)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.28.1...v0.29.0)
+
+**Merged pull requests:**
+
+- Maggma API additions [\#448](https://github.com/materialsproject/maggma/pull/448) ([munrojm](https://github.com/munrojm))
+
 ## [v0.28.1](https://github.com/materialsproject/maggma/tree/v0.28.1) (2021-06-08)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.28.0...v0.28.1)
