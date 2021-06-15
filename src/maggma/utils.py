@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 from importlib import import_module
 from typing import Dict, Iterable, Optional, Union
 
-from bson import ObjectId
+from bson.json_util import ObjectId
 from pydash.objects import get, has, set_
 from pydash.objects import unset as _unset
 from pydash.utilities import to_path
