@@ -96,7 +96,7 @@ def test_sort_error():
 
     op = SortQuery()
 
-    op.query(sort_field="volume")
+    op.query(sort_field="volume", ascending=None)
 
 
 def test_sort_serialization():
@@ -131,4 +131,3 @@ def test_submission_functionality(status_enum):
             ]
         }
     }
-
