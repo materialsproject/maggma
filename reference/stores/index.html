@@ -2748,7 +2748,7 @@ to a MongoStore</p>
 
       <a class="headerlink" href="#maggma.stores.mongolike.MemoryStore.name" title="Permanent link">&para;</a></h3>
 <div class="doc doc-contents ">
-<p>Name for the store </p>
+<p>Name for the store</p>
 </div>
 </div>
 <div class="doc doc-object doc-method">
@@ -2793,12 +2793,12 @@ other: other MemoryStore to compare with</p>
 
       <a class="headerlink" href="#maggma.stores.mongolike.MemoryStore.__hash__" title="Permanent link">&para;</a></h3>
 <div class="doc doc-contents ">
-<p>Hash for the store </p>
+<p>Hash for the store</p>
 <details class="quote">
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
           <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">""" Hash for the store """</span>
+    <span class="sd">"""Hash for the store"""</span>
     <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">))</span>
 </code></pre>
 </div>
@@ -2999,7 +2999,11 @@ values are 1 for ascending or -1 for descending.</p>
 <span class="sd">        generator returning tuples of (key, list of elemnts)</span>
 <span class="sd">    """</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">keys</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">keys</span><span class="p">]</span>
-    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">doc</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span> <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">has</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)]</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">doc</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">has</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)</span>
+    <span class="p">]</span>
 
     <span class="k">def</span> <span class="nf">grouping_keys</span><span class="p">(</span><span class="n">doc</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">get</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)</span>
@@ -3085,12 +3089,12 @@ other: other mongostore to compare with</p>
 
       <a class="headerlink" href="#maggma.stores.mongolike.MongoStore.__hash__" title="Permanent link">&para;</a></h3>
 <div class="doc doc-contents ">
-<p>Hash for MongoStore </p>
+<p>Hash for MongoStore</p>
 <details class="quote">
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
           <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-    <span class="sd">""" Hash for MongoStore """</span>
+    <span class="sd">"""Hash for MongoStore"""</span>
     <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">))</span>
 </code></pre>
 </div>
@@ -3226,12 +3230,12 @@ other: other mongostore to compare with</p>
 
       <a class="headerlink" href="#maggma.stores.mongolike.MongoStore.close" title="Permanent link">&para;</a></h3>
 <div class="doc doc-contents ">
-<p>Close up all collections </p>
+<p>Close up all collections</p>
 <details class="quote">
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
           <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">""" Close up all collections """</span>
+    <span class="sd">"""Close up all collections"""</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
@@ -3361,7 +3365,9 @@ other: other mongostore to compare with</p>
 <details class="quote">
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
           <div class="highlight">
-<pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+<pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
     <span class="sd">"""</span>
 <span class="sd">    Get all distinct values for a field</span>
 
@@ -3374,7 +3380,10 @@ other: other mongostore to compare with</p>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">distinct_vals</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">criteria</span><span class="p">)</span>
     <span class="k">except</span> <span class="p">(</span><span class="n">OperationFailure</span><span class="p">,</span> <span class="n">DocumentTooLarge</span><span class="p">):</span>
-        <span class="n">distinct_vals</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s2">"_id"</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">aggregate</span><span class="p">([{</span><span class="s2">"$group"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"$</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">"</span><span class="p">}}])]</span>
+        <span class="n">distinct_vals</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">d</span><span class="p">[</span><span class="s2">"_id"</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">aggregate</span><span class="p">([{</span><span class="s2">"$group"</span><span class="p">:</span> <span class="p">{</span><span class="s2">"_id"</span><span class="p">:</span> <span class="sa">f</span><span class="s2">"$</span><span class="si">{</span><span class="n">field</span><span class="si">}</span><span class="s2">"</span><span class="p">}}])</span>
+        <span class="p">]</span>
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">distinct_vals</span><span class="p">)):</span>  <span class="c1"># type: ignore</span>
             <span class="n">distinct_vals</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">distinct_vals</span><span class="p">)))</span>
 
@@ -3794,10 +3803,21 @@ values are 1 for ascending or -1 for descending.</p>
         <span class="n">properties</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="mi">1</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">}</span>
 
     <span class="n">sort_list</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">Sort</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sort</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span> <span class="k">if</span> <span class="n">sort</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Sort</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">sort</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">sort</span>
+        <span class="k">else</span> <span class="kc">None</span>
     <span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort_list</span><span class="p">,):</span>
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
+        <span class="nb">filter</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span>
+        <span class="n">projection</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
+        <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span>
+        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+        <span class="n">sort</span><span class="o">=</span><span class="n">sort_list</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="k">yield</span> <span class="n">d</span>
 </code></pre>
 </div>
@@ -4037,7 +4057,12 @@ client parameters via TXT records</p>
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
           <div class="highlight">
 <pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHTunnel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">uri</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">collection_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">database</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHTunnel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">"""</span>
 <span class="sd">    Args:</span>
@@ -4052,7 +4077,9 @@ client parameters via TXT records</p>
     <span class="k">if</span> <span class="n">database</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">d_uri</span> <span class="o">=</span> <span class="n">uri_parser</span><span class="o">.</span><span class="n">parse_uri</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">d_uri</span><span class="p">[</span><span class="s2">"database"</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span><span class="s2">"If database name is not supplied, a database must be set in the uri"</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ConfigurationError</span><span class="p">(</span>
+                <span class="s2">"If database name is not supplied, a database must be set in the uri"</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">d_uri</span><span class="p">[</span><span class="s2">"database"</span><span class="p">]</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
