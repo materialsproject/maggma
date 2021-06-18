@@ -1,7 +1,9 @@
 from typing import Optional
+
+from fastapi import HTTPException, Query
+
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
-from fastapi import HTTPException, Query
 
 
 class SortQuery(QueryOperator):
@@ -12,7 +14,10 @@ class SortQuery(QueryOperator):
     def query(
         self,
         field: Optional[str] = Query(None, description="Field to sort with"),
-        ascending: Optional[bool] = Query(None, description="Whether the sorting should be ascending",),
+        ascending: Optional[bool] = Query(
+            None,
+            description="Whether the sorting should be ascending",
+        ),
     ) -> STORE_PARAMS:
 
         sort = {}
@@ -22,7 +27,8 @@ class SortQuery(QueryOperator):
 
         elif field or ascending is not None:
             raise HTTPException(
-                status_code=400, detail="Must specify both a field and order for sorting.",
+                status_code=400,
+                detail="Must specify both a field and order for sorting.",
             )
 
         return {"sort": sort}

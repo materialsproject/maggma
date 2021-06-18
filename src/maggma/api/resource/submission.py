@@ -1,23 +1,18 @@
-from typing import Any, List, Optional, Type
-from inspect import signature
 from datetime import datetime
+from enum import Enum
+from inspect import signature
+from typing import Any, List, Optional, Type
 from uuid import uuid4
 
 from fastapi import HTTPException, Path, Request
+from pydantic import BaseModel, Field, create_model
 
-from maggma.api.models import Response, Meta
-
+from maggma.api.models import Meta, Response
 from maggma.api.query_operator import QueryOperator, SubmissionQuery
-
 from maggma.api.resource import Resource
 from maggma.api.resource.utils import attach_query_ops
-from maggma.api.utils import (
-    STORE_PARAMS,
-    merge_queries,
-)
+from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
-from enum import Enum
-from pydantic import create_model, Field, BaseModel
 
 
 class SubmissionResource(Resource):
@@ -73,9 +68,7 @@ class SubmissionResource(Resource):
         self.tags = tags or []
         self.post_query_operators = post_query_operators
         self.get_query_operators = (
-            [
-                op for op in get_query_operators if op is not None  # type: ignore
-            ]
+            [op for op in get_query_operators if op is not None]  # type: ignore
             + [SubmissionQuery(state_enum)]
             if state_enum is not None
             else get_query_operators
@@ -281,7 +274,8 @@ class SubmissionResource(Resource):
                 self.store.update(docs=query["criteria"])  # type: ignore
             except Exception:
                 raise HTTPException(
-                    status_code=400, detail="Problem when trying to post data.",
+                    status_code=400,
+                    detail="Problem when trying to post data.",
                 )
 
             response = {
