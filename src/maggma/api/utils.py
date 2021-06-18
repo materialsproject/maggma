@@ -1,5 +1,5 @@
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Type
+from typing import Any, Callable, Dict, List, Optional, Type, get_args
 
 from monty.json import MSONable
 from pydantic import BaseModel
@@ -110,12 +110,13 @@ def api_sanitize(
                 field.required = False
                 field.field_info.default = None
 
-            if (
-                field_type is not None
-                and lenient_issubclass(field_type, MSONable)
-                and allow_dict_msonable
-            ):
-                field.type_ = allow_msonable_dict(field_type)
+            if field_type is not None and allow_dict_msonable:
+                if lenient_issubclass(field_type, MSONable):
+                    field.type_ = allow_msonable_dict(field_type)
+                else:
+                    for sub_type in get_args(field_type):
+                        if lenient_issubclass(sub_type, MSONable):
+                            allow_msonable_dict(sub_type)
                 field.populate_validators()
 
     return pydantic_model
