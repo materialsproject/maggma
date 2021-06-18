@@ -1,8 +1,10 @@
+from datetime import datetime
 from typing import Optional
+
+from fastapi import Query
+
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
-from fastapi import Query
-from datetime import datetime
 
 
 class SubmissionQuery(QueryOperator):
@@ -19,7 +21,8 @@ class SubmissionQuery(QueryOperator):
                 None, description="Latest status of the submission"
             ),
             last_updated: Optional[datetime] = Query(
-                None, description="Minimum datetime of status update for submission",
+                None,
+                description="Minimum datetime of status update for submission",
             ),
         ) -> STORE_PARAMS:
 
@@ -45,5 +48,5 @@ class SubmissionQuery(QueryOperator):
         self.query = query
 
     def query(self):
-        " Stub query function for abstract class "
+        "Stub query function for abstract class"
         pass

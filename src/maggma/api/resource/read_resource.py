@@ -1,21 +1,14 @@
-from typing import Any, Dict, List, Optional, Type
 from inspect import signature
+from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends, HTTPException, Path, Request
 from pydantic import BaseModel
 
 from maggma.api.models import Meta, Response
-from maggma.api.query_operator import (
-    PaginationQuery,
-    QueryOperator,
-    SparseFieldsQuery,
-)
+from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
 from maggma.api.resource import Resource
 from maggma.api.resource.utils import attach_query_ops
-from maggma.api.utils import (
-    STORE_PARAMS,
-    merge_queries,
-)
+from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
 
 
@@ -104,7 +97,9 @@ class ReadOnlyResource(Resource):
 
         async def get_by_key(
             key: str = Path(
-                ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
+                ...,
+                alias=key_name,
+                title=f"The {key_name} of the {model_name} to get",
             ),
             fields: STORE_PARAMS = Depends(field_input),
         ):

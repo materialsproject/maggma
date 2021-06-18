@@ -3,9 +3,9 @@ from typing import Dict, List, Optional
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from monty.json import MSONable
 from starlette.responses import RedirectResponse
-from fastapi.middleware.cors import CORSMiddleware
 
 from maggma import __version__
 from maggma.api.resource import Resource
@@ -82,7 +82,7 @@ class API(MSONable):
 
         @app.get("/heartbeat", include_in_schema=False)
         def heartbeat():
-            """ API Heartbeat for Load Balancing """
+            """API Heartbeat for Load Balancing"""
 
             return {
                 "status": "OK",
@@ -93,7 +93,7 @@ class API(MSONable):
 
         @app.get("/", include_in_schema=False)
         def redirect_docs():
-            """ Redirects the root end point to the docs """
+            """Redirects the root end point to the docs"""
             return RedirectResponse(url=app.docs_url, status_code=301)
 
         return app

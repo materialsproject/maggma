@@ -161,7 +161,7 @@ class MongoStore(Store):
             self._collection = db[self.collection_name]
 
     def __hash__(self) -> int:
-        """ Hash for MongoStore """
+        """Hash for MongoStore"""
         return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
@@ -177,7 +177,9 @@ class MongoStore(Store):
         kwargs.pop("aliases", None)
         return cls(**kwargs)
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def distinct(
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
         Get all distinct values for a field
 
@@ -190,7 +192,10 @@ class MongoStore(Store):
         try:
             distinct_vals = self._collection.distinct(field, criteria)
         except (OperationFailure, DocumentTooLarge):
-            distinct_vals = [d["_id"] for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])]
+            distinct_vals = [
+                d["_id"]
+                for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])
+            ]
             if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
                 distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
 
@@ -267,7 +272,7 @@ class MongoStore(Store):
     @property  # type: ignore
     @deprecated(message="This will be removed in the future")
     def collection(self):
-        """ Property referring to underlying pymongo collection """
+        """Property referring to underlying pymongo collection"""
         if self._collection is None:
             raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._collection
@@ -306,10 +311,21 @@ class MongoStore(Store):
             properties = {p: 1 for p in properties}
 
         sort_list = (
-            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in sort.items()] if sort else None
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in sort.items()
+            ]
+            if sort
+            else None
         )
 
-        for d in self._collection.find(filter=criteria, projection=properties, skip=skip, limit=limit, sort=sort_list,):
+        for d in self._collection.find(
+            filter=criteria,
+            projection=properties,
+            skip=skip,
+            limit=limit,
+            sort=sort_list,
+        ):
             yield d
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
@@ -398,7 +414,7 @@ class MongoStore(Store):
         self._collection.delete_many(filter=criteria)
 
     def close(self):
-        """ Close up all collections """
+        """Close up all collections"""
         self._collection.database.client.close()
         if self.ssh_tunnel is not None:
             self.ssh_tunnel.stop()
@@ -423,7 +439,12 @@ class MongoURIStore(MongoStore):
     """
 
     def __init__(
-        self, uri: str, collection_name: str, database: str = None, ssh_tunnel: Optional[SSHTunnel] = None, **kwargs
+        self,
+        uri: str,
+        collection_name: str,
+        database: str = None,
+        ssh_tunnel: Optional[SSHTunnel] = None,
+        **kwargs,
     ):
         """
         Args:
@@ -438,7 +459,9 @@ class MongoURIStore(MongoStore):
         if database is None:
             d_uri = uri_parser.parse_uri(uri)
             if d_uri["database"] is None:
-                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
+                raise ConfigurationError(
+                    "If database name is not supplied, a database must be set in the uri"
+                )
             self.database = d_uri["database"]
         else:
             self.database = database
@@ -494,11 +517,11 @@ class MemoryStore(MongoStore):
 
     @property
     def name(self):
-        """ Name for the store """
+        """Name for the store"""
         return f"mem://{self.collection_name}"
 
     def __hash__(self):
-        """ Hash for the store """
+        """Hash for the store"""
         return hash((self.name, self.last_updated_field))
 
     def groupby(
@@ -527,7 +550,11 @@ class MemoryStore(MongoStore):
             generator returning tuples of (key, list of elemnts)
         """
         keys = keys if isinstance(keys, list) else [keys]
-        data = [doc for doc in self.query(properties=keys, criteria=criteria) if all(has(doc, k) for k in keys)]
+        data = [
+            doc
+            for doc in self.query(properties=keys, criteria=criteria)
+            if all(has(doc, k) for k in keys)
+        ]
 
         def grouping_keys(doc):
             return tuple(get(doc, k) for k in keys)
