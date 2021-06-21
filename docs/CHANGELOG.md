@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.29.3](https://github.com/materialsproject/maggma/tree/v0.29.3) (2021-06-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.2...v0.29.3)
+
+**Merged pull requests:**
+
+- Sort query and query operator meta bug fixes [\#453](https://github.com/materialsproject/maggma/pull/453) ([munrojm](https://github.com/munrojm))
+
 ## [v0.29.2](https://github.com/materialsproject/maggma/tree/v0.29.2) (2021-06-18)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.1...v0.29.2)
