@@ -1,5 +1,7 @@
-from typing import Callable, List, Dict
-from fastapi import Request, Depends
+from typing import Callable, Dict, List
+
+from fastapi import Depends, Request
+
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS, attach_signature
 

@@ -18,14 +18,14 @@ from maggma.utils import LU_KEY_ISOFORMAT
 
 
 class Sort(Enum):
-    """ Enumeration for sorting order """
+    """Enumeration for sorting order"""
 
     Ascending = 1
     Descending = -1
 
 
 class DateTimeFormat(Enum):
-    """ Datetime format in store document """
+    """Datetime format in store document"""
 
     DateTime = "datetime"
     IsoFormat = "isoformat"
@@ -354,7 +354,7 @@ class Store(MSONable, metaclass=ABCMeta):
 
 
 class StoreError(Exception):
-    """ General Store-related error """
+    """General Store-related error"""
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)

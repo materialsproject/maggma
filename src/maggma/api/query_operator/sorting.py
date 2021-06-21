@@ -1,7 +1,9 @@
 from typing import Optional
+
+from fastapi import HTTPException, Query
+
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
-from fastapi import HTTPException, Query
 
 
 class SortQuery(QueryOperator):
