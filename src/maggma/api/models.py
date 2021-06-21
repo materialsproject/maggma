@@ -29,6 +29,9 @@ class Meta(BaseModel):
 
     total_doc: Optional[int] = Field(None, description="the total number of documents available for this query", ge=0)
 
+    class Config:
+        extra = "allow"
+
 
 class Error(BaseModel):
     """
