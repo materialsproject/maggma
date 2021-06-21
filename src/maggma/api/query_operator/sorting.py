@@ -13,22 +13,18 @@ class SortQuery(QueryOperator):
 
     def query(
         self,
-        field: Optional[str] = Query(None, description="Field to sort with"),
-        ascending: Optional[bool] = Query(
-            None,
-            description="Whether the sorting should be ascending",
-        ),
+        sort_field: Optional[str] = Query(None, description="Field to sort with"),
+        ascending: Optional[bool] = Query(None, description="Whether the sorting should be ascending"),
     ) -> STORE_PARAMS:
 
         sort = {}
 
-        if field and ascending is not None:
-            sort.update({field: 1 if ascending else -1})
-
-        elif field or ascending is not None:
-            raise HTTPException(
-                status_code=400,
-                detail="Must specify both a field and order for sorting.",
-            )
+        if sort_field:
+            if ascending is not None:
+                sort.update({sort_field: 1 if ascending else -1})
+            else:
+                raise HTTPException(
+                    status_code=400, detail="Must specify both a field and order for sorting.",
+                )
 
         return {"sort": sort}

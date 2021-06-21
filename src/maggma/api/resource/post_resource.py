@@ -54,10 +54,7 @@ class PostOnlyResource(Resource):
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(
-                    model,
-                    default_fields=[self.store.key, self.store.last_updated_field],
-                ),
+                SparseFieldsQuery(model, default_fields=[self.store.key, self.store.last_updated_field],),
             ]
         )
 
@@ -79,20 +76,14 @@ class PostOnlyResource(Resource):
             request: Request = queries.pop("request")  # type: ignore
 
             query_params = [
-                entry
-                for _, i in enumerate(self.query_operators)
-                for entry in signature(i.query).parameters
+                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
@@ -102,12 +93,14 @@ class PostOnlyResource(Resource):
 
             count = self.store.count(query["criteria"])
             data = list(self.store.query(**query))
+            operator_meta = {}
 
             for operator in self.query_operators:
                 data = operator.post_process(data)
+                operator_meta.update(operator.meta())
 
             meta = Meta(total_doc=count)
-            response = {"data": data, "meta": meta.dict()}
+            response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
             return response
 
         self.router.post(
