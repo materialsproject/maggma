@@ -7,10 +7,7 @@ from maggma.api.models import Meta, Response
 from maggma.api.query_operator import QueryOperator
 from maggma.api.resource import Resource
 from maggma.api.resource.utils import attach_query_ops
-from maggma.api.utils import (
-    STORE_PARAMS,
-    merge_queries,
-)
+from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
 
 
@@ -70,16 +67,16 @@ class AggregationResource(Resource):
                 data = list(self.store._collection.aggregate(query["pipeline"]))
             except Exception:
                 raise HTTPException(
-                    status_code=400,
-                    detail="Problem with provided aggregation pipeline.",
+                    status_code=400, detail="Problem with provided aggregation pipeline.",
                 )
 
             count = len(data)
 
             data = self.pipeline_query_operator.post_process(data)
+            operator_meta = self.pipeline_query_operator.meta()
 
             meta = Meta(total_doc=count)
-            response = {"data": data, "meta": meta.dict()}
+            response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
             return response
 
         self.router.get(

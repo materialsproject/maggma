@@ -49,7 +49,7 @@ class SparseFieldsQuery(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        " Stub query function for abstract class "
+        "Stub query function for abstract class"
         pass
 
     def meta(self) -> Dict:

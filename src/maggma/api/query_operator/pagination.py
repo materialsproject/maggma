@@ -9,7 +9,9 @@ from maggma.api.utils import STORE_PARAMS
 class PaginationQuery(QueryOperator):
     """Query opertators to provides Pagination"""
 
-    def __init__(self, default_skip: int = 0, default_limit: int = 100, max_limit: int = 1000):
+    def __init__(
+        self, default_skip: int = 0, default_limit: int = 100, max_limit: int = 1000
+    ):
         """
         Args:
             default_skip: the default number of documents to skip
@@ -21,10 +23,13 @@ class PaginationQuery(QueryOperator):
         self.max_limit = max_limit
 
         def query(
-            skip: int = Query(default_skip, description="Number of entries to skip in the search"),
+            skip: int = Query(
+                default_skip, description="Number of entries to skip in the search"
+            ),
             limit: int = Query(
                 default_limit,
-                description="Max number of entries to return in a single query." f" Limited to {max_limit}",
+                description="Max number of entries to return in a single query."
+                f" Limited to {max_limit}",
             ),
         ) -> STORE_PARAMS:
             """
@@ -41,7 +46,7 @@ class PaginationQuery(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        " Stub query function for abstract class "
+        "Stub query function for abstract class"
         pass
 
     def meta(self) -> Dict:

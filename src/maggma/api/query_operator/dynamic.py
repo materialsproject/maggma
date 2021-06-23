@@ -1,7 +1,6 @@
 import inspect
-from typing import Type
 from abc import abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from fastapi.params import Query
 from monty.json import MontyDecoder
@@ -81,7 +80,7 @@ class DynamicQueryOperator(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        " Stub query function for abstract class "
+        "Stub query function for abstract class"
         pass
 
     @abstractmethod
@@ -115,7 +114,7 @@ class DynamicQueryOperator(QueryOperator):
 
 
 class NumericQuery(DynamicQueryOperator):
-    " Query Operator to enable searching on numeric fields"
+    "Query Operator to enable searching on numeric fields"
 
     def field_to_operator(
         self, name: str, field: ModelField
@@ -140,7 +139,8 @@ class NumericQuery(DynamicQueryOperator):
                     f"{field.name}_max",
                     field_type,
                     Query(
-                        default=None, description=f"Query for maximum value of {title}",
+                        default=None,
+                        description=f"Query for maximum value of {title}",
                     ),
                     lambda val: {f"{field.name}": {"$lte": val}},
                 ),
@@ -148,7 +148,8 @@ class NumericQuery(DynamicQueryOperator):
                     f"{field.name}_min",
                     field_type,
                     Query(
-                        default=None, description=f"Query for minimum value of {title}",
+                        default=None,
+                        description=f"Query for minimum value of {title}",
                     ),
                     lambda val: {f"{field.name}": {"$gte": val}},
                 ),
@@ -209,7 +210,7 @@ class NumericQuery(DynamicQueryOperator):
 
 
 class StringQueryOperator(DynamicQueryOperator):
-    " Query Operator to enable searching on numeric fields"
+    "Query Operator to enable searching on numeric fields"
 
     def field_to_operator(
         self, name: str, field: ModelField

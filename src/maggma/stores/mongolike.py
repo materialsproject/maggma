@@ -161,7 +161,7 @@ class MongoStore(Store):
             self._collection = db[self.collection_name]
 
     def __hash__(self) -> int:
-        """ Hash for MongoStore """
+        """Hash for MongoStore"""
         return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
@@ -274,7 +274,7 @@ class MongoStore(Store):
     @property  # type: ignore
     @deprecated(message="This will be removed in the future")
     def collection(self):
-        """ Property referring to underlying pymongo collection """
+        """Property referring to underlying pymongo collection"""
         if self._collection is None:
             raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._collection
@@ -416,7 +416,7 @@ class MongoStore(Store):
         self._collection.delete_many(filter=criteria)
 
     def close(self):
-        """ Close up all collections """
+        """Close up all collections"""
         self._collection.database.client.close()
         if self.ssh_tunnel is not None:
             self.ssh_tunnel.stop()
@@ -519,11 +519,11 @@ class MemoryStore(MongoStore):
 
     @property
     def name(self):
-        """ Name for the store """
+        """Name for the store"""
         return f"mem://{self.collection_name}"
 
     def __hash__(self):
-        """ Hash for the store """
+        """Hash for the store"""
         return hash((self.name, self.last_updated_field))
 
     def groupby(
