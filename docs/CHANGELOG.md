@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.29.4](https://github.com/materialsproject/maggma/tree/v0.29.4) (2021-06-23)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.3...v0.29.4)
+
+**Merged pull requests:**
+
+- BugFix: Manual distinct in MongoStore not using Criteria [\#461](https://github.com/materialsproject/maggma/pull/461) ([shyamd](https://github.com/shyamd))
+
 ## [v0.29.3](https://github.com/materialsproject/maggma/tree/v0.29.3) (2021-06-21)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.2...v0.29.3)
