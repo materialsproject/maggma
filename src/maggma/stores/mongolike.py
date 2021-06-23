@@ -194,7 +194,9 @@ class MongoStore(Store):
         except (OperationFailure, DocumentTooLarge):
             distinct_vals = [
                 d["_id"]
-                for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])
+                for d in self._collection.aggregate(
+                    [{"$match": criteria}, {"$group": {"_id": f"${field}"}}]
+                )
             ]
             if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
                 distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))

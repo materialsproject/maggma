@@ -86,6 +86,13 @@ def test_mongostore_distinct(mongostore):
     assert len(vals) == len(list(range(1000000)))
     assert all([isinstance(v, str) for v in vals])
 
+    # Test to make sure manual distinct uses the criteria query
+    mongostore._collection.insert_many(
+        [{"key": f"mp-{i}", "a": 2} for i in range(1000001, 2000001)]
+    )
+    vals = mongostore.distinct("key", {"a": 2})
+    assert len(vals) == len(list(range(1000001, 2000001)))
+
 
 def test_mongostore_update(mongostore):
     mongostore.update({"e": 6, "d": 4}, key="e")
