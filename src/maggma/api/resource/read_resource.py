@@ -2,6 +2,7 @@ from inspect import signature
 from typing import Any, Dict, List, Optional, Type
 
 from fastapi import Depends, HTTPException, Path, Request
+from fastapi import Response as BareResponse
 from pydantic import BaseModel
 
 from maggma.api.models import Meta, Response
@@ -10,6 +11,8 @@ from maggma.api.resource import Resource
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
+
+from monty.serialization import MontyEncoder
 
 
 class ReadOnlyResource(Resource):
@@ -29,6 +32,7 @@ class ReadOnlyResource(Resource):
         query: Optional[Dict] = None,
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
+        monty_encoded_response: bool = False,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
     ):
@@ -42,6 +46,9 @@ class ReadOnlyResource(Resource):
                 to allow user to define these on-the-fly.
             enable_get_by_key: Enable default key route for endpoint.
             enable_default_search: Enable default endpoint search behavior.
+            monty_encoded_response: Whether to use MontyEncoder and provide a direct FastAPI response.
+                Note this will disable auto JSON serialization and response validation with the
+                provided model. 
             include_in_schema: Whether the endpoint should be shown in the documented schema.
             sub_path: sub-URL path for the resource.
         """
@@ -52,6 +59,7 @@ class ReadOnlyResource(Resource):
         self.versioned = False
         self.enable_get_by_key = enable_get_by_key
         self.enable_default_search = enable_default_search
+        self.monty_encoded_response = monty_encoded_response
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
         self.response_model = Response[model]  # type: ignore
@@ -61,7 +69,10 @@ class ReadOnlyResource(Resource):
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(model, default_fields=[self.store.key, self.store.last_updated_field],),
+                SparseFieldsQuery(
+                    model,
+                    default_fields=[self.store.key, self.store.last_updated_field],
+                ),
             ]
         )
 
@@ -84,14 +95,18 @@ class ReadOnlyResource(Resource):
         model_name = self.model.__name__
 
         if self.key_fields is None:
-            field_input = SparseFieldsQuery(self.model, [self.store.key, self.store.last_updated_field]).query
+            field_input = SparseFieldsQuery(
+                self.model, [self.store.key, self.store.last_updated_field]
+            ).query
         else:
 
             def field_input():
                 return {"properties": self.key_fields}
 
         async def get_by_key(
-            key: str = Path(..., alias=key_name, title=f"The {key_name} of the {model_name} to get",),
+            key: str = Path(
+                ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
+            ),
             fields: STORE_PARAMS = Depends(field_input),
         ):
             f"""
@@ -106,18 +121,28 @@ class ReadOnlyResource(Resource):
             self.store.connect()
 
             item = [
-                self.store.query_one(criteria={self.store.key: key, **self.query}, properties=fields["properties"],)
+                self.store.query_one(
+                    criteria={self.store.key: key, **self.query},
+                    properties=fields["properties"],
+                )
             ]
 
             if item == [None]:
                 raise HTTPException(
-                    status_code=404, detail=f"Item with {self.store.key} = {key} not found",
+                    status_code=404,
+                    detail=f"Item with {self.store.key} = {key} not found",
                 )
 
             for operator in self.query_operators:
                 item = operator.post_process(item)
 
             response = {"data": item}
+
+            if self.monty_encoded_response:
+                response = BareResponse(  # type: ignore
+                    MontyEncoder().encode(response)
+                )
+
             return response
 
         self.router.get(
@@ -137,14 +162,20 @@ class ReadOnlyResource(Resource):
             request: Request = queries.pop("request")  # type: ignore
 
             query_params = [
-                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
+                entry
+                for _, i in enumerate(self.query_operators)
+                for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [
+                key for key in request.query_params.keys() if key not in query_params
+            ]
             if any(overlap):
                 raise HTTPException(
                     status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
+                    detail="Request contains query parameters which cannot be used: {}".format(
+                        ", ".join(overlap)
+                    ),
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
@@ -163,6 +194,12 @@ class ReadOnlyResource(Resource):
             meta = Meta(total_doc=count)
 
             response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
+
+            if self.monty_encoded_response:
+                response = BareResponse(  # type: ignore
+                    MontyEncoder().encode(response)
+                )
+
             return response
 
         self.router.get(
