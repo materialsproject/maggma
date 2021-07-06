@@ -48,7 +48,7 @@ class ReadOnlyResource(Resource):
             enable_default_search: Enable default endpoint search behavior.
             monty_encoded_response: Whether to use MontyEncoder and provide a direct FastAPI response.
                 Note this will disable auto JSON serialization and response validation with the
-                provided model. 
+                provided model.
             include_in_schema: Whether the endpoint should be shown in the documented schema.
             sub_path: sub-URL path for the resource.
         """
