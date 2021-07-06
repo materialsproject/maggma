@@ -128,6 +128,7 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
             NumericQuery(model=Owner),
             SparseFieldsQuery(model=Owner),
         ],
+        monty_encoded_response=True,
     )
     app = FastAPI()
     app.include_router(endpoint.router)
