@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.30.0](https://github.com/materialsproject/maggma/tree/v0.30.0) (2021-07-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.4...v0.30.0)
+
+**Merged pull requests:**
+
+- Enable monty encoded direct responses [\#463](https://github.com/materialsproject/maggma/pull/463) ([munrojm](https://github.com/munrojm))
+
 ## [v0.29.4](https://github.com/materialsproject/maggma/tree/v0.29.4) (2021-06-23)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.3...v0.29.4)
