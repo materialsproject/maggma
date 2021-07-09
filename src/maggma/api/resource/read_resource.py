@@ -12,7 +12,6 @@ from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries, custom_serialization
 from maggma.core import Store
 
-from monty.serialization import MontyEncoder
 import orjson
 
 
