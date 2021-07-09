@@ -42,6 +42,7 @@ setup(
         "dnspython>=1.16.0",
         "sshtunnel>=0.1.5",
         "msgpack>=0.5.6",
+        "orjson>=3.6.0",
     ],
     extras_require={
         "vault": ["hvac>=0.9.5"],
