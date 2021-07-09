@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.30.2](https://github.com/materialsproject/maggma/tree/v0.30.2) (2021-07-09)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.1...v0.30.2)
+
+**Merged pull requests:**
+
+- orjson added to setup.py [\#465](https://github.com/materialsproject/maggma/pull/465) ([munrojm](https://github.com/munrojm))
+
 ## [v0.30.1](https://github.com/materialsproject/maggma/tree/v0.30.1) (2021-07-09)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.0...v0.30.1)
