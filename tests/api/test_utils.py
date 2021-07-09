@@ -5,8 +5,10 @@ import pytest
 from monty.json import MSONable
 from pydantic import BaseModel, Field
 
-from maggma.api.utils import api_sanitize
+from maggma.api.utils import api_sanitize, object_id_serilaization_helper
 from typing import Union
+
+from bson import ObjectId
 
 
 class SomeEnum(Enum):
@@ -89,3 +91,8 @@ def test_api_sanitize():
     temp_pet_dict = AnotherPet(name="fido", age=3).as_dict()
 
     assert isinstance(AnotherPet.validate_monty(temp_pet_dict), dict)
+
+
+def test_object_id_serilaization_helper():
+    oid = ObjectId("60b7d47bb671aa7b01a2adf6")
+    assert object_id_serilaization_helper(oid) == "60b7d47bb671aa7b01a2adf6"

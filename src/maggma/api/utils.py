@@ -164,7 +164,7 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
     return monty_cls
 
 
-def custom_serialization(obj):
+def object_id_serilaization_helper(obj):
     if isinstance(obj, ObjectId):
         return str(obj)
     raise TypeError

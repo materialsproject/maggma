@@ -69,7 +69,7 @@ def test_msonable(owner_store):
 
 
 def test_get_by_key(owner_store):
-    endpoint = ReadOnlyResource(owner_store, Owner, custom_encoded_response=True)
+    endpoint = ReadOnlyResource(owner_store, Owner, disable_validation=True)
     app = FastAPI()
     app.include_router(endpoint.router)
 
@@ -128,7 +128,7 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
             NumericQuery(model=Owner),
             SparseFieldsQuery(model=Owner),
         ],
-        custom_encoded_response=True,
+        disable_validation=True,
     )
     app = FastAPI()
     app.include_router(endpoint.router)
