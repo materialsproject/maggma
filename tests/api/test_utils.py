@@ -96,3 +96,9 @@ def test_api_sanitize():
 def test_object_id_serilaization_helper():
     oid = ObjectId("60b7d47bb671aa7b01a2adf6")
     assert object_id_serilaization_helper(oid) == "60b7d47bb671aa7b01a2adf6"
+
+
+@pytest.mark.xfail
+def test_object_id_serilaization_helper_xfail():
+    oid = "test"
+    object_id_serilaization_helper(oid)
