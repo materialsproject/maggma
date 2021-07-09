@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.30.1](https://github.com/materialsproject/maggma/tree/v0.30.1) (2021-07-09)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.0...v0.30.1)
+
+**Merged pull requests:**
+
+- Switch from monty to orjson for serialization [\#464](https://github.com/materialsproject/maggma/pull/464) ([munrojm](https://github.com/munrojm))
+
 ## [v0.30.0](https://github.com/materialsproject/maggma/tree/v0.30.0) (2021-07-06)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.4...v0.30.0)
