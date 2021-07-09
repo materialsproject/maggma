@@ -1,6 +1,7 @@
 import inspect
 import sys
 from typing import Any, Callable, Dict, List, Optional, Type
+from bson.objectid import ObjectId
 
 from monty.json import MSONable
 from pydantic import BaseModel
@@ -161,3 +162,9 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
     setattr(monty_cls, "validate_monty", classmethod(validate_monty))
 
     return monty_cls
+
+
+def object_id_serilaization_helper(obj):
+    if isinstance(obj, ObjectId):
+        return str(obj)
+    raise TypeError
