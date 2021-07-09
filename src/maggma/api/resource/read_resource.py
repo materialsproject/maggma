@@ -9,10 +9,11 @@ from maggma.api.models import Meta, Response
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
 from maggma.api.resource import Resource
 from maggma.api.resource.utils import attach_query_ops
-from maggma.api.utils import STORE_PARAMS, merge_queries
+from maggma.api.utils import STORE_PARAMS, merge_queries, custom_serialization
 from maggma.core import Store
 
 from monty.serialization import MontyEncoder
+import orjson
 
 
 class ReadOnlyResource(Resource):
@@ -32,7 +33,7 @@ class ReadOnlyResource(Resource):
         query: Optional[Dict] = None,
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
-        monty_encoded_response: bool = False,
+        custom_encoded_response: bool = False,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
     ):
@@ -46,7 +47,7 @@ class ReadOnlyResource(Resource):
                 to allow user to define these on-the-fly.
             enable_get_by_key: Enable default key route for endpoint.
             enable_default_search: Enable default endpoint search behavior.
-            monty_encoded_response: Whether to use MontyEncoder and provide a direct FastAPI response.
+            custom_encoded_response: Whether to use ORJSON and provide a direct FastAPI response.
                 Note this will disable auto JSON serialization and response validation with the
                 provided model.
             include_in_schema: Whether the endpoint should be shown in the documented schema.
@@ -59,7 +60,7 @@ class ReadOnlyResource(Resource):
         self.versioned = False
         self.enable_get_by_key = enable_get_by_key
         self.enable_default_search = enable_default_search
-        self.monty_encoded_response = monty_encoded_response
+        self.custom_encoded_response = custom_encoded_response
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
         self.response_model = Response[model]  # type: ignore
@@ -138,9 +139,9 @@ class ReadOnlyResource(Resource):
 
             response = {"data": item}
 
-            if self.monty_encoded_response:
+            if self.custom_encoded_response:
                 response = BareResponse(  # type: ignore
-                    MontyEncoder().encode(response)
+                    orjson.dumps(response, default=custom_serialization)
                 )
 
             return response
@@ -195,9 +196,9 @@ class ReadOnlyResource(Resource):
 
             response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
 
-            if self.monty_encoded_response:
+            if self.custom_encoded_response:
                 response = BareResponse(  # type: ignore
-                    MontyEncoder().encode(response)
+                    orjson.dumps(response, default=custom_serialization)
                 )
 
             return response
