@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.30.3](https://github.com/materialsproject/maggma/tree/v0.30.3) (2021-08-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.2...v0.30.3)
+
+**Merged pull requests:**
+
+- Enable enhanced documentation [\#468](https://github.com/materialsproject/maggma/pull/468) ([munrojm](https://github.com/munrojm))
+
 ## [v0.30.2](https://github.com/materialsproject/maggma/tree/v0.30.2) (2021-07-09)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.1...v0.30.2)
