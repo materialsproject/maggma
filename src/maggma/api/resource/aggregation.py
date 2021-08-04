@@ -67,7 +67,8 @@ class AggregationResource(Resource):
                 data = list(self.store._collection.aggregate(query["pipeline"]))
             except Exception:
                 raise HTTPException(
-                    status_code=400, detail="Problem with provided aggregation pipeline.",
+                    status_code=400,
+                    detail="Problem with provided aggregation pipeline.",
                 )
 
             count = len(data)
@@ -82,8 +83,8 @@ class AggregationResource(Resource):
         self.router.get(
             self.sub_path,
             tags=self.tags,
-            summary=f"Post {model_name} documents",
+            summary=f"Get {model_name} documents",
             response_model=self.response_model,
-            response_description=f"Post {model_name} data",
+            response_description=f"Get {model_name} data",
             response_model_exclude_unset=True,
         )(attach_query_ops(search, [self.pipeline_query_operator]))
