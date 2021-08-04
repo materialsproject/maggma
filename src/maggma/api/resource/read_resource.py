@@ -147,7 +147,8 @@ class ReadOnlyResource(Resource):
 
         self.router.get(
             f"{self.sub_path}{{{key_name}}}/",
-            response_description=f"Get an {model_name} by {key_name}",
+            summary=f"Get a {model_name} document by by {key_name}",
+            response_description=f"Get a {model_name} document by {key_name}",
             response_model=self.response_model,
             response_model_exclude_unset=True,
             tags=self.tags,

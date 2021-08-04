@@ -30,7 +30,8 @@ class SparseFieldsQuery(QueryOperator):
         def query(
             fields: str = Query(
                 None,
-                description=f"Fields to project from {str(model_name)} as a list of comma seperated strings",
+                description=f"Fields to project from {str(model_name)} as a list of comma seperated strings.\
+                    Fields include: {model_fields}",
             ),
             all_fields: bool = Query(False, description="Include all fields."),
         ) -> STORE_PARAMS:
