@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.30.4](https://github.com/materialsproject/maggma/tree/v0.30.4) (2021-08-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.3...v0.30.4)
+
+**Merged pull requests:**
+
+- Fix documentation in aggregation and sparse fields [\#469](https://github.com/materialsproject/maggma/pull/469) ([munrojm](https://github.com/munrojm))
+
 ## [v0.30.3](https://github.com/materialsproject/maggma/tree/v0.30.3) (2021-08-04)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.2...v0.30.3)
