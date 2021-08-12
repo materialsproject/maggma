@@ -20,6 +20,12 @@ def db_json(test_dir):
 
 
 @pytest.fixture
+def lp_file(test_dir):
+    db_dir = test_dir / "settings_files"
+    lp_file = db_dir / "db.json"
+    return lp_file.resolve()
+
+@pytest.fixture
 def log_to_stdout():
     # Set Logging
     root = logging.getLogger()
