@@ -199,7 +199,6 @@ class MongoStore(Store):
 
         return cls(**db_creds)
 
-
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
     ) -> List:
