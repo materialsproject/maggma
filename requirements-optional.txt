@@ -1,6 +1,6 @@
 uvicorn==0.13.4
 boto3==1.18.16
-hvac==0.10.11
+hvac==0.11.0
 IPython==7.16.1;python_version<"3.7"
 IPython==7.25.0;python_version>"3.6"
 nbformat==5.1.2
