@@ -8,6 +8,7 @@ various utillities
 import copy
 import json
 import zlib
+import yaml
 from datetime import datetime
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
@@ -61,7 +62,7 @@ class GridFSStore(Store):
             collection_name: The name of the collection.
                 This is the string portion before the GridFS extensions
             host: hostname for the database
-            port: port to connec to
+            port: port to connect to
             username: username to connect as
             password: password to authenticate as
             compression: compress the data as it goes into GridFS
@@ -84,6 +85,27 @@ class GridFSStore(Store):
         if "key" not in kwargs:
             kwargs["key"] = "_id"
         super().__init__(**kwargs)
+
+    @classmethod
+    def from_launchpad_file(cls, lp_file, collection_name):
+        """
+        Convenience method to construct a GridFSStore from a launchpad file
+
+        Note: A launchpad file is a special formatted yaml file used in fireworks
+
+        Returns:
+        """
+        with open(lp_file, 'r') as f:
+            lp_creds = yaml.load(f, Loader=None)
+
+        db_creds = lp_creds.copy()
+        db_creds['database'] = db_creds['name']
+        for key in list(db_creds.keys()):
+            if key not in ['database', 'host', 'port', 'username', 'password']:
+                db_creds.pop(key)
+        db_creds['collection_name'] = collection_name
+
+        return cls(**db_creds)
 
     @property
     def name(self) -> str:

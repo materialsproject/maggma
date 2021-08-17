@@ -234,6 +234,12 @@ def test_gfs_metadata(gridfsstore):
         assert gridfsstore.last_updated_field in d
 
 
+def test_gridfsstore_from_launchpad_file(lp_file):
+    ms = GridFSStore.from_launchpad_file(lp_file, collection_name='tmp')
+    ms.connect()
+    assert ms._collection.full_name == "maggma_tests.tmp"
+
+
 def test_searchable_fields(gridfsstore):
 
     tic = datetime(2018, 4, 12, 16)
