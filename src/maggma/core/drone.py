@@ -3,7 +3,7 @@ import os
 from abc import abstractmethod
 from datetime import datetime
 from pathlib import Path, PosixPath
-from typing import Dict, Iterable, List, Optional
+from typing import Dict, Iterable, List, Optional, Any
 
 from pydantic import BaseModel, Field
 
