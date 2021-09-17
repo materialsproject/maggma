@@ -20,7 +20,7 @@ class SimpleBibDrone(Drone):
     """
 
     def __init__(self, store, path):
-        super().__init__(store=store, path=path)
+        super().__init__(target=store, path=path)
 
     def compute_record_identifier(
         self, record_key: str, doc_list: List[Document]
@@ -123,3 +123,15 @@ class SimpleBibDrone(Drone):
             key = self.compute_record_identifier_key(doc)
             log[key] = log.get(key, []) + [doc]
         return log
+
+    def process_item(self, item: RecordIdentifier):  # type: ignore
+        """
+        Process an item (i.e., a RecordIdentifier).
+
+        Arguments:
+            item:
+
+        Returns:
+           A processed item.
+        """
+        return {**self.compute_data(recordID=item), **item.dict()}

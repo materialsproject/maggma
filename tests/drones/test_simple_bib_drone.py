@@ -5,7 +5,7 @@ import pytest
 
 from maggma.stores import MongoStore
 
-from .simple_bib_drone import SimpleBibDrone
+from simple_bib_drone import SimpleBibDrone
 
 
 @pytest.fixture
@@ -104,20 +104,20 @@ def test_get_items(init_drone: SimpleBibDrone):
     init_drone.finalize()
 
     init_drone.connect()
-    init_drone.store.remove_docs(criteria={})  # clears the database
+    init_drone.target.remove_docs(criteria={})  # clears the database
     assert sum([1 for _ in init_drone.get_items()]) == 7
     init_drone.finalize()
 
 
-def test_assimilate(init_drone: SimpleBibDrone):
-    """
-    Test whether assimilate file is correct
-    :param init_drone: un-connected simpleBibDrone instance
-    :return:
-    None
-    """
-    record_ids = init_drone.assimilate(init_drone.path)
-    assert len(record_ids) == 7
+# def test_assimilate(init_drone: SimpleBibDrone):
+#     """
+#     Test whether assimilate file is correct
+#     :param init_drone: un-connected simpleBibDrone instance
+#     :return:
+#     None
+#     """
+#     record_ids = init_drone.assimilate(init_drone.path)
+#     assert len(record_ids) == 7
 
 
 def test_compute_data(init_drone: SimpleBibDrone):
