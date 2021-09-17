@@ -111,7 +111,7 @@ class DirectoryDrone(Drone, metaclass=ABCMeta):
         """
         pass
 
-    def process_item(self, item: Dict):
+    def process_item(self, item: RecordIdentifier):
         """
         Generic process items to process a RecordIdentifier using
         unary_function
