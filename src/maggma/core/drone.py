@@ -164,21 +164,6 @@ class Drone(Builder):
             if to_update
         ]
 
-    def assimilate(self, path: Path) -> List[RecordIdentifier]:
-        """
-        Function mainly for debugging purpose. It will
-            1. read file in the path specified
-            2. convert them into recordIdentifier
-            3. return the converted recordIdentifiers
-        Args:
-            path: path in which files are read
-
-        Returns:
-            list of record Identifiers
-        """
-        record_identifiers: List[RecordIdentifier] = self.read(path=path)
-        return record_identifiers
-
     def get_items(self) -> Iterable:
         """
         Read from the path that was given, compare against database files to find recordIDs that needs to be updated
