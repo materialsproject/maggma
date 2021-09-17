@@ -59,10 +59,11 @@ class RecordIdentifier(BaseModel):
             hash of the list of documents passed in
         """
         digest = hashlib.md5()
+        block_size = 128 * digest.block_size
         for doc in self.documents:
             digest.update(doc.name.encode())
             with open(doc.path.as_posix(), "rb") as file:
-                buf = file.read()
+                buf = file.read(block_size)
                 digest.update(buf)
         return str(digest.hexdigest())
 
