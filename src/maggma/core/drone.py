@@ -114,25 +114,6 @@ class Drone(Builder):
         """
         pass
 
-    @abstractmethod
-    def compute_data(self, recordID: RecordIdentifier) -> Dict:
-        """
-        User can specify what raw data they want to save from the Documents that this recordID refers to
-
-        Args:
-            recordID: recordID that needs to be re-saved
-
-        Returns:
-            Dictionary of NAME_OF_DATA -> DATA
-                        ex:
-                            for a recordID refering to 1,
-                            {
-                                "citation": cite.bibtex ,
-                                "text": data.txt
-                            }
-        """
-        pass
-
     def should_update_records(
         self, record_identifiers: List[RecordIdentifier]
     ) -> List[RecordIdentifier]:
@@ -195,15 +176,16 @@ class Drone(Builder):
         else:
             self.logger.debug("There are no items to update")
 
-    def process_item(self, item: RecordIdentifier) -> Dict:  # type: ignore
+    def process_item(self, item: RecordIdentifier) -> Any:  # type: ignore
         """
-        compute the item to update
+        Process an item (i.e., a RecordIdentifier).
 
-        Args:
-            item: item to update
+        Default behavior is to return the item.
+
+        Arguments:
+            item:
 
         Returns:
-            result from expanding the item
+           A processed item.
         """
-
-        return {**self.compute_data(recordID=item), **item.dict()}
+        return item
