@@ -80,12 +80,12 @@ class Drone(Builder):
      and example implementation is available in tests/builders/test_simple_bibdrone.py
     """
 
-    def __init__(self, path: Path, target: Store, **kwargs):
+    def __init__(self, path: Path, target: Store, chunk_size=1):
         if not isinstance(path, Path):
             path = Path(path)
         self.path = path
         self.target = target
-        super().__init__(sources=[], targets=target, **kwargs)
+        super().__init__(sources=[], targets=target, chunk_size=chunk_size)
 
     @abstractmethod
     def read(self, path: Path) -> List[RecordIdentifier]:
