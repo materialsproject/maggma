@@ -2,6 +2,7 @@ from pathlib import Path
 import traceback
 from datetime import datetime
 from time import time
+import fnmatch
 from typing import List, Dict
 from abc import ABCMeta, abstractmethod
 
@@ -41,6 +42,7 @@ class DirectoryDrone(Drone, metaclass=ABCMeta):
         self,
         path: Path,
         target: Store,
+        track_files: List,
         timeout: int = 0,
         delete_orphans: bool = False,
         store_process_time: bool = True,
@@ -53,6 +55,8 @@ class DirectoryDrone(Drone, metaclass=ABCMeta):
         Args:
             path: parent directory containing all files and subdirectories to process
             target: target Store
+            track_files: List of files or fnmatch patterns to be tracked when computing
+                the state_hash.
             delete_orphans: Whether to delete documents on target store
                 with key values not present in source store. Deletion happens
                 after all updates, during Builder.finalize.
@@ -64,6 +68,7 @@ class DirectoryDrone(Drone, metaclass=ABCMeta):
         """
         self.path = path
         self.target = target
+        self.track_files = track_files
         self.delete_orphans = delete_orphans
         self.kwargs = kwargs
         self.timeout = timeout
@@ -90,7 +95,7 @@ class DirectoryDrone(Drone, metaclass=ABCMeta):
         # generate a list of subdirectories
         for d in [d for d in self.path.iterdir() if d.is_dir()]:
             doc_list = [
-                Document(path=f, name=f.name) for f in d.iterdir() if f.is_file()
+                Document(path=f, name=f.name) for f in d.iterdir() if f.is_file() and any([fnmatch.fnmatch(f.name, fn) for fn in self.track_files])
             ]
             record_id = RecordIdentifier(
                 last_updated=datetime.now(), documents=doc_list, record_key=d.name
