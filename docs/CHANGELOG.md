@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.31.0](https://github.com/materialsproject/maggma/tree/v0.31.0) (2021-08-14)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.4...v0.31.0)
+
+**Merged pull requests:**
+
+- Add from\_launchpad\_file classmethod to MongoStore [\#476](https://github.com/materialsproject/maggma/pull/476) ([sivonxay](https://github.com/sivonxay))
+
 ## [v0.30.4](https://github.com/materialsproject/maggma/tree/v0.30.4) (2021-08-04)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.3...v0.30.4)
