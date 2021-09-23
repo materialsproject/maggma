@@ -87,7 +87,7 @@ class GridFSStore(Store):
         super().__init__(**kwargs)
 
     @classmethod
-    def from_launchpad_file(cls, lp_file, collection_name):
+    def from_launchpad_file(cls, lp_file, collection_name, **kwargs):
         """
         Convenience method to construct a GridFSStore from a launchpad file
 
@@ -105,7 +105,7 @@ class GridFSStore(Store):
                 db_creds.pop(key)
         db_creds['collection_name'] = collection_name
 
-        return cls(**db_creds)
+        return cls(**db_creds, **kwargs)
 
     @property
     def name(self) -> str:
