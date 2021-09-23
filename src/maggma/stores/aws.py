@@ -187,7 +187,7 @@ class S3Store(Store):
                 try:
                     # TODO: THis is ugly and unsafe, do some real checking before pulling data
                     data = (
-                        self.s3_bucket.Object(self.sub_dir + doc[self.key])
+                        self.s3_bucket.Object(self.sub_dir + str(doc[self.key]))
                         .get()["Body"]
                         .read()
                     )
@@ -357,7 +357,7 @@ class S3Store(Store):
         """
         s3_bucket = self._get_bucket()
 
-        search_doc = {k: str(doc[k]) for k in search_keys}
+        search_doc = {k: doc[k] for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
         if self.sub_dir != "":
             search_doc["sub_dir"] = self.sub_dir
@@ -382,7 +382,7 @@ class S3Store(Store):
             )
 
         s3_bucket.put_object(
-            Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
+            Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata={k:str(v) for k,v in search_doc.items()}
         )
 
         if lu_info is not None:
