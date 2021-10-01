@@ -237,7 +237,7 @@ def test_gfs_metadata(gridfsstore):
 def test_gridfsstore_from_launchpad_file(lp_file):
     ms = GridFSStore.from_launchpad_file(lp_file, collection_name='tmp')
     ms.connect()
-    assert ms._collection.name == "gridfs://localhost/maggma_tests/tmp"
+    assert ms.name == "gridfs://localhost/maggma_tests/tmp"
 
 
 def test_searchable_fields(gridfsstore):
