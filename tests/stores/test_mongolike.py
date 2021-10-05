@@ -162,6 +162,7 @@ def test_mongostore_from_db_file(mongostore, db_json):
     ms.connect()
     assert ms._collection.full_name == "maggma_tests.tmp"
 
+
 def test_mongostore_from_launchpad_file(lp_file):
     ms = MongoStore.from_launchpad_file(lp_file, collection_name='tmp')
     ms.connect()

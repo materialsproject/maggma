@@ -166,7 +166,7 @@ class MongoStore(Store):
         return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
-    def from_db_file(cls, filename: str):
+    def from_db_file(cls, filename: str, **kwargs):
         """
         Convenience method to construct MongoStore from db_file
         from old QueryEngine format
@@ -179,7 +179,7 @@ class MongoStore(Store):
         return cls(**kwargs)
 
     @classmethod
-    def from_launchpad_file(cls, lp_file, collection_name):
+    def from_launchpad_file(cls, lp_file, collection_name, **kwargs):
         """
         Convenience method to construct MongoStore from a launchpad file
 
@@ -197,7 +197,7 @@ class MongoStore(Store):
                 db_creds.pop(key)
         db_creds['collection_name'] = collection_name
 
-        return cls(**db_creds)
+        return cls(**db_creds, **kwargs)
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
