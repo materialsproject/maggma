@@ -13,7 +13,8 @@ class SortQuery(QueryOperator):
 
     def query(
         self,
-        sort_fields: Optional[List[str]] = Query(None, description="Field to sort with"),
+        sort_fields: Optional[List[str]] = Query(None, description="Fields to sort with. Prefixing '-' to a field will\
+ force a sort in descending order."),
     ) -> STORE_PARAMS:
 
         sort = {}
