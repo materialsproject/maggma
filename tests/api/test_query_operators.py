@@ -69,7 +69,7 @@ def test_numeric_query_functionality():
 
     assert op.meta() == {}
     assert op.query(age_max=10, age_min=1, age_not_eq=[2, 3], weight_min=120) == {
-        "criteria": {"age": {"$lte": 10, "$gte": 1, "$ne": [2, 3]}, "weight": {"$gte": 120},}
+        "criteria": {"age": {"$lte": 10, "$gte": 1, "$ne": [2, 3]}, "weight": {"$gte": 120}}
     }
 
 
@@ -87,16 +87,7 @@ def test_sort_query_functionality():
 
     op = SortQuery()
 
-    assert op.query(sort_field="volume", ascending=True) == {"sort": {"volume": 1}}
-    assert op.query(sort_field="density", ascending=False) == {"sort": {"density": -1}}
-
-
-@pytest.mark.xfail
-def test_sort_error():
-
-    op = SortQuery()
-
-    op.query(sort_field="volume", ascending=None)
+    assert op.query(sort_fields=["volume", "-density"]) == {"sort": {"volume": 1, "density": -1}}
 
 
 def test_sort_serialization():
@@ -106,7 +97,7 @@ def test_sort_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query(sort_field="volume", ascending=True) == {"sort": {"volume": 1}}
+        assert new_op.query(sort_fields=["volume", "-density"]) == {"sort": {"volume": 1, "density": -1}}
 
 
 @pytest.fixture

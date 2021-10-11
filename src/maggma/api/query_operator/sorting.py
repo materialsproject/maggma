@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from fastapi import HTTPException, Query
 
@@ -13,18 +13,16 @@ class SortQuery(QueryOperator):
 
     def query(
         self,
-        sort_field: Optional[str] = Query(None, description="Field to sort with"),
-        ascending: Optional[bool] = Query(None, description="Whether the sorting should be ascending"),
+        sort_fields: Optional[List[str]] = Query(None, description="Field to sort with"),
     ) -> STORE_PARAMS:
 
         sort = {}
 
-        if sort_field:
-            if ascending is not None:
-                sort.update({sort_field: 1 if ascending else -1})
-            else:
-                raise HTTPException(
-                    status_code=400, detail="Must specify both a field and order for sorting.",
-                )
+        if sort_fields:
+            for sort_field in sort_fields:
+                if sort_field[0] == "-":
+                    sort.update({sort_field[1:]: -1})
+                else:
+                    sort.update({sort_field: 1})
 
         return {"sort": sort}
