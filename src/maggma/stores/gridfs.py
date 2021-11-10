@@ -487,7 +487,7 @@ class GridFSURIStore(GridFSStore):
         """
         Connect to the source data
         """
-        if not self._collection or force_reset:
+        if not self._collection or force_reset:  # pragma: no cover
             conn = MongoClient(self.uri)
             db = conn[self.database]
             self._collection = gridfs.GridFS(db, self.collection_name)
