@@ -1,3 +1,5 @@
+import os
+
 import json
 from datetime import datetime
 
@@ -6,7 +8,7 @@ import numpy.testing.utils as nptu
 import pytest
 
 from maggma.stores import GridFSStore, MongoStore
-from maggma.stores.gridfs import files_collection_fields
+from maggma.stores.gridfs import files_collection_fields, GridFSURIStore
 
 
 @pytest.fixture
@@ -268,3 +270,16 @@ def test_additional_metadata(gridfsstore):
 
     # This should only work if the searchable field was put into the index store
     assert set(gridfsstore.distinct("task_id")) == {"mp-0", "mp-1", "mp-2"}
+
+
+@pytest.mark.skipif(
+    "mongodb+srv" not in os.environ.get("MONGODB_SRV_URI", ""),
+    reason="requires special mongodb+srv URI",
+    )
+def test_gridfs_uri():
+    uri = os.environ["MONGODB_SRV_URI"]
+    store = GridFSURIStore(uri, database="mp_core", collection_name="xas")
+    store.connect()
+    is_name = store.name is uri
+    # This is try and keep the secret safe
+    assert is_name
