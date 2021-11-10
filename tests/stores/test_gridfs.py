@@ -9,6 +9,7 @@ import pytest
 
 from maggma.stores import GridFSStore, MongoStore
 from maggma.stores.gridfs import files_collection_fields, GridFSURIStore
+from pymongo.errors import ConfigurationError
 
 
 @pytest.fixture
@@ -237,7 +238,7 @@ def test_gfs_metadata(gridfsstore):
 
 
 def test_gridfsstore_from_launchpad_file(lp_file):
-    ms = GridFSStore.from_launchpad_file(lp_file, collection_name='tmp')
+    ms = GridFSStore.from_launchpad_file(lp_file, collection_name="tmp")
     ms.connect()
     assert ms.name == "gridfs://localhost/maggma_tests/tmp"
 
@@ -275,7 +276,7 @@ def test_additional_metadata(gridfsstore):
 @pytest.mark.skipif(
     "mongodb+srv" not in os.environ.get("MONGODB_SRV_URI", ""),
     reason="requires special mongodb+srv URI",
-    )
+)
 def test_gridfs_uri():
     uri = os.environ["MONGODB_SRV_URI"]
     store = GridFSURIStore(uri, database="mp_core", collection_name="xas")
@@ -283,3 +284,18 @@ def test_gridfs_uri():
     is_name = store.name is uri
     # This is try and keep the secret safe
     assert is_name
+
+
+def test_gridfs_uri_dbname_parse():
+    # test parsing dbname from uri
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = GridFSURIStore(uri_with_db, "test")
+    assert store.database == "fake_db"
+
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = GridFSURIStore(uri_with_db, "test", database="fake_db2")
+    assert store.database == "fake_db2"
+
+    uri_with_db = "mongodb://uuu:xxxx@host:27017"
+    with pytest.raises(ConfigurationError):
+        GridFSURIStore(uri_with_db, "test")
