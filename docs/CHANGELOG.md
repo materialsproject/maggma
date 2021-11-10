@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.32.1](https://github.com/materialsproject/maggma/tree/v0.32.1) (2021-11-10)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.32.0...v0.32.1)
+
+**Merged pull requests:**
+
+- Default to yaml full loader to fix tests [\#505](https://github.com/materialsproject/maggma/pull/505) ([munrojm](https://github.com/munrojm))
+- Add GridFSURIStore with support for URI connections [\#504](https://github.com/materialsproject/maggma/pull/504) ([utf](https://github.com/utf))
+
 ## [v0.32.0](https://github.com/materialsproject/maggma/tree/v0.32.0) (2021-10-11)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.31.0...v0.32.0)
