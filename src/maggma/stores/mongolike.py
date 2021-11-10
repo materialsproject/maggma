@@ -187,15 +187,15 @@ class MongoStore(Store):
 
         Returns:
         """
-        with open(lp_file, 'r') as f:
-            lp_creds = yaml.load(f, Loader=None)
+        with open(lp_file, "r") as f:
+            lp_creds = yaml.load(f, Loader=yaml.FullLoader)
 
         db_creds = lp_creds.copy()
-        db_creds['database'] = db_creds['name']
+        db_creds["database"] = db_creds["name"]
         for key in list(db_creds.keys()):
-            if key not in ['database', 'host', 'port', 'username', 'password']:
+            if key not in ["database", "host", "port", "username", "password"]:
                 db_creds.pop(key)
-        db_creds['collection_name'] = collection_name
+        db_creds["collection_name"] = collection_name
 
         return cls(**db_creds, **kwargs)
 
