@@ -187,15 +187,15 @@ class MongoStore(Store):
 
         Returns:
         """
-        with open(lp_file, 'r') as f:
-            lp_creds = yaml.load(f, Loader=None)
+        with open(lp_file, "r") as f:
+            lp_creds = yaml.load(f, Loader=yaml.FullLoader)
 
         db_creds = lp_creds.copy()
-        db_creds['database'] = db_creds['name']
+        db_creds["database"] = db_creds["name"]
         for key in list(db_creds.keys()):
-            if key not in ['database', 'host', 'port', 'username', 'password']:
+            if key not in ["database", "host", "port", "username", "password"]:
                 db_creds.pop(key)
-        db_creds['collection_name'] = collection_name
+        db_creds["collection_name"] = collection_name
 
         return cls(**db_creds, **kwargs)
 
@@ -507,7 +507,7 @@ class MongoURIStore(MongoStore):
         """
         Connect to the source data
         """
-        if not self._collection or force_reset:
+        if not self._collection or force_reset:  # pragma: no cover
             conn = MongoClient(self.uri)
             db = conn[self.database]
             self._collection = db[self.collection_name]
