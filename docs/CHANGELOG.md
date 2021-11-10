@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.32.0](https://github.com/materialsproject/maggma/tree/v0.32.0) (2021-10-11)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.31.0...v0.32.0)
+
+**Merged pull requests:**
+
+- Update sorting query operator to take multiple fields [\#500](https://github.com/materialsproject/maggma/pull/500) ([munrojm](https://github.com/munrojm))
+- Change to S3Store serialization behavior in update\(\) and other Mongolike Store changes [\#493](https://github.com/materialsproject/maggma/pull/493) ([sivonxay](https://github.com/sivonxay))
+
 ## [v0.31.0](https://github.com/materialsproject/maggma/tree/v0.31.0) (2021-08-14)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.4...v0.31.0)
