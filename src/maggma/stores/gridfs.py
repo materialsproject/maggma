@@ -484,7 +484,7 @@ class GridFSURIStore(GridFSStore):
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
-        super().__init__(**kwargs)
+        super(GridFSStore, self).__init__(**kwargs)  # lgtm
 
     def connect(self, force_reset: bool = False):
         """
