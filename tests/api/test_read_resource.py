@@ -16,6 +16,8 @@ from maggma.api.query_operator import (
 from maggma.api.resource import ReadOnlyResource
 from maggma.stores import MemoryStore
 
+import inspect
+
 
 class Owner(BaseModel):
     name: str = Field(..., title="Owner's name")
@@ -67,7 +69,7 @@ def test_msonable(owner_store):
 
 
 def test_get_by_key(owner_store):
-    endpoint = ReadOnlyResource(owner_store, Owner)
+    endpoint = ReadOnlyResource(owner_store, Owner, disable_validation=True)
     app = FastAPI()
     app.include_router(endpoint.router)
 
@@ -77,6 +79,28 @@ def test_get_by_key(owner_store):
 
     assert client.get("/Person1/").status_code == 200
     assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
+
+
+def test_key_fields(owner_store):
+    endpoint = ReadOnlyResource(owner_store, Owner, key_fields=["name"])
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    assert client.get("/Person1/").status_code == 200
+    assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
+
+
+@pytest.mark.xfail
+def test_problem_query_params(owner_store):
+    endpoint = ReadOnlyResource(owner_store, Owner)
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    client.get("/?param=test").status_code
 
 
 def search_helper(payload, base: str = "/?", debug=True) -> Response:
@@ -104,18 +128,21 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
             NumericQuery(model=Owner),
             SparseFieldsQuery(model=Owner),
         ],
+        disable_validation=True,
     )
     app = FastAPI()
     app.include_router(endpoint.router)
 
     client = TestClient(app)
 
+    print(inspect.signature(NumericQuery(model=Owner).query))
+
     url = base + urlencode(payload)
     if debug:
         print(url)
     res = client.get(url)
     json = res.json()
-    return res, json.get("data", [])
+    return res, json.get("data", [])  # type: ignore
 
 
 def test_numeric_query_operator():
@@ -132,12 +159,12 @@ def test_numeric_query_operator():
     assert res.status_code == 200
     assert len(data) == 11
 
-    payload = {"age_lt": 10}
+    payload = {"age_max": 9}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 8
 
-    payload = {"age_gt": 0}
+    payload = {"age_min": 0}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 13
@@ -161,7 +188,8 @@ def test_resource_compound():
     payload = {
         "name": "PersonAge20Weight200",
         "all_fields": True,
-        "weight": 200,
+        "weight_min": 199.1,
+        "weight_max": 201.4,
         "age": 20,
     }
     res, data = search_helper(payload=payload, base="/?", debug=True)
@@ -173,7 +201,8 @@ def test_resource_compound():
         "name": "PersonAge20Weight200",
         "all_fields": False,
         "fields": "name,age",
-        "weight": 200,
+        "weight_min": 199.3,
+        "weight_max": 201.9,
         "age": 20,
     }
     res, data = search_helper(payload=payload, base="/?", debug=True)

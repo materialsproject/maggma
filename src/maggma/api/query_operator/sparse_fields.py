@@ -30,7 +30,8 @@ class SparseFieldsQuery(QueryOperator):
         def query(
             fields: str = Query(
                 None,
-                description=f"Fields to project from {str(model_name)} as a list of comma seperated strings",
+                description=f"Fields to project from {str(model_name)} as a list of comma seperated strings.\
+                    Fields include: `{'` `'.join(model_fields)}`",
             ),
             all_fields: bool = Query(False, description="Include all fields."),
         ) -> STORE_PARAMS:
@@ -49,7 +50,7 @@ class SparseFieldsQuery(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        " Stub query function for abstract class "
+        "Stub query function for abstract class"
         pass
 
     def meta(self) -> Dict:

@@ -1,5 +1,5 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict
+from typing import Dict, List
 
 from monty.json import MSONable
 
@@ -28,8 +28,8 @@ class QueryOperator(MSONable, metaclass=ABCMeta):
         """
         return {}
 
-    def post_process(self, doc: Dict) -> Dict:
+    def post_process(self, docs: List[Dict]) -> List[Dict]:
         """
         An optional post-processing function for the data
         """
-        return doc
+        return docs

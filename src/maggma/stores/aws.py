@@ -34,18 +34,18 @@ class S3Store(Store):
     """
 
     def __init__(
-        self,
-        index: Store,
-        bucket: str,
-        s3_profile: Union[str, dict] = None,
-        compress: bool = False,
-        endpoint_url: str = None,
-        sub_dir: str = None,
-        s3_workers: int = 1,
-        key: str = "fs_id",
-        store_hash: bool = True,
-        searchable_fields: Optional[List[str]] = None,
-        **kwargs,
+            self,
+            index: Store,
+            bucket: str,
+            s3_profile: Union[str, dict] = None,
+            compress: bool = False,
+            endpoint_url: str = None,
+            sub_dir: str = None,
+            s3_workers: int = 1,
+            key: str = "fs_id",
+            store_hash: bool = True,
+            searchable_fields: Optional[List[str]] = None,
+            **kwargs,
     ):
         """
         Initializes an S3 Store
@@ -96,6 +96,7 @@ class S3Store(Store):
         self._thread_local = threading.local()
         super(S3Store, self).__init__(**kwargs)
 
+    @property
     def name(self) -> str:
         """
         Returns:
@@ -153,12 +154,12 @@ class S3Store(Store):
         return self.index.count(criteria)
 
     def query(
-        self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
-        skip: int = 0,
-        limit: int = 0,
+            self,
+            criteria: Optional[Dict] = None,
+            properties: Union[Dict, List, None] = None,
+            sort: Optional[Dict[str, Union[Sort, int]]] = None,
+            skip: int = 0,
+            limit: int = 0,
     ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
@@ -178,7 +179,7 @@ class S3Store(Store):
             prop_keys = set(properties)
 
         for doc in self.index.query(
-            criteria=criteria, sort=sort, limit=limit, skip=skip
+                criteria=criteria, sort=sort, limit=limit, skip=skip
         ):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
@@ -186,9 +187,9 @@ class S3Store(Store):
                 try:
                     # TODO: THis is ugly and unsafe, do some real checking before pulling data
                     data = (
-                        self.s3_bucket.Object(self.sub_dir + doc[self.key])
-                        .get()["Body"]
-                        .read()
+                        self.s3_bucket.Object(self.sub_dir + str(doc[self.key]))
+                            .get()["Body"]
+                            .read()
                     )
                 except botocore.exceptions.ClientError as e:
                     # If a client error is thrown, then check that it was a 404 error.
@@ -219,7 +220,7 @@ class S3Store(Store):
                 yield unpacked_data
 
     def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+            self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
     ) -> List:
         """
         Get all distinct values for a field
@@ -232,13 +233,13 @@ class S3Store(Store):
         return self.index.distinct(field, criteria=criteria)
 
     def groupby(
-        self,
-        keys: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
-        skip: int = 0,
-        limit: int = 0,
+            self,
+            keys: Union[List[str], str],
+            criteria: Optional[Dict] = None,
+            properties: Union[Dict, List, None] = None,
+            sort: Optional[Dict[str, Union[Sort, int]]] = None,
+            skip: int = 0,
+            limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
         Simple grouping function that will group documents
@@ -279,10 +280,10 @@ class S3Store(Store):
         return self.index.ensure_index(key, unique=unique)
 
     def update(
-        self,
-        docs: Union[List[Dict], Dict],
-        key: Union[List, str, None] = None,
-        additional_metadata: Union[str, List[str], None] = None,
+            self,
+            docs: Union[List[Dict], Dict],
+            key: Union[List, str, None] = None,
+            additional_metadata: Union[str, List[str], None] = None,
     ):
         """
         Update documents into the Store
@@ -356,7 +357,7 @@ class S3Store(Store):
         """
         s3_bucket = self._get_bucket()
 
-        search_doc = {k: str(doc[k]) for k in search_keys}
+        search_doc = {k: doc[k] for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
         if self.sub_dir != "":
             search_doc["sub_dir"] = self.sub_dir
@@ -381,7 +382,7 @@ class S3Store(Store):
             )
 
         s3_bucket.put_object(
-            Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata=search_doc
+            Key=self.sub_dir + str(doc[self.key]), Body=data, Metadata={k: str(v) for k, v in search_doc.items()}
         )
 
         if lu_info is not None:
@@ -419,7 +420,7 @@ class S3Store(Store):
         return self.index.last_updated
 
     def newer_in(
-        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
+            self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
     ) -> List[str]:
         """
         Returns the keys of documents that are newer in the target

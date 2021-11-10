@@ -1,6 +1,6 @@
 import inspect
 from abc import abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Tuple
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 
 from fastapi.params import Query
 from monty.json import MontyDecoder
@@ -17,7 +17,7 @@ class DynamicQueryOperator(QueryOperator):
 
     def __init__(
         self,
-        model: BaseModel,
+        model: Type[BaseModel],
         fields: Optional[List[str]] = None,
         excluded_fields: Optional[List[str]] = None,
     ):
@@ -54,7 +54,15 @@ class DynamicQueryOperator(QueryOperator):
                             f"Cannot find key {k} in current query to database mapping"
                         )
 
-            return {"criteria": {k: v for crit in criteria for k, v in crit.items()}}
+            final_crit = {}
+            for entry in criteria:
+                for key, value in entry.items():
+                    if key not in final_crit:
+                        final_crit[key] = value
+                    else:
+                        final_crit[key].update(value)
+
+            return {"criteria": final_crit}
 
         # building the signatures for FastAPI Swagger UI
         signatures: List = [
@@ -72,7 +80,7 @@ class DynamicQueryOperator(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        " Stub query function for abstract class "
+        "Stub query function for abstract class"
         pass
 
     @abstractmethod
@@ -106,7 +114,7 @@ class DynamicQueryOperator(QueryOperator):
 
 
 class NumericQuery(DynamicQueryOperator):
-    " Query Operator to enable searching on numeric fields"
+    "Query Operator to enable searching on numeric fields"
 
     def field_to_operator(
         self, name: str, field: ModelField
@@ -128,22 +136,22 @@ class NumericQuery(DynamicQueryOperator):
 
             ops = [
                 (
-                    f"{field.name}_lt",
+                    f"{field.name}_max",
                     field_type,
                     Query(
                         default=None,
-                        description=f"Querying for {title} is less than a value",
+                        description=f"Query for maximum value of {title}",
                     ),
-                    lambda val: {f"{field.name}": {"$lt": val}},
+                    lambda val: {f"{field.name}": {"$lte": val}},
                 ),
                 (
-                    f"{field.name}_gt",
+                    f"{field.name}_min",
                     field_type,
                     Query(
                         default=None,
-                        description=f"Querying for {title} is greater than a value",
+                        description=f"Query for minimum value of {title}",
                     ),
-                    lambda val: {f"{field.name}": {"$gt": val}},
+                    lambda val: {f"{field.name}": {"$gte": val}},
                 ),
             ]
 
@@ -155,7 +163,7 @@ class NumericQuery(DynamicQueryOperator):
                         field_type,
                         Query(
                             default=None,
-                            description=f"Querying for {title} is equal to a value",
+                            description=f"Query for {title} being equal to an exact value",
                         ),
                         lambda val: {f"{field.name}": val},
                     ),
@@ -164,27 +172,36 @@ class NumericQuery(DynamicQueryOperator):
                         field_type,
                         Query(
                             default=None,
-                            description=f"Querying for {title} is not equal to a value",
+                            description=f"Query for {title} being not equal to an exact value",
                         ),
                         lambda val: {f"{field.name}": {"$ne": val}},
                     ),
                     (
                         f"{field.name}_eq_any",
-                        List[field_type],  # type: ignore
+                        str,  # type: ignore
                         Query(
                             default=None,
-                            description=f"Querying for {title} is any of these values",
+                            description=f"Query for {title} being any of these values. Provide a comma separated list.",
                         ),
-                        lambda val: {f"{field.name}": {"$in": val}},
+                        lambda val: {
+                            f"{field.name}": {
+                                "$in": [int(entry.strip()) for entry in val.split(",")]
+                            }
+                        },
                     ),
                     (
                         f"{field.name}_neq_any",
-                        List[field_type],  # type: ignore
+                        str,  # type: ignore
                         Query(
                             default=None,
-                            description=f"Querying for {title} is not any of these values",
+                            description=f"Query for {title} being not any of these values. \
+                            Provide a comma separated list.",
                         ),
-                        lambda val: {f"{field.name}": {"$nin": val}},
+                        lambda val: {
+                            f"{field.name}": {
+                                "$nin": [int(entry.strip()) for entry in val.split(",")]
+                            }
+                        },
                     ),
                 ]
             )
@@ -193,7 +210,7 @@ class NumericQuery(DynamicQueryOperator):
 
 
 class StringQueryOperator(DynamicQueryOperator):
-    " Query Operator to enable searching on numeric fields"
+    "Query Operator to enable searching on numeric fields"
 
     def field_to_operator(
         self, name: str, field: ModelField
@@ -219,7 +236,7 @@ class StringQueryOperator(DynamicQueryOperator):
                     field_type,
                     Query(
                         default=None,
-                        description=f"Query for {title} is equal to a value",
+                        description=f"Query for {title} being equal to a value",
                     ),
                     lambda val: {f"{field.name}": val},
                 ),
@@ -228,27 +245,35 @@ class StringQueryOperator(DynamicQueryOperator):
                     field_type,
                     Query(
                         default=None,
-                        description=f"Querying for {title} is not equal to a value",
+                        description=f"Query for {title} being not equal to a value",
                     ),
                     lambda val: {f"{field.name}": {"$ne": val}},
                 ),
                 (
                     f"{field.name}_eq_any",
-                    List[field_type],  # type: ignore
+                    str,  # type: ignore
                     Query(
                         default=None,
-                        description=f"Querying for {title} is any of these values",
+                        description=f"Query for {title} being any of these values. Provide a comma separated list.",
                     ),
-                    lambda val: {f"{field.name}": {"$in": val}},
+                    lambda val: {
+                        f"{field.name}": {
+                            "$in": [entry.strip() for entry in val.split(",")]
+                        }
+                    },
                 ),
                 (
                     f"{field.name}_neq_any",
-                    List[field_type],  # type: ignore
+                    str,  # type: ignore
                     Query(
                         default=None,
-                        description=f"Querying for {title} is not any of these values",
+                        description=f"Query for {title} being not any of these values. Provide a comma separated list",
                     ),
-                    lambda val: {f"{field.name}": {"$nin": val}},
+                    lambda val: {
+                        f"{field.name}": {
+                            "$nin": [entry.strip() for entry in val.split(",")]
+                        }
+                    },
                 ),
             ]
 

@@ -1,5 +1,7 @@
 import inspect
+import sys
 from typing import Any, Callable, Dict, List, Optional, Type
+from bson.objectid import ObjectId
 
 from monty.json import MSONable
 from pydantic import BaseModel
@@ -7,8 +9,17 @@ from pydantic.schema import get_flat_models_from_model
 from pydantic.utils import lenient_issubclass
 from typing_extensions import Literal
 
+if sys.version_info >= (3, 8):
+    from typing import get_args
+else:
+    from typing_extensions import get_args
+
+
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
-STORE_PARAMS = Dict[Literal["criteria", "properties", "skip", "limit"], Any]
+STORE_PARAMS = Dict[
+    Literal["criteria", "properties", "sort", "skip", "limit", "request", "pipeline"],
+    Any,
+]
 
 
 def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
@@ -107,12 +118,13 @@ def api_sanitize(
                 field.required = False
                 field.field_info.default = None
 
-            if (
-                field_type is not None
-                and lenient_issubclass(field_type, MSONable)
-                and allow_dict_msonable
-            ):
-                field.type_ = allow_msonable_dict(field_type)
+            if field_type is not None and allow_dict_msonable:
+                if lenient_issubclass(field_type, MSONable):
+                    field.type_ = allow_msonable_dict(field_type)
+                else:
+                    for sub_type in get_args(field_type):
+                        if lenient_issubclass(sub_type, MSONable):
+                            allow_msonable_dict(sub_type)
                 field.populate_validators()
 
     return pydantic_model
@@ -150,3 +162,9 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
     setattr(monty_cls, "validate_monty", classmethod(validate_monty))
 
     return monty_cls
+
+
+def object_id_serilaization_helper(obj):
+    if isinstance(obj, ObjectId):
+        return str(obj)
+    raise TypeError

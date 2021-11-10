@@ -5,7 +5,10 @@ import pytest
 from monty.json import MSONable
 from pydantic import BaseModel, Field
 
-from maggma.api.utils import api_sanitize, merge_queries
+from maggma.api.utils import api_sanitize, object_id_serilaization_helper
+from typing import Union
+
+from bson import ObjectId
 
 
 class SomeEnum(Enum):
@@ -18,6 +21,17 @@ class Pet(MSONable):
     def __init__(self, name, age):
         self.name = name
         self.age = age
+
+
+class AnotherPet(MSONable):
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+
+
+class AnotherOwner(BaseModel):
+    name: str = Field(..., description="Ower name")
+    weight_or_pet: Union[float, AnotherPet] = Field(..., title="Owners weight or Pet")
 
 
 class Owner(BaseModel):
@@ -71,3 +85,20 @@ def test_api_sanitize():
 
     # This should work
     assert isinstance(Owner(pet=temp_pet_dict).pet, dict)
+
+    # This should work evne though AnotherPet is inside the Union type
+    api_sanitize(AnotherOwner, allow_dict_msonable=True)
+    temp_pet_dict = AnotherPet(name="fido", age=3).as_dict()
+
+    assert isinstance(AnotherPet.validate_monty(temp_pet_dict), dict)
+
+
+def test_object_id_serilaization_helper():
+    oid = ObjectId("60b7d47bb671aa7b01a2adf6")
+    assert object_id_serilaization_helper(oid) == "60b7d47bb671aa7b01a2adf6"
+
+
+@pytest.mark.xfail
+def test_object_id_serilaization_helper_xfail():
+    oid = "test"
+    object_id_serilaization_helper(oid)

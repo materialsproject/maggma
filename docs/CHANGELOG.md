@@ -1,5 +1,107 @@
 # Changelog
 
+## [v0.31.0](https://github.com/materialsproject/maggma/tree/v0.31.0) (2021-08-14)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.4...v0.31.0)
+
+**Merged pull requests:**
+
+- Add from\_launchpad\_file classmethod to MongoStore [\#476](https://github.com/materialsproject/maggma/pull/476) ([sivonxay](https://github.com/sivonxay))
+
+## [v0.30.4](https://github.com/materialsproject/maggma/tree/v0.30.4) (2021-08-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.3...v0.30.4)
+
+**Merged pull requests:**
+
+- Fix documentation in aggregation and sparse fields [\#469](https://github.com/materialsproject/maggma/pull/469) ([munrojm](https://github.com/munrojm))
+
+## [v0.30.3](https://github.com/materialsproject/maggma/tree/v0.30.3) (2021-08-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.2...v0.30.3)
+
+**Merged pull requests:**
+
+- Enable enhanced documentation [\#468](https://github.com/materialsproject/maggma/pull/468) ([munrojm](https://github.com/munrojm))
+
+## [v0.30.2](https://github.com/materialsproject/maggma/tree/v0.30.2) (2021-07-09)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.1...v0.30.2)
+
+**Merged pull requests:**
+
+- orjson added to setup.py [\#465](https://github.com/materialsproject/maggma/pull/465) ([munrojm](https://github.com/munrojm))
+
+## [v0.30.1](https://github.com/materialsproject/maggma/tree/v0.30.1) (2021-07-09)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.30.0...v0.30.1)
+
+**Merged pull requests:**
+
+- Switch from monty to orjson for serialization [\#464](https://github.com/materialsproject/maggma/pull/464) ([munrojm](https://github.com/munrojm))
+
+## [v0.30.0](https://github.com/materialsproject/maggma/tree/v0.30.0) (2021-07-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.4...v0.30.0)
+
+**Merged pull requests:**
+
+- Enable monty encoded direct responses [\#463](https://github.com/materialsproject/maggma/pull/463) ([munrojm](https://github.com/munrojm))
+
+## [v0.29.4](https://github.com/materialsproject/maggma/tree/v0.29.4) (2021-06-23)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.3...v0.29.4)
+
+**Merged pull requests:**
+
+- BugFix: Manual distinct in MongoStore not using Criteria [\#461](https://github.com/materialsproject/maggma/pull/461) ([shyamd](https://github.com/shyamd))
+
+## [v0.29.3](https://github.com/materialsproject/maggma/tree/v0.29.3) (2021-06-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.2...v0.29.3)
+
+**Merged pull requests:**
+
+- Sort query and query operator meta bug fixes [\#453](https://github.com/materialsproject/maggma/pull/453) ([munrojm](https://github.com/munrojm))
+
+## [v0.29.2](https://github.com/materialsproject/maggma/tree/v0.29.2) (2021-06-18)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.1...v0.29.2)
+
+**Merged pull requests:**
+
+- Fix API Sanitizing MSONable types in combined types [\#454](https://github.com/materialsproject/maggma/pull/454) ([shyamd](https://github.com/shyamd))
+
+## [v0.29.1](https://github.com/materialsproject/maggma/tree/v0.29.1) (2021-06-15)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.29.0...v0.29.1)
+
+**Merged pull requests:**
+
+- Switch from classic bson to pymongo bson [\#452](https://github.com/materialsproject/maggma/pull/452) ([shyamd](https://github.com/shyamd))
+
+## [v0.29.0](https://github.com/materialsproject/maggma/tree/v0.29.0) (2021-06-08)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.28.1...v0.29.0)
+
+**Merged pull requests:**
+
+- Maggma API additions [\#448](https://github.com/materialsproject/maggma/pull/448) ([munrojm](https://github.com/munrojm))
+
+## [v0.28.1](https://github.com/materialsproject/maggma/tree/v0.28.1) (2021-06-08)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.28.0...v0.28.1)
+
+**Closed issues:**
+
+- Indescriptive error when not specifying any builders in CLI [\#446](https://github.com/materialsproject/maggma/issues/446)
+- Add port auto-negotiation  [\#445](https://github.com/materialsproject/maggma/issues/445)
+
+**Merged pull requests:**
+
+- New release wflow [\#450](https://github.com/materialsproject/maggma/pull/450) ([shyamd](https://github.com/shyamd))
+- Ensure Store.name is a property [\#449](https://github.com/materialsproject/maggma/pull/449) ([utf](https://github.com/utf))
+
 ## [v0.28.0](https://github.com/materialsproject/maggma/tree/v0.28.0) (2021-05-26)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.27.0...v0.28.0)

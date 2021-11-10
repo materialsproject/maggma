@@ -86,6 +86,13 @@ def test_mongostore_distinct(mongostore):
     assert len(vals) == len(list(range(1000000)))
     assert all([isinstance(v, str) for v in vals])
 
+    # Test to make sure manual distinct uses the criteria query
+    mongostore._collection.insert_many(
+        [{"key": f"mp-{i}", "a": 2} for i in range(1000001, 2000001)]
+    )
+    vals = mongostore.distinct("key", {"a": 2})
+    assert len(vals) == len(list(range(1000001, 2000001)))
+
 
 def test_mongostore_update(mongostore):
     mongostore.update({"e": 6, "d": 4}, key="e")
@@ -152,6 +159,12 @@ def test_mongostore_remove_docs(mongostore):
 
 def test_mongostore_from_db_file(mongostore, db_json):
     ms = MongoStore.from_db_file(db_json)
+    ms.connect()
+    assert ms._collection.full_name == "maggma_tests.tmp"
+
+
+def test_mongostore_from_launchpad_file(lp_file):
+    ms = MongoStore.from_launchpad_file(lp_file, collection_name='tmp')
     ms.connect()
     assert ms._collection.full_name == "maggma_tests.tmp"
 

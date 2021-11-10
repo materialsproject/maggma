@@ -10,7 +10,7 @@ class PaginationQuery(QueryOperator):
     """Query opertators to provides Pagination"""
 
     def __init__(
-        self, default_skip: int = 0, default_limit: int = 10, max_limit: int = 100
+        self, default_skip: int = 0, default_limit: int = 100, max_limit: int = 1000
     ):
         """
         Args:
@@ -39,14 +39,14 @@ class PaginationQuery(QueryOperator):
                 raise HTTPException(
                     status_code=400,
                     detail="Requested more data per query than allowed by this endpoint."
-                    f"The max limit is {max_limit} entries",
+                    f" The max limit is {max_limit} entries",
                 )
             return {"skip": skip, "limit": limit}
 
         self.query = query  # type: ignore
 
     def query(self):
-        " Stub query function for abstract class "
+        "Stub query function for abstract class"
         pass
 
     def meta(self) -> Dict:

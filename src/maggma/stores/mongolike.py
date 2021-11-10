@@ -6,6 +6,7 @@ various utilities
 """
 
 import json
+import yaml
 from itertools import chain, groupby
 from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
@@ -161,11 +162,11 @@ class MongoStore(Store):
             self._collection = db[self.collection_name]
 
     def __hash__(self) -> int:
-        """ Hash for MongoStore """
+        """Hash for MongoStore"""
         return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
-    def from_db_file(cls, filename: str):
+    def from_db_file(cls, filename: str, **kwargs):
         """
         Convenience method to construct MongoStore from db_file
         from old QueryEngine format
@@ -176,6 +177,27 @@ class MongoStore(Store):
         # Get rid of aliases from traditional query engine db docs
         kwargs.pop("aliases", None)
         return cls(**kwargs)
+
+    @classmethod
+    def from_launchpad_file(cls, lp_file, collection_name, **kwargs):
+        """
+        Convenience method to construct MongoStore from a launchpad file
+
+        Note: A launchpad file is a special formatted yaml file used in fireworks
+
+        Returns:
+        """
+        with open(lp_file, 'r') as f:
+            lp_creds = yaml.load(f, Loader=None)
+
+        db_creds = lp_creds.copy()
+        db_creds['database'] = db_creds['name']
+        for key in list(db_creds.keys()):
+            if key not in ['database', 'host', 'port', 'username', 'password']:
+                db_creds.pop(key)
+        db_creds['collection_name'] = collection_name
+
+        return cls(**db_creds, **kwargs)
 
     def distinct(
         self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
@@ -194,7 +216,9 @@ class MongoStore(Store):
         except (OperationFailure, DocumentTooLarge):
             distinct_vals = [
                 d["_id"]
-                for d in self._collection.aggregate([{"$group": {"_id": f"${field}"}}])
+                for d in self._collection.aggregate(
+                    [{"$match": criteria}, {"$group": {"_id": f"${field}"}}]
+                )
             ]
             if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
                 distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
@@ -272,7 +296,7 @@ class MongoStore(Store):
     @property  # type: ignore
     @deprecated(message="This will be removed in the future")
     def collection(self):
-        """ Property referring to underlying pymongo collection """
+        """Property referring to underlying pymongo collection"""
         if self._collection is None:
             raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._collection
@@ -414,7 +438,7 @@ class MongoStore(Store):
         self._collection.delete_many(filter=criteria)
 
     def close(self):
-        """ Close up all collections """
+        """Close up all collections"""
         self._collection.database.client.close()
         if self.ssh_tunnel is not None:
             self.ssh_tunnel.stop()
@@ -438,7 +462,14 @@ class MongoURIStore(MongoStore):
     client parameters via TXT records
     """
 
-    def __init__(self, uri: str, collection_name: str, database: str = None, **kwargs):
+    def __init__(
+        self,
+        uri: str,
+        collection_name: str,
+        database: str = None,
+        ssh_tunnel: Optional[SSHTunnel] = None,
+        **kwargs,
+    ):
         """
         Args:
             uri: MongoDB+SRV URI
@@ -446,6 +477,7 @@ class MongoURIStore(MongoStore):
             collection_name: The collection name
         """
         self.uri = uri
+        self.ssh_tunnel = ssh_tunnel
 
         # parse the dbname from the uri
         if database is None:
@@ -509,11 +541,11 @@ class MemoryStore(MongoStore):
 
     @property
     def name(self):
-        """ Name for the store """
+        """Name for the store"""
         return f"mem://{self.collection_name}"
 
     def __hash__(self):
-        """ Hash for the store """
+        """Hash for the store"""
         return hash((self.name, self.last_updated_field))
 
     def groupby(
