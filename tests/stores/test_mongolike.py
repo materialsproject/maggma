@@ -1,7 +1,9 @@
 import os
+import shutil
 from datetime import datetime
 
 import mongomock.collection
+from monty.tempfile import ScratchDir
 import pymongo.collection
 import pytest
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
@@ -276,6 +278,26 @@ def test_json_store_load(jsonstore, test_dir):
     jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz")
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
+
+
+def test_json_store_writeable(test_dir):
+    with ScratchDir("."):
+        shutil.copy(test_dir / "test_set" / "d.json", ".")
+        jsonstore = JSONStore("d.json", writable=True)
+        jsonstore.connect()
+        assert jsonstore.count() == 2
+        jsonstore.update({'new': 'hello', 'task_id': 2})
+        assert jsonstore.count() == 3
+        jsonstore.close()
+        jsonstore = JSONStore("d.json", writable=True)
+        jsonstore.connect()
+        assert jsonstore.count() == 3
+        jsonstore.remove_docs({'a': 5})
+        assert jsonstore.count() == 2
+        jsonstore.close()
+        jsonstore = JSONStore("d.json", writable=True)
+        jsonstore.connect()
+        assert jsonstore.count() == 2
 
 
 def test_eq(mongostore, memorystore, jsonstore):

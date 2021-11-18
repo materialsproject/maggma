@@ -606,13 +606,20 @@ class JSONStore(MemoryStore):
     A Store for access to a single or multiple JSON files
     """
 
-    def __init__(self, paths: Union[str, List[str]], **kwargs):
+    def __init__(self, paths: Union[str, List[str]], writable=False, **kwargs):
         """
         Args:
             paths: paths for json files to turn into a Store
+            writable: whether this JSONStore is writable. When a JSONStore is writable,
+                the json file will be automatically updated everytime a write-like
+                operation is performed. Note that only JSONStore with a single JSON file
+                is compatible with writable True.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
+        if writable and len(paths) > 1:
+            raise RuntimeError('Cannot instantiate writable JSONStore with multiple JSON files.')
+        self.writable = writable
         self.kwargs = kwargs
         super().__init__(collection_name="collection", **kwargs)
 
@@ -628,6 +635,46 @@ class JSONStore(MemoryStore):
                 objects = json.loads(data)
                 objects = [objects] if not isinstance(objects, list) else objects
                 self.update(objects)
+
+    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
+        """
+        Update documents into the Store.
+
+        For a writable JSONStore, the json file is updated.
+
+        Args:
+            docs: the document or list of documents to update
+            key: field name(s) to determine uniqueness for a
+                 document, can be a list of multiple fields,
+                 a single field, or None if the Store's key
+                 field is to be used
+        """
+        super().update(docs=docs, key=key)
+        if self.writable:
+            self.update_json_file()
+
+    def remove_docs(self, criteria: Dict):
+        """
+        Remove docs matching the query dictionary.
+
+        For a writable JSONStore, the json file is updated.
+
+        Args:
+            criteria: query dictionary to match
+        """
+        super().remove_docs(criteria=criteria)
+        if self.writable:
+            self.update_json_file()
+
+    def update_json_file(self):
+        """
+        Updates the json file when a write-like operation is performed.
+        """
+        with zopen(self.paths[0], 'w') as f:
+            data = [d for d in self.query()]
+            for d in data:
+                d.pop('_id')
+            json.dump(data, f)
 
     def __hash__(self):
         return hash((*self.paths, self.last_updated_field))
