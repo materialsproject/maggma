@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.32.2](https://github.com/materialsproject/maggma/tree/v0.32.2) (2021-11-23)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.32.1...v0.32.2)
+
+**Merged pull requests:**
+
+- Alter sorting query operator to take comma delimited string [\#510](https://github.com/materialsproject/maggma/pull/510) ([munrojm](https://github.com/munrojm))
+
 ## [v0.32.1](https://github.com/materialsproject/maggma/tree/v0.32.1) (2021-11-10)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.32.0...v0.32.1)
