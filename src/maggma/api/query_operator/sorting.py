@@ -13,14 +13,17 @@ class SortQuery(QueryOperator):
 
     def query(
         self,
-        sort_fields: Optional[List[str]] = Query(None, description="Fields to sort with. Prefixing '-' to a field will\
- force a sort in descending order."),
+        sort_fields: Optional[str] = Query(
+            None,
+            description="Comma delimited fields to sort with.\
+ Prefixing '-' to a field will force a sort in descending order.",
+        ),
     ) -> STORE_PARAMS:
 
         sort = {}
 
         if sort_fields:
-            for sort_field in sort_fields:
+            for sort_field in sort_fields.split(","):
                 if sort_field[0] == "-":
                     sort.update({sort_field[1:]: -1})
                 else:

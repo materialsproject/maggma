@@ -87,7 +87,7 @@ def test_sort_query_functionality():
 
     op = SortQuery()
 
-    assert op.query(sort_fields=["volume", "-density"]) == {"sort": {"volume": 1, "density": -1}}
+    assert op.query(sort_fields="volume,-density") == {"sort": {"volume": 1, "density": -1}}
 
 
 def test_sort_serialization():
@@ -97,7 +97,7 @@ def test_sort_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query(sort_fields=["volume", "-density"]) == {"sort": {"volume": 1, "density": -1}}
+        assert new_op.query(sort_fields="volume,-density") == {"sort": {"volume": 1, "density": -1}}
 
 
 @pytest.fixture
