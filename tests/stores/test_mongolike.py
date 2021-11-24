@@ -283,21 +283,33 @@ def test_json_store_load(jsonstore, test_dir):
 def test_json_store_writeable(test_dir):
     with ScratchDir("."):
         shutil.copy(test_dir / "test_set" / "d.json", ".")
-        jsonstore = JSONStore("d.json", writable=True)
+        jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 2
         jsonstore.update({'new': 'hello', 'task_id': 2})
         assert jsonstore.count() == 3
         jsonstore.close()
-        jsonstore = JSONStore("d.json", writable=True)
+        jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
+        mtime = os.path.getmtime("d.json")
         assert jsonstore.count() == 3
         jsonstore.remove_docs({'a': 5})
         assert jsonstore.count() == 2
+        mtime2 = os.path.getmtime("d.json")
+        assert mtime != mtime2
         jsonstore.close()
-        jsonstore = JSONStore("d.json", writable=True)
+        jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 2
+        jsonstore.close()
+        jsonstore = JSONStore("d.json", file_writable=False)
+        jsonstore.connect()
+        mtime = os.path.getmtime("d.json")
+        jsonstore.update({'new': 'hello', 'task_id': 5})
+        assert jsonstore.count() == 3
+        mtime2 = os.path.getmtime("d.json")
+        assert mtime == mtime2
+        jsonstore.close()
 
 
 def test_eq(mongostore, memorystore, jsonstore):

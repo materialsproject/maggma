@@ -606,20 +606,26 @@ class JSONStore(MemoryStore):
     A Store for access to a single or multiple JSON files
     """
 
-    def __init__(self, paths: Union[str, List[str]], writable=False, **kwargs):
+    def __init__(self, paths: Union[str, List[str]], file_writable=False, **kwargs):
         """
         Args:
             paths: paths for json files to turn into a Store
-            writable: whether this JSONStore is writable. When a JSONStore is writable,
-                the json file will be automatically updated everytime a write-like
-                operation is performed. Note that only JSONStore with a single JSON file
-                is compatible with writable True.
+            file_writable: whether this JSONStore is "file-writable". When a JSONStore
+                is "file-writable", the json file will be automatically updated
+                everytime a write-like operation is performed. Note that only
+                JSONStore with a single JSON file is compatible with file_writable
+                True. Note also that when file_writable is False, the JSONStore
+                can still apply MongoDB-like writable operations (e.g. an update)
+                as it behaves like a MemoryStore, but it will not write those changes
+                to the file.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
-        if writable and len(paths) > 1:
-            raise RuntimeError('Cannot instantiate writable JSONStore with multiple JSON files.')
-        self.writable = writable
+        if file_writable and len(paths) > 1:
+            raise RuntimeError(
+                'Cannot instantiate file-writable JSONStore with multiple JSON files.'
+            )
+        self.file_writable = file_writable
         self.kwargs = kwargs
         super().__init__(collection_name="collection", **kwargs)
 
@@ -640,7 +646,7 @@ class JSONStore(MemoryStore):
         """
         Update documents into the Store.
 
-        For a writable JSONStore, the json file is updated.
+        For a file-writable JSONStore, the json file is updated.
 
         Args:
             docs: the document or list of documents to update
@@ -650,20 +656,20 @@ class JSONStore(MemoryStore):
                  field is to be used
         """
         super().update(docs=docs, key=key)
-        if self.writable:
+        if self.file_writable:
             self.update_json_file()
 
     def remove_docs(self, criteria: Dict):
         """
         Remove docs matching the query dictionary.
 
-        For a writable JSONStore, the json file is updated.
+        For a file-writable JSONStore, the json file is updated.
 
         Args:
             criteria: query dictionary to match
         """
         super().remove_docs(criteria=criteria)
-        if self.writable:
+        if self.file_writable:
             self.update_json_file()
 
     def update_json_file(self):
