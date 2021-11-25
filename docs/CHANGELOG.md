@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.32.3](https://github.com/materialsproject/maggma/tree/v0.32.3) (2021-11-25)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.32.2...v0.32.3)
+
+**Merged pull requests:**
+
+- Added option for writable JSONStores \(for single JSON files only\). [\#507](https://github.com/materialsproject/maggma/pull/507) ([davidwaroquiers](https://github.com/davidwaroquiers))
+
 ## [v0.32.2](https://github.com/materialsproject/maggma/tree/v0.32.2) (2021-11-23)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.32.1...v0.32.2)
