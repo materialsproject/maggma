@@ -1,11 +1,15 @@
 import os
+import shutil
 from datetime import datetime
+from unittest import mock
 
 import mongomock.collection
+from monty.tempfile import ScratchDir
 import pymongo.collection
 import pytest
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
+import maggma.stores
 from maggma.core import StoreError
 from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore
 from maggma.validators import JSONSchemaValidator
@@ -276,6 +280,41 @@ def test_json_store_load(jsonstore, test_dir):
     jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz")
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
+
+
+def test_json_store_writeable(test_dir):
+    with ScratchDir("."):
+        shutil.copy(test_dir / "test_set" / "d.json", ".")
+        jsonstore = JSONStore("d.json", file_writable=True)
+        jsonstore.connect()
+        assert jsonstore.count() == 2
+        jsonstore.update({'new': 'hello', 'task_id': 2})
+        assert jsonstore.count() == 3
+        jsonstore.close()
+        jsonstore = JSONStore("d.json", file_writable=True)
+        jsonstore.connect()
+        assert jsonstore.count() == 3
+        jsonstore.remove_docs({'a': 5})
+        assert jsonstore.count() == 2
+        jsonstore.close()
+        jsonstore = JSONStore("d.json", file_writable=True)
+        jsonstore.connect()
+        assert jsonstore.count() == 2
+        jsonstore.close()
+        with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
+            jsonstore = JSONStore("d.json", file_writable=False)
+            jsonstore.connect()
+            jsonstore.update({'new': 'hello', 'task_id': 5})
+            assert jsonstore.count() == 3
+            jsonstore.close()
+            update_json_file_mock.assert_not_called()
+        with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
+            jsonstore = JSONStore("d.json", file_writable=False)
+            jsonstore.connect()
+            jsonstore.remove_docs({'task_id': 5})
+            assert jsonstore.count() == 2
+            jsonstore.close()
+            update_json_file_mock.assert_not_called()
 
 
 def test_eq(mongostore, memorystore, jsonstore):
