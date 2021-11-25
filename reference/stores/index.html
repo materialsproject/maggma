@@ -509,6 +509,27 @@
   
 </li>
         
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.JSONStore.remove_docs" class="md-nav__link">
+    remove_docs()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.JSONStore.update" class="md-nav__link">
+    update()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.JSONStore.update_json_file" class="md-nav__link">
+    update_json_file()
+  </a>
+  
+</li>
+        
       </ul>
     </nav>
   
@@ -1633,6 +1654,27 @@
           <li class="md-nav__item">
   <a href="#maggma.stores.mongolike.JSONStore.connect" class="md-nav__link">
     connect()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.JSONStore.remove_docs" class="md-nav__link">
+    remove_docs()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.JSONStore.update" class="md-nav__link">
+    update()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.JSONStore.update_json_file" class="md-nav__link">
+    update_json_file()
   </a>
   
 </li>
@@ -2795,7 +2837,7 @@ various utilities</p>
 
 
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.JSONStore.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">file_writable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -2823,17 +2865,43 @@ various utilities</p>
         <td><p>paths for json files to turn into a Store</p></td>
         <td><em>required</em></td>
       </tr>
+      <tr>
+        <td><code>file_writable</code></td>
+        <td><code></code></td>
+        <td><p>whether this JSONStore is "file-writable". When a JSONStore
+is "file-writable", the json file will be automatically updated
+everytime a write-like operation is performed. Note that only
+JSONStore with a single JSON file is compatible with file_writable
+True. Note also that when file_writable is False, the JSONStore
+can still apply MongoDB-like writable operations (e.g. an update)
+as it behaves like a MemoryStore, but it will not write those changes
+to the file.</p></td>
+        <td><code>False</code></td>
+      </tr>
   </tbody>
 </table>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
-          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">file_writable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        paths: paths for json files to turn into a Store</span>
+<span class="sd">        file_writable: whether this JSONStore is &quot;file-writable&quot;. When a JSONStore</span>
+<span class="sd">            is &quot;file-writable&quot;, the json file will be automatically updated</span>
+<span class="sd">            everytime a write-like operation is performed. Note that only</span>
+<span class="sd">            JSONStore with a single JSON file is compatible with file_writable</span>
+<span class="sd">            True. Note also that when file_writable is False, the JSONStore</span>
+<span class="sd">            can still apply MongoDB-like writable operations (e.g. an update)</span>
+<span class="sd">            as it behaves like a MemoryStore, but it will not write those changes</span>
+<span class="sd">            to the file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span>
+    <span class="k">if</span> <span class="n">file_writable</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+            <span class="s1">&#39;Cannot instantiate file-writable JSONStore with multiple JSON files.&#39;</span>
+        <span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span> <span class="o">=</span> <span class="n">file_writable</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">collection_name</span><span class="o">=</span><span class="s2">&quot;collection&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
@@ -2872,6 +2940,164 @@ various utilities</p>
             <span class="n">objects</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">objects</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">objects</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">objects</span><span class="p">)</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.JSONStore.remove_docs">
+<code class="codehilite language-python"><span class="n">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#maggma.stores.mongolike.JSONStore.remove_docs" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Remove docs matching the query dictionary.</p>
+<p>For a file-writable JSONStore, the json file is updated.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>criteria</code></td>
+        <td><code>Dict</code></td>
+        <td><p>query dictionary to match</p></td>
+        <td><em>required</em></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Remove docs matching the query dictionary.</span>
+
+<span class="sd">    For a file-writable JSONStore, the json file is updated.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        criteria: query dictionary to match</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove_docs</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_json_file</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.JSONStore.update">
+<code class="codehilite language-python"><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#maggma.stores.mongolike.JSONStore.update" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Update documents into the Store.</p>
+<p>For a file-writable JSONStore, the json file is updated.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>docs</code></td>
+        <td><code>Union[List[Dict], Dict]</code></td>
+        <td><p>the document or list of documents to update</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>key</code></td>
+        <td><code>Union[List, str]</code></td>
+        <td><p>field name(s) to determine uniqueness for a
+ document, can be a list of multiple fields,
+ a single field, or None if the Store's key
+ field is to be used</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update documents into the Store.</span>
+
+<span class="sd">    For a file-writable JSONStore, the json file is updated.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        docs: the document or list of documents to update</span>
+<span class="sd">        key: field name(s) to determine uniqueness for a</span>
+<span class="sd">             document, can be a list of multiple fields,</span>
+<span class="sd">             a single field, or None if the Store&#39;s key</span>
+<span class="sd">             field is to be used</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">docs</span><span class="o">=</span><span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">update_json_file</span><span class="p">()</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.JSONStore.update_json_file">
+<code class="codehilite language-python"><span class="n">update_json_file</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#maggma.stores.mongolike.JSONStore.update_json_file" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Updates the json file when a write-like operation is performed.</p>
+
+        <details class="quote">
+          <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">update_json_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Updates the json file when a write-like operation is performed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">()]</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_id&#39;</span><span class="p">)</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
