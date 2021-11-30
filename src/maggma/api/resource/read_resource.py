@@ -185,7 +185,7 @@ class ReadOnlyResource(Resource):
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 
-            if self.hint_scheme is not None:
+            if self.hint_scheme is not None:  # pragma: no cover
                 hints = self.hint_scheme.generate_hints(query)
                 query.update(hints)
 
