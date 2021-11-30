@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
-from maggma.api.resource import Resource
+from maggma.api.resource import Resource, HintScheme
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries, object_id_serilaization_helper
 from maggma.core import Store
@@ -29,7 +29,7 @@ class ReadOnlyResource(Resource):
         tags: Optional[List[str]] = None,
         query_operators: Optional[List[QueryOperator]] = None,
         key_fields: Optional[List[str]] = None,
-        query: Optional[Dict] = None,
+        hint_scheme: Optional[HintScheme] = None,
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
         disable_validation: bool = False,
@@ -42,6 +42,7 @@ class ReadOnlyResource(Resource):
             model: The pydantic model this Resource represents
             tags: List of tags for the Endpoint
             query_operators: Operators for the query language
+            hint_scheme: The hint scheme to use for this resource
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
             enable_get_by_key: Enable default key route for endpoint.
@@ -54,7 +55,7 @@ class ReadOnlyResource(Resource):
         """
         self.store = store
         self.tags = tags or []
-        self.query = query or {}
+        self.hint_scheme = hint_scheme
         self.key_fields = key_fields
         self.versioned = False
         self.enable_get_by_key = enable_get_by_key
@@ -180,7 +181,10 @@ class ReadOnlyResource(Resource):
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
-            query["criteria"].update(self.query)
+
+            if self.hint_scheme is not None:
+                hints = self.hint_scheme.generate_hints(query)
+                query.update(hints)
 
             self.store.connect()
 

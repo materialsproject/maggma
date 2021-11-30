@@ -7,7 +7,7 @@ from monty.json import MontyDecoder, MSONable
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 
-from maggma.api.utils import api_sanitize
+from maggma.api.utils import STORE_PARAMS, api_sanitize
 from maggma.utils import dynamic_import
 
 
@@ -17,8 +17,7 @@ class Resource(MSONable, metaclass=ABCMeta):
     """
 
     def __init__(
-        self,
-        model: Type[BaseModel],
+        self, model: Type[BaseModel],
     ):
         """
         Args:
@@ -86,3 +85,15 @@ class Resource(MSONable, metaclass=ABCMeta):
             d["model"] = dynamic_import(d["model"])
         d = {k: MontyDecoder().process_decoded(v) for k, v in d.items()}
         return cls(**d)
+
+
+class HintScheme(MSONable, metaclass=ABCMeta):
+    """
+    Base class for generic hint schemes generation
+    """
+
+    @abstractmethod
+    def generate_hints(self, query: STORE_PARAMS) -> STORE_PARAMS:
+        """
+        This method takes in a MongoDB query and returns hints
+        """

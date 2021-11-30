@@ -17,7 +17,9 @@ else:
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
 STORE_PARAMS = Dict[
-    Literal["criteria", "properties", "sort", "skip", "limit", "request", "pipeline"],
+    Literal[
+        "criteria", "properties", "sort", "skip", "limit", "request", "pipeline", "hint"
+    ],
     Any,
 ]
 

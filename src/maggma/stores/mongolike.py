@@ -312,7 +312,7 @@ class MongoStore(Store):
         criteria = criteria if criteria else {}
         return self._collection.find(filter=criteria).count()
 
-    def query(
+    def query(  # type: ignore
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
