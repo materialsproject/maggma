@@ -11,6 +11,7 @@ from maggma.api.resource import Resource, HintScheme
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries, object_id_serilaization_helper
 from maggma.core import Store
+from maggma.stores.mongolike import MongoStore
 
 import orjson
 
@@ -64,6 +65,9 @@ class ReadOnlyResource(Resource):
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
         self.response_model = Response[model]  # type: ignore
+
+        if not isinstance(store, MongoStore) and self.hint_scheme is not None:
+            raise ValueError("Hint scheme is only supported for MongoDB stores")
 
         self.query_operators = (
             query_operators
