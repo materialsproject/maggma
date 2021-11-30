@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.33.0](https://github.com/materialsproject/maggma/tree/v0.33.0) (2021-11-30)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.32.3...v0.33.0)
+
+**Merged pull requests:**
+
+- MongoDB hint support [\#513](https://github.com/materialsproject/maggma/pull/513) ([munrojm](https://github.com/munrojm))
+
 ## [v0.32.3](https://github.com/materialsproject/maggma/tree/v0.32.3) (2021-11-25)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.32.2...v0.32.3)
