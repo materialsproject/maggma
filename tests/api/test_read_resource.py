@@ -18,6 +18,8 @@ from maggma.stores import MemoryStore
 
 import inspect
 
+from maggma.api.resource.core import HintScheme
+
 
 class Owner(BaseModel):
     name: str = Field(..., title="Owner's name")
@@ -101,6 +103,15 @@ def test_problem_query_params(owner_store):
     client = TestClient(app)
 
     client.get("/?param=test").status_code
+
+
+@pytest.mark.xfail
+def test_problem_hint_scheme(owner_store):
+    class TestHintScheme(HintScheme):
+        def generate_hints(query):
+            return {"hint": "test"}
+
+    ReadOnlyResource(owner_store, Owner, hint_scheme=TestHintScheme())
 
 
 def search_helper(payload, base: str = "/?", debug=True) -> Response:
