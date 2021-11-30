@@ -2899,7 +2899,7 @@ to the file.</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span>
     <span class="k">if</span> <span class="n">file_writable</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
-            <span class="s1">&#39;Cannot instantiate file-writable JSONStore with multiple JSON files.&#39;</span>
+            <span class="s2">&quot;Cannot instantiate file-writable JSONStore with multiple JSON files.&quot;</span>
         <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span> <span class="o">=</span> <span class="n">file_writable</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -3093,10 +3093,10 @@ to the file.</p></td>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Updates the json file when a write-like operation is performed.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+    <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">()]</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-            <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;_id&#39;</span><span class="p">)</span>
+            <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;_id&quot;</span><span class="p">)</span>
         <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 </code></pre></div>
         </details>
@@ -4273,7 +4273,7 @@ values are 1 for ascending or -1 for descending.</p></td>
 
 
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.MongoStore.query">
-<code class="codehilite language-python"><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="n">query</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">hint</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></code>
 
 
 <a class="headerlink" href="#maggma.stores.mongolike.MongoStore.query" title="Permanent link">&para;</a></h3>
@@ -4313,6 +4313,13 @@ values are 1 for ascending or -1 for descending.</p></td>
         <td><code>None</code></td>
       </tr>
       <tr>
+        <td><code>hint</code></td>
+        <td><code>Optional[Dict[str, Union[maggma.core.store.Sort, int]]]</code></td>
+        <td><p>Dictionary of indexes to use as hints for query optimizer.
+Keys are field names and values are 1 for ascending or -1 for descending.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
         <td><code>skip</code></td>
         <td><code>int</code></td>
         <td><p>number documents to skip</p></td>
@@ -4328,11 +4335,12 @@ values are 1 for ascending or -1 for descending.</p></td>
 </table>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
-          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">query</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">hint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
@@ -4344,6 +4352,8 @@ values are 1 for ascending or -1 for descending.</p></td>
 <span class="sd">        properties: properties to return in grouped documents</span>
 <span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
 <span class="sd">            values are 1 for ascending or -1 for descending.</span>
+<span class="sd">        hint: Dictionary of indexes to use as hints for query optimizer.</span>
+<span class="sd">            Keys are field names and values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -4359,12 +4369,22 @@ values are 1 for ascending or -1 for descending.</p></td>
         <span class="k">else</span> <span class="kc">None</span>
     <span class="p">)</span>
 
+    <span class="n">hint_list</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">[</span>
+            <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">Sort</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">value</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">hint</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="n">hint</span>
+        <span class="k">else</span> <span class="kc">None</span>
+    <span class="p">)</span>
+
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span>
         <span class="nb">filter</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span>
         <span class="n">projection</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
         <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span>
         <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
         <span class="n">sort</span><span class="o">=</span><span class="n">sort_list</span><span class="p">,</span>
+        <span class="n">hint</span><span class="o">=</span><span class="n">hint_list</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">yield</span> <span class="n">d</span>
 </code></pre></div>
