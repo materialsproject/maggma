@@ -123,8 +123,7 @@ class ReadOnlyResource(Resource):
 
             item = [
                 self.store.query_one(
-                    criteria={self.store.key: key, **self.query},
-                    properties=fields["properties"],
+                    criteria={self.store.key: key}, properties=fields["properties"],
                 )
             ]
 
