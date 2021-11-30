@@ -93,7 +93,7 @@ class HintScheme(MSONable, metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def generate_hints(self, query: STORE_PARAMS) -> STORE_PARAMS:  # pragma: no cover
+    def generate_hints(self, query: STORE_PARAMS) -> STORE_PARAMS:
         """
         This method takes in a MongoDB query and returns hints
         """
