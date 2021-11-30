@@ -312,11 +312,12 @@ class MongoStore(Store):
         criteria = criteria if criteria else {}
         return self._collection.find(filter=criteria).count()
 
-    def query(
+    def query(  # type: ignore
         self,
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
@@ -328,6 +329,8 @@ class MongoStore(Store):
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
+            hint: Dictionary of indexes to use as hints for query optimizer.
+                Keys are field names and values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
@@ -343,12 +346,22 @@ class MongoStore(Store):
             else None
         )
 
+        hint_list = (
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in hint.items()
+            ]
+            if hint
+            else None
+        )
+
         for d in self._collection.find(
             filter=criteria,
             projection=properties,
             skip=skip,
             limit=limit,
             sort=sort_list,
+            hint=hint_list,
         ):
             yield d
 
@@ -623,7 +636,7 @@ class JSONStore(MemoryStore):
         self.paths = paths
         if file_writable and len(paths) > 1:
             raise RuntimeError(
-                'Cannot instantiate file-writable JSONStore with multiple JSON files.'
+                "Cannot instantiate file-writable JSONStore with multiple JSON files."
             )
         self.file_writable = file_writable
         self.kwargs = kwargs
@@ -676,10 +689,10 @@ class JSONStore(MemoryStore):
         """
         Updates the json file when a write-like operation is performed.
         """
-        with zopen(self.paths[0], 'w') as f:
+        with zopen(self.paths[0], "w") as f:
             data = [d for d in self.query()]
             for d in data:
-                d.pop('_id')
+                d.pop("_id")
             json.dump(data, f)
 
     def __hash__(self):

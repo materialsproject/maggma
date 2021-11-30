@@ -7,10 +7,11 @@ from pydantic import BaseModel
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
-from maggma.api.resource import Resource
+from maggma.api.resource import Resource, HintScheme
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries, object_id_serilaization_helper
 from maggma.core import Store
+from maggma.stores.mongolike import MongoStore
 
 import orjson
 
@@ -29,7 +30,7 @@ class ReadOnlyResource(Resource):
         tags: Optional[List[str]] = None,
         query_operators: Optional[List[QueryOperator]] = None,
         key_fields: Optional[List[str]] = None,
-        query: Optional[Dict] = None,
+        hint_scheme: Optional[HintScheme] = None,
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
         disable_validation: bool = False,
@@ -42,6 +43,7 @@ class ReadOnlyResource(Resource):
             model: The pydantic model this Resource represents
             tags: List of tags for the Endpoint
             query_operators: Operators for the query language
+            hint_scheme: The hint scheme to use for this resource
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
             enable_get_by_key: Enable default key route for endpoint.
@@ -54,7 +56,7 @@ class ReadOnlyResource(Resource):
         """
         self.store = store
         self.tags = tags or []
-        self.query = query or {}
+        self.hint_scheme = hint_scheme
         self.key_fields = key_fields
         self.versioned = False
         self.enable_get_by_key = enable_get_by_key
@@ -63,6 +65,9 @@ class ReadOnlyResource(Resource):
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
         self.response_model = Response[model]  # type: ignore
+
+        if not isinstance(store, MongoStore) and self.hint_scheme is not None:
+            raise ValueError("Hint scheme is only supported for MongoDB stores")
 
         self.query_operators = (
             query_operators
@@ -122,8 +127,7 @@ class ReadOnlyResource(Resource):
 
             item = [
                 self.store.query_one(
-                    criteria={self.store.key: key, **self.query},
-                    properties=fields["properties"],
+                    criteria={self.store.key: key}, properties=fields["properties"],
                 )
             ]
 
@@ -180,7 +184,10 @@ class ReadOnlyResource(Resource):
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
-            query["criteria"].update(self.query)
+
+            if self.hint_scheme is not None:  # pragma: no cover
+                hints = self.hint_scheme.generate_hints(query)
+                query.update(hints)
 
             self.store.connect()
 

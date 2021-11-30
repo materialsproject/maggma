@@ -1,5 +1,6 @@
 # isort: off
 from maggma.api.resource.core import Resource
+from maggma.api.resource.core import HintScheme
 
 # isort: on
 
