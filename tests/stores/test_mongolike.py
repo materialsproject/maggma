@@ -168,7 +168,7 @@ def test_mongostore_from_db_file(mongostore, db_json):
 
 
 def test_mongostore_from_launchpad_file(lp_file):
-    ms = MongoStore.from_launchpad_file(lp_file, collection_name='tmp')
+    ms = MongoStore.from_launchpad_file(lp_file, collection_name="tmp")
     ms.connect()
     assert ms._collection.full_name == "maggma_tests.tmp"
 
@@ -288,30 +288,34 @@ def test_json_store_writeable(test_dir):
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 2
-        jsonstore.update({'new': 'hello', 'task_id': 2})
+        jsonstore.update({"new": "hello", "task_id": 2})
         assert jsonstore.count() == 3
         jsonstore.close()
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 3
-        jsonstore.remove_docs({'a': 5})
+        jsonstore.remove_docs({"a": 5})
         assert jsonstore.count() == 2
         jsonstore.close()
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 2
         jsonstore.close()
-        with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
+        with mock.patch(
+            "maggma.stores.JSONStore.update_json_file"
+        ) as update_json_file_mock:
             jsonstore = JSONStore("d.json", file_writable=False)
             jsonstore.connect()
-            jsonstore.update({'new': 'hello', 'task_id': 5})
+            jsonstore.update({"new": "hello", "task_id": 5})
             assert jsonstore.count() == 3
             jsonstore.close()
             update_json_file_mock.assert_not_called()
-        with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
+        with mock.patch(
+            "maggma.stores.JSONStore.update_json_file"
+        ) as update_json_file_mock:
             jsonstore = JSONStore("d.json", file_writable=False)
             jsonstore.connect()
-            jsonstore.remove_docs({'task_id': 5})
+            jsonstore.remove_docs({"task_id": 5})
             assert jsonstore.count() == 2
             jsonstore.close()
             update_json_file_mock.assert_not_called()
