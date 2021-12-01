@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.33.1](https://github.com/materialsproject/maggma/tree/v0.33.1) (2021-12-01)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.0...v0.33.1)
+
+**Merged pull requests:**
+
+- Patch memory store connect method [\#515](https://github.com/materialsproject/maggma/pull/515) ([munrojm](https://github.com/munrojm))
+
 ## [v0.33.0](https://github.com/materialsproject/maggma/tree/v0.33.0) (2021-11-30)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.32.3...v0.33.0)
