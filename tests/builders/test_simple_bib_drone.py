@@ -98,15 +98,7 @@ def test_get_items(init_drone: SimpleBibDrone):
     """
 
     init_drone.connect()
-    init_drone.run()  # make sure the database is up-to-date
-    init_drone.connect()
-    assert sum([1 for _ in init_drone.get_items()]) == 0
-    init_drone.finalize()
-
-    init_drone.connect()
-    init_drone.store.remove_docs(criteria={})  # clears the database
     assert sum([1 for _ in init_drone.get_items()]) == 7
-    init_drone.finalize()
 
 
 def test_assimilate(init_drone: SimpleBibDrone):
