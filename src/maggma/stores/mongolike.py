@@ -520,7 +520,7 @@ class MongoURIStore(MongoStore):
         """
         Connect to the source data
         """
-        if not self._collection or force_reset:  # pragma: no cover
+        if self._collection is None or force_reset:  # pragma: no cover
             conn = MongoClient(self.uri)
             db = conn[self.database]
             self._collection = db[self.collection_name]
