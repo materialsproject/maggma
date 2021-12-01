@@ -149,7 +149,7 @@ class MongoStore(Store):
         """
         Connect to the source data
         """
-        if not self._collection or force_reset:
+        if self._collection is None or force_reset:
             if self.ssh_tunnel is None:
                 conn = MongoClient(self.host, self.port)
             else:
@@ -549,7 +549,7 @@ class MemoryStore(MongoStore):
         Connect to the source data
         """
 
-        if not self._collection or force_reset:
+        if self._collection is None or force_reset:
             self._collection = mongomock.MongoClient().db[self.name]
 
     @property
