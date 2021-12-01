@@ -3,7 +3,7 @@ from pathlib import Path
 
 import pytest
 
-from maggma.stores import MongoStore
+from maggma.stores import MemoryStore
 
 from .simple_bib_drone import SimpleBibDrone
 
@@ -16,9 +16,7 @@ def init_drone(test_dir):
     :return:
         initialized drone
     """
-    mongo_store = MongoStore(
-        database="drone_test", collection_name="drone_test", key="record_key"
-    )
+    mongo_store = MemoryStore(collection_name="drone_test", key="record_key")
     simple_path = test_dir / "simple_bib_example_data"
     assert simple_path.exists(), f"{simple_path} not found"
     simple_bib_drone = SimpleBibDrone(store=mongo_store, path=simple_path)
@@ -98,7 +96,15 @@ def test_get_items(init_drone: SimpleBibDrone):
     """
 
     init_drone.connect()
+    init_drone.run()  # make sure the database is up-to-date
+    init_drone.connect()
+    assert sum([1 for _ in init_drone.get_items()]) == 0
+    init_drone.finalize()
+
+    init_drone.connect()
+    init_drone.store.remove_docs(criteria={})  # clears the database
     assert sum([1 for _ in init_drone.get_items()]) == 7
+    init_drone.finalize()
 
 
 def test_assimilate(init_drone: SimpleBibDrone):
