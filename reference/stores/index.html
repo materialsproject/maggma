@@ -3314,7 +3314,7 @@ other: other MemoryStore to compare with</p>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">mongomock</span><span class="o">.</span><span class="n">MongoClient</span><span class="p">()</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
 </code></pre></div>
         </details>
@@ -3747,7 +3747,7 @@ other: other mongostore to compare with</p>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
