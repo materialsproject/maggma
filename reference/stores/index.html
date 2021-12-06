@@ -14,7 +14,7 @@
         <link rel="canonical" href="https://materialsproject.github.io/maggma/reference/stores/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.1.2, mkdocs-material-7.1.8">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.1.8">
     
     
       
@@ -740,6 +740,47 @@
           <li class="md-nav__item">
   <a href="#maggma.stores.mongolike.MongoURIStore.connect" class="md-nav__link">
     connect()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore" class="md-nav__link">
+    MontyStore
+  </a>
+  
+    <nav class="md-nav" aria-label="MontyStore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore.name" class="md-nav__link">
+    name
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore.connect" class="md-nav__link">
+    connect()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore.update" class="md-nav__link">
+    update()
   </a>
   
 </li>
@@ -1889,6 +1930,47 @@
           <li class="md-nav__item">
   <a href="#maggma.stores.mongolike.MongoURIStore.connect" class="md-nav__link">
     connect()
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore" class="md-nav__link">
+    MontyStore
+  </a>
+  
+    <nav class="md-nav" aria-label="MontyStore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore.name" class="md-nav__link">
+    name
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore.__init__" class="md-nav__link">
+    __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore.connect" class="md-nav__link">
+    connect()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MontyStore.update" class="md-nav__link">
+    update()
   </a>
   
 </li>
@@ -3810,7 +3892,7 @@ other: other mongostore to compare with</p>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="k">if</span> <span class="n">criteria</span> <span class="k">else</span> <span class="p">{}</span>
-    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">count_documents</span><span class="p">(</span><span class="nb">filter</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -4729,6 +4811,345 @@ client parameters via TXT records</p>
         <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+
+
+  </div>
+
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-class">
+
+
+
+<h2 class="doc doc-heading" id="maggma.stores.mongolike.MontyStore">
+        <code>MontyStore</code>
+
+
+
+<a class="headerlink" href="#maggma.stores.mongolike.MontyStore" title="Permanent link">&para;</a></h2>
+
+    <div class="doc doc-contents ">
+
+      <p>A MongoDB compatible store that uses on disk files for storage.</p>
+<p>This is handled under the hood using MontyDB. A number of on-disk storage options
+are available but MontyDB provides a mongo style interface for all options. The
+options include:</p>
+<ul>
+<li>sqlite: Uses an sqlite database to store documents.</li>
+<li>lightning: Uses Lightning Memory-Mapped Database (LMDB) for storage. This can
+  provide fast read and write times but requires lmdb to be installed (in most cases
+  this can be achieved using <code>pip install lmdb</code>).</li>
+<li>flatfile: Uses a system of flat json files. This is not recommended as multiple
+  simultaneous connections to the store will not work correctly.</li>
+</ul>
+<p>See the MontyDB repository for more information: https://github.com/davidlatwe/montydb</p>
+
+
+
+
+  <div class="doc doc-children">
+
+
+
+
+
+
+  <div class="doc doc-object doc-attribute">
+
+
+
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.MontyStore.name">
+<code class="codehilite language-python"><span class="n">name</span><span class="p">:</span> <span class="nb">str</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-property"><code>property</code></small>
+      <small class="doc doc-property doc-property-readonly"><code>readonly</code></small>
+  </span>
+
+<a class="headerlink" href="#maggma.stores.mongolike.MontyStore.name" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Return a string representing this data source.</p>
+    </div>
+
+  </div>
+
+
+
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.MontyStore.__init__">
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">database_path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">database_name</span><span class="o">=</span><span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="s1">&#39;sqlite&#39;</span><span class="p">,</span> <span class="n">storage_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">client_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+
+  <span class="doc doc-properties">
+      <small class="doc doc-property doc-property-special"><code>special</code></small>
+  </span>
+
+<a class="headerlink" href="#maggma.stores.mongolike.MontyStore.__init__" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Initializes the Monty Store.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>collection_name</code></td>
+        <td><code></code></td>
+        <td><p>Name for the collection.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>database_path</code></td>
+        <td><code>str</code></td>
+        <td><p>Path to on-disk database files. If None, the current working
+directory will be used.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>database_name</code></td>
+        <td><code>str</code></td>
+        <td><p>The database name.</p></td>
+        <td><code>&#39;db&#39;</code></td>
+      </tr>
+      <tr>
+        <td><code>storage</code></td>
+        <td><code>str</code></td>
+        <td><p>The storage type. Options include "sqlite", "lightning", "flatfile".</p></td>
+        <td><code>&#39;sqlite&#39;</code></td>
+      </tr>
+      <tr>
+        <td><code>storage_kwargs</code></td>
+        <td><code>Optional[dict]</code></td>
+        <td><p>Keyword arguments passed to <code>montydb.set_storage</code>.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>client_kwargs</code></td>
+        <td><code>Optional[dict]</code></td>
+        <td><p>Keyword arguments passed to the <code>montydb.MontyClient</code>
+constructor.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>**kwargs</code></td>
+        <td><code></code></td>
+        <td><p>Additional keyword arguments passed to the Store constructor.</p></td>
+        <td><code>{}</code></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">collection_name</span><span class="p">,</span>
+    <span class="n">database_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">database_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;db&quot;</span><span class="p">,</span>
+    <span class="n">storage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sqlite&quot;</span><span class="p">,</span>
+    <span class="n">storage_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">client_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Initializes the Monty Store.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        collection_name: Name for the collection.</span>
+<span class="sd">        database_path: Path to on-disk database files. If None, the current working</span>
+<span class="sd">            directory will be used.</span>
+<span class="sd">        database_name: The database name.</span>
+<span class="sd">        storage: The storage type. Options include &quot;sqlite&quot;, &quot;lightning&quot;, &quot;flatfile&quot;.</span>
+<span class="sd">        storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.</span>
+<span class="sd">        client_kwargs: Keyword arguments passed to the ``montydb.MontyClient``</span>
+<span class="sd">            constructor.</span>
+<span class="sd">        **kwargs: Additional keyword arguments passed to the Store constructor.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">database_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">database_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">database_path</span> <span class="o">=</span> <span class="n">database_path</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">database_name</span> <span class="o">=</span> <span class="n">database_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># This is to fix issues with the tunnel on close</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">storage</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span> <span class="o">=</span> <span class="n">storage_kwargs</span> <span class="ow">or</span> <span class="p">{</span>
+        <span class="s2">&quot;use_bson&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s2">&quot;monty_version&quot;</span><span class="p">:</span> <span class="s2">&quot;4.0&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">client_kwargs</span> <span class="o">=</span> <span class="n">client_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
+    <span class="nb">super</span><span class="p">(</span><span class="n">MongoStore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># noqa</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.MontyStore.connect">
+<code class="codehilite language-python"><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#maggma.stores.mongolike.MontyStore.connect" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Connect to the database store.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>force_reset</code></td>
+        <td><code>bool</code></td>
+        <td><p>Force connection reset.</p></td>
+        <td><code>False</code></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Connect to the database store.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        force_reset: Force connection reset.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">montydb</span> <span class="kn">import</span> <span class="n">set_storage</span><span class="p">,</span> <span class="n">MontyClient</span>
+
+    <span class="n">set_storage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span><span class="p">)</span>
+    <span class="n">client</span> <span class="o">=</span> <span class="n">MontyClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">client_kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="s2">&quot;db&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.MontyStore.update">
+<code class="codehilite language-python"><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#maggma.stores.mongolike.MontyStore.update" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Update documents into the Store.</p>
+
+<p><strong>Parameters:</strong></p>
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Type</th>
+      <th>Description</th>
+      <th>Default</th>
+    </tr>
+  </thead>
+  <tbody>
+      <tr>
+        <td><code>docs</code></td>
+        <td><code>Union[List[Dict], Dict]</code></td>
+        <td><p>The document or list of documents to update.</p></td>
+        <td><em>required</em></td>
+      </tr>
+      <tr>
+        <td><code>key</code></td>
+        <td><code>Union[List, str]</code></td>
+        <td><p>Field name(s) to determine uniqueness for a document, can be a list of
+multiple fields, a single field, or None if the Store's key field is to be
+used.</p></td>
+        <td><code>None</code></td>
+      </tr>
+  </tbody>
+</table>
+        <details class="quote">
+          <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update documents into the Store.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        docs: The document or list of documents to update.</span>
+<span class="sd">        key: Field name(s) to determine uniqueness for a document, can be a list of</span>
+<span class="sd">            multiple fields, a single field, or None if the Store&#39;s key field is to be</span>
+<span class="sd">            used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">docs</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">docs</span> <span class="o">=</span> <span class="p">[</span><span class="n">docs</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="n">jsanitize</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">allow_bson</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="c1"># document-level validation is optional</span>
+        <span class="n">validates</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="p">:</span>
+            <span class="n">validates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="o">.</span><span class="n">is_valid</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">validates</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="o">.</span><span class="n">strict</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="o">.</span><span class="n">validation_errors</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">validator</span><span class="o">.</span><span class="n">validation_errors</span><span class="p">(</span><span class="n">d</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">validates</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">key</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">search_doc</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">key</span><span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">search_doc</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="n">key</span><span class="p">]}</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">replace_one</span><span class="p">(</span><span class="n">search_doc</span><span class="p">,</span> <span class="n">d</span><span class="p">,</span> <span class="n">upsert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
