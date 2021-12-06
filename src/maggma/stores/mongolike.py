@@ -6,13 +6,15 @@ various utilities
 """
 
 import json
+from pathlib import Path
+
 import yaml
 from itertools import chain, groupby
 from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
-from monty.dev import deprecated
+from monty.dev import deprecated, requires
 from monty.io import zopen
 from monty.json import MSONable, jsanitize
 from monty.serialization import loadfn
@@ -23,6 +25,11 @@ from sshtunnel import SSHTunnelForwarder
 
 from maggma.core import Sort, Store, StoreError
 from maggma.utils import confirm_field_index
+
+try:
+    import montydb
+except ImportError:
+    montydb = None
 
 
 class SSHTunnel(MSONable):
@@ -710,6 +717,126 @@ class JSONStore(MemoryStore):
 
         fields = ["paths", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
+
+
+@requires(
+    montydb,
+    "MontyStore requires MontyDB to be installed. See the MontyDB repository for more "
+    "information: https://github.com/davidlatwe/montydb",
+)
+class MontyStore(MemoryStore):
+    """
+    A MongoDB compatible store that uses on disk files for storage.
+
+    This is handled under the hood using MontyDB. A number of on-disk storage options
+    are available but MontyDB provides a mongo style interface for all options. The
+    options include:
+
+    - sqlite: Uses an sqlite database to store documents.
+    - lightning: Uses Lightning Memory-Mapped Database (LMDB) for storage. This can
+      provide fast read and write times but requires lmdb to be installed (in most cases
+      this can be achieved using ``pip install lmdb``).
+    - flatfile: Uses a system of flat json files. This is not recommended as multiple
+      simultaneous connections to the store will not work correctly.
+
+    See the MontyDB repository for more information: https://github.com/davidlatwe/montydb
+    """
+
+    def __init__(
+        self,
+        collection_name,
+        database_path: str = None,
+        database_name: str = "db",
+        storage: str = "sqlite",
+        storage_kwargs: Optional[dict] = None,
+        client_kwargs: Optional[dict] = None,
+        **kwargs,
+    ):
+        """
+        Initializes the Monty Store.
+
+        Args:
+            collection_name: Name for the collection.
+            database_path: Path to on-disk database files. If None, the current working
+                directory will be used.
+            database_name: The database name.
+            storage: The storage type. Options include "sqlite", "lightning", "flatfile".
+            storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.
+            client_kwargs: Keyword arguments passed to the ``montydb.MontyClient``
+                constructor.
+            **kwargs: Additional keyword arguments passed to the Store constructor.
+        """
+        if database_path is None:
+            database_path = str(Path.cwd())
+
+        self.database_path = database_path
+        self.database_name = database_name
+        self.collection_name = collection_name
+        self._collection = None
+        self.ssh_tunnel = None  # This is to fix issues with the tunnel on close
+        self.kwargs = kwargs
+        self.storage = storage
+        self.storage_kwargs = storage_kwargs or {
+            "use_bson": True,
+            "monty_version": "4.0",
+        }
+        self.client_kwargs = client_kwargs or {}
+        super(MongoStore, self).__init__(**kwargs)  # noqa
+
+    def connect(self, force_reset: bool = False):
+        """
+        Connect to the database store.
+
+        Args:
+            force_reset: Force connection reset.
+        """
+        from montydb import set_storage, MontyClient
+
+        set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
+        client = MontyClient(self.database_path, **self.client_kwargs)
+        if not self._collection or force_reset:
+            self._collection = client["db"][self.collection_name]
+
+    @property
+    def name(self) -> str:
+        """Return a string representing this data source."""
+        return f"monty://{self.database_path}/{self.database}/{self.collection_name}"
+
+    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
+        """
+        Update documents into the Store.
+
+        Args:
+            docs: The document or list of documents to update.
+            key: Field name(s) to determine uniqueness for a document, can be a list of
+                multiple fields, a single field, or None if the Store's key field is to be
+                used.
+        """
+
+        if not isinstance(docs, list):
+            docs = [docs]
+
+        for d in docs:
+            d = jsanitize(d, allow_bson=True)
+
+            # document-level validation is optional
+            validates = True
+            if self.validator:
+                validates = self.validator.is_valid(d)
+                if not validates:
+                    if self.validator.strict:
+                        raise ValueError(self.validator.validation_errors(d))
+                    else:
+                        self.logger.error(self.validator.validation_errors(d))
+
+            if validates:
+                key = key or self.key
+                if isinstance(key, list):
+                    search_doc = {k: d[k] for k in key}
+                else:
+                    search_doc = {key: d[key]}
+
+                self._collection.replace_one(search_doc, d, upsert=True)
 
 
 def _find_free_port(address="0.0.0.0"):

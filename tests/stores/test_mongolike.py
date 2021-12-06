@@ -12,6 +12,7 @@ from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailur
 import maggma.stores
 from maggma.core import StoreError
 from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore
+from maggma.stores.mongolike import MontyStore
 from maggma.validators import JSONSchemaValidator
 
 
@@ -21,6 +22,13 @@ def mongostore():
     store.connect()
     yield store
     store._collection.drop()
+
+
+@pytest.fixture
+def montystore(tmp_dir):
+    store = MontyStore("maggma_test")
+    store.connect()
+    return store
 
 
 @pytest.fixture
@@ -271,6 +279,116 @@ def test_groupby(memorystore):
     )
     data = list(memorystore.groupby("e.d"))
     assert len(data) == 2
+
+
+# Monty store tests
+def test_monty_store_connect(tmp_dir):
+    montystore = MontyStore(collection_name="my_collection")
+    assert montystore._collection is None
+    montystore.connect()
+    assert montystore._collection is not None
+
+
+def test_monty_store_groupby(montystore):
+    montystore.update(
+        [
+            {"e": 7, "d": 9, "f": 9},
+            {"e": 7, "d": 9, "f": 10},
+            {"e": 8, "d": 9, "f": 11},
+            {"e": 9, "d": 10, "f": 12},
+        ],
+        key="f",
+    )
+    data = list(montystore.groupby("d"))
+    assert len(data) == 2
+    grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
+    assert len(grouped_by_9) == 3
+    grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
+    assert len(grouped_by_10) == 1
+
+    data = list(montystore.groupby(["e", "d"]))
+    assert len(data) == 3
+
+    montystore.update(
+        [
+            {"e": {"d": 9}, "f": 9},
+            {"e": {"d": 9}, "f": 10},
+            {"e": {"d": 9}, "f": 11},
+            {"e": {"d": 10}, "f": 12},
+        ],
+        key="f",
+    )
+    data = list(montystore.groupby("e.d"))
+    assert len(data) == 2
+
+
+def test_montystore_query(montystore):
+    montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    assert montystore.query_one(properties=["a"])["a"] == 1
+    assert montystore.query_one(properties=["a"])["a"] == 1
+    assert montystore.query_one(properties=["b"])["b"] == 2
+    assert montystore.query_one(properties=["c"])["c"] == 3
+
+
+def test_montystore_count(montystore):
+    montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    assert montystore.count() == 1
+    montystore._collection.insert_one({"aa": 1, "b": 2, "c": 3})
+    assert montystore.count() == 2
+    assert montystore.count({"a": 1}) == 1
+
+
+def test_montystore_distinct(montystore):
+    montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    montystore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
+    assert set(montystore.distinct("a")) == {1, 4}
+
+    # Test list distinct functionality
+    montystore._collection.insert_one({"a": 4, "d": 6, "e": 7})
+    montystore._collection.insert_one({"a": 4, "d": 6, "g": {"h": 2}})
+
+    # Test distinct subdocument functionality
+    ghs = montystore.distinct("g.h")
+    assert set(ghs) == {1, 2}
+
+    # Test when key doesn't exist
+    assert montystore.distinct("blue") == []
+
+    # Test when null is a value
+    montystore._collection.insert_one({"i": None})
+    assert montystore.distinct("i") == [None]
+
+
+def test_montystore_update(montystore):
+    montystore.update({"e": 6, "d": 4}, key="e")
+    assert (
+        montystore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
+    )
+
+    montystore.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
+    assert montystore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 7
+
+    montystore.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
+    assert montystore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 11
+
+    test_schema = {
+        "type": "object",
+        "properties": {"e": {"type": "integer"}},
+        "required": ["e"],
+    }
+    montystore.validator = JSONSchemaValidator(schema=test_schema)
+    montystore.update({"e": 100, "d": 3}, key="e")
+
+    # Continue to update doc when validator is not set to strict mode
+    montystore.update({"e": "abc", "d": 3}, key="e")
+
+
+def test_montystore_remove_docs(montystore):
+    montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    montystore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
+    montystore.remove_docs({"a": 1})
+    assert len(list(montystore.query({"a": 4}))) == 1
+    assert len(list(montystore.query({"a": 1}))) == 0
 
 
 def test_json_store_load(jsonstore, test_dir):
