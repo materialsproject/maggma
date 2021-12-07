@@ -21,8 +21,6 @@ def mongostore():
     store = MongoStore(
         database="maggma_test",
         collection_name="test",
-        username="root",
-        password="password",
     )
     store.connect()
     yield store
@@ -31,7 +29,7 @@ def mongostore():
 
 @pytest.fixture
 def montystore(tmp_dir):
-    store = MontyStore("maggma_test", username="root", password="password")
+    store = MontyStore("maggma_test")
     store.connect()
     return store
 

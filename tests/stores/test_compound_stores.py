@@ -9,7 +9,7 @@ from maggma.stores import ConcatStore, JointStore, MemoryStore, MongoStore
 
 @pytest.fixture
 def mongostore():
-    store = MongoStore("maggma_test", "test")
+    store = MongoStore("magmma_test", "test")
     store.connect()
     yield store
     store._collection.drop()
