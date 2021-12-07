@@ -21,8 +21,6 @@ def mongostore():
     store = MongoStore(
         database="maggma_test",
         collection_name="test",
-        username="root",
-        password="password"
     )
     store.connect()
     yield store

@@ -14,8 +14,7 @@ from maggma.stores import MemoryStore, MongoStore, S3Store
 
 @pytest.fixture
 def mongostore():
-    store = MongoStore("maggma_test", "test",  username="root",
-        password="password")
+    store = MongoStore("maggma_test", "test")
     store.connect()
     yield store
     store._collection.drop()
