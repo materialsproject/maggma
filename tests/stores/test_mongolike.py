@@ -18,7 +18,12 @@ from maggma.validators import JSONSchemaValidator
 
 @pytest.fixture
 def mongostore():
-    store = MongoStore("maggma_test", "test")
+    store = MongoStore(
+        database="maggma_test",
+        collection_name="test",
+        username="root",
+        password="password",
+    )
     store.connect()
     yield store
     store._collection.drop()
@@ -26,7 +31,7 @@ def mongostore():
 
 @pytest.fixture
 def montystore(tmp_dir):
-    store = MontyStore("maggma_test")
+    store = MontyStore("maggma_test", username="root", password="password")
     store.connect()
     return store
 
