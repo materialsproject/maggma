@@ -119,11 +119,18 @@ class GridFSStore(Store):
         """
         Connect to the source data
         """
-        conn = MongoClient(self.host, self.port)
+        conn = (
+            MongoClient(
+                host=self.host,
+                port=self.port,
+                username=self.username,
+                password=self.password,
+            )
+            if self.username != ""
+            else MongoClient(self.host, self.port)
+        )
         if not self._collection or force_reset:
             db = conn[self.database]
-            if self.username != "":
-                db.authenticate(self.username, self.password)
 
             self._collection = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db["{}.files".format(self.collection_name)]

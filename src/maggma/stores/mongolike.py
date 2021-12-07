@@ -158,14 +158,24 @@ class MongoStore(Store):
         """
         if self._collection is None or force_reset:
             if self.ssh_tunnel is None:
-                conn = MongoClient(self.host, self.port)
+                host = self.host
+                port = self.port
             else:
                 self.ssh_tunnel.start()
                 host, port = self.ssh_tunnel.local_address
-                conn = MongoClient(host=host, port=port)
+
+            conn = (
+                MongoClient(
+                    host=host,
+                    port=port,
+                    username=self.username,
+                    password=self.password,
+                    authSource=self.database,
+                )
+                if self.username != ""
+                else MongoClient(host, port)
+            )
             db = conn[self.database]
-            if self.username != "":
-                db.authenticate(self.username, self.password)
             self._collection = db[self.collection_name]
 
     def __hash__(self) -> int:

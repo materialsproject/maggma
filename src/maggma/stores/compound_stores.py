@@ -70,10 +70,17 @@ class JointStore(Store):
         Args:
             force_reset: whether to forcibly reset the connection
         """
-        conn = MongoClient(self.host, self.port)
+        conn = (
+            MongoClient(
+                host=self.host,
+                port=self.port,
+                username=self.username,
+                password=self.password,
+            )
+            if self.username != ""
+            else MongoClient(self.host, self.port)
+        )
         db = conn[self.database]
-        if self.username != "":
-            db.authenticate(self.username, self.password)
         self._collection = db[self.main]
         self._has_merge_objects = (
             self._collection.database.client.server_info()["version"] > "3.6"
