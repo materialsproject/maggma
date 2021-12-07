@@ -120,7 +120,12 @@ class GridFSStore(Store):
         Connect to the source data
         """
         conn = (
-            MongoClient(host=self.host, port=self.port, username=self.username, password=self.password)
+            MongoClient(
+                host=self.host,
+                port=self.port,
+                username=self.username,
+                password=self.password,
+            )
             if self.username != ""
             else MongoClient(self.host, self.port)
         )
@@ -156,7 +161,9 @@ class GridFSStore(Store):
         """
         new_criteria = dict()
         for field in criteria:
-            if field not in files_collection_fields and not field.startswith("metadata."):
+            if field not in files_collection_fields and not field.startswith(
+                "metadata."
+            ):
                 new_criteria["metadata." + field] = copy.copy(criteria[field])
             else:
                 new_criteria[field] = copy.copy(criteria[field])
@@ -210,14 +217,18 @@ class GridFSStore(Store):
         elif isinstance(properties, list):
             prop_keys = set(properties)
 
-        for doc in self._files_store.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
+        for doc in self._files_store.query(
+            criteria=criteria, sort=sort, limit=limit, skip=skip
+        ):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
 
                 metadata = doc.get("metadata", {})
 
-                data = self._collection.find_one(filter={"_id": doc["_id"]}, skip=skip, limit=limit, sort=sort,).read()
+                data = self._collection.find_one(
+                    filter={"_id": doc["_id"]}, skip=skip, limit=limit, sort=sort,
+                ).read()
 
                 if metadata.get("compression", "") == "zlib":
                     data = zlib.decompress(data).decode("UTF-8")
@@ -237,7 +248,9 @@ class GridFSStore(Store):
 
                 yield data
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def distinct(
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
         Get all distinct values for a field. This function only operates
         on the metadata in the files collection
@@ -246,10 +259,17 @@ class GridFSStore(Store):
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
         """
-        criteria = self.transform_criteria(criteria) if isinstance(criteria, dict) else criteria
+        criteria = (
+            self.transform_criteria(criteria)
+            if isinstance(criteria, dict)
+            else criteria
+        )
 
         field = (
-            f"metadata.{field}" if field not in files_collection_fields and not field.startswith("metadata.") else field
+            f"metadata.{field}"
+            if field not in files_collection_fields
+            and not field.startswith("metadata.")
+            else field
         )
 
         return self._files_store.distinct(field=field, criteria=criteria)
@@ -281,15 +301,30 @@ class GridFSStore(Store):
             generator returning tuples of (dict, list of docs)
         """
 
-        criteria = self.transform_criteria(criteria) if isinstance(criteria, dict) else criteria
+        criteria = (
+            self.transform_criteria(criteria)
+            if isinstance(criteria, dict)
+            else criteria
+        )
         keys = [keys] if not isinstance(keys, list) else keys
         keys = [
-            f"metadata.{k}" if k not in files_collection_fields and not k.startswith("metadata.") else k for k in keys
+            f"metadata.{k}"
+            if k not in files_collection_fields and not k.startswith("metadata.")
+            else k
+            for k in keys
         ]
-        for group, ids in self._files_store.groupby(keys, criteria=criteria, properties=[f"metadata.{self.key}"]):
-            ids = [get(doc, f"metadata.{self.key}") for doc in ids if has(doc, f"metadata.{self.key}")]
+        for group, ids in self._files_store.groupby(
+            keys, criteria=criteria, properties=[f"metadata.{self.key}"]
+        ):
+            ids = [
+                get(doc, f"metadata.{self.key}")
+                for doc in ids
+                if has(doc, f"metadata.{self.key}")
+            ]
 
-            group = {k.replace("metadata.", ""): get(group, k) for k in keys if has(group, k)}
+            group = {
+                k.replace("metadata.", ""): get(group, k) for k in keys if has(group, k)
+            }
 
             yield group, list(self.query(criteria={self.key: {"$in": ids}}))
 
@@ -351,7 +386,9 @@ class GridFSStore(Store):
 
             metadata = {
                 k: get(d, k)
-                for k in [self.last_updated_field] + additional_metadata + self.searchable_fields
+                for k in [self.last_updated_field]
+                + additional_metadata
+                + self.searchable_fields
                 if has(d, k)
             }
             metadata.update(search_doc)
@@ -364,7 +401,11 @@ class GridFSStore(Store):
             search_doc = self.transform_criteria(search_doc)
 
             # Cleans up old gridfs entries
-            for fdoc in self._files_collection.find(search_doc, ["_id"]).sort("uploadDate", -1).skip(1):
+            for fdoc in (
+                self._files_collection.find(search_doc, ["_id"])
+                .sort("uploadDate", -1)
+                .skip(1)
+            ):
                 self._collection.delete(fdoc["_id"])
 
     def remove_docs(self, criteria: Dict):
@@ -431,7 +472,9 @@ class GridFSURIStore(GridFSStore):
         if database is None:
             d_uri = uri_parser.parse_uri(uri)
             if d_uri["database"] is None:
-                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
+                raise ConfigurationError(
+                    "If database name is not supplied, a database must be set in the uri"
+                )
             self.database = d_uri["database"]
         else:
             self.database = database

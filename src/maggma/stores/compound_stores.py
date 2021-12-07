@@ -71,13 +71,20 @@ class JointStore(Store):
             force_reset: whether to forcibly reset the connection
         """
         conn = (
-            MongoClient(host=self.host, port=self.port, username=self.username, password=self.password)
+            MongoClient(
+                host=self.host,
+                port=self.port,
+                username=self.username,
+                password=self.password,
+            )
             if self.username != ""
             else MongoClient(self.host, self.port)
         )
         db = conn[self.database]
         self._collection = db[self.main]
-        self._has_merge_objects = self._collection.database.client.server_info()["version"] > "3.6"
+        self._has_merge_objects = (
+            self._collection.database.client.server_info()["version"] > "3.6"
+        )
 
     def close(self):
         """
@@ -152,26 +159,52 @@ class JointStore(Store):
         collection_names = list(set(self.collection_names) - set(self.main))
         for cname in collection_names:
             pipeline.append(
-                {"$lookup": {"from": cname, "localField": self.key, "foreignField": self.key, "as": cname,}}
+                {
+                    "$lookup": {
+                        "from": cname,
+                        "localField": self.key,
+                        "foreignField": self.key,
+                        "as": cname,
+                    }
+                }
             )
 
             if self.merge_at_root:
                 if not self._has_merge_objects:
-                    raise Exception("MongoDB server version too low to use $mergeObjects.")
+                    raise Exception(
+                        "MongoDB server version too low to use $mergeObjects."
+                    )
 
                 pipeline.append(
                     {
                         "$replaceRoot": {
-                            "newRoot": {"$mergeObjects": [{"$arrayElemAt": ["${}".format(cname), 0]}, "$$ROOT",]}
+                            "newRoot": {
+                                "$mergeObjects": [
+                                    {"$arrayElemAt": ["${}".format(cname), 0]},
+                                    "$$ROOT",
+                                ]
+                            }
                         }
                     }
                 )
             else:
-                pipeline.append({"$unwind": {"path": "${}".format(cname), "preserveNullAndEmptyArrays": True,}})
+                pipeline.append(
+                    {
+                        "$unwind": {
+                            "path": "${}".format(cname),
+                            "preserveNullAndEmptyArrays": True,
+                        }
+                    }
+                )
 
         # Do projection for max last_updated
         lu_max_fields = ["${}".format(self.last_updated_field)]
-        lu_max_fields.extend(["${}.{}".format(cname, self.last_updated_field) for cname in self.collection_names])
+        lu_max_fields.extend(
+            [
+                "${}.{}".format(cname, self.last_updated_field)
+                for cname in self.collection_names
+            ]
+        )
         lu_proj = {self.last_updated_field: {"$max": lu_max_fields}}
         pipeline.append({"$addFields": lu_proj})
 
@@ -209,7 +242,9 @@ class JointStore(Store):
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
-        pipeline = self._get_pipeline(criteria=criteria, properties=properties, skip=skip, limit=limit)
+        pipeline = self._get_pipeline(
+            criteria=criteria, properties=properties, skip=skip, limit=limit
+        )
         agg = self._collection.aggregate(pipeline)
         for d in agg:
             yield d
@@ -223,7 +258,9 @@ class JointStore(Store):
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
-        pipeline = self._get_pipeline(criteria=criteria, properties=properties, skip=skip, limit=limit)
+        pipeline = self._get_pipeline(
+            criteria=criteria, properties=properties, skip=skip, limit=limit
+        )
         if not isinstance(keys, list):
             keys = [keys]
         group_id = {}  # type: Dict[str,Any]
@@ -360,7 +397,9 @@ class ConcatStore(Store):
         """
         raise NotImplementedError("No update method for ConcatStore")
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def distinct(
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
         Get all distinct values for a field
 
@@ -453,7 +492,14 @@ class ConcatStore(Store):
         docs = []
         for store in self.stores:
             temp_docs = list(
-                store.groupby(keys=keys, criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit,)
+                store.groupby(
+                    keys=keys,
+                    criteria=criteria,
+                    properties=properties,
+                    sort=sort,
+                    skip=skip,
+                    limit=limit,
+                )
             )
             for key, group in temp_docs:
                 docs.extend(group)
