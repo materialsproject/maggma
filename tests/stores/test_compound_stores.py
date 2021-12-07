@@ -9,7 +9,7 @@ from maggma.stores import ConcatStore, JointStore, MemoryStore, MongoStore
 
 @pytest.fixture
 def mongostore():
-    store = MongoStore("maggma_test", "test",  username="root",
+    store = MongoStore("admin", "test",  username="root",
         password="password")
     store.connect()
     yield store
@@ -18,7 +18,7 @@ def mongostore():
 
 @pytest.fixture(scope="module")
 def jointstore_test1():
-    store = MongoStore("maggma_test", "test1",  username="root",
+    store = MongoStore("admin", "test1",  username="root",
         password="password")
     store.connect()
     yield store
@@ -27,7 +27,7 @@ def jointstore_test1():
 
 @pytest.fixture(scope="module")
 def jointstore_test2():
-    store = MongoStore("maggma_test", "test2",  username="root",
+    store = MongoStore("admin", "test2",  username="root",
         password="password")
     store.connect()
     yield store

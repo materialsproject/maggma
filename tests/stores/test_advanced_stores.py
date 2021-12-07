@@ -32,7 +32,7 @@ from maggma.stores.advanced_stores import substitute
 
 @pytest.fixture
 def mongostore():
-    store = MongoStore("maggma_test", "test",  username="root",
+    store = MongoStore("admin", "test",  username="root",
         password="password")
     store.connect()
     yield store
