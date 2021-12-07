@@ -19,7 +19,7 @@ from maggma.validators import JSONSchemaValidator
 @pytest.fixture
 def mongostore():
     store = MongoStore(
-        database="admin",
+        database="maggma_test",
         collection_name="test",
         username="root",
         password="password"

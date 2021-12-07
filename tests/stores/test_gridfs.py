@@ -14,7 +14,7 @@ from pymongo.errors import ConfigurationError
 
 @pytest.fixture
 def mongostore():
-    store = MongoStore("admin", "test",  username="root",
+    store = MongoStore("maggma_test", "test",  username="root",
         password="password")
     store.connect()
     yield store
@@ -23,7 +23,7 @@ def mongostore():
 
 @pytest.fixture
 def gridfsstore():
-    store = GridFSStore("admin", "test",  username="root",
+    store = GridFSStore("maggma_test", "test",  username="root",
         password="password", key="task_id")
     store.connect()
     yield store
