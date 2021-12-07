@@ -3831,14 +3831,24 @@ other: other mongostore to compare with</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
             <span class="n">host</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">local_address</span>
-            <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">)</span>
+
+        <span class="n">conn</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">MongoClient</span><span class="p">(</span>
+                <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+                <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
+                <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+                <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+                <span class="n">authSource</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="n">db</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
 </code></pre></div>
         </details>
@@ -5670,11 +5680,18 @@ This is the string portion before the GridFS extensions</p></td>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">MongoClient</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-            <span class="n">db</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">gridfs</span><span class="o">.</span><span class="n">GridFS</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.files&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)]</span>
@@ -11318,10 +11335,17 @@ all collection connections</p>
 <span class="sd">    Args:</span>
 <span class="sd">        force_reset: whether to forcibly reset the connection</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+    <span class="n">conn</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">MongoClient</span><span class="p">(</span>
+            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
+            <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-        <span class="n">db</span><span class="o">.</span><span class="n">authenticate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_has_merge_objects</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">server_info</span><span class="p">()[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="s2">&quot;3.6&quot;</span>
