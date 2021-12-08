@@ -470,6 +470,7 @@ class MongoStore(Store):
     def close(self):
         """Close up all collections"""
         self._collection.database.client.close()
+        self._collection = None
         if self.ssh_tunnel is not None:
             self.ssh_tunnel.stop()
 
