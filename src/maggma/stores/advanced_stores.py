@@ -50,7 +50,7 @@ class MongograntStore(MongoStore):
         self.mongogrant_spec = mongogrant_spec
         self.collection_name = collection_name
         self.mgclient_config_path = mgclient_config_path
-        self._collection = None
+        self._coll = None
 
         if self.mgclient_config_path:
             config = Config(check=check, path=self.mgclient_config_path)
@@ -371,8 +371,8 @@ class AliasingStore(Store):
         self.store.close()
 
     @property
-    def collection(self):
-        return self.store.collection
+    def _collection(self):
+        return self.store._collection
 
     def connect(self, force_reset=False):
         self.store.connect(force_reset=force_reset)
@@ -544,8 +544,8 @@ class SandboxStore(Store):
         self.store.close()
 
     @property
-    def collection(self):
-        return self.store.collection
+    def _collection(self):
+        return self.store._collection
 
     def connect(self, force_reset=False):
         self.store.connect(force_reset=force_reset)

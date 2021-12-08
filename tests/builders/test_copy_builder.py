@@ -105,8 +105,9 @@ def test_run(source, target, old_docs, new_docs):
 
     builder = CopyBuilder(source, target)
     builder.run()
-    assert target.query_one(criteria={"k": 0})["v"] == "new"
-    assert target.query_one(criteria={"k": 10})["v"] == "old"
+    builder.target.connect()
+    assert builder.target.query_one(criteria={"k": 0})["v"] == "new"
+    assert builder.target.query_one(criteria={"k": 10})["v"] == "old"
 
 
 def test_query(source, target, old_docs, new_docs):
@@ -127,10 +128,10 @@ def test_delete_orphans(source, target, old_docs, new_docs):
     target.update(old_docs)
 
     deletion_criteria = {"k": {"$in": list(range(5))}}
-    source.collection.delete_many(deletion_criteria)
+    source._collection.delete_many(deletion_criteria)
     builder.run()
 
-    assert target.collection.count_documents(deletion_criteria) == 0
+    assert target._collection.count_documents(deletion_criteria) == 0
     assert target.query_one(criteria={"k": 5})["v"] == "new"
     assert target.query_one(criteria={"k": 10})["v"] == "old"
 

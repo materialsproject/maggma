@@ -48,20 +48,19 @@ def jsonstore(test_dir):
     return JSONStore(files)
 
 
-def test_mongostore_connect():
+@pytest.mark.xfail(raises=StoreError)
+def test_mongostore_connect_error():
     mongostore = MongoStore("maggma_test", "test")
-    assert mongostore._collection is None
-    mongostore.connect()
-    assert isinstance(mongostore._collection, pymongo.collection.Collection)
+    mongostore.count()
 
 
-def test_mongostore_connect_disconnect():
+def test_mongostore_connect_reconnect():
     mongostore = MongoStore("maggma_test", "test")
-    assert mongostore._collection is None
+    assert mongostore._coll is None
     mongostore.connect()
     assert isinstance(mongostore._collection, pymongo.collection.Collection)
     mongostore.close()
-    assert mongostore._collection is None
+    assert mongostore._coll is None
     mongostore.connect()
 
 
@@ -196,7 +195,7 @@ def test_mongostore_from_collection(mongostore, db_json):
     ms.connect()
 
     other_ms = MongoStore.from_collection(ms._collection)
-    assert ms._collection.full_name == other_ms._collection.full_name
+    assert ms._coll.full_name == other_ms._collection.full_name
     assert ms.database == other_ms.database
 
 
@@ -253,7 +252,7 @@ def test_mongostore_newer_in(mongostore):
 # Memory store tests
 def test_memory_store_connect():
     memorystore = MemoryStore()
-    assert memorystore._collection is None
+    assert memorystore._coll is None
     memorystore.connect()
     assert isinstance(memorystore._collection, mongomock.collection.Collection)
 
@@ -294,7 +293,7 @@ def test_groupby(memorystore):
 # Monty store tests
 def test_monty_store_connect(tmp_dir):
     montystore = MontyStore(collection_name="my_collection")
-    assert montystore._collection is None
+    assert montystore._coll is None
     montystore.connect()
     assert montystore._collection is not None
 
