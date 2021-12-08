@@ -19,7 +19,7 @@ from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient, uri_parser
 
-from maggma.core import Sort, Store
+from maggma.core import Sort, Store, StoreError
 from maggma.stores.mongolike import MongoStore
 
 # https://github.com/mongodb/specifications/
@@ -77,7 +77,7 @@ class GridFSStore(Store):
         self.port = port
         self.username = username
         self.password = password
-        self._collection = None  # type: Any
+        self._coll = None  # type: Any
         self.compression = compression
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
@@ -129,20 +129,22 @@ class GridFSStore(Store):
             if self.username != ""
             else MongoClient(self.host, self.port)
         )
-        if not self._collection or force_reset:
+        if not self._coll or force_reset:
             db = conn[self.database]
 
-            self._collection = gridfs.GridFS(db, self.collection_name)
+            self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db["{}.files".format(self.collection_name)]
             self._files_store = MongoStore.from_collection(self._files_collection)
             self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
             self._files_store.key = self.key
             self._chunks_collection = db["{}.chunks".format(self.collection_name)]
 
-    @property  # type: ignore
-    @deprecated(message="This will be removed in the future")
-    def collection(self):
-        return self._collection
+    @property
+    def _collection(self):
+        """Property referring to underlying pymongo collection"""
+        if self._coll is None:
+            raise StoreError("Must connect Mongo-like store before attemping to use it")
+        return self._coll
 
     @property
     def last_updated(self) -> datetime:
@@ -480,7 +482,7 @@ class GridFSURIStore(GridFSStore):
             self.database = database
 
         self.collection_name = collection_name
-        self._collection = None  # type: Any
+        self._coll = None  # type: Any
         self.compression = compression
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
@@ -494,10 +496,10 @@ class GridFSURIStore(GridFSStore):
         """
         Connect to the source data
         """
-        if not self._collection or force_reset:  # pragma: no cover
+        if not self._coll or force_reset:  # pragma: no cover
             conn = MongoClient(self.uri)
             db = conn[self.database]
-            self._collection = gridfs.GridFS(db, self.collection_name)
+            self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db["{}.files".format(self.collection_name)]
             self._files_store = MongoStore.from_collection(self._files_collection)
             self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
