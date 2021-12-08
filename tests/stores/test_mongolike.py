@@ -62,6 +62,7 @@ def test_mongostore_connect_disconnect():
     assert isinstance(mongostore._collection, pymongo.collection.Collection)
     mongostore.close()
     assert mongostore._collection is None
+    mongostore.connect()
 
 
 def test_mongostore_query(mongostore):
