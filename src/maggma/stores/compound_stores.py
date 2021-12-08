@@ -363,9 +363,8 @@ class ConcatStore(Store):
         for store in self.stores:
             store.close()
 
-    @property  # type: ignore
-    @deprecated
-    def collection(self):
+    @property
+    def _collection(self):
         raise NotImplementedError("No collection property for ConcatStore")
 
     @property

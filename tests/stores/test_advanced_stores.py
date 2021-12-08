@@ -333,7 +333,7 @@ def test_sandbox_count(sandbox_store):
 
 
 def test_sandbox_query(sandbox_store):
-    sandbox_store._collection.ipytensert_one({"a": 1, "b": 2, "c": 3})
+    sandbox_store._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert sandbox_store.query_one(properties=["a"])["a"] == 1
 
     sandbox_store._collection.insert_one({"a": 2, "b": 2, "sbxn": ["test"]})
