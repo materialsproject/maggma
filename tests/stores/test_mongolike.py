@@ -18,10 +18,7 @@ from maggma.validators import JSONSchemaValidator
 
 @pytest.fixture
 def mongostore():
-    store = MongoStore(
-        database="maggma_test",
-        collection_name="test",
-    )
+    store = MongoStore(database="maggma_test", collection_name="test",)
     store.connect()
     yield store
     store._collection.drop()
@@ -56,6 +53,15 @@ def test_mongostore_connect():
     assert mongostore._collection is None
     mongostore.connect()
     assert isinstance(mongostore._collection, pymongo.collection.Collection)
+
+
+def test_mongostore_connect_disconnect():
+    mongostore = MongoStore("maggma_test", "test")
+    assert mongostore._collection is None
+    mongostore.connect()
+    assert isinstance(mongostore._collection, pymongo.collection.Collection)
+    mongostore.close()
+    assert mongostore._collection is None
 
 
 def test_mongostore_query(mongostore):
