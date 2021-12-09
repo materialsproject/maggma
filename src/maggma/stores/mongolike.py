@@ -14,7 +14,7 @@ from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
-from monty.dev import deprecated, requires
+from monty.dev import requires
 from monty.io import zopen
 from monty.json import MSONable, jsanitize
 from monty.serialization import loadfn

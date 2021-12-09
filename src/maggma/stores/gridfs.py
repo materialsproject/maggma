@@ -14,7 +14,6 @@ from pymongo.errors import ConfigurationError
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import gridfs
-from monty.dev import deprecated
 from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient, uri_parser
