@@ -325,33 +325,33 @@ def sandbox_store():
 
 
 def test_sandbox_count(sandbox_store):
-    sandbox_store.collection.insert_one({"a": 1, "b": 2, "c": 3})
+    sandbox_store._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert sandbox_store.count({"a": 1}) == 1
 
-    sandbox_store.collection.insert_one({"a": 1, "b": 3, "sbxn": ["test"]})
+    sandbox_store._collection.insert_one({"a": 1, "b": 3, "sbxn": ["test"]})
     assert sandbox_store.count({"a": 1}) == 2
 
 
 def test_sandbox_query(sandbox_store):
-    sandbox_store.collection.insert_one({"a": 1, "b": 2, "c": 3})
+    sandbox_store._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert sandbox_store.query_one(properties=["a"])["a"] == 1
 
-    sandbox_store.collection.insert_one({"a": 2, "b": 2, "sbxn": ["test"]})
+    sandbox_store._collection.insert_one({"a": 2, "b": 2, "sbxn": ["test"]})
     assert sandbox_store.query_one(properties=["b"], criteria={"a": 2})["b"] == 2
 
-    sandbox_store.collection.insert_one({"a": 3, "b": 2, "sbxn": ["not_test"]})
+    sandbox_store._collection.insert_one({"a": 3, "b": 2, "sbxn": ["not_test"]})
     assert sandbox_store.query_one(properties=["c"], criteria={"a": 3}) is None
 
 
 def test_sandbox_distinct(sandbox_store):
     sandbox_store.connect()
-    sandbox_store.collection.insert_one({"a": 1, "b": 2, "c": 3})
+    sandbox_store._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert sandbox_store.distinct("a") == [1]
 
-    sandbox_store.collection.insert_one({"a": 4, "d": 5, "e": 6, "sbxn": ["test"]})
+    sandbox_store._collection.insert_one({"a": 4, "d": 5, "e": 6, "sbxn": ["test"]})
     assert sandbox_store.distinct("a")[1] == 4
 
-    sandbox_store.collection.insert_one({"a": 7, "d": 8, "e": 9, "sbxn": ["not_test"]})
+    sandbox_store._collection.insert_one({"a": 7, "d": 8, "e": 9, "sbxn": ["not_test"]})
     assert sandbox_store.distinct("a")[1] == 4
 
 
@@ -362,7 +362,7 @@ def test_sandbox_update(sandbox_store):
         next(sandbox_store.query(criteria={"d": {"$exists": 1}}, properties=["d"]))["d"]
         == 4
     )
-    assert sandbox_store.collection.find_one({"e": 6})["sbxn"] == ["test"]
+    assert sandbox_store._collection.find_one({"e": 6})["sbxn"] == ["test"]
     sandbox_store.update([{"e": 7, "sbxn": ["core"]}], key="e")
     assert set(sandbox_store.query_one(criteria={"e": 7})["sbxn"]) == {"test", "core"}
 

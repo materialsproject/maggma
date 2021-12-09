@@ -64,12 +64,10 @@ class Store(MSONable, metaclass=ABCMeta):
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
 
-    @abstractproperty  # type: ignore
-    @deprecated(message="This will be removed in the future")
-    def collection(self):
+    @abstractproperty
+    def _collection(self):
         """
         Returns a handle to the pymongo collection object
-        Not guaranteed to exist in the future
         """
 
     @abstractproperty

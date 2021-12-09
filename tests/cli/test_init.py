@@ -80,6 +80,45 @@ def test_run_builder(mongostore):
         assert "Update" not in result.output
 
 
+def test_run_builder_chain(mongostore):
+
+    memorystore = MemoryStore("temp")
+    builder1 = CopyBuilder(mongostore, memorystore)
+    builder2 = CopyBuilder(mongostore, memorystore)
+
+    mongostore.update(
+        [
+            {mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()}
+            for i in range(10)
+        ]
+    )
+
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        dumpfn([builder1, builder2], "test_builders.json")
+        result = runner.invoke(run, ["-v", "test_builders.json"])
+        assert result.exit_code == 0
+        assert "CopyBuilder" in result.output
+        assert "SerialProcessor" in result.output
+
+        result = runner.invoke(run, ["-vvv", "--no_bars", "test_builders.json"])
+        assert result.exit_code == 0
+        assert "Get" not in result.output
+        assert "Update" not in result.output
+
+        result = runner.invoke(run, ["-v", "-n", "2", "test_builders.json"])
+        assert result.exit_code == 0
+        assert "CopyBuilder" in result.output
+        assert "MultiProcessor" in result.output
+
+        result = runner.invoke(
+            run, ["-vvv", "-n", "2", "--no_bars", "test_builders.json"]
+        )
+        assert result.exit_code == 0
+        assert "Get" not in result.output
+        assert "Update" not in result.output
+
+
 def test_reporting(mongostore, reporting_store):
 
     memorystore = MemoryStore("temp")

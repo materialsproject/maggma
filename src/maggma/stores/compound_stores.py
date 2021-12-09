@@ -3,11 +3,10 @@ from datetime import datetime
 from itertools import groupby
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
-from monty.dev import deprecated
 from pydash import set_
 from pymongo import MongoClient
 
-from maggma.core import Sort, Store
+from maggma.core import Sort, Store, StoreError
 from maggma.stores.mongolike import MongoStore
 
 
@@ -48,7 +47,7 @@ class JointStore(Store):
         self.port = port
         self.username = username
         self.password = password
-        self._collection = None  # type: Any
+        self._coll = None  # type: Any
         self.main = main or collection_names[0]
         self.merge_at_root = merge_at_root
         self.kwargs = kwargs
@@ -81,7 +80,7 @@ class JointStore(Store):
             else MongoClient(self.host, self.port)
         )
         db = conn[self.database]
-        self._collection = db[self.main]
+        self._coll = db[self.main]
         self._has_merge_objects = (
             self._collection.database.client.server_info()["version"] > "3.6"
         )
@@ -92,13 +91,12 @@ class JointStore(Store):
         """
         self._collection.database.client.close()
 
-    @property  # type: ignore
-    @deprecated("This will be removed in the future")
-    def collection(self):
-        """
-        The root collection for this JointStore
-        """
-        return self._collection
+    @property
+    def _collection(self):
+        """Property referring to the root pymongo collection"""
+        if self._coll is None:
+            raise StoreError("Must connect Mongo-like store before attemping to use it")
+        return self._coll
 
     @property
     def nonmain_names(self) -> List:
@@ -364,9 +362,8 @@ class ConcatStore(Store):
         for store in self.stores:
             store.close()
 
-    @property  # type: ignore
-    @deprecated
-    def collection(self):
+    @property
+    def _collection(self):
         raise NotImplementedError("No collection property for ConcatStore")
 
     @property

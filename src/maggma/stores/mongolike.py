@@ -14,7 +14,7 @@ from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
-from monty.dev import deprecated, requires
+from monty.dev import requires
 from monty.io import zopen
 from monty.json import MSONable, jsanitize
 from monty.serialization import loadfn
@@ -141,7 +141,7 @@ class MongoStore(Store):
         self.password = password
         self.ssh_tunnel = ssh_tunnel
         self.safe_update = safe_update
-        self._collection = None  # type: Any
+        self._coll = None  # type: Any
         self.kwargs = kwargs
         super().__init__(**kwargs)
 
@@ -156,7 +156,7 @@ class MongoStore(Store):
         """
         Connect to the source data
         """
-        if self._collection is None or force_reset:
+        if self._coll is None or force_reset:
             if self.ssh_tunnel is None:
                 host = self.host
                 port = self.port
@@ -176,7 +176,7 @@ class MongoStore(Store):
                 else MongoClient(host, port)
             )
             db = conn[self.database]
-            self._collection = db[self.collection_name]
+            self._coll = db[self.collection_name]
 
     def __hash__(self) -> int:
         """Hash for MongoStore"""
@@ -307,16 +307,15 @@ class MongoStore(Store):
         db_name = collection.database.name
 
         store = cls(db_name, coll_name)
-        store._collection = collection
+        store._coll = collection
         return store
 
-    @property  # type: ignore
-    @deprecated(message="This will be removed in the future")
-    def collection(self):
+    @property
+    def _collection(self):
         """Property referring to underlying pymongo collection"""
-        if self._collection is None:
+        if self._coll is None:
             raise StoreError("Must connect Mongo-like store before attemping to use it")
-        return self._collection
+        return self._coll
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
@@ -470,6 +469,7 @@ class MongoStore(Store):
     def close(self):
         """Close up all collections"""
         self._collection.database.client.close()
+        self._coll = None
         if self.ssh_tunnel is not None:
             self.ssh_tunnel.stop()
 
@@ -522,7 +522,7 @@ class MongoURIStore(MongoStore):
 
         self.collection_name = collection_name
         self.kwargs = kwargs
-        self._collection = None
+        self._coll = None
         super(MongoStore, self).__init__(**kwargs)  # lgtm
 
     @property
@@ -537,10 +537,10 @@ class MongoURIStore(MongoStore):
         """
         Connect to the source data
         """
-        if self._collection is None or force_reset:  # pragma: no cover
+        if self._coll is None or force_reset:  # pragma: no cover
             conn = MongoClient(self.uri)
             db = conn[self.database]
-            self._collection = db[self.collection_name]
+            self._coll = db[self.collection_name]
 
 
 class MemoryStore(MongoStore):
@@ -556,8 +556,7 @@ class MemoryStore(MongoStore):
             collection_name: name for the collection in memory
         """
         self.collection_name = collection_name
-        self._collection = None
-        self.ssh_tunnel = None  # This is to fix issues with the tunnel on close
+        self._coll = None
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)  # noqa
 
@@ -566,8 +565,12 @@ class MemoryStore(MongoStore):
         Connect to the source data
         """
 
-        if self._collection is None or force_reset:
-            self._collection = mongomock.MongoClient().db[self.name]
+        if self._coll is None or force_reset:
+            self._coll = mongomock.MongoClient().db[self.name]
+
+    def close(self):
+        """Close up all collections"""
+        self._coll.database.client.close()
 
     @property
     def name(self):
@@ -782,7 +785,7 @@ class MontyStore(MemoryStore):
         self.database_path = database_path
         self.database_name = database_name
         self.collection_name = collection_name
-        self._collection = None
+        self._coll = None
         self.ssh_tunnel = None  # This is to fix issues with the tunnel on close
         self.kwargs = kwargs
         self.storage = storage
@@ -804,8 +807,8 @@ class MontyStore(MemoryStore):
 
         set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
         client = MontyClient(self.database_path, **self.client_kwargs)
-        if not self._collection or force_reset:
-            self._collection = client["db"][self.collection_name]
+        if not self._coll or force_reset:
+            self._coll = client["db"][self.collection_name]
 
     @property
     def name(self) -> str:
