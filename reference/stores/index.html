@@ -572,6 +572,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MemoryStore.close" class="md-nav__link">
+    close()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#maggma.stores.mongolike.MemoryStore.connect" class="md-nav__link">
     connect()
   </a>
@@ -1757,6 +1764,13 @@
           <li class="md-nav__item">
   <a href="#maggma.stores.mongolike.MemoryStore.__init__" class="md-nav__link">
     __init__()
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#maggma.stores.mongolike.MemoryStore.close" class="md-nav__link">
+    close()
   </a>
   
 </li>
@@ -3363,10 +3377,36 @@ other: other MemoryStore to compare with</p>
 <span class="sd">        collection_name: name for the collection in memory</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># This is to fix issues with the tunnel on close</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">MongoStore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># noqa</span>
+</code></pre></div>
+        </details>
+    </div>
+
+  </div>
+
+
+
+  <div class="doc doc-object doc-method">
+
+
+
+<h3 class="doc doc-heading" id="maggma.stores.mongolike.MemoryStore.close">
+<code class="codehilite language-python"><span class="n">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
+
+
+<a class="headerlink" href="#maggma.stores.mongolike.MemoryStore.close" title="Permanent link">&para;</a></h3>
+
+    <div class="doc doc-contents ">
+
+      <p>Close up all collections</p>
+
+        <details class="quote">
+          <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Close up all collections&quot;&quot;&quot;</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 </code></pre></div>
         </details>
     </div>
@@ -3396,8 +3436,8 @@ other: other MemoryStore to compare with</p>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">mongomock</span><span class="o">.</span><span class="n">MongoClient</span><span class="p">()</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">mongomock</span><span class="o">.</span><span class="n">MongoClient</span><span class="p">()</span><span class="o">.</span><span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -3565,7 +3605,6 @@ values are 1 for ascending or -1 for descending.</p></td>
 
 
   <div class="doc doc-children">
-
 
 
 
@@ -3769,7 +3808,7 @@ other: other mongostore to compare with</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="n">ssh_tunnel</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">safe_update</span> <span class="o">=</span> <span class="n">safe_update</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
@@ -3799,6 +3838,7 @@ other: other mongostore to compare with</p>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Close up all collections&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </code></pre></div>
@@ -3829,7 +3869,7 @@ other: other mongostore to compare with</p>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span>
             <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span>
@@ -3849,7 +3889,7 @@ other: other mongostore to compare with</p>
             <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -4123,7 +4163,7 @@ As a result, this will not serialize and can not reset its connection</p>
     <span class="n">db_name</span> <span class="o">=</span> <span class="n">collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">name</span>
 
     <span class="n">store</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">db_name</span><span class="p">,</span> <span class="n">coll_name</span><span class="p">)</span>
-    <span class="n">store</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">collection</span>
+    <span class="n">store</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">collection</span>
     <span class="k">return</span> <span class="n">store</span>
 </code></pre></div>
         </details>
@@ -4787,7 +4827,7 @@ client parameters via TXT records</p>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">MongoStore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># lgtm</span>
 </code></pre></div>
         </details>
@@ -4817,10 +4857,10 @@ client parameters via TXT records</p>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -5008,7 +5048,7 @@ constructor.</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">database_path</span> <span class="o">=</span> <span class="n">database_path</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">database_name</span> <span class="o">=</span> <span class="n">database_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># This is to fix issues with the tunnel on close</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">storage</span>
@@ -5072,8 +5112,8 @@ constructor.</p></td>
 
     <span class="n">set_storage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span><span class="p">)</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">MontyClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">client_kwargs</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="s2">&quot;db&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="s2">&quot;db&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -5407,7 +5447,6 @@ various utillities</p>
 
 
 
-
   <div class="doc doc-object doc-attribute">
 
 
@@ -5617,7 +5656,7 @@ This is the string portion before the GridFS extensions</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">compression</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
@@ -5690,10 +5729,10 @@ This is the string portion before the GridFS extensions</p></td>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
         <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">gridfs</span><span class="o">.</span><span class="n">GridFS</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">gridfs</span><span class="o">.</span><span class="n">GridFS</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.files&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files_store</span> <span class="o">=</span> <span class="n">MongoStore</span><span class="o">.</span><span class="n">from_collection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files_collection</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files_store</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;metadata.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -6629,7 +6668,7 @@ via TXT records</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">compression</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
@@ -6666,10 +6705,10 @@ via TXT records</p>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
         <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">gridfs</span><span class="o">.</span><span class="n">GridFS</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">gridfs</span><span class="o">.</span><span class="n">GridFS</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.files&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files_store</span> <span class="o">=</span> <span class="n">MongoStore</span><span class="o">.</span><span class="n">from_collection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_files_collection</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files_store</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;metadata.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -6742,7 +6781,6 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
 
   <div class="doc doc-children">
-
 
 
 
@@ -6944,18 +6982,18 @@ Alternatively you can pass in a dictionary with the full credentials:
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">index</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
-        <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">s3_profile</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">compress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-        <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sub_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">s3_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-        <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fs_id&quot;</span><span class="p">,</span>
-        <span class="n">store_hash</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">index</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span>
+    <span class="n">bucket</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">s3_profile</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">compress</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">endpoint_url</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sub_dir</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">s3_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fs_id&quot;</span><span class="p">,</span>
+    <span class="n">store_hash</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initializes an S3 Store</span>
@@ -7179,7 +7217,7 @@ Alternatively you can pass in a dictionary with the full credentials:
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all distinct values for a field</span>
@@ -7357,13 +7395,13 @@ values are 1 for ascending or -1 for descending.</p></td>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">groupby</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">keys</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]]]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple grouping function that will group documents</span>
@@ -7448,7 +7486,7 @@ Store than this Store.</p>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the keys of documents that are newer in the target</span>
@@ -7538,12 +7576,12 @@ values are 1 for ascending or -1 for descending.</p></td>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-        <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">properties</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Queries the Store for a set of documents</span>
@@ -7563,7 +7601,7 @@ values are 1 for ascending or -1 for descending.</p></td>
         <span class="n">prop_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
-            <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span>
+        <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">prop_keys</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
             <span class="k">yield</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">}</span>
@@ -7572,8 +7610,8 @@ values are 1 for ascending or -1 for descending.</p></td>
                 <span class="c1"># TODO: THis is ugly and unsafe, do some real checking before pulling data</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
-                        <span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span>
-                        <span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span>
+                    <span class="o">.</span><span class="n">read</span><span class="p">()</span>
                 <span class="p">)</span>
             <span class="k">except</span> <span class="n">botocore</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ClientError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="c1"># If a client error is thrown, then check that it was a 404 error.</span>
@@ -7842,10 +7880,10 @@ Force all of the keys to be lower case to be Minio compatible</p>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">update</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span>
-        <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span>
-        <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span>
+    <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Update documents into the Store</span>
@@ -7973,7 +8011,9 @@ Force all of the keys to be lower case to be Minio compatible</p>
         <span class="p">)</span>
 
     <span class="n">s3_bucket</span><span class="o">.</span><span class="n">put_object</span><span class="p">(</span>
-        <span class="n">Key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]),</span> <span class="n">Body</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">Metadata</span><span class="o">=</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">Key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]),</span>
+        <span class="n">Body</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
+        <span class="n">Metadata</span><span class="o">=</span><span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">lu_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -8051,7 +8091,6 @@ Force all of the keys to be lower case to be Minio compatible</p>
 
 
   <div class="doc doc-children">
-
 
 
 
@@ -9030,7 +9069,7 @@ or None if default path (<code>mongogrant.client.path</code>).</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">mongogrant_spec</span> <span class="o">=</span> <span class="n">mongogrant_spec</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">mgclient_config_path</span> <span class="o">=</span> <span class="n">mgclient_config_path</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mgclient_config_path</span><span class="p">:</span>
         <span class="n">config</span> <span class="o">=</span> <span class="n">Config</span><span class="p">(</span><span class="n">check</span><span class="o">=</span><span class="n">check</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">mgclient_config_path</span><span class="p">)</span>
@@ -9158,7 +9197,6 @@ or None if default path (<code>mongogrant.client.path</code>).</p></td>
 
 
   <div class="doc doc-children">
-
 
 
 
@@ -10174,7 +10212,6 @@ VAULT_TOKEN or GITHUB_TOKEN - token used to authenticate to vault</p>
 
 
 
-
   <div class="doc doc-object doc-attribute">
 
 
@@ -11004,7 +11041,6 @@ This is a Read-Only Store designed to combine data from multiple collections.</p
 
 
 
-
   <div class="doc doc-object doc-attribute">
 
 
@@ -11249,7 +11285,7 @@ in collection_names list</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="n">main</span> <span class="ow">or</span> <span class="n">collection_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">merge_at_root</span> <span class="o">=</span> <span class="n">merge_at_root</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -11346,7 +11382,7 @@ all collection connections</p>
         <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main</span><span class="p">]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_has_merge_objects</span> <span class="o">=</span> <span class="p">(</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">server_info</span><span class="p">()[</span><span class="s2">&quot;version&quot;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="s2">&quot;3.6&quot;</span>
     <span class="p">)</span>
