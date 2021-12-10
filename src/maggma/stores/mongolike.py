@@ -342,7 +342,7 @@ class MongoStore(Store):
             else None
         )
 
-        if hint_list is not None:
+        if hint_list is not None:  # pragma: no cover
             return self._collection.count_documents(filter=criteria, hint=hint_list)
 
         return self._collection.count_documents(filter=criteria)
