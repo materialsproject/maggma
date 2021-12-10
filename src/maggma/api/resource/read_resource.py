@@ -191,7 +191,14 @@ class ReadOnlyResource(Resource):
 
             self.store.connect()
 
-            count = self.store.count(query["criteria"])
+            count = self.store.count(
+                **{
+                    field: query[field]
+                    for field in query
+                    if field in ["criteria", "hint"]
+                }
+            )
+
             data = list(self.store.query(**query))
             operator_meta = {}
 

@@ -317,16 +317,32 @@ class MongoStore(Store):
             raise StoreError("Must connect Mongo-like store before attemping to use it")
         return self._coll
 
-    def count(self, criteria: Optional[Dict] = None) -> int:
+    def count(
+        self,
+        criteria: Optional[Dict] = None,
+        hint: Optional[Dict[str, Union[Sort, int]]] = None,
+    ) -> int:
         """
         Counts the number of documents matching the query criteria
 
         Args:
             criteria: PyMongo filter for documents to count in
+            hint: Dictionary of indexes to use as hints for query optimizer.
+                Keys are field names and values are 1 for ascending or -1 for descending.
         """
 
         criteria = criteria if criteria else {}
-        return self._collection.count_documents(filter=criteria)
+
+        hint_list = (
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in hint.items()
+            ]
+            if hint
+            else None
+        )
+
+        return self._collection.count_documents(filter=criteria, hint=hint_list)
 
     def query(  # type: ignore
         self,
