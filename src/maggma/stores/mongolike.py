@@ -342,7 +342,10 @@ class MongoStore(Store):
             else None
         )
 
-        return self._collection.count_documents(filter=criteria, hint=hint_list)
+        if hint_list is not None:
+            return self._collection.count_documents(filter=criteria, hint=hint_list)
+
+        return self._collection.count_documents(filter=criteria)
 
     def query(  # type: ignore
         self,
