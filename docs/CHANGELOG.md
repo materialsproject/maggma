@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.38.1](https://github.com/materialsproject/maggma/tree/v0.38.1) (2021-12-10)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.38.0...v0.38.1)
+
+**Merged pull requests:**
+
+- Add ability to input index hints to count method [\#524](https://github.com/materialsproject/maggma/pull/524) ([munrojm](https://github.com/munrojm))
+
 ## [v0.38.0](https://github.com/materialsproject/maggma/tree/v0.38.0) (2021-12-09)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.37.0...v0.38.0)
