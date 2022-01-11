@@ -379,10 +379,17 @@ class S3Store(Store):
                 to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
+        # Any underscores are encoded as double dashes in metadata, since keys with 
+        # underscores may be result in the corresponding HTTP header being stripped 
+        # by certain server configurations (e.g. default nginx), leading to:
+        # `botocore.exceptions.ClientError: An error occurred (AccessDenied) when 
+        # calling the PutObject operation: There were headers present in the request 
+        # which were not signed`
+        # Metadata stored in the MongoDB index (self.index) is stored unchanged.
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]),
             Body=data,
-            Metadata={k: str(v) for k, v in search_doc.items()},
+            Metadata={k.replace('_', '--'): str(v) for k, v in search_doc.items()},
         )
 
         if lu_info is not None:
