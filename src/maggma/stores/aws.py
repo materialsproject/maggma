@@ -5,7 +5,7 @@ Advanced Stores for connecting to AWS data
 
 import threading
 import warnings
-import zlib
+import zlib     
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
@@ -379,11 +379,11 @@ class S3Store(Store):
                 to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
-        # Any underscores are encoded as double dashes in metadata, since keys with 
-        # underscores may be result in the corresponding HTTP header being stripped 
+        # Any underscores are encoded as double dashes in metadata, since keys with
+        # underscores may be result in the corresponding HTTP header being stripped
         # by certain server configurations (e.g. default nginx), leading to:
-        # `botocore.exceptions.ClientError: An error occurred (AccessDenied) when 
-        # calling the PutObject operation: There were headers present in the request 
+        # `botocore.exceptions.ClientError: An error occurred (AccessDenied) when
+        # calling the PutObject operation: There were headers present in the request
         # which were not signed`
         # Metadata stored in the MongoDB index (self.index) is stored unchanged.
         s3_bucket.put_object(
