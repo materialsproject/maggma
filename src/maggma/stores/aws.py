@@ -379,14 +379,7 @@ class S3Store(Store):
                 to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
-        # Any underscores are encoded as double dashes in metadata, since keys with
-        # underscores may be result in the corresponding HTTP header being stripped
-        # by certain server configurations (e.g. default nginx), leading to:
-        # `botocore.exceptions.ClientError: An error occurred (AccessDenied) when
-        # calling the PutObject operation: There were headers present in the request
-        # which were not signed`
-        # Metadata stored in the MongoDB index (self.index) is stored unchanged.
-        search_doc["s3-to-mongo-keys"] = {k: k.replace('_', '-') for k in search_doc.keys()}
+        search_doc["s3-to-mongo-keys"] = {k: self._sanitize_key(k) for k in search_doc.keys()}
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]),
             Body=data,
@@ -402,6 +395,22 @@ class S3Store(Store):
             obj_hash = hasher.hexdigest()
             search_doc["obj_hash"] = obj_hash
         return search_doc
+    
+    def _sanitize_key(key):
+        """
+        Sanitize keys to store in S3/MinIO metadata.
+        """
+
+        # Any underscores are encoded as double dashes in metadata, since keys with
+        # underscores may be result in the corresponding HTTP header being stripped
+        # by certain server configurations (e.g. default nginx), leading to:
+        # `botocore.exceptions.ClientError: An error occurred (AccessDenied) when
+        # calling the PutObject operation: There were headers present in the request
+        # which were not signed`
+        # Metadata stored in the MongoDB index (self.index) is stored unchanged.
+
+        # Additionally, MinIO requires lowercase keys
+        return str(key).replace('_', '-').lower()        
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
         """
@@ -482,8 +491,7 @@ class S3Store(Store):
         for index_doc in self.index.query(qq):
             key_ = self.sub_dir + index_doc[self.key]
             s3_object = self.s3_bucket.Object(key_)
-            # make sure the keys all all lower case
-            new_meta = {str(k).lower(): v for k, v in s3_object.metadata.items()}
+            new_meta = {self._sanitize_key(k): v for k, v in s3_object.metadata.items()}
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
