@@ -386,10 +386,11 @@ class S3Store(Store):
         # calling the PutObject operation: There were headers present in the request
         # which were not signed`
         # Metadata stored in the MongoDB index (self.index) is stored unchanged.
+        search_doc["s3-to-mongo-keys"] = {k: k.replace('_', '-') for k in search_doc.keys()}
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]),
             Body=data,
-            Metadata={k.replace('_', '--'): str(v) for k, v in search_doc.items()},
+            Metadata={search_doc["s3-to-mongo-keys"][k]: str(v) for k, v in search_doc.items()},
         )
 
         if lu_info is not None:
