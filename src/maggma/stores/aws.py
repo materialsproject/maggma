@@ -5,7 +5,7 @@ Advanced Stores for connecting to AWS data
 
 import threading
 import warnings
-import zlib     
+import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
