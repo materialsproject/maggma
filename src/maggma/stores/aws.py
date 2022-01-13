@@ -410,7 +410,7 @@ class S3Store(Store):
         # Metadata stored in the MongoDB index (self.index) is stored unchanged.
 
         # Additionally, MinIO requires lowercase keys
-        return str(key).replace('_', '-').lower()        
+        return str(key).replace('_', '-').lower()
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
         """
