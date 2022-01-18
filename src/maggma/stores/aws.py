@@ -395,7 +395,8 @@ class S3Store(Store):
             obj_hash = hasher.hexdigest()
             search_doc["obj_hash"] = obj_hash
         return search_doc
-    
+
+    @staticmethod
     def _sanitize_key(key):
         """
         Sanitize keys to store in S3/MinIO metadata.
