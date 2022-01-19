@@ -10,6 +10,7 @@ from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from json import dumps
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -381,12 +382,14 @@ class S3Store(Store):
 
         # keep a record of original keys, in case these are important for the individual researcher
         # it is not expected that this information will be used except in disaster recovery
-        search_doc["s3-to-mongo-keys"] = {k: self._sanitize_key(k) for k in search_doc.keys()}
-        search_doc["s3-to-mongo-keys"]["s3-to-mongo-keys"] = "s3-to-mongo-keys"  # inception
+        s3_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc.keys()}
+        s3_to_mongo_keys["s3-to-mongo-keys"] = "s3-to-mongo-keys"  # inception
+        # encode dictionary since values have to be strings
+        search_doc["s3-to-mongo-keys"] = dumps(s3_to_mongo_keys)
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]),
             Body=data,
-            Metadata={search_doc["s3-to-mongo-keys"][k]: str(v) for k, v in search_doc.items()},
+            Metadata={s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()},
         )
 
         if lu_info is not None:
