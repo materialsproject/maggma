@@ -379,7 +379,10 @@ class S3Store(Store):
                 to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
+        # keep a record of original keys, in case these are important for the individual researcher
+        # it is not expected that this information will be used except in disaster recovery
         search_doc["s3-to-mongo-keys"] = {k: self._sanitize_key(k) for k in search_doc.keys()}
+        search_doc["s3-to-mongo-keys"]["s3-to-mongo-keys"] = "s3-to-mongo-keys"  # inception
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]),
             Body=data,
