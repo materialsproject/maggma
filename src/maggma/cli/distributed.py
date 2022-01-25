@@ -115,7 +115,7 @@ async def worker(url: str, port: int, num_workers: int):
     except Exception as e:
         logger.error(f"A worker failed with error: {e}")
         await socket.send("ERROR".encode("utf-8"))
-        message = await socket.recv()
+        await socket.recv()
 
         socket.close()
 
