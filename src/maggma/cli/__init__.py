@@ -57,6 +57,7 @@ sys.meta_path.append(ScriptFinder())
     " mrun will find an open port if None is provided to the manager",
 )
 @click.option("-N", "--num-chunks", "num_chunks", default=0, type=int)
+@click.option("-w", "--num-workers", "num_workers", default=0, type=int)
 @click.option(
     "--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations"
 )
@@ -100,7 +101,7 @@ def run(
                 root.critical(f"Using random port for mrun manager: {port}")
             loop.run_until_complete(
                 manager(
-                    url=url, port=port, builders=builder_objects, num_chunks=num_chunks
+                    url=url, port=port, builders=builder_objects, num_chunks=num_chunks, num_workers=num_workers
                 )
             )
         else:

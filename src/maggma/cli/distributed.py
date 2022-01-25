@@ -32,6 +32,10 @@ async def manager(
     """
     logger = getLogger("Manager")
 
+    if not num_chunks and num_workers:
+        raise ValueError("Both num_chunks and num_workers must be non-zero")
+
+
     logger.info(f"Binding to Manager URL {url}:{port}")
     context = zmq.Context()
     socket = context.socket(REP)
