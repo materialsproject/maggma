@@ -3,6 +3,7 @@
 
 import json
 from logging import getLogger
+from multiprocessing.sharedctypes import Value
 import socket as pysocket
 from typing import List
 
@@ -47,25 +48,34 @@ async def manager(
         try:
 
             builder.connect()
-            chunks_dicts = list(builder.prechunk(num_chunks))
+            chunks_tuples = [(d, False) for d in builder.prechunk(num_chunks)]
 
-            logger.info(f"Distributing {len(chunks_dicts)} chunks to workers")
-            for chunk_dict in tqdm(chunks_dicts, desc="Chunks"):
-                temp_builder_dict = dict(**builder_dict)
-                temp_builder_dict.update(chunk_dict)
-                temp_builder_dict = jsanitize(temp_builder_dict)
+            logger.info(f"Distributing {len(chunks_tuples)} chunks to workers")
 
-                # Wait for client connection that announces client and says it is ready to do work
-                logger.debug("Waiting for a worker")
+            for chunk_dict, distributed in tqdm(chunks_tuples, desc="Chunks"):
+                while not distributed:
+                    if num_workers <= 0:
+                        socket.close()
+                        raise RuntimeError("No workers left to distribute chunks to")
 
-                worker = await socket.recv()
+                    temp_builder_dict = dict(**builder_dict)
+                    temp_builder_dict.update(chunk_dict)
+                    temp_builder_dict = jsanitize(temp_builder_dict)
 
-                if worker.decode("utf-8") == "ERROR":
-                    num_workers -= 1
+                    # Wait for client connection that announces client and says it is ready to do work
+                    logger.debug("Waiting for a worker")
 
-                logger.debug(f"Got connection from worker: {worker.decode('utf-8')}")
-                # Send out the next chunk
-                await socket.send(json.dumps(temp_builder_dict).encode("utf-8"))
+                    worker = await socket.recv()
+
+                    if worker.decode("utf-8") == "ERROR":
+                        num_workers -= 1
+                    else:
+                        logger.debug(
+                            f"Got connection from worker: {worker.decode('utf-8')}"
+                        )
+                        # Send out the next chunk
+                        await socket.send(json.dumps(temp_builder_dict).encode("utf-8"))
+                        distributed = True
 
             logger.info("Sending exit messages to workers")
             for _ in range(num_workers):
@@ -113,7 +123,6 @@ async def worker(url: str, port: int, num_processes: int):
     except Exception as e:
         logger.error(f"A worker failed with error: {e}")
         await socket.send("ERROR".encode("utf-8"))
-        await socket.recv()
 
         socket.close()
 
