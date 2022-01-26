@@ -41,6 +41,17 @@ class DummyBuilder(DummyBuilderWithNoPrechunk):
         return [{"val": i} for i in range(num_chunks)]
 
 
+class DummyBuilderError(DummyBuilderWithNoPrechunk):
+    def prechunk(self, num_chunks):
+        return [{"val": i} for i in range(num_chunks)]
+
+    def get_items(self):
+        raise ValueError("Dummy error")
+
+    def process_items(self, items):
+        raise ValueError("Dummy error")
+
+
 SERVER_URL = "tcp://127.0.0.1"
 SERVER_PORT = 8234
 
@@ -102,6 +113,33 @@ async def test_worker():
         await asyncio.sleep(1)
         message = await socket.recv()
         assert message == HOSTNAME.encode("utf-8")
+
+    worker_task.cancel()
+
+
+@pytest.mark.asyncio
+async def test_worker_error():
+    context = zmq.Context()
+    socket = context.socket(REP)
+    socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
+
+    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_workers=1))
+
+    message = await socket.recv()
+    assert message == HOSTNAME.encode("utf-8")
+
+    dummy_work = {
+        "@module": "tests.cli.test_distributed",
+        "@class": "DummyBuilderError",
+        "@version": None,
+        "dummy_prechunk": False,
+        "val": 0,
+    }
+
+    await socket.send(json.dumps(dummy_work).encode("utf-8"))
+    await asyncio.sleep(1)
+    message = await socket.recv()
+    assert message.decode("utf-8") == "ERROR"
 
     worker_task.cancel()
 
