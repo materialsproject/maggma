@@ -31,9 +31,9 @@ sys.meta_path.append(ScriptFinder())
 )
 @click.option(
     "-n",
-    "--num-workers",
-    "num_workers",
-    help="Number of worker processes. Defaults to single processing",
+    "--num-processes",
+    "num_processes",
+    help="Number of processes to spawn for each worker. Defaults to single processing",
     default=1,
     type=click.IntRange(1),
 )
@@ -56,12 +56,35 @@ sys.meta_path.append(ScriptFinder())
     help="Port for distributed communication."
     " mrun will find an open port if None is provided to the manager",
 )
-@click.option("-N", "--num-chunks", "num_chunks", default=0, type=int)
+@click.option(
+    "-N",
+    "--num-chunks",
+    "num_chunks",
+    default=0,
+    type=int,
+    help="Number of chunks to distribute to workers",
+)
+@click.option(
+    "-w",
+    "--num-workers",
+    "num_workers",
+    default=0,
+    type=int,
+    help="Number of distributed workers to process chunks",
+)
 @click.option(
     "--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations"
 )
 def run(
-    builders, verbosity, reporting_store, num_workers, url, port, num_chunks, no_bars
+    builders,
+    verbosity,
+    reporting_store,
+    num_workers,
+    url,
+    port,
+    num_chunks,
+    no_bars,
+    num_processes,
 ):
 
     # Set Logging
@@ -100,19 +123,25 @@ def run(
                 root.critical(f"Using random port for mrun manager: {port}")
             loop.run_until_complete(
                 manager(
-                    url=url, port=port, builders=builder_objects, num_chunks=num_chunks
+                    url=url,
+                    port=port,
+                    builders=builder_objects,
+                    num_chunks=num_chunks,
+                    num_workers=num_workers,
                 )
             )
         else:
             # worker
-            loop.run_until_complete(worker(url=url, port=port, num_workers=num_workers))
+            loop.run_until_complete(
+                worker(url=url, port=port, num_processes=num_processes)
+            )
     else:
-        if num_workers == 1:
+        if num_processes == 1:
             for builder in builder_objects:
                 serial(builder, no_bars)
         else:
             loop = asyncio.get_event_loop()
             for builder in builder_objects:
                 loop.run_until_complete(
-                    multi(builder=builder, num_workers=num_workers, no_bars=no_bars)
+                    multi(builder=builder, num_processes=num_processes, no_bars=no_bars)
                 )

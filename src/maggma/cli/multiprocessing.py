@@ -146,11 +146,11 @@ def safe_dispatch(val):
         return None
 
 
-async def multi(builder, num_workers, no_bars=False):
+async def multi(builder, num_processes, no_bars=False):
 
     builder.connect()
     cursor = builder.get_items()
-    executor = ProcessPoolExecutor(num_workers)
+    executor = ProcessPoolExecutor(num_processes)
 
     # Gets the total number of items to process by priming
     # the cursor

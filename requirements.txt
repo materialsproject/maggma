@@ -10,7 +10,7 @@ pydantic==1.9.0
 fastapi==0.73.0
 numpy==1.19.5;python_version<"3.7"
 numpy==1.21.0;python_version>"3.6"
-pynng==0.5.0
+pyzmq==22.3.0
 dnspython==2.1.0
 uvicorn==0.13.4
 sshtunnel==0.4.0
