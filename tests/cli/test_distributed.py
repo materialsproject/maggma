@@ -56,6 +56,24 @@ SERVER_URL = "tcp://127.0.0.1"
 SERVER_PORT = 8234
 
 
+@pytest.mark.xfail(raises=ValueError)
+@pytest.mark.asyncio
+async def test_wrong_worker_input(log_to_stdout):
+
+    manager_server = asyncio.create_task(
+        manager(
+            SERVER_URL,
+            SERVER_PORT,
+            [DummyBuilder(dummy_prechunk=False)],
+            num_chunks=2,
+            num_workers=0,
+        )
+    )
+
+    await asyncio.sleep(1)
+    manager_server.result()
+
+
 @pytest.mark.asyncio
 async def test_manager_give_out_chunks(log_to_stdout):
 
