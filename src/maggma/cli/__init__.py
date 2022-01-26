@@ -65,7 +65,7 @@ sys.meta_path.append(ScriptFinder())
     help="Number of chunks to distribute to workers",
 )
 @click.option(
-    "-d",
+    "-w",
     "--num-workers",
     "num_workers",
     default=0,

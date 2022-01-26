@@ -90,6 +90,11 @@ async def test_manager_give_out_chunks(manager_server, log_to_stdout):
         assert work["@module"] == "tests.cli.test_distributed"
         assert work["val"] == i
 
+    for i in range(0, 10):
+        await socket.send(b"Ready")
+        message = await socket.recv()
+        assert message == b'"EXIT"'
+
 
 @pytest.mark.asyncio
 async def test_worker():
