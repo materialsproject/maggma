@@ -143,5 +143,5 @@ def run(
             loop = asyncio.get_event_loop()
             for builder in builder_objects:
                 loop.run_until_complete(
-                    multi(builder=builder, num_workers=num_workers, no_bars=no_bars)
+                    multi(builder=builder, num_processes=num_processes, no_bars=no_bars)
                 )
