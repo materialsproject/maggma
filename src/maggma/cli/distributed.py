@@ -35,7 +35,6 @@ async def manager(
     if not num_chunks and num_workers:
         raise ValueError("Both num_chunks and num_workers must be non-zero")
 
-
     logger.info(f"Binding to Manager URL {url}:{port}")
     context = zmq.Context()
     socket = context.socket(REP)
@@ -109,7 +108,6 @@ async def worker(url: str, port: int, num_workers: int):
                 await multi(builder, num_workers)
             elif work == "EXIT":
                 # End the worker
-                # This should look for a specific message ?
                 running = False
 
     except Exception as e:
