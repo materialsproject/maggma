@@ -97,7 +97,7 @@ async def test_worker():
     socket = context.socket(REP)
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
-    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_workers=1))
+    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1))
 
     message = await socket.recv()
 
@@ -123,7 +123,7 @@ async def test_worker_error():
     socket = context.socket(REP)
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
-    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_workers=1))
+    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1))
 
     message = await socket.recv()
     assert message == HOSTNAME.encode("utf-8")
