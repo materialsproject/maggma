@@ -136,7 +136,7 @@ def run(
                 worker(url=url, port=port, num_processes=num_processes)
             )
     else:
-        if num_workers == 1:
+        if num_processes == 1:
             for builder in builder_objects:
                 serial(builder, no_bars)
         else:
