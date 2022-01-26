@@ -653,11 +653,11 @@
 <li><code>update_targets</code>: This method should take a list of processed items and update the target stores.</li>
 </ul>
 <p>To make this less abstract, we will write a builder that multiplies the "a" sub-document by a pre-configured <code>multiplier</code>. Let's assume we have some source collection in MongoDB with documents that look like this:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span>
-    <span class="nt">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="nt">&quot;a&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-    <span class="nt">&quot;last_updated&quot;</span><span class="p">:</span> <span class="s2">&quot;2019-11-3&quot;</span>
-<span class="p">}</span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;a&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-11-3&quot;</span><span class="w"></span>
+<span class="p">}</span><span class="w"></span>
 </code></pre></div>
 <h2 id="class-definition-and-__init__">Class definition and <code>__init__</code><a class="headerlink" href="#class-definition-and-__init__" title="Permanent link">&para;</a></h2>
 <p>A simple class definition for a Maggma-based builder looks like this:</p>
