@@ -80,7 +80,7 @@ async def manager(
     socket.close()
 
 
-async def worker(url: str, port: int, num_workers: int):
+async def worker(url: str, port: int, num_processes: int):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
@@ -105,7 +105,7 @@ async def worker(url: str, port: int, num_workers: int):
             if "@class" in work and "@module" in work:
                 # We have a valid builder
                 builder = MontyDecoder().process_decoded(work)
-                await multi(builder, num_workers)
+                await multi(builder, num_processes)
             elif work == "EXIT":
                 # End the worker
                 running = False
