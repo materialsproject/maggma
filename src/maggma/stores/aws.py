@@ -10,6 +10,7 @@ from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from json import dumps
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -379,10 +380,16 @@ class S3Store(Store):
                 to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
+        # keep a record of original keys, in case these are important for the individual researcher
+        # it is not expected that this information will be used except in disaster recovery
+        s3_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc.keys()}
+        s3_to_mongo_keys["s3-to-mongo-keys"] = "s3-to-mongo-keys"  # inception
+        # encode dictionary since values have to be strings
+        search_doc["s3-to-mongo-keys"] = dumps(s3_to_mongo_keys)
         s3_bucket.put_object(
             Key=self.sub_dir + str(doc[self.key]),
             Body=data,
-            Metadata={k: str(v) for k, v in search_doc.items()},
+            Metadata={s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()},
         )
 
         if lu_info is not None:
@@ -394,6 +401,23 @@ class S3Store(Store):
             obj_hash = hasher.hexdigest()
             search_doc["obj_hash"] = obj_hash
         return search_doc
+
+    @staticmethod
+    def _sanitize_key(key):
+        """
+        Sanitize keys to store in S3/MinIO metadata.
+        """
+
+        # Any underscores are encoded as double dashes in metadata, since keys with
+        # underscores may be result in the corresponding HTTP header being stripped
+        # by certain server configurations (e.g. default nginx), leading to:
+        # `botocore.exceptions.ClientError: An error occurred (AccessDenied) when
+        # calling the PutObject operation: There were headers present in the request
+        # which were not signed`
+        # Metadata stored in the MongoDB index (self.index) is stored unchanged.
+
+        # Additionally, MinIO requires lowercase keys
+        return str(key).replace('_', '-').lower()
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
         """
@@ -474,8 +498,7 @@ class S3Store(Store):
         for index_doc in self.index.query(qq):
             key_ = self.sub_dir + index_doc[self.key]
             s3_object = self.s3_bucket.Object(key_)
-            # make sure the keys all all lower case
-            new_meta = {str(k).lower(): v for k, v in s3_object.metadata.items()}
+            new_meta = {self._sanitize_key(k): v for k, v in s3_object.metadata.items()}
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")

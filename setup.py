@@ -38,15 +38,15 @@ setup(
         "numpy>=1.17.3",
         "pydantic>=0.32.2",
         "fastapi>=0.42.0",
-        "pynng>=0.5.0",
+        "pyzmq==22.3.0",
         "dnspython>=1.16.0",
         "sshtunnel>=0.1.5",
         "msgpack>=0.5.6",
         "orjson>=3.6.0",
+        "boto3>=1.20.41"
     ],
     extras_require={
         "vault": ["hvac>=0.9.5"],
-        "S3": ["boto3>=1.14.56"],
         "montydb": ["montydb>=2.3.12"],
         "notebook_runner": ["IPython>=7.16", "nbformat>=5.0", "regex>=2020.6"],
     },

@@ -1,5 +1,26 @@
 # Changelog
 
+## [v0.39.1](https://github.com/materialsproject/maggma/tree/v0.39.1) (2022-01-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.39.0...v0.39.1)
+
+**Fixed bugs:**
+
+- Single import-dependence on pynng causes M1 Mac install error [\#528](https://github.com/materialsproject/maggma/issues/528)
+
+**Merged pull requests:**
+
+- Add boto3 to required packages [\#544](https://github.com/materialsproject/maggma/pull/544) ([munrojm](https://github.com/munrojm))
+
+## [v0.39.0](https://github.com/materialsproject/maggma/tree/v0.39.0) (2022-01-26)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.38.1...v0.39.0)
+
+**Merged pull requests:**
+
+- Replace `pynng` functionality with `pyzmq` [\#543](https://github.com/materialsproject/maggma/pull/543) ([munrojm](https://github.com/munrojm))
+- Encode `_` as `--` in metadata when using `S3Store.write_doc_to_s3` [\#532](https://github.com/materialsproject/maggma/pull/532) ([mkhorton](https://github.com/mkhorton))
+
 ## [v0.38.1](https://github.com/materialsproject/maggma/tree/v0.38.1) (2021-12-10)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.38.0...v0.38.1)
