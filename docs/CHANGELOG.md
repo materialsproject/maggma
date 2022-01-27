@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.39.1](https://github.com/materialsproject/maggma/tree/v0.39.1) (2022-01-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.39.0...v0.39.1)
+
+**Fixed bugs:**
+
+- Single import-dependence on pynng causes M1 Mac install error [\#528](https://github.com/materialsproject/maggma/issues/528)
+
+**Merged pull requests:**
+
+- Add boto3 to required packages [\#544](https://github.com/materialsproject/maggma/pull/544) ([munrojm](https://github.com/munrojm))
+
 ## [v0.39.0](https://github.com/materialsproject/maggma/tree/v0.39.0) (2022-01-26)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.38.1...v0.39.0)
