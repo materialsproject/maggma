@@ -53,6 +53,7 @@ class GridFSStore(Store):
         compression: bool = False,
         ensure_metadata: bool = False,
         searchable_fields: List[str] = None,
+        auth_source: Optional[str] = None,
         **kwargs,
     ):
         """
@@ -68,6 +69,7 @@ class GridFSStore(Store):
             compression: compress the data as it goes into GridFS
             ensure_metadata: ensure returned documents have the metadata fields
             searchable_fields: fields to keep in the index store
+            auth_source: The database to authenticate on. Defaults to the database name.
         """
 
         self.database = database
@@ -81,6 +83,10 @@ class GridFSStore(Store):
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
         self.kwargs = kwargs
+
+        if auth_source is None:
+            auth_source = self.database
+        self.auth_source = auth_source
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
@@ -124,6 +130,7 @@ class GridFSStore(Store):
                 port=self.port,
                 username=self.username,
                 password=self.password,
+                authSource=self.auth_source,
             )
             if self.username != ""
             else MongoClient(self.host, self.port)
@@ -228,7 +235,10 @@ class GridFSStore(Store):
                 metadata = doc.get("metadata", {})
 
                 data = self._collection.find_one(
-                    filter={"_id": doc["_id"]}, skip=skip, limit=limit, sort=sort,
+                    filter={"_id": doc["_id"]},
+                    skip=skip,
+                    limit=limit,
+                    sort=sort,
                 ).read()
 
                 if metadata.get("compression", "") == "zlib":
