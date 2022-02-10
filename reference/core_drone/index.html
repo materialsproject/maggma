@@ -10,11 +10,10 @@
       
       
       
-      
         <link rel="canonical" href="https://materialsproject.github.io/maggma/reference/core_drone/">
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.1.8">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-8.1.10">
     
     
       
@@ -22,10 +21,10 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.ca7ac06f.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.d6be258b.min.css">
       
         
-        <link rel="stylesheet" href="../../assets/stylesheets/palette.f1a3b89f.min.css">
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.e6a45f82.min.css">
         
       
     
@@ -35,16 +34,15 @@
         
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
-        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
       
-    
     
     
       <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
     
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
     
       
-
 
     
     
@@ -59,7 +57,6 @@
     <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
   
     
-    <script>function __prefix(e){return new URL("../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
     
     <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
     <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
@@ -76,7 +73,10 @@
       
     </div>
     
-      <header class="md-header" data-md-component="header">
+    
+      
+
+<header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
     <a href="../.." title="Maggma Documentation" class="md-header__button md-logo" aria-label="Maggma Documentation" data-md-component="logo">
       
@@ -109,19 +109,22 @@
       <label class="md-header__button md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
       </label>
-      
-<div class="md-search" data-md-component="search" role="dialog">
+      <div class="md-search" data-md-component="search" role="dialog">
   <label class="md-search__overlay" for="__search"></label>
   <div class="md-search__inner" role="search">
     <form class="md-search__form" name="search">
-      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" data-md-state="active" required>
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
       <label class="md-search__icon md-icon" for="__search">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
       </label>
-      <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
-      </button>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
     </form>
     <div class="md-search__output">
       <div class="md-search__scrollwrap" data-md-scrollfix>
@@ -138,8 +141,7 @@
     
     
       <div class="md-header__source">
-        
-<a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-component="source">
+        <a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -151,11 +153,14 @@
       </div>
     
   </nav>
+  
 </header>
     
     <div class="md-container" data-md-component="container">
       
       
+        
+          
         
       
       <main class="md-main" data-md-component="main">
@@ -181,8 +186,7 @@
   </label>
   
     <div class="md-nav__source">
-      
-<a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-component="source">
+      <a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-component="source">
   <div class="md-source__icon md-icon">
     
     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
@@ -238,10 +242,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" >
       
-      <label class="md-nav__link" for="__nav_3">
-        Getting Started
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
         <label class="md-nav__title" for="__nav_3">
           <span class="md-nav__icon md-icon"></span>
@@ -250,6 +258,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -260,8 +269,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -272,8 +283,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -284,8 +297,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -296,8 +311,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -308,8 +325,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -320,8 +339,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -332,6 +353,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -354,10 +376,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" checked>
       
-      <label class="md-nav__link" for="__nav_4">
-        Reference
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Reference" data-md-level="1">
         <label class="md-nav__title" for="__nav_4">
           <span class="md-nav__icon md-icon"></span>
@@ -366,6 +392,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
     
@@ -377,10 +404,14 @@
       
         <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" type="checkbox" id="__nav_4_1" checked>
       
-      <label class="md-nav__link" for="__nav_4_1">
-        Core
-        <span class="md-nav__icon md-icon"></span>
-      </label>
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1">
+          Core
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <nav class="md-nav" aria-label="Core" data-md-level="2">
         <label class="md-nav__title" for="__nav_4_1">
           <span class="md-nav__icon md-icon"></span>
@@ -389,6 +420,7 @@
         <ul class="md-nav__list" data-md-scrollfix>
           
             
+              
   
   
   
@@ -399,8 +431,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -411,8 +445,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -423,8 +459,10 @@
     </li>
   
 
+            
           
             
+              
   
   
     
@@ -446,6 +484,7 @@
       </a>
       
         
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -574,14 +613,17 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -592,8 +634,10 @@
     </li>
   
 
+            
           
             
+              
   
   
   
@@ -604,6 +648,7 @@
     </li>
   
 
+            
           
         </ul>
       </nav>
@@ -638,6 +683,7 @@
                 <div class="md-sidebar__scrollwrap">
                   <div class="md-sidebar__inner">
                     
+
 <nav class="md-nav md-nav--secondary" aria-label="Table of contents">
   
   
@@ -771,14 +817,14 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/materialsproject/maggma/edit/master/docs/reference/core_drone.md" title="Edit this page" class="md-content__button md-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
-                  </a>
-                
-                
-                  <h1>Drone</h1>
-                
-                <div class="doc doc-object doc-module">
+<a href="https://github.com/materialsproject/maggma/edit/master/docs/reference/core_drone.md" title="Edit this page" class="md-content__button md-icon">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+</a>
+
+
+  <h1>Drone</h1>
+
+<div class="doc doc-object doc-module">
 
 <a id="maggma.core.drone"></a>
     <div class="doc doc-contents first">
@@ -799,7 +845,9 @@
 
 
 <h2 class="doc doc-heading" id="maggma.core.drone.Document">
-        <code>Document</code>
+        <code>
+Document            (<span title="pydantic.main.BaseModel">BaseModel</span>)
+        </code>
 
 
   <span class="doc doc-properties">
@@ -812,6 +860,17 @@
 
       <p>Represent a file</p>
 
+        <details class="quote">
+          <summary>Source code in <code>maggma/core/drone.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Document</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represent a file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">path</span><span class="p">:</span> <span class="n">PosixPath</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Path of this file&quot;</span><span class="p">)</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;File name&quot;</span><span class="p">)</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -844,7 +903,9 @@
 
 
 <h2 class="doc doc-heading" id="maggma.core.drone.Drone">
-        <code>Drone</code>
+        <code>
+Drone            (<a title="maggma.core.builder.Builder" href="../core_builder/#maggma.core.builder.Builder">Builder</a>)
+        </code>
 
 
 
@@ -859,6 +920,164 @@ Note: The steps of a Drone can be divided into roughly 5 steps</p>
 <p>For sample usage, please see /docs/getting_started/core_drone.md
  and example implementation is available in tests/builders/test_simple_bibdrone.py</p>
 
+        <details class="quote">
+          <summary>Source code in <code>maggma/core/drone.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Drone</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    An abstract drone that handles operations with database, using Builder to support multi-threading</span>
+<span class="sd">    User have to implement all abstract methods to specify the data that they want to use to interact with this class</span>
+
+<span class="sd">    Note: All embarrassingly parallel function should be in process_items</span>
+<span class="sd">    Note: The steps of a Drone can be divided into roughly 5 steps</span>
+
+<span class="sd">     For sample usage, please see /docs/getting_started/core_drone.md</span>
+<span class="sd">     and example implementation is available in tests/builders/test_simple_bibdrone.py</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">store</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">store</span> <span class="o">=</span> <span class="n">store</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="p">[],</span> <span class="n">targets</span><span class="o">=</span><span class="n">store</span><span class="p">)</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">compute_record_identifier_key</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Document</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Compute the RecordIdentifier key that this document correspond to</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            doc: document which the record identifier key will be inferred from</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            RecordIdentifiierKey</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">read</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">RecordIdentifier</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Given a folder path to a data folder, read all the files, and return a dictionary</span>
+<span class="sd">        that maps each RecordKey -&gt; [RecordIdentifier]</span>
+
+<span class="sd">        ** Note: require user to implement the function computeRecordIdentifierKey</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            path: Path object that indicate a path to a data folder</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of Record Identifiers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">compute_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">recordID</span><span class="p">:</span> <span class="n">RecordIdentifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        User can specify what raw data they want to save from the Documents that this recordID refers to</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            recordID: recordID that needs to be re-saved</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Dictionary of NAME_OF_DATA -&gt; DATA</span>
+<span class="sd">                        ex:</span>
+<span class="sd">                            for a recordID refering to 1,</span>
+<span class="sd">                            {</span>
+<span class="sd">                                &quot;citation&quot;: cite.bibtex ,</span>
+<span class="sd">                                &quot;text&quot;: data.txt</span>
+<span class="sd">                            }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">should_update_records</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">record_identifiers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RecordIdentifier</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">RecordIdentifier</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Batch query database by computing all the keys and send them at once</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            record_identifiers: all the record_identifiers that need to fetch from database</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List of recordIdentifiers representing data that needs to be updated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
+            <span class="n">criteria</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;record_key&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">r</span><span class="o">.</span><span class="n">record_key</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">record_identifiers</span><span class="p">]}</span>
+            <span class="p">},</span>
+            <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;record_key&quot;</span><span class="p">,</span> <span class="s2">&quot;state_hash&quot;</span><span class="p">,</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+
+        <span class="n">not_exists</span> <span class="o">=</span> <span class="nb">object</span><span class="p">()</span>
+        <span class="n">db_record_log</span> <span class="o">=</span> <span class="p">{</span><span class="n">doc</span><span class="p">[</span><span class="s2">&quot;record_key&quot;</span><span class="p">]:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;state_hash&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">cursor</span><span class="p">}</span>
+        <span class="n">to_update_list</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">recordID</span><span class="o">.</span><span class="n">state_hash</span> <span class="o">!=</span> <span class="n">db_record_log</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">recordID</span><span class="o">.</span><span class="n">record_key</span><span class="p">,</span> <span class="n">not_exists</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">recordID</span> <span class="ow">in</span> <span class="n">record_identifiers</span>
+        <span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span>
+            <span class="n">recordID</span>
+            <span class="k">for</span> <span class="n">recordID</span><span class="p">,</span> <span class="n">to_update</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">record_identifiers</span><span class="p">,</span> <span class="n">to_update_list</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">to_update</span>
+        <span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">assimilate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">RecordIdentifier</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Function mainly for debugging purpose. It will</span>
+<span class="sd">            1. read file in the path specified</span>
+<span class="sd">            2. convert them into recordIdentifier</span>
+<span class="sd">            3. return the converted recordIdentifiers</span>
+<span class="sd">        Args:</span>
+<span class="sd">            path: path in which files are read</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list of record Identifiers</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">record_identifiers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RecordIdentifier</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">record_identifiers</span>
+
+    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Read from the path that was given, compare against database files to find recordIDs that needs to be updated</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            RecordIdentifiers that needs to be updated</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s2">&quot;Starting get_items in </span><span class="si">{}</span><span class="s2"> Builder&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">record_identifiers</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">RecordIdentifier</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">records_to_update</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">should_update_records</span><span class="p">(</span><span class="n">record_identifiers</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">records_to_update</span>
+
+    <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Receive a list of items to update, update the items</span>
+
+<span class="sd">        Assume that each item are in the correct format</span>
+<span class="sd">        Args:</span>
+<span class="sd">            items: List of items to update</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Updating </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">items</span><span class="p">)))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;There are no items to update&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">RecordIdentifier</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>  <span class="c1"># type: ignore</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        compute the item to update</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            item: item to update</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            result from expanding the item</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">compute_data</span><span class="p">(</span><span class="n">recordID</span><span class="o">=</span><span class="n">item</span><span class="p">),</span> <span class="o">**</span><span class="n">item</span><span class="o">.</span><span class="n">dict</span><span class="p">()}</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -991,10 +1210,9 @@ Note: The steps of a Drone can be divided into roughly 5 steps</p>
   </thead>
   <tbody>
     <tr>
-      <td><code>Dict</code></td>
-      <td><p>Dictionary of NAME_OF_DATA -&gt; DATA
-            ex:
-                for a recordID refering to 1,
+      <td><code>Dictionary of NAME_OF_DATA -&gt; DATA
+            ex</code></td>
+      <td><p>for a recordID refering to 1,
                 {
                     "citation": cite.bibtex ,
                     "text": data.txt
@@ -1429,7 +1647,7 @@ that maps each RecordKey -&gt; [RecordIdentifier]</p>
   </thead>
   <tbody>
     <tr>
-      <td><code></code></td>
+      <td></td>
       <td><p>None</p></td>
     </tr>
   </tbody>
@@ -1475,7 +1693,9 @@ that maps each RecordKey -&gt; [RecordIdentifier]</p>
 
 
 <h2 class="doc doc-heading" id="maggma.core.drone.RecordIdentifier">
-        <code>RecordIdentifier</code>
+        <code>
+RecordIdentifier            (<span title="pydantic.main.BaseModel">BaseModel</span>)
+        </code>
 
 
   <span class="doc doc-properties">
@@ -1488,6 +1708,56 @@ that maps each RecordKey -&gt; [RecordIdentifier]</p>
 
       <p>The meta data for a record</p>
 
+        <details class="quote">
+          <summary>Source code in <code>maggma/core/drone.py</code></summary>
+          <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">RecordIdentifier</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The meta data for a record</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">last_updated</span><span class="p">:</span> <span class="n">datetime</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;The time in which this record is last updated&quot;</span>
+    <span class="p">)</span>
+    <span class="n">documents</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Document</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="p">[],</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;List of documents this RecordIdentifier indicate&quot;</span>
+    <span class="p">)</span>
+    <span class="n">record_key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="o">...</span><span class="p">,</span>
+        <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hash that uniquely define this record, can be inferred from each document inside&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">state_hash</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span>
+        <span class="kc">None</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;Hash of the state of the documents in this Record&quot;</span>
+    <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parent_directory</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        root most directory that documnents in this record share</span>
+<span class="sd">        :return:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">paths</span> <span class="o">=</span> <span class="p">[</span><span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span> <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">documents</span><span class="p">]</span>
+        <span class="n">parent_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">commonprefix</span><span class="p">(</span><span class="n">paths</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">parent_path</span><span class="o">.</span><span class="n">parent</span>
+
+        <span class="k">return</span> <span class="n">parent_path</span>
+
+    <span class="k">def</span> <span class="nf">compute_state_hash</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        compute the hash of the state of the documents in this record</span>
+<span class="sd">        :param doc_list: list of documents</span>
+<span class="sd">        :return:</span>
+<span class="sd">            hash of the list of documents passed in</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">digest</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">documents</span><span class="p">:</span>
+            <span class="n">digest</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">encode</span><span class="p">())</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">(),</span> <span class="s2">&quot;rb&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">digest</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">digest</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">())</span>
+</code></pre></div>
+        </details>
 
 
 
@@ -1591,11 +1861,6 @@ that maps each RecordKey -&gt; [RecordIdentifier]</p>
     </div>
 
   </div>
-                
-              
-              
-                
-
 
               
             </article>
@@ -1604,8 +1869,7 @@ that maps each RecordKey -&gt; [RecordIdentifier]</p>
         
       </main>
       
-        
-<footer class="md-footer">
+        <footer class="md-footer">
   
     <nav class="md-footer__inner md-grid" aria-label="Footer">
       
@@ -1644,18 +1908,19 @@ that maps each RecordKey -&gt; [RecordIdentifier]</p>
   
   <div class="md-footer-meta md-typeset">
     <div class="md-footer-meta__inner md-grid">
-      <div class="md-footer-copyright">
-        
-          <div class="md-footer-copyright__highlight">
-            Built by The Materials Project
-          </div>
-        
-        Made with
-        <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
-          Material for MkDocs
-        </a>
-        
-      </div>
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Built by The Materials Project
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
       
     </div>
   </div>
@@ -1665,10 +1930,10 @@ that maps each RecordKey -&gt; [RecordIdentifier]</p>
     <div class="md-dialog" data-md-component="dialog">
       <div class="md-dialog__inner md-typeset"></div>
     </div>
-    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.b0710199.min.js", "version": null}</script>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../assets/javascripts/workers/search.092fa1f6.min.js"}</script>
     
     
-      <script src="../../assets/javascripts/bundle.76f349be.min.js"></script>
+      <script src="../../assets/javascripts/bundle.e3b2bf44.min.js"></script>
       
     
   </body>
