@@ -7,7 +7,7 @@ from pydantic import BaseModel
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
-from maggma.api.resource import Resource, HintScheme
+from maggma.api.resource import Resource, HintScheme, HeaderProcessor
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries, object_id_serilaization_helper
 from maggma.core import Store
@@ -31,6 +31,7 @@ class ReadOnlyResource(Resource):
         query_operators: Optional[List[QueryOperator]] = None,
         key_fields: Optional[List[str]] = None,
         hint_scheme: Optional[HintScheme] = None,
+        header_processor: Optional[HeaderProcessor] = None,
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
         disable_validation: bool = False,
@@ -44,6 +45,7 @@ class ReadOnlyResource(Resource):
             tags: List of tags for the Endpoint
             query_operators: Operators for the query language
             hint_scheme: The hint scheme to use for this resource
+            header_processor: The header processor to use for this resource
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
             enable_get_by_key: Enable default key route for endpoint.
@@ -57,6 +59,7 @@ class ReadOnlyResource(Resource):
         self.store = store
         self.tags = tags or []
         self.hint_scheme = hint_scheme
+        self.header_processor = header_processor
         self.key_fields = key_fields
         self.versioned = False
         self.enable_get_by_key = enable_get_by_key
@@ -64,6 +67,7 @@ class ReadOnlyResource(Resource):
         self.disable_validation = disable_validation
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
+
         self.response_model = Response[model]  # type: ignore
 
         if not isinstance(store, MongoStore) and self.hint_scheme is not None:
@@ -182,6 +186,8 @@ class ReadOnlyResource(Resource):
                         ", ".join(overlap)
                     ),
                 )
+
+            self.header_processor.process_header(request)
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 
