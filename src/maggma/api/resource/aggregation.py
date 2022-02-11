@@ -1,11 +1,12 @@
 from typing import Any, Dict, List, Optional, Type
 
-from fastapi import HTTPException
+from fastapi import HTTPException, Response, Request
 from pydantic import BaseModel
 
-from maggma.api.models import Meta, Response
+from maggma.api.models import Meta
+from maggma.api.models import Response as ResponseModel
 from maggma.api.query_operator import QueryOperator
-from maggma.api.resource import Resource
+from maggma.api.resource import Resource, HeaderProcessor
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
@@ -24,6 +25,7 @@ class AggregationResource(Resource):
         tags: Optional[List[str]] = None,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
+        header_processor: Optional[HeaderProcessor] = None,
     ):
         """
         Args:
@@ -39,9 +41,10 @@ class AggregationResource(Resource):
 
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
-        self.response_model = Response[model]  # type: ignore
+        self.response_model = ResponseModel[model]  # type: ignore
 
         self.pipeline_query_operator = pipeline_query_operator
+        self.header_processor = header_processor
 
         super().__init__(model)
 
@@ -58,6 +61,8 @@ class AggregationResource(Resource):
         model_name = self.model.__name__
 
         async def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
+            request: Request = queries.pop("request")  # type: ignore
+            temp_response: Response = queries.pop("temp_response")  # type: ignore
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 
@@ -78,6 +83,10 @@ class AggregationResource(Resource):
 
             meta = Meta(total_doc=count)
             response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
+
+            if self.header_processor is not None:
+                self.header_processor.process_header(temp_response, request)
+
             return response
 
         self.router.get(

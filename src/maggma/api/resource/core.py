@@ -2,7 +2,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Type
 
-from fastapi import APIRouter, FastAPI, Request
+from fastapi import APIRouter, FastAPI, Response, Request
 from monty.json import MontyDecoder, MSONable
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
@@ -105,7 +105,9 @@ class HeaderProcessor(MSONable, metaclass=ABCMeta):
     """
 
     @abstractmethod
-    def process_header(self, request: Request):
+    def process_header(self, response: Response, request: Request):
         """
-        This method takes in a FastAPI Request object and processes a new header for it in-place
+        This method takes in a FastAPI Response object and processes a new header for it in-place.
+        It can use data in the upstream request to generate the header.
+        (https://fastapi.tiangolo.com/advanced/response-headers/#use-a-response-parameter)
         """

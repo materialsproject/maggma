@@ -1,11 +1,12 @@
 from inspect import signature
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from fastapi import Depends, HTTPException, Path, Request
-from fastapi import Response as BareResponse
+from fastapi import Response
 from pydantic import BaseModel
 
-from maggma.api.models import Meta, Response
+from maggma.api.models import Meta
+from maggma.api.models import Response as ResponseModel
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
 from maggma.api.resource import Resource, HintScheme, HeaderProcessor
 from maggma.api.resource.utils import attach_query_ops
@@ -68,7 +69,7 @@ class ReadOnlyResource(Resource):
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
 
-        self.response_model = Response[model]  # type: ignore
+        self.response_model = ResponseModel[model]  # type: ignore
 
         if not isinstance(store, MongoStore) and self.hint_scheme is not None:
             raise ValueError("Hint scheme is only supported for MongoDB stores")
@@ -113,6 +114,8 @@ class ReadOnlyResource(Resource):
                 return {"properties": self.key_fields}
 
         async def get_by_key(
+            request: Request,
+            response: Response,
             key: str = Path(
                 ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
             ),
@@ -144,12 +147,15 @@ class ReadOnlyResource(Resource):
             for operator in self.query_operators:
                 item = operator.post_process(item)
 
-            response = {"data": item}
+            response = {"data": item}  # type: ignore
 
             if self.disable_validation:
-                response = BareResponse(  # type: ignore
+                response = Response(  # type: ignore
                     orjson.dumps(response, default=object_id_serilaization_helper)
                 )
+
+            if self.header_processor is not None:
+                self.header_processor.process_header(response, request)
 
             return response
 
@@ -167,8 +173,9 @@ class ReadOnlyResource(Resource):
 
         model_name = self.model.__name__
 
-        async def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
+        async def search(**queries: Dict[str, STORE_PARAMS]) -> Union[Dict, Response]:
             request: Request = queries.pop("request")  # type: ignore
+            response: Response = queries.pop("temp_response")  # type: ignore
 
             query_params = [
                 entry
@@ -186,8 +193,6 @@ class ReadOnlyResource(Resource):
                         ", ".join(overlap)
                     ),
                 )
-
-            self.header_processor.process_header(request)
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 
@@ -214,12 +219,15 @@ class ReadOnlyResource(Resource):
 
             meta = Meta(total_doc=count)
 
-            response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
+            response = {"data": data, "meta": {**meta.dict(), **operator_meta}}  # type: ignore
 
             if self.disable_validation:
-                response = BareResponse(  # type: ignore
+                response = Response(  # type: ignore
                     orjson.dumps(response, default=object_id_serilaization_helper)
                 )
+
+            if self.header_processor is not None:
+                self.header_processor.process_header(response, request)
 
             return response
 
