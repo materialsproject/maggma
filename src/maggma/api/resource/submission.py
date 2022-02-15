@@ -225,6 +225,7 @@ class SubmissionResource(Resource):
         async def post_data(**queries: STORE_PARAMS):
 
             request: Request = queries.pop("request")  # type: ignore
+            queries.pop("temp_response")  # type: ignore
 
             query: STORE_PARAMS = merge_queries(list(queries.values()))
 
