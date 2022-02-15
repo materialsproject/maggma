@@ -2,7 +2,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Type
 
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, Response, Request
 from monty.json import MontyDecoder, MSONable
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
@@ -96,4 +96,18 @@ class HintScheme(MSONable, metaclass=ABCMeta):
     def generate_hints(self, query: STORE_PARAMS) -> STORE_PARAMS:
         """
         This method takes in a MongoDB query and returns hints
+        """
+
+
+class HeaderProcessor(MSONable, metaclass=ABCMeta):
+    """
+    Base class for generic header processing
+    """
+
+    @abstractmethod
+    def process_header(self, response: Response, request: Request):
+        """
+        This method takes in a FastAPI Response object and processes a new header for it in-place.
+        It can use data in the upstream request to generate the header.
+        (https://fastapi.tiangolo.com/advanced/response-headers/#use-a-response-parameter)
         """

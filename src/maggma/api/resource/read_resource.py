@@ -1,13 +1,14 @@
 from inspect import signature
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type, Union
 
 from fastapi import Depends, HTTPException, Path, Request
-from fastapi import Response as BareResponse
+from fastapi import Response
 from pydantic import BaseModel
 
-from maggma.api.models import Meta, Response
+from maggma.api.models import Meta
+from maggma.api.models import Response as ResponseModel
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
-from maggma.api.resource import Resource, HintScheme
+from maggma.api.resource import Resource, HintScheme, HeaderProcessor
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries, object_id_serilaization_helper
 from maggma.core import Store
@@ -31,6 +32,7 @@ class ReadOnlyResource(Resource):
         query_operators: Optional[List[QueryOperator]] = None,
         key_fields: Optional[List[str]] = None,
         hint_scheme: Optional[HintScheme] = None,
+        header_processor: Optional[HeaderProcessor] = None,
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
         disable_validation: bool = False,
@@ -44,6 +46,7 @@ class ReadOnlyResource(Resource):
             tags: List of tags for the Endpoint
             query_operators: Operators for the query language
             hint_scheme: The hint scheme to use for this resource
+            header_processor: The header processor to use for this resource
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
             enable_get_by_key: Enable default key route for endpoint.
@@ -57,6 +60,7 @@ class ReadOnlyResource(Resource):
         self.store = store
         self.tags = tags or []
         self.hint_scheme = hint_scheme
+        self.header_processor = header_processor
         self.key_fields = key_fields
         self.versioned = False
         self.enable_get_by_key = enable_get_by_key
@@ -64,7 +68,8 @@ class ReadOnlyResource(Resource):
         self.disable_validation = disable_validation
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
-        self.response_model = Response[model]  # type: ignore
+
+        self.response_model = ResponseModel[model]  # type: ignore
 
         if not isinstance(store, MongoStore) and self.hint_scheme is not None:
             raise ValueError("Hint scheme is only supported for MongoDB stores")
@@ -109,6 +114,8 @@ class ReadOnlyResource(Resource):
                 return {"properties": self.key_fields}
 
         async def get_by_key(
+            request: Request,
+            response: Response,
             key: str = Path(
                 ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
             ),
@@ -140,12 +147,15 @@ class ReadOnlyResource(Resource):
             for operator in self.query_operators:
                 item = operator.post_process(item)
 
-            response = {"data": item}
+            response = {"data": item}  # type: ignore
 
             if self.disable_validation:
-                response = BareResponse(  # type: ignore
+                response = Response(  # type: ignore
                     orjson.dumps(response, default=object_id_serilaization_helper)
                 )
+
+            if self.header_processor is not None:
+                self.header_processor.process_header(response, request)
 
             return response
 
@@ -163,8 +173,9 @@ class ReadOnlyResource(Resource):
 
         model_name = self.model.__name__
 
-        async def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
+        async def search(**queries: Dict[str, STORE_PARAMS]) -> Union[Dict, Response]:
             request: Request = queries.pop("request")  # type: ignore
+            response: Response = queries.pop("temp_response")  # type: ignore
 
             query_params = [
                 entry
@@ -208,12 +219,15 @@ class ReadOnlyResource(Resource):
 
             meta = Meta(total_doc=count)
 
-            response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
+            response = {"data": data, "meta": {**meta.dict(), **operator_meta}}  # type: ignore
 
             if self.disable_validation:
-                response = BareResponse(  # type: ignore
+                response = Response(  # type: ignore
                     orjson.dumps(response, default=object_id_serilaization_helper)
                 )
+
+            if self.header_processor is not None:
+                self.header_processor.process_header(response, request)
 
             return response
 

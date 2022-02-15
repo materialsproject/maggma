@@ -175,6 +175,7 @@ class SubmissionResource(Resource):
         async def search(**queries: STORE_PARAMS):
 
             request: Request = queries.pop("request")  # type: ignore
+            queries.pop("temp_response")  # type: ignore
 
             query: STORE_PARAMS = merge_queries(list(queries.values()))
 
@@ -224,6 +225,7 @@ class SubmissionResource(Resource):
         async def post_data(**queries: STORE_PARAMS):
 
             request: Request = queries.pop("request")  # type: ignore
+            queries.pop("temp_response")  # type: ignore
 
             query: STORE_PARAMS = merge_queries(list(queries.values()))
 
@@ -274,8 +276,7 @@ class SubmissionResource(Resource):
                 self.store.update(docs=query["criteria"])  # type: ignore
             except Exception:
                 raise HTTPException(
-                    status_code=400,
-                    detail="Problem when trying to post data.",
+                    status_code=400, detail="Problem when trying to post data.",
                 )
 
             response = {

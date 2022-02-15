@@ -1,6 +1,6 @@
 from typing import Callable, Dict, List
 
-from fastapi import Depends, Request
+from fastapi import Depends, Request, Response
 
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS, attach_signature
@@ -21,6 +21,7 @@ def attach_query_ops(
         annotations={
             **{f"dep{i}": STORE_PARAMS for i, _ in enumerate(query_ops)},
             "request": Request,
+            "temp_response": Response,
         },
         defaults={f"dep{i}": Depends(dep.query) for i, dep in enumerate(query_ops)},
     )

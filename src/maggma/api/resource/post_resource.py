@@ -54,7 +54,10 @@ class PostOnlyResource(Resource):
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(model, default_fields=[self.store.key, self.store.last_updated_field],),
+                SparseFieldsQuery(
+                    model,
+                    default_fields=[self.store.key, self.store.last_updated_field],
+                ),
             ]
         )
 
@@ -74,16 +77,23 @@ class PostOnlyResource(Resource):
 
         async def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
             request: Request = queries.pop("request")  # type: ignore
+            queries.pop("temp_response")  # type: ignore
 
             query_params = [
-                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
+                entry
+                for _, i in enumerate(self.query_operators)
+                for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [
+                key for key in request.query_params.keys() if key not in query_params
+            ]
             if any(overlap):
                 raise HTTPException(
                     status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
+                    detail="Request contains query parameters which cannot be used: {}".format(
+                        ", ".join(overlap)
+                    ),
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
