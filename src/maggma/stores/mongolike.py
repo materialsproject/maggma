@@ -122,6 +122,7 @@ class MongoStore(Store):
         ssh_tunnel: Optional[SSHTunnel] = None,
         safe_update: bool = False,
         auth_source: Optional[str] = None,
+        mongoclient_kwargs: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         """
@@ -134,6 +135,7 @@ class MongoStore(Store):
             password: Password to connect with
             safe_update: fail gracefully on DocumentTooLarge errors on update
             auth_source: The database to authenticate on. Defaults to the database name.
+            mongoclient_kwargs: Any extra kwargs to pass to the MongoClient
         """
         self.database = database
         self.collection_name = collection_name
@@ -149,6 +151,7 @@ class MongoStore(Store):
         if auth_source is None:
             auth_source = self.database
         self.auth_source = auth_source
+        self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         super().__init__(**kwargs)
 
@@ -178,6 +181,7 @@ class MongoStore(Store):
                     username=self.username,
                     password=self.password,
                     authSource=self.auth_source,
+                    **self.mongoclient_kwargs,
                 )
                 if self.username != ""
                 else MongoClient(host, port)
