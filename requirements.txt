@@ -1,13 +1,13 @@
-pymongo==4.0.1
+pymongo==4.0.2
 monty==2022.1.19
 mongomock==4.0.0
 pydash==5.1.0
 jsonschema==3.2.0
-tqdm==4.62.1
+tqdm==4.63.0
 mongogrant==0.3.3
 aioitertools==0.9.0
 pydantic==1.9.0
-fastapi==0.73.0
+fastapi==0.74.1
 numpy==1.19.5;python_version<"3.7"
 numpy==1.21.0;python_version>"3.6"
 pyzmq==22.3.0
