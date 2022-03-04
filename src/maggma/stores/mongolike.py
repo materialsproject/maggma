@@ -5,6 +5,7 @@ Stores are a default access pattern to data and provide
 various utilities
 """
 
+from inspect import getfullargspec
 import json
 from pathlib import Path
 
@@ -122,7 +123,6 @@ class MongoStore(Store):
         ssh_tunnel: Optional[SSHTunnel] = None,
         safe_update: bool = False,
         auth_source: Optional[str] = None,
-        mongoclient_kwargs: Optional[Dict[str, Any]] = None,
         **kwargs,
     ):
         """
@@ -151,9 +151,13 @@ class MongoStore(Store):
         if auth_source is None:
             auth_source = self.database
         self.auth_source = auth_source
-        self.mongoclient_kwargs = mongoclient_kwargs or {}
+        store_spec = set(getfullargspec(super().__init__).args)
+        store_kwargs = {k: v for k, v in kwargs.items() if k in store_spec}
+        self.mongoclient_kwargs = {
+            k: v for k, v in kwargs.items() if k not in store_spec
+        }
 
-        super().__init__(**kwargs)
+        super().__init__(**store_kwargs)
 
     @property
     def name(self) -> str:
