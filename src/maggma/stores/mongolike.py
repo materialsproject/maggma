@@ -122,6 +122,7 @@ class MongoStore(Store):
         ssh_tunnel: Optional[SSHTunnel] = None,
         safe_update: bool = False,
         auth_source: Optional[str] = None,
+        mongoclient_kwargs: Optional[Dict] = None,
         **kwargs,
     ):
         """
@@ -149,6 +150,7 @@ class MongoStore(Store):
         if auth_source is None:
             auth_source = self.database
         self.auth_source = auth_source
+        self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         super().__init__(**kwargs)
 
@@ -178,9 +180,10 @@ class MongoStore(Store):
                     username=self.username,
                     password=self.password,
                     authSource=self.auth_source,
+                    **self.mongoclient_kwargs,
                 )
                 if self.username != ""
-                else MongoClient(host, port)
+                else MongoClient(host, port, **self.mongoclient_kwargs)
             )
             db = conn[self.database]
             self._coll = db[self.collection_name]
@@ -564,7 +567,7 @@ class MongoURIStore(MongoStore):
         Connect to the source data
         """
         if self._coll is None or force_reset:  # pragma: no cover
-            conn = MongoClient(self.uri)
+            conn = MongoClient(self.uri, self.mongodb_client_kwargs)
             db = conn[self.database]
             self._coll = db[self.collection_name]
 

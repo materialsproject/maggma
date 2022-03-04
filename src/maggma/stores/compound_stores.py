@@ -26,6 +26,7 @@ class JointStore(Store):
         password: str = "",
         main: Optional[str] = None,
         merge_at_root: bool = False,
+        mongoclient_kwargs: Optional[Dict] = None,
         **kwargs,
     ):
         """
@@ -50,7 +51,9 @@ class JointStore(Store):
         self._coll = None  # type: Any
         self.main = main or collection_names[0]
         self.merge_at_root = merge_at_root
+        self.mongoclient_kwargs = mongoclient_kwargs or {}
         self.kwargs = kwargs
+
         super(JointStore, self).__init__(**kwargs)
 
     @property
@@ -75,9 +78,10 @@ class JointStore(Store):
                 port=self.port,
                 username=self.username,
                 password=self.password,
+                **self.mongoclient_kwargs,
             )
             if self.username != ""
-            else MongoClient(self.host, self.port)
+            else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
         )
         db = conn[self.database]
         self._coll = db[self.main]
