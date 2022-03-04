@@ -135,7 +135,7 @@ class MongoStore(Store):
             password: Password to connect with
             safe_update: fail gracefully on DocumentTooLarge errors on update
             auth_source: The database to authenticate on. Defaults to the database name.
-            mongoclient_kwargs: Any extra kwargs to pass to the MongoClient
+            kwargs: any extra args passed to the Store then MongoClient
         """
         self.database = database
         self.collection_name = collection_name
