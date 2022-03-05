@@ -3864,6 +3864,7 @@ MongoStore            (<a title="maggma.core.store.Store" href="../core_store/#m
         <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHTunnel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">safe_update</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">auth_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -3891,6 +3892,7 @@ MongoStore            (<a title="maggma.core.store.Store" href="../core_store/#m
         <span class="k">if</span> <span class="n">auth_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">auth_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span> <span class="o">=</span> <span class="n">auth_source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span> <span class="o">=</span> <span class="n">mongoclient_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -3920,9 +3922,10 @@ MongoStore            (<a title="maggma.core.store.Store" href="../core_store/#m
                     <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
                     <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
                     <span class="n">authSource</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span><span class="p">,</span>
+                    <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-                <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+                <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
@@ -4362,7 +4365,7 @@ other: other mongostore to compare with</p>
 
 
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.MongoStore.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">safe_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auth_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">safe_update</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">auth_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mongoclient_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -4447,6 +4450,7 @@ other: other mongostore to compare with</p>
     <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHTunnel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">safe_update</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">auth_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -4474,6 +4478,7 @@ other: other mongostore to compare with</p>
     <span class="k">if</span> <span class="n">auth_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">auth_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span> <span class="o">=</span> <span class="n">auth_source</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span> <span class="o">=</span> <span class="n">mongoclient_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
@@ -4549,9 +4554,10 @@ other: other mongostore to compare with</p>
                 <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
                 <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
                 <span class="n">authSource</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
@@ -5460,7 +5466,7 @@ client parameters via TXT records</p>
 <span class="sd">        Connect to the source data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-            <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongodb_client_kwargs</span><span class="p">)</span>
             <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
 </code></pre></div>
@@ -5611,7 +5617,7 @@ client parameters via TXT records</p>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-        <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongodb_client_kwargs</span><span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
 </code></pre></div>
@@ -6408,6 +6414,7 @@ GridFSStore            (<a title="maggma.core.store.Store" href="../core_store/#
         <span class="n">ensure_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">auth_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -6441,6 +6448,7 @@ GridFSStore            (<a title="maggma.core.store.Store" href="../core_store/#
         <span class="k">if</span> <span class="n">auth_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">auth_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span> <span class="o">=</span> <span class="n">auth_source</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span> <span class="o">=</span> <span class="n">mongoclient_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="s2">&quot;key&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;_id&quot;</span>
@@ -6485,9 +6493,10 @@ GridFSStore            (<a title="maggma.core.store.Store" href="../core_store/#
                 <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
                 <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
                 <span class="n">authSource</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
             <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
@@ -6905,7 +6914,7 @@ other: other GridFSStore to compare with</p>
 
 
 <h3 class="doc doc-heading" id="maggma.stores.gridfs.GridFSStore.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ensure_metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">searchable_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auth_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ensure_metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">searchable_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auth_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mongoclient_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -7005,6 +7014,7 @@ This is the string portion before the GridFS extensions</p></td>
     <span class="n">ensure_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">auth_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -7038,6 +7048,7 @@ This is the string portion before the GridFS extensions</p></td>
     <span class="k">if</span> <span class="n">auth_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">auth_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span> <span class="o">=</span> <span class="n">auth_source</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span> <span class="o">=</span> <span class="n">mongoclient_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="s2">&quot;key&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;_id&quot;</span>
@@ -7103,9 +7114,10 @@ This is the string portion before the GridFS extensions</p></td>
             <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
             <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
             <span class="n">authSource</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
@@ -7995,7 +8007,7 @@ via TXT records</p>
 <span class="sd">        Connect to the source data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-            <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+            <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
             <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">gridfs</span><span class="o">.</span><span class="n">GridFS</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_files_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.files&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)]</span>
@@ -8159,7 +8171,7 @@ via TXT records</p>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
-        <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">)</span>
+        <span class="n">conn</span> <span class="o">=</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">uri</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">gridfs</span><span class="o">.</span><span class="n">GridFS</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_files_collection</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="s2">&quot;</span><span class="si">{}</span><span class="s2">.files&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">)]</span>
@@ -13786,6 +13798,7 @@ This is a Read-Only Store designed to combine data from multiple collections.</p
         <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="n">main</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">merge_at_root</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -13810,7 +13823,9 @@ This is a Read-Only Store designed to combine data from multiple collections.</p
         <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="n">main</span> <span class="ow">or</span> <span class="n">collection_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">merge_at_root</span> <span class="o">=</span> <span class="n">merge_at_root</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span> <span class="o">=</span> <span class="n">mongoclient_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
         <span class="nb">super</span><span class="p">(</span><span class="n">JointStore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -13835,9 +13850,10 @@ This is a Read-Only Store designed to combine data from multiple collections.</p
                 <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
                 <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
                 <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main</span><span class="p">]</span>
@@ -14234,7 +14250,7 @@ that checks all underlying collections</p>
 
 
 <h3 class="doc doc-heading" id="maggma.stores.compound_stores.JointStore.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_names</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">main</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">merge_at_root</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_names</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">main</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">merge_at_root</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">mongoclient_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -14315,6 +14331,7 @@ in collection_names list</p></td>
     <span class="n">password</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
     <span class="n">main</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">merge_at_root</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -14339,7 +14356,9 @@ in collection_names list</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">main</span> <span class="o">=</span> <span class="n">main</span> <span class="ow">or</span> <span class="n">collection_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">merge_at_root</span> <span class="o">=</span> <span class="n">merge_at_root</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span> <span class="o">=</span> <span class="n">mongoclient_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
     <span class="nb">super</span><span class="p">(</span><span class="n">JointStore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
         </details>
@@ -14428,9 +14447,10 @@ all collection connections</p>
             <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
             <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
             <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>
+        <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">db</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">main</span><span class="p">]</span>
