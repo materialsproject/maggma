@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.41.1](https://github.com/materialsproject/maggma/tree/v0.41.1) (2022-03-05)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.0...v0.41.1)
+
+**Merged pull requests:**
+
+- mongoclient\_kwargs [\#575](https://github.com/materialsproject/maggma/pull/575) ([jmmshn](https://github.com/jmmshn))
+- change cleint -\> resource in aws tests [\#574](https://github.com/materialsproject/maggma/pull/574) ([jmmshn](https://github.com/jmmshn))
+
 ## [v0.41.0](https://github.com/materialsproject/maggma/tree/v0.41.0) (2022-02-15)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.40.0...v0.41.0)
