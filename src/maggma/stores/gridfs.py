@@ -54,6 +54,7 @@ class GridFSStore(Store):
         ensure_metadata: bool = False,
         searchable_fields: List[str] = None,
         auth_source: Optional[str] = None,
+        mongoclient_kwargs: Optional[Dict] = None,
         **kwargs,
     ):
         """
@@ -87,6 +88,7 @@ class GridFSStore(Store):
         if auth_source is None:
             auth_source = self.database
         self.auth_source = auth_source
+        self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
@@ -131,9 +133,10 @@ class GridFSStore(Store):
                 username=self.username,
                 password=self.password,
                 authSource=self.auth_source,
+                **self.mongoclient_kwargs,
             )
             if self.username != ""
-            else MongoClient(self.host, self.port)
+            else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
         )
         if not self._coll or force_reset:
             db = conn[self.database]
@@ -506,7 +509,7 @@ class GridFSURIStore(GridFSStore):
         Connect to the source data
         """
         if not self._coll or force_reset:  # pragma: no cover
-            conn = MongoClient(self.uri)
+            conn = MongoClient(self.uri, **self.mongoclient_kwargs)
             db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db["{}.files".format(self.collection_name)]
