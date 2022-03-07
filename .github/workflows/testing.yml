@@ -48,6 +48,7 @@ jobs:
         flake8 --count --exit-zero --max-complexity=20 --statistics src/maggma
 
   test:
+    needs: lint
     services:
       local_mongodb:
         image: mongo:4.0
