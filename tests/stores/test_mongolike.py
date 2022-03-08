@@ -18,7 +18,10 @@ from maggma.validators import JSONSchemaValidator
 
 @pytest.fixture
 def mongostore():
-    store = MongoStore(database="maggma_test", collection_name="test",)
+    store = MongoStore(
+        database="maggma_test",
+        collection_name="test",
+    )
     store.connect()
     yield store
     store._collection.drop()
@@ -469,6 +472,11 @@ def test_mongo_uri():
     is_name = store.name is uri
     # This is try and keep the secret safe
     assert is_name
+
+
+def test_mongo_uri_localhost():
+    store = MongoURIStore("mongodb://localhost:27017/mp_core", collection_name="xas")
+    store.connect()
 
 
 def test_mongo_uri_dbname_parse():

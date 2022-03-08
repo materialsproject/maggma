@@ -527,6 +527,7 @@ class MongoURIStore(MongoStore):
         collection_name: str,
         database: str = None,
         ssh_tunnel: Optional[SSHTunnel] = None,
+        mongoclient_kwargs: Optional[Dict] = None,
         **kwargs,
     ):
         """
@@ -537,6 +538,7 @@ class MongoURIStore(MongoStore):
         """
         self.uri = uri
         self.ssh_tunnel = ssh_tunnel
+        self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         # parse the dbname from the uri
         if database is None:
