@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta
 from inspect import signature
 from typing import Any, Dict, List, Optional, Type, Union
+from botocore.exceptions import ClientError
 
 from fastapi import Depends, HTTPException, Path, Request
 from fastapi import Response
@@ -34,7 +35,6 @@ class S3URLResource(Resource):
         Args:
             store: The Maggma Store to get data from
             url_lifetime: URL lifetime in seconds
-            tags: List of tags for the Endpoint
             header_processor: The header processor to use for this resource
             disable_validation: Whether to use ORJSON and provide a direct FastAPI response.
                 Note this will disable auto JSON serialization and response validation with the
@@ -60,8 +60,7 @@ class S3URLResource(Resource):
         for routes
         """
 
-        if self.enable_get_by_key:
-            self.build_get_by_key()
+        self.build_get_by_key()
 
     def build_get_by_key(self):
         key_name = self.store.key
@@ -70,7 +69,9 @@ class S3URLResource(Resource):
         async def get_by_key(
             request: Request,
             response: Response,
-            key: str = Path(..., alias=key_name, title=f"The {key_name} of the {model_name} to get",)
+            key: str = Path(
+                ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
+            ),
         ):
             f"""
             Get's a document by the primary key in the store
@@ -83,20 +84,43 @@ class S3URLResource(Resource):
             """
             self.store.connect()
 
+            if self.store.sub_dir is not None:
+                key = self.store.sub_dir.strip("/") + "/" + key
+
+            # Make sure object is in bucket
+            try:
+                self.store.s3.Object(self.store.bucket, key).load()
+            except ClientError:
+                raise HTTPException(
+                    status_code=404,
+                    detail="No object found for {} = {}".format(
+                        self.store.key, key.split("/")[-1]
+                    ),
+                )
+
             # Get URL
             try:
-                url = self.store.s3.meta.client.generate_presigned_url(ClientMethod='get_object',
-                                                                       Params={'Bucket': self.store.bucket, 'Key': key},
-                                                                       ExpiresIn=self.url_lifetime)
+                url = self.store.s3.meta.client.generate_presigned_url(
+                    ClientMethod="get_object",
+                    Params={"Bucket": self.store.bucket, "Key": key},
+                    ExpiresIn=self.url_lifetime,
+                )
             except Exception:
                 raise HTTPException(
-                    status_code=404, detail=f"Problem obtaining URL for {self.store.key} = {key}",
+                    status_code=404,
+                    detail="Problem obtaining URL for {} = {}".format(
+                        self.store.key, key.split("/")[-1]
+                    ),
                 )
 
             requested_datetime = datetime.utcnow()
             expiry_datetime = requested_datetime + timedelta(seconds=self.url_lifetime)
 
-            item = S3URLDoc(url=url, requested_datetime=requested_datetime, expiry_datetime=expiry_datetime)
+            item = S3URLDoc(
+                url=url,
+                requested_datetime=requested_datetime,
+                expiry_datetime=expiry_datetime,
+            )
 
             response = {"data": item.dict()}  # type: ignore
 
