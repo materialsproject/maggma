@@ -58,9 +58,7 @@ class SubmissionResource(Resource):
         if isinstance(state_enum, Enum) and default_state not in [
             entry.value for entry in state_enum  # type: ignore
         ]:
-            raise RuntimeError(
-                "If data is stateful a state enum and valid default value must be provided"
-            )
+            raise RuntimeError("If data is stateful a state enum and valid default value must be provided")
 
         self.state_enum = state_enum
         self.default_state = default_state
@@ -124,11 +122,7 @@ class SubmissionResource(Resource):
         key_name = "submission_id" if self.calculate_submission_id else self.store.key
 
         async def get_by_key(
-            key: str = Path(
-                ...,
-                alias=key_name,
-                description=f"The {key_name} of the {model_name} to get",
-            ),
+            key: str = Path(..., alias=key_name, description=f"The {key_name} of the {model_name} to get",),
         ):
             f"""
             Get a document using the {key_name}
@@ -148,12 +142,11 @@ class SubmissionResource(Resource):
 
             if item == [None]:
                 raise HTTPException(
-                    status_code=404,
-                    detail=f"Item with submission ID = {key} not found",
+                    status_code=404, detail=f"Item with submission ID = {key} not found",
                 )
 
             for operator in self.get_query_operators:  # type: ignore
-                item = operator.post_process(item)
+                item = operator.post_process(item, {})
 
             response = {"data": item}
 
@@ -185,15 +178,11 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             self.store.connect(force_reset=True)
@@ -203,7 +192,7 @@ class SubmissionResource(Resource):
             meta = Meta(total_doc=count)
 
             for operator in self.get_query_operators:  # type: ignore
-                data = operator.post_process(data)
+                data = operator.post_process(data, query)
 
             response = {"data": data, "meta": meta.dict()}
 
@@ -235,15 +224,11 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             self.store.connect(force_reset=True)
@@ -251,10 +236,7 @@ class SubmissionResource(Resource):
             # Check for duplicate entry
             if self.duplicate_fields_check:
                 duplicate = self.store.query_one(
-                    criteria={
-                        field: query["criteria"][field]
-                        for field in self.duplicate_fields_check
-                    }
+                    criteria={field: query["criteria"][field] for field in self.duplicate_fields_check}
                 )
 
                 if duplicate:

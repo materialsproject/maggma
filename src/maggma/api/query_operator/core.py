@@ -28,8 +28,12 @@ class QueryOperator(MSONable, metaclass=ABCMeta):
         """
         return {}
 
-    def post_process(self, docs: List[Dict]) -> List[Dict]:
+    def post_process(self, docs: List[Dict], query: Dict) -> List[Dict]:
         """
         An optional post-processing function for the data
+
+        Args:
+            docs: list of query results to process
+            query: query dict to use in processing
         """
         return docs

@@ -133,7 +133,7 @@ class ReadOnlyResource(Resource):
                 )
 
             for operator in self.query_operators:
-                item = operator.post_process(item)
+                item = operator.post_process(item, {})
 
             response = {"data": item}  # type: ignore
 
@@ -190,7 +190,7 @@ class ReadOnlyResource(Resource):
             operator_meta = {}
 
             for operator in self.query_operators:
-                data = operator.post_process(data)
+                data = operator.post_process(data, query)
                 operator_meta.update(operator.meta())
 
             meta = Meta(total_doc=count)

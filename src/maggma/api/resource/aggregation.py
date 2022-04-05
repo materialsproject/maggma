@@ -78,7 +78,7 @@ class AggregationResource(Resource):
 
             count = len(data)
 
-            data = self.pipeline_query_operator.post_process(data)
+            data = self.pipeline_query_operator.post_process(data, query)
             operator_meta = self.pipeline_query_operator.meta()
 
             meta = Meta(total_doc=count)
