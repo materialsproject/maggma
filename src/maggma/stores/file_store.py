@@ -52,7 +52,7 @@ class Directory(BaseModel):
         ..., title="The time in which this record is last updated"
     )
     documents: List[Document] = Field([], title="List of documents in this Directory")
-    record_key: str = Field(
+    dir_name: str = Field(
         ...,
         title="Hash that uniquely define this record, can be inferred from each document inside",
     )
@@ -136,9 +136,10 @@ class FileStore(MemoryStore):
         self.track_files = track_files if track_files else ["*"]
         self.kwargs = kwargs
         self.collection_name = "file_store"
+        self.key = "dir_name"
         self.read_only = read_only
 
-        super().__init__(collection_name=self.collection_name, **kwargs)
+        super().__init__(collection_name=self.collection_name, key=self.key, **kwargs)
 
     @property
     def name(self) -> str:
@@ -171,7 +172,7 @@ class FileStore(MemoryStore):
                 lu = datetime.utcnow()
 
             record_id = Directory(
-                last_updated=lu, documents=doc_list, record_key=d.name
+                last_updated=lu, documents=doc_list, dir_name=d.name
             )
             record_id_list.append(record_id)
 
@@ -188,7 +189,7 @@ class FileStore(MemoryStore):
             force_reset: whether to reset the connection or not
         """
         super().connect()
-        super().update([k.dict() for k in self.read()], key="record_key")
+        super().update([k.dict() for k in self.read()], key=self.key)
 
     def close(self):
         """

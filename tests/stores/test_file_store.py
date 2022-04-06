@@ -47,9 +47,7 @@ def test_newer_in_on_local_update(test_dir):
 
     assert fs2.last_updated > fs.last_updated
     assert (
-        fs2.query_one({"record_key": "calculation1"})["last_updated"]
-        > fs.query_one({"record_key": "calculation1"})["last_updated"]
+        fs2.query_one({"dir_name": "calculation1"})["last_updated"]
+        > fs.query_one({"dir_name": "calculation1"})["last_updated"]
     )
-
-    # TODO - I can't figure out why this one fails!
     assert len(fs.newer_in(fs2)) == 1
