@@ -43,7 +43,7 @@ class Document(BaseModel):
         return Document(path=path, name=path.name)
 
 
-class RecordIdentifier(BaseModel):
+class Directory(BaseModel):
     """
     The metadata for an item in the FileStore (a directory)
     """
@@ -52,7 +52,7 @@ class RecordIdentifier(BaseModel):
         ..., title="The time in which this record is last updated"
     )
     documents: List[Document] = Field(
-        [], title="List of documents this RecordIdentifier indicate"
+        [], title="List of documents in this Directory"
     )
     record_key: str = Field(
         ...,
@@ -133,7 +133,7 @@ class FileStore(MemoryStore):
         path: parent directory containing all files and subdirectories to process
         track_files: List of files or fnmatch patterns to be tracked by the FileStore.
                 Only files that match the pattern provided will be included in the
-                RecordIdentifier for each directory or monitored for changes. If None
+                Directory for each directory or monitored for changes. If None
                 (default), all files are included.
         read_only: If True (default), the .update() and .remove_docs
                 () methods are disabled, preventing any changes to the files on disk.
@@ -154,10 +154,10 @@ class FileStore(MemoryStore):
         """
         return f"file://{self.path}"
 
-    def read(self) -> List[RecordIdentifier]:
+    def read(self) -> List[Directory]:
         """
         Given a folder path to a data folder, read all the files, and return a
-        list of RecordIdentifier objects containing metadata about the contents
+        list of Directory objects containing metadata about the contents
         of each directory.
         """
         record_id_list = []
@@ -174,7 +174,7 @@ class FileStore(MemoryStore):
             except ValueError:
                 lu = datetime.utcnow()
 
-            record_id = RecordIdentifier(
+            record_id = Directory(
                 last_updated=lu, documents=doc_list, record_key=d.name
             )
             record_id.state_hash = record_id.compute_state_hash()
