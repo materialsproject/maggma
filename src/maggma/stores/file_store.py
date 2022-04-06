@@ -4,26 +4,18 @@ Module defining a FileStore that enables accessing files in a local directory
 using typical maggma access patterns.
 """
 
-import copy
-import json
-import zlib
-
-# import yaml
 import warnings
 import os
 import hashlib
 import fnmatch
 from pathlib import Path, PosixPath
-from datetime import datetime
-
-# from pymongo.errors import ConfigurationError
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from datetime import datetime, timezone
+from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
 from monty.json import jsanitize
-
-from maggma.core import Sort, Store, StoreError
+from maggma.core import Sort, StoreError
 from maggma.stores.mongolike import MemoryStore
 
 
@@ -38,9 +30,17 @@ class Document(BaseModel):
 
     path: PosixPath = Field(..., title="Path of this file")
     name: str = Field(..., title="File name")
-    last_updated: datetime = Field(
-        ..., title="The time in which this record is last updated"
-    )
+
+    @property
+    def last_updated(self) -> datetime:
+        """
+        The time this file was last modified.
+        """
+        return datetime.fromtimestamp(self.path.stat().st_mtime, tz=timezone.utc)
+
+    @classmethod
+    def from_file(cls, path):
+        return Document(path=path, name=path.name)
 
 
 class RecordIdentifier(BaseModel):
@@ -164,13 +164,18 @@ class FileStore(MemoryStore):
         # generate a list of subdirectories
         for d in [d for d in self.path.iterdir() if d.is_dir()]:
             doc_list = [
-                Document(path=f, name=f.name, last_updated=f.stat().st_mtime)
+                Document.from_file(f)
                 for f in d.iterdir()
                 if f.is_file()
                 and any([fnmatch.fnmatch(f.name, fn) for fn in self.track_files])
             ]
+            try:
+                lu = max([d.last_updated for d in doc_list])
+            except ValueError:
+                lu = datetime.utcnow()
+
             record_id = RecordIdentifier(
-                last_updated=datetime.now(), documents=doc_list, record_key=d.name
+                last_updated=lu, documents=doc_list, record_key=d.name
             )
             record_id.state_hash = record_id.compute_state_hash()
             record_id_list.append(record_id)
