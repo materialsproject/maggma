@@ -116,7 +116,7 @@ class FileStore(MemoryStore):
     def __init__(
         self,
         path: Union[str, Path],
-        track_files: Optional[List],
+        track_files: Optional[List] = None,
         read_only: bool = True,
         **kwargs,
     ):
@@ -166,7 +166,7 @@ class FileStore(MemoryStore):
             # last_updated equals the most recent file modification date,
             # or the current time
             try:
-                lu = max([d.last_updated for d in doc_list])
+                lu = max([doc.last_updated for doc in doc_list])
             except ValueError:
                 lu = datetime.utcnow()
 
@@ -238,12 +238,8 @@ class FileStore(MemoryStore):
                 "This Store is read-only. To enable file I/O, re-initialize the store with read_only=False."
             )
 
-        ids = [cursor._id for cursor in self._collection.find(criteria)]
+        # ids = [cursor._id for cursor in self._collection.find(criteria)]
 
-        for _id in ids:
-            self._collection.delete(_id)
-
-        warnings.warn(
-            UserWarning,
-            "FileStore does not yet support file I/O. Therefore, removing a document from the store only affects the underlying MemoryStore and not any files on disk.",
+        raise NotImplementedError(
+            "FileStore does not yet support file I/O. Therefore, documents cannot be removed from the FileStore."
         )
