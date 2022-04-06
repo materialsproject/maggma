@@ -51,15 +51,10 @@ class Directory(BaseModel):
     last_updated: datetime = Field(
         ..., title="The time in which this record is last updated"
     )
-    documents: List[Document] = Field(
-        [], title="List of documents in this Directory"
-    )
+    documents: List[Document] = Field([], title="List of documents in this Directory")
     record_key: str = Field(
         ...,
         title="Hash that uniquely define this record, can be inferred from each document inside",
-    )
-    state_hash: Optional[str] = Field(
-        None, title="Hash of the state of the documents in this Record"
     )
 
     @property
@@ -75,12 +70,10 @@ class Directory(BaseModel):
 
         return parent_path
 
-    def compute_state_hash(self) -> str:
+    @property
+    def state_hash(self) -> str:
         """
-        compute the hash of the state of the documents in this record
-        :param doc_list: list of documents
-        :return:
-            hash of the list of documents passed in
+        Hash of the state of the documents in this Directory
         """
         digest = hashlib.md5()
         block_size = 128 * digest.block_size
@@ -169,6 +162,9 @@ class FileStore(MemoryStore):
                 if f.is_file()
                 and any([fnmatch.fnmatch(f.name, fn) for fn in self.track_files])
             ]
+
+            # last_updated equals the most recent file modification date,
+            # or the current time
             try:
                 lu = max([d.last_updated for d in doc_list])
             except ValueError:
@@ -177,8 +173,8 @@ class FileStore(MemoryStore):
             record_id = Directory(
                 last_updated=lu, documents=doc_list, record_key=d.name
             )
-            record_id.state_hash = record_id.compute_state_hash()
             record_id_list.append(record_id)
+
         return record_id_list
 
     def connect(self, force_reset: bool = False):
