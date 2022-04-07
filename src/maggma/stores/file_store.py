@@ -28,13 +28,44 @@ class Document(BaseModel):
     TODO: is there a pre-existing Python equivalent of this?
     """
 
-    path: PosixPath = Field(..., title="Path of this file")
+    path: Path = Field(..., title="Path of this file")
     name: str = Field(..., title="File name")
+    last_updated: datetime = Field(None, title="Time this file was last modified")
+    hash: str = Field(None, title="Hash of the file contents")
 
-    @property
-    def last_updated(self) -> datetime:
+    def __init__(self, *args, **kwargs):
         """
-        The time this file was last modified.
+        Overriding __init__ allows class methods
+        to function like a default_factory argument to the last_updated and hash
+        fields. Class methods cannot be used as default_factory methods because
+        they have not been defined on init.
+
+        See https://stackoverflow.com/questions/63051253/using-class-or-static-method-as-default-factory-in-dataclasses, except post_init is not
+        supported in BaseModel at this time
+        """
+        super().__init__(*args, **kwargs)
+        if not self.last_updated:
+            self.last_updated = self.get_mtime()
+
+        if not self.hash:
+            self.hash = self.compute_hash()
+
+    def compute_hash(self) -> str:
+        """
+        Hash of the state of the documents in this Directory
+        """
+        digest = hashlib.md5()
+        block_size = 128 * digest.block_size
+        digest.update(self.name.encode())
+        with open(self.path.as_posix(), "rb") as file:
+            buf = file.read(block_size)
+            digest.update(buf)
+        return str(digest.hexdigest())
+
+    def get_mtime(self) -> datetime:
+        """
+        Get the timestamp when the file was last modified, using pathlib's
+        stat.st_mtime() function. The timestamp is returned in UTC time.
         """
         return datetime.fromtimestamp(self.path.stat().st_mtime, tz=timezone.utc)
 
@@ -170,10 +201,10 @@ class FileStore(MemoryStore):
                 lu = max([doc.last_updated for doc in doc_list])
             except ValueError:
                 lu = datetime.utcnow()
+            except TypeError:
+                lu = datetime.utcnow()
 
-            record_id = Directory(
-                last_updated=lu, documents=doc_list, dir_name=d.name
-            )
+            record_id = Directory(last_updated=lu, documents=doc_list, dir_name=d.name)
             record_id_list.append(record_id)
 
         return record_id_list
