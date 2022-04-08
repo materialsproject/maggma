@@ -6,6 +6,7 @@ various utilities
 """
 
 from pathlib import Path
+from datetime import datetime
 import yaml
 from itertools import chain, groupby
 from socket import socket
@@ -722,13 +723,14 @@ class JSONStore(MemoryStore):
             raise RuntimeError(
                 "Cannot instantiate file-writable JSONStore with multiple JSON files."
             )
+        self.file_writable = file_writable
+        self.kwargs = kwargs
 
         # create the .json file if it does not exist
-        if not self.read_only and not Path(self.paths[0]).exists():
+        if self.file_writable and not Path(self.paths[0]).exists():
             with zopen(self.paths[0], "w") as f:
                 data: List[dict] = []
-                bytesdata = orjson.dumps(data)
-                f.write(bytesdata.decode("utf-8"))
+                json.dump(data, f, default=json_serial)
         super().__init__(**kwargs)
 
     def connect(self, force_reset=False):
@@ -792,8 +794,7 @@ class JSONStore(MemoryStore):
             data = [d for d in self.query()]
             for d in data:
                 d.pop("_id")
-            bytesdata = orjson.dumps(data)
-            f.write(bytesdata.decode("utf-8"))
+            json.dump(data, f, default=json_serial)
 
     def __hash__(self):
         return hash((*self.paths, self.last_updated_field))
@@ -936,3 +937,12 @@ def _find_free_port(address="0.0.0.0"):
     s = socket()
     s.bind((address, 0))  # Bind to a free port provided by the host.
     return s.getsockname()[1]  # Return the port number assigned.
+
+
+# Included for now to make it possible to serialize datetime objects. Probably maggma already has a solution to this somewhere.
+def json_serial(obj):
+    """JSON serializer for objects not serializable by default json code"""
+
+    if isinstance(obj, (datetime)):
+        return obj.isoformat()
+    raise TypeError("Type %s not serializable" % type(obj))
