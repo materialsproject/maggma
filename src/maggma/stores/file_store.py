@@ -6,6 +6,7 @@ using typical maggma access patterns.
 
 import warnings
 import os
+import json
 import hashlib
 import fnmatch
 from pathlib import Path, PosixPath
@@ -14,9 +15,9 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from monty.json import jsanitize
+from monty.io import zopen
 from maggma.core import Sort, StoreError
-from maggma.stores.mongolike import MemoryStore
+from maggma.stores.mongolike import MemoryStore, JSONStore, json_serial
 
 
 class Document(BaseModel):
@@ -28,8 +29,9 @@ class Document(BaseModel):
     TODO: is there a pre-existing Python equivalent of this?
     """
 
-    path: Path = Field(..., title="Path of this file")
     name: str = Field(..., title="File name")
+    path: Path = Field(..., title="Path of this file")
+    file_id: str = Field(None, title="Unique identifier for this file")
     last_updated: datetime = Field(None, title="Time this file was last modified")
     hash: str = Field(None, title="Hash of the file contents")
 
@@ -50,6 +52,9 @@ class Document(BaseModel):
         if not self.hash:
             self.hash = self.compute_hash()
 
+        if not self.file_id:
+            self.file_id = self.get_file_id()
+
     def compute_hash(self) -> str:
         """
         Hash of the state of the documents in this Directory
@@ -68,6 +73,14 @@ class Document(BaseModel):
         stat.st_mtime() function. The timestamp is returned in UTC time.
         """
         return datetime.fromtimestamp(self.path.stat().st_mtime, tz=timezone.utc)
+
+    def get_file_id(self) -> str:
+        """
+        Compute a unique identifier for this file. Currently this is just the hash of the full path
+        """
+        digest = hashlib.md5()
+        digest.update(str(self.path).encode())
+        return str(digest.hexdigest())
 
     @classmethod
     def from_file(cls, path):
@@ -116,7 +129,7 @@ class Directory(BaseModel):
         return str(digest.hexdigest())
 
 
-class FileStore(MemoryStore):
+class FileStore(JSONStore):
     """
     A Store for files on disk. Provides a common access method consistent with other stores.
 
@@ -148,29 +161,44 @@ class FileStore(MemoryStore):
         self,
         path: Union[str, Path],
         track_files: Optional[List] = None,
+        max_depth: Optional[int] = None,
         read_only: bool = True,
+        json_name: str = "FileStore.json",
         **kwargs,
     ):
         """
         Initializes a FileStore
         Args:
         path: parent directory containing all files and subdirectories to process
-        track_files: List of files or fnmatch patterns to be tracked by the FileStore.
+        track_files: List of files or fnmatch patterns to be    tracked by the FileStore.
                 Only files that match the pattern provided will be included in the
                 Directory for each directory or monitored for changes. If None
                 (default), all files are included.
+        max_depth: The maximum depth to look into subdirectories. 0 = no recursion, 1 = include files 1 directory below the FileStore, etc. None (default) will scan all files below
+        the FileStore root directory, regardless of depth.
         read_only: If True (default), the .update() and .remove_docs
-                () methods are disabled, preventing any changes to the files on disk.
+                () methods are disabled, preventing any changes to the files on disk. In addition, metadata cannot be written to disk.
+        json_name: Name of the .json file to which metadata is saved. If read_only
+                is False, this file will be created in the root directory of the
+                FileStore.
         """
 
         self.path = Path(path) if isinstance(path, str) else path
+        self.json_name = json_name
+        self.paths = [str(self.path / self.json_name)]
         self.track_files = track_files if track_files else ["*"]
         self.kwargs = kwargs
         self.collection_name = "file_store"
-        self.key = "dir_name"
+        self.key = "file_id"
         self.read_only = read_only
 
-        super().__init__(collection_name=self.collection_name, key=self.key, **kwargs)
+        super().__init__(
+            paths=self.paths,
+            file_writable=(not self.read_only),
+            collection_name=self.collection_name,
+            key=self.key,
+            **kwargs,
+        )
 
     @property
     def name(self) -> str:
@@ -179,35 +207,21 @@ class FileStore(MemoryStore):
         """
         return f"file://{self.path}"
 
-    def read(self) -> List[Directory]:
+    def read(self) -> List[Document]:
         """
-        Given a folder path to a data folder, read all the files, and return a
-        list of Directory objects containing metadata about the contents
-        of each directory.
+        Iterate through all files in the Store folder and populate
+        the Store with Document objects.
         """
-        record_id_list = []
+        file_list = []
         # generate a list of subdirectories
-        for d in [d for d in self.path.iterdir() if d.is_dir()]:
-            doc_list = [
-                Document.from_file(f)
-                for f in d.iterdir()
-                if f.is_file()
-                and any([fnmatch.fnmatch(f.name, fn) for fn in self.track_files])
-            ]
+        for f in [f for f in self.path.rglob("*")]:
+            if f.is_file():
+                if f.name == self.json_name:
+                    continue
+                elif any([fnmatch.fnmatch(f.name, fn) for fn in self.track_files]):
+                    file_list.append(Document.from_file(f))
 
-            # last_updated equals the most recent file modification date,
-            # or the current time
-            try:
-                lu = max([doc.last_updated for doc in doc_list])
-            except ValueError:
-                lu = datetime.utcnow()
-            except TypeError:
-                lu = datetime.utcnow()
-
-            record_id = Directory(last_updated=lu, documents=doc_list, dir_name=d.name)
-            record_id_list.append(record_id)
-
-        return record_id_list
+        return file_list
 
     def connect(self, force_reset: bool = False):
         """
@@ -233,9 +247,6 @@ class FileStore(MemoryStore):
         """
         Update items (directories) in the Store
 
-        TODO: should it be possible to make changes at the individual file (Document) level?
-        TODO: this method should create the new directory on disk.
-
         Args:
             docs: the document or list of documents to update
             key: field name(s) to determine uniqueness for a
@@ -248,12 +259,20 @@ class FileStore(MemoryStore):
                 "This Store is read-only. To enable file I/O, re-initialize the store with read_only=False."
             )
 
-        warnings.warn(
-            UserWarning,
-            "FileStore does not yet support file I/O. Therefore, adding a document to the store only affects the underlying MemoryStore and not any files on disk.",
-        )
+        # warnings.warn(
+        #     "FileStore does not yet support file I/O. Therefore, adding a document to the store only affects the underlying MemoryStore and not any files on disk.", UserWarning
+        # )
+        super().update(docs, key)
 
-        super.update()
+    def update_json_file(self):
+        """
+        Updates the json file when a write-like operation is performed.
+        """
+        with zopen(self.paths[0], "w") as f:
+            data = [d for d in self.query({}, properties=["file_id", "metadata"])]
+            for d in data:
+                d.pop("_id")
+            json.dump(data, f, default=json_serial)
 
     def remove_docs(self, criteria: Dict):
         """

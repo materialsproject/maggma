@@ -38,16 +38,16 @@ def test_newer_in_on_local_update(test_dir):
     Init another FileStore on the same directory
     confirm that one record shows up in newer_in
     """
-    fs = FileStore(test_dir)
+    fs = FileStore(test_dir, read_only=False)
     fs.connect()
     with open(test_dir / "calculation1" / "input.in", "w") as f:
         f.write("Ryan was here")
-    fs2 = FileStore(test_dir)
+    fs2 = FileStore(test_dir, read_only=False)
     fs2.connect()
 
     assert fs2.last_updated > fs.last_updated
     assert (
-        fs2.query_one({"dir_name": "calculation1"})["last_updated"]
-        > fs.query_one({"dir_name": "calculation1"})["last_updated"]
+        fs2.query_one({"path": {"$regex":"calculation1/input.in"}})["last_updated"]
+        > fs.query_one({"path":{"$regex":"calculation1/input.in"}})["last_updated"]
     )
     assert len(fs.newer_in(fs2)) == 1
