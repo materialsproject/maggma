@@ -31,6 +31,8 @@ class File(BaseModel):
 
     name: str = Field(..., title="File name")
     path: Path = Field(..., title="Path of this file")
+    parent: str = Field(None, title="Name of the parent directory")
+    size: int = Field(None, title="Size of this file in bytes")
     file_id: str = Field(None, title="Unique identifier for this file")
     last_updated: datetime = Field(None, title="Time this file was last modified")
     hash: str = Field(None, title="Hash of the file contents")
@@ -42,8 +44,8 @@ class File(BaseModel):
         fields. Class methods cannot be used as default_factory methods because
         they have not been defined on init.
 
-        See https://stackoverflow.com/questions/63051253/using-class-or-static-method-as-default-factory-in-dataclasses, except post_init is not
-        supported in BaseModel at this time
+        See https://stackoverflow.com/questions/63051253/using-class-or-static-method-as-default-factory-in-dataclasses, except
+        post_init is not supported in BaseModel at this time
         """
         super().__init__(*args, **kwargs)
         if not self.last_updated:
@@ -54,6 +56,12 @@ class File(BaseModel):
 
         if not self.file_id:
             self.file_id = self.get_file_id()
+
+        if not self.parent:
+            self.parent = self.path.parent.name
+
+        if not self.size:
+            self.size = self.path.stat().st_size
 
     def compute_hash(self) -> str:
         """
