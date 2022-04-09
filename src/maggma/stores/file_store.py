@@ -20,7 +20,7 @@ from maggma.core import Sort, StoreError
 from maggma.stores.mongolike import MemoryStore, JSONStore, json_serial
 
 
-class Document(BaseModel):
+class File(BaseModel):
     """
     Represent a file on disk. Records of this type will populate the
     'documents' key of each Item (directory) in the FileStore.
@@ -151,7 +151,7 @@ class FileStore(JSONStore):
             logfile.log
 
     The name of the subdirectory serves as the identifier for
-    each item, and each item contains a list of Document objects which each
+    each item, and each item contains a list of File objects which each
     corresponds to a single file contained in the subdirectory. So the example
     data above would result in 3 unique items with keys 'calculation1',
     'calculation2', and 'calculation3'.
@@ -207,10 +207,10 @@ class FileStore(JSONStore):
         """
         return f"file://{self.path}"
 
-    def read(self) -> List[Document]:
+    def read(self) -> List[File]:
         """
         Iterate through all files in the Store folder and populate
-        the Store with Document objects.
+        the Store with File objects.
         """
         file_list = []
         # generate a list of subdirectories
@@ -219,7 +219,7 @@ class FileStore(JSONStore):
                 if f.name == self.json_name:
                     continue
                 elif any([fnmatch.fnmatch(f.name, fn) for fn in self.track_files]):
-                    file_list.append(Document.from_file(f))
+                    file_list.append(File.from_file(f))
 
         return file_list
 
@@ -227,7 +227,7 @@ class FileStore(JSONStore):
         """
         Connect to the source data
 
-        Read all the files in the directory, create corresponding Document
+        Read all the files in the directory, create corresponding File
         items in the internal MemoryStore
 
         Args:
