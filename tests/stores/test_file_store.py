@@ -2,6 +2,7 @@
 Future home of unit tests for FileStore
 """
 
+import json
 from datetime import datetime, timezone
 from distutils.dir_util import copy_tree
 from pathlib import Path
@@ -11,6 +12,7 @@ import pytest
 
 from maggma.stores import MemoryStore
 from maggma.stores.file_store import FileStore, File
+from monty.io import zopen
 
 
 @pytest.fixture
@@ -75,8 +77,6 @@ def test_max_depth(test_dir):
     fs = FileStore(test_dir, read_only=False)
     fs.connect()
     assert len(list(fs.query())) == 6
-    # TODO - fix later
-    Path(test_dir / "FileStore.json").unlink()
 
     # 0 depth should parse 1 file
     fs = FileStore(test_dir, read_only=False, max_depth=0)
@@ -108,6 +108,33 @@ def test_track_files(test_dir):
 
 def test_read_only(test_dir):
     pass
+
+
+def test_metadata(test_dir):
+    """
+    1. init a FileStore
+    2. add some metadata to both 'input.in' files
+    3. confirm metadata written to .json
+    4. close the store, init a new one
+    5. confirm metadata correctly associated with the files
+    """
+    fs = FileStore(test_dir, read_only=False)
+    fs.connect()
+    k1 = list(fs.query({"name": "input.in", "parent": "calculation1"}))[0][fs.key]
+    fs.update([{"file_id": k1, "metadata": {"experiment date": "2022-01-18"}}], fs.key)
+    fs.close()
+    with zopen(fs.metadata_store.paths[0]) as f:
+        data = f.read()
+        data = data.decode() if isinstance(data, bytes) else data
+        objects = json.loads(data)
+        objects = [objects] if not isinstance(objects, list) else objects
+        record = [d for d in objects if d["file_id"] == k1][0]
+    assert record["metadata"] == {"experiment date": "2022-01-18"}
+
+    fs2 = FileStore(test_dir, read_only=False)
+    fs2.connect()
+    docs = [d for d in fs2.query({"file_id": k1})]
+    assert docs[0].get("metadata") == {"experiment date": "2022-01-18"}
 
 
 def test_json_name(test_dir):

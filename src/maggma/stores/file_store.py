@@ -13,7 +13,7 @@ from pydantic import BaseModel, Field
 
 from monty.io import zopen
 from maggma.core import StoreError
-from maggma.stores.mongolike import JSONStore, json_serial
+from maggma.stores.mongolike import MemoryStore, JSONStore, json_serial
 
 
 class File(BaseModel):
@@ -90,7 +90,7 @@ class File(BaseModel):
         return File(path=path, name=path.name)
 
 
-class FileStore(JSONStore):
+class FileStore(MemoryStore):
     """
     A Store for files on disk. Provides a common access method consistent with
     other stores. Each Item in the Store represents one file. Files can be organized
@@ -132,22 +132,29 @@ class FileStore(JSONStore):
             json_name: Name of the .json file to which metadata is saved. If read_only
                 is False, this file will be created in the root directory of the
                 FileStore.
-            kwargs: kwargs passed to JSONStore.__init__()
+            kwargs: kwargs passed to MemoryStore.__init__()
         """
 
         self.path = Path(path) if isinstance(path, str) else path
         self.json_name = json_name
-        self.paths = [str(self.path / self.json_name)]
         self.track_files = track_files if track_files else ["*"]
         self.collection_name = "file_store"
         self.key = "file_id"
         self.read_only = read_only
         self.max_depth = max_depth
+
+        if not self.read_only:
+            self.metadata_store = JSONStore(
+                paths=[str(self.path / self.json_name)],
+                file_writable=(not self.read_only),
+                collection_name=self.collection_name,
+                key=self.key,
+            )
+        else:
+            self.metadata_store = None
         self.kwargs = kwargs
 
         super().__init__(
-            paths=self.paths,
-            file_writable=(not self.read_only),
             collection_name=self.collection_name,
             key=self.key,
             **self.kwargs,
@@ -186,13 +193,23 @@ class FileStore(JSONStore):
         Connect to the source data
 
         Read all the files in the directory, create corresponding File
-        items in the internal MemoryStore
+        items in the internal MemoryStore.
+
+        If there is a metadata .json file in the directory, read its
+        contents into the MemoryStore
 
         Args:
             force_reset: whether to reset the connection or not
         """
         super().connect()
         super().update([k.dict() for k in self.read()], key=self.key)
+
+        if self.metadata_store:
+            self.metadata_store.connect()
+            metadata = [d for d in self.metadata_store.query()]
+            for d in metadata:
+                d.pop("_id")
+            super().update(metadata)
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
@@ -211,6 +228,7 @@ class FileStore(JSONStore):
             )
 
         super().update(docs, key)
+        self.metadata_store.update([{self.key: d[self.key], "metadata": d.get("metadata", {})} for d in docs], key)
 
     def remove_docs(self, criteria: Dict):
         """
@@ -229,7 +247,4 @@ class FileStore(JSONStore):
 
         # ids = [cursor._id for cursor in self._collection.find(criteria)]
 
-        raise NotImplementedError(
-            "FileStore does not yet support file I/O. Therefore, documents cannot "
-            "be removed from the FileStore."
-        )
+        raise NotImplementedError("FileStore does not yet support deleting files.")
