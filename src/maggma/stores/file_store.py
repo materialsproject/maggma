@@ -92,49 +92,7 @@ class File(BaseModel):
 
     @classmethod
     def from_file(cls, path):
-        return Document(path=path, name=path.name)
-
-
-class Directory(BaseModel):
-    """
-    The metadata for an item in the FileStore (a directory)
-    """
-
-    last_updated: datetime = Field(
-        ..., title="The time in which this record is last updated"
-    )
-    documents: List[Document] = Field([], title="List of documents in this Directory")
-    dir_name: str = Field(
-        ...,
-        title="Hash that uniquely define this record, can be inferred from each document inside",
-    )
-
-    @property
-    def parent_directory(self) -> Path:
-        """
-        root most directory that documnents in this record share
-        :return:
-        """
-        paths = [doc.path.as_posix() for doc in self.documents]
-        parent_path = Path(os.path.commonprefix(paths))
-        if not parent_path.is_dir():
-            return parent_path.parent
-
-        return parent_path
-
-    @property
-    def state_hash(self) -> str:
-        """
-        Hash of the state of the documents in this Directory
-        """
-        digest = hashlib.md5()
-        block_size = 128 * digest.block_size
-        for doc in self.documents:
-            digest.update(doc.name.encode())
-            with open(doc.path.as_posix(), "rb") as file:
-                buf = file.read(block_size)
-                digest.update(buf)
-        return str(digest.hexdigest())
+        return File(path=path, name=path.name)
 
 
 class FileStore(JSONStore):
