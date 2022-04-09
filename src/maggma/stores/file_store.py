@@ -140,10 +140,13 @@ class FileStore(JSONStore):
                 Only files that match the pattern provided will be included in the
                 Directory for each directory or monitored for changes. If None
                 (default), all files are included.
-        max_depth: The maximum depth to look into subdirectories. 0 = no recursion, 1 = include files 1 directory below the FileStore, etc. None (default) will scan all files below
+        max_depth: The maximum depth to look into subdirectories. 0 = no recursion,
+                1 = include files 1 directory below the FileStore, etc.
+                None (default) will scan all files below
         the FileStore root directory, regardless of depth.
         read_only: If True (default), the .update() and .remove_docs
-                () methods are disabled, preventing any changes to the files on disk. In addition, metadata cannot be written to disk.
+                () methods are disabled, preventing any changes to the files on
+                disk. In addition, metadata cannot be written to disk.
         json_name: Name of the .json file to which metadata is saved. If read_only
                 is False, this file will be created in the root directory of the
                 FileStore.
@@ -226,7 +229,10 @@ class FileStore(JSONStore):
             )
 
         # warnings.warn(
-        #     "FileStore does not yet support file I/O. Therefore, adding a document to the store only affects the underlying MemoryStore and not any files on disk.", UserWarning
+        #     "FileStore does not yet support file I/O. Therefore, adding a document "
+        #     "to the store only affects the underlying MemoryStore and not any "
+        #     "files on disk.",
+        #     UserWarning,
         # )
         super().update(docs, key)
 
@@ -234,7 +240,6 @@ class FileStore(JSONStore):
         """
         Remove Items (directories) matching the query dictionary.
 
-        TODO: should it be possible to make changes at the individual file (Document) level?
         TODO: This method should delete the corresponding files on disk
 
         Args:
@@ -242,11 +247,13 @@ class FileStore(JSONStore):
         """
         if self.read_only:
             raise StoreError(
-                "This Store is read-only. To enable file I/O, re-initialize the store with read_only=False."
+                "This Store is read-only. To enable file I/O, re-initialize the "
+                "store with read_only=False."
             )
 
         # ids = [cursor._id for cursor in self._collection.find(criteria)]
 
         raise NotImplementedError(
-            "FileStore does not yet support file I/O. Therefore, documents cannot be removed from the FileStore."
+            "FileStore does not yet support file I/O. Therefore, documents cannot "
+            "be removed from the FileStore."
         )
