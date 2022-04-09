@@ -92,3 +92,28 @@ def test_max_depth(test_dir):
     fs = FileStore(test_dir, read_only=False, max_depth=2)
     fs.connect()
     assert len(list(fs.query())) == 6
+
+
+def test_track_files(test_dir):
+    """
+    Make sure multiple patterns work correctly
+    """
+    # here, we should get 2 input.in files and the file_2_levels_deep.json
+    # the store's FileStore.json should be skipped even though .json is
+    # in the file patterns
+    fs = FileStore(test_dir, read_only=False, track_files=["*.in", "*.json"])
+    fs.connect()
+    assert len(list(fs.query())) == 3
+
+
+def test_read_only(test_dir):
+    pass
+
+
+def test_json_name(test_dir):
+    """
+    Make sure custom .json name works
+    """
+    fs = FileStore(test_dir, read_only=False, json_name="random.json")
+    fs.connect()
+    assert Path(test_dir / "random.json").exists()
