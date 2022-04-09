@@ -939,7 +939,8 @@ def _find_free_port(address="0.0.0.0"):
     return s.getsockname()[1]  # Return the port number assigned.
 
 
-# Included for now to make it possible to serialize datetime objects. Probably maggma already has a solution to this somewhere.
+# Included for now to make it possible to serialize datetime objects. Probably
+# maggma already has a solution to this somewhere.
 def json_serial(obj):
     """JSON serializer for objects not serializable by default json code"""
 

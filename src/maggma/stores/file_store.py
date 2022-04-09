@@ -4,20 +4,16 @@ Module defining a FileStore that enables accessing files in a local directory
 using typical maggma access patterns.
 """
 
-import warnings
-import os
-import json
 import hashlib
-import fnmatch
-from pathlib import Path, PosixPath
+from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
 from monty.io import zopen
-from maggma.core import Sort, StoreError
-from maggma.stores.mongolike import MemoryStore, JSONStore, json_serial
+from maggma.core import StoreError
+from maggma.stores.mongolike import JSONStore, json_serial
 
 
 class File(BaseModel):
@@ -39,10 +35,9 @@ class File(BaseModel):
 
     def __init__(self, *args, **kwargs):
         """
-        Overriding __init__ allows class methods
-        to function like a default_factory argument to the last_updated and hash
-        fields. Class methods cannot be used as default_factory methods because
-        they have not been defined on init.
+        Overriding __init__ allows class methods to function like a default_factory
+        argument to various fields. Class methods cannot be used as default_factory
+        methods because they have not been defined on init.
 
         See https://stackoverflow.com/questions/63051253/using-class-or-static-method-as-default-factory-in-dataclasses, except
         post_init is not supported in BaseModel at this time
@@ -97,30 +92,15 @@ class File(BaseModel):
 
 class FileStore(JSONStore):
     """
-    A Store for files on disk. Provides a common access method consistent with other stores.
+    A Store for files on disk. Provides a common access method consistent with
+    other stores. Each Item in the Store represents one file. Files can be organized
+    into any type of directory structure.
 
-    Each Item is a subdirectory of the Path used to instantiate the Store
-    that contains one or more files. For example,
+    A hash of the full path to each file is used to define a file_id that uniquely
+    identifies each item.
 
-    <path passed to FileStore.__init__()>
-        calculation1/
-            input.in
-            output.out
-            logfile.log
-        calculation2/
-            input.in
-            output.out
-            logfile.log
-        calculation3/
-            input.in
-            output.out
-            logfile.log
-
-    The name of the subdirectory serves as the identifier for
-    each item, and each item contains a list of File objects which each
-    corresponds to a single file contained in the subdirectory. So the example
-    data above would result in 3 unique items with keys 'calculation1',
-    'calculation2', and 'calculation3'.
+    Any metadata added to the items is written to a .json file in the root directory
+    of the FileStore.
     """
 
     def __init__(
@@ -135,38 +115,39 @@ class FileStore(JSONStore):
         """
         Initializes a FileStore
         Args:
-        path: parent directory containing all files and subdirectories to process
-        track_files: List of files or fnmatch patterns to be    tracked by the FileStore.
+            path: parent directory containing all files and subdirectories to process
+            track_files: List of glob patterns defining the files to be tracked by the FileStore.
                 Only files that match the pattern provided will be included in the
-                Directory for each directory or monitored for changes. If None
-                (default), all files are included.
-        max_depth: The maximum depth to look into subdirectories. 0 = no recursion,
+                Store or monitored for changes. If None (default), all files are included.
+            max_depth: The maximum depth to look into subdirectories. 0 = no recursion,
                 1 = include files 1 directory below the FileStore, etc.
                 None (default) will scan all files below
-        the FileStore root directory, regardless of depth.
-        read_only: If True (default), the .update() and .remove_docs
-                () methods are disabled, preventing any changes to the files on
+                the FileStore root directory, regardless of depth.
+            read_only: If True (default), the .update() and .remove_docs()
+                methods are disabled, preventing any changes to the files on
                 disk. In addition, metadata cannot be written to disk.
-        json_name: Name of the .json file to which metadata is saved. If read_only
+            json_name: Name of the .json file to which metadata is saved. If read_only
                 is False, this file will be created in the root directory of the
                 FileStore.
+            kwargs: kwargs passed to JSONStore.__init__()
         """
 
         self.path = Path(path) if isinstance(path, str) else path
         self.json_name = json_name
         self.paths = [str(self.path / self.json_name)]
         self.track_files = track_files if track_files else ["*"]
-        self.kwargs = kwargs
         self.collection_name = "file_store"
         self.key = "file_id"
         self.read_only = read_only
+        self.max_depth = max_depth
+        self.kwargs = kwargs
 
         super().__init__(
             paths=self.paths,
             file_writable=(not self.read_only),
             collection_name=self.collection_name,
             key=self.key,
-            **kwargs,
+            **self.kwargs,
         )
 
     @property
@@ -182,13 +163,18 @@ class FileStore(JSONStore):
         the Store with File objects.
         """
         file_list = []
-        # generate a list of subdirectories
-        for f in [f for f in self.path.rglob("*")]:
-            if f.is_file():
-                if f.name == self.json_name:
-                    continue
-                elif any([fnmatch.fnmatch(f.name, fn) for fn in self.track_files]):
-                    file_list.append(File.from_file(f))
+        # generate a list of files in subdirectories
+        for pattern in self.track_files:
+            # list every file that matches the pattern
+            for f in self.path.rglob(pattern):
+                if f.is_file():
+                    # ignore the .json file created by the Store
+                    if f.name == self.json_name:
+                        continue
+                    # filter based on depth
+                    depth = len(f.relative_to(self.path).parts) - 1
+                    if self.max_depth is not None and depth <= self.max_depth:
+                        file_list.append(File.from_file(f))
 
         return file_list
 
@@ -204,13 +190,6 @@ class FileStore(JSONStore):
         """
         super().connect()
         super().update([k.dict() for k in self.read()], key=self.key)
-
-    def close(self):
-        """
-        Closes any connections
-        """
-        # write out metadata and close the file handles
-        super().close()
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
@@ -228,12 +207,6 @@ class FileStore(JSONStore):
                 "This Store is read-only. To enable file I/O, re-initialize the store with read_only=False."
             )
 
-        # warnings.warn(
-        #     "FileStore does not yet support file I/O. Therefore, adding a document "
-        #     "to the store only affects the underlying MemoryStore and not any "
-        #     "files on disk.",
-        #     UserWarning,
-        # )
         super().update(docs, key)
 
     def remove_docs(self, criteria: Dict):
