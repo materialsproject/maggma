@@ -116,9 +116,12 @@ class FileStore(JSONStore):
         Initializes a FileStore
         Args:
             path: parent directory containing all files and subdirectories to process
-            track_files: List of glob patterns defining the files to be tracked by the FileStore.
-                Only files that match the pattern provided will be included in the
-                Store or monitored for changes. If None (default), all files are included.
+            track_files: List of fnmatch patterns defining the files to be tracked by
+                the FileStore. Only files that match one of the patterns  provided will
+                be included in the Store If None (default), all files are included.
+
+                Examples: "*.txt", "test-[abcd].txt", etc.
+                See https://docs.python.org/3/library/fnmatch.html for full syntax
             max_depth: The maximum depth to look into subdirectories. 0 = no recursion,
                 1 = include files 1 directory below the FileStore, etc.
                 None (default) will scan all files below
@@ -173,7 +176,7 @@ class FileStore(JSONStore):
                         continue
                     # filter based on depth
                     depth = len(f.relative_to(self.path).parts) - 1
-                    if self.max_depth is not None and depth <= self.max_depth:
+                    if self.max_depth is None or depth <= self.max_depth:
                         file_list.append(File.from_file(f))
 
         return file_list
