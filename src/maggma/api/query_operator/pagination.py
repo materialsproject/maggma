@@ -9,39 +9,64 @@ from maggma.api.utils import STORE_PARAMS
 class PaginationQuery(QueryOperator):
     """Query opertators to provides Pagination"""
 
-    def __init__(
-        self, default_skip: int = 0, default_limit: int = 100, max_limit: int = 1000
-    ):
+    def __init__(self, default_limit: int = 100, max_limit: int = 1000):
         """
         Args:
             default_skip: the default number of documents to skip
             default_limit: the default number of documents to return
             max_limit: max number of documents to return
         """
-        self.default_skip = default_skip
+
         self.default_limit = default_limit
         self.max_limit = max_limit
 
         def query(
-            skip: int = Query(
-                default_skip, description="Number of entries to skip in the search"
-            ),
-            limit: int = Query(
+            _page: int = Query(1, description="Page number to request."),
+            _per_page: int = Query(
                 default_limit,
-                description="Max number of entries to return in a single query."
-                f" Limited to {max_limit}",
+                description="Number of entries to show per page."
+                f" Limited to {max_limit}.",
+            ),
+            _skip: int = Query(
+                None,
+                description="Number of entries to skip in the search (takes precedent over _page and _per_page).",
+            ),
+            _limit: int = Query(
+                default_limit,
+                description="Max number of entries to return in a single query "
+                "(takes precedent over _page and _per_page)."
+                f" Limited to {max_limit}.",
             ),
         ) -> STORE_PARAMS:
             """
             Pagination parameters for the API Endpoint
             """
-            if limit > max_limit:
+
+            if _limit > max_limit or _per_page > max_limit:
                 raise HTTPException(
                     status_code=400,
                     detail="Requested more data per query than allowed by this endpoint."
                     f" The max limit is {max_limit} entries",
                 )
-            return {"skip": skip, "limit": limit}
+
+            if _skip is not None:
+                if _skip < 0 or _limit < 0:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Cannot request negative skip or limit values",
+                    )
+
+                return {"skip": _skip, "limit": _limit}
+
+            else:
+
+                if _page < 0 or _per_page < 0:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Cannot request negative page or per_page values",
+                    )
+
+                return {"skip": _page - 1 if _page >= 1 else 0, "limit": _per_page}
 
         self.query = query  # type: ignore
 
