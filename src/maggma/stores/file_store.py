@@ -230,16 +230,6 @@ class FileStore(JSONStore):
         # )
         super().update(docs, key)
 
-    def update_json_file(self):
-        """
-        Updates the json file when a write-like operation is performed.
-        """
-        with zopen(self.paths[0], "w") as f:
-            data = [d for d in self.query({}, properties=["file_id", "metadata"])]
-            for d in data:
-                d.pop("_id")
-            json.dump(data, f, default=json_serial)
-
     def remove_docs(self, criteria: Dict):
         """
         Remove Items (directories) matching the query dictionary.
