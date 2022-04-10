@@ -146,8 +146,6 @@ class FileStore(MemoryStore):
                 collection_name=self.collection_name,
                 key=self.key,
             )
-        else:
-            self.metadata_store = None
         self.kwargs = kwargs
 
         super().__init__(
@@ -200,7 +198,7 @@ class FileStore(MemoryStore):
         super().connect()
         super().update([k.dict() for k in self.read()], key=self.key)
 
-        if self.metadata_store:
+        if not self.read_only:
             self.metadata_store.connect()
             metadata = [d for d in self.metadata_store.query()]
             for d in metadata:
