@@ -6,11 +6,9 @@ import json
 from datetime import datetime, timezone
 from distutils.dir_util import copy_tree
 from pathlib import Path
-import numpy as np
-import numpy.testing as nptu
 import pytest
 
-from maggma.stores import MemoryStore
+from maggma.core import StoreError
 from maggma.stores.file_store import FileStore, FileRecord
 from monty.io import zopen
 
@@ -21,14 +19,6 @@ def test_dir(tmp_path):
     test_dir = module_dir / ".." / "test_files" / "file_store_test"
     copy_tree(str(test_dir), str(tmp_path))
     return tmp_path.resolve()
-
-
-# @pytest.fixture
-# def mongostore():
-#     store = MemoryStore("memory_compare")
-#     store.connect()
-#     yield store
-#     store._collection.drop()
 
 
 def test_filerecord(test_dir):
@@ -107,7 +97,28 @@ def test_track_files(test_dir):
 
 
 def test_read_only(test_dir):
-    pass
+    """
+    Make sure nothing is written to a read-only FileStore and that
+    documents cannot be deleted
+    """
+    fs = FileStore(test_dir, read_only=True, json_name="random.json")
+    fs.connect()
+    assert not Path(test_dir / "random.json").exists()
+    with pytest.raises(StoreError, match="read-only"):
+        file_id = fs.query_one()["file_id"]
+        fs.update({"file_id": file_id, "tags": "something"})
+    with pytest.raises(StoreError, match="read-only"):
+        fs.remove_docs({})
+
+
+def test_remove(test_dir):
+    """
+    Test behavior of remove_docs()
+    """
+    fs = FileStore(test_dir, read_only=False)
+    fs.connect()
+    with pytest.raises(NotImplementedError, match="deleting"):
+        fs.remove_docs({})
 
 
 def test_metadata(test_dir):

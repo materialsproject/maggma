@@ -11,18 +11,14 @@ from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
 
-from monty.io import zopen
 from maggma.core import StoreError
-from maggma.stores.mongolike import MemoryStore, JSONStore, json_serial
+from maggma.stores.mongolike import MemoryStore, JSONStore
 
 
 class FileRecord(BaseModel):
     """
     Represent a file on disk. Records of this type will populate the
     'documents' key of each Item (directory) in the FileStore.
-
-    TODO: perhaps add convenience methods for reading/writing?
-    TODO: is there a pre-existing Python equivalent of this?
     """
 
     name: str = Field(..., title="File name")
@@ -39,8 +35,8 @@ class FileRecord(BaseModel):
         argument to various fields. Class methods cannot be used as default_factory
         methods because they have not been defined on init.
 
-        See https://stackoverflow.com/questions/63051253/using-class-or-static-method-as-default-factory-in-dataclasses, except
-        post_init is not supported in BaseModel at this time
+        See https://stackoverflow.com/questions/63051253/using-class-or-static-method-as-default-factory-in-dataclasses,
+        except post_init is not supported in BaseModel at this time
         """
         super().__init__(*args, **kwargs)
         if not self.last_updated:
@@ -221,6 +217,9 @@ class FileStore(MemoryStore):
                  document, can be a list of multiple fields,
                  a single field, or None if the Store's key
                  field is to be used
+
+        TODO - the .json file will only be updated with anything under the 'metadata' key,
+        but the internal memorystore could be updated with other keys. Make consistent.
         """
         if self.read_only:
             raise StoreError(
@@ -228,11 +227,14 @@ class FileStore(MemoryStore):
             )
 
         super().update(docs, key)
-        self.metadata_store.update([{self.key: d[self.key], "metadata": d.get("metadata", {})} for d in docs], key)
+        self.metadata_store.update(
+            [{self.key: d[self.key], "metadata": d.get("metadata", {})} for d in docs],
+            key,
+        )
 
     def remove_docs(self, criteria: Dict):
         """
-        Remove Items (directories) matching the query dictionary.
+        Remove Items (FileRecord) matching the query dictionary.
 
         TODO: This method should delete the corresponding files on disk
 
