@@ -16,7 +16,7 @@ from maggma.core import StoreError
 from maggma.stores.mongolike import MemoryStore, JSONStore, json_serial
 
 
-class File(BaseModel):
+class FileRecord(BaseModel):
     """
     Represent a file on disk. Records of this type will populate the
     'documents' key of each Item (directory) in the FileStore.
@@ -87,7 +87,7 @@ class File(BaseModel):
 
     @classmethod
     def from_file(cls, path):
-        return File(path=path, name=path.name)
+        return FileRecord(path=path, name=path.name)
 
 
 class FileStore(MemoryStore):
@@ -167,10 +167,10 @@ class FileStore(MemoryStore):
         """
         return f"file://{self.path}"
 
-    def read(self) -> List[File]:
+    def read(self) -> List[FileRecord]:
         """
         Iterate through all files in the Store folder and populate
-        the Store with File objects.
+        the Store with FileRecord objects.
         """
         file_list = []
         # generate a list of files in subdirectories
@@ -184,7 +184,7 @@ class FileStore(MemoryStore):
                     # filter based on depth
                     depth = len(f.relative_to(self.path).parts) - 1
                     if self.max_depth is None or depth <= self.max_depth:
-                        file_list.append(File.from_file(f))
+                        file_list.append(FileRecord.from_file(f))
 
         return file_list
 

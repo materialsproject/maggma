@@ -11,7 +11,7 @@ import numpy.testing as nptu
 import pytest
 
 from maggma.stores import MemoryStore
-from maggma.stores.file_store import FileStore, File
+from maggma.stores.file_store import FileStore, FileRecord
 from monty.io import zopen
 
 
@@ -31,11 +31,11 @@ def test_dir(tmp_path):
 #     store._collection.drop()
 
 
-def test_file_class(test_dir):
+def test_filerecord(test_dir):
     """
-    Test functionality of the file class
+    Test functionality of the FileRecord class
     """
-    f = File.from_file(test_dir / "calculation1" / "input.in")
+    f = FileRecord.from_file(test_dir / "calculation1" / "input.in")
     assert f.name == "input.in"
     assert f.parent == "calculation1"
     assert f.path == test_dir / "calculation1" / "input.in"
