@@ -2,6 +2,7 @@ import os
 import shutil
 from datetime import datetime
 from unittest import mock
+from pathlib import Path
 
 import mongomock.collection
 from monty.tempfile import ScratchDir
@@ -414,9 +415,20 @@ def test_json_store_load(jsonstore, test_dir):
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
 
+    # confirm descriptive error raised if you get a KeyError
+    with pytest.raises(KeyError, match="Key field 'random key' not found"):
+        jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", key="random_key")
+
 
 def test_json_store_writeable(test_dir):
     with ScratchDir("."):
+        # if the .json does not exist, it should be created
+        jsonstore = JSONStore("a.json", file_writable=True)
+        assert Path("a.json").exists()
+        jsonstore.connect()
+        # confirm RunTimeError with multiple paths
+        with pytest.raises(RuntimeError, match="multiple JSON"):
+            jsonstore = JSONStore(["a.json", "d.json"], file_writable=True)
         shutil.copy(test_dir / "test_set" / "d.json", ".")
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
