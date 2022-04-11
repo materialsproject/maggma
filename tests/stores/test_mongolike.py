@@ -416,8 +416,9 @@ def test_json_store_load(jsonstore, test_dir):
     assert len(list(jsonstore.query())) == 20
 
     # confirm descriptive error raised if you get a KeyError
-    with pytest.raises(KeyError, match="Key field 'random key' not found"):
+    with pytest.raises(KeyError, match="Key field 'random_key' not found"):
         jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", key="random_key")
+        jsonstore.connect()
 
 
 def test_json_store_writeable(test_dir):
