@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.44.3](https://github.com/materialsproject/maggma/tree/v0.44.3) (2022-04-11)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.2...v0.44.3)
+
+**Merged pull requests:**
+
+- MemoryStore: fix groupby ignoring properties [\#621](https://github.com/materialsproject/maggma/pull/621) ([rkingsbury](https://github.com/rkingsbury))
+
 ## [v0.44.2](https://github.com/materialsproject/maggma/tree/v0.44.2) (2022-04-05)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.1...v0.44.2)
@@ -10,15 +18,11 @@
 
 ## [v0.44.1](https://github.com/materialsproject/maggma/tree/v0.44.1) (2022-03-08)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.1)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.1)
 
 **Merged pull requests:**
 
 - added localhost test for MongoURIStore [\#595](https://github.com/materialsproject/maggma/pull/595) ([jmmshn](https://github.com/jmmshn))
-
-## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
 
 ## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
 
@@ -26,7 +30,11 @@
 
 ## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.44.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.0)
+
+## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
 
 **Merged pull requests:**
 
