@@ -270,10 +270,12 @@ def test_groupby(memorystore):
         ],
         key="f",
     )
-    data = list(memorystore.groupby("d"))
+    data = list(memorystore.groupby("d", properties={"e": 1, "f": 1}))
     assert len(data) == 2
     grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
     assert len(grouped_by_9) == 3
+    assert all([d.get("f", False) for d in grouped_by_9])
+    assert all([d.get("e", False) for d in grouped_by_9])
     grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
     assert len(grouped_by_10) == 1
 
@@ -289,8 +291,9 @@ def test_groupby(memorystore):
         ],
         key="f",
     )
-    data = list(memorystore.groupby("e.d"))
+    data = list(memorystore.groupby("e.d", properties=["f"]))
     assert len(data) == 2
+    assert data[0][1][0].get("f", False)
 
 
 # Monty store tests

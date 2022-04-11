@@ -638,9 +638,15 @@ class MemoryStore(MongoStore):
             generator returning tuples of (key, list of elemnts)
         """
         keys = keys if isinstance(keys, list) else [keys]
+
+        if properties is None:
+            properties = []
+        if isinstance(properties, dict):
+            properties = list(properties.keys())
+
         data = [
             doc
-            for doc in self.query(properties=keys, criteria=criteria)
+            for doc in self.query(properties=keys + properties, criteria=criteria)
             if all(has(doc, k) for k in keys)
         ]
 
