@@ -5,7 +5,6 @@ Stores are a default access pattern to data and provide
 various utilities
 """
 
-import json
 from pathlib import Path
 from datetime import datetime
 import yaml
@@ -14,6 +13,7 @@ from socket import socket
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
+import orjson
 from monty.dev import requires
 from monty.io import zopen
 from monty.json import MSONable, jsanitize
@@ -702,7 +702,8 @@ class JSONStore(MemoryStore):
         if self.file_writable and not Path(self.paths[0]).exists():
             with zopen(self.paths[0], "w") as f:
                 data: List[dict] = []
-                json.dump(data, f, default=json_serial)
+                bytesdata = orjson.dumps(data)
+                f.write(bytesdata.decode("utf-8"))
         super().__init__(**kwargs)
 
     def connect(self, force_reset=False):
@@ -714,7 +715,7 @@ class JSONStore(MemoryStore):
             with zopen(path) as f:
                 data = f.read()
                 data = data.decode() if isinstance(data, bytes) else data
-                objects = json.loads(data)
+                objects = orjson.loads(data)
                 objects = [objects] if not isinstance(objects, list) else objects
                 try:
                     self.update(objects)
@@ -766,7 +767,8 @@ class JSONStore(MemoryStore):
             data = [d for d in self.query()]
             for d in data:
                 d.pop("_id")
-            json.dump(data, f, default=json_serial)
+            bytesdata = orjson.dumps(data)
+            f.write(bytesdata.decode("utf-8"))
 
     def __hash__(self):
         return hash((*self.paths, self.last_updated_field))
@@ -909,13 +911,3 @@ def _find_free_port(address="0.0.0.0"):
     s = socket()
     s.bind((address, 0))  # Bind to a free port provided by the host.
     return s.getsockname()[1]  # Return the port number assigned.
-
-
-# Included for now to make it possible to serialize datetime objects. Probably
-# maggma already has a solution to this somewhere.
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, (datetime)):
-        return obj.isoformat()
-    raise TypeError("Type %s not serializable" % type(obj))
