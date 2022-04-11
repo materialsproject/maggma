@@ -3446,9 +3446,15 @@ to a MongoStore</p>
 <span class="sd">            generator returning tuples of (key, list of elemnts)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="n">keys</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">keys</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">properties</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">properties</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
         <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
             <span class="n">doc</span>
-            <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">keys</span> <span class="o">+</span> <span class="n">properties</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">has</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)</span>
         <span class="p">]</span>
 
@@ -3799,9 +3805,15 @@ values are 1 for ascending or -1 for descending.</p></td>
 <span class="sd">        generator returning tuples of (key, list of elemnts)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">keys</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="p">[</span><span class="n">keys</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">properties</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
     <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">doc</span>
-        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">keys</span> <span class="o">+</span> <span class="n">properties</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">has</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="n">k</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">keys</span><span class="p">)</span>
     <span class="p">]</span>
 
