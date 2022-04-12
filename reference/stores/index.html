@@ -2913,30 +2913,55 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 <span class="sd">    A Store for access to a single or multiple JSON files</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">file_writable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            paths: paths for json files to turn into a Store</span>
-<span class="sd">            file_writable: whether this JSONStore is &quot;file-writable&quot;. When a JSONStore</span>
-<span class="sd">                is &quot;file-writable&quot;, the json file will be automatically updated</span>
-<span class="sd">                everytime a write-like operation is performed. Note that only</span>
-<span class="sd">                JSONStore with a single JSON file is compatible with file_writable</span>
-<span class="sd">                True. Note also that when file_writable is False, the JSONStore</span>
-<span class="sd">                can still apply MongoDB-like writable operations (e.g. an update)</span>
-<span class="sd">                as it behaves like a MemoryStore, but it will not write those changes</span>
-<span class="sd">                to the file.</span>
+<span class="sd">            read_only: whether this JSONStore is read only. When read_only=True,</span>
+<span class="sd">                       the JSONStore can still apply MongoDB-like writable operations</span>
+<span class="sd">                       (e.g. an update) because it behaves like a MemoryStore,</span>
+<span class="sd">                       but it will not write those changes to the file. On the other hand,</span>
+<span class="sd">                       if read_only=False (i.e., it is writeable), the JSON file</span>
+<span class="sd">                       will be automatically updated every time a write-like operation is</span>
+<span class="sd">                       performed.</span>
+
+<span class="sd">                       Note that when read_only=False, JSONStore only supports a single JSON</span>
+<span class="sd">                       file. If the file does not exist, it will be automatically created</span>
+<span class="sd">                       when the JSONStore is initialized.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span>
-        <span class="k">if</span> <span class="n">file_writable</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+
+        <span class="c1"># file_writable overrides read_only for compatibility reasons</span>
+        <span class="k">if</span> <span class="s2">&quot;file_writable&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">file_writable</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;file_writable&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;file_writable is deprecated; use read only instead.&quot;</span><span class="p">,</span>
+                <span class="ne">DeprecationWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">file_writable</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="o">!=</span> <span class="n">read_only</span><span class="p">:</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Received conflicting keyword arguments file_writable=</span><span class="si">{</span><span class="n">file_writable</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; and read_only=</span><span class="si">{</span><span class="n">read_only</span><span class="si">}</span><span class="s2">. Setting read_only=</span><span class="si">{</span><span class="n">file_writable</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                    <span class="ne">UserWarning</span><span class="p">,</span>
+                <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="o">=</span> <span class="n">read_only</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
                 <span class="s2">&quot;Cannot instantiate file-writable JSONStore with multiple JSON files.&quot;</span>
             <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span> <span class="o">=</span> <span class="n">file_writable</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
         <span class="c1"># create the .json file if it does not exist</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">bytesdata</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -2980,7 +3005,7 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 <span class="sd">                 field is to be used</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">docs</span><span class="o">=</span><span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_json_file</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
@@ -2993,7 +3018,7 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 <span class="sd">            criteria: query dictionary to match</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove_docs</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_json_file</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">update_json_file</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -3101,7 +3126,7 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 
 
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.JSONStore.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">file_writable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -3130,46 +3155,74 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
         <td><em>required</em></td>
       </tr>
       <tr>
-        <td><code>file_writable</code></td>
-        <td></td>
-        <td><p>whether this JSONStore is "file-writable". When a JSONStore
-is "file-writable", the json file will be automatically updated
-everytime a write-like operation is performed. Note that only
-JSONStore with a single JSON file is compatible with file_writable
-True. Note also that when file_writable is False, the JSONStore
-can still apply MongoDB-like writable operations (e.g. an update)
-as it behaves like a MemoryStore, but it will not write those changes
-to the file.</p></td>
-        <td><code>False</code></td>
+        <td><code>read_only</code></td>
+        <td><code>bool</code></td>
+        <td><p>whether this JSONStore is read only. When read_only=True,
+       the JSONStore can still apply MongoDB-like writable operations
+       (e.g. an update) because it behaves like a MemoryStore,
+       but it will not write those changes to the file. On the other hand,
+       if read_only=False (i.e., it is writeable), the JSON file
+       will be automatically updated every time a write-like operation is
+       performed.</p>
+<div class="codehilite"><pre><span></span><code>   <span class="nv">Note</span> <span class="nv">that</span> <span class="nv">when</span> <span class="nv">read_only</span><span class="o">=</span><span class="nv">False</span>, <span class="nv">JSONStore</span> <span class="nv">only</span> <span class="nv">supports</span> <span class="nv">a</span> <span class="nv">single</span> <span class="nv">JSON</span>
+   <span class="nv">file</span>. <span class="k">If</span> <span class="nv">the</span> <span class="nv">file</span> <span class="nv">does</span> <span class="nv">not</span> <span class="nv">exist</span>, <span class="nv">it</span> <span class="nv">will</span> <span class="nv">be</span> <span class="nv">automatically</span> <span class="nv">created</span>
+   <span class="nv">when</span> <span class="nv">the</span> <span class="nv">JSONStore</span> <span class="nv">is</span> <span class="nv">initialized</span>.
+</code></pre></div></td>
+        <td><code>True</code></td>
       </tr>
   </tbody>
 </table>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
-          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">file_writable</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        paths: paths for json files to turn into a Store</span>
-<span class="sd">        file_writable: whether this JSONStore is &quot;file-writable&quot;. When a JSONStore</span>
-<span class="sd">            is &quot;file-writable&quot;, the json file will be automatically updated</span>
-<span class="sd">            everytime a write-like operation is performed. Note that only</span>
-<span class="sd">            JSONStore with a single JSON file is compatible with file_writable</span>
-<span class="sd">            True. Note also that when file_writable is False, the JSONStore</span>
-<span class="sd">            can still apply MongoDB-like writable operations (e.g. an update)</span>
-<span class="sd">            as it behaves like a MemoryStore, but it will not write those changes</span>
-<span class="sd">            to the file.</span>
+<span class="sd">        read_only: whether this JSONStore is read only. When read_only=True,</span>
+<span class="sd">                   the JSONStore can still apply MongoDB-like writable operations</span>
+<span class="sd">                   (e.g. an update) because it behaves like a MemoryStore,</span>
+<span class="sd">                   but it will not write those changes to the file. On the other hand,</span>
+<span class="sd">                   if read_only=False (i.e., it is writeable), the JSON file</span>
+<span class="sd">                   will be automatically updated every time a write-like operation is</span>
+<span class="sd">                   performed.</span>
+
+<span class="sd">                   Note that when read_only=False, JSONStore only supports a single JSON</span>
+<span class="sd">                   file. If the file does not exist, it will be automatically created</span>
+<span class="sd">                   when the JSONStore is initialized.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span>
-    <span class="k">if</span> <span class="n">file_writable</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+
+    <span class="c1"># file_writable overrides read_only for compatibility reasons</span>
+    <span class="k">if</span> <span class="s2">&quot;file_writable&quot;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="n">file_writable</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;file_writable&quot;</span><span class="p">)</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;file_writable is deprecated; use read only instead.&quot;</span><span class="p">,</span>
+            <span class="ne">DeprecationWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="o">=</span> <span class="ow">not</span> <span class="n">file_writable</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="o">!=</span> <span class="n">read_only</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Received conflicting keyword arguments file_writable=</span><span class="si">{</span><span class="n">file_writable</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; and read_only=</span><span class="si">{</span><span class="n">read_only</span><span class="si">}</span><span class="s2">. Setting read_only=</span><span class="si">{</span><span class="n">file_writable</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">,</span>
+                <span class="ne">UserWarning</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="o">=</span> <span class="n">read_only</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
             <span class="s2">&quot;Cannot instantiate file-writable JSONStore with multiple JSON files.&quot;</span>
         <span class="p">)</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span> <span class="o">=</span> <span class="n">file_writable</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
 
     <span class="c1"># create the .json file if it does not exist</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">with</span> <span class="n">zopen</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">paths</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">data</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">bytesdata</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
@@ -3275,7 +3328,7 @@ to the file.</p></td>
 <span class="sd">        criteria: query dictionary to match</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">remove_docs</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_json_file</span><span class="p">()</span>
 </code></pre></div>
         </details>
@@ -3344,7 +3397,7 @@ to the file.</p></td>
 <span class="sd">             field is to be used</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">docs</span><span class="o">=</span><span class="n">docs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">key</span><span class="p">)</span>
-    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_writable</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">read_only</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_json_file</span><span class="p">()</span>
 </code></pre></div>
         </details>
