@@ -680,32 +680,29 @@ class JSONStore(MemoryStore):
         self,
         paths: Union[str, List[str]],
         read_only: bool = True,
-        file_writable: Optional[bool] = None,
         **kwargs,
     ):
         """
         Args:
             paths: paths for json files to turn into a Store
-            read_only: whether this JSONStore is read only. When a JSONStore
-                       is read only (default), the JSONStore can still apply MongoDB-like
-                       writable operations (e.g. an update) as it behaves like a MemoryStore,
+            read_only: whether this JSONStore is read only. When read_only=True,
+                       the JSONStore can still apply MongoDB-like writable operations
+                       (e.g. an update) because it behaves like a MemoryStore,
                        but it will not write those changes to the file. On the other hand,
-                       if a JSONStore is NOT read only (i.e., it is writeable), the JSON file
+                       if read_only=False (i.e., it is writeable), the JSON file
                        will be automatically updated every time a write-like operation is
                        performed.
 
-                       Note that when read only=False, JSONStore only supports a single JSON
+                       Note that when read_only=False, JSONStore only supports a single JSON
                        file. If the file does not exist, it will be automatically created
                        when the JSONStore is initialized.
-            file_writable: DEPRECATED keyword argument, use read only instead. read only=False
-                        is equivalent to file_writable=True and vice versa. For compatibilty
-                        reasons, file_writable=True will override read_only and raise a warning.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
 
         # file_writable overrides read_only for compatibility reasons
-        if file_writable is not None:
+        if "file_writable" in kwargs:
+            file_writable = kwargs.pop("file_writable")
             warnings.warn(
                 "file_writable is deprecated; use read only instead.",
                 DeprecationWarning,
@@ -719,13 +716,12 @@ class JSONStore(MemoryStore):
                 )
         else:
             self.read_only = read_only
+        self.kwargs = kwargs
 
         if not self.read_only and len(paths) > 1:
             raise RuntimeError(
                 "Cannot instantiate file-writable JSONStore with multiple JSON files."
             )
-
-        self.kwargs = kwargs
 
         # create the .json file if it does not exist
         if not self.read_only and not Path(self.paths[0]).exists():
