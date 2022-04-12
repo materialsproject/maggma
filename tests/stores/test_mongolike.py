@@ -423,7 +423,7 @@ def test_json_store_load(jsonstore, test_dir):
     # if the .json does not exist, it should be created
     with pytest.warns(DeprecationWarning, match="file_writable is deprecated"):
         jsonstore = JSONStore("a.json", file_writable=False)
-        assert jsonstore.read_only == True
+        assert jsonstore.read_only is True
 
 
 def test_json_store_writeable(test_dir):
@@ -447,7 +447,7 @@ def test_json_store_writeable(test_dir):
         # if the .json does not exist, it should be created
         with pytest.warns(UserWarning, match="Received conflicting keyword arguments"):
             jsonstore = JSONStore("a.json", file_writable=True)
-            assert jsonstore.read_only == False
+            assert jsonstore.read_only is False
         assert Path("a.json").exists()
         jsonstore.connect()
 
