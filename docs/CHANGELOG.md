@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.44.5](https://github.com/materialsproject/maggma/tree/v0.44.5) (2022-04-12)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.4...v0.44.5)
+
+**Merged pull requests:**
+
+- JSONStore: file\_writable -\> read\_only [\#625](https://github.com/materialsproject/maggma/pull/625) ([rkingsbury](https://github.com/rkingsbury))
+
 ## [v0.44.4](https://github.com/materialsproject/maggma/tree/v0.44.4) (2022-04-12)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.3...v0.44.4)
@@ -34,15 +42,15 @@
 
 ## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.0)
-
-## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.43.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.0)
 
 ## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
+
+## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.43.0)
 
 **Merged pull requests:**
 
