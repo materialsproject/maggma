@@ -6,10 +6,10 @@ various utilities
 """
 
 from pathlib import Path
-from datetime import datetime
 import yaml
 from itertools import chain, groupby
 from socket import socket
+import warnings
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
@@ -676,30 +676,59 @@ class JSONStore(MemoryStore):
     A Store for access to a single or multiple JSON files
     """
 
-    def __init__(self, paths: Union[str, List[str]], file_writable=False, **kwargs):
+    def __init__(
+        self,
+        paths: Union[str, List[str]],
+        read_only: bool = True,
+        file_writable: Optional[bool] = None,
+        **kwargs,
+    ):
         """
         Args:
             paths: paths for json files to turn into a Store
-            file_writable: whether this JSONStore is "file-writable". When a JSONStore
-                is "file-writable", the json file will be automatically updated
-                everytime a write-like operation is performed. Note that only
-                JSONStore with a single JSON file is compatible with file_writable
-                True. Note also that when file_writable is False, the JSONStore
-                can still apply MongoDB-like writable operations (e.g. an update)
-                as it behaves like a MemoryStore, but it will not write those changes
-                to the file.
+            read_only: whether this JSONStore is read only. When a JSONStore
+                       is read only (default), the JSONStore can still apply MongoDB-like
+                       writable operations (e.g. an update) as it behaves like a MemoryStore,
+                       but it will not write those changes to the file. On the other hand,
+                       if a JSONStore is NOT read only (i.e., it is writeable), the JSON file
+                       will be automatically updated every time a write-like operation is
+                       performed.
+
+                       Note that when read only=False, JSONStore only supports a single JSON
+                       file. If the file does not exist, it will be automatically created
+                       when the JSONStore is initialized.
+            file_writable: DEPRECATED keyword argument, use read only instead. read only=False
+                        is equivalent to file_writable=True and vice versa. For compatibilty
+                        reasons, file_writable=True will override read_only and raise a warning.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
-        if file_writable and len(paths) > 1:
+
+        # file_writable overrides read_only for compatibility reasons
+        if file_writable is not None:
+            warnings.warn(
+                "file_writable is deprecated; use read only instead.",
+                DeprecationWarning,
+            )
+            self.read_only = not file_writable
+            if self.read_only != read_only:
+                warnings.warn(
+                    f"Received conflicting keyword arguments file_writable={file_writable}"
+                    f" and read_only={read_only}. Setting read_only={file_writable}.",
+                    UserWarning,
+                )
+        else:
+            self.read_only = read_only
+
+        if not self.read_only and len(paths) > 1:
             raise RuntimeError(
                 "Cannot instantiate file-writable JSONStore with multiple JSON files."
             )
-        self.file_writable = file_writable
+
         self.kwargs = kwargs
 
         # create the .json file if it does not exist
-        if self.file_writable and not Path(self.paths[0]).exists():
+        if not self.read_only and not Path(self.paths[0]).exists():
             with zopen(self.paths[0], "w") as f:
                 data: List[dict] = []
                 bytesdata = orjson.dumps(data)
@@ -743,7 +772,7 @@ class JSONStore(MemoryStore):
                  field is to be used
         """
         super().update(docs=docs, key=key)
-        if self.file_writable:
+        if not self.read_only:
             self.update_json_file()
 
     def remove_docs(self, criteria: Dict):
@@ -756,7 +785,7 @@ class JSONStore(MemoryStore):
             criteria: query dictionary to match
         """
         super().remove_docs(criteria=criteria)
-        if self.file_writable:
+        if not self.read_only:
             self.update_json_file()
 
     def update_json_file(self):

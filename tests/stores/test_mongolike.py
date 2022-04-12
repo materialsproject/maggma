@@ -420,13 +420,37 @@ def test_json_store_load(jsonstore, test_dir):
         jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", key="random_key")
         jsonstore.connect()
 
+    # if the .json does not exist, it should be created
+    with pytest.warns(DeprecationWarning, match="file_writable is deprecated"):
+        jsonstore = JSONStore("a.json", file_writable=False)
+        assert jsonstore.read_only == True
+
 
 def test_json_store_writeable(test_dir):
     with ScratchDir("."):
         # if the .json does not exist, it should be created
-        jsonstore = JSONStore("a.json", file_writable=True)
+        jsonstore = JSONStore("a.json", read_only=False)
         assert Path("a.json").exists()
         jsonstore.connect()
+        # confirm RunTimeError with multiple paths
+        with pytest.raises(RuntimeError, match="multiple JSON"):
+            jsonstore = JSONStore(["a.json", "d.json"], read_only=False)
+        shutil.copy(test_dir / "test_set" / "d.json", ".")
+        jsonstore = JSONStore("d.json", read_only=False)
+        jsonstore.connect()
+        assert jsonstore.count() == 2
+        jsonstore.update({"new": "hello", "task_id": 2})
+        assert jsonstore.count() == 3
+        jsonstore.close()
+
+        # repeat the above with the deprecated file_writable kwarg
+        # if the .json does not exist, it should be created
+        with pytest.warns(UserWarning, match="Received conflicting keyword arguments"):
+            jsonstore = JSONStore("a.json", file_writable=True)
+            assert jsonstore.read_only == False
+        assert Path("a.json").exists()
+        jsonstore.connect()
+
         # confirm RunTimeError with multiple paths
         with pytest.raises(RuntimeError, match="multiple JSON"):
             jsonstore = JSONStore(["a.json", "d.json"], file_writable=True)
