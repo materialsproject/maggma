@@ -5,11 +5,14 @@ using typical maggma access patterns.
 """
 
 import hashlib
+
+import warnings
 from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Union
 
 from pydantic import BaseModel, Field
+from pymongo import UpdateOne
 
 from maggma.core import StoreError
 from maggma.stores.mongolike import MemoryStore, JSONStore
@@ -139,13 +142,13 @@ class FileStore(MemoryStore):
         self.read_only = read_only
         self.max_depth = max_depth
 
-        if not self.read_only:
-            self.metadata_store = JSONStore(
-                paths=[str(self.path / self.json_name)],
-                file_writable=(not self.read_only),
-                collection_name=self.collection_name,
-                key=self.key,
-            )
+        self.metadata_store = JSONStore(
+            paths=[str(self.path / self.json_name)],
+            read_only=self.read_only,
+            collection_name=self.collection_name,
+            key=self.key,
+        )
+
         self.kwargs = kwargs
 
         super().__init__(
@@ -195,19 +198,56 @@ class FileStore(MemoryStore):
         Args:
             force_reset: whether to reset the connection or not
         """
+        # read all files and place them in the MemoryStore
+        # use super.update to bypass the read_only guard statement
+        # because we want the file data to be populated in memory
         super().connect()
-        super().update([k.dict() for k in self.read()], key=self.key)
+        super().update([d.dict() for d in self.read()])
 
-        if not self.read_only:
+        # now read any metadata from the .json file
+        try:
             self.metadata_store.connect()
             metadata = [d for d in self.metadata_store.query()]
-            for d in metadata:
-                d.pop("_id")
-            super().update(metadata)
+        except FileNotFoundError:
+            metadata = []
+            warnings.warn(
+                f"""
+                JSON file '{self.json_name}' not found. To create this file automatically, re-initialize
+                the FileStore with read_only=False.
+                """
+            )
+
+        # merge metadata with file data and check for orphaned metadata
+        requests = []
+        key = self.key
+        file_ids = self.distinct(self.key)
+        for d in metadata:
+            if isinstance(key, list):
+                search_doc = {k: d[k] for k in key}
+            else:
+                search_doc = {key: d[key]}
+
+            if d[key] not in file_ids:
+                d.update({"orphan": True})
+
+            del d["_id"]
+
+            requests.append(UpdateOne(search_doc, {"$set": d}, upsert=True))
+
+        if len(requests) > 0:
+            self._collection.bulk_write(requests, ordered=False)
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Update items (directories) in the Store
+        Update items in the Store. Only possible if the store is not read only. Any new
+        fields that are added will be written to the JSON file in the root directory
+        of the FileStore.
+
+        Note that certain fields that come from file metadata on disk are protected and
+        cannot be updated with this method. This prevents the contents of the FileStore
+        from becoming out of sync with the files on which it is based. The protected fields
+        are all attributes of the FileRecord class, e.g. 'name', 'path', 'parent',
+        'last_updated', 'hash', and 'size'.
 
         Args:
             docs: the document or list of documents to update
@@ -215,9 +255,6 @@ class FileStore(MemoryStore):
                  document, can be a list of multiple fields,
                  a single field, or None if the Store's key
                  field is to be used
-
-        TODO - the .json file will only be updated with anything under the 'metadata' key,
-        but the internal memorystore could be updated with other keys. Make consistent.
         """
         if self.read_only:
             raise StoreError(
@@ -225,10 +262,23 @@ class FileStore(MemoryStore):
             )
 
         super().update(docs, key)
-        self.metadata_store.update(
-            [{self.key: d[self.key], "metadata": d.get("metadata", {})} for d in docs],
-            key,
-        )
+        data = [d for d in self.query()]
+        filtered_data = []
+        # remove fields that are populated by .read()
+        protected_keys = {
+            "_id",
+            "name",
+            "path",
+            "last_updated",
+            "hash",
+            "size",
+            "parent",
+        }
+        for d in data:
+            filtered_d = {k: v for k, v in d.items() if k not in protected_keys}
+            if len(filtered_d.keys()) > 1:
+                filtered_data.append(filtered_d)
+        self.metadata_store.update(filtered_data, self.key)
 
     def remove_docs(self, criteria: Dict):
         """
