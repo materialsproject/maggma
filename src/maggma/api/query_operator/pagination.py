@@ -53,7 +53,7 @@ class PaginationQuery(QueryOperator):
                 if _skip < 0 or _limit < 0:
                     raise HTTPException(
                         status_code=400,
-                        detail="Cannot request negative skip or limit values",
+                        detail="Cannot request negative _skip or _limit values",
                     )
 
                 return {"skip": _skip, "limit": _limit}
@@ -63,10 +63,13 @@ class PaginationQuery(QueryOperator):
                 if _page < 0 or _per_page < 0:
                     raise HTTPException(
                         status_code=400,
-                        detail="Cannot request negative page or per_page values",
+                        detail="Cannot request negative _page or _per_page values",
                     )
 
-                return {"skip": _page - 1 if _page >= 1 else 0, "limit": _per_page}
+                return {
+                    "skip": (_page - 1) * _per_page if _page >= 1 else 0,
+                    "limit": _per_page,
+                }
 
         self.query = query  # type: ignore
 

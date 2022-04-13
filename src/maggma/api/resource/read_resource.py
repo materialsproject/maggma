@@ -187,12 +187,20 @@ class ReadOnlyResource(Resource):
                 key for key in request.query_params.keys() if key not in query_params
             ]
             if any(overlap):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
-                )
+                if "limit" in overlap or "skip" in overlap:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="'limit' and 'skip' parameters have been renamed. "
+                        "Please update your API client to the newest version.",
+                    )
+
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Request contains query parameters which cannot be used: {}".format(
+                            ", ".join(overlap)
+                        ),
+                    )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 
