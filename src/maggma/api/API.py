@@ -4,6 +4,7 @@ from typing import Dict, List, Optional
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from monty.json import MSONable
 from starlette.responses import RedirectResponse
 
@@ -87,6 +88,8 @@ class API(MSONable):
                 main_resource.router.include_router(resource.router)
 
             app.include_router(main_resource.router, prefix=f"/{prefix}")
+
+        app.add_middleware(GZipMiddleware, minimum_size=1000)
 
         @app.get("/heartbeat", include_in_schema=False)
         def heartbeat():
