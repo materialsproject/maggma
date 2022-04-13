@@ -75,6 +75,10 @@ def test_newer_in_on_local_update(test_dir):
 def test_max_depth(test_dir):
     """
     test max_depth parameter
+
+    NOTE this test only creates a single temporary directory, meaning that
+    the JSON file created by the first FileStore.init() persists for the other
+    tests. This creates the possibility of orphaned metadata.
     """
     # default (None) should parse all 6 files
     fs = FileStore(test_dir, read_only=False)
@@ -82,22 +86,67 @@ def test_max_depth(test_dir):
     assert len(list(fs.query())) == 6
 
     # 0 depth should parse 1 file
-    # exclude orphaned metadata in the query
     fs = FileStore(test_dir, read_only=False, max_depth=0)
     fs.connect()
-    assert len(list(fs.query({"name": {"$exists": True}}))) == 1
+    assert len(list(fs.query())) == 1
 
     # 1 depth should parse 5 files
-    # exclude orphaned metadata in the query
     fs = FileStore(test_dir, read_only=False, max_depth=1)
     fs.connect()
-    assert len(list(fs.query({"name": {"$exists": True}}))) == 5
+    assert len(list(fs.query())) == 5
 
     # 2 depth should parse 6 files
-    # exclude orphaned metadata in the query
     fs = FileStore(test_dir, read_only=False, max_depth=2)
     fs.connect()
+    assert len(list(fs.query())) == 6
+
+
+def test_orphaned_metadata(test_dir):
+    """
+    test behavior when orphaned metadata is found
+
+    NOTE the design of this test exploits the fact that the test only creates
+    a single temporary directory, meaning that the JSON file created by the
+    first FileStore.init() persists for the other tests.
+    """
+    # make a FileStore of all files and add metadata to all of them
+    fs = FileStore(test_dir, read_only=False)
+    fs.connect()
+    data = list(fs.query())
+    for d in data:
+        d.update({"tags": "Ryan was here"})
+    fs.update(data)
+
+    assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
+    fs.close()
+
+    # re-init the store with a different max_depth parameter
+    # this will result in orphaned metadata
+    fs = FileStore(test_dir, read_only=True, max_depth=0)
+    with pytest.warns(
+        UserWarning, match="Orphaned metadata was found in FileStore.json"
+    ):
+        fs.connect()
+    assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
+    assert len(list(fs.query({"name": {"$exists": True}}))) == 1
+    assert len(list(fs.query({"orphan": True}))) == 5
+    fs.close()
+
+    # re-init the store after renaming one of the files on disk
+    # this will result in orphaned metadata
+    Path(test_dir / "calculation1" / "input.in").rename(
+        test_dir / "calculation1" / "input_renamed.in"
+    )
+    fs = FileStore(test_dir, read_only=True)
+    with pytest.warns(
+        UserWarning, match="Orphaned metadata was found in FileStore.json"
+    ):
+        fs.connect()
+    print(list(fs.query()))
+    assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
     assert len(list(fs.query({"name": {"$exists": True}}))) == 6
+    assert len(list(fs.query({"orphan": True}))) == 1
+    fs.close()
 
 
 def test_track_files(test_dir):
@@ -148,31 +197,51 @@ def test_metadata(test_dir):
     """
     fs = FileStore(test_dir, read_only=False)
     fs.connect()
-    k1 = list(fs.query({"name": "input.in", "parent": "calculation1"}))[0][fs.key]
-    fs.update([{"file_id": k1, "metadata": {"experiment date": "2022-01-18"}}], fs.key)
+    item = list(fs.query({"name": "input.in", "parent": "calculation1"}))[0]
+    k1 = item[fs.key]
+    item.update({"metadata": {"experiment date": "2022-01-18"}})
+    fs.update([item], fs.key)
+
+    # make sure metadata has been added to the item without removing other contents
+    item_from_store = list(fs.query({"file_id": k1}))[0]
+    assert item_from_store.get("name", False)
+    assert item_from_store.get("metadata", False)
     fs.close()
     data = fs.metadata_store.read_json_file(fs.path / fs.json_name)
-    record = [d for d in data if d["file_id"] == k1][0]
-    assert record["metadata"] == {"experiment date": "2022-01-18"}
+
+    # only the updated item should have been written to the JSON,
+    # and it should not contain any of the protected keys
+    assert len(data) == 1
+    item_from_file = [d for d in data if d["file_id"] == k1][0]
+    assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
+    assert not item_from_file.get("name")
+    assert item_from_file.get("path")
 
     # make sure metadata is preserved after reconnecting
     fs2 = FileStore(test_dir, read_only=True)
     fs2.connect()
-    data = fs2.metadata_store.read_json_file(fs2.path / fs.json_name)
-    record = [d for d in data if d["file_id"] == k1][0]
-    assert record["metadata"] == {"experiment date": "2022-01-18"}
-    docs = [d for d in fs2.query({"file_id": k1})]
-    print(docs)
-    assert docs[0].get("metadata") == {"experiment date": "2022-01-18"}
+    data = fs2.metadata_store.read_json_file(fs2.path / fs2.json_name)
+    item_from_file = [d for d in data if d["file_id"] == k1][0]
+    assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
+
+    # make sure reconnected store properly merges in the metadata
+    item_from_store = [d for d in fs2.query({"file_id": k1})][0]
+    assert item_from_store["name"] == "input.in"
+    assert item_from_store["parent"] == "calculation1"
+    assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}
+    fs2.close()
 
     # make sure reconnecting with read_only=False doesn't remove metadata from the JSON
-    fs2 = FileStore(test_dir, read_only=False)
-    fs2.connect()
-    data = fs2.metadata_store.read_json_file(fs2.path / fs.json_name)
-    record = [d for d in data if d["file_id"] == k1][0]
-    assert record["metadata"] == {"experiment date": "2022-01-18"}
-    docs = [d for d in fs2.query({"file_id": k1})]
-    assert docs[0].get("metadata") == {"experiment date": "2022-01-18"}
+    fs3 = FileStore(test_dir, read_only=False)
+    fs3.connect()
+    data = fs3.metadata_store.read_json_file(fs3.path / fs3.json_name)
+    item_from_file = [d for d in data if d["file_id"] == k1][0]
+    assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
+    item_from_store = [d for d in fs3.query({"file_id": k1})][0]
+    assert item_from_store["name"] == "input.in"
+    assert item_from_store["parent"] == "calculation1"
+    assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}
+    fs3.close()
 
 
 def test_json_name(test_dir):

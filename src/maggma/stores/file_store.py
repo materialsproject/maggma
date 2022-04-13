@@ -219,6 +219,7 @@ class FileStore(MemoryStore):
 
         # merge metadata with file data and check for orphaned metadata
         requests = []
+        found_orphans = False
         key = self.key
         file_ids = self.distinct(self.key)
         for d in metadata:
@@ -228,12 +229,18 @@ class FileStore(MemoryStore):
                 search_doc = {key: d[key]}
 
             if d[key] not in file_ids:
+                found_orphans = True
                 d.update({"orphan": True})
 
             del d["_id"]
 
             requests.append(UpdateOne(search_doc, {"$set": d}, upsert=True))
 
+        if found_orphans:
+            warnings.warn(
+                f"Orphaned metadata was found in {self.json_name}. This metadata"
+                "will be added to the store with {'orphan': True}"
+            )
         if len(requests) > 0:
             self._collection.bulk_write(requests, ordered=False)
 
@@ -246,8 +253,9 @@ class FileStore(MemoryStore):
         Note that certain fields that come from file metadata on disk are protected and
         cannot be updated with this method. This prevents the contents of the FileStore
         from becoming out of sync with the files on which it is based. The protected fields
-        are all attributes of the FileRecord class, e.g. 'name', 'path', 'parent',
-        'last_updated', 'hash', and 'size'.
+        are all attributes of the FileRecord class, e.g. 'name', 'parent', 'last_updated',
+        'hash', 'size', and 'orphan'. The 'path' and key fields are retained to
+        make each document in the JSON file identifiable by manual inspection.
 
         Args:
             docs: the document or list of documents to update
@@ -268,15 +276,16 @@ class FileStore(MemoryStore):
         protected_keys = {
             "_id",
             "name",
-            "path",
             "last_updated",
             "hash",
             "size",
             "parent",
+            "orphan",
         }
         for d in data:
             filtered_d = {k: v for k, v in d.items() if k not in protected_keys}
-            if len(filtered_d.keys()) > 1:
+            # don't write records that contain only file_id and path
+            if len(set(filtered_d.keys()).difference(set(["path", self.key]))) != 0:
                 filtered_data.append(filtered_d)
         self.metadata_store.update(filtered_data, self.key)
 
