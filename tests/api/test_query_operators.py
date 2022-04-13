@@ -39,13 +39,14 @@ def test_pagination_functionality():
     }
 
     with pytest.raises(HTTPException):
-        op.query(_limit=10000)
+        op.query(_limit=10000, _skip=100)
 
     with pytest.raises(HTTPException):
-        op.query(_limit=-1)
+        op.query(_limit=-1, _skip=100)
 
     with pytest.raises(HTTPException):
-        op.query(_page=-1)
+        op.query(_page=-1, _per_page=100)
+
 
 def test_pagination_serialization():
 
