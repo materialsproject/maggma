@@ -739,22 +739,34 @@ class JSONStore(MemoryStore):
         """
         super().connect(force_reset=force_reset)
         for path in self.paths:
-            with zopen(path) as f:
-                data = f.read()
-                data = data.decode() if isinstance(data, bytes) else data
-                objects = orjson.loads(data)
-                objects = [objects] if not isinstance(objects, list) else objects
-                try:
-                    self.update(objects)
-                except KeyError:
-                    raise KeyError(
-                        f"""
-                        Key field '{self.key}' not found in {f.name}. This
-                        could mean that this JSONStore was initially created with a different key field.
-                        The keys found in the .json file are {list(objects[0].keys())}. Try
-                        re-initializing your JSONStore using one of these as the key arguments.
-                        """
-                    )
+            objects = self.read_json_file(path)
+            try:
+                self.update(objects)
+            except KeyError:
+                raise KeyError(
+                    f"""
+                    Key field '{self.key}' not found in {path.name}. This
+                    could mean that this JSONStore was initially created with a different key field.
+                    The keys found in the .json file are {list(objects[0].keys())}. Try
+                    re-initializing your JSONStore using one of these as the key arguments.
+                    """
+                )
+
+    def read_json_file(self, path) -> List:
+        """
+        Helper method to read the contents of a JSON file and generate
+        a list of docs.
+
+        Args:
+            path: Path to the JSON file to be read
+        """
+        with zopen(path) as f:
+            data = f.read()
+            data = data.decode() if isinstance(data, bytes) else data
+            objects = orjson.loads(data)
+            objects = [objects] if not isinstance(objects, list) else objects
+
+        return objects
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """

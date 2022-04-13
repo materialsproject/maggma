@@ -134,12 +134,8 @@ def test_metadata(test_dir):
     k1 = list(fs.query({"name": "input.in", "parent": "calculation1"}))[0][fs.key]
     fs.update([{"file_id": k1, "metadata": {"experiment date": "2022-01-18"}}], fs.key)
     fs.close()
-    with zopen(fs.metadata_store.paths[0]) as f:
-        data = f.read()
-        data = data.decode() if isinstance(data, bytes) else data
-        objects = json.loads(data)
-        objects = [objects] if not isinstance(objects, list) else objects
-        record = [d for d in objects if d["file_id"] == k1][0]
+    data = fs.metadata_store.read_json_file(fs.path / fs.json_name)
+    record = [d for d in data if d["file_id"] == k1][0]
     assert record["metadata"] == {"experiment date": "2022-01-18"}
 
     fs2 = FileStore(test_dir, read_only=False)
