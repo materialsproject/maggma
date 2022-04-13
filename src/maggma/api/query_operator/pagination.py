@@ -42,14 +42,14 @@ class PaginationQuery(QueryOperator):
             Pagination parameters for the API Endpoint
             """
 
-            if _limit > max_limit or _per_page > max_limit:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Requested more data per query than allowed by this endpoint."
-                    f" The max limit is {max_limit} entries",
-                )
-
             if _skip is not None:
+                if _limit > max_limit:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Requested more data per query than allowed by this endpoint."
+                        f" The max limit is {max_limit} entries",
+                    )
+
                 if _skip < 0 or _limit < 0:
                     raise HTTPException(
                         status_code=400,
@@ -59,6 +59,13 @@ class PaginationQuery(QueryOperator):
                 return {"skip": _skip, "limit": _limit}
 
             else:
+
+                if _per_page > max_limit:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Requested more data per query than allowed by this endpoint."
+                        f" The max limit is {max_limit} entries",
+                    )
 
                 if _page < 0 or _per_page < 0:
                     raise HTTPException(

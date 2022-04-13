@@ -29,10 +29,17 @@ def test_pagination_functionality():
 
     op = PaginationQuery()
 
-    assert op.query(_skip=10, _limit=20) == {"limit": 20, "skip": 10}
+    assert op.query(_skip=10, _limit=20, _page=None, _per_page=None) == {
+        "limit": 20,
+        "skip": 10,
+    }
+    assert op.query(_skip=None, _limit=None, _page=3, _per_page=23) == {
+        "limit": 23,
+        "skip": 46,
+    }
 
     with pytest.raises(HTTPException):
-        op.query(limit=10000)
+        op.query(_limit=10000)
 
 
 def test_pagination_serialization():
