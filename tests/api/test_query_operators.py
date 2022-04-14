@@ -55,7 +55,10 @@ def test_pagination_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query(_skip=10, _limit=20) == {"limit": 20, "skip": 10}
+        assert new_op.query(_skip=10, _limit=20, _page=None, _per_page=None) == {
+            "limit": 20,
+            "skip": 10,
+        }
 
 
 def test_sparse_query_functionality():
