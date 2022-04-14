@@ -33,9 +33,20 @@ def test_pagination_functionality():
         "limit": 20,
         "skip": 10,
     }
+
+    assert op.query(_limit=20, _page=None, _per_page=None) == {
+        "limit": 20,
+        "skip": 0,
+    }
+
     assert op.query(_skip=None, _limit=None, _page=3, _per_page=23) == {
         "limit": 23,
         "skip": 46,
+    }
+
+    assert op.query(_skip=None, _limit=None, _page=1) == {
+        "limit": 100,
+        "skip": 100,
     }
 
     with pytest.raises(HTTPException):
