@@ -12,7 +12,6 @@ class PaginationQuery(QueryOperator):
     def __init__(self, default_limit: int = 100, max_limit: int = 1000):
         """
         Args:
-            default_skip: the default number of documents to skip
             default_limit: the default number of documents to return
             max_limit: max number of documents to return
         """
@@ -21,20 +20,21 @@ class PaginationQuery(QueryOperator):
         self.max_limit = max_limit
 
         def query(
-            _page: int = Query(1, description="Page number to request."),
+            _page: int = Query(
+                None,
+                description="Page number to request (takes precedent over _limit and _skip).",
+            ),
             _per_page: int = Query(
                 default_limit,
-                description="Number of entries to show per page."
+                description="Number of entries to show per page (takes precedent over _limit and _skip)."
                 f" Limited to {max_limit}.",
             ),
             _skip: int = Query(
-                None,
-                description="Number of entries to skip in the search (takes precedent over _page and _per_page).",
+                0, description="Number of entries to skip in the search.",
             ),
             _limit: int = Query(
                 default_limit,
-                description="Max number of entries to return in a single query "
-                "(takes precedent over _page and _per_page)."
+                description="Max number of entries to return in a single query."
                 f" Limited to {max_limit}.",
             ),
         ) -> STORE_PARAMS:
@@ -42,23 +42,7 @@ class PaginationQuery(QueryOperator):
             Pagination parameters for the API Endpoint
             """
 
-            if _skip is not None:
-                if _limit > max_limit:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Requested more data per query than allowed by this endpoint."
-                        f" The max limit is {max_limit} entries",
-                    )
-
-                if _skip < 0 or _limit < 0:
-                    raise HTTPException(
-                        status_code=400,
-                        detail="Cannot request negative _skip or _limit values",
-                    )
-
-                return {"skip": _skip, "limit": _limit}
-
-            else:
+            if _page is not None:
 
                 if _per_page > max_limit:
                     raise HTTPException(
@@ -74,9 +58,25 @@ class PaginationQuery(QueryOperator):
                     )
 
                 return {
-                    "skip": (_page - 1) * _per_page if _page >= 1 else 0,
+                    "skip": ((_page - 1) * _per_page) if _page >= 1 else 0,
                     "limit": _per_page,
                 }
+
+            else:
+                if _limit > max_limit:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Requested more data per query than allowed by this endpoint."
+                        f" The max limit is {max_limit} entries",
+                    )
+
+                if _skip < 0 or _limit < 0:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Cannot request negative _skip or _limit values",
+                    )
+
+                return {"skip": _skip, "limit": _limit}
 
         self.query = query  # type: ignore
 
