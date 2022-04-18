@@ -105,7 +105,7 @@ class FileStore(MemoryStore):
     def __init__(
         self,
         path: Union[str, Path],
-        track_files: Optional[List] = None,
+        file_filters: Optional[List] = None,
         max_depth: Optional[int] = None,
         read_only: bool = True,
         json_name: str = "FileStore.json",
@@ -115,11 +115,11 @@ class FileStore(MemoryStore):
         Initializes a FileStore
         Args:
             path: parent directory containing all files and subdirectories to process
-            track_files: List of fnmatch patterns defining the files to be tracked by
+            file_filters: List of fnmatch patterns defining the files to be tracked by
                 the FileStore. Only files that match one of the patterns  provided will
                 be included in the Store If None (default), all files are included.
 
-                Examples: "*.txt", "test-[abcd].txt", etc.
+                Examples: ["*.txt", "test-[abcd].txt"], etc.
                 See https://docs.python.org/3/library/fnmatch.html for full syntax
             max_depth: The maximum depth to look into subdirectories. 0 = no recursion,
                 1 = include files 1 directory below the FileStore, etc.
@@ -136,7 +136,7 @@ class FileStore(MemoryStore):
 
         self.path = Path(path) if isinstance(path, str) else path
         self.json_name = json_name
-        self.track_files = track_files if track_files else ["*"]
+        self.file_filters = file_filters if file_filters else ["*"]
         self.collection_name = "file_store"
         self.key = "file_id"
         self.read_only = read_only
@@ -171,7 +171,7 @@ class FileStore(MemoryStore):
         """
         file_list = []
         # generate a list of files in subdirectories
-        for pattern in self.track_files:
+        for pattern in self.file_filters:
             # list every file that matches the pattern
             for f in self.path.rglob(pattern):
                 if f.is_file():

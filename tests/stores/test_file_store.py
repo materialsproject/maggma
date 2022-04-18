@@ -149,14 +149,14 @@ def test_orphaned_metadata(test_dir):
     fs.close()
 
 
-def test_track_files(test_dir):
+def test_file_filters(test_dir):
     """
     Make sure multiple patterns work correctly
     """
     # here, we should get 2 input.in files and the file_2_levels_deep.json
     # the store's FileStore.json should be skipped even though .json is
     # in the file patterns
-    fs = FileStore(test_dir, read_only=False, track_files=["*.in", "*.json"])
+    fs = FileStore(test_dir, read_only=False, file_filters=["*.in", "*.json"])
     fs.connect()
     assert len(list(fs.query())) == 3
 
