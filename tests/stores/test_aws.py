@@ -191,16 +191,24 @@ def tests_msonable_read_write(s3store):
 
 
 def test_remove(s3store):
+    def objects_in_bucket(key):
+        objs = list(s3store.s3_bucket.objects.filter(Prefix=key))
+        return key in [o.key for o in objs]
+
     s3store.update([{"task_id": "mp-2", "data": "asd"}])
     s3store.update([{"task_id": "mp-4", "data": "asd"}])
     s3store.update({"task_id": "mp-5", "data": "aaa"})
     assert s3store.query_one({"task_id": "mp-2"}) is not None
     assert s3store.query_one({"task_id": "mp-4"}) is not None
+    assert objects_in_bucket("mp-2")
+    assert objects_in_bucket("mp-4")
 
     s3store.remove_docs({"task_id": "mp-2"})
+    s3store.remove_docs({"task_id": "mp-4"}, remove_s3_object=True)
 
-    assert s3store.query_one({"task_id": "mp-2"}) is None
-    assert s3store.query_one({"task_id": "mp-4"}) is not None
+    assert objects_in_bucket("mp-2")
+    assert not objects_in_bucket("mp-4")
+
     assert s3store.query_one({"task_id": "mp-5"}) is not None
 
 
