@@ -1,24 +1,72 @@
 # Changelog
 
+## [v0.45.1](https://github.com/materialsproject/maggma/tree/v0.45.1) (2022-04-18)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.45.0...v0.45.1)
+
+**Merged pull requests:**
+
+- minor bug fix in remove\_docs [\#626](https://github.com/materialsproject/maggma/pull/626) ([jmmshn](https://github.com/jmmshn))
+
+## [v0.45.0](https://github.com/materialsproject/maggma/tree/v0.45.0) (2022-04-14)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.5...v0.45.0)
+
+**Merged pull requests:**
+
+- Changes to core query operators and API [\#620](https://github.com/materialsproject/maggma/pull/620) ([munrojm](https://github.com/munrojm))
+
+## [v0.44.5](https://github.com/materialsproject/maggma/tree/v0.44.5) (2022-04-12)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.4...v0.44.5)
+
+**Merged pull requests:**
+
+- JSONStore: file\_writable -\> read\_only [\#625](https://github.com/materialsproject/maggma/pull/625) ([rkingsbury](https://github.com/rkingsbury))
+
+## [v0.44.4](https://github.com/materialsproject/maggma/tree/v0.44.4) (2022-04-12)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.3...v0.44.4)
+
+**Merged pull requests:**
+
+- JSONStore: write file on init, add descriptive KeyError, add tests [\#624](https://github.com/materialsproject/maggma/pull/624) ([rkingsbury](https://github.com/rkingsbury))
+
+## [v0.44.3](https://github.com/materialsproject/maggma/tree/v0.44.3) (2022-04-11)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.2...v0.44.3)
+
+**Merged pull requests:**
+
+- MemoryStore: fix groupby ignoring properties [\#621](https://github.com/materialsproject/maggma/pull/621) ([rkingsbury](https://github.com/rkingsbury))
+
+## [v0.44.2](https://github.com/materialsproject/maggma/tree/v0.44.2) (2022-04-05)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.1...v0.44.2)
+
+**Merged pull requests:**
+
+- Force post-process method to take in query params [\#618](https://github.com/materialsproject/maggma/pull/618) ([munrojm](https://github.com/munrojm))
+
 ## [v0.44.1](https://github.com/materialsproject/maggma/tree/v0.44.1) (2022-03-08)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.44.1)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.1)
 
 **Merged pull requests:**
 
 - added localhost test for MongoURIStore [\#595](https://github.com/materialsproject/maggma/pull/595) ([jmmshn](https://github.com/jmmshn))
 
-## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
+## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
 
 ## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.43.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.43.0)
 
-## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
+## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.44.0)
 
 **Merged pull requests:**
 

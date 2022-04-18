@@ -2,6 +2,7 @@ import os
 import shutil
 from datetime import datetime
 from unittest import mock
+from pathlib import Path
 
 import mongomock.collection
 from monty.tempfile import ScratchDir
@@ -270,10 +271,12 @@ def test_groupby(memorystore):
         ],
         key="f",
     )
-    data = list(memorystore.groupby("d"))
+    data = list(memorystore.groupby("d", properties={"e": 1, "f": 1}))
     assert len(data) == 2
     grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
     assert len(grouped_by_9) == 3
+    assert all([d.get("f", False) for d in grouped_by_9])
+    assert all([d.get("e", False) for d in grouped_by_9])
     grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
     assert len(grouped_by_10) == 1
 
@@ -289,8 +292,9 @@ def test_groupby(memorystore):
         ],
         key="f",
     )
-    data = list(memorystore.groupby("e.d"))
+    data = list(memorystore.groupby("e.d", properties=["f"]))
     assert len(data) == 2
+    assert data[0][1][0].get("f", False)
 
 
 # Monty store tests
@@ -411,9 +415,45 @@ def test_json_store_load(jsonstore, test_dir):
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
 
+    # confirm descriptive error raised if you get a KeyError
+    with pytest.raises(KeyError, match="Key field 'random_key' not found"):
+        jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", key="random_key")
+        jsonstore.connect()
+
+    # if the .json does not exist, it should be created
+    with pytest.warns(DeprecationWarning, match="file_writable is deprecated"):
+        jsonstore = JSONStore("a.json", file_writable=False)
+        assert jsonstore.read_only is True
+
 
 def test_json_store_writeable(test_dir):
     with ScratchDir("."):
+        # if the .json does not exist, it should be created
+        jsonstore = JSONStore("a.json", read_only=False)
+        assert Path("a.json").exists()
+        jsonstore.connect()
+        # confirm RunTimeError with multiple paths
+        with pytest.raises(RuntimeError, match="multiple JSON"):
+            jsonstore = JSONStore(["a.json", "d.json"], read_only=False)
+        shutil.copy(test_dir / "test_set" / "d.json", ".")
+        jsonstore = JSONStore("d.json", read_only=False)
+        jsonstore.connect()
+        assert jsonstore.count() == 2
+        jsonstore.update({"new": "hello", "task_id": 2})
+        assert jsonstore.count() == 3
+        jsonstore.close()
+
+        # repeat the above with the deprecated file_writable kwarg
+        # if the .json does not exist, it should be created
+        with pytest.warns(UserWarning, match="Received conflicting keyword arguments"):
+            jsonstore = JSONStore("a.json", file_writable=True)
+            assert jsonstore.read_only is False
+        assert Path("a.json").exists()
+        jsonstore.connect()
+
+        # confirm RunTimeError with multiple paths
+        with pytest.raises(RuntimeError, match="multiple JSON"):
+            jsonstore = JSONStore(["a.json", "d.json"], file_writable=True)
         shutil.copy(test_dir / "test_set" / "d.json", ".")
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()

@@ -144,13 +144,13 @@ def test_cluster_run(owner_store, pet_store):
     res, data = search_helper(payload="")
     assert res.status_code == 200
 
-    payload = {"name": "Person1", "limit": 10, "all_fields": True}
+    payload = {"name": "Person1", "_limit": 10, "_all_fields": True}
     res, data = search_helper(payload=payload, base="/owners/?")
     assert res.status_code == 200
     assert len(data) == 1
     assert data[0]["name"] == "Person1"
 
-    payload = {"name": "Pet1", "limit": 10, "all_fields": True}
+    payload = {"name": "Pet1", "_limit": 10, "_all_fields": True}
     res, data = search_helper(payload=payload, base="/pets/?")
     assert res.status_code == 200
     assert len(data) == 1

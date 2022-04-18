@@ -153,7 +153,7 @@ class SubmissionResource(Resource):
                 )
 
             for operator in self.get_query_operators:  # type: ignore
-                item = operator.post_process(item)
+                item = operator.post_process(item, {})
 
             response = {"data": item}
 
@@ -203,7 +203,7 @@ class SubmissionResource(Resource):
             meta = Meta(total_doc=count)
 
             for operator in self.get_query_operators:  # type: ignore
-                data = operator.post_process(data)
+                data = operator.post_process(data, query)
 
             response = {"data": data, "meta": meta.dict()}
 

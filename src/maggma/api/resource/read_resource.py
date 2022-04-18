@@ -133,7 +133,7 @@ class ReadOnlyResource(Resource):
                 )
 
             for operator in self.query_operators:
-                item = operator.post_process(item)
+                item = operator.post_process(item, {})
 
             response = {"data": item}  # type: ignore
 
@@ -171,10 +171,20 @@ class ReadOnlyResource(Resource):
 
             overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
-                raise HTTPException(
-                    status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
-                )
+                if "limit" in overlap or "skip" in overlap:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="'limit' and 'skip' parameters have been renamed. "
+                        "Please update your API client to the newest version.",
+                    )
+
+                else:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Request contains query parameters which cannot be used: {}".format(
+                            ", ".join(overlap)
+                        ),
+                    )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 
@@ -190,7 +200,7 @@ class ReadOnlyResource(Resource):
             operator_meta = {}
 
             for operator in self.query_operators:
-                data = operator.post_process(data)
+                data = operator.post_process(data, query)
                 operator_meta.update(operator.meta())
 
             meta = Meta(total_doc=count)

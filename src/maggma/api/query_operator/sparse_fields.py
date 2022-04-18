@@ -28,21 +28,21 @@ class SparseFieldsQuery(QueryOperator):
         )
 
         def query(
-            fields: str = Query(
+            _fields: str = Query(
                 None,
                 description=f"Fields to project from {str(model_name)} as a list of comma seperated strings.\
                     Fields include: `{'` `'.join(model_fields)}`",
             ),
-            all_fields: bool = Query(False, description="Include all fields."),
+            _all_fields: bool = Query(False, description="Include all fields."),
         ) -> STORE_PARAMS:
             """
             Pagination parameters for the API Endpoint
             """
 
             properties = (
-                fields.split(",") if isinstance(fields, str) else self.default_fields
+                _fields.split(",") if isinstance(_fields, str) else self.default_fields
             )
-            if all_fields:
+            if _all_fields:
                 properties = model_fields
 
             return {"properties": properties}
