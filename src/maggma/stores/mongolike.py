@@ -6,7 +6,6 @@ various utilities
 """
 
 from pathlib import Path
-from datetime import datetime
 import yaml
 from itertools import chain, groupby
 from socket import socket
@@ -723,14 +722,13 @@ class JSONStore(MemoryStore):
             raise RuntimeError(
                 "Cannot instantiate file-writable JSONStore with multiple JSON files."
             )
-        self.file_writable = file_writable
-        self.kwargs = kwargs
 
         # create the .json file if it does not exist
-        if self.file_writable and not Path(self.paths[0]).exists():
+        if not self.read_only and not Path(self.paths[0]).exists():
             with zopen(self.paths[0], "w") as f:
                 data: List[dict] = []
-                json.dump(data, f, default=json_serial)
+                bytesdata = orjson.dumps(data)
+                f.write(bytesdata.decode("utf-8"))
         super().__init__(**kwargs)
 
     def connect(self, force_reset=False):
@@ -739,34 +737,22 @@ class JSONStore(MemoryStore):
         """
         super().connect(force_reset=force_reset)
         for path in self.paths:
-            objects = self.read_json_file(path)
-            try:
-                self.update(objects)
-            except KeyError:
-                raise KeyError(
-                    f"""
-                    Key field '{self.key}' not found in {path.name}. This
-                    could mean that this JSONStore was initially created with a different key field.
-                    The keys found in the .json file are {list(objects[0].keys())}. Try
-                    re-initializing your JSONStore using one of these as the key arguments.
-                    """
-                )
-
-    def read_json_file(self, path) -> List:
-        """
-        Helper method to read the contents of a JSON file and generate
-        a list of docs.
-
-        Args:
-            path: Path to the JSON file to be read
-        """
-        with zopen(path) as f:
-            data = f.read()
-            data = data.decode() if isinstance(data, bytes) else data
-            objects = orjson.loads(data)
-            objects = [objects] if not isinstance(objects, list) else objects
-
-        return objects
+            with zopen(path) as f:
+                data = f.read()
+                data = data.decode() if isinstance(data, bytes) else data
+                objects = orjson.loads(data)
+                objects = [objects] if not isinstance(objects, list) else objects
+                try:
+                    self.update(objects)
+                except KeyError:
+                    raise KeyError(
+                        f"""
+                        Key field '{self.key}' not found in {f.name}. This
+                        could mean that this JSONStore was initially created with a different key field.
+                        The keys found in the .json file are {list(objects[0].keys())}. Try
+                        re-initializing your JSONStore using one of these as the key arguments.
+                        """
+                    )
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
@@ -806,7 +792,8 @@ class JSONStore(MemoryStore):
             data = [d for d in self.query()]
             for d in data:
                 d.pop("_id")
-            json.dump(data, f, default=json_serial)
+            bytesdata = orjson.dumps(data)
+            f.write(bytesdata.decode("utf-8"))
 
     def __hash__(self):
         return hash((*self.paths, self.last_updated_field))
@@ -949,13 +936,3 @@ def _find_free_port(address="0.0.0.0"):
     s = socket()
     s.bind((address, 0))  # Bind to a free port provided by the host.
     return s.getsockname()[1]  # Return the port number assigned.
-
-
-# Included for now to make it possible to serialize datetime objects. Probably
-# maggma already has a solution to this somewhere.
-def json_serial(obj):
-    """JSON serializer for objects not serializable by default json code"""
-
-    if isinstance(obj, (datetime)):
-        return obj.isoformat()
-    raise TypeError("Type %s not serializable" % type(obj))
