@@ -15,5 +15,5 @@ uvicorn==0.17.6
 sshtunnel==0.4.0
 msgpack==1.0.3
 msgpack-python==0.5.6
-orjson==3.6.7
-boto3==1.21.22
+orjson==3.6.8
+boto3==1.21.42
