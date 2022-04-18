@@ -7,7 +7,7 @@ tqdm==4.64.0
 mongogrant==0.3.3
 aioitertools==0.10.0
 pydantic==1.9.0
-fastapi==0.75.0
+fastapi==0.75.2
 numpy==1.21.0;python_version>"3.6"
 pyzmq==22.3.0
 dnspython==2.2.1
@@ -15,5 +15,5 @@ uvicorn==0.17.6
 sshtunnel==0.4.0
 msgpack==1.0.3
 msgpack-python==0.5.6
-orjson==3.6.7
+orjson==3.6.8
 boto3==1.21.22
