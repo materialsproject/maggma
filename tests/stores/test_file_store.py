@@ -117,34 +117,42 @@ def test_orphaned_metadata(test_dir):
         d.update({"tags": "Ryan was here"})
     fs.update(data)
 
+    assert len(list(fs.query())) == 6
     assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
+    # the orphan field should be populated for all documents
+    assert len(list(fs.query({"orphan": {"$exists": True}}))) == 6
     fs.close()
 
     # re-init the store with a different max_depth parameter
     # this will result in orphaned metadata
-    fs = FileStore(test_dir, read_only=True, max_depth=0)
+    # with include_orphans=True, this should be returend in queries
+    fs = FileStore(test_dir, read_only=True, max_depth=1, include_orphans=True)
     with pytest.warns(
         UserWarning, match="Orphaned metadata was found in FileStore.json"
     ):
         fs.connect()
+    assert len(list(fs.query())) == 6
     assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
-    assert len(list(fs.query({"name": {"$exists": True}}))) == 1
-    assert len(list(fs.query({"orphan": True}))) == 5
+    # all items, including orphans, should have a path
+    assert len(list(fs.query({"path": {"$exists": True}}))) == 6
+    assert len(list(fs.query({"orphan": True}))) == 1
     fs.close()
 
     # re-init the store after renaming one of the files on disk
     # this will result in orphaned metadata
+    # with include_orphans=False (default), that metadata should be
+    # excluded from query results
     Path(test_dir / "calculation1" / "input.in").rename(
         test_dir / "calculation1" / "input_renamed.in"
     )
-    fs = FileStore(test_dir, read_only=True)
+    fs = FileStore(test_dir, read_only=True, include_orphans=False)
     with pytest.warns(
         UserWarning, match="Orphaned metadata was found in FileStore.json"
     ):
         fs.connect()
-    print(list(fs.query()))
-    assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
-    assert len(list(fs.query({"name": {"$exists": True}}))) == 6
+    assert len(list(fs.query())) == 6
+    assert len(list(fs.query({"tags": {"$exists": True}}))) == 5
+    assert len(list(fs.query({"path": {"$exists": True}}))) == 6
     assert len(list(fs.query({"orphan": True}))) == 1
     fs.close()
 

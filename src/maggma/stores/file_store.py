@@ -9,12 +9,12 @@ import hashlib
 import warnings
 from pathlib import Path
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Union, Iterator
 
 from pydantic import BaseModel, Field
 from pymongo import UpdateOne
 
-from maggma.core import StoreError
+from maggma.core import StoreError, Sort
 from maggma.stores.mongolike import MemoryStore, JSONStore
 
 
@@ -31,6 +31,7 @@ class FileRecord(BaseModel):
     file_id: str = Field(None, title="Unique identifier for this file")
     last_updated: datetime = Field(None, title="Time this file was last modified")
     hash: str = Field(None, title="Hash of the file contents")
+    orphan: bool = Field(False, title="Whether this record is an orphan")
 
     def __init__(self, *args, **kwargs):
         """
@@ -108,6 +109,7 @@ class FileStore(MemoryStore):
         file_filters: Optional[List] = None,
         max_depth: Optional[int] = None,
         read_only: bool = True,
+        include_orphans: bool = False,
         json_name: str = "FileStore.json",
         **kwargs,
     ):
@@ -128,6 +130,13 @@ class FileStore(MemoryStore):
             read_only: If True (default), the .update() and .remove_docs()
                 methods are disabled, preventing any changes to the files on
                 disk. In addition, metadata cannot be written to disk.
+            include_orphans: Whether to include orphaned metadata records in query results.
+                Orphaned metadata records are records found in the local JSON file that can
+                no longer be associated to a file on disk. This can happen if a file is renamed
+                or deleted, or if the FileStore is re-initialized with a more restrictive
+                file_filters or max_depth argument. By default (False), these records
+                do not appear in query results. Nevertheless, the metadata records are
+                retained in the JSON file and the FileStore to prevent accidental data loss.
             json_name: Name of the .json file to which metadata is saved. If read_only
                 is False, this file will be created in the root directory of the
                 FileStore.
@@ -139,6 +148,7 @@ class FileStore(MemoryStore):
         self.file_filters = file_filters if file_filters else ["*"]
         self.collection_name = "file_store"
         self.key = "file_id"
+        self.include_orphans = include_orphans
         self.read_only = read_only
         self.max_depth = max_depth
 
@@ -288,6 +298,42 @@ class FileStore(MemoryStore):
             if len(set(filtered_d.keys()).difference(set(["path", self.key]))) != 0:
                 filtered_data.append(filtered_d)
         self.metadata_store.update(filtered_data, self.key)
+
+    def query(  # type: ignore
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        hint: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Dict]:
+        """
+        Queries the Store for a set of documents
+
+        Args:
+            criteria: PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
+            hint: Dictionary of indexes to use as hints for query optimizer.
+                Keys are field names and values are 1 for ascending or -1 for descending.
+            skip: number documents to skip
+            limit: limit on total number of documents returned
+        """
+        criteria = criteria or {}
+        if criteria.get("orphan", None) is None:
+            if not self.include_orphans:
+                criteria.update({"orphan": False})
+
+        return super().query(
+            criteria=criteria,
+            properties=properties,
+            sort=sort,
+            hint=hint,
+            skip=skip,
+            limit=limit,
+        )
 
     def remove_docs(self, criteria: Dict):
         """
