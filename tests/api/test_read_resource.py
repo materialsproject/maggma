@@ -161,13 +161,13 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
 def test_numeric_query_operator():
 
     # Checking int
-    payload = {"age": 20, "all_fields": True}
+    payload = {"age": 20, "_all_fields": True}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 1
     assert data[0]["age"] == 20
 
-    payload = {"age_not_eq": 9, "all_fields": True}
+    payload = {"age_not_eq": 9, "_all_fields": True}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 11
@@ -185,13 +185,13 @@ def test_numeric_query_operator():
 
 def test_string_query_operator():
 
-    payload = {"name": "PersonAge9", "all_fields": True}
+    payload = {"name": "PersonAge9", "_all_fields": True}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 1
     assert data[0]["name"] == "PersonAge9"
 
-    payload = {"name_not_eq": "PersonAge9", "all_fields": True}
+    payload = {"name_not_eq": "PersonAge9", "_all_fields": True}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 12
@@ -200,7 +200,7 @@ def test_string_query_operator():
 def test_resource_compound():
     payload = {
         "name": "PersonAge20Weight200",
-        "all_fields": True,
+        "_all_fields": True,
         "weight_min": 199.1,
         "weight_max": 201.4,
         "age": 20,
@@ -212,8 +212,8 @@ def test_resource_compound():
 
     payload = {
         "name": "PersonAge20Weight200",
-        "all_fields": False,
-        "fields": "name,age",
+        "_all_fields": False,
+        "_fields": "name,age",
         "weight_min": 199.3,
         "weight_max": 201.9,
         "age": 20,

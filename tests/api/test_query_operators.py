@@ -29,10 +29,27 @@ def test_pagination_functionality():
 
     op = PaginationQuery()
 
-    assert op.query(skip=10, limit=20) == {"limit": 20, "skip": 10}
+    assert op.query(_skip=10, _limit=20, _page=None, _per_page=None) == {
+        "limit": 20,
+        "skip": 10,
+    }
+
+    assert op.query(_skip=None, _limit=None, _page=3, _per_page=23) == {
+        "limit": 23,
+        "skip": 46,
+    }
 
     with pytest.raises(HTTPException):
-        op.query(limit=10000)
+        op.query(_limit=10000, _skip=100, _page=None, _per_page=None)
+
+    with pytest.raises(HTTPException):
+        op.query(_limit=None, _skip=None, _page=5, _per_page=10000)
+
+    with pytest.raises(HTTPException):
+        op.query(_limit=-1, _skip=100, _page=None, _per_page=None)
+
+    with pytest.raises(HTTPException):
+        op.query(_page=-1, _per_page=100, _skip=None, _limit=None)
 
 
 def test_pagination_serialization():
@@ -42,7 +59,10 @@ def test_pagination_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query(skip=10, limit=20) == {"limit": 20, "skip": 10}
+        assert new_op.query(_skip=10, _limit=20, _page=None, _per_page=None) == {
+            "limit": 20,
+            "skip": 10,
+        }
 
 
 def test_sparse_query_functionality():
@@ -60,7 +80,9 @@ def test_sparse_query_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query() == {"properties": ["name", "age", "weight", "last_updated"]}
+        assert new_op.query() == {
+            "properties": ["name", "age", "weight", "last_updated"]
+        }
 
 
 def test_numeric_query_functionality():
@@ -69,7 +91,10 @@ def test_numeric_query_functionality():
 
     assert op.meta() == {}
     assert op.query(age_max=10, age_min=1, age_not_eq=[2, 3], weight_min=120) == {
-        "criteria": {"age": {"$lte": 10, "$gte": 1, "$ne": [2, 3]}, "weight": {"$gte": 120}}
+        "criteria": {
+            "age": {"$lte": 10, "$gte": 1, "$ne": [2, 3]},
+            "weight": {"$gte": 120},
+        }
     }
 
 
@@ -87,7 +112,9 @@ def test_sort_query_functionality():
 
     op = SortQuery()
 
-    assert op.query(sort_fields="volume,-density") == {"sort": {"volume": 1, "density": -1}}
+    assert op.query(_sort_fields="volume,-density") == {
+        "sort": {"volume": 1, "density": -1}
+    }
 
 
 def test_sort_serialization():
@@ -97,7 +124,9 @@ def test_sort_serialization():
     with ScratchDir("."):
         dumpfn(op, "temp.json")
         new_op = loadfn("temp.json")
-        assert new_op.query(sort_fields="volume,-density") == {"sort": {"volume": 1, "density": -1}}
+        assert new_op.query(_sort_fields="volume,-density") == {
+            "sort": {"volume": 1, "density": -1}
+        }
 
 
 @pytest.fixture
