@@ -413,7 +413,7 @@ class FileStore(MemoryStore):
             None,
         )
 
-    def remove_docs(self, criteria: Dict):
+    def remove_docs(self, criteria: Dict, confirm: bool = False):
         """
         Remove Items (FileRecord) matching the query dictionary.
 
@@ -421,6 +421,8 @@ class FileStore(MemoryStore):
 
         Args:
             criteria: query dictionary to match
+            confirm: Boolean flag to confirm that remove_docs should delete
+                     files on disk. Default: False.
         """
         if self.read_only:
             raise StoreError(
@@ -428,6 +430,17 @@ class FileStore(MemoryStore):
                 "store with read_only=False."
             )
 
-        # ids = [cursor._id for cursor in self._collection.find(criteria)]
+        docs = [d for d in self.query(criteria)]
+        # this ensures that any modifications to criteria made by self.query
+        # (e.g., related to orphans or contents) are propagated through to the superclass
+        new_criteria = {"file_id": {"$in": [d["file_id"] for d in docs]}}
 
-        raise NotImplementedError("FileStore does not yet support deleting files.")
+        if len(docs) > 0 and not confirm:
+            raise StoreError(
+                f"Warning! This command is about to delete {len(docs)} items from disk!"
+                "If this is what you want, reissue this command with confirm=True."
+            )
+
+        for d in docs:
+            Path(d["path"]).unlink()
+            super().remove_docs(criteria=new_criteria)

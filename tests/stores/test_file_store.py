@@ -23,7 +23,6 @@ import pytest
 
 from maggma.core import StoreError
 from maggma.stores.file_store import FileStore, FileRecord
-from monty.io import zopen
 
 
 @pytest.fixture
@@ -223,8 +222,15 @@ def test_remove(test_dir):
     """
     fs = FileStore(test_dir, read_only=False)
     fs.connect()
-    with pytest.raises(NotImplementedError, match="deleting"):
+    paths = [d["path"] for d in fs.query()]
+    with pytest.raises(StoreError, match="about to delete 6 items"):
         fs.remove_docs({})
+    fs.remove_docs({"name": "input.in"}, confirm=True)
+    assert len(list(fs.query())) == 4
+    assert not Path.exists(test_dir / "calculation1" / "input.in")
+    assert not Path.exists(test_dir / "calculation2" / "input.in")
+    fs.remove_docs({}, confirm=True)
+    assert not any([Path(p).exists() for p in paths])
 
 
 def test_metadata(test_dir):
