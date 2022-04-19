@@ -338,8 +338,6 @@ class FileStore(MemoryStore):
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
 
-        if properties == {}:
-            properties = None
         orig_properties = properties.copy() if properties else None
 
         if properties is None or properties.get("contents"):
