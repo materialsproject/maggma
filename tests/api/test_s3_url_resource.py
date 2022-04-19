@@ -1,34 +1,14 @@
-from datetime import datetime
-from random import randint
-from urllib.parse import urlencode
-
 import pytest
-from fastapi import FastAPI
-from datetime import datetime
-from requests import Response
-from starlette.testclient import TestClient
-
-from maggma.api.models import S3URLDoc
+from maggma.stores import MemoryStore
 from maggma.api.resource import S3URLResource
-from maggma.stores import MemoryStore, AliasingStore
-
-import inspect
-
-from maggma.api.resource.core import HintScheme
 
 
-entries = [S3URLDoc(url="URL1", requested_datetime=datetime.utcnow(), expiry_datetime=datetime.utcnow())] + [
-    S3URLDoc(url="URL2", requested_datetime=datetime.utcnow(), expiry_datetime=datetime.utcnow())
-]
-
-total_owners = len(entries)
 
 
 @pytest.fixture
 def entries_store():
     store = MemoryStore("entries", key="url")
     store.connect()
-    store.update([d.dict() for d in entries])
     return store
 
 
