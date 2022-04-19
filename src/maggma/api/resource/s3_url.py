@@ -1,9 +1,8 @@
 from datetime import datetime, timedelta
-from inspect import signature
-from typing import Any, Dict, List, Optional, Type, Union
+from typing import List, Optional
 from botocore.exceptions import ClientError
 
-from fastapi import Depends, HTTPException, Path, Request
+from fastapi import HTTPException, Path, Request
 from fastapi import Response
 
 from maggma.api.models import S3URLDoc
