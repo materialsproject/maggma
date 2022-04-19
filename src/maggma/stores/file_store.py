@@ -13,7 +13,7 @@ from typing import Dict, List, Optional, Union, Iterator
 
 from pydantic import BaseModel, Field
 from pymongo import UpdateOne
-
+from monty.io import zopen
 from maggma.core import StoreError, Sort
 from maggma.stores.mongolike import MemoryStore, JSONStore
 
@@ -264,7 +264,7 @@ class FileStore(MemoryStore):
         cannot be updated with this method. This prevents the contents of the FileStore
         from becoming out of sync with the files on which it is based. The protected fields
         are all attributes of the FileRecord class, e.g. 'name', 'parent', 'last_updated',
-        'hash', 'size', and 'orphan'. The 'path' and key fields are retained to
+        'hash', 'size', 'contents', and 'orphan'. The 'path' and key fields are retained to
         make each document in the JSON file identifiable by manual inspection.
 
         Args:
@@ -291,6 +291,7 @@ class FileStore(MemoryStore):
             "size",
             "parent",
             "orphan",
+            "contents",
         }
         for d in data:
             filtered_d = {k: v for k, v in d.items() if k not in protected_keys}
@@ -307,6 +308,7 @@ class FileStore(MemoryStore):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
+        contents_size_limit: Optional[int] = None,
     ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
@@ -320,19 +322,95 @@ class FileStore(MemoryStore):
                 Keys are field names and values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
+            contents_size_limit: Maximum file size in bytes for which to return contents.
+                The FileStore will attempt to read the file and populate the 'contents' key
+                with its content at query time, unless the file size is larger than this value.
         """
-        criteria = criteria or {}
+        return_contents = False
+        criteria = criteria if criteria else {}
         if criteria.get("orphan", None) is None:
             if not self.include_orphans:
                 criteria.update({"orphan": False})
 
-        return super().query(
+        if criteria.get("contents"):
+            warnings.warn("'contents' is not a queryable field! Ignoring.")
+
+        if isinstance(properties, list):
+            properties = {p: 1 for p in properties}
+
+        if properties is not None and properties.get("contents"):
+            return_contents = True
+            orig_properties = properties.copy()
+            properties.pop("contents")
+
+            # add size and path to query so that file can be read
+            if "size" not in properties:
+                properties.update({"size": 1})
+            if "path" not in properties:
+                properties.update({"path": 1})
+
+        # add file contents to the returned documents, if appropriate
+        for d in super().query(
             criteria=criteria,
             properties=properties,
             sort=sort,
             hint=hint,
             skip=skip,
             limit=limit,
+        ):
+            if return_contents:
+                if contents_size_limit is None or d["size"] <= contents_size_limit:
+                    # attempt to read the file contents and inject into the document
+                    # TODO - could all more logic for detecting different file types
+                    # and more nuanced exception handling
+                    try:
+                        with zopen(d["path"], "r") as f:
+                            data = f.read()
+                    except Exception as e:
+                        data = f"Unable to read: {e}"
+
+                elif d["size"] > contents_size_limit:
+                    data = "Unable to read: file too large"
+                else:
+                    data = "Unknown error"
+
+                d.update({"contents": data})
+
+                # remove size and path if not explicitly requested
+                if orig_properties is not None and "size" not in orig_properties:
+                    d.pop("size")
+                if orig_properties is not None and "path" not in orig_properties:
+                    d.pop("path")
+
+            yield d
+
+    def query_one(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        contents_size_limit: Optional[int] = None,
+    ):
+        """
+        Queries the Store for a single document
+
+        Args:
+            criteria: PyMongo filter for documents to search
+            properties: properties to return in the document
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
+            contents_size_limit: Maximum file size in bytes for which to return contents.
+                The FileStore will attempt to read the file and populate the 'contents' key
+                with its content at query time, unless the file size is larger than this value.
+        """
+        return next(
+            self.query(
+                criteria=criteria,
+                properties=properties,
+                sort=sort,
+                contents_size_limit=contents_size_limit,
+            ),
+            None,
         )
 
     def remove_docs(self, criteria: Dict):

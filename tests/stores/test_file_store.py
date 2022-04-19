@@ -42,7 +42,7 @@ def test_filerecord(test_dir):
     assert f.name == "input.in"
     assert f.parent == "calculation1"
     assert f.path == test_dir / "calculation1" / "input.in"
-    assert f.size == 0
+    assert f.size == 90
     assert f.hash == f.compute_hash()
     assert f.file_id == f.get_file_id()
     assert f.last_updated == datetime.fromtimestamp(
@@ -153,6 +153,7 @@ def test_orphaned_metadata(test_dir):
     assert len(list(fs.query())) == 6
     assert len(list(fs.query({"tags": {"$exists": True}}))) == 5
     assert len(list(fs.query({"path": {"$exists": True}}))) == 6
+    # manually specifying orphan: True should still work
     assert len(list(fs.query({"orphan": True}))) == 1
     fs.close()
 
@@ -183,6 +184,37 @@ def test_read_only(test_dir):
         fs.update({"file_id": file_id, "tags": "something"})
     with pytest.raises(StoreError, match="read-only"):
         fs.remove_docs({})
+
+
+def test_query(test_dir):
+    """
+    File contents should be read unless file is too large
+    size and path keys should not be returned unless explicitly requested
+    querying on 'contents' should raise a warning
+    contents should be empty if a file is too large
+    """
+    fs = FileStore(test_dir, read_only=True)
+    fs.connect()
+    d = fs.query_one(
+        {"name": "input.in", "parent": "calculation1"},
+        properties=["file_id", "contents"],
+    )
+    assert not d.get("size")
+    assert not d.get("path")
+    assert d.get("file_id")
+    assert d.get("contents")
+    assert "This is the file named input.in" in d["contents"]
+
+    with pytest.warns(UserWarning, match="'contents' is not a queryable field!"):
+        fs.query_one({"contents": {"$regex": "input.in"}})
+
+    d = fs.query_one(
+        {"name": "input.in", "parent": "calculation1"},
+        properties=["name", "contents"],
+        contents_size_limit=50,
+    )
+    assert d["contents"] == "Unable to read: file too large"
+    assert d.get("name")
 
 
 def test_remove(test_dir):
