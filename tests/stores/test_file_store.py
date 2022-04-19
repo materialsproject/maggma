@@ -191,6 +191,7 @@ def test_query(test_dir):
     size and path keys should not be returned unless explicitly requested
     querying on 'contents' should raise a warning
     contents should be empty if a file is too large
+    empty properties kwarg should return contents, size, and path (along with everything else)
     """
     fs = FileStore(test_dir, read_only=True)
     fs.connect()
@@ -203,6 +204,15 @@ def test_query(test_dir):
     assert d.get("file_id")
     assert d.get("contents")
     assert "This is the file named input.in" in d["contents"]
+
+    d = fs.query_one(
+        {"name": "input.in", "parent": "calculation1"},
+        properties=None,
+    )
+    assert d.get("size")
+    assert d.get("path")
+    assert d.get("file_id")
+    assert d.get("contents")
 
     with pytest.warns(UserWarning, match="'contents' is not a queryable field!"):
         fs.query_one({"contents": {"$regex": "input.in"}})

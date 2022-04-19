@@ -338,18 +338,20 @@ class FileStore(MemoryStore):
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
 
-        if properties is not None and properties.get("contents"):
+        if properties == {}:
+            properties = None
+        orig_properties = properties.copy() if properties else None
+
+        if properties is None or properties.get("contents"):
             return_contents = True
-            orig_properties = properties.copy()
+
+        if properties is not None and return_contents:
+            # remove contents b/c it isn't stored in the MemoryStore
             properties.pop("contents")
-
             # add size and path to query so that file can be read
-            if "size" not in properties:
-                properties.update({"size": 1})
-            if "path" not in properties:
-                properties.update({"path": 1})
+            properties.update({"size": 1})
+            properties.update({"path": 1})
 
-        # add file contents to the returned documents, if appropriate
         for d in super().query(
             criteria=criteria,
             properties=properties,
@@ -358,10 +360,11 @@ class FileStore(MemoryStore):
             skip=skip,
             limit=limit,
         ):
+            # add file contents to the returned documents, if appropriate
             if return_contents:
                 if contents_size_limit is None or d["size"] <= contents_size_limit:
                     # attempt to read the file contents and inject into the document
-                    # TODO - could all more logic for detecting different file types
+                    # TODO - could add more logic for detecting different file types
                     # and more nuanced exception handling
                     try:
                         with zopen(d["path"], "r") as f:
@@ -372,7 +375,7 @@ class FileStore(MemoryStore):
                 elif d["size"] > contents_size_limit:
                     data = "Unable to read: file too large"
                 else:
-                    data = "Unknown error"
+                    data = "Unable to read: Unknown error"
 
                 d.update({"contents": data})
 
