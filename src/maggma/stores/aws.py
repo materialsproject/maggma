@@ -44,6 +44,7 @@ class S3Store(Store):
         s3_workers: int = 1,
         key: str = "fs_id",
         store_hash: bool = True,
+        unpack_data: bool = True,
         searchable_fields: Optional[List[str]] = None,
         **kwargs,
     ):
@@ -64,6 +65,7 @@ class S3Store(Store):
             sub_dir: (optional)  subdirectory of the s3 bucket to store the data
             s3_workers: number of concurrent S3 puts to run
             store_hash: store the sha1 hash right before insertion to the database.
+            unpack_data: whether to decompress and unpack byte data when querying from the bucket.
             searchable_fields: fields to keep in the index store
         """
         if boto3 is None:
@@ -78,13 +80,12 @@ class S3Store(Store):
         self.s3 = None  # type: Any
         self.s3_bucket = None  # type: Any
         self.s3_workers = s3_workers
+        self.unpack_data = unpack_data
         self.searchable_fields = searchable_fields if searchable_fields else []
         self.store_hash = store_hash
 
         # Force the key to be the same as the index
-        assert isinstance(
-            index.key, str
-        ), "Since we are using the key as a file name in S3, they key must be a string"
+        assert isinstance(index.key, str), "Since we are using the key as a file name in S3, they key must be a string"
         if key != index.key:
             warnings.warn(
                 f'The desired S3Store key "{key}" does not match the index key "{index.key},"'
@@ -170,6 +171,7 @@ class S3Store(Store):
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
+
         """
         prop_keys = set()
         if isinstance(properties, dict):
@@ -177,50 +179,47 @@ class S3Store(Store):
         elif isinstance(properties, list):
             prop_keys = set(properties)
 
-        for doc in self.index.query(
-            criteria=criteria, sort=sort, limit=limit, skip=skip
-        ):
+        for doc in self.index.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
                 try:
                     # TODO: THis is ugly and unsafe, do some real checking before pulling data
-                    data = (
-                        self.s3_bucket.Object(self.sub_dir + str(doc[self.key]))
-                        .get()["Body"]
-                        .read()
-                    )
+                    data = self.s3_bucket.Object(self.sub_dir + str(doc[self.key])).get()["Body"].read()
                 except botocore.exceptions.ClientError as e:
                     # If a client error is thrown, then check that it was a 404 error.
                     # If it was a 404 error, then the object does not exist.
                     error_code = int(e.response["Error"]["Code"])
                     if error_code == 404:
-                        self.logger.error(
-                            "Could not find S3 object {}".format(doc[self.key])
-                        )
+                        self.logger.error("Could not find S3 object {}".format(doc[self.key]))
                         break
                     else:
                         raise e
 
-                if doc.get("compression", "") == "zlib":
-                    data = zlib.decompress(data)
-                # requires msgpack-python to be installed to fix string encoding problem
-                # https://github.com/msgpack/msgpack/issues/121
-                # During recursion
-                # msgpack.unpackb goes as deep as possible during reconstruction
-                # MontyDecoder().process_decode only goes until it finds a from_dict
-                # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
-                # Should just return the unpacked object then let the user run process_decoded
-                unpacked_data = msgpack.unpackb(data, raw=False)
-                if self.last_updated_field in doc:
-                    unpacked_data[self.last_updated_field] = doc[
-                        self.last_updated_field
-                    ]
-                yield unpacked_data
+                if self.unpack_data:
+                    data = self._unpack(data=data, compressed=doc.get("compression", "") == "zlib")
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+                    if self.last_updated_field in doc:
+                        data[self.last_updated_field] = doc[self.last_updated_field]
+
+                yield data
+
+    @staticmethod
+    def _unpack(data: bytes, compressed: bool):
+
+        if compressed:
+            data = zlib.decompress(data)
+        # requires msgpack-python to be installed to fix string encoding problem
+        # https://github.com/msgpack/msgpack/issues/121
+        # During recursion
+        # msgpack.unpackb goes as deep as possible during reconstruction
+        # MontyDecoder().process_decode only goes until it finds a from_dict
+        # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
+        # Should just return the unpacked object then let the user run process_decoded
+        unpacked_data = msgpack.unpackb(data, raw=False)
+        return unpacked_data
+
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -257,12 +256,7 @@ class S3Store(Store):
             generator returning tuples of (dict, list of docs)
         """
         return self.index.groupby(
-            keys=keys,
-            criteria=criteria,
-            properties=properties,
-            sort=sort,
-            skip=skip,
-            limit=limit,
+            keys=keys, criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit,
         )
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
@@ -313,9 +307,7 @@ class S3Store(Store):
         with ThreadPoolExecutor(max_workers=self.s3_workers) as pool:
             fs = {
                 pool.submit(
-                    self.write_doc_to_s3,
-                    doc=itr_doc,
-                    search_keys=key + additional_metadata + self.searchable_fields,
+                    self.write_doc_to_s3, doc=itr_doc, search_keys=key + additional_metadata + self.searchable_fields,
                 )
                 for itr_doc in docs
             }
@@ -376,9 +368,7 @@ class S3Store(Store):
 
         if self.last_updated_field in doc:
             # need this conversion for aws metadata insert
-            search_doc[self.last_updated_field] = str(
-                to_isoformat_ceil_ms(doc[self.last_updated_field])
-            )
+            search_doc[self.last_updated_field] = str(to_isoformat_ceil_ms(doc[self.last_updated_field]))
 
         # keep a record of original keys, in case these are important for the individual researcher
         # it is not expected that this information will be used except in disaster recovery
@@ -417,7 +407,7 @@ class S3Store(Store):
         # Metadata stored in the MongoDB index (self.index) is stored unchanged.
 
         # Additionally, MinIO requires lowercase keys
-        return str(key).replace('_', '-').lower()
+        return str(key).replace("_", "-").lower()
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
         """
@@ -443,9 +433,7 @@ class S3Store(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def newer_in(
-        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
-    ) -> List[str]:
+    def newer_in(self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
@@ -458,13 +446,9 @@ class S3Store(Store):
                         that to filter out new items in
         """
         if hasattr(target, "index"):
-            return self.index.newer_in(
-                target=target.index, criteria=criteria, exhaustive=exhaustive
-            )
+            return self.index.newer_in(target=target.index, criteria=criteria, exhaustive=exhaustive)
         else:
-            return self.index.newer_in(
-                target=target, criteria=criteria, exhaustive=exhaustive
-            )
+            return self.index.newer_in(target=target, criteria=criteria, exhaustive=exhaustive)
 
     def __hash__(self):
         return hash((self.index.__hash__, self.bucket))
@@ -503,14 +487,10 @@ class S3Store(Store):
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
             if self.last_updated_field in new_meta:
-                new_meta[self.last_updated_field] = str(
-                    to_isoformat_ceil_ms(new_meta[self.last_updated_field])
-                )
+                new_meta[self.last_updated_field] = str(to_isoformat_ceil_ms(new_meta[self.last_updated_field]))
             # s3_object.metadata.update(new_meta)
             s3_object.copy_from(
-                CopySource={"Bucket": self.s3_bucket.name, "Key": key_},
-                Metadata=new_meta,
-                MetadataDirective="REPLACE",
+                CopySource={"Bucket": self.s3_bucket.name, "Key": key_}, Metadata=new_meta, MetadataDirective="REPLACE",
             )
 
     def __eq__(self, other: object) -> bool:
