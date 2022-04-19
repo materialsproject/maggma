@@ -8370,6 +8370,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="n">s3_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
         <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fs_id&quot;</span><span class="p">,</span>
         <span class="n">store_hash</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">unpack_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
         <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
@@ -8390,6 +8391,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 <span class="sd">            sub_dir: (optional)  subdirectory of the s3 bucket to store the data</span>
 <span class="sd">            s3_workers: number of concurrent S3 puts to run</span>
 <span class="sd">            store_hash: store the sha1 hash right before insertion to the database.</span>
+<span class="sd">            unpack_data: whether to decompress and unpack byte data when querying from the bucket.</span>
 <span class="sd">            searchable_fields: fields to keep in the index store</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">boto3</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -8404,13 +8406,12 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="bp">self</span><span class="o">.</span><span class="n">s3</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">s3_workers</span> <span class="o">=</span> <span class="n">s3_workers</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">unpack_data</span> <span class="o">=</span> <span class="n">unpack_data</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="n">searchable_fields</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="k">else</span> <span class="p">[]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">store_hash</span> <span class="o">=</span> <span class="n">store_hash</span>
 
         <span class="c1"># Force the key to be the same as the index</span>
-        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
-            <span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span>
-        <span class="p">),</span> <span class="s2">&quot;Since we are using the key as a file name in S3, they key must be a string&quot;</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s2">&quot;Since we are using the key as a file name in S3, they key must be a string&quot;</span>
         <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;The desired S3Store key &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot; does not match the index key &quot;</span><span class="si">{</span><span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s1">,&quot;&#39;</span>
@@ -8496,6 +8497,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 <span class="sd">                values are 1 for ascending or -1 for descending.</span>
 <span class="sd">            skip: number documents to skip</span>
 <span class="sd">            limit: limit on total number of documents returned</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">prop_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -8503,50 +8505,47 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
             <span class="n">prop_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
-        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
-            <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span>
-        <span class="p">):</span>
+        <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">prop_keys</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
                 <span class="k">yield</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">}</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># TODO: THis is ugly and unsafe, do some real checking before pulling data</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
-                        <span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span>
-                        <span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                    <span class="p">)</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                 <span class="k">except</span> <span class="n">botocore</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ClientError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="c1"># If a client error is thrown, then check that it was a 404 error.</span>
                     <span class="c1"># If it was a 404 error, then the object does not exist.</span>
                     <span class="n">error_code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Code&quot;</span><span class="p">])</span>
                     <span class="k">if</span> <span class="n">error_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                            <span class="s2">&quot;Could not find S3 object </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">])</span>
-                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Could not find S3 object </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
                         <span class="k">break</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">e</span>
 
-                <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;zlib&quot;</span><span class="p">:</span>
-                    <span class="n">data</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-                <span class="c1"># requires msgpack-python to be installed to fix string encoding problem</span>
-                <span class="c1"># https://github.com/msgpack/msgpack/issues/121</span>
-                <span class="c1"># During recursion</span>
-                <span class="c1"># msgpack.unpackb goes as deep as possible during reconstruction</span>
-                <span class="c1"># MontyDecoder().process_decode only goes until it finds a from_dict</span>
-                <span class="c1"># as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)</span>
-                <span class="c1"># Should just return the unpacked object then let the user run process_decoded</span>
-                <span class="n">unpacked_data</span> <span class="o">=</span> <span class="n">msgpack</span><span class="o">.</span><span class="n">unpackb</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
-                    <span class="n">unpacked_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span>
-                    <span class="p">]</span>
-                <span class="k">yield</span> <span class="n">unpacked_data</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack_data</span><span class="p">:</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">compressed</span><span class="o">=</span><span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;zlib&quot;</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
+                        <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span>
+
+                <span class="k">yield</span> <span class="n">data</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">compressed</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">compressed</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="c1"># requires msgpack-python to be installed to fix string encoding problem</span>
+        <span class="c1"># https://github.com/msgpack/msgpack/issues/121</span>
+        <span class="c1"># During recursion</span>
+        <span class="c1"># msgpack.unpackb goes as deep as possible during reconstruction</span>
+        <span class="c1"># MontyDecoder().process_decode only goes until it finds a from_dict</span>
+        <span class="c1"># as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)</span>
+        <span class="c1"># Should just return the unpacked object then let the user run process_decoded</span>
+        <span class="n">unpacked_data</span> <span class="o">=</span> <span class="n">msgpack</span><span class="o">.</span><span class="n">unpackb</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">unpacked_data</span>
+
+    <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get all distinct values for a field</span>
 
@@ -8583,12 +8582,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 <span class="sd">            generator returning tuples of (dict, list of docs)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
-            <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span>
-            <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span>
-            <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
-            <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
-            <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span>
-            <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+            <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -8639,9 +8633,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">s3_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
             <span class="n">fs</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">write_doc_to_s3</span><span class="p">,</span>
-                    <span class="n">doc</span><span class="o">=</span><span class="n">itr_doc</span><span class="p">,</span>
-                    <span class="n">search_keys</span><span class="o">=</span><span class="n">key</span> <span class="o">+</span> <span class="n">additional_metadata</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">write_doc_to_s3</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="n">itr_doc</span><span class="p">,</span> <span class="n">search_keys</span><span class="o">=</span><span class="n">key</span> <span class="o">+</span> <span class="n">additional_metadata</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span><span class="p">,</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">itr_doc</span> <span class="ow">in</span> <span class="n">docs</span>
             <span class="p">}</span>
@@ -8702,9 +8694,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
             <span class="c1"># need this conversion for aws metadata insert</span>
-            <span class="n">search_doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-                <span class="n">to_isoformat_ceil_ms</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
-            <span class="p">)</span>
+            <span class="n">search_doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_isoformat_ceil_ms</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]))</span>
 
         <span class="c1"># keep a record of original keys, in case these are important for the individual researcher</span>
         <span class="c1"># it is not expected that this information will be used except in disaster recovery</span>
@@ -8743,7 +8733,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="c1"># Metadata stored in the MongoDB index (self.index) is stored unchanged.</span>
 
         <span class="c1"># Additionally, MinIO requires lowercase keys</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="s1">&#39;-&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="s2">&quot;-&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">remove_s3_object</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -8769,9 +8759,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
     <span class="k">def</span> <span class="nf">last_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">last_updated</span>
 
-    <span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the keys of documents that are newer in the target</span>
 <span class="sd">        Store than this Store.</span>
@@ -8784,13 +8772,9 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 <span class="sd">                        that to filter out new items in</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">):</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span>
-                <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="n">exhaustive</span>
-            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="n">exhaustive</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span>
-                <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="n">exhaustive</span>
-            <span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="n">exhaustive</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="fm">__hash__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">bucket</span><span class="p">))</span>
@@ -8829,14 +8813,10 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
                 <span class="n">new_meta</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">v</span>
             <span class="n">new_meta</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;_id&quot;</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="ow">in</span> <span class="n">new_meta</span><span class="p">:</span>
-                <span class="n">new_meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-                    <span class="n">to_isoformat_ceil_ms</span><span class="p">(</span><span class="n">new_meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
-                <span class="p">)</span>
+                <span class="n">new_meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_isoformat_ceil_ms</span><span class="p">(</span><span class="n">new_meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]))</span>
             <span class="c1"># s3_object.metadata.update(new_meta)</span>
             <span class="n">s3_object</span><span class="o">.</span><span class="n">copy_from</span><span class="p">(</span>
-                <span class="n">CopySource</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Bucket&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;Key&quot;</span><span class="p">:</span> <span class="n">key_</span><span class="p">},</span>
-                <span class="n">Metadata</span><span class="o">=</span><span class="n">new_meta</span><span class="p">,</span>
-                <span class="n">MetadataDirective</span><span class="o">=</span><span class="s2">&quot;REPLACE&quot;</span><span class="p">,</span>
+                <span class="n">CopySource</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Bucket&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;Key&quot;</span><span class="p">:</span> <span class="n">key_</span><span class="p">},</span> <span class="n">Metadata</span><span class="o">=</span><span class="n">new_meta</span><span class="p">,</span> <span class="n">MetadataDirective</span><span class="o">=</span><span class="s2">&quot;REPLACE&quot;</span><span class="p">,</span>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -8969,7 +8949,7 @@ other: other S3Store to compare with</p>
 
 
 <h3 class="doc doc-heading" id="maggma.stores.aws.S3Store.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">s3_profile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">endpoint_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s3_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;fs_id&#39;</span><span class="p">,</span> <span class="n">store_hash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">searchable_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">bucket</span><span class="p">,</span> <span class="n">s3_profile</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compress</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">endpoint_url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sub_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">s3_workers</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="s1">&#39;fs_id&#39;</span><span class="p">,</span> <span class="n">store_hash</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">unpack_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">searchable_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -9046,6 +9026,12 @@ Alternatively you can pass in a dictionary with the full credentials:
         <td><code>True</code></td>
       </tr>
       <tr>
+        <td><code>unpack_data</code></td>
+        <td><code>bool</code></td>
+        <td><p>whether to decompress and unpack byte data when querying from the bucket.</p></td>
+        <td><code>True</code></td>
+      </tr>
+      <tr>
         <td><code>searchable_fields</code></td>
         <td><code>Optional[List[str]]</code></td>
         <td><p>fields to keep in the index store</p></td>
@@ -9066,6 +9052,7 @@ Alternatively you can pass in a dictionary with the full credentials:
     <span class="n">s3_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;fs_id&quot;</span><span class="p">,</span>
     <span class="n">store_hash</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">unpack_data</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
@@ -9086,6 +9073,7 @@ Alternatively you can pass in a dictionary with the full credentials:
 <span class="sd">        sub_dir: (optional)  subdirectory of the s3 bucket to store the data</span>
 <span class="sd">        s3_workers: number of concurrent S3 puts to run</span>
 <span class="sd">        store_hash: store the sha1 hash right before insertion to the database.</span>
+<span class="sd">        unpack_data: whether to decompress and unpack byte data when querying from the bucket.</span>
 <span class="sd">        searchable_fields: fields to keep in the index store</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">boto3</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -9100,13 +9088,12 @@ Alternatively you can pass in a dictionary with the full credentials:
     <span class="bp">self</span><span class="o">.</span><span class="n">s3</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">s3_workers</span> <span class="o">=</span> <span class="n">s3_workers</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">unpack_data</span> <span class="o">=</span> <span class="n">unpack_data</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="n">searchable_fields</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="k">else</span> <span class="p">[]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">store_hash</span> <span class="o">=</span> <span class="n">store_hash</span>
 
     <span class="c1"># Force the key to be the same as the index</span>
-    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span>
-        <span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span>
-    <span class="p">),</span> <span class="s2">&quot;Since we are using the key as a file name in S3, they key must be a string&quot;</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">),</span> <span class="s2">&quot;Since we are using the key as a file name in S3, they key must be a string&quot;</span>
     <span class="k">if</span> <span class="n">key</span> <span class="o">!=</span> <span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="p">:</span>
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;The desired S3Store key &quot;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1">&quot; does not match the index key &quot;</span><span class="si">{</span><span class="n">index</span><span class="o">.</span><span class="n">key</span><span class="si">}</span><span class="s1">,&quot;&#39;</span>
@@ -9290,9 +9277,7 @@ Alternatively you can pass in a dictionary with the full credentials:
 </table>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
-          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all distinct values for a field</span>
 
@@ -9494,12 +9479,7 @@ values are 1 for ascending or -1 for descending.</p></td>
 <span class="sd">        generator returning tuples of (dict, list of docs)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span>
-        <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span>
-        <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span>
-        <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span>
-        <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
-        <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span>
-        <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+        <span class="n">keys</span><span class="o">=</span><span class="n">keys</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
     <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -9559,9 +9539,7 @@ Store than this Store.</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
-          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the keys of documents that are newer in the target</span>
 <span class="sd">    Store than this Store.</span>
@@ -9574,13 +9552,9 @@ Store than this Store.</p>
 <span class="sd">                    that to filter out new items in</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="s2">&quot;index&quot;</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span>
-            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="n">exhaustive</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="n">exhaustive</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span>
-            <span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="n">exhaustive</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="n">exhaustive</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -9667,6 +9641,7 @@ values are 1 for ascending or -1 for descending.</p></td>
 <span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        skip: number documents to skip</span>
 <span class="sd">        limit: limit on total number of documents returned</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">prop_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
@@ -9674,46 +9649,30 @@ values are 1 for ascending or -1 for descending.</p></td>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">properties</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
         <span class="n">prop_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
-        <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span>
-    <span class="p">):</span>
+    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">prop_keys</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
             <span class="k">yield</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># TODO: THis is ugly and unsafe, do some real checking before pulling data</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
-                    <span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span>
-                    <span class="o">.</span><span class="n">read</span><span class="p">()</span>
-                <span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
             <span class="k">except</span> <span class="n">botocore</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ClientError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="c1"># If a client error is thrown, then check that it was a 404 error.</span>
                 <span class="c1"># If it was a 404 error, then the object does not exist.</span>
                 <span class="n">error_code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Code&quot;</span><span class="p">])</span>
                 <span class="k">if</span> <span class="n">error_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                        <span class="s2">&quot;Could not find S3 object </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">])</span>
-                    <span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Could not find S3 object </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
                     <span class="k">break</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">e</span>
 
-            <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;zlib&quot;</span><span class="p">:</span>
-                <span class="n">data</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
-            <span class="c1"># requires msgpack-python to be installed to fix string encoding problem</span>
-            <span class="c1"># https://github.com/msgpack/msgpack/issues/121</span>
-            <span class="c1"># During recursion</span>
-            <span class="c1"># msgpack.unpackb goes as deep as possible during reconstruction</span>
-            <span class="c1"># MontyDecoder().process_decode only goes until it finds a from_dict</span>
-            <span class="c1"># as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)</span>
-            <span class="c1"># Should just return the unpacked object then let the user run process_decoded</span>
-            <span class="n">unpacked_data</span> <span class="o">=</span> <span class="n">msgpack</span><span class="o">.</span><span class="n">unpackb</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
-                <span class="n">unpacked_data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span>
-                <span class="p">]</span>
-            <span class="k">yield</span> <span class="n">unpacked_data</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack_data</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unpack</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">compressed</span><span class="o">=</span><span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;zlib&quot;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
+                    <span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span>
+
+            <span class="k">yield</span> <span class="n">data</span>
 </code></pre></div>
         </details>
     </div>
@@ -9817,14 +9776,10 @@ Force all of the keys to be lower case to be Minio compatible</p>
             <span class="n">new_meta</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()]</span> <span class="o">=</span> <span class="n">v</span>
         <span class="n">new_meta</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;_id&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="ow">in</span> <span class="n">new_meta</span><span class="p">:</span>
-            <span class="n">new_meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-                <span class="n">to_isoformat_ceil_ms</span><span class="p">(</span><span class="n">new_meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
-            <span class="p">)</span>
+            <span class="n">new_meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_isoformat_ceil_ms</span><span class="p">(</span><span class="n">new_meta</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]))</span>
         <span class="c1"># s3_object.metadata.update(new_meta)</span>
         <span class="n">s3_object</span><span class="o">.</span><span class="n">copy_from</span><span class="p">(</span>
-            <span class="n">CopySource</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Bucket&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;Key&quot;</span><span class="p">:</span> <span class="n">key_</span><span class="p">},</span>
-            <span class="n">Metadata</span><span class="o">=</span><span class="n">new_meta</span><span class="p">,</span>
-            <span class="n">MetadataDirective</span><span class="o">=</span><span class="s2">&quot;REPLACE&quot;</span><span class="p">,</span>
+            <span class="n">CopySource</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Bucket&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">&quot;Key&quot;</span><span class="p">:</span> <span class="n">key_</span><span class="p">},</span> <span class="n">Metadata</span><span class="o">=</span><span class="n">new_meta</span><span class="p">,</span> <span class="n">MetadataDirective</span><span class="o">=</span><span class="s2">&quot;REPLACE&quot;</span><span class="p">,</span>
         <span class="p">)</span>
 </code></pre></div>
         </details>
@@ -9987,9 +9942,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
     <span class="k">with</span> <span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">s3_workers</span><span class="p">)</span> <span class="k">as</span> <span class="n">pool</span><span class="p">:</span>
         <span class="n">fs</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">pool</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">write_doc_to_s3</span><span class="p">,</span>
-                <span class="n">doc</span><span class="o">=</span><span class="n">itr_doc</span><span class="p">,</span>
-                <span class="n">search_keys</span><span class="o">=</span><span class="n">key</span> <span class="o">+</span> <span class="n">additional_metadata</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">write_doc_to_s3</span><span class="p">,</span> <span class="n">doc</span><span class="o">=</span><span class="n">itr_doc</span><span class="p">,</span> <span class="n">search_keys</span><span class="o">=</span><span class="n">key</span> <span class="o">+</span> <span class="n">additional_metadata</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">for</span> <span class="n">itr_doc</span> <span class="ow">in</span> <span class="n">docs</span>
         <span class="p">}</span>
@@ -10079,9 +10032,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">:</span>
         <span class="c1"># need this conversion for aws metadata insert</span>
-        <span class="n">search_doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
-            <span class="n">to_isoformat_ceil_ms</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
-        <span class="p">)</span>
+        <span class="n">search_doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">to_isoformat_ceil_ms</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]))</span>
 
     <span class="c1"># keep a record of original keys, in case these are important for the individual researcher</span>
     <span class="c1"># it is not expected that this information will be used except in disaster recovery</span>
