@@ -112,7 +112,7 @@ class ReadOnlyResource(Resource):
             request: Request,
             response: Response,
             key: str = Path(..., alias=key_name, title=f"The {key_name} of the {model_name} to get",),
-            fields: STORE_PARAMS = Depends(field_input),
+            _fields: STORE_PARAMS = Depends(field_input),
         ):
             f"""
             Get's a document by the primary key in the store
@@ -125,7 +125,7 @@ class ReadOnlyResource(Resource):
             """
             self.store.connect()
 
-            item = [self.store.query_one(criteria={self.store.key: key}, properties=fields["properties"],)]
+            item = [self.store.query_one(criteria={self.store.key: key}, properties=_fields["properties"],)]
 
             if item == [None]:
                 raise HTTPException(
