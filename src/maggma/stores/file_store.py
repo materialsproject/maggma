@@ -9,7 +9,7 @@ import hashlib
 import warnings
 from pathlib import Path
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union, Iterator
+from typing import Dict, List, Optional, Union, Iterator, Callable
 
 from pydantic import BaseModel, Field
 from pymongo import UpdateOne
@@ -174,17 +174,38 @@ class FileStore(MemoryStore):
         """
         return f"file://{self.path}"
 
-    def add_metadata(self, metadata: Dict, query: Optional[Dict] = None, **kwargs):
+    def add_metadata(
+        self,
+        metadata: Dict = {},
+        query: Optional[Dict] = None,
+        auto_data: Callable[[Dict], Dict] = None,
+        **kwargs,
+    ):
         """
-        Add metadata to a record in the FileStore
-
-        Convenience method that wraps around .update()
+        Add metadata to a record in the FileStore, either manually or by computing it automatically
+        from another field, such as name or path (see auto_data).
 
         Args:
             metadata: dict of additional data to add to the records returned by query.
                       Note that any protected keys (such as 'name', 'path', etc.)
                       will be ignored.
             query: Query passed to FileStore.query()
+            auto_data: A function that automatically computes metadata based on a field in
+                    the record itself. The function must take in the item as a dict and
+                    return a dict containing the desired metadata. A typical use case is
+                    to assign metadata based on the name of a file. For example, for
+                    data files named like `2022-04-01_april_fool_experiment.txt`, the
+                    auto_data function could be:
+
+                    def get_metadata_from_filename(d):
+                        return {"date": d["name"].split("_")[0],
+                                "test_name": d["name"].split("_")[1]
+                                }
+
+                    Note that in the case of conflict between manual and automatically
+                    computed metadata (for example, if metadata={"name": "another_name"} was
+                    supplied alongside the auto_data function above), the manually-supplied
+                    metadata is used.
             kwargs: kwargs passed to FileStore.query()
         """
         # sanitize the metadata
@@ -192,6 +213,9 @@ class FileStore(MemoryStore):
         updated_docs = []
 
         for doc in self.query(query, **kwargs):
+            if auto_data:
+                extra_data = self._filter_data(auto_data(doc))
+                doc.update(extra_data)
             doc.update(filtered_metadata)
             updated_docs.append(doc)
 

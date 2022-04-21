@@ -298,6 +298,18 @@ def test_metadata(test_dir):
     assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}
     fs3.close()
 
+    # test automatic metadata assignment
+    def add_data_from_name(d):
+        return {"calc_name": d["name"][0:5]}
+
+    fs4 = FileStore(test_dir, read_only=False)
+    fs4.connect()
+    # apply the auto function to all records
+    fs4.add_metadata(auto_data=add_data_from_name)
+    for d in fs4.query():
+        print(d)
+        assert d.get("calc_name", False) == d["name"][0:5]
+
 
 def test_json_name(test_dir):
     """
