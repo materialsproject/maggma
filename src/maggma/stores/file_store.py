@@ -174,6 +174,29 @@ class FileStore(MemoryStore):
         """
         return f"file://{self.path}"
 
+    def add_metadata(self, metadata: Dict, query: Optional[Dict] = None, **kwargs):
+        """
+        Add metadata to a record in the FileStore
+
+        Convenience method that wraps around .update()
+
+        Args:
+            metadata: dict of additional data to add to the records returned by query.
+                      Note that any protected keys (such as 'name', 'path', etc.)
+                      will be ignored.
+            query: Query passed to FileStore.query()
+            kwargs: kwargs passed to FileStore.query()
+        """
+        # sanitize the metadata
+        filtered_metadata = self._filter_data(metadata)
+        updated_docs = []
+
+        for doc in self.query(query, **kwargs):
+            doc.update(filtered_metadata)
+            updated_docs.append(doc)
+
+        self.update(updated_docs, key=self.key)
+
     def read(self) -> List[FileRecord]:
         """
         Iterate through all files in the Store folder and populate
@@ -283,6 +306,20 @@ class FileStore(MemoryStore):
         data = [d for d in self.query()]
         filtered_data = []
         # remove fields that are populated by .read()
+        for d in data:
+            filtered_d = self._filter_data(d)
+            # don't write records that contain only file_id and path
+            if len(set(filtered_d.keys()).difference(set(["path", self.key]))) != 0:
+                filtered_data.append(filtered_d)
+        self.metadata_store.update(filtered_data, self.key)
+
+    def _filter_data(self, d):
+        """
+        Remove any protected keys from a dictionary
+
+        Args:
+            d: Dictionary whose keys are to be filtered
+        """
         protected_keys = {
             "_id",
             "name",
@@ -293,12 +330,8 @@ class FileStore(MemoryStore):
             "orphan",
             "contents",
         }
-        for d in data:
-            filtered_d = {k: v for k, v in d.items() if k not in protected_keys}
-            # don't write records that contain only file_id and path
-            if len(set(filtered_d.keys()).difference(set(["path", self.key]))) != 0:
-                filtered_data.append(filtered_d)
-        self.metadata_store.update(filtered_data, self.key)
+        filtered_d = {k: v for k, v in d.items() if k not in protected_keys}
+        return filtered_d
 
     def query(  # type: ignore
         self,

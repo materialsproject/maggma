@@ -253,22 +253,21 @@ def test_metadata(test_dir):
     """
     fs = FileStore(test_dir, read_only=False)
     fs.connect()
-    item = list(fs.query({"name": "input.in", "parent": "calculation1"}))[0]
-    k1 = item[fs.key]
-    item.update({"metadata": {"experiment date": "2022-01-18"}})
-    fs.update([item], fs.key)
+    query = {"name": "input.in", "parent": "calculation1"}
+    key = list(fs.query(query))[0][fs.key]
+    fs.add_metadata({"metadata": {"experiment date": "2022-01-18"}}, query)
 
     # make sure metadata has been added to the item without removing other contents
-    item_from_store = list(fs.query({"file_id": k1}))[0]
+    item_from_store = list(fs.query({"file_id": key}))[0]
     assert item_from_store.get("name", False)
     assert item_from_store.get("metadata", False)
     fs.close()
-    data = fs.metadata_store.read_json_file(fs.path / fs.json_name)
 
     # only the updated item should have been written to the JSON,
     # and it should not contain any of the protected keys
+    data = fs.metadata_store.read_json_file(fs.path / fs.json_name)
     assert len(data) == 1
-    item_from_file = [d for d in data if d["file_id"] == k1][0]
+    item_from_file = [d for d in data if d["file_id"] == key][0]
     assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
     assert not item_from_file.get("name")
     assert item_from_file.get("path")
@@ -277,11 +276,11 @@ def test_metadata(test_dir):
     fs2 = FileStore(test_dir, read_only=True)
     fs2.connect()
     data = fs2.metadata_store.read_json_file(fs2.path / fs2.json_name)
-    item_from_file = [d for d in data if d["file_id"] == k1][0]
+    item_from_file = [d for d in data if d["file_id"] == key][0]
     assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
 
     # make sure reconnected store properly merges in the metadata
-    item_from_store = [d for d in fs2.query({"file_id": k1})][0]
+    item_from_store = [d for d in fs2.query({"file_id": key})][0]
     assert item_from_store["name"] == "input.in"
     assert item_from_store["parent"] == "calculation1"
     assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}
@@ -291,9 +290,9 @@ def test_metadata(test_dir):
     fs3 = FileStore(test_dir, read_only=False)
     fs3.connect()
     data = fs3.metadata_store.read_json_file(fs3.path / fs3.json_name)
-    item_from_file = [d for d in data if d["file_id"] == k1][0]
+    item_from_file = [d for d in data if d["file_id"] == key][0]
     assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
-    item_from_store = [d for d in fs3.query({"file_id": k1})][0]
+    item_from_store = [d for d in fs3.query({"file_id": key})][0]
     assert item_from_store["name"] == "input.in"
     assert item_from_store["parent"] == "calculation1"
     assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}
