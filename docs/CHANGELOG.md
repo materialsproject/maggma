@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.46.1](https://github.com/materialsproject/maggma/tree/v0.46.1) (2022-04-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.46.0...v0.46.1)
+
+**Merged pull requests:**
+
+- Prefix `fields` input for read resource key endpoint [\#636](https://github.com/materialsproject/maggma/pull/636) ([munrojm](https://github.com/munrojm))
+
 ## [v0.46.0](https://github.com/materialsproject/maggma/tree/v0.46.0) (2022-04-19)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.45.1...v0.46.0)
