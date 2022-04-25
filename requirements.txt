@@ -1,5 +1,5 @@
 pymongo==4.0.2
-monty==2022.1.19
+monty==2022.3.12
 mongomock==4.0.0
 pydash==5.1.0
 jsonschema==4.4.0
