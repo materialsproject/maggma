@@ -11,11 +11,23 @@ from pathlib import Path
 from datetime import datetime, timezone
 from typing import Dict, List, Optional, Union, Iterator, Callable
 
-from pydantic import BaseModel, Field
 from pymongo import UpdateOne
 from monty.io import zopen
 from maggma.core import StoreError, Sort
 from maggma.stores.mongolike import MemoryStore, JSONStore
+
+# These keys are automatically populated by the FileStore.read() method and
+# hence are not allowed to be manually overwritten
+PROTECTED_KEYS = {
+    "_id",
+    "name",
+    "last_updated",
+    "hash",
+    "size",
+    "parent",
+    "orphan",
+    "contents",
+}
 
 
 class FileStore(MemoryStore):
@@ -338,17 +350,7 @@ class FileStore(MemoryStore):
         Args:
             d: Dictionary whose keys are to be filtered
         """
-        protected_keys = {
-            "_id",
-            "name",
-            "last_updated",
-            "hash",
-            "size",
-            "parent",
-            "orphan",
-            "contents",
-        }
-        filtered_d = {k: v for k, v in d.items() if k not in protected_keys}
+        filtered_d = {k: v for k, v in d.items() if k not in PROTECTED_KEYS}
         return filtered_d
 
     def query(  # type: ignore
