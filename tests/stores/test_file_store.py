@@ -14,15 +14,19 @@ Desired behavior
     - if read_only=False, the file is created
     - if read_only=True, no metadata is read in
 - if read_only=False, the update() method is enabled
+- if a FileStore is moved to a different location on disk (but all contents of the
+  main directory are preserved), file_ids should not change and metadata should
+  remain intact.
 """
 
 from datetime import datetime, timezone
 from distutils.dir_util import copy_tree
 from pathlib import Path
 import pytest
+import hashlib
 
 from maggma.core import StoreError
-from maggma.stores.file_store import FileStore, FileRecord
+from maggma.stores.file_store import FileStore
 
 
 @pytest.fixture
@@ -33,19 +37,28 @@ def test_dir(tmp_path):
     return tmp_path.resolve()
 
 
-def test_filerecord(test_dir):
+def test_record_from_file(test_dir):
     """
-    Test functionality of the FileRecord class
+    Test functionality of _create_record_from_file
     """
-    f = FileRecord.from_file(test_dir / "calculation1" / "input.in")
-    assert f.name == "input.in"
-    assert f.parent == "calculation1"
-    assert f.path == test_dir / "calculation1" / "input.in"
-    assert f.size == 90
-    assert f.hash == f.compute_hash()
-    assert f.file_id == f.get_file_id()
-    assert f.last_updated == datetime.fromtimestamp(
-        f.path.stat().st_mtime, tz=timezone.utc
+    fs = FileStore(test_dir, read_only=True)
+    fs.connect()
+    f = Path(test_dir / "calculation1" / "input.in")
+
+    relative_path = f.relative_to(test_dir)
+    digest = hashlib.md5()
+    digest.update(str(relative_path).encode())
+    file_id = str(digest.hexdigest())
+
+    d = fs._create_record_from_file(f)
+    assert d["name"] == "input.in"
+    assert d["parent"] == "calculation1"
+    assert d["path"] == test_dir / "calculation1" / "input.in"
+    assert d["size"] == 90
+    assert d["hash"] is not None
+    assert d["file_id"] == file_id
+    assert d["last_updated"] == datetime.fromtimestamp(
+        f.stat().st_mtime, tz=timezone.utc
     )
 
 
@@ -155,6 +168,32 @@ def test_orphaned_metadata(test_dir):
     # manually specifying orphan: True should still work
     assert len(list(fs.query({"orphan": True}))) == 1
     fs.close()
+
+
+def test_store_files_moved(test_dir):
+    """
+    test behavior when the directory that constitutes the FileStore is
+    moved to a new location on disk
+    """
+    # make a FileStore of all files and add metadata to all of them
+    fs = FileStore(test_dir, read_only=False)
+    fs.connect()
+    data = list(fs.query())
+    for d in data:
+        d.update({"tags": "Ryan was here"})
+    fs.update(data)
+
+    # the orphan field should be populated for all documents, and False
+    assert len(list(fs.query({"orphan": False}))) == 6
+    original_file_ids = {f["file_id"] for f in fs.query()}
+    fs.close()
+
+    # now copy the entire FileStore to a new directory and re-initialize
+    copy_tree(test_dir, str(test_dir / "new_store_location"))
+    fs = FileStore(test_dir / "new_store_location", read_only=False)
+    fs.connect()
+    assert len(list(fs.query({"orphan": False}))) == 6
+    assert {f["file_id"] for f in fs.query()} == original_file_ids
 
 
 def test_file_filters(test_dir):

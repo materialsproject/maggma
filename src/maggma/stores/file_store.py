@@ -18,78 +18,6 @@ from maggma.core import StoreError, Sort
 from maggma.stores.mongolike import MemoryStore, JSONStore
 
 
-class FileRecord(BaseModel):
-    """
-    Represent a file on disk. Records of this type will populate the
-    'documents' key of each Item (directory) in the FileStore.
-    """
-
-    name: str = Field(..., title="File name")
-    path: Path = Field(..., title="Path of this file")
-    parent: str = Field(None, title="Name of the parent directory")
-    size: int = Field(None, title="Size of this file in bytes")
-    file_id: str = Field(None, title="Unique identifier for this file")
-    last_updated: datetime = Field(None, title="Time this file was last modified")
-    hash: str = Field(None, title="Hash of the file contents")
-    orphan: bool = Field(False, title="Whether this record is an orphan")
-
-    def __init__(self, *args, **kwargs):
-        """
-        Overriding __init__ allows class methods to function like a default_factory
-        argument to various fields. Class methods cannot be used as default_factory
-        methods because they have not been defined on init.
-
-        See https://stackoverflow.com/questions/63051253/using-class-or-static-method-as-default-factory-in-dataclasses,
-        except post_init is not supported in BaseModel at this time
-        """
-        super().__init__(*args, **kwargs)
-        if not self.last_updated:
-            self.last_updated = self.get_mtime()
-
-        if not self.hash:
-            self.hash = self.compute_hash()
-
-        if not self.file_id:
-            self.file_id = self.get_file_id()
-
-        if not self.parent:
-            self.parent = self.path.parent.name
-
-        if not self.size:
-            self.size = self.path.stat().st_size
-
-    def compute_hash(self) -> str:
-        """
-        Hash of the state of the documents in this Directory
-        """
-        digest = hashlib.md5()
-        block_size = 128 * digest.block_size
-        digest.update(self.name.encode())
-        with open(self.path.as_posix(), "rb") as file:
-            buf = file.read(block_size)
-            digest.update(buf)
-        return str(digest.hexdigest())
-
-    def get_mtime(self) -> datetime:
-        """
-        Get the timestamp when the file was last modified, using pathlib's
-        stat.st_mtime() function. The timestamp is returned in UTC time.
-        """
-        return datetime.fromtimestamp(self.path.stat().st_mtime, tz=timezone.utc)
-
-    def get_file_id(self) -> str:
-        """
-        Compute a unique identifier for this file. Currently this is just the hash of the full path
-        """
-        digest = hashlib.md5()
-        digest.update(str(self.path).encode())
-        return str(digest.hexdigest())
-
-    @classmethod
-    def from_file(cls, path):
-        return FileRecord(path=path, name=path.name)
-
-
 class FileStore(MemoryStore):
     """
     A Store for files on disk. Provides a common access method consistent with
@@ -221,10 +149,25 @@ class FileStore(MemoryStore):
 
         self.update(updated_docs, key=self.key)
 
-    def read(self) -> List[FileRecord]:
+    def read(self) -> List[Dict]:
         """
         Iterate through all files in the Store folder and populate
-        the Store with FileRecord objects.
+        the Store with dictionaries containing basic information about each file.
+
+        The keys of the documents added to the Store are
+
+            name: str = File name
+            path: Path = Absolute path of this file
+            parent: str = Name of the parent directory (if any)
+            file_id: str = Unique identifier for this file, computed from the hash
+                        of its path relative to the base FileStore directory and
+                        the file creation time. The key of this field is 'file_id'
+                        by default but can be changed via the 'key' kwarg to
+                        FileStore.__init__().
+            size: int = Size of this file in bytes
+            last_updated: datetime = Time this file was last modified
+            hash: str = Hash of the file contents
+            orphan: bool = Whether this record is an orphan
         """
         file_list = []
         # generate a list of files in subdirectories
@@ -238,9 +181,60 @@ class FileStore(MemoryStore):
                     # filter based on depth
                     depth = len(f.relative_to(self.path).parts) - 1
                     if self.max_depth is None or depth <= self.max_depth:
-                        file_list.append(FileRecord.from_file(f))
+                        file_list.append(self._create_record_from_file(f))
 
         return file_list
+
+    def _create_record_from_file(self, f: Union[str, Path]) -> Dict:
+        """
+        Given the path to a file, return a Dict that constitues a record of
+        basic information about that file. The keys in the returned dict
+        are:
+
+            name: str = File name
+            path: Path = Absolute path of this file
+            parent: str = Name of the parent directory (if any)
+            file_id: str = Unique identifier for this file, computed from the hash
+                        of its path relative to the base FileStore directory and
+                        the file creation time. The key of this field is 'file_id'
+                        by default but can be changed via the 'key' kwarg to
+                        FileStore.__init__().
+            size: int = Size of this file in bytes
+            last_updated: datetime = Time this file was last modified
+            hash: str = Hash of the file contents
+            orphan: bool = Whether this record is an orphan
+        """
+        # make sure f is a Path object
+        if not isinstance(f, Path):
+            f = Path(f)
+
+        # compute the file_id from the relative path
+        relative_path = f.relative_to(self.path)
+        digest = hashlib.md5()
+        digest.update(str(relative_path).encode())
+        file_id = str(digest.hexdigest())
+
+        # hash the file contents
+        content_hash = hashlib.md5()
+        block_size = 128 * content_hash.block_size
+        content_hash.update(self.name.encode())
+        with open(f.as_posix(), "rb") as file:
+            buf = file.read(block_size)
+            content_hash.update(buf)
+        content_hash = str(content_hash.hexdigest())
+
+        d = {
+            "name": f.name,
+            "path": f,
+            "parent": f.parent.name,
+            "size": f.stat().st_size,
+            "last_updated": datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc),
+            "orphan": False,
+            "hash": content_hash,
+            self.key: file_id,
+        }
+
+        return d
 
     def connect(self, force_reset: bool = False):
         """
@@ -259,7 +253,7 @@ class FileStore(MemoryStore):
         # use super.update to bypass the read_only guard statement
         # because we want the file data to be populated in memory
         super().connect()
-        super().update([d.dict() for d in self.read()])
+        super().update(self.read())
 
         # now read any metadata from the .json file
         try:
@@ -310,9 +304,9 @@ class FileStore(MemoryStore):
         Note that certain fields that come from file metadata on disk are protected and
         cannot be updated with this method. This prevents the contents of the FileStore
         from becoming out of sync with the files on which it is based. The protected fields
-        are all attributes of the FileRecord class, e.g. 'name', 'parent', 'last_updated',
-        'hash', 'size', 'contents', and 'orphan'. The 'path' and key fields are retained to
-        make each document in the JSON file identifiable by manual inspection.
+        are keys in the dict returned by _create_record_from_file, e.g. 'name', 'parent',
+        'last_updated', 'hash', 'size', 'contents', and 'orphan'. The 'path' and key fields
+        are retained to make each document in the JSON file identifiable by manual inspection.
 
         Args:
             docs: the document or list of documents to update
@@ -473,9 +467,7 @@ class FileStore(MemoryStore):
 
     def remove_docs(self, criteria: Dict, confirm: bool = False):
         """
-        Remove Items (FileRecord) matching the query dictionary.
-
-        TODO: This method should delete the corresponding files on disk
+        Remove items matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
