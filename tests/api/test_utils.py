@@ -5,7 +5,7 @@ import pytest
 from monty.json import MSONable
 from pydantic import BaseModel, Field
 
-from maggma.api.utils import api_sanitize, object_id_serilaization_helper
+from maggma.api.utils import api_sanitize, serialization_helper
 from typing import Union
 
 from bson import ObjectId
@@ -93,12 +93,12 @@ def test_api_sanitize():
     assert isinstance(AnotherPet.validate_monty(temp_pet_dict), dict)
 
 
-def test_object_id_serilaization_helper():
+def test_serialization_helper():
     oid = ObjectId("60b7d47bb671aa7b01a2adf6")
-    assert object_id_serilaization_helper(oid) == "60b7d47bb671aa7b01a2adf6"
+    assert serialization_helper(oid) == "60b7d47bb671aa7b01a2adf6"
 
 
 @pytest.mark.xfail
-def test_object_id_serilaization_helper_xfail():
+def test_serialization_helper_xfail():
     oid = "test"
-    object_id_serilaization_helper(oid)
+    serialization_helper(oid)
