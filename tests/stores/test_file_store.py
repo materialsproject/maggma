@@ -55,7 +55,7 @@ def test_record_from_file(test_dir):
     assert d["parent"] == "calculation1"
     assert d["path"] == test_dir / "calculation1" / "input.in"
     assert d["size"] == 90
-    assert d["hash"] is not None
+    assert isinstance(d["hash"], str)
     assert d["file_id"] == file_id
     assert d["last_updated"] == datetime.fromtimestamp(
         f.stat().st_mtime, tz=timezone.utc

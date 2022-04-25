@@ -215,13 +215,13 @@ class FileStore(MemoryStore):
         file_id = str(digest.hexdigest())
 
         # hash the file contents
-        content_hash = hashlib.md5()
-        block_size = 128 * content_hash.block_size
-        content_hash.update(self.name.encode())
+        digest2 = hashlib.md5()
+        block_size = 128 * digest2.block_size
+        digest2.update(self.name.encode())
         with open(f.as_posix(), "rb") as file:
             buf = file.read(block_size)
-            content_hash.update(buf)
-        content_hash = str(content_hash.hexdigest())
+            digest2.update(buf)
+        content_hash = str(digest2.hexdigest())
 
         d = {
             "name": f.name,
