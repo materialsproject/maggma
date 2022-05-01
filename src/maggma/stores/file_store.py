@@ -84,8 +84,9 @@ class FileStore(MemoryStore):
         """
         # this conditional block is needed in order to guarantee that the 'name'
         # property, which is passed to `MemoryStore`, works correctly
+        # collection names passed to MemoryStore cannot end with '.'
         if path == ".":
-            self.path = Path.cwd()
+            path = Path.cwd()
         self.path = Path(path) if isinstance(path, str) else path
 
         self.json_name = json_name
