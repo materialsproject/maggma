@@ -357,3 +357,12 @@ def test_json_name(test_dir):
     fs = FileStore(test_dir, read_only=False, json_name="random.json")
     fs.connect()
     assert Path(test_dir / "random.json").exists()
+
+
+def test_this_dir():
+    """
+    Make sure connect() works when path is "."
+    """
+    fs = FileStore(".")
+    fs.connect()
+    assert not fs.name.endswith(".")

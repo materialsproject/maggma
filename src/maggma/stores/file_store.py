@@ -82,8 +82,12 @@ class FileStore(MemoryStore):
                 FileStore.
             kwargs: kwargs passed to MemoryStore.__init__()
         """
-
+        # this conditional block is needed in order to guarantee that the 'name'
+        # property, which is passed to `MemoryStore`, works correctly
+        if path == ".":
+            self.path = Path.cwd()
         self.path = Path(path) if isinstance(path, str) else path
+
         self.json_name = json_name
         self.file_filters = file_filters if file_filters else ["*"]
         self.collection_name = "file_store"
