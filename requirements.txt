@@ -2,7 +2,7 @@ pymongo==4.0.2
 monty==2022.4.26
 mongomock==4.0.0
 pydash==5.1.0
-jsonschema==4.4.0
+jsonschema==4.5.1
 tqdm==4.64.0
 mongogrant==0.3.3
 aioitertools==0.10.0
