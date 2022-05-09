@@ -1,4 +1,4 @@
-pymongo==4.0.2
+pymongo==4.1.1
 monty==2022.4.26
 mongomock==4.0.0
 pydash==5.1.0
