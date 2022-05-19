@@ -2,7 +2,6 @@
 """
 Advanced Stores for connecting to AWS data
 """
-from __future__ import annotations
 import threading
 import warnings
 import zlib
@@ -37,12 +36,12 @@ class S3Store(Store):
         self,
         index: Store,
         bucket: str,
-        s3_profile: str | dict = None,
+        s3_profile: Optional[Union[str, dict]] = None,
         compress: bool = False,
         endpoint_url: str = None,
         sub_dir: str = None,
         s3_workers: int = 1,
-        s3_resource_kwargs: dict = None,
+        s3_resource_kwargs: Optional[dict] = None,
         key: str = "fs_id",
         store_hash: bool = True,
         unpack_data: bool = True,
