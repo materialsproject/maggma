@@ -467,6 +467,7 @@ class GridFSURIStore(GridFSStore):
         compression: bool = False,
         ensure_metadata: bool = False,
         searchable_fields: List[str] = None,
+        mongoclient_kwargs: Optional[Dict] = None,
         **kwargs,
     ):
         """
@@ -499,6 +500,7 @@ class GridFSURIStore(GridFSStore):
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
         self.kwargs = kwargs
+        self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
