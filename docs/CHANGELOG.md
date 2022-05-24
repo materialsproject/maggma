@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.47.1](https://github.com/materialsproject/maggma/tree/v0.47.1) (2022-05-24)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.0...v0.47.1)
+
+**Merged pull requests:**
+
+- Fix gridfs URI store [\#667](https://github.com/materialsproject/maggma/pull/667) ([utf](https://github.com/utf))
+
 ## [v0.47.0](https://github.com/materialsproject/maggma/tree/v0.47.0) (2022-05-23)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.46.2...v0.47.0)
@@ -90,15 +98,15 @@
 
 ## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.0)
-
-## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.0)
 
 ## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.43.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.43.0)
+
+## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
 
 **Merged pull requests:**
 
