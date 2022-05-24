@@ -8151,6 +8151,7 @@ via TXT records</p>
         <span class="n">compression</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">ensure_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -8183,6 +8184,7 @@ via TXT records</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span> <span class="o">=</span> <span class="n">mongoclient_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
         <span class="k">if</span> <span class="s2">&quot;key&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;_id&quot;</span>
@@ -8221,7 +8223,7 @@ via TXT records</p>
 
 
 <h3 class="doc doc-heading" id="maggma.stores.gridfs.GridFSURIStore.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ensure_metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">searchable_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">uri</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ensure_metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">searchable_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mongoclient_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -8292,6 +8294,7 @@ via TXT records</p>
     <span class="n">compression</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">ensure_metadata</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -8324,6 +8327,7 @@ via TXT records</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span> <span class="o">=</span> <span class="n">mongoclient_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="s2">&quot;key&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;key&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;_id&quot;</span>
