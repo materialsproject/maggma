@@ -467,7 +467,6 @@ class GridFSURIStore(GridFSStore):
         compression: bool = False,
         ensure_metadata: bool = False,
         searchable_fields: List[str] = None,
-        auth_source: Optional[str] = None,
         mongoclient_kwargs: Optional[Dict] = None,
         **kwargs,
     ):
