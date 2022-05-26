@@ -52,7 +52,7 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",
