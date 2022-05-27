@@ -895,7 +895,7 @@ class MontyStore(MemoryStore):
                     search_doc = {key: d[key]}
 
                 self._collection.replace_one(search_doc, d, upsert=True)
-    
+
     # Moved this from MemoryStore b/c MontyDB does not implement aggregate() as
     # of May 2022. See https://github.com/davidlatwe/montydb/issues/66
     def groupby(
