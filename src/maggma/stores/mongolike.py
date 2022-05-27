@@ -7,7 +7,7 @@ various utilities
 
 from pathlib import Path
 import yaml
-from itertools import chain
+from itertools import chain, groupby
 from socket import socket
 import warnings
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
