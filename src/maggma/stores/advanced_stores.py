@@ -327,7 +327,12 @@ class AliasingStore(Store):
         lazy_substitute(criteria, self.reverse_aliases)
 
         return self.store.groupby(
-            keys=keys, properties=properties, criteria=criteria, skip=skip, limit=limit, sort=sort,
+            keys=keys,
+            properties=properties,
+            criteria=criteria,
+            skip=skip,
+            limit=limit,
+            sort=sort,
         )
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
@@ -502,7 +507,12 @@ class SandboxStore(Store):
         )
 
         return self.store.groupby(
-            keys=keys, properties=properties, criteria=criteria, skip=skip, limit=limit, sort=sort
+            keys=keys,
+            properties=properties,
+            criteria=criteria,
+            skip=skip,
+            limit=limit,
+            sort=sort,
         )
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
