@@ -612,53 +612,6 @@ class MemoryStore(MongoStore):
         """Hash for the store"""
         return hash((self.name, self.last_updated_field))
 
-    def groupby(
-        self,
-        keys: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
-        skip: int = 0,
-        limit: int = 0,
-    ) -> Iterator[Tuple[Dict, List[Dict]]]:
-        """
-        Simple grouping function that will group documents
-        by keys.
-
-        Args:
-            keys: fields to group documents
-            criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields. Keys are field names and
-                values are 1 for ascending or -1 for descending.
-            skip: number documents to skip
-            limit: limit on total number of documents returned
-
-        Returns:
-            generator returning tuples of (key, list of elemnts)
-        """
-        keys = keys if isinstance(keys, list) else [keys]
-
-        if properties is None:
-            properties = []
-        if isinstance(properties, dict):
-            properties = list(properties.keys())
-
-        data = [
-            doc
-            for doc in self.query(properties=keys + properties, criteria=criteria)
-            if all(has(doc, k) for k in keys)
-        ]
-
-        def grouping_keys(doc):
-            return tuple(get(doc, k) for k in keys)
-
-        for vals, group in groupby(sorted(data, key=grouping_keys), key=grouping_keys):
-            doc = {}  # type: Dict[Any,Any]
-            for k, v in zip(keys, vals):
-                set_(doc, k, v)
-            yield doc, list(group)
-
     def __eq__(self, other: object) -> bool:
         """
         Check equality for MemoryStore
