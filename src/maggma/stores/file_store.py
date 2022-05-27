@@ -494,7 +494,7 @@ class FileStore(MemoryStore):
 
         if len(docs) > 0 and not confirm:
             raise StoreError(
-                f"Warning! This command is about to delete {len(docs)} items from disk!"
+                f"Warning! This command is about to delete {len(docs)} items from disk! "
                 "If this is what you want, reissue this command with confirm=True."
             )
 
