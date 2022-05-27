@@ -269,7 +269,7 @@ class MongoStore(Store):
         Args:
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
-            properties: fields to include in returned documents. By default, all fields are returned.
+            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -372,7 +372,7 @@ class MongoStore(Store):
 
         Args:
             criteria: PyMongo filter for documents to search in
-            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
+            properties: fields to include in returned documents. By default, all fields are returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             hint: Dictionary of indexes to use as hints for query optimizer.
@@ -895,6 +895,53 @@ class MontyStore(MemoryStore):
                     search_doc = {key: d[key]}
 
                 self._collection.replace_one(search_doc, d, upsert=True)
+    
+    # Moved this from MemoryStore b/c MontyDB does not implement aggregate() as
+    # of May 2022. See https://github.com/davidlatwe/montydb/issues/66
+    def groupby(
+        self,
+        keys: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Tuple[Dict, List[Dict]]]:
+        """
+        Simple grouping function that will group documents
+        by keys.
+        Args:
+            keys: fields to group documents
+            criteria: PyMongo filter for documents to search in
+            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
+            skip: number documents to skip
+            limit: limit on total number of documents returned
+        Returns:
+            generator returning tuples of (key, list of elemnts)
+        """
+        keys = keys if isinstance(keys, list) else [keys]
+
+        if properties is None:
+            properties = []
+        if isinstance(properties, dict):
+            properties = list(properties.keys())
+
+        data = [
+            doc
+            for doc in self.query(properties=keys + properties, criteria=criteria)
+            if all(has(doc, k) for k in keys)
+        ]
+
+        def grouping_keys(doc):
+            return tuple(get(doc, k) for k in keys)
+
+        for vals, group in groupby(sorted(data, key=grouping_keys), key=grouping_keys):
+            doc = {}  # type: Dict[Any,Any]
+            for k, v in zip(keys, vals):
+                set_(doc, k, v)
+            yield doc, list(group)
 
 
 def _find_free_port(address="0.0.0.0"):
