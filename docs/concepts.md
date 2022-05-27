@@ -21,16 +21,3 @@ Builders represent a data processing step. Builders break down each transformati
 3. `update_target`: Add the processed item to the target Store(s).
 
 Both `get_items` and `update_targets` can perform IO (input/output) to the data stores. `process_item` is expected to not perform any IO so that it can be parallelized by Maggma. Builders can be chained together into an array and then saved as a JSON file to be run on a production system.
-
-## Drone
-Drone is a standardized class to synchronize local files and data in your database. It breaks down the process in 4 steps:
-
-1. `get_items`
-    - Given a folder path to a data folder, read all the files, and return a dictionary
-        that maps each RecordKey -> List of `RecordIdentifier`
-2. `should_update_records`
-    - Given a list of `RecordIdentifier`, it query the database return a list of `RecordIdentifier` that requires update
-3. `process_item` (from `Builder`)
-    - Given a single `RecordIdentifier`, return the data that it refers to and add meta data
-4. `update_targets`
-    - updates the database given a list of data

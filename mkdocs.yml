@@ -15,13 +15,11 @@ nav:
     - Advanced Builders: getting_started/advanced_builder.md
     - Working with MapBuilder: getting_started/map_builder.md
     - Working with GroupBuilder: getting_started/group_builder.md
-    - Writing a Drone: getting_started/simple_drone.md
   - Reference:
       Core:
         Store: reference/core_store.md
         Builder: reference/core_builder.md
         Validator: reference/core_validator.md
-        Drone: reference/core_drone.md
       Stores: reference/stores.md
       Builders: reference/builders.md
   - Changelog: CHANGELOG.md
