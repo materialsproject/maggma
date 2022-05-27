@@ -251,6 +251,7 @@ class JointStore(Store):
         for d in agg:
             yield d
 
+    # TODO - sort kwarg is not passed anywhere
     def groupby(
         self,
         keys: Union[List[str], str],

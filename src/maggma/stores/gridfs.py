@@ -288,6 +288,7 @@ class GridFSStore(Store):
 
         return self._files_store.distinct(field=field, criteria=criteria)
 
+    # TODO - sort, skip, limit, and properties are not functional
     def groupby(
         self,
         keys: Union[List[str], str],
