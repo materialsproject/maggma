@@ -1,0 +1,1082 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="Documentation for Maggma, a files-to-API data pipeline for scientific applications">
+      
+      
+      
+        <link rel="canonical" href="https://materialsproject.github.io/maggma/getting_started/using_file_store/">
+      
+      <link rel="icon" href="../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.3.0, mkdocs-material-8.2.14">
+    
+    
+      
+        <title>Working with FileStore - Maggma Documentation</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/stylesheets/main.3de6f41f.min.css">
+      
+        
+        <link rel="stylesheet" href="../../assets/stylesheets/palette.cc9b2e1e.min.css">
+        
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+      <link rel="stylesheet" href="../../assets/_mkdocstrings.css">
+    
+    <script>__md_scope=new URL("../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="none" data-md-color-accent="none">
+  
+    
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#using-filestore-for-files-on-disk" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../.." title="Maggma Documentation" class="md-header__button md-logo" aria-label="Maggma Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Maggma Documentation
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Working with FileStore
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../.." title="Maggma Documentation" class="md-nav__button md-logo" aria-label="Maggma Documentation" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54Z"/></svg>
+
+    </a>
+    Maggma Documentation
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/materialsproject/maggma/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    GitHub
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../concepts/" class="md-nav__link">
+        Core Concepts
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Getting Started
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Getting Started" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Getting Started
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../stores/" class="md-nav__link">
+        Using Stores
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Working with FileStore
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Working with FileStore
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#creating-the-filestore" class="md-nav__link">
+    Creating the FileStore
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating the FileStore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#choosing-files-to-index" class="md-nav__link">
+    Choosing files to index
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-access" class="md-nav__link">
+    Write access
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-identifiers-file_id" class="md-nav__link">
+    File identifiers (file_id)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connecting-and-querying" class="md-nav__link">
+    Connecting and querying
+  </a>
+  
+    <nav class="md-nav" aria-label="Connecting and querying">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    Performance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-contents" class="md-nav__link">
+    File Contents
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-metadata" class="md-nav__link">
+    Adding metadata
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding metadata">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-method" class="md-nav__link">
+    update method
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_metadata-convenience-method" class="md-nav__link">
+    add_metadata convenience method
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatic-metadata" class="md-nav__link">
+    Automatic metadata
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protected-keys" class="md-nav__link">
+    Protected Keys
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orphaned-metadata" class="md-nav__link">
+    Orphaned Metadata
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deleting-files" class="md-nav__link">
+    Deleting files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#processing-files-with-a-builder" class="md-nav__link">
+    Processing files with a Builder
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../simple_builder/" class="md-nav__link">
+        Writing a Builder
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../running_builders/" class="md-nav__link">
+        Running a Builder Pipeline
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../advanced_builder/" class="md-nav__link">
+        Advanced Builders
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../map_builder/" class="md-nav__link">
+        Working with MapBuilder
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../group_builder/" class="md-nav__link">
+        Working with GroupBuilder
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../simple_drone/" class="md-nav__link">
+        Writing a Drone
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4" type="checkbox" id="__nav_4" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4">
+          Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_4">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_4_1" type="checkbox" id="__nav_4_1" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_4_1">
+          Core
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Core" data-md-level="2">
+        <label class="md-nav__title" for="__nav_4_1">
+          <span class="md-nav__icon md-icon"></span>
+          Core
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/core_store/" class="md-nav__link">
+        Store
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/core_builder/" class="md-nav__link">
+        Builder
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/core_validator/" class="md-nav__link">
+        Validator
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/core_drone/" class="md-nav__link">
+        Drone
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/stores/" class="md-nav__link">
+        Stores
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../reference/builders/" class="md-nav__link">
+        Builders
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../CHANGELOG/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#creating-the-filestore" class="md-nav__link">
+    Creating the FileStore
+  </a>
+  
+    <nav class="md-nav" aria-label="Creating the FileStore">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#choosing-files-to-index" class="md-nav__link">
+    Choosing files to index
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write-access" class="md-nav__link">
+    Write access
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-identifiers-file_id" class="md-nav__link">
+    File identifiers (file_id)
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#connecting-and-querying" class="md-nav__link">
+    Connecting and querying
+  </a>
+  
+    <nav class="md-nav" aria-label="Connecting and querying">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#performance" class="md-nav__link">
+    Performance
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#file-contents" class="md-nav__link">
+    File Contents
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#adding-metadata" class="md-nav__link">
+    Adding metadata
+  </a>
+  
+    <nav class="md-nav" aria-label="Adding metadata">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#update-method" class="md-nav__link">
+    update method
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#add_metadata-convenience-method" class="md-nav__link">
+    add_metadata convenience method
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#automatic-metadata" class="md-nav__link">
+    Automatic metadata
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#protected-keys" class="md-nav__link">
+    Protected Keys
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#orphaned-metadata" class="md-nav__link">
+    Orphaned Metadata
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#deleting-files" class="md-nav__link">
+    Deleting files
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#processing-files-with-a-builder" class="md-nav__link">
+    Processing files with a Builder
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/materialsproject/maggma/edit/master/docs/getting_started/using_file_store.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="using-filestore-for-files-on-disk">Using <code>FileStore</code> for files on disk<a class="headerlink" href="#using-filestore-for-files-on-disk" title="Permanent link">&para;</a></h1>
+<p>The first step in any <code>maggma</code> pipeline is creating a <code>Store</code> so that data can be queried
+and transformed. Often times your data will originate as files on disk (e.g., calculation output
+files, files generated by instruments, etc.). <code>FileStore</code> provides a convenient way
+to access this type of data as if it were in a database, making it possible to <code>query</code>, add metadata,
+and run <code>Builder</code> on it.</p>
+<p>Suppose you have some data files organized in the following directory structure:</p>
+<p><img alt="Example directory structure" src="../file_store_dir_structure.png" width="300" /></p>
+<h2 id="creating-the-filestore">Creating the <code>FileStore</code><a class="headerlink" href="#creating-the-filestore" title="Permanent link">&para;</a></h2>
+<p>To create a <code>Filestore</code>, simply pass the path to the top-level directory that contains the files.</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">FileStore</span><span class="p">(</span><span class="s1">&#39;/path/to/file_store_test/&#39;</span><span class="p">)</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+</code></pre></div>
+<p>On <code>connect()</code>, <code>FileStore</code> iterates through all files in the base directory and
+all subdirectories. For each file, it creates dict-like record based on the file's metadata such as name, size, last modification date, etc. These records are kept in 
+memory using an internal <code>MemoryStore</code>. An example record is shown below.</p>
+<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="s1">&#39;_id&#39;</span><span class="p">:</span> <span class="n">ObjectId</span><span class="p">(</span><span class="s1">&#39;625e581113cef6275a992abe&#39;</span><span class="p">),</span>
+ <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;input.in&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;path&#39;</span><span class="p">:</span> <span class="s1">&#39;/test_files/file_store_test/calculation1/input.in&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;parent&#39;</span><span class="p">:</span> <span class="s1">&#39;calculation1&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;size&#39;</span><span class="p">:</span> <span class="mi">90</span><span class="p">,</span>
+ <span class="s1">&#39;file_id&#39;</span><span class="p">:</span> <span class="s1">&#39;2d12e9803fa0c6eaffb065c8dc3cf4fe&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;last_updated&#39;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2022</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">19</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">23</span><span class="p">,</span> <span class="mi">54</span><span class="p">,</span> <span class="mi">109000</span><span class="p">),</span>
+ <span class="s1">&#39;hash&#39;</span><span class="p">:</span> <span class="s1">&#39;d42c9ff24dc2fde99ed831ec767bd3fb&#39;</span><span class="p">,</span>
+ <span class="s1">&#39;orphan&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+ <span class="s1">&#39;contents&#39;</span><span class="p">:</span> <span class="s1">&#39;This is the file named input.in</span><span class="se">\n</span><span class="s1">In directory calculation1</span><span class="se">\n</span><span class="s1">in the FileStore test directory.&#39;</span><span class="p">}</span>
+</code></pre></div>
+<h3 id="choosing-files-to-index">Choosing files to index<a class="headerlink" href="#choosing-files-to-index" title="Permanent link">&para;</a></h3>
+<p>To restrict which files are indexed by the Store (which can improve performance), the optional keyword arguments <code>max_depth</code> and <code>file_filters</code> can be used. For example, to index only files ending in ".in", use</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">FileStore</span><span class="p">(</span><span class="s1">&#39;/path/to/my/data&#39;</span><span class="p">,</span> <span class="n">file_filters</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*.in&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p>You can pass multiple <code>file_filters</code> and use regex-like <a href="https://docs.python.org/3/library/fnmatch.html">fnmatch</a> patterns as well. For example, to index all files ending in ".in" or named "test-X.txt" where X is any single letter between a and d, use</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">FileStore</span><span class="p">(</span><span class="s1">&#39;/path/to/my/data&#39;</span><span class="p">,</span> <span class="n">file_filters</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;*.in&quot;</span><span class="p">,</span><span class="s2">&quot;test-[abcd].txt&quot;</span><span class="p">])</span>
+</code></pre></div>
+<p>If you only want to index the root directory and exclude all subdirectories, use <code>max_depth=0</code>, e.g.</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">FileStore</span><span class="p">(</span><span class="s1">&#39;/path/to/my/data&#39;</span><span class="p">,</span> <span class="n">max_depth</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="write-access">Write access<a class="headerlink" href="#write-access" title="Permanent link">&para;</a></h3>
+<p>By default, the <code>FileStore</code> is read-only. However you can set <code>read_only=False</code> if
+you want to add additional metadata to the data (See <a href="#adding-metadata">"Adding Metadata"</a> below). This
+metadata is stored in a .json file placed in the root directory of the <code>FileStore</code>
+(the name of the file can be customized with the <code>json_name</code> keyword argument.)</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span> <span class="o">=</span> <span class="n">FileStore</span><span class="p">(</span><span class="s1">&#39;/path/to/my/data&#39;</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">json_name</span><span class="o">=</span><span class="s1">&#39;my_store.json&#39;</span><span class="p">)</span>
+</code></pre></div>
+<p>Several methods that modify the contents of the <code>FileStore</code> such as <code>add_metadata</code>, <code>update</code>, and <code>remove_docs</code> will not work unless the store is writable (i.e., <code>read_only=False</code>).</p>
+<h3 id="file-identifiers-file_id">File identifiers (<code>file_id</code>)<a class="headerlink" href="#file-identifiers-file_id" title="Permanent link">&para;</a></h3>
+<p>Each file is uniquely identified by a <code>file_id</code> key, which is computed
+from the hash of the file's path relative to the base <code>FileStore</code> directory. Unique
+identifiers for every file are necessary to enable <code>Builder</code> to work correctly
+and for associating custom metadata (See <a href="#adding-metadata">"Adding Metadata"</a> below). By using the relative path instead of the absolute path makes it possible to move the entire <code>FileStore</code> to a new location on disk without changing <code>file_id</code>  (as long as the relative paths don't change).</p>
+<h2 id="connecting-and-querying">Connecting and querying<a class="headerlink" href="#connecting-and-querying" title="Permanent link">&para;</a></h2>
+<p>As with any <code>Store</code>, you have to <code>connect()</code> before you can query any data from a <code>FileStore</code>. After that, you can use <code>query_one()</code> to examine a single document or
+<code>query()</code> to return an interator of matching documents. For example, let's print the
+parent directory of each of the files named "input.in" in our example <code>FileStore</code>:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+<span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">fs</span><span class="o">.</span><span class="n">query</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;input.in&quot;</span><span class="p">})]</span>
+<span class="p">[</span><span class="s1">&#39;calculation2&#39;</span><span class="p">,</span> <span class="s1">&#39;calculation1&#39;</span><span class="p">]</span>
+</code></pre></div>
+<h3 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">&para;</a></h3>
+<p><strong><em>NOTE</em></strong> <code>FileStore</code> can take a long time to <code>connect()</code> when there are more than a few hundred files in the directory. This is due to limitations of the <code>mongomock</code> package that powers the internal <code>MemoryStore</code>. We hope to identify a more performant
+alternative in the near future. In the mean time, use <code>file_filters</code> and <code>max_depth</code> to limit the total number of files in the <code>FileStore</code>.</p>
+<h3 id="file-contents">File Contents<a class="headerlink" href="#file-contents" title="Permanent link">&para;</a></h3>
+<p>When you <code>query()</code> data, <code>FileStore</code> attempts to read the contents of each matching file and include them in the <code>contents</code> key of the returned dictionary, as you can
+see in the example above. There is an optional keyword argument <code>contents_size_limit</code> which specifies the maximum size of file that <code>FileStore</code> will attempt to read.</p>
+<p>At present, this only works with text files and the entire file contents are returned as a single string. If a file is too large to read, or if <code>FileStore</code> was unable to open the file (because it is a binary file, etc.), then you will see <code>contents</code> populated with a message that beings with <code>"Unable to read:</code>. <strong>This behavior may change in the future.</strong></p>
+<h2 id="adding-metadata">Adding metadata<a class="headerlink" href="#adding-metadata" title="Permanent link">&para;</a></h2>
+<p>As long as a store is not read-only (see #write-access), you can <code>update()</code> documents in it just like any
+other <code>Store</code>. This is a great way to associate additional information with raw data
+files. For example, if you have a store of files generated by an instrument, you can add metadata related to the environmental conditions, the sample that was tested, etc.</p>
+<h3 id="update-method"><code>update</code> method<a class="headerlink" href="#update-method" title="Permanent link">&para;</a></h3>
+<p>You can use <code>update()</code> to add keys to the <code>FileStore</code> records. For example, to add
+some tags to the files named "input.in", use:</p>
+<div class="highlight"><pre><span></span><code><span class="n">docs</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">fs</span><span class="o">.</span><span class="n">query</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;input.in&quot;</span><span class="p">})]</span>
+<span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">:</span>
+    <span class="n">d</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]</span>
+<span class="n">fs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
+</code></pre></div>
+<p>The above steps will result in the following contents being added to the .json file. This metadata will be automatically read back in next time you connect to the Store. </p>
+<div class="highlight"><pre><span></span><code><span class="p">[{</span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="s2">&quot;.../file_store_test/calculation2/input.in&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="nt">&quot;file_id&quot;</span><span class="p">:</span><span class="s2">&quot;3c3012f84c162e9ff9bb834c53dd1f58&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="nt">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]},</span><span class="w"></span>
+<span class="p">{</span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="s2">&quot;.../file_store_test/calculation1/input.in&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="nt">&quot;file_id&quot;</span><span class="p">:</span><span class="s2">&quot;fde43ea119034eb8732d6f3f0d9802ce&quot;</span><span class="p">,</span><span class="w"></span>
+<span class="nt">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]}]</span><span class="w"></span>
+</code></pre></div>
+<p>Notice that only the items modified with extra keys are written to the JSON (i.e., if you have 10 items in the store but add metadata to just two, only the two items will be written to the JSON). The purpose of this behavior is to prevent any duplication of data. The <code>file_id</code> and <code>path</code> are retained in the JSON file to make each metadata record manually identifiable.</p>
+<h3 id="add_metadata-convenience-method"><code>add_metadata</code> convenience method<a class="headerlink" href="#add_metadata-convenience-method" title="Permanent link">&para;</a></h3>
+<p>A more convenient way to add metadata is via the <code>add_metadata</code> method. To use it, just pass a query to identify the documents you want to update, and a dict to add to the document. Here is what the <a href="#the-update-method">example above</a> would look like using <code>add_metadata</code></p>
+<div class="highlight"><pre><span></span><code><span class="n">fs</span><span class="o">.</span><span class="n">add_metadata</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;input.in&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]})</span>
+</code></pre></div>
+<h3 id="automatic-metadata">Automatic metadata<a class="headerlink" href="#automatic-metadata" title="Permanent link">&para;</a></h3>
+<p>You can even define a function to automatically crate metadata from file or directory names. For example, if you prefix all your files with datestamps (e.g., '2022-05-07_experiment.csv'), you can write a simple string parsing function to
+extract information from any key in a <code>FileStore</code> record and pass the function as an argument to <code>add_metadata</code>.</p>
+<p>For example, to extract the date from files named like '2022-05-07_experiment.csv'
+and add it to the 'date' field:</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">get_date_from_filename</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Args:</span>
+<span class="sd">        d: An item returned from the `FileStore`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s2">&quot;test_name&quot;</span><span class="p">:</span> <span class="n">d</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">}</span>
+
+<span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">add_metadata</span><span class="p">({},</span> <span class="n">auto_data</span><span class="o">=</span><span class="n">get_date_from_filename</span><span class="p">)</span>
+</code></pre></div>
+<h3 id="protected-keys">Protected Keys<a class="headerlink" href="#protected-keys" title="Permanent link">&para;</a></h3>
+<p>Note that when using any of the above methods, you cannot modify any keys that are populated by default (e.g. <code>name</code>, <code>parent</code>, <code>file_id</code>), because they are derived directly from the files on disk.</p>
+<h3 id="orphaned-metadata">Orphaned Metadata<a class="headerlink" href="#orphaned-metadata" title="Permanent link">&para;</a></h3>
+<p>In the course of working with <code>FileStore</code> you may encounter a situation where there are metadata records stored in the JSON file that no longer match files on disk. This can happen if, for example, you init a <code>FileStore</code> and later delete a file, or if you init the store with the default arguments but later restrict the file selection with <code>max_depth</code> or <code>file_filters</code>. </p>
+<p>These orphaned metadata records will appear in the <code>FileStore</code> with the field <code>{"orphan": True}</code>. The goal with this behavior is to preserve all metadata the user may have added and prevent data loss.</p>
+<p>By default, <strong>orphaned metadata is excluded from query results</strong>. There is an <code>include_orphans</code> keyword argument you can set on init if you want orphaned metadata
+to be returned in queries.</p>
+<h2 id="deleting-files">Deleting files<a class="headerlink" href="#deleting-files" title="Permanent link">&para;</a></h2>
+<p>For consistency with the <code>Store</code> interface, <code>FileStore</code> provides the <code>remove_docs</code> method whenever <code>read_only=False</code>. <strong>This method will delete files on disk</strong>, because
+<code>FileStore</code> documents are simply representations of those files. It has an additional guard argument <code>confirm</code> which must be set to the non-default value <code>True</code> for the method to actually do anything.</p>
+<div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">remove_docs</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;input.in&quot;</span><span class="p">})</span>
+<span class="n">Traceback</span> <span class="p">(</span><span class="n">most</span> <span class="n">recent</span> <span class="n">call</span> <span class="n">last</span><span class="p">):</span>
+  <span class="n">File</span> <span class="s2">&quot;&lt;stdin&gt;&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">1</span><span class="p">,</span> <span class="ow">in</span> <span class="o">&lt;</span><span class="n">module</span><span class="o">&gt;</span>
+  <span class="n">File</span> <span class="s2">&quot;.../maggma/src/maggma/stores/file_store.py&quot;</span><span class="p">,</span> <span class="n">line</span> <span class="mi">496</span><span class="p">,</span> <span class="ow">in</span> <span class="n">remove_docs</span>
+    <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span>
+<span class="n">maggma</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">store</span><span class="o">.</span><span class="n">StoreError</span><span class="p">:</span> <span class="p">(</span><span class="n">StoreError</span><span class="p">(</span><span class="o">...</span><span class="p">),</span> <span class="s1">&#39;Warning! This command is about &#39;</span>
+    <span class="s1">&#39;to delete 2 items from disk! If this is what you want, reissue &#39;</span>
+    <span class="s1">&#39;this command with confirm=True.&#39;</span><span class="p">)</span>
+</code></pre></div>
+<h2 id="processing-files-with-a-builder">Processing files with a <code>Builder</code><a class="headerlink" href="#processing-files-with-a-builder" title="Permanent link">&para;</a></h2>
+<p>Now that you can access your files on disk via a <code>FileStore</code>, it's time to write a <code>Builder</code> to read and process the data (see <a href="../simple_builder/">Writing a Builder</a>).
+Keep in mind that <code>get_items</code> will return documents like the one shown in (#creating-the-filestore). You can then use <code>process_items</code> to</p>
+<ul>
+<li>Create strucured data from the <code>contents</code></li>
+<li>Open the file for reading using a custom piece of code</li>
+<li>etc.</li>
+</ul>
+<p>Once you can process data on your disk with a <code>Builder</code>, you can send that data
+to any kind of <code>Store</code> you like - another <code>FileStore</code>, a database, etc.</p>
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    <nav class="md-footer__inner md-grid" aria-label="Footer">
+      
+        
+        <a href="../stores/" class="md-footer__link md-footer__link--prev" aria-label="Previous: Using Stores" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Using Stores
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../simple_builder/" class="md-footer__link md-footer__link--next" aria-label="Next: Writing a Builder" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Writing a Builder
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Built by The Materials Project
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.2a1c317c.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../assets/javascripts/bundle.c2e1ee47.min.js"></script>
+      
+    
+  </body>
+</html>

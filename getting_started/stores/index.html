@@ -348,6 +348,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../using_file_store/" class="md-nav__link">
+        Working with FileStore
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../simple_builder/" class="md-nav__link">
         Writing a Builder
       </a>
@@ -677,44 +691,47 @@
 
 
 <h1 id="using-store">Using <code>Store</code><a class="headerlink" href="#using-store" title="Permanent link">&para;</a></h1>
-<p>A <code>Store</code> is just a wrapper to access data from somewhere. That somewhere is typically a MongoDB collection, but it could also be GridFS which lets you keep large binary objects. <code>maggma</code> makes GridFS and MongoDB collections feel the same. Beyond that it adds in something that looks like GridFS but is actually using AWS S3 as the storage space. Finally, <code>Store</code> can actually perform logic, concatenating two or more <code>Stores</code> together to make them look like one data source for instance. This means you only have to write a <code>Builder</code> for one scenario of how to transform data and the choice of <code>Store</code> lets you control where the data comes from and goes.</p>
+<p>A <code>Store</code> is just a wrapper to access data from a data source. That data source is typically a MongoDB collection, but it could also be an Amazon S3 bucket, a GridFS collection, or folder of files on disk. <code>maggma</code> makes interacting with all of these data sources feel the same (see the <code>Store</code> interface, below). <code>Store</code> can also perform logic, concatenating two or more <code>Store</code> together to make them look like one data source for instance.</p>
+<p>The benefit of the <code>Store</code> interface is that you only have to write a <code>Builder</code> once. As your data moves or evolves, you simply point it to different <code>Store</code> without having to change your processing code.</p>
 <h2 id="list-of-stores">List of Stores<a class="headerlink" href="#list-of-stores" title="Permanent link">&para;</a></h2>
-<p>Current working and tested Stores include:</p>
+<p>Current working and tested <code>Store</code> include:</p>
 <ul>
-<li>MongoStore: interfaces to a MongoDB Collection</li>
-<li>MongoURIStore: MongoDB Introduced advanced URIs including their special "mongodb+srv://" which uses a combination of SRV and TXT DNS records to fully setup the client. This store is to safely handle these kinds of URIs.</li>
-<li>MemoryStore: just a Store that exists temporarily in memory</li>
-<li>JSONStore: builds a MemoryStore and then populates it with the contents of the given JSON files</li>
-<li>GridFSStore: interfaces to GridFS collection in MongoDB</li>
-<li>MongograntStore: uses Mongogrant to get credentials for MongoDB database</li>
-<li>VaulStore: uses Vault to get credentials for a MongoDB database</li>
-<li>AliasingStore: aliases keys from the underlying store to new names</li>
-<li>SandboxStore: provides permission control to documents via a <code>_sbxn</code> sandbox key</li>
-<li>S3Store: provides an interface to an S3 Bucket either on AWS or self-hosted solutions (<a href="../advanced_stores/">additional documentation</a>)</li>
-<li>JointStore: joins several MongoDB collections together, merging documents with the same <code>key</code>, so they look like one collection</li>
-<li>ConcatStore: concatenates several MongoDB collections in series so they look like one collection</li>
+<li><code>MongoStore</code>: interfaces to a MongoDB Collection</li>
+<li><code>MemoryStore</code>: just a Store that exists temporarily in memory</li>
+<li><code>JSONStore</code>: builds a MemoryStore and then populates it with the contents of the given JSON files</li>
+<li><code>FileStore</code>: query and add metadata to files stored on disk as if they were in a databsae</li>
+<li><code>GridFSStore</code>: interfaces to GridFS collection in MongoDB</li>
+<li><code>S3Store</code>: provides an interface to an S3 Bucket either on AWS or self-hosted solutions (<a href="../advanced_stores/">additional documentation</a>)</li>
+<li><code>ConcatStore</code>: concatenates several Stores together so they look like one Store</li>
+<li><code>MongoURIStore</code>: MongoDB Introduced advanced URIs including their special "mongodb+srv://" which uses a combination of SRV and TXT DNS records to fully setup the client. This store is to safely handle these kinds of URIs.</li>
+<li><code>MongograntStore</code>: uses Mongogrant to get credentials for MongoDB database</li>
+<li><code>VaultStore</code>: uses Vault to get credentials for a MongoDB database</li>
+<li><code>AliasingStore</code>: aliases keys from the underlying store to new names</li>
+<li><code>SandboxStore: provides permission control to documents via a</code>_sbxn` sandbox key</li>
+<li><code>JointStore</code>: joins several MongoDB collections together, merging documents with the same <code>key</code>, so they look like one collection</li>
 </ul>
 <h2 id="the-store-interface">The <code>Store</code> interface<a class="headerlink" href="#the-store-interface" title="Permanent link">&para;</a></h2>
+<p>All <code>Store</code> provide a number of basic methods that facilitate querying, updating, and removing data:</p>
+<ul>
+<li><code>query</code>: Standard mongo style <code>find</code> method that lets you search the store.</li>
+<li><code>query_one</code>: Same as above but limits returned results to just the first document that matches your query. Very useful for understanding the structure of the returned data.</li>
+<li><code>update</code>: Update the documents into the collection. This will override documents if the key field matches.</li>
+<li><code>ensure_index</code>: This creates an index for the underlying data-source for fast querying.</li>
+<li><code>distinct</code>: Gets distinct values of a field.</li>
+<li><code>groupby</code>: Similar to query but performs a grouping operation and returns sets of documents.</li>
+<li><code>remove_docs</code>: Removes documents from the underlying data source.</li>
+<li><code>last_updated</code>: Finds the most recently updated <code>last_updated_field</code> value and returns that. Useful for knowing how old a data-source is.</li>
+<li><code>newer_in</code>: Finds all documents that are newer in the target collection and returns their <code>key</code>s. This is a very useful way of performing incremental processing.</li>
+</ul>
 <h3 id="initializing-a-store">Initializing a Store<a class="headerlink" href="#initializing-a-store" title="Permanent link">&para;</a></h3>
-<p>All <code>Store</code>s have a few basic arguments that are critical for basic usage. Every <code>Store</code> has two attributes that the user should customize based on the data contained in that store: <code>key</code> and <code>last_updated_field</code>. The <code>key</code> defines how the <code>Store</code> tells documents apart. Typically this is <code>_id</code> in MongoDB, but you could use your own field (be sure all values under the key field can be used to uniquely identify documents). <code>last_updated_field</code> tells <code>Store</code> how to order the documents by a date, which is typically in the <code>datetime</code> format, but can also be an ISO 8601-format (ex: <code>2009-05-28T16:15:00</code>) <code>Store</code>s can also take a <code>Validator</code> object to make sure the data going into obeys some schema.</p>
+<p>All <code>Store</code>s have a few basic arguments that are critical for basic usage. Every <code>Store</code> has two attributes that the user should customize based on the data contained in that store: <code>key</code> and <code>last_updated_field</code>. The <code>key</code> defines how the <code>Store</code> tells documents apart. Typically this is <code>_id</code> in MongoDB, but you could use your own field (be sure all values under the key field can be used to uniquely identify documents). <code>last_updated_field</code> tells <code>Store</code> how to order the documents by a date, which is typically in the <code>datetime</code> format, but can also be an ISO 8601-format (ex: <code>2009-05-28T16:15:00</code>) <code>Store</code>s can also take a <code>Validator</code> object to make sure the data going into it obeys some schema.</p>
 <h3 id="using-a-store">Using a Store<a class="headerlink" href="#using-a-store" title="Permanent link">&para;</a></h3>
-<p>You must connect to a store by running <code>store.connect()</code> before querying and updating the store.
-If you are operating on the stores inside of another code it is recommended to use the built-in context manager:</p>
+<p>You must connect to a store by running <code>store.connect()</code> before querying or updating the store.
+If you are operating on the stores inside of another code it is recommended to use the built-in context manager,
+which will take care of the <code>connect()</code> automatically, e.g.:</p>
 <div class="highlight"><pre><span></span><code><span class="k">with</span> <span class="n">MongoStore</span><span class="p">(</span><span class="o">...</span><span class="p">)</span> <span class="k">as</span> <span class="n">store</span><span class="p">:</span>
     <span class="n">store</span><span class="o">.</span><span class="n">query</span><span class="p">()</span>
 </code></pre></div>
-<p>Stores provide a number of basic methods that make easy to use:</p>
-<ul>
-<li>query: Standard mongo style <code>find</code> method that lets you search the store.</li>
-<li>query_one: Same as above but limits returned results to just the first document that matches your query.</li>
-<li>update: Update the documents into the collection. This will override documents if the key field matches.</li>
-<li>ensure_index: This creates an index for the underlying data-source for fast querying.</li>
-<li>distinct: Gets distinct values of a field.</li>
-<li>groupby: Similar to query but performs a grouping operation and returns sets of documents.</li>
-<li>remove_docs: Removes documents from the underlying data source.</li>
-<li>last_updated: Finds the most recently updated <code>last_updated_field</code> value and returns that. Useful for knowing how old a data-source is.</li>
-<li>newer_in: Finds all documents that are newer in the target collection and returns their <code>key</code>s. This is a very useful way of performing incremental processing.</li>
-</ul>
 
               
             </article>
@@ -744,13 +761,13 @@ If you are operating on the stores inside of another code it is recommended to u
       
       
         
-        <a href="../simple_builder/" class="md-footer__link md-footer__link--next" aria-label="Next: Writing a Builder" rel="next">
+        <a href="../using_file_store/" class="md-footer__link md-footer__link--next" aria-label="Next: Working with FileStore" rel="next">
           <div class="md-footer__title">
             <div class="md-ellipsis">
               <span class="md-footer__direction">
                 Next
               </span>
-              Writing a Builder
+              Working with FileStore
             </div>
           </div>
           <div class="md-footer__button md-icon">

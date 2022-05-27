@@ -257,13 +257,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#msonable" class="md-nav__link">
-    MSONable
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#store" class="md-nav__link">
     Store
   </a>
@@ -273,6 +266,13 @@
         <li class="md-nav__item">
   <a href="#builder" class="md-nav__link">
     Builder
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#msonable" class="md-nav__link">
+    MSONable
   </a>
   
 </li>
@@ -328,6 +328,20 @@
     <li class="md-nav__item">
       <a href="../getting_started/stores/" class="md-nav__link">
         Using Stores
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../getting_started/using_file_store/" class="md-nav__link">
+        Working with FileStore
       </a>
     </li>
   
@@ -617,13 +631,6 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
-  <a href="#msonable" class="md-nav__link">
-    MSONable
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
   <a href="#store" class="md-nav__link">
     Store
   </a>
@@ -633,6 +640,13 @@
         <li class="md-nav__item">
   <a href="#builder" class="md-nav__link">
     Builder
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#msonable" class="md-nav__link">
+    MSONable
   </a>
   
 </li>
@@ -663,20 +677,24 @@
 
 
 <h1 id="concepts">Concepts<a class="headerlink" href="#concepts" title="Permanent link">&para;</a></h1>
-<h2 id="msonable">MSONable<a class="headerlink" href="#msonable" title="Permanent link">&para;</a></h2>
-<p>One challenge in building complex data-transformation codes is keeping track of all the settings necessary to make some output database. One bad solution is to hard-code these settings, but then any modification is difficult to keep track of.</p>
-<p>Maggma solves this by putting the configuration with the pipeline definition in JSON or YAML files. This is done using the <code>MSONable</code> pattern, which requires that any Maggma object (the databases and transformation steps) can convert itself to a python dictionary with it's configuration parameters in a process called serialization. These dictionaries can then be converted back to the origianl Maggma object without having to know what class it belonged. <code>MSONable</code> does this by injecting in <code>@class</code> and <code>@module</code> keys that tell it where to find the original python code for that Maggma object.</p>
 <h2 id="store">Store<a class="headerlink" href="#store" title="Permanent link">&para;</a></h2>
-<p>Another challenge is dealing with all the different types of databases out there. Maggma was originally built off MongoDB, so it's interface looks a lot like <code>PyMongo</code>. Still, there are a number of usefull new <code>object</code> databases that can be used to store large quantities of data you don't need to search in such as Amazon S3 and Google Cloud. It would be nice to have a single interface to all of these so you could write your datapipeline only once.</p>
+<p>A major challenge in building scalable data piplines is dealing with all the different types of data sources out there. Maggma's <code>Store</code> class provides a consistent, unified interface for querying data from arbitrary data
+sources. It was originally built around MongoDB, so it's interface closely resembles <code>PyMongo</code> syntax. However,
+Maggma makes it possible to use that same syntax to query other types of databases, such as Amazon S3, GridFS, or even files on disk.</p>
 <p>Stores are databases containing organized document-based data. They represent either a data source or a data sink. They are modeled around the MongoDB collection although they can represent more complex data sources that auto-alias keys without the user knowing, or even providing concatenation or joining of Stores. Stores implement methods to <code>connect</code>, <code>query</code>, find <code>distinct</code> values, <code>groupby</code> fields, <code>update</code> documents, and <code>remove</code> documents. Stores also implement a number of critical fields for Maggma that help in efficient document processing: the <code>key</code> and the <code>last_updated_field</code>. <code>key</code> is the field that is used to uniquely index the underlying data source. <code>last_updated_field</code> is the timestamp of when that document was last modified.</p>
 <h2 id="builder">Builder<a class="headerlink" href="#builder" title="Permanent link">&para;</a></h2>
-<p>Builders represent a data processing step. Builders break down each transformation into 3 phases: <code>get_items</code>, <code>process_item</code>, and <code>update_targets</code>:</p>
+<p>Builders represent a data processing step, analogous to an extrac-transform-load (ETL) operation in a data
+warehouse model. Much like <code>Store</code>, the <code>Builder</code> class provides a consistent interface for writing data
+transformations, which are each broken into 3 phases: <code>get_items</code>, <code>process_item</code>, and <code>update_targets</code>:</p>
 <ol>
 <li><code>get_items</code>: Retrieve items from the source Store(s) for processing by the next phase</li>
 <li><code>process_item</code>: Manipulate the input item and create an output document that is sent to the next phase for storage.</li>
 <li><code>update_target</code>: Add the processed item to the target Store(s).</li>
 </ol>
 <p>Both <code>get_items</code> and <code>update_targets</code> can perform IO (input/output) to the data stores. <code>process_item</code> is expected to not perform any IO so that it can be parallelized by Maggma. Builders can be chained together into an array and then saved as a JSON file to be run on a production system.</p>
+<h2 id="msonable">MSONable<a class="headerlink" href="#msonable" title="Permanent link">&para;</a></h2>
+<p>Another challenge in building complex data-transformation codes is keeping track of all the settings necessary to make some output database. One bad solution is to hard-code these settings, but then any modification is difficult to keep track of.</p>
+<p>Maggma solves this by putting the configuration with the pipeline definition in JSON or YAML files. This is done using the <code>MSONable</code> pattern, which requires that any Maggma object (the databases and transformation steps) can convert itself to a python dictionary with it's configuration parameters in a process called serialization. These dictionaries can then be converted back to the origianl Maggma object without having to know what class it belonged. <code>MSONable</code> does this by injecting in <code>@class</code> and <code>@module</code> keys that tell it where to find the original python code for that Maggma object.</p>
 <h2 id="drone">Drone<a class="headerlink" href="#drone" title="Permanent link">&para;</a></h2>
 <p>Drone is a standardized class to synchronize local files and data in your database. It breaks down the process in 4 steps:</p>
 <ol>
