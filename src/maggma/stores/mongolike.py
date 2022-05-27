@@ -252,6 +252,7 @@ class MongoStore(Store):
 
         return distinct_vals if distinct_vals is not None else []
 
+    # TODO - sort, skip, and limit are not functional
     def groupby(
         self,
         keys: Union[List[str], str],
@@ -268,7 +269,7 @@ class MongoStore(Store):
         Args:
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in returned documents. By default, all fields are returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -371,7 +372,7 @@ class MongoStore(Store):
 
         Args:
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             hint: Dictionary of indexes to use as hints for query optimizer.
