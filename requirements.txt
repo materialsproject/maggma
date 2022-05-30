@@ -6,7 +6,7 @@ jsonschema==4.5.1
 tqdm==4.64.0
 mongogrant==0.3.3
 aioitertools==0.10.0
-pydantic==1.9.0
+pydantic==1.9.1
 fastapi==0.76.0
 numpy==1.21.0;python_version>"3.6"
 pyzmq==22.3.0
