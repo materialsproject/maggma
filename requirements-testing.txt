@@ -11,4 +11,4 @@ mypy==0.950
 mypy-extensions==0.4.3
 responses<0.21.0
 types-PyYAML==6.0.7
-types-setuptools==57.4.15
+types-setuptools==57.4.17
