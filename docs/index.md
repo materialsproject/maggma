@@ -4,9 +4,9 @@
 
 ## What is Maggma
 
-Maggma is a framework to build data pipelines from files on disk all the way to a REST API in scientific environments. Maggma has been developed by the Materials Project (MP) team at Lawrence Berkeley Labs.
+Maggma is a framework to build data pipelines from files on disk all the way to a REST API in scientific environments. Maggma has been developed by the Materials Project (MP) team at Lawrence Berkeley National Laboratory.
 
-Maggma is written in [Python](http://docs.python-guide.org/en/latest/) and supports Python 3.6+.
+Maggma is written in [Python](http://docs.python-guide.org/en/latest/) and supports Python 3.7+.
 
 ## Installation from PyPI
 

@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.47.2](https://github.com/materialsproject/maggma/tree/v0.47.2) (2022-05-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.1...v0.47.2)
+
+**Merged pull requests:**
+
+- Docs updates: add FileStore and misc edits [\#668](https://github.com/materialsproject/maggma/pull/668) ([rkingsbury](https://github.com/rkingsbury))
+
 ## [v0.47.1](https://github.com/materialsproject/maggma/tree/v0.47.1) (2022-05-24)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.0...v0.47.1)
