@@ -407,6 +407,7 @@ class MongoStore(Store):
             limit=limit,
             sort=sort_list,
             hint=hint_list,
+            allow_disk_use=True
         ):
             yield d
 
