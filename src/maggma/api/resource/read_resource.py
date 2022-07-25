@@ -79,7 +79,10 @@ class ReadOnlyResource(Resource):
             if query_operators is not None
             else [
                 PaginationQuery(),
-                SparseFieldsQuery(model, default_fields=[self.store.key, self.store.last_updated_field],),
+                SparseFieldsQuery(
+                    model,
+                    default_fields=[self.store.key, self.store.last_updated_field],
+                ),
             ]
         )
 
@@ -102,7 +105,9 @@ class ReadOnlyResource(Resource):
         model_name = self.model.__name__
 
         if self.key_fields is None:
-            field_input = SparseFieldsQuery(self.model, [self.store.key, self.store.last_updated_field]).query
+            field_input = SparseFieldsQuery(
+                self.model, [self.store.key, self.store.last_updated_field]
+            ).query
         else:
 
             def field_input():
@@ -110,8 +115,10 @@ class ReadOnlyResource(Resource):
 
         async def get_by_key(
             request: Request,
-            response: Response,
-            key: str = Path(..., alias=key_name, title=f"The {key_name} of the {model_name} to get",),
+            temp_response: Response,
+            key: str = Path(
+                ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
+            ),
             _fields: STORE_PARAMS = Depends(field_input),
         ):
             f"""
@@ -125,11 +132,16 @@ class ReadOnlyResource(Resource):
             """
             self.store.connect()
 
-            item = [self.store.query_one(criteria={self.store.key: key}, properties=_fields["properties"],)]
+            item = [
+                self.store.query_one(
+                    criteria={self.store.key: key}, properties=_fields["properties"],
+                )
+            ]
 
             if item == [None]:
                 raise HTTPException(
-                    status_code=404, detail=f"Item with {self.store.key} = {key} not found",
+                    status_code=404,
+                    detail=f"Item with {self.store.key} = {key} not found",
                 )
 
             for operator in self.query_operators:
@@ -143,7 +155,7 @@ class ReadOnlyResource(Resource):
                 )
 
             if self.header_processor is not None:
-                self.header_processor.process_header(response, request)
+                self.header_processor.process_header(temp_response, request)
 
             return response
 
@@ -163,13 +175,17 @@ class ReadOnlyResource(Resource):
 
         async def search(**queries: Dict[str, STORE_PARAMS]) -> Union[Dict, Response]:
             request: Request = queries.pop("request")  # type: ignore
-            response: Response = queries.pop("temp_response")  # type: ignore
+            temp_response: Response = queries.pop("temp_response")  # type: ignore
 
             query_params = [
-                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
+                entry
+                for _, i in enumerate(self.query_operators)
+                for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [
+                key for key in request.query_params.keys() if key not in query_params
+            ]
             if any(overlap):
                 if "limit" in overlap or "skip" in overlap:
                     raise HTTPException(
@@ -194,7 +210,13 @@ class ReadOnlyResource(Resource):
 
             self.store.connect()
 
-            count = self.store.count(**{field: query[field] for field in query if field in ["criteria", "hint"]})
+            count = self.store.count(
+                **{
+                    field: query[field]
+                    for field in query
+                    if field in ["criteria", "hint"]
+                }
+            )
 
             data = list(self.store.query(**query))
             operator_meta = {}
@@ -213,7 +235,7 @@ class ReadOnlyResource(Resource):
                 )
 
             if self.header_processor is not None:
-                self.header_processor.process_header(response, request)
+                self.header_processor.process_header(temp_response, request)
 
             return response
 
