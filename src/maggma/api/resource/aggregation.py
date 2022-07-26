@@ -2,6 +2,8 @@ from typing import Any, Dict, List, Optional, Type
 
 from fastapi import HTTPException, Response, Request
 from pydantic import BaseModel
+from pymongo import timeout as query_timeout
+from pymongo.errors import NetworkTimeout, PyMongoError
 
 from maggma.api.models import Meta
 from maggma.api.models import Response as ResponseModel
@@ -22,6 +24,7 @@ class AggregationResource(Resource):
         store: Store,
         model: Type[BaseModel],
         pipeline_query_operator: QueryOperator,
+        timeout: Optional[int] = None,
         tags: Optional[List[str]] = None,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
@@ -33,6 +36,8 @@ class AggregationResource(Resource):
             model: The pydantic model this Resource represents
             tags: List of tags for the Endpoint
             pipeline_query_operator: Operator for the aggregation pipeline
+            timeout: Time in seconds Pymongo should wait when querying MongoDB
+                before raising a timeout error
             include_in_schema: Whether the endpoint should be shown in the documented schema.
             sub_path: sub-URL path for the resource.
         """
@@ -45,6 +50,7 @@ class AggregationResource(Resource):
 
         self.pipeline_query_operator = pipeline_query_operator
         self.header_processor = header_processor
+        self.timeout = timeout
 
         super().__init__(model)
 
@@ -69,12 +75,18 @@ class AggregationResource(Resource):
             self.store.connect()
 
             try:
-                data = list(self.store._collection.aggregate(query["pipeline"]))
-            except Exception:
-                raise HTTPException(
-                    status_code=400,
-                    detail="Problem with provided aggregation pipeline.",
-                )
+                with query_timeout(self.timeout):
+                    data = list(self.store._collection.aggregate(query["pipeline"]))
+            except (NetworkTimeout, PyMongoError) as e:
+                if e.timeout:
+                    raise HTTPException(
+                        status_code=504,
+                        detail=f"Server timed out trying to obtain data. Try again with a smaller request.",
+                    )
+                else:
+                    raise HTTPException(
+                        status_code=500,
+                    )
 
             count = len(data)
 

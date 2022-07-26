@@ -6,6 +6,8 @@ from uuid import uuid4
 
 from fastapi import HTTPException, Path, Request
 from pydantic import BaseModel, Field, create_model
+from pymongo import timeout as query_timeout
+from pymongo.errors import NetworkTimeout, PyMongoError
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import QueryOperator, SubmissionQuery
@@ -28,6 +30,7 @@ class SubmissionResource(Resource):
         post_query_operators: List[QueryOperator],
         get_query_operators: List[QueryOperator],
         tags: Optional[List[str]] = None,
+        timeout: Optional[int] = None,
         include_in_schema: Optional[bool] = True,
         duplicate_fields_check: Optional[List[str]] = None,
         enable_default_search: Optional[bool] = True,
@@ -42,6 +45,8 @@ class SubmissionResource(Resource):
             store: The Maggma Store to get data from
             model: The pydantic model this resource represents
             tags: List of tags for the Endpoint
+            timeout: Time in seconds Pymongo should wait when querying MongoDB
+                before raising a timeout error
             post_query_operators: Operators for the query language for post data
             get_query_operators: Operators for the query language for get data
             include_in_schema: Whether to include the submission resource in the documented schema
@@ -66,6 +71,7 @@ class SubmissionResource(Resource):
         self.default_state = default_state
         self.store = store
         self.tags = tags or []
+        self.timeout = timeout
         self.post_query_operators = post_query_operators
         self.get_query_operators = (
             [op for op in get_query_operators if op is not None]  # type: ignore
@@ -143,8 +149,17 @@ class SubmissionResource(Resource):
             self.store.connect()
 
             crit = {key_name: key}
-
-            item = [self.store.query_one(criteria=crit)]
+            try:
+                with query_timeout(self.timeout):
+                    item = [self.store.query_one(criteria=crit)]
+            except (NetworkTimeout, PyMongoError) as e:
+                if e.timeout:
+                    raise HTTPException(
+                        status_code=504,
+                        detail=f"Server timed out trying to obtain data. Try again with a smaller request.",
+                    )
+                else:
+                    raise HTTPException(status_code=500)
 
             if item == [None]:
                 raise HTTPException(
@@ -198,8 +213,21 @@ class SubmissionResource(Resource):
 
             self.store.connect(force_reset=True)
 
-            count = self.store.count(query["criteria"])
-            data = list(self.store.query(**query))  # type: ignore
+            try:
+                with query_timeout(self.timeout):
+                    count = self.store.count(query["criteria"])
+                    data = list(self.store.query(**query))  # type: ignore
+            except (NetworkTimeout, PyMongoError) as e:
+                if e.timeout:
+                    raise HTTPException(
+                        status_code=504,
+                        detail=f"Server timed out trying to obtain data. Try again with a smaller request.",
+                    )
+                else:
+                    raise HTTPException(
+                        status_code=500,
+                    )
+            
             meta = Meta(total_doc=count)
 
             for operator in self.get_query_operators:  # type: ignore

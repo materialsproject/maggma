@@ -3,6 +3,8 @@ from typing import Any, Dict, List, Optional, Type
 
 from fastapi import HTTPException, Request
 from pydantic import BaseModel
+from pymongo import timeout as query_timeout
+from pymongo.errors import NetworkTimeout, PyMongoError
 
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
@@ -25,6 +27,7 @@ class PostOnlyResource(Resource):
         query_operators: Optional[List[QueryOperator]] = None,
         key_fields: Optional[List[str]] = None,
         query: Optional[Dict] = None,
+        timeout: Optional[int] = None,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
     ):
@@ -36,6 +39,8 @@ class PostOnlyResource(Resource):
             query_operators: Operators for the query language
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
+            timeout: Time in seconds Pymongo should wait when querying MongoDB
+                before raising a timeout error
             include_in_schema: Whether the endpoint should be shown in the documented schema.
             sub_path: sub-URL path for the resource.
         """
@@ -44,6 +49,7 @@ class PostOnlyResource(Resource):
         self.query = query or {}
         self.key_fields = key_fields
         self.versioned = False
+        self.timeout = timeout
 
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
@@ -101,8 +107,19 @@ class PostOnlyResource(Resource):
 
             self.store.connect()
 
-            count = self.store.count(query["criteria"])
-            data = list(self.store.query(**query))
+            try:
+                with query_timeout(self.timeout):
+                    count = self.store.count(query["criteria"])
+                    data = list(self.store.query(**query))
+            except (NetworkTimeout, PyMongoError) as e:
+                if e.timeout:
+                    raise HTTPException(
+                        status_code=504,
+                        detail=f"Server timed out trying to obtain data. Try again with a smaller request.",
+                    )
+                else:
+                    raise HTTPException(status_code=500)
+
             operator_meta = {}
 
             for operator in self.query_operators:
