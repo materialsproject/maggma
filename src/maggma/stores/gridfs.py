@@ -126,7 +126,7 @@ class GridFSStore(Store):
         """
         Connect to the source data
         """
-        conn = (
+        conn: MongoClient = (
             MongoClient(
                 host=self.host,
                 port=self.port,
@@ -238,10 +238,7 @@ class GridFSStore(Store):
                 metadata = doc.get("metadata", {})
 
                 data = self._collection.find_one(
-                    filter={"_id": doc["_id"]},
-                    skip=skip,
-                    limit=limit,
-                    sort=sort,
+                    filter={"_id": doc["_id"]}, skip=skip, limit=limit, sort=sort,
                 ).read()
 
                 if metadata.get("compression", "") == "zlib":
@@ -511,7 +508,7 @@ class GridFSURIStore(GridFSStore):
         Connect to the source data
         """
         if not self._coll or force_reset:  # pragma: no cover
-            conn = MongoClient(self.uri, **self.mongoclient_kwargs)
+            conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
             db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db["{}.files".format(self.collection_name)]
