@@ -156,7 +156,7 @@ class SubmissionResource(Resource):
                 if e.timeout:
                     raise HTTPException(
                         status_code=504,
-                        detail=f"Server timed out trying to obtain data. Try again with a smaller request.",
+                        detail="Server timed out trying to obtain data. Try again with a smaller request.",
                     )
                 else:
                     raise HTTPException(status_code=500)
@@ -221,13 +221,11 @@ class SubmissionResource(Resource):
                 if e.timeout:
                     raise HTTPException(
                         status_code=504,
-                        detail=f"Server timed out trying to obtain data. Try again with a smaller request.",
+                        detail="Server timed out trying to obtain data. Try again with a smaller request.",
                     )
                 else:
-                    raise HTTPException(
-                        status_code=500,
-                    )
-            
+                    raise HTTPException(status_code=500,)
+
             meta = Meta(total_doc=count)
 
             for operator in self.get_query_operators:  # type: ignore

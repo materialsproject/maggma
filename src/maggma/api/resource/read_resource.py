@@ -150,7 +150,7 @@ class ReadOnlyResource(Resource):
                 if e.timeout:
                     raise HTTPException(
                         status_code=504,
-                        detail=f"Server timed out trying to obtain data. Try again with a smaller request.",
+                        detail="Server timed out trying to obtain data. Try again with a smaller request.",
                     )
                 else:
                     raise HTTPException(
@@ -243,7 +243,7 @@ class ReadOnlyResource(Resource):
                 if e.timeout:
                     raise HTTPException(
                         status_code=504,
-                        detail=f"Server timed out trying to obtain data. Try again with a smaller request.",
+                        detail="Server timed out trying to obtain data. Try again with a smaller request.",
                     )
                 else:
                     raise HTTPException(
