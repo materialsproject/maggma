@@ -38,7 +38,7 @@ setup(
         "numpy>=1.17.3",
         "pydantic>=0.32.2",
         "fastapi>=0.42.0",
-        "pyzmq==22.3.0",
+        "pyzmq==23.2.0",
         "dnspython>=1.16.0",
         "sshtunnel>=0.1.5",
         "msgpack>=0.5.6",
