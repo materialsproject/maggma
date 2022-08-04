@@ -1,5 +1,14 @@
 # Concepts
 
+`maggma`'s core classes -- [`Store`](#store) and [`Builder`](#builder) -- provide building blocks for
+modular data pipelines. Data resides in one or more `Store` and is processed by a
+`Builder`. The results of the processing are saved in another `Store`, and so on:
+
+```mermaid
+flowchart LR  
+    s1(Store 1) --Builder 1--> s2(Store 2) --Builder 2--> s3(Store 3)
+s2 -- Builder 3-->s4(Store 4)
+```
 
 ## Store
 
