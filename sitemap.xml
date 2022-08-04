@@ -46,11 +46,6 @@
          <changefreq>daily</changefreq>
     </url>
     <url>
-         <loc>https://materialsproject.github.io/maggma/getting_started/simple_drone/</loc>
-         <lastmod>2022-08-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/stores/</loc>
          <lastmod>2022-08-04</lastmod>
          <changefreq>daily</changefreq>
@@ -67,11 +62,6 @@
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/reference/core_builder/</loc>
-         <lastmod>2022-08-04</lastmod>
-         <changefreq>daily</changefreq>
-    </url>
-    <url>
-         <loc>https://materialsproject.github.io/maggma/reference/core_drone/</loc>
          <lastmod>2022-08-04</lastmod>
          <changefreq>daily</changefreq>
     </url>

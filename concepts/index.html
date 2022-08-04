@@ -278,13 +278,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#drone" class="md-nav__link">
-    Drone
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -419,20 +412,6 @@
 
             
           
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../getting_started/simple_drone/" class="md-nav__link">
-        Writing a Drone
-      </a>
-    </li>
-  
-
-            
-          
         </ul>
       </nav>
     </li>
@@ -529,20 +508,6 @@
     <li class="md-nav__item">
       <a href="../reference/core_validator/" class="md-nav__link">
         Validator
-      </a>
-    </li>
-  
-
-            
-          
-            
-              
-  
-  
-  
-    <li class="md-nav__item">
-      <a href="../reference/core_drone/" class="md-nav__link">
-        Drone
       </a>
     </li>
   
@@ -652,13 +617,6 @@
   
 </li>
       
-        <li class="md-nav__item">
-  <a href="#drone" class="md-nav__link">
-    Drone
-  </a>
-  
-</li>
-      
     </ul>
   
 </nav>
@@ -702,27 +660,6 @@ transformations, which are each broken into 3 phases: <code>get_items</code>, <c
 <h2 id="msonable">MSONable<a class="headerlink" href="#msonable" title="Permanent link">&para;</a></h2>
 <p>Another challenge in building complex data-transformation codes is keeping track of all the settings necessary to make some output database. One bad solution is to hard-code these settings, but then any modification is difficult to keep track of.</p>
 <p>Maggma solves this by putting the configuration with the pipeline definition in JSON or YAML files. This is done using the <code>MSONable</code> pattern, which requires that any Maggma object (the databases and transformation steps) can convert itself to a python dictionary with it's configuration parameters in a process called serialization. These dictionaries can then be converted back to the origianl Maggma object without having to know what class it belonged. <code>MSONable</code> does this by injecting in <code>@class</code> and <code>@module</code> keys that tell it where to find the original python code for that Maggma object.</p>
-<h2 id="drone">Drone<a class="headerlink" href="#drone" title="Permanent link">&para;</a></h2>
-<p>Drone is a standardized class to synchronize local files and data in your database. It breaks down the process in 4 steps:</p>
-<ol>
-<li><code>get_items</code><ul>
-<li>Given a folder path to a data folder, read all the files, and return a dictionary
-    that maps each RecordKey -&gt; List of <code>RecordIdentifier</code></li>
-</ul>
-</li>
-<li><code>should_update_records</code><ul>
-<li>Given a list of <code>RecordIdentifier</code>, it query the database return a list of <code>RecordIdentifier</code> that requires update</li>
-</ul>
-</li>
-<li><code>process_item</code> (from <code>Builder</code>)<ul>
-<li>Given a single <code>RecordIdentifier</code>, return the data that it refers to and add meta data</li>
-</ul>
-</li>
-<li><code>update_targets</code><ul>
-<li>updates the database given a list of data</li>
-</ul>
-</li>
-</ol>
 
               
             </article>
