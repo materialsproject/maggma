@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.48.0](https://github.com/materialsproject/maggma/tree/v0.48.0) (2022-08-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.6...v0.48.0)
+
+**Merged pull requests:**
+
+- Proposal: remove Drone class [\#669](https://github.com/materialsproject/maggma/pull/669) ([rkingsbury](https://github.com/rkingsbury))
+
 ## [v0.47.6](https://github.com/materialsproject/maggma/tree/v0.47.6) (2022-08-04)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.5...v0.47.6)
