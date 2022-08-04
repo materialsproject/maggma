@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.47.6](https://github.com/materialsproject/maggma/tree/v0.47.6) (2022-08-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.5...v0.47.6)
+
+**Merged pull requests:**
+
+- Docs: add mermaid diagram support [\#677](https://github.com/materialsproject/maggma/pull/677) ([rkingsbury](https://github.com/rkingsbury))
+
 ## [v0.47.5](https://github.com/materialsproject/maggma/tree/v0.47.5) (2022-07-26)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.4...v0.47.5)
