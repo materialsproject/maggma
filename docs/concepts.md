@@ -1,5 +1,14 @@
 # Concepts
 
+`maggma`'s core classes -- [`Store`](#store) and [`Builder`](#builder) -- provide building blocks for
+modular data pipelines. Data resides in one or more `Store` and is processed by a
+`Builder`. The results of the processing are saved in another `Store`, and so on:
+
+```mermaid
+flowchart LR  
+    s1(Store 1) --Builder 1--> s2(Store 2) --Builder 2--> s3(Store 3)
+s2 -- Builder 3-->s4(Store 4)
+```
 
 ## Store
 
@@ -27,15 +36,3 @@ Another challenge in building complex data-transformation codes is keeping track
 
 Maggma solves this by putting the configuration with the pipeline definition in JSON or YAML files. This is done using the `MSONable` pattern, which requires that any Maggma object (the databases and transformation steps) can convert itself to a python dictionary with it's configuration parameters in a process called serialization. These dictionaries can then be converted back to the origianl Maggma object without having to know what class it belonged. `MSONable` does this by injecting in `@class` and `@module` keys that tell it where to find the original python code for that Maggma object.
 
-## Drone
-Drone is a standardized class to synchronize local files and data in your database. It breaks down the process in 4 steps:
-
-1. `get_items`
-    - Given a folder path to a data folder, read all the files, and return a dictionary
-        that maps each RecordKey -> List of `RecordIdentifier`
-2. `should_update_records`
-    - Given a list of `RecordIdentifier`, it query the database return a list of `RecordIdentifier` that requires update
-3. `process_item` (from `Builder`)
-    - Given a single `RecordIdentifier`, return the data that it refers to and add meta data
-4. `update_targets`
-    - updates the database given a list of data
