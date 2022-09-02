@@ -72,7 +72,7 @@ class GridFSStore(Store):
             ensure_metadata: ensure returned documents have the metadata fields
             searchable_fields: fields to keep in the index store
             auth_source: The database to authenticate on. Defaults to the database name.
-            ssh_tunnel: A SSHTunnel object to use.
+            ssh_tunnel: An SSHTunnel object to use.
         """
 
         self.database = database
