@@ -1,5 +1,7 @@
 ::: maggma.stores.mongolike
 
+::: maggma.stores.file_store
+
 ::: maggma.stores.gridfs
 
 ::: maggma.stores.aws

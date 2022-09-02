@@ -27,7 +27,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "setuptools",
-        "pymongo>=4.0",
+        "pymongo>=4.2.0",
         "monty>=1.0.2",
         "mongomock>=3.10.0",
         "pydash>=4.1.0",
@@ -52,7 +52,7 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",

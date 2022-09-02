@@ -72,6 +72,7 @@ class GridFSStore(Store):
             ensure_metadata: ensure returned documents have the metadata fields
             searchable_fields: fields to keep in the index store
             auth_source: The database to authenticate on. Defaults to the database name.
+            ssh_tunnel: A SSHTunnel object to use.
         """
 
         self.database = database
@@ -135,7 +136,7 @@ class GridFSStore(Store):
             self.ssh_tunnel.start()
             host, port = self.ssh_tunnel.local_address
 
-        conn = (
+        conn: MongoClient = (
             MongoClient(
                 host=host,
                 port=port,
@@ -145,7 +146,7 @@ class GridFSStore(Store):
                 **self.mongoclient_kwargs,
             )
             if self.username != ""
-            else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
+            else MongoClient(host, port, **self.mongoclient_kwargs)
         )
         if not self._coll or force_reset:
             db = conn[self.database]
@@ -522,7 +523,7 @@ class GridFSURIStore(GridFSStore):
         Connect to the source data
         """
         if not self._coll or force_reset:  # pragma: no cover
-            conn = MongoClient(self.uri, **self.mongoclient_kwargs)
+            conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
             db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db["{}.files".format(self.collection_name)]

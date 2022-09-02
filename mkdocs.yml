@@ -10,18 +10,17 @@ nav:
   - Core Concepts: concepts.md
   - Getting Started:
     - Using Stores: getting_started/stores.md
+    - Working with FileStore: getting_started/using_file_store.md
     - Writing a Builder: getting_started/simple_builder.md
     - Running a Builder Pipeline: getting_started/running_builders.md
     - Advanced Builders: getting_started/advanced_builder.md
     - Working with MapBuilder: getting_started/map_builder.md
     - Working with GroupBuilder: getting_started/group_builder.md
-    - Writing a Drone: getting_started/simple_drone.md
   - Reference:
       Core:
         Store: reference/core_store.md
         Builder: reference/core_builder.md
         Validator: reference/core_validator.md
-        Drone: reference/core_drone.md
       Stores: reference/stores.md
       Builders: reference/builders.md
   - Changelog: CHANGELOG.md
@@ -34,7 +33,11 @@ markdown_extensions:
   - codehilite
   - attr_list
   - pymdownx.details
-  - pymdownx.superfences
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
   - pymdownx.inlinehilite
   - toc:
       permalink: true

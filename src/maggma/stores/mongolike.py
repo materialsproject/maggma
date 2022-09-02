@@ -173,7 +173,7 @@ class MongoStore(Store):
                 self.ssh_tunnel.start()
                 host, port = self.ssh_tunnel.local_address
 
-            conn = (
+            conn: MongoClient = (
                 MongoClient(
                     host=host,
                     port=port,
@@ -569,7 +569,7 @@ class MongoURIStore(MongoStore):
         Connect to the source data
         """
         if self._coll is None or force_reset:  # pragma: no cover
-            conn = MongoClient(self.uri, **self.mongoclient_kwargs)
+            conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
             db = conn[self.database]
             self._coll = db[self.collection_name]
 
@@ -677,10 +677,7 @@ class JSONStore(MemoryStore):
     """
 
     def __init__(
-        self,
-        paths: Union[str, List[str]],
-        read_only: bool = True,
-        **kwargs,
+        self, paths: Union[str, List[str]], read_only: bool = True, **kwargs,
     ):
         """
         Args:
