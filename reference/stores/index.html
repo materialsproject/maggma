@@ -3339,9 +3339,9 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
        if read_only=False (i.e., it is writeable), the JSON file
        will be automatically updated every time a write-like operation is
        performed.</p>
-<div class="codehilite"><pre><span></span><code>   <span class="nv">Note</span> <span class="nv">that</span> <span class="nv">when</span> <span class="nv">read_only</span><span class="o">=</span><span class="nv">False</span>, <span class="nv">JSONStore</span> <span class="nv">only</span> <span class="nv">supports</span> <span class="nv">a</span> <span class="nv">single</span> <span class="nv">JSON</span>
-   <span class="nv">file</span>. <span class="k">If</span> <span class="nv">the</span> <span class="nv">file</span> <span class="nv">does</span> <span class="nv">not</span> <span class="nv">exist</span>, <span class="nv">it</span> <span class="nv">will</span> <span class="nv">be</span> <span class="nv">automatically</span> <span class="nv">created</span>
-   <span class="nv">when</span> <span class="nv">the</span> <span class="nv">JSONStore</span> <span class="nv">is</span> <span class="nv">initialized</span>.
+<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="nv">Note</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">when</span><span class="w"> </span><span class="nv">read_only</span><span class="o">=</span><span class="nv">False</span>,<span class="w"> </span><span class="nv">JSONStore</span><span class="w"> </span><span class="nv">only</span><span class="w"> </span><span class="nv">supports</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">single</span><span class="w"> </span><span class="nv">JSON</span><span class="w"></span>
+<span class="w">   </span><span class="nv">file</span>.<span class="w"> </span><span class="k">If</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="nv">does</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">exist</span>,<span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="nv">will</span><span class="w"> </span><span class="nv">be</span><span class="w"> </span><span class="nv">automatically</span><span class="w"> </span><span class="nv">created</span><span class="w"></span>
+<span class="w">   </span><span class="nv">when</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">JSONStore</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">initialized</span>.<span class="w"></span>
 </code></pre></div></td>
         <td><code>True</code></td>
       </tr>
@@ -7460,15 +7460,15 @@ from another field, such as name or path (see auto_data).</p>
     to assign metadata based on the name of a file. For example, for
     data files named like <code>2022-04-01_april_fool_experiment.txt</code>, the
     auto_data function could be:</p>
-<div class="codehilite"><pre><span></span><code><span class="nv">def</span> <span class="nv">get_metadata_from_filename</span><span class="ss">(</span><span class="nv">d</span><span class="ss">)</span>:
-    <span class="k">return</span> {<span class="s2">&quot;</span><span class="s">date</span><span class="s2">&quot;</span>: <span class="nv">d</span>[<span class="s2">&quot;</span><span class="s">name</span><span class="s2">&quot;</span>].<span class="nv">split</span><span class="ss">(</span><span class="s2">&quot;</span><span class="s">_</span><span class="s2">&quot;</span><span class="ss">)</span>[<span class="mi">0</span>],
-            <span class="s2">&quot;</span><span class="s">test_name</span><span class="s2">&quot;</span>: <span class="nv">d</span>[<span class="s2">&quot;</span><span class="s">name</span><span class="s2">&quot;</span>].<span class="nv">split</span><span class="ss">(</span><span class="s2">&quot;</span><span class="s">_</span><span class="s2">&quot;</span><span class="ss">)</span>[<span class="mi">1</span>]
-            }
+<div class="codehilite"><pre><span></span><code><span class="nv">def</span><span class="w"> </span><span class="nv">get_metadata_from_filename</span><span class="ss">(</span><span class="nv">d</span><span class="ss">)</span>:<span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span>{<span class="s2">&quot;date&quot;</span>:<span class="w"> </span><span class="nv">d</span>[<span class="s2">&quot;name&quot;</span>].<span class="nv">split</span><span class="ss">(</span><span class="s2">&quot;_&quot;</span><span class="ss">)</span>[<span class="mi">0</span>],<span class="w"></span>
+<span class="w">            </span><span class="s2">&quot;test_name&quot;</span>:<span class="w"> </span><span class="nv">d</span>[<span class="s2">&quot;name&quot;</span>].<span class="nv">split</span><span class="ss">(</span><span class="s2">&quot;_&quot;</span><span class="ss">)</span>[<span class="mi">1</span>]<span class="w"></span>
+<span class="w">            </span>}<span class="w"></span>
 
-<span class="nv">Note</span> <span class="nv">that</span> <span class="nv">in</span> <span class="nv">the</span> <span class="nv">case</span> <span class="nv">of</span> <span class="nv">conflict</span> <span class="nv">between</span> <span class="nv">manual</span> <span class="nv">and</span> <span class="nv">automatically</span>
-<span class="nv">computed</span> <span class="nv">metadata</span> <span class="ss">(</span><span class="k">for</span> <span class="nv">example</span>, <span class="k">if</span> <span class="nv">metadata</span><span class="o">=</span>{<span class="s2">&quot;</span><span class="s">name</span><span class="s2">&quot;</span>: <span class="s2">&quot;</span><span class="s">another_name</span><span class="s2">&quot;</span>} <span class="nv">was</span>
-<span class="nv">supplied</span> <span class="nv">alongside</span> <span class="nv">the</span> <span class="nv">auto_data</span> <span class="nv">function</span> <span class="nv">above</span><span class="ss">)</span>, <span class="nv">the</span> <span class="nv">manually</span><span class="o">-</span><span class="nv">supplied</span>
-<span class="nv">metadata</span> <span class="nv">is</span> <span class="nv">used</span>.
+<span class="nv">Note</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">case</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">conflict</span><span class="w"> </span><span class="nv">between</span><span class="w"> </span><span class="nv">manual</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">automatically</span><span class="w"></span>
+<span class="nv">computed</span><span class="w"> </span><span class="nv">metadata</span><span class="w"> </span><span class="ss">(</span><span class="k">for</span><span class="w"> </span><span class="nv">example</span>,<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">metadata</span><span class="o">=</span>{<span class="s2">&quot;name&quot;</span>:<span class="w"> </span><span class="s2">&quot;another_name&quot;</span>}<span class="w"> </span><span class="nv">was</span><span class="w"></span>
+<span class="nv">supplied</span><span class="w"> </span><span class="nv">alongside</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">auto_data</span><span class="w"> </span><span class="nv">function</span><span class="w"> </span><span class="nv">above</span><span class="ss">)</span>,<span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">manually</span><span class="o">-</span><span class="nv">supplied</span><span class="w"></span>
+<span class="nv">metadata</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">used</span>.<span class="w"></span>
 </code></pre></div></td>
         <td><code>None</code></td>
       </tr>
@@ -8227,6 +8227,7 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
         <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">auth_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHTunnel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -8243,6 +8244,7 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
 <span class="sd">            ensure_metadata: ensure returned documents have the metadata fields</span>
 <span class="sd">            searchable_fields: fields to keep in the index store</span>
 <span class="sd">            auth_source: The database to authenticate on. Defaults to the database name.</span>
+<span class="sd">            ssh_tunnel: An SSHTunnel object to use.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
@@ -8256,6 +8258,7 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="n">ssh_tunnel</span>
 
         <span class="k">if</span> <span class="n">auth_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">auth_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
@@ -8298,17 +8301,24 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Connect to the source data</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span>
+            <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+            <span class="n">host</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">local_address</span>
+
         <span class="n">conn</span><span class="p">:</span> <span class="n">MongoClient</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">MongoClient</span><span class="p">(</span>
-                <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
-                <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+                <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+                <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
                 <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
                 <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
                 <span class="n">authSource</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span><span class="p">,</span>
                 <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
+            <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
             <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
@@ -8410,7 +8420,10 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
                 <span class="n">metadata</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
                 <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
-                    <span class="nb">filter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]},</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
+                    <span class="nb">filter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]},</span>
+                    <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span>
+                    <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+                    <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
                 <span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
                 <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;zlib&quot;</span><span class="p">:</span>
@@ -8607,6 +8620,8 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
 
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -8723,7 +8738,7 @@ other: other GridFSStore to compare with</p>
 
 
 <h3 class="doc doc-heading" id="maggma.stores.gridfs.GridFSStore.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ensure_metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">searchable_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auth_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mongoclient_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">collection_name</span><span class="p">,</span> <span class="n">host</span><span class="o">=</span><span class="s1">&#39;localhost&#39;</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="mi">27017</span><span class="p">,</span> <span class="n">username</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ensure_metadata</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">searchable_fields</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">auth_source</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">mongoclient_kwargs</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ssh_tunnel</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -8807,6 +8822,12 @@ This is the string portion before the GridFS extensions</p></td>
         <td><p>The database to authenticate on. Defaults to the database name.</p></td>
         <td><code>None</code></td>
       </tr>
+      <tr>
+        <td><code>ssh_tunnel</code></td>
+        <td><code>Optional[maggma.stores.mongolike.SSHTunnel]</code></td>
+        <td><p>An SSHTunnel object to use.</p></td>
+        <td><code>None</code></td>
+      </tr>
   </tbody>
 </table>
         <details class="quote">
@@ -8824,6 +8845,7 @@ This is the string portion before the GridFS extensions</p></td>
     <span class="n">searchable_fields</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">auth_source</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">mongoclient_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">ssh_tunnel</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">SSHTunnel</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -8840,6 +8862,7 @@ This is the string portion before the GridFS extensions</p></td>
 <span class="sd">        ensure_metadata: ensure returned documents have the metadata fields</span>
 <span class="sd">        searchable_fields: fields to keep in the index store</span>
 <span class="sd">        auth_source: The database to authenticate on. Defaults to the database name.</span>
+<span class="sd">        ssh_tunnel: An SSHTunnel object to use.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
@@ -8853,6 +8876,7 @@ This is the string portion before the GridFS extensions</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="o">=</span> <span class="n">ssh_tunnel</span>
 
     <span class="k">if</span> <span class="n">auth_source</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">auth_source</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span>
@@ -8888,6 +8912,8 @@ This is the string portion before the GridFS extensions</p></td>
           <summary>Source code in <code>maggma/stores/gridfs.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </code></pre></div>
         </details>
     </div>
@@ -8916,17 +8942,24 @@ This is the string portion before the GridFS extensions</p></td>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect to the source data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">host</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">host</span>
+        <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+        <span class="n">host</span><span class="p">,</span> <span class="n">port</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">local_address</span>
+
     <span class="n">conn</span><span class="p">:</span> <span class="n">MongoClient</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">MongoClient</span><span class="p">(</span>
-            <span class="n">host</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span>
-            <span class="n">port</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span>
+            <span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span>
+            <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span>
             <span class="n">username</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">username</span><span class="p">,</span>
             <span class="n">password</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">password</span><span class="p">,</span>
             <span class="n">authSource</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">auth_source</span><span class="p">,</span>
             <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
-        <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">host</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
+        <span class="k">else</span> <span class="n">MongoClient</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">mongoclient_kwargs</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">conn</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="p">]</span>
@@ -9458,7 +9491,10 @@ values are 1 for ascending or -1 for descending.</p></td>
             <span class="n">metadata</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
-                <span class="nb">filter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]},</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
+                <span class="nb">filter</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="s2">&quot;_id&quot;</span><span class="p">]},</span>
+                <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span>
+                <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">,</span>
+                <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">,</span>
             <span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
             <span class="k">if</span> <span class="n">metadata</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compression&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;zlib&quot;</span><span class="p">:</span>
