@@ -19,7 +19,7 @@ from pydash import get, has
 from pymongo import MongoClient, uri_parser
 
 from maggma.core import Sort, Store, StoreError
-from maggma.stores.mongolike import MongoStore
+from maggma.stores.mongolike import MongoStore, SSHTunnel
 
 # https://github.com/mongodb/specifications/
 #   blob/master/source/gridfs/gridfs-spec.rst#terms
@@ -55,6 +55,7 @@ class GridFSStore(Store):
         searchable_fields: List[str] = None,
         auth_source: Optional[str] = None,
         mongoclient_kwargs: Optional[Dict] = None,
+        ssh_tunnel: Optional[SSHTunnel] = None,
         **kwargs,
     ):
         """
@@ -71,6 +72,7 @@ class GridFSStore(Store):
             ensure_metadata: ensure returned documents have the metadata fields
             searchable_fields: fields to keep in the index store
             auth_source: The database to authenticate on. Defaults to the database name.
+            ssh_tunnel: An SSHTunnel object to use.
         """
 
         self.database = database
@@ -84,6 +86,7 @@ class GridFSStore(Store):
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
         self.kwargs = kwargs
+        self.ssh_tunnel = ssh_tunnel
 
         if auth_source is None:
             auth_source = self.database
@@ -126,17 +129,24 @@ class GridFSStore(Store):
         """
         Connect to the source data
         """
+        if self.ssh_tunnel is None:
+            host = self.host
+            port = self.port
+        else:
+            self.ssh_tunnel.start()
+            host, port = self.ssh_tunnel.local_address
+
         conn: MongoClient = (
             MongoClient(
-                host=self.host,
-                port=self.port,
+                host=host,
+                port=port,
                 username=self.username,
                 password=self.password,
                 authSource=self.auth_source,
                 **self.mongoclient_kwargs,
             )
             if self.username != ""
-            else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
+            else MongoClient(host, port, **self.mongoclient_kwargs)
         )
         if not self._coll or force_reset:
             db = conn[self.database]
@@ -238,7 +248,10 @@ class GridFSStore(Store):
                 metadata = doc.get("metadata", {})
 
                 data = self._collection.find_one(
-                    filter={"_id": doc["_id"]}, skip=skip, limit=limit, sort=sort,
+                    filter={"_id": doc["_id"]},
+                    skip=skip,
+                    limit=limit,
+                    sort=sort,
                 ).read()
 
                 if metadata.get("compression", "") == "zlib":
@@ -435,6 +448,8 @@ class GridFSStore(Store):
 
     def close(self):
         self._collection.database.client.close()
+        if self.ssh_tunnel is not None:
+            self.ssh_tunnel.stop()
 
     def __eq__(self, other: object) -> bool:
         """
