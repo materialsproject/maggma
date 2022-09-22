@@ -49,6 +49,8 @@ async def manager(
     poll.register(socket, zmq.POLLIN)
 
     workers = {}
+    workers_seen = 0
+    num_errors = 0
 
     for builder in builders:
         logger.info(f"Working on {builder.__class__.__name__}")
@@ -73,6 +75,12 @@ async def manager(
                         socket.close()
                         raise RuntimeError("No workers left to distribute chunks to")
 
+                    if num_errors / workers_seen > 0.5:
+                        socket.close()
+                        raise RuntimeError(
+                            "More than half of the chunks sent to workers have failed. Stopping distributed build."
+                        )
+
                     # Poll and look for messages from workers
                     logger.debug("Manager started and looking for workers")
 
@@ -92,10 +100,12 @@ async def manager(
                                 )
                                 workers[identity] = {
                                     "working": False,
-                                    "heartbeats": 0,
+                                    "heartbeats": 1,
                                     "last_ping": perf_counter(),
                                     "work_index": -1,
                                 }
+
+                                workers_seen += 1
 
                             else:
                                 workers[identity]["working"] = False
@@ -103,6 +113,8 @@ async def manager(
                             # Remove worker and requeue work sent to it
                             chunks_tuples[workers[identity]["work_index"]][1] = False  # type: ignore
                             workers.pop(identity)
+                            num_errors += 1
+
                         elif msg == "PING":
                             # Respond to heartbeat
                             socket.send_multipart([identity, b"", b"PONG"])
@@ -110,7 +122,7 @@ async def manager(
                             workers[identity]["heartbeats"] += 1
 
                     # Decide if any workers are dead and need to be removed
-                    handle_dead_workers(workers, chunks_tuples)
+                    handle_dead_workers(workers, chunks_tuples, num_errors)
 
                     # Send work for available workers
                     for identity in workers:
@@ -142,25 +154,28 @@ async def manager(
     socket.close()
 
 
-def handle_dead_workers(workers, chunks_tuples):
+def handle_dead_workers(workers, chunks_tuples, num_errors):
     if len(workers) == 1:
         # Use global timeout
         identity = list(workers.keys())[0]
         if (perf_counter() - workers[identity]["last_ping"]) >= TIMEOUT:
             chunks_tuples[workers[identity]["work_index"]][1] = False  # type: ignore
             workers.pop(identity)
+            num_errors += 1
 
     elif len(workers) == 2:
         # Use 10% ratio between workers
         workers_sorted = sorted(list(workers.items()), key=lambda x: x[1]["heartbeats"])
+        print(workers_sorted)
 
-        ratio = workers_sorted[1][1]["heartbeat"] / workers_sorted[0][1]["heartbeat"]
+        ratio = workers_sorted[1][1]["heartbeats"] / workers_sorted[0][1]["heartbeats"]
 
         if ratio <= 0.1:
             chunks_tuples[workers[workers_sorted[0][0]]["work_index"]][  # type: ignore
                 1
             ] = False
             workers.pop(identity)
+            num_errors += 1
 
     elif len(workers) > 2:
         # Calculate modified z-score of heartbeat counts and remove those <= -3.5
@@ -176,6 +191,7 @@ def handle_dead_workers(workers, chunks_tuples):
                     1
                 ] = False
                 workers.pop(identity)
+                num_errors += 1
 
 
 async def worker(url: str, port: int, num_processes: int):
