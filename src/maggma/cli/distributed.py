@@ -33,7 +33,10 @@ async def manager(
 ):
     """
     Really simple manager for distributed processing that uses a builder prechunk to modify
-    the builder and send out modified builders for each worker to run
+    the builder and send out modified builders for each worker to run.
+
+    The manager will try and keep track of workers, including which error out and which complete.
+    Currently, if a single workers fails the entire distributed job will be stopped. 
     """
     logger = getLogger("Manager")
 
