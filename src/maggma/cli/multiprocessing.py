@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from asyncio import BoundedSemaphore, Queue, gather, get_event_loop, wait
+from asyncio import BoundedSemaphore, Queue, gather, get_event_loop
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
@@ -146,7 +146,7 @@ def safe_dispatch(val):
         return None
 
 
-async def multi(builder, num_processes, no_bars=False):
+async def multi(builder, num_processes, no_bars=False, socket=None):
 
     builder.connect()
     cursor = builder.get_items()

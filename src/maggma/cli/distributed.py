@@ -4,7 +4,10 @@
 import json
 from logging import getLogger
 import socket as pysocket
+from tkinter import W
 from typing import List
+import numpy as np
+from time import perf_counter
 
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
@@ -13,8 +16,10 @@ from maggma.cli.multiprocessing import multi
 from maggma.core import Builder
 from maggma.utils import tqdm
 
-from zmq import REP, REQ
-import zmq.asyncio as zmq
+import zmq
+import zmq.asyncio as azmq
+
+TIMEOUT = 1200  # max timeout in seconds for a worker
 
 
 def find_port():
@@ -37,8 +42,13 @@ async def manager(
 
     logger.info(f"Binding to Manager URL {url}:{port}")
     context = zmq.Context()
-    socket = context.socket(REP)
+    socket = context.socket(zmq.ROUTER)
     socket.bind(f"{url}:{port}")
+
+    poll = zmq.Poller()
+    poll.register(socket, zmq.POLLIN)
+
+    workers = {}
 
     for builder in builders:
         logger.info(f"Working on {builder.__class__.__name__}")
@@ -47,39 +57,82 @@ async def manager(
         try:
 
             builder.connect()
-            chunks_tuples = [(d, False) for d in builder.prechunk(num_chunks)]
-
+            chunks_tuples = [[d, False] for d in builder.prechunk(num_chunks)]
             logger.info(f"Distributing {len(chunks_tuples)} chunks to workers")
 
-            for chunk_dict, distributed in tqdm(chunks_tuples, desc="Chunks"):
+            for work_index, (chunk_dict, distributed) in tqdm(
+                enumerate(chunks_tuples), desc="Chunks", total=num_chunks
+            ):
+                temp_builder_dict = dict(**builder_dict)
+                temp_builder_dict.update(chunk_dict)
+                temp_builder_dict = jsanitize(temp_builder_dict)
+
                 while not distributed:
+
                     if num_workers <= 0:
                         socket.close()
                         raise RuntimeError("No workers left to distribute chunks to")
 
-                    temp_builder_dict = dict(**builder_dict)
-                    temp_builder_dict.update(chunk_dict)
-                    temp_builder_dict = jsanitize(temp_builder_dict)
+                    # Poll and look for messages from workers
+                    logger.debug("Manager started and looking for workers")
 
-                    # Wait for client connection that announces client and says it is ready to do work
-                    logger.debug("Waiting for a worker")
+                    connections = dict(poll.poll(1000))
 
-                    worker = await socket.recv()
+                    # If workers send messages decode and figure out what do
+                    if connections:
+                        identity, _, msg = socket.recv_multipart()
 
-                    if worker.decode("utf-8") == "ERROR":
-                        num_workers -= 1
-                    else:
-                        logger.debug(
-                            f"Got connection from worker: {worker.decode('utf-8')}"
-                        )
-                        # Send out the next chunk
-                        await socket.send(json.dumps(temp_builder_dict).encode("utf-8"))
-                        distributed = True
+                        msg = msg.decode("utf-8")
+                        print(msg)
+
+                        if "READY" in msg:
+                            if identity not in workers:
+                                logger.debug(
+                                    f"Got connection from worker: {msg.split('_')[1]}"
+                                )
+                                workers[identity] = {
+                                    "working": False,
+                                    "heartbeats": 0,
+                                    "last_ping": perf_counter(),
+                                    "work_index": -1,
+                                }
+
+                            else:
+                                workers[identity]["working"] = False
+                        elif msg == "ERROR":
+                            # Remove worker and requeue work sent to it
+                            chunks_tuples[workers[identity]["work_index"]][1] = False  # type: ignore
+                            workers.pop(identity)
+                        elif msg == "PING":
+                            # Respond to heartbeat
+                            socket.send_multipart([identity, b"", b"PONG"])
+                            workers[identity]["last_ping"] = perf_counter()
+                            workers[identity]["heartbeats"] += 1
+
+                    # Decide if any workers are dead and need to be removed
+                    handle_dead_workers(workers, chunks_tuples)
+
+                    # Send work for available workers
+                    for identity in workers:
+                        if not workers[identity]["working"]:
+
+                            # Send out a chunk to idle worker
+                            socket.send_multipart(
+                                [
+                                    identity,
+                                    b"",
+                                    json.dumps(temp_builder_dict).encode("utf-8"),
+                                ]
+                            )
+
+                            workers[identity]["work_index"] = work_index
+                            workers[identity]["working"] = True
+
+                            distributed = True
 
             logger.info("Sending exit messages to workers")
-            for _ in range(num_workers):
-                await socket.recv()
-                await socket.send_json("EXIT")
+            for identity in workers:
+                socket.send_multipart([identity, b"", b"EXIT"])
 
         except NotImplementedError:
             logger.error(
@@ -87,6 +140,42 @@ async def manager(
             )
 
     socket.close()
+
+
+def handle_dead_workers(workers, chunks_tuples):
+    if len(workers) == 1:
+        # Use global timeout
+        identity = list(workers.keys())[0]
+        if (perf_counter() - workers[identity]["last_ping"]) >= TIMEOUT:
+            chunks_tuples[workers[identity]["work_index"]][1] = False  # type: ignore
+            workers.pop(identity)
+
+    elif len(workers) == 2:
+        # Use 10% ratio between workers
+        workers_sorted = sorted(list(workers.items()), key=lambda x: x[1]["heartbeats"])
+
+        ratio = workers_sorted[1][1]["heartbeat"] / workers_sorted[0][1]["heartbeat"]
+
+        if ratio <= 0.1:
+            chunks_tuples[workers[workers_sorted[0][0]]["work_index"]][  # type: ignore
+                1
+            ] = False
+            workers.pop(identity)
+
+    elif len(workers) > 2:
+        # Calculate modified z-score of heartbeat counts and remove those <= -3.5
+        # Re-queue work sent to dead worker
+        hearbeat_vals = [w["heartbeats"] for w in workers.values()]
+        median = np.median(hearbeat_vals)
+        mad = np.median([abs(i - median) for i in hearbeat_vals])
+        for identity in list(workers.keys()):
+            z_score = 0.6745 * (workers[identity]["heartbeat"] - median) / mad
+            if z_score <= -3.5:
+                # Remove worker and requeue work sent to it
+                chunks_tuples[workers[identity]["work_index"]][  # type: ignore
+                    1
+                ] = False
+                workers.pop(identity)
 
 
 async def worker(url: str, port: int, num_processes: int):
@@ -98,8 +187,8 @@ async def worker(url: str, port: int, num_processes: int):
     logger = getLogger("Worker")
 
     logger.info(f"Connnecting to Manager at {url}:{port}")
-    context = zmq.Context()
-    socket = context.socket(REQ)
+    context = azmq.Context()
+    socket = context.socket(zmq.REQ)
     socket.connect(f"{url}:{port}")
 
     # Initial message package
@@ -108,13 +197,13 @@ async def worker(url: str, port: int, num_processes: int):
     try:
         running = True
         while running:
-            await socket.send(hostname.encode("utf-8"))
+            await socket.send("READY_{}".format(hostname).encode("utf-8"))
             message = await socket.recv()
             work = json.loads(message.decode("utf-8"))
             if "@class" in work and "@module" in work:
                 # We have a valid builder
                 builder = MontyDecoder().process_decoded(work)
-                await multi(builder, num_processes)
+                await multi(builder, num_processes, socket=socket)
             elif work == "EXIT":
                 # End the worker
                 running = False
@@ -122,7 +211,6 @@ async def worker(url: str, port: int, num_processes: int):
     except Exception as e:
         logger.error(f"A worker failed with error: {e}")
         await socket.send("ERROR".encode("utf-8"))
-
         socket.close()
 
     socket.close()
