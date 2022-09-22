@@ -198,12 +198,13 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
         disable=no_bars,
     )
 
-    if socket:
-        await socket.send_string("PING")
-        message = await socket.recv()
-        if message.decode("utf-8") != "PONG":
-            socket.close()
-            raise RuntimeError("Stopping work as main node is not responding.")
+    # if socket:
+    #     await socket.send_string("PING")
+    #     message = await socket.recv()
+    #     print(message)
+    #     if message.decode("utf-8") != "PONG":
+    #         socket.close()
+    #         raise RuntimeError("Stopping work as main node is not responding.")
 
     back_pressure_relief = back_pressured_get.release(processed_items)
 
