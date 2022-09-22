@@ -8,6 +8,7 @@ from tkinter import W
 from typing import List
 import numpy as np
 from time import perf_counter
+import asyncio
 
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
@@ -224,7 +225,11 @@ async def worker(url: str, port: int, num_processes: int):
         running = True
         while running:
             await socket.send("READY_{}".format(hostname).encode("utf-8"))
-            message = await socket.recv()
+            try:
+                message = await asyncio.wait_for(socket.recv(), timeout=120)
+            except asyncio.TimeoutError:
+                socket.close()
+                raise RuntimeError("Stopping work as manager timed out.")
             message = message.decode("utf-8")
             if "@class" in message and "@module" in message:
                 # We have a valid builder

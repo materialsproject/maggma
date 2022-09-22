@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from asyncio import BoundedSemaphore, Queue, gather, get_event_loop
+from asyncio import (
+    BoundedSemaphore,
+    Queue,
+    gather,
+    get_event_loop,
+    wait_for,
+    TimeoutError,
+)
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
@@ -198,13 +205,19 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
         disable=no_bars,
     )
 
-    # if socket:
-    #     await socket.send_string("PING")
-    #     message = await socket.recv()
-    #     print(message)
-    #     if message.decode("utf-8") != "PONG":
-    #         socket.close()
-    #         raise RuntimeError("Stopping work as main node is not responding.")
+    if socket:
+        await socket.send_string("PING")
+        try:
+            message = await wait_for(socket.recv(), timeout=120)
+            if message.decode("utf-8") != "PONG":
+                socket.close()
+                raise RuntimeError(
+                    "Stopping work as main node did not respong to heartbeat from worker."
+                )
+
+        except TimeoutError:
+            socket.close()
+            raise RuntimeError("Stopping work as main node is not responding.")
 
     back_pressure_relief = back_pressured_get.release(processed_items)
 
