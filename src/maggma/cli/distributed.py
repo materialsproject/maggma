@@ -13,14 +13,14 @@ import asyncio
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
 
-from maggma.cli.multiprocessing import multi
+from maggma.cli.multiprocessing import multi, MANAGER_TIMEOUT
 from maggma.core import Builder
 from maggma.utils import tqdm
 
 import zmq
 import zmq.asyncio as azmq
 
-TIMEOUT = 1200  # max timeout in seconds for a worker
+WORKER_TIMEOUT = 1200  # max timeout in seconds for a worker
 
 
 def find_port():
@@ -176,7 +176,7 @@ def handle_dead_workers(workers, socket):
     if len(workers) == 1:
         # Use global timeout
         identity = list(workers.keys())[0]
-        if (perf_counter() - workers[identity]["last_ping"]) >= TIMEOUT:
+        if (perf_counter() - workers[identity]["last_ping"]) >= WORKER_TIMEOUT:
             attempt_graceful_shutdown(workers, socket)
             raise RuntimeError("Worker has timed out. Stopping distributed build.")
 
@@ -196,13 +196,14 @@ def handle_dead_workers(workers, socket):
         hearbeat_vals = [w["heartbeats"] for w in workers.values()]
         median = np.median(hearbeat_vals)
         mad = np.median([abs(i - median) for i in hearbeat_vals])
-        for identity in list(workers.keys()):
-            z_score = 0.6745 * (workers[identity]["heartbeat"] - median) / mad
-            if z_score <= -3.5:
-                attempt_graceful_shutdown(workers, socket)
-                raise RuntimeError(
-                    "At least one worker has timed out. Stopping distributed build."
-                )
+        if mad > 0:
+            for identity in list(workers.keys()):
+                z_score = 0.6745 * (workers[identity]["heartbeats"] - median) / mad
+                if z_score <= -3.5:
+                    attempt_graceful_shutdown(workers, socket)
+                    raise RuntimeError(
+                        "At least one worker has timed out. Stopping distributed build."
+                    )
 
 
 async def worker(url: str, port: int, num_processes: int):
@@ -226,7 +227,7 @@ async def worker(url: str, port: int, num_processes: int):
         while running:
             await socket.send("READY_{}".format(hostname).encode("utf-8"))
             try:
-                message = await asyncio.wait_for(socket.recv(), timeout=120)
+                message = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
             except asyncio.TimeoutError:
                 socket.close()
                 raise RuntimeError("Stopping work as manager timed out.")

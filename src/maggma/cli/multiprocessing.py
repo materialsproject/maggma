@@ -18,6 +18,8 @@ from tqdm import tqdm
 
 from maggma.utils import primed
 
+MANAGER_TIMEOUT = 120 # max timeout in seconds for manager
+
 logger = getLogger("MultiProcessor")
 
 
@@ -208,16 +210,16 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
     if socket:
         await socket.send_string("PING")
         try:
-            message = await wait_for(socket.recv(), timeout=120)
+            message = await wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
             if message.decode("utf-8") != "PONG":
                 socket.close()
                 raise RuntimeError(
-                    "Stopping work as main node did not respong to heartbeat from worker."
+                    "Stopping work as manager did not respond to heartbeat from worker."
                 )
 
         except TimeoutError:
             socket.close()
-            raise RuntimeError("Stopping work as main node is not responding.")
+            raise RuntimeError("Stopping work as manager is not responding.")
 
     back_pressure_relief = back_pressured_get.release(processed_items)
 
