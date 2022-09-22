@@ -198,6 +198,12 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
         disable=no_bars,
     )
 
+    if socket:
+        await socket.send("PING")
+        message = await socket.recv()
+        if message.decode("utf-8") != "PONG":
+            raise RuntimeError("Stopping work as main node is not responding.")
+
     back_pressure_relief = back_pressured_get.release(processed_items)
 
     update_items = tqdm(total=total, desc="Update Targets", disable=no_bars)
