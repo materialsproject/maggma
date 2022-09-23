@@ -1,5 +1,8 @@
 import asyncio
 import json
+from multiprocessing.sharedctypes import Value
+import threading
+import time
 
 import pytest
 
@@ -53,110 +56,57 @@ class DummyBuilderError(DummyBuilderWithNoPrechunk):
 
 
 SERVER_URL = "tcp://127.0.0.1"
-SERVER_PORT = 8234
+SERVER_PORT = 1234
 
 
 @pytest.mark.xfail(raises=ValueError)
-@pytest.mark.asyncio
-async def test_wrong_worker_input(log_to_stdout):
+def test_wrong_worker_input(log_to_stdout):
 
-    manager_server = asyncio.create_task(
-        manager(
-            SERVER_URL,
-            SERVER_PORT,
-            [DummyBuilder(dummy_prechunk=False)],
-            num_chunks=2,
-            num_workers=0,
-        )
+    manager(
+        SERVER_URL,
+        SERVER_PORT,
+        [DummyBuilder(dummy_prechunk=False)],
+        num_chunks=2,
+        num_workers=0,
     )
-
-    await asyncio.sleep(1)
-    manager_server.result()
 
 
 @pytest.mark.asyncio
-async def test_manager_give_out_chunks(log_to_stdout):
+async def test_manager_and_worker(log_to_stdout):
 
-    manager_server = asyncio.create_task(
-        manager(
-            SERVER_URL,
-            SERVER_PORT,
-            [DummyBuilder(dummy_prechunk=False)],
-            num_chunks=10,
-            num_workers=10,
-        )
+    manager_thread = threading.Thread(
+        target=manager,
+        args=(SERVER_URL, SERVER_PORT, [DummyBuilder(dummy_prechunk=False)], 5, 5),
     )
+    manager_thread.start()
 
     context = zmq.Context()
     socket = context.socket(REQ)
     socket.connect(f"{SERVER_URL}:{SERVER_PORT}")
 
-    for i in range(0, 10):
-        log_to_stdout.debug(f"Going to ask Manager for work: {i}")
-        await socket.send(b"Ready")
-        message = await socket.recv()
+    tasks = [worker(SERVER_URL, SERVER_PORT, num_processes=1) for _ in range(5)]
+    await asyncio.gather(*tasks)
 
-        work = json.loads(message.decode("utf-8"))
-
-        assert work["@class"] == "DummyBuilder"
-        assert work["@module"] == "tests.cli.test_distributed"
-        assert work["val"] == i
-
-    for i in range(0, 10):
-        await socket.send(b"Ready")
-        message = await socket.recv()
-        assert message == b'"EXIT"'
-
-    manager_server.cancel()
+    manager_thread.join()
 
 
 @pytest.mark.asyncio
 async def test_manager_worker_error(log_to_stdout):
 
-    manager_server = asyncio.create_task(
-        manager(
-            SERVER_URL,
-            SERVER_PORT,
-            [DummyBuilder(dummy_prechunk=False)],
-            num_chunks=10,
-            num_workers=1,
-        )
+    manager_thread = threading.Thread(
+        target=manager,
+        args=(SERVER_URL, SERVER_PORT, [DummyBuilder(dummy_prechunk=False)], 10, 1),
     )
+    manager_thread.start()
 
     context = zmq.Context()
     socket = context.socket(REQ)
     socket.connect(f"{SERVER_URL}:{SERVER_PORT}")
 
-    await socket.send("ERROR".encode("utf-8"))
+    await socket.send("ERROR_testerror".encode("utf-8"))
     await asyncio.sleep(1)
-    assert manager_server.done()
-    manager_server.cancel()
 
-
-@pytest.mark.asyncio
-async def test_worker():
-    context = zmq.Context()
-    socket = context.socket(REP)
-    socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
-
-    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1))
-
-    message = await socket.recv()
-
-    dummy_work = {
-        "@module": "tests.cli.test_distributed",
-        "@class": "DummyBuilder",
-        "@version": None,
-        "dummy_prechunk": False,
-        "val": 0,
-    }
-    for i in range(2):
-        await socket.send(json.dumps(dummy_work).encode("utf-8"))
-        await asyncio.sleep(1)
-        message = await socket.recv()
-        assert message == HOSTNAME.encode("utf-8")
-
-    worker_task.cancel()
+    manager_thread.join()
 
 
 @pytest.mark.asyncio
@@ -168,7 +118,7 @@ async def test_worker_error():
     worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1))
 
     message = await socket.recv()
-    assert message == HOSTNAME.encode("utf-8")
+    assert message == "READY_{}".format(HOSTNAME).encode("utf-8")
 
     dummy_work = {
         "@module": "tests.cli.test_distributed",
@@ -181,7 +131,7 @@ async def test_worker_error():
     await socket.send(json.dumps(dummy_work).encode("utf-8"))
     await asyncio.sleep(1)
     message = await socket.recv()
-    assert message.decode("utf-8") == "ERROR"
+    assert message.decode("utf-8") == "ERROR_Dummy error"
 
     worker_task.cancel()
 
@@ -195,31 +145,23 @@ async def test_worker_exit():
     worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1))
 
     message = await socket.recv()
-    assert message == HOSTNAME.encode("utf-8")
+    assert message == "READY_{}".format(HOSTNAME).encode("utf-8")
 
-    await socket.send_json("EXIT")
+    await socket.send(b"EXIT")
     await asyncio.sleep(1)
     assert worker_task.done()
 
     worker_task.cancel()
 
 
-@pytest.mark.asyncio
-async def test_no_prechunk(caplog):
-
-    asyncio.create_task(
-        manager(
-            SERVER_URL,
-            SERVER_PORT,
-            [DummyBuilderWithNoPrechunk(dummy_prechunk=False)],
-            num_chunks=10,
-            num_workers=10,
-        )
-    )
-    await asyncio.sleep(1)
-    assert (
-        "Can't distributed process DummyBuilderWithNoPrechunk. Skipping for now"
-        in caplog.text
+@pytest.mark.xfail
+def test_no_prechunk(caplog):
+    manager(
+        SERVER_URL,
+        SERVER_PORT,
+        [DummyBuilderWithNoPrechunk(dummy_prechunk=False)],
+        10,
+        1,
     )
 
 

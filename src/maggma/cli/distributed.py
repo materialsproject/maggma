@@ -28,7 +28,7 @@ def find_port():
     return sock.getsockname()[1]
 
 
-async def manager(
+def manager(
     url: str, port: int, builders: List[Builder], num_chunks: int, num_workers: int
 ):
     """
@@ -53,6 +53,8 @@ async def manager(
 
     workers = {}
 
+    logger.debug("Manager started and looking for workers")
+
     for builder in builders:
         logger.info(f"Working on {builder.__class__.__name__}")
         builder_dict = builder.as_dict()
@@ -76,8 +78,9 @@ async def manager(
             logger.info(f"Distributing {len(chunk_dicts)} chunks to workers")
 
         except NotImplementedError:
-            logger.error(
-                f"Can't distribute process {builder.__class__.__name__}. Skipping for now"
+            attempt_graceful_shutdown(workers, socket)
+            raise RuntimeError(
+                f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists."
             )
 
         completed = False
@@ -91,8 +94,6 @@ async def manager(
                 raise RuntimeError("No workers to distribute chunks to")
 
             # Poll and look for messages from workers
-            logger.debug("Manager started and looking for workers")
-
             connections = dict(poll.poll(1000))
 
             # If workers send messages decode and figure out what do
