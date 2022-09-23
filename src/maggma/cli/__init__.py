@@ -115,23 +115,23 @@ def run(
         root.addHandler(ReportingHandler(reporting_store))
 
     if url:
-        loop = asyncio.get_event_loop()
         if num_chunks > 0:
             # Manager
             if port is None:
                 port = find_port()
                 root.critical(f"Using random port for mrun manager: {port}")
-            loop.run_until_complete(
-                manager(
-                    url=url,
-                    port=port,
-                    builders=builder_objects,
-                    num_chunks=num_chunks,
-                    num_workers=num_workers,
-                )
+
+            manager(
+                url=url,
+                port=port,
+                builders=builder_objects,
+                num_chunks=num_chunks,
+                num_workers=num_workers,
             )
+
         else:
             # worker
+            loop = asyncio.get_event_loop()
             loop.run_until_complete(
                 worker(url=url, port=port, num_processes=num_processes)
             )
