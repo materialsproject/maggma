@@ -51,7 +51,7 @@ def manager(
     poll = zmq.Poller()
     poll.register(socket, zmq.POLLIN)
 
-    workers = {}
+    workers = {}  # type: ignore
 
     logger.debug("Manager started and looking for workers")
 
