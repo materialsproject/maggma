@@ -4,7 +4,6 @@
 import json
 from logging import getLogger
 import socket as pysocket
-from tkinter import W
 from typing import List
 import numpy as np
 from time import perf_counter
@@ -37,7 +36,7 @@ async def manager(
     the builder and send out modified builders for each worker to run.
 
     The manager will try and keep track of workers, including which error out and which complete.
-    Currently, if a single workers fails the entire distributed job will be stopped. 
+    Currently, if a single workers fails the entire distributed job will be stopped.
     """
     logger = getLogger("Manager")
 
