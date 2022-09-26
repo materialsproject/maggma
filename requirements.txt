@@ -9,7 +9,7 @@ aioitertools==0.10.0
 pydantic==1.9.1
 fastapi==0.79.0
 numpy==1.21.0;python_version>"3.6"
-pyzmq==22.3.0
+pyzmq==24.0.1
 dnspython==2.2.1
 uvicorn==0.18.2
 sshtunnel==0.4.0
