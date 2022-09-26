@@ -94,7 +94,7 @@ def manager(
                 raise RuntimeError("No workers to distribute chunks to")
 
             # Poll and look for messages from workers
-            connections = dict(poll.poll(2000))
+            connections = dict(poll.poll())
 
             # If workers send messages decode and figure out what do
             if connections:
@@ -142,11 +142,11 @@ def manager(
             handle_dead_workers(workers, socket)
 
             for work_index, chunk_dict in enumerate(chunk_dicts):
-                temp_builder_dict = dict(**builder_dict)
-                temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
-                temp_builder_dict = jsanitize(temp_builder_dict)
-
                 if not chunk_dict["distributed"]:
+
+                    temp_builder_dict = dict(**builder_dict)
+                    temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
+                    temp_builder_dict = jsanitize(temp_builder_dict)
 
                     # Send work for available workers
                     for identity in workers:
