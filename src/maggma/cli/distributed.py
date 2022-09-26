@@ -125,6 +125,7 @@ def manager(
                                     f"Sending exit signal to worker: {msg.split('_')[1]}"
                                 )
                                 socket.send_multipart([identity, b"", b"EXIT"])
+                                workers.pop(identity)
 
                 elif "ERROR" in msg:
                     # Remove worker and requeue work sent to it
