@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.49.1](https://github.com/materialsproject/maggma/tree/v0.49.1) (2022-09-26)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.0...v0.49.1)
+
+**Merged pull requests:**
+
+- Send proper exit message to workers [\#714](https://github.com/materialsproject/maggma/pull/714) ([munrojm](https://github.com/munrojm))
+
 ## [v0.49.0](https://github.com/materialsproject/maggma/tree/v0.49.0) (2022-09-23)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.48.1...v0.49.0)
