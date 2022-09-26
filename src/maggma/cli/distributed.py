@@ -8,6 +8,7 @@ from typing import List
 import numpy as np
 from time import perf_counter
 import asyncio
+from random import randint
 
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
@@ -220,12 +221,14 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
     Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
     """
-    # Should this have some sort of unique ID?
-    logger = getLogger("Worker")
+    identity = "%04X-%04X" % (randint(0, 0x10000), randint(0, 0x10000))
+    logger = getLogger(f"Worker {identity}")
 
     logger.info(f"Connnecting to Manager at {url}:{port}")
     context = azmq.Context()
     socket = context.socket(zmq.REQ)
+    
+    socket.setsockopt_string(zmq.IDENTITY, identity)
     socket.connect(f"{url}:{port}")
 
     # Initial message package
