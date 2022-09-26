@@ -121,6 +121,9 @@ def manager(
 
                             # If everything is distributed, send EXIT to the worker
                             if all(chunk["distributed"] for chunk in chunk_dicts):
+                                logger.debug(
+                                    f"Sending exit signal to worker: {msg.split('_')[1]}"
+                                )
                                 socket.send_multipart([identity, b"", b"EXIT"])
 
                 elif "ERROR" in msg:
