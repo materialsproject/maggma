@@ -210,7 +210,7 @@ def handle_dead_workers(workers, socket):
                     )
 
 
-async def worker(url: str, port: int, num_processes: int):
+async def worker(url: str, port: int, num_processes: int, no_bars: bool):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
@@ -240,7 +240,7 @@ async def worker(url: str, port: int, num_processes: int):
                 # We have a valid builder
                 work = json.loads(message)
                 builder = MontyDecoder().process_decoded(work)
-                await multi(builder, num_processes, socket=socket)
+                await multi(builder, num_processes, socket=socket, no_bars=no_bars)
             elif message == "EXIT":
                 # End the worker
                 running = False
