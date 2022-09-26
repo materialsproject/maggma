@@ -45,6 +45,7 @@ def manager(
 
     logger.info(f"Binding to Manager URL {url}:{port}")
     context = zmq.Context()
+    context.setsockopt(opt=zmq.SocketOption.ROUTER_MANDATORY, value=1)
     socket = context.socket(zmq.ROUTER)
     socket.bind(f"{url}:{port}")
 
