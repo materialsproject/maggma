@@ -94,7 +94,7 @@ def manager(
                 raise RuntimeError("No workers to distribute chunks to")
 
             # Poll and look for messages from workers
-            connections = dict(poll.poll(1000))
+            connections = dict(poll.poll(500))
 
             # If workers send messages decode and figure out what do
             if connections:
@@ -118,6 +118,10 @@ def manager(
                         if work_ind != -1:
                             chunk_dicts[work_ind]["completed"] = True  # type: ignore
                             pbar_completed.update(1)
+
+                            # If everything is distributed, send EXIT to the worker
+                            if all(chunk["distributed"] for chunk in chunk_dicts):
+                                socket.send_multipart([identity, b"", b"EXIT"])
 
                 elif "ERROR" in msg:
                     # Remove worker and requeue work sent to it
@@ -162,7 +166,8 @@ def manager(
                             chunk_dicts[work_index]["distributed"] = True
                             pbar_distributed.update(1)
 
-    logger.info("Sending exit messages to workers")
+    # Send EXIT to any remaining workers
+    logger.info("Sending exit messages to workers once they are done")
     attempt_graceful_shutdown(workers, socket)
 
 
@@ -191,8 +196,7 @@ def handle_dead_workers(workers, socket):
             raise RuntimeError("One worker has timed out. Stopping distributed build.")
 
     elif len(workers) > 2:
-        # Calculate modified z-score of heartbeat counts and remove those <= -3.5
-        # Re-queue work sent to dead worker
+        # Calculate modified z-score of heartbeat counts and see if any are <= -3.5
         hearbeat_vals = [w["heartbeats"] for w in workers.values()]
         median = np.median(hearbeat_vals)
         mad = np.median([abs(i - median) for i in hearbeat_vals])
