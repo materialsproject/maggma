@@ -66,12 +66,12 @@ def manager(
                 for d in builder.prechunk(num_chunks)
             ]
             pbar_distributed = tqdm(
-                total=num_chunks,
+                total=len(chunk_dicts),
                 desc="Distributed chunks for {}".format(builder.__class__.__name__),
             )
 
             pbar_completed = tqdm(
-                total=num_chunks,
+                total=len(chunk_dicts),
                 desc="Completed chunks for {}".format(builder.__class__.__name__),
             )
 
@@ -94,7 +94,7 @@ def manager(
                 raise RuntimeError("No workers to distribute chunks to")
 
             # Poll and look for messages from workers
-            connections = dict(poll.poll(500))
+            connections = dict(poll.poll())
 
             # If workers send messages decode and figure out what do
             if connections:
