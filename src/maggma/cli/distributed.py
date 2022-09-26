@@ -94,7 +94,7 @@ def manager(
                 raise RuntimeError("No workers to distribute chunks to")
 
             # Poll and look for messages from workers
-            connections = dict(poll.poll())
+            connections = dict(poll.poll(100))
 
             # If workers send messages decode and figure out what do
             if connections:
