@@ -208,9 +208,9 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
     )
 
     if socket:
-        socket.send_string("PING")
+        await socket.send_string("PING")
         try:
-            message = socket.recv()
+            message = await wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
             if message.decode("utf-8") != "PONG":
                 socket.close()
                 raise RuntimeError(
