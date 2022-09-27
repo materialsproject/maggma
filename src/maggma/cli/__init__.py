@@ -133,7 +133,7 @@ def run(
             # worker
             loop = asyncio.get_event_loop()
             loop.run_until_complete(
-                worker(url=url, port=port, num_processes=num_processes)
+                worker(url=url, port=port, num_processes=num_processes, no_bars=no_bars)
             )
     else:
         if num_processes == 1:

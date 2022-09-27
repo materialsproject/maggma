@@ -18,7 +18,7 @@ from tqdm import tqdm
 
 from maggma.utils import primed
 
-MANAGER_TIMEOUT = 120  # max timeout in seconds for manager
+MANAGER_TIMEOUT = 600  # max timeout in seconds for manager
 
 logger = getLogger("MultiProcessor")
 

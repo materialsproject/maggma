@@ -80,11 +80,7 @@ async def test_manager_and_worker(log_to_stdout):
     )
     manager_thread.start()
 
-    context = zmq.Context()
-    socket = context.socket(REQ)
-    socket.connect(f"{SERVER_URL}:{SERVER_PORT}")
-
-    tasks = [worker(SERVER_URL, SERVER_PORT, num_processes=1) for _ in range(5)]
+    tasks = [worker(SERVER_URL, SERVER_PORT, num_processes=1, no_bars=True) for _ in range(5)]
     await asyncio.gather(*tasks)
 
     manager_thread.join()
@@ -115,7 +111,7 @@ async def test_worker_error():
     socket = context.socket(REP)
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
-    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1))
+    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1, no_bars=True))
 
     message = await socket.recv()
     assert message == "READY_{}".format(HOSTNAME).encode("utf-8")
@@ -142,11 +138,11 @@ async def test_worker_exit():
     socket = context.socket(REP)
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
-    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1))
+    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1, no_bars=True))
 
     message = await socket.recv()
     assert message == "READY_{}".format(HOSTNAME).encode("utf-8")
-
+    await asyncio.sleep(1)
     await socket.send(b"EXIT")
     await asyncio.sleep(1)
     assert worker_task.done()

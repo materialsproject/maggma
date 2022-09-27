@@ -8,6 +8,7 @@ from typing import List
 import numpy as np
 from time import perf_counter
 import asyncio
+from random import randint
 
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
@@ -45,6 +46,7 @@ def manager(
 
     logger.info(f"Binding to Manager URL {url}:{port}")
     context = zmq.Context()
+    context.setsockopt(opt=zmq.SocketOption.ROUTER_MANDATORY, value=1)
     socket = context.socket(zmq.ROUTER)
     socket.bind(f"{url}:{port}")
 
@@ -66,12 +68,12 @@ def manager(
                 for d in builder.prechunk(num_chunks)
             ]
             pbar_distributed = tqdm(
-                total=num_chunks,
+                total=len(chunk_dicts),
                 desc="Distributed chunks for {}".format(builder.__class__.__name__),
             )
 
             pbar_completed = tqdm(
-                total=num_chunks,
+                total=len(chunk_dicts),
                 desc="Completed chunks for {}".format(builder.__class__.__name__),
             )
 
@@ -94,13 +96,13 @@ def manager(
                 raise RuntimeError("No workers to distribute chunks to")
 
             # Poll and look for messages from workers
-            connections = dict(poll.poll(500))
+            connections = dict(poll.poll(100))
 
             # If workers send messages decode and figure out what do
             if connections:
-                identity, _, msg = socket.recv_multipart()
+                identity, _, bmsg = socket.recv_multipart()
 
-                msg = msg.decode("utf-8")
+                msg = bmsg.decode("utf-8")
 
                 if "READY" in msg:
                     if identity not in workers:
@@ -121,7 +123,11 @@ def manager(
 
                             # If everything is distributed, send EXIT to the worker
                             if all(chunk["distributed"] for chunk in chunk_dicts):
+                                logger.debug(
+                                    f"Sending exit signal to worker: {msg.split('_')[1]}"
+                                )
                                 socket.send_multipart([identity, b"", b"EXIT"])
+                                workers.pop(identity)
 
                 elif "ERROR" in msg:
                     # Remove worker and requeue work sent to it
@@ -142,11 +148,11 @@ def manager(
             handle_dead_workers(workers, socket)
 
             for work_index, chunk_dict in enumerate(chunk_dicts):
-                temp_builder_dict = dict(**builder_dict)
-                temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
-                temp_builder_dict = jsanitize(temp_builder_dict)
-
                 if not chunk_dict["distributed"]:
+
+                    temp_builder_dict = dict(**builder_dict)
+                    temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
+                    temp_builder_dict = jsanitize(temp_builder_dict)
 
                     # Send work for available workers
                     for identity in workers:
@@ -210,17 +216,19 @@ def handle_dead_workers(workers, socket):
                     )
 
 
-async def worker(url: str, port: int, num_processes: int):
+async def worker(url: str, port: int, num_processes: int, no_bars: bool):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
     """
-    # Should this have some sort of unique ID?
-    logger = getLogger("Worker")
+    identity = "%04X-%04X" % (randint(0, 0x10000), randint(0, 0x10000))
+    logger = getLogger(f"Worker {identity}")
 
     logger.info(f"Connnecting to Manager at {url}:{port}")
     context = azmq.Context()
     socket = context.socket(zmq.REQ)
+
+    socket.setsockopt_string(zmq.IDENTITY, identity)
     socket.connect(f"{url}:{port}")
 
     # Initial message package
@@ -231,16 +239,17 @@ async def worker(url: str, port: int, num_processes: int):
         while running:
             await socket.send("READY_{}".format(hostname).encode("utf-8"))
             try:
-                message = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
+                bmessage: bytes = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)  # type: ignore
             except asyncio.TimeoutError:
                 socket.close()
                 raise RuntimeError("Stopping work as manager timed out.")
-            message = message.decode("utf-8")
+
+            message = bmessage.decode("utf-8")
             if "@class" in message and "@module" in message:
                 # We have a valid builder
                 work = json.loads(message)
                 builder = MontyDecoder().process_decoded(work)
-                await multi(builder, num_processes, socket=socket)
+                await multi(builder, num_processes, socket=socket, no_bars=no_bars)
             elif message == "EXIT":
                 # End the worker
                 running = False
