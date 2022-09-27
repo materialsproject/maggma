@@ -227,7 +227,7 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
     logger = getLogger(f"Worker {identity}")
 
     logger.info(f"Connnecting to Manager at {url}:{port}")
-    context = azmq.Context()
+    context = zmq.Context()
     socket = context.socket(zmq.REQ)
 
     socket.setsockopt_string(zmq.IDENTITY, identity)
@@ -239,12 +239,9 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
     try:
         running = True
         while running:
-            await socket.send("READY_{}".format(hostname).encode("utf-8"))
-            try:
-                bmessage: bytes = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)  # type: ignore
-            except asyncio.TimeoutError:
-                socket.close()
-                raise RuntimeError("Stopping work as manager timed out.")
+            socket.send("READY_{}".format(hostname).encode("utf-8"))
+
+            bmessage: bytes = socket.recv()  # type: ignore
 
             message = bmessage.decode("utf-8")
             if "@class" in message and "@module" in message:
@@ -258,7 +255,7 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
 
     except Exception as e:
         logger.error(f"A worker failed with error: {e}")
-        await socket.send("ERROR_{}".format(e).encode("utf-8"))
+        socket.send("ERROR_{}".format(e).encode("utf-8"))
         socket.close()
 
     socket.close()
