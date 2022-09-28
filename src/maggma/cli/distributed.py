@@ -6,7 +6,7 @@ from logging import getLogger
 import socket as pysocket
 from typing import List
 import numpy as np
-from time import perf_counter
+from time import perf_counter, sleep
 import asyncio
 from random import randint
 
@@ -149,6 +149,7 @@ def manager(
                                     identity, _, bmsg = socket.recv_multipart()
                                     expected_response = "RUNNING_{}".format(identity.decode("utf-8"))
                                     if expected_response == bmsg.decode("utf-8"):
+
                                         workers[identity]["work_index"] = work_index
                                         workers[identity]["working"] = True
                                         chunk_dicts[work_index]["distributed"] = True
@@ -278,7 +279,6 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
 
                 # Tell manager we have work
                 await socket.send("RUNNING_{}".format(identity).encode("utf-8"))
-                bmessage: bytes = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)  # type: ignore
 
                 builder = MontyDecoder().process_decoded(work)
                 await multi(builder, num_processes, socket=socket, no_bars=no_bars)
