@@ -20,7 +20,7 @@ from maggma.utils import tqdm
 import zmq
 import zmq.asyncio as azmq
 
-WORKER_TIMEOUT = 1200  # max timeout in seconds for a worker
+WORKER_TIMEOUT = 5400  # max timeout in seconds for a worker
 
 
 def find_port():
