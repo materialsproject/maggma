@@ -97,39 +97,89 @@ def manager(
                 socket.close()
                 raise RuntimeError("No workers to distribute chunks to")
 
-            # Poll and look for messages from workers
-            connections = dict(poll.poll(100))
+            # Ensure all workers are connected
+            while not len(workers) == num_workers:
 
+                # Poll and look for workers
+                connections = dict(poll.poll(100))
+
+                # If workers send messages decode and figure out what do
+                if connections:
+                    identity, _, bmsg = socket.recv_multipart()
+
+                    msg = bmsg.decode("utf-8")
+
+                    if "READY" in msg:
+                        if identity not in workers:
+                            logger.debug(f"Got connection from worker: {msg.split('_')[1]}")
+                            workers[identity] = {
+                                "working": False,
+                                "heartbeats": 1,
+                                "last_ping": perf_counter(),
+                                "work_index": -1,
+                            }
+
+            # Distribute work to workers and wait for confirmation
+            while not all([w["working"] for w in workers.values()]):
+
+                for work_index, chunk_dict in enumerate(chunk_dicts):
+                    if not chunk_dict["distributed"]:
+
+                        temp_builder_dict = dict(**builder_dict)
+                        temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
+                        temp_builder_dict = jsanitize(temp_builder_dict)
+
+                        # Send work for available workers
+                        for identity in workers:
+                            if not workers[identity]["working"]:
+
+                                # Send out a chunk to idle worker
+                                socket.send_multipart(
+                                    [
+                                        identity,
+                                        b"",
+                                        json.dumps(temp_builder_dict).encode("utf-8"),
+                                    ]
+                                )
+
+                                # Poll with blocking and look for response from worker
+                                connections = dict(poll.poll())
+
+                                if connections:
+                                    identity, _, bmsg = socket.recv_multipart()
+                                    expected_response = "RUNNING_{}".format(identity).encode("utf-8")  # type: ignore
+                                    if expected_response == bmsg:
+                                        workers[identity]["work_index"] = work_index
+                                        workers[identity]["working"] = True
+                                        chunk_dicts[work_index]["distributed"] = True
+                                        pbar_distributed.update(1)
+                                    else:
+                                        raise RuntimeError("Incorrect worker response. Aborting build.")
+                                else:
+                                    raise RuntimeError("No response from worker. Aborting build.")
+
+            # Poll and look for workers
+            connections = dict(poll.poll(100))
             # If workers send messages decode and figure out what do
             if connections:
                 identity, _, bmsg = socket.recv_multipart()
-
                 msg = bmsg.decode("utf-8")
 
                 if "READY" in msg:
-                    if identity not in workers:
-                        logger.debug(f"Got connection from worker: {msg.split('_')[1]}")
-                        workers[identity] = {
-                            "working": False,
-                            "heartbeats": 1,
-                            "last_ping": perf_counter(),
-                            "work_index": -1,
-                        }
 
-                    else:
-                        workers[identity]["working"] = False
-                        work_ind = workers[identity]["work_index"]
-                        if work_ind != -1:
-                            chunk_dicts[work_ind]["completed"] = True  # type: ignore
-                            pbar_completed.update(1)
+                    workers[identity]["working"] = False
+                    work_ind = workers[identity]["work_index"]
 
-                            # If everything is distributed, send EXIT to the worker
-                            if all(chunk["distributed"] for chunk in chunk_dicts):
-                                logger.debug(
-                                    f"Sending exit signal to worker: {msg.split('_')[1]}"
-                                )
-                                socket.send_multipart([identity, b"", b"EXIT"])
-                                workers.pop(identity)
+                    if work_ind != -1:
+                        chunk_dicts[work_ind]["completed"] = True  # type: ignore
+                        pbar_completed.update(1)
+
+                        # If everything is distributed, send EXIT to the worker
+                        if all(chunk["distributed"] for chunk in chunk_dicts):
+                            logger.debug(
+                                f"Sending exit signal to worker: {msg.split('_')[1]}"
+                            )
+                            socket.send_multipart([identity, b"", b"EXIT"])
 
                 elif "ERROR" in msg:
                     # Remove worker and requeue work sent to it
@@ -148,31 +198,6 @@ def manager(
 
             # Decide if any workers are dead and need to be removed
             handle_dead_workers(workers, socket)
-
-            for work_index, chunk_dict in enumerate(chunk_dicts):
-                if not chunk_dict["distributed"]:
-
-                    temp_builder_dict = dict(**builder_dict)
-                    temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
-                    temp_builder_dict = jsanitize(temp_builder_dict)
-
-                    # Send work for available workers
-                    for identity in workers:
-                        if not workers[identity]["working"]:
-
-                            # Send out a chunk to idle worker
-                            socket.send_multipart(
-                                [
-                                    identity,
-                                    b"",
-                                    json.dumps(temp_builder_dict).encode("utf-8"),
-                                ]
-                            )
-
-                            workers[identity]["work_index"] = work_index
-                            workers[identity]["working"] = True
-                            chunk_dicts[work_index]["distributed"] = True
-                            pbar_distributed.update(1)
 
     # Send EXIT to any remaining workers
     logger.info("Sending exit messages to workers once they are done")
@@ -240,7 +265,6 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
         running = True
         while running:
             await socket.send("READY_{}".format(hostname).encode("utf-8"))
-            await asyncio.sleep(2)
             try:
                 bmessage: bytes = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)  # type: ignore
             except asyncio.TimeoutError:
@@ -251,6 +275,11 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
             if "@class" in message and "@module" in message:
                 # We have a valid builder
                 work = json.loads(message)
+
+                # Tell manager we have work
+                await socket.send("RUNNING_{}".format(identity).encode("utf-8"))
+                bmessage: bytes = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)  # type: ignore
+
                 builder = MontyDecoder().process_decoded(work)
                 await multi(builder, num_processes, socket=socket, no_bars=no_bars)
             elif message == "EXIT":
