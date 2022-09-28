@@ -147,8 +147,8 @@ def manager(
 
                                 if connections:
                                     identity, _, bmsg = socket.recv_multipart()
-                                    expected_response = "RUNNING_{}".format(identity).encode("utf-8")  # type: ignore
-                                    if expected_response == bmsg:
+                                    expected_response = "RUNNING_{}".format(identity.decode("utf-8"))
+                                    if expected_response == bmsg.decode("utf-8"):
                                         workers[identity]["work_index"] = work_index
                                         workers[identity]["working"] = True
                                         chunk_dicts[work_index]["distributed"] = True
