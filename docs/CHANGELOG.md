@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.49.5](https://github.com/materialsproject/maggma/tree/v0.49.5) (2022-09-30)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.4...v0.49.5)
+
+**Merged pull requests:**
+
+- Up manager timeout [\#718](https://github.com/materialsproject/maggma/pull/718) ([munrojm](https://github.com/munrojm))
+
 ## [v0.49.4](https://github.com/materialsproject/maggma/tree/v0.49.4) (2022-09-28)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.3...v0.49.4)
