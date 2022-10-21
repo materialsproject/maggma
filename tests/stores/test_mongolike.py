@@ -506,13 +506,17 @@ def test_json_store_writeable(test_dir):
 
 def test_jsonstore_last_updated(jsonstore):
     jsonstore.connect()
-    assert jsonstore.last_updated == datetime.min
+    with pytest.raises(StoreError) as cm:
+        jsonstore.last_updated
+    assert cm.match(jsonstore.last_updated_field)
     start_time = datetime.utcnow()
-    # all documents in the .json files are missing the last_updated field, so
-    # the field is instantiated with a value of None
-    # this will return datetime.min when last_updated is called
-    jsonstore._collection.insert_one({jsonstore.key: 1, "a": 1})
-    assert jsonstore.last_updated == datetime.min
+    # jsonstore._collection.insert_one({jsonstore.key: 1, "a": 1})
+    # assert jsonstore.last_updated == datetime.min
+    # NOTE: mongo only stores datetime with ms precision (apparently), and that
+    # can cause the test below to fail. So we add a wait here.
+    import time
+
+    time.sleep(0.1)
     jsonstore.update(
         [{jsonstore.key: 1, "a": 1, jsonstore.last_updated_field: datetime.utcnow()}]
     )

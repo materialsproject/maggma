@@ -763,13 +763,13 @@ class JSONStore(MemoryStore):
             objects = orjson.loads(data)
             objects = [objects] if not isinstance(objects, list) else objects
             # datetime objects deserialize to str. Try to convert the last_updated
-            # field back to datetime. If it does not exist, create it and assign
-            # value of None. See Store.last_updated in store.py.
+            # field back to datetime.
+            # # TODO - there may still be problems caused if a JSONStore is init'ed from
+            # documents that don't contain a last_updated field
+            # See Store.last_updated in store.py.
             for obj in objects:
                 if obj.get(self.last_updated_field):
                     obj[self.last_updated_field] = to_dt(obj[self.last_updated_field])
-                else:
-                    obj[self.last_updated_field] = None
 
         return objects
 
