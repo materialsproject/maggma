@@ -407,6 +407,19 @@ def test_montystore_remove_docs(montystore):
     assert len(list(montystore.query({"a": 1}))) == 0
 
 
+def test_montystore_last_updated(montystore):
+    assert montystore.last_updated == datetime.min
+    start_time = datetime.utcnow()
+    montystore._collection.insert_one({montystore.key: 1, "a": 1})
+    with pytest.raises(StoreError) as cm:
+        montystore.last_updated
+    assert cm.match(montystore.last_updated_field)
+    montystore.update(
+        [{montystore.key: 1, "a": 1, montystore.last_updated_field: datetime.utcnow()}]
+    )
+    assert montystore.last_updated > start_time
+
+
 def test_json_store_load(jsonstore, test_dir):
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
@@ -489,6 +502,21 @@ def test_json_store_writeable(test_dir):
             assert jsonstore.count() == 2
             jsonstore.close()
             update_json_file_mock.assert_not_called()
+
+
+def test_jsonstore_last_updated(jsonstore):
+    jsonstore.connect()
+    assert jsonstore.last_updated == datetime.min
+    start_time = datetime.utcnow()
+    # all documents in the .json files are missing the last_updated field, so
+    # the field is instantiated with a value of None
+    # this will return datetime.min when last_updated is called
+    jsonstore._collection.insert_one({jsonstore.key: 1, "a": 1})
+    assert jsonstore.last_updated == datetime.min
+    jsonstore.update(
+        [{jsonstore.key: 1, "a": 1, jsonstore.last_updated_field: datetime.utcnow()}]
+    )
+    assert jsonstore.last_updated > start_time
 
 
 def test_eq(mongostore, memorystore, jsonstore):
