@@ -388,7 +388,7 @@ class MongoStore(Store):
                 for k, v in sort.items()
             ]
             if sort
-            else None
+            else [("_id", 1)]
         )
 
         hint_list = (
