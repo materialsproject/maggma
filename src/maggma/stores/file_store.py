@@ -21,6 +21,7 @@ from maggma.stores.mongolike import MemoryStore, JSONStore
 PROTECTED_KEYS = {
     "_id",
     "name",
+    "path",
     "last_updated",
     "hash",
     "size",
@@ -243,6 +244,7 @@ class FileStore(MemoryStore):
         d = {
             "name": f.name,
             "path": f,
+            "path_relative": relative_path,
             "parent": f.parent.name,
             "size": f.stat().st_size,
             "last_updated": datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc),
@@ -322,8 +324,8 @@ class FileStore(MemoryStore):
         cannot be updated with this method. This prevents the contents of the FileStore
         from becoming out of sync with the files on which it is based. The protected fields
         are keys in the dict returned by _create_record_from_file, e.g. 'name', 'parent',
-        'last_updated', 'hash', 'size', 'contents', and 'orphan'. The 'path' and key fields
-        are retained to make each document in the JSON file identifiable by manual inspection.
+        'path', 'last_updated', 'hash', 'size', 'contents', and 'orphan'. The 'path_relative' and key fields are
+        retained to make each document in the JSON file identifiable by manual inspection.
 
         Args:
             docs: the document or list of documents to update
@@ -343,8 +345,11 @@ class FileStore(MemoryStore):
         # remove fields that are populated by .read()
         for d in data:
             filtered_d = self._filter_data(d)
-            # don't write records that contain only file_id and path
-            if len(set(filtered_d.keys()).difference(set(["path", self.key]))) != 0:
+            # don't write records that contain only file_id
+            if (
+                len(set(filtered_d.keys()).difference(set(["path_relative", self.key])))
+                != 0
+            ):
                 filtered_data.append(filtered_d)
         self.metadata_store.update(filtered_data, self.key)
 
