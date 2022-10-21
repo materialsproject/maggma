@@ -296,11 +296,17 @@ def test_metadata(test_dir):
     4. close the store, init a new one
     5. confirm metadata correctly associated with the files
     """
-    fs = FileStore(test_dir, read_only=False)
+    fs = FileStore(test_dir, read_only=False, last_updated_field="last_change")
     fs.connect()
     query = {"name": "input.in", "parent": "calculation1"}
     key = list(fs.query(query))[0][fs.key]
-    fs.add_metadata({"metadata": {"experiment date": "2022-01-18"}}, query)
+    fs.add_metadata(
+        {
+            "metadata": {"experiment date": "2022-01-18"},
+            fs.last_updated_field: "this should not be here",
+        },
+        query,
+    )
 
     # make sure metadata has been added to the item without removing other contents
     item_from_store = list(fs.query({"file_id": key}))[0]
@@ -316,6 +322,7 @@ def test_metadata(test_dir):
     assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
     assert not item_from_file.get("name")
     assert not item_from_file.get("path")
+    assert not item_from_file.get(fs.last_updated_field)
     assert item_from_file.get("path_relative")
 
     # make sure metadata is preserved after reconnecting

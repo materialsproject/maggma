@@ -360,7 +360,11 @@ class FileStore(MemoryStore):
         Args:
             d: Dictionary whose keys are to be filtered
         """
-        filtered_d = {k: v for k, v in d.items() if k not in PROTECTED_KEYS}
+        filtered_d = {
+            k: v
+            for k, v in d.items()
+            if k not in PROTECTED_KEYS.union({self.last_updated_field})
+        }
         return filtered_d
 
     def query(  # type: ignore
