@@ -510,8 +510,8 @@ def test_jsonstore_last_updated(jsonstore):
         jsonstore.last_updated
     assert cm.match(jsonstore.last_updated_field)
     start_time = datetime.utcnow()
-    # jsonstore._collection.insert_one({jsonstore.key: 1, "a": 1})
-    # assert jsonstore.last_updated == datetime.min
+    jsonstore.close()
+    jsonstore.connect()
     # NOTE: mongo only stores datetime with ms precision (apparently), and that
     # can cause the test below to fail. So we add a wait here.
     import time
