@@ -3081,7 +3081,10 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+        <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
@@ -3163,6 +3166,14 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
             <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">data</span>
             <span class="n">objects</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
             <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">objects</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">objects</span>
+            <span class="c1"># datetime objects deserialize to str. Try to convert the last_updated</span>
+            <span class="c1"># field back to datetime.</span>
+            <span class="c1"># # TODO - there may still be problems caused if a JSONStore is init&#39;ed from</span>
+            <span class="c1"># documents that don&#39;t contain a last_updated field</span>
+            <span class="c1"># See Store.last_updated in store.py.</span>
+            <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">):</span>
+                    <span class="n">obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_dt</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
 
         <span class="k">return</span> <span class="n">objects</span>
 
@@ -3350,7 +3361,10 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
         <details class="quote">
           <summary>Source code in <code>maggma/stores/mongolike.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
+    <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
@@ -3498,6 +3512,14 @@ a list of docs.</p>
         <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">decode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="k">else</span> <span class="n">data</span>
         <span class="n">objects</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="n">objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">objects</span><span class="p">]</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">objects</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="k">else</span> <span class="n">objects</span>
+        <span class="c1"># datetime objects deserialize to str. Try to convert the last_updated</span>
+        <span class="c1"># field back to datetime.</span>
+        <span class="c1"># # TODO - there may still be problems caused if a JSONStore is init&#39;ed from</span>
+        <span class="c1"># documents that don&#39;t contain a last_updated field</span>
+        <span class="c1"># See Store.last_updated in store.py.</span>
+        <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">obj</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">):</span>
+                <span class="n">obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">]</span> <span class="o">=</span> <span class="n">to_dt</span><span class="p">(</span><span class="n">obj</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
 
     <span class="k">return</span> <span class="n">objects</span>
 </code></pre></div>
@@ -6948,6 +6970,7 @@ of the FileStore.</p>
         <span class="n">d</span> <span class="o">=</span> <span class="p">{</span>
             <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">f</span><span class="p">,</span>
+            <span class="s2">&quot;path_relative&quot;</span><span class="p">:</span> <span class="n">relative_path</span><span class="p">,</span>
             <span class="s2">&quot;parent&quot;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="s2">&quot;size&quot;</span><span class="p">:</span> <span class="n">f</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="p">,</span>
             <span class="s2">&quot;last_updated&quot;</span><span class="p">:</span> <span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_mtime</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">),</span>
@@ -7027,8 +7050,8 @@ of the FileStore.</p>
 <span class="sd">        cannot be updated with this method. This prevents the contents of the FileStore</span>
 <span class="sd">        from becoming out of sync with the files on which it is based. The protected fields</span>
 <span class="sd">        are keys in the dict returned by _create_record_from_file, e.g. &#39;name&#39;, &#39;parent&#39;,</span>
-<span class="sd">        &#39;last_updated&#39;, &#39;hash&#39;, &#39;size&#39;, &#39;contents&#39;, and &#39;orphan&#39;. The &#39;path&#39; and key fields</span>
-<span class="sd">        are retained to make each document in the JSON file identifiable by manual inspection.</span>
+<span class="sd">        &#39;path&#39;, &#39;last_updated&#39;, &#39;hash&#39;, &#39;size&#39;, &#39;contents&#39;, and &#39;orphan&#39;. The &#39;path_relative&#39; and key fields are</span>
+<span class="sd">        retained to make each document in the JSON file identifiable by manual inspection.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            docs: the document or list of documents to update</span>
@@ -7048,8 +7071,11 @@ of the FileStore.</p>
         <span class="c1"># remove fields that are populated by .read()</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
             <span class="n">filtered_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_data</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-            <span class="c1"># don&#39;t write records that contain only file_id and path</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">filtered_d</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">])))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># don&#39;t write records that contain only file_id</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">filtered_d</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="s2">&quot;path_relative&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">])))</span>
+                <span class="o">!=</span> <span class="mi">0</span>
+            <span class="p">):</span>
                 <span class="n">filtered_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filtered_d</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">metadata_store</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
 
@@ -7060,7 +7086,11 @@ of the FileStore.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            d: Dictionary whose keys are to be filtered</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">filtered_d</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PROTECTED_KEYS</span><span class="p">}</span>
+        <span class="n">filtered_d</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">k</span><span class="p">:</span> <span class="n">v</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">k</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">PROTECTED_KEYS</span><span class="o">.</span><span class="n">union</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">})</span>
+        <span class="p">}</span>
         <span class="k">return</span> <span class="n">filtered_d</span>
 
     <span class="k">def</span> <span class="nf">query</span><span class="p">(</span>  <span class="c1"># type: ignore</span>
@@ -8072,8 +8102,8 @@ of the FileStore.</p>
 cannot be updated with this method. This prevents the contents of the FileStore
 from becoming out of sync with the files on which it is based. The protected fields
 are keys in the dict returned by _create_record_from_file, e.g. 'name', 'parent',
-'last_updated', 'hash', 'size', 'contents', and 'orphan'. The 'path' and key fields
-are retained to make each document in the JSON file identifiable by manual inspection.</p>
+'path', 'last_updated', 'hash', 'size', 'contents', and 'orphan'. The 'path_relative' and key fields are
+retained to make each document in the JSON file identifiable by manual inspection.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -8115,8 +8145,8 @@ are retained to make each document in the JSON file identifiable by manual inspe
 <span class="sd">    cannot be updated with this method. This prevents the contents of the FileStore</span>
 <span class="sd">    from becoming out of sync with the files on which it is based. The protected fields</span>
 <span class="sd">    are keys in the dict returned by _create_record_from_file, e.g. &#39;name&#39;, &#39;parent&#39;,</span>
-<span class="sd">    &#39;last_updated&#39;, &#39;hash&#39;, &#39;size&#39;, &#39;contents&#39;, and &#39;orphan&#39;. The &#39;path&#39; and key fields</span>
-<span class="sd">    are retained to make each document in the JSON file identifiable by manual inspection.</span>
+<span class="sd">    &#39;path&#39;, &#39;last_updated&#39;, &#39;hash&#39;, &#39;size&#39;, &#39;contents&#39;, and &#39;orphan&#39;. The &#39;path_relative&#39; and key fields are</span>
+<span class="sd">    retained to make each document in the JSON file identifiable by manual inspection.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        docs: the document or list of documents to update</span>
@@ -8136,8 +8166,11 @@ are retained to make each document in the JSON file identifiable by manual inspe
     <span class="c1"># remove fields that are populated by .read()</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
         <span class="n">filtered_d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filter_data</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-        <span class="c1"># don&#39;t write records that contain only file_id and path</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">filtered_d</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="s2">&quot;path&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">])))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># don&#39;t write records that contain only file_id</span>
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">filtered_d</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="s2">&quot;path_relative&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">])))</span>
+            <span class="o">!=</span> <span class="mi">0</span>
+        <span class="p">):</span>
             <span class="n">filtered_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">filtered_d</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">metadata_store</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">filtered_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
 </code></pre></div>
