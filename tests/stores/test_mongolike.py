@@ -10,7 +10,6 @@ import pymongo.collection
 import pytest
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
-import maggma.stores
 from maggma.core import StoreError
 from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore
 from maggma.stores.mongolike import MontyStore
@@ -407,6 +406,19 @@ def test_montystore_remove_docs(montystore):
     assert len(list(montystore.query({"a": 1}))) == 0
 
 
+def test_montystore_last_updated(montystore):
+    assert montystore.last_updated == datetime.min
+    start_time = datetime.utcnow()
+    montystore._collection.insert_one({montystore.key: 1, "a": 1})
+    with pytest.raises(StoreError) as cm:
+        montystore.last_updated
+    assert cm.match(montystore.last_updated_field)
+    montystore.update(
+        [{montystore.key: 1, "a": 1, montystore.last_updated_field: datetime.utcnow()}]
+    )
+    assert montystore.last_updated > start_time
+
+
 def test_json_store_load(jsonstore, test_dir):
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
@@ -489,6 +501,36 @@ def test_json_store_writeable(test_dir):
             assert jsonstore.count() == 2
             jsonstore.close()
             update_json_file_mock.assert_not_called()
+
+
+def test_jsonstore_last_updated(test_dir):
+    # files = []
+    # for f in ["a.json", "b.json"]:
+    #     files.append(test_dir / "test_set" / f)
+    with ScratchDir("."):
+        # if the .json does not exist, it should be created
+        jsonstore = JSONStore("a.json", read_only=False)
+        jsonstore.connect()
+        start_time = datetime.utcnow()
+        # NOTE: mongo only stores datetime with ms precision (apparently), and that
+        # can cause the test below to fail. So we add a wait here.
+        import time
+
+        time.sleep(0.1)
+        jsonstore.update(
+            [
+                {
+                    jsonstore.key: 1,
+                    "a": 1,
+                    jsonstore.last_updated_field: datetime.utcnow(),
+                }
+            ]
+        )
+        # These lines ensure that the read_json_file method gets called after
+        # last_updated is written to the .json file
+        jsonstore.close()
+        jsonstore.connect()
+        assert jsonstore.last_updated > start_time
 
 
 def test_eq(mongostore, memorystore, jsonstore):

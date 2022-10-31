@@ -24,7 +24,7 @@ from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailur
 from sshtunnel import SSHTunnelForwarder
 
 from maggma.core import Sort, Store, StoreError
-from maggma.utils import confirm_field_index
+from maggma.utils import confirm_field_index, to_dt
 
 try:
     import montydb
@@ -388,7 +388,7 @@ class MongoStore(Store):
                 for k, v in sort.items()
             ]
             if sort
-            else None
+            else [("_id", 1)]
         )
 
         hint_list = (
@@ -677,7 +677,10 @@ class JSONStore(MemoryStore):
     """
 
     def __init__(
-        self, paths: Union[str, List[str]], read_only: bool = True, **kwargs,
+        self,
+        paths: Union[str, List[str]],
+        read_only: bool = True,
+        **kwargs,
     ):
         """
         Args:
@@ -759,6 +762,14 @@ class JSONStore(MemoryStore):
             data = data.decode() if isinstance(data, bytes) else data
             objects = orjson.loads(data)
             objects = [objects] if not isinstance(objects, list) else objects
+            # datetime objects deserialize to str. Try to convert the last_updated
+            # field back to datetime.
+            # # TODO - there may still be problems caused if a JSONStore is init'ed from
+            # documents that don't contain a last_updated field
+            # See Store.last_updated in store.py.
+            for obj in objects:
+                if obj.get(self.last_updated_field):
+                    obj[self.last_updated_field] = to_dt(obj[self.last_updated_field])
 
         return objects
 

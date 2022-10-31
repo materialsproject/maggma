@@ -1,7 +1,14 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from asyncio import BoundedSemaphore, Queue, gather, get_event_loop, wait
+from asyncio import (
+    BoundedSemaphore,
+    Queue,
+    gather,
+    get_event_loop,
+    wait_for,
+    TimeoutError,
+)
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
@@ -10,6 +17,8 @@ from aioitertools import enumerate
 from tqdm import tqdm
 
 from maggma.utils import primed
+
+MANAGER_TIMEOUT = 5400  # max timeout in seconds for manager
 
 logger = getLogger("MultiProcessor")
 
@@ -146,7 +155,7 @@ def safe_dispatch(val):
         return None
 
 
-async def multi(builder, num_processes, no_bars=False):
+async def multi(builder, num_processes, no_bars=False, socket=None):
 
     builder.connect()
     cursor = builder.get_items()
@@ -197,6 +206,20 @@ async def multi(builder, num_processes, no_bars=False):
         desc="Process Items",
         disable=no_bars,
     )
+
+    if socket:
+        await socket.send_string("PING")
+        try:
+            message = await wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
+            if message.decode("utf-8") != "PONG":
+                socket.close()
+                raise RuntimeError(
+                    "Stopping work as manager did not respond to heartbeat from worker."
+                )
+
+        except TimeoutError:
+            socket.close()
+            raise RuntimeError("Stopping work as manager is not responding.")
 
     back_pressure_relief = back_pressured_get.release(processed_items)
 
