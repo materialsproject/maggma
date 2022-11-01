@@ -44,6 +44,7 @@ setup(
         "msgpack>=0.5.6",
         "orjson>=3.6.0",
         "boto3>=1.20.41",
+        "python-dateutil>=2.8.2"
     ],
     extras_require={
         "vault": ["hvac>=0.9.5"],
