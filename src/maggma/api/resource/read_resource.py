@@ -39,6 +39,7 @@ class ReadOnlyResource(Resource):
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
         disable_validation: bool = False,
+        query_disk_use: bool = True,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
     ):
@@ -56,6 +57,7 @@ class ReadOnlyResource(Resource):
                 to allow user to define these on-the-fly.
             enable_get_by_key: Enable default key route for endpoint.
             enable_default_search: Enable default endpoint search behavior.
+            query_disk_use: Whether to use temporary disk space in large MongoDB queries.
             disable_validation: Whether to use ORJSON and provide a direct FastAPI response.
                 Note this will disable auto JSON serialization and response validation with the
                 provided model.
@@ -74,6 +76,7 @@ class ReadOnlyResource(Resource):
         self.disable_validation = disable_validation
         self.include_in_schema = include_in_schema
         self.sub_path = sub_path
+        self.query_disk_use = query_disk_use
 
         self.response_model = ResponseModel[model]  # type: ignore
 
@@ -228,6 +231,7 @@ class ReadOnlyResource(Resource):
                 query.update(hints)
 
             self.store.connect()
+
             try:
                 with query_timeout(self.timeout):
                     count = self.store.count(
@@ -238,7 +242,11 @@ class ReadOnlyResource(Resource):
                         }
                     )
 
-                    data = list(self.store.query(**query))
+                    if self.query_disk_use:
+                        data = list(self.store.query(**query, allow_disk_use=True))
+                    else:
+                        data = list(self.store.query(**query))
+                        
             except (NetworkTimeout, PyMongoError) as e:
                 if e.timeout:
                     raise HTTPException(
