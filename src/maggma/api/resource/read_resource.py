@@ -243,10 +243,10 @@ class ReadOnlyResource(Resource):
                     )
 
                     if self.query_disk_use:
-                        data = list(self.store.query(**query, allow_disk_use=True))
+                        data = list(self.store.query(**query, allow_disk_use=True))  # type: ignore
                     else:
                         data = list(self.store.query(**query))
-                        
+
             except (NetworkTimeout, PyMongoError) as e:
                 if e.timeout:
                     raise HTTPException(
