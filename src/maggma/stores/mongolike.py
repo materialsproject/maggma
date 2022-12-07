@@ -365,6 +365,7 @@ class MongoStore(Store):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
+        **kwargs
     ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
@@ -378,6 +379,7 @@ class MongoStore(Store):
                 Keys are field names and values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
+            mongoclient_kwargs: Dict of extra kwargs to pass to pymongo find.
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
@@ -407,6 +409,7 @@ class MongoStore(Store):
             limit=limit,
             sort=sort_list,
             hint=hint_list,
+            **kwargs
         ):
             yield d
 
