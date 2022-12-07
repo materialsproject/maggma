@@ -407,6 +407,7 @@ class MongoStore(Store):
             limit=limit,
             sort=sort_list,
             hint=hint_list,
+            allow_disk_use=True
         ):
             yield d
 
@@ -658,6 +659,59 @@ class MemoryStore(MongoStore):
             for k, v in zip(keys, vals):
                 set_(doc, k, v)
             yield doc, list(group)
+            
+    def query(  # type: ignore
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        hint: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Dict]:
+        """
+        Queries the Store for a set of documents
+
+        Args:
+            criteria: PyMongo filter for documents to search in
+            properties: properties to return in grouped documents
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
+            hint: Dictionary of indexes to use as hints for query optimizer.
+                Keys are field names and values are 1 for ascending or -1 for descending.
+            skip: number documents to skip
+            limit: limit on total number of documents returned
+        """
+        if isinstance(properties, list):
+            properties = {p: 1 for p in properties}
+
+        sort_list = (
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in sort.items()
+            ]
+            if sort
+            else [("_id", 1)]
+        )
+
+        hint_list = (
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in hint.items()
+            ]
+            if hint
+            else None
+        )
+
+        for d in self._collection.find(
+            filter=criteria,
+            projection=properties,
+            skip=skip,
+            limit=limit,
+            sort=sort_list,
+            hint=hint_list,
+        ):
+            yield d
 
     def __eq__(self, other: object) -> bool:
         """
