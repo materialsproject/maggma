@@ -659,7 +659,7 @@ class MemoryStore(MongoStore):
             for k, v in zip(keys, vals):
                 set_(doc, k, v)
             yield doc, list(group)
-            
+
     def query(  # type: ignore
         self,
         criteria: Optional[Dict] = None,
