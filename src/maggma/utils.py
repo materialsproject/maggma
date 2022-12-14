@@ -75,6 +75,24 @@ def confirm_field_index(collection: Collection, field: str) -> bool:
     keys = {spec[0] for index in info for spec in index["key"]}
     return field in keys
 
+async def confirm_field_index_async(collection: Collection, field: str) -> bool:
+    """Async function for confirming index on store for at least one of fields
+
+    One can't simply ensure an index exists via
+    `store.collection.create_index` because a Builder must assume
+    read-only access to source Stores. The MongoDB `read` built-in role
+    does not include the `createIndex` action.
+
+    Returns:
+        True if an index exists for a given field
+        False if not
+
+    """
+    index_info = await collection.index_information()
+    info = list(index_info.values())
+    keys = {spec[0] for index in info for spec in index["key"]}
+    return field in keys
+
 
 def to_isoformat_ceil_ms(dt: Union[datetime, str]) -> str:
     """Helper to account for Mongo storing datetimes with only ms precision."""
