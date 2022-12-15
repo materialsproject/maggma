@@ -66,7 +66,7 @@ class AggregationResource(Resource):
 
         model_name = self.model.__name__
 
-        async def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
+        def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
             request: Request = queries.pop("request")  # type: ignore
             temp_response: Response = queries.pop("temp_response")  # type: ignore
 
