@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.49.11](https://github.com/materialsproject/maggma/tree/v0.49.11) (2022-12-15)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.10...v0.49.11)
+
+**Merged pull requests:**
+
+- Async to sync for fastapi funcs [\#750](https://github.com/materialsproject/maggma/pull/750) ([munrojm](https://github.com/munrojm))
+
 ## [v0.49.10](https://github.com/materialsproject/maggma/tree/v0.49.10) (2022-12-07)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.9...v0.49.10)
