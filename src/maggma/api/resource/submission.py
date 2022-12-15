@@ -129,7 +129,7 @@ class SubmissionResource(Resource):
 
         key_name = "submission_id" if self.calculate_submission_id else self.store.key
 
-        async def get_by_key(
+        def get_by_key(
             key: str = Path(
                 ...,
                 alias=key_name,
@@ -187,7 +187,7 @@ class SubmissionResource(Resource):
 
         model_name = self.model.__name__
 
-        async def search(**queries: STORE_PARAMS):
+        def search(**queries: STORE_PARAMS):
 
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
@@ -248,7 +248,7 @@ class SubmissionResource(Resource):
     def build_post_data(self):
         model_name = self.model.__name__
 
-        async def post_data(**queries: STORE_PARAMS):
+        def post_data(**queries: STORE_PARAMS):
 
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore

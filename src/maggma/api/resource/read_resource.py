@@ -122,7 +122,7 @@ class ReadOnlyResource(Resource):
             def field_input():
                 return {"properties": self.key_fields}
 
-        async def get_by_key(
+        def get_by_key(
             request: Request,
             temp_response: Response,
             key: str = Path(
@@ -195,7 +195,7 @@ class ReadOnlyResource(Resource):
 
         model_name = self.model.__name__
 
-        async def search(**queries: Dict[str, STORE_PARAMS]) -> Union[Dict, Response]:
+        def search(**queries: Dict[str, STORE_PARAMS]) -> Union[Dict, Response]:
             request: Request = queries.pop("request")  # type: ignore
             temp_response: Response = queries.pop("temp_response")  # type: ignore
 

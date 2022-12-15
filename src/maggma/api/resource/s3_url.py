@@ -65,7 +65,7 @@ class S3URLResource(Resource):
         key_name = self.store.key
         model_name = self.model.__name__
 
-        async def get_by_key(
+        def get_by_key(
             request: Request,
             temp_response: Response,
             key: str = Path(
