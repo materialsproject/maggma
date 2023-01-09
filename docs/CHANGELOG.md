@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.49.12](https://github.com/materialsproject/maggma/tree/v0.49.12) (2023-01-09)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.11...v0.49.12)
+
+**Merged pull requests:**
+
+- Add default sort parameter to `MongoStore` [\#758](https://github.com/materialsproject/maggma/pull/758) ([munrojm](https://github.com/munrojm))
+
 ## [v0.49.11](https://github.com/materialsproject/maggma/tree/v0.49.11) (2022-12-15)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.10...v0.49.11)
@@ -18,19 +26,19 @@
 
 ## [v0.49.9](https://github.com/materialsproject/maggma/tree/v0.49.9) (2022-11-01)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.8...v0.49.9)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.7...v0.49.9)
 
 **Merged pull requests:**
 
 - Parse datetime with dateutil [\#741](https://github.com/materialsproject/maggma/pull/741) ([munrojm](https://github.com/munrojm))
 
-## [v0.49.8](https://github.com/materialsproject/maggma/tree/v0.49.8) (2022-10-25)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.7...v0.49.8)
-
 ## [v0.49.7](https://github.com/materialsproject/maggma/tree/v0.49.7) (2022-10-25)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.6...v0.49.7)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.8...v0.49.7)
+
+## [v0.49.8](https://github.com/materialsproject/maggma/tree/v0.49.8) (2022-10-25)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.6...v0.49.8)
 
 **Merged pull requests:**
 
@@ -239,15 +247,11 @@
 
 ## [v0.44.1](https://github.com/materialsproject/maggma/tree/v0.44.1) (2022-03-08)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.1)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.1)
 
 **Merged pull requests:**
 
 - added localhost test for MongoURIStore [\#595](https://github.com/materialsproject/maggma/pull/595) ([jmmshn](https://github.com/jmmshn))
-
-## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
 
 ## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
 
@@ -255,7 +259,11 @@
 
 ## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.44.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.0)
+
+## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
 
 **Merged pull requests:**
 
