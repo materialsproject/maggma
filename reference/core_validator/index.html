@@ -702,7 +702,7 @@ added to the Store will call .validate_doc() before being added.</p>
         <details class="quote">
           <summary>Source code in <code>maggma/core/validator.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Validator</span><span class="p">(</span><span class="n">MSONable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    A generic class to perform document-level validation on Stores.</span>
 <span class="sd">    Attach a Validator to a Store during initialization, any all documents</span>
 <span class="sd">    added to the Store will call .validate_doc() before being added.</span>
@@ -710,7 +710,7 @@ added to the Store will call .validate_doc() before being added.</p>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Determines if the document is valid</span>
 
 <span class="sd">        Args:</span>
@@ -719,7 +719,7 @@ added to the Store will call .validate_doc() before being added.</p>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">validation_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        If document is not valid, provides a list of</span>
 <span class="sd">        strings to display for why validation has failed</span>
 
@@ -780,7 +780,7 @@ added to the Store will call .validate_doc() before being added.</p>
           <summary>Source code in <code>maggma/core/validator.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">is_valid</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Determines if the document is valid</span>
 
 <span class="sd">    Args:</span>
@@ -833,7 +833,7 @@ strings to display for why validation has failed</p>
           <summary>Source code in <code>maggma/core/validator.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">validation_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    If document is not valid, provides a list of</span>
 <span class="sd">    strings to display for why validation has failed</span>
 

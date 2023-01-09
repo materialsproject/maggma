@@ -570,13 +570,13 @@
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
 <span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">MapBuilder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div>
 <p>Just like before we define a new class, but this time it should inherit from <code>MapBuilder</code>.</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            source: the source store</span>
 <span class="sd">            target: the target store</span>

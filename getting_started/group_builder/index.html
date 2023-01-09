@@ -566,37 +566,37 @@
 <h1 id="group-builder">Group Builder<a class="headerlink" href="#group-builder" title="Permanent link">&para;</a></h1>
 <p>Another advanced template in <code>maggma</code> is the <code>GroupBuilder</code>, which groups documents together before applying your function on the group of items. Just like <code>MapBuilder</code>, <code>GroupBuilder</code> also handles incremental building, keeping track of errors, getting only the data you need, and managing timeouts. GroupBuilder won't delete orphaned documents since that reverse relationshop isn't valid.</p>
 <p>Let's create a simple <code>ResupplyBuilder</code>, which will look at the inventory of items and determine what items need resupply. The source document will look something like this:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Banana&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fruit&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;minimum&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-11-3T19:09:45&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;name&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Banana&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fruit&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;quantity&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">20</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;minimum&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-11-3T19:09:45&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>Our builder should give us documents that look like this:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Grapes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Apples&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Bananas&quot;</span><span class="p">],</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fruit&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;resupply&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;Apples&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;Bananes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span><span class="w"></span>
-<span class="w">        </span><span class="nt">&quot;Grapes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span><span class="w"></span>
-<span class="w">    </span><span class="p">},</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-11-3T19:09:45&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;names&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;Grapes&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Apples&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;Bananas&quot;</span><span class="p">],</span>
+<span class="w">    </span><span class="nt">&quot;type&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;fruit&quot;</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;resupply&quot;</span><span class="p">:</span><span class="w"> </span><span class="p">{</span>
+<span class="w">        </span><span class="nt">&quot;Apples&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">10</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Bananes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">0</span><span class="p">,</span>
+<span class="w">        </span><span class="nt">&quot;Grapes&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">5</span>
+<span class="w">    </span><span class="p">},</span>
+<span class="w">    </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-11-3T19:09:45&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <p>To begin, we define our <code>GroupBuilder</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">maggma.builders</span> <span class="kn">import</span> <span class="n">GroupBuilder</span>
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
 <span class="k">class</span> <span class="nc">ResupplyBuilder</span><span class="p">(</span><span class="n">GroupBuilder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that determines which items to resupply</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="n">inventory</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">resupply</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span><span class="n">resupply_percent</span> <span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            inventory: current inventory information</span>
 <span class="sd">            resupply: target resupply information</span>

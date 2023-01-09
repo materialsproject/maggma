@@ -986,10 +986,10 @@ CopyBuilder            (<a class="autorefs autorefs-internal" title="maggma.buil
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">CopyBuilder</span><span class="p">(</span><span class="n">MapBuilder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sync a source store with a target store.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sync a source store with a target store.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Identity function for copy builder map operation</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="s2">&quot;_id&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
@@ -1027,7 +1027,7 @@ CopyBuilder            (<a class="autorefs autorefs-internal" title="maggma.buil
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Identity function for copy builder map operation</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="s2">&quot;_id&quot;</span> <span class="ow">in</span> <span class="n">item</span><span class="p">:</span>
@@ -1074,7 +1074,7 @@ document.</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">MapBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply a unary function to yield a target document for each source document.</span>
 
 <span class="sd">    Supports incremental building, where a source document gets built only if it</span>
@@ -1095,7 +1095,7 @@ document.</p>
         <span class="n">retry_failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Apply a unary function to each source document.</span>
 
 <span class="sd">        Args:</span>
@@ -1125,7 +1125,7 @@ document.</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="n">source</span><span class="p">],</span> <span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="n">target</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ensures indicies on critical fields for MapBuilder</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index_checks</span> <span class="o">=</span> <span class="p">[</span>
@@ -1146,7 +1146,7 @@ document.</p>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generic prechunk for map builder to perform domain-decompostion</span>
 <span class="sd">        by the key field</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1158,7 +1158,7 @@ document.</p>
             <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">)}}}</span>
 
     <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generic get items for Map Builder designed to perform</span>
 <span class="sd">        incremental building</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1197,7 +1197,7 @@ document.</p>
                 <span class="k">yield</span> <span class="n">doc</span>
 
     <span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generic process items to process a dictionary using</span>
 <span class="sd">        a map function</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1237,7 +1237,7 @@ document.</p>
         <span class="k">return</span> <span class="n">out</span>
 
     <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generic update targets for Map Builder</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
@@ -1250,7 +1250,7 @@ document.</p>
             <span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Finalize MapBuilder operations including removing orphaned documents</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_orphans</span><span class="p">:</span>
@@ -1266,7 +1266,7 @@ document.</p>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        ufn: Unary function to process item</span>
 <span class="sd">                You do not need to provide values for</span>
 <span class="sd">                source.key and source.last_updated_field in the output.</span>
@@ -1387,7 +1387,7 @@ previously failed</p></td>
     <span class="n">retry_failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Apply a unary function to each source document.</span>
 
 <span class="sd">    Args:</span>
@@ -1440,7 +1440,7 @@ previously failed</p></td>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ensures indicies on critical fields for MapBuilder</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">index_checks</span> <span class="o">=</span> <span class="p">[</span>
@@ -1484,7 +1484,7 @@ previously failed</p></td>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Finalize MapBuilder operations including removing orphaned documents</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">delete_orphans</span><span class="p">:</span>
@@ -1523,7 +1523,7 @@ incremental building</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic get items for Map Builder designed to perform</span>
 <span class="sd">    incremental building</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1586,7 +1586,7 @@ by the key field</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic prechunk for map builder to perform domain-decompostion</span>
 <span class="sd">    by the key field</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1622,7 +1622,7 @@ a map function</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic process items to process a dictionary using</span>
 <span class="sd">    a map function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1693,7 +1693,7 @@ in the target document.</p>
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    ufn: Unary function to process item</span>
 <span class="sd">            You do not need to provide values for</span>
 <span class="sd">            source.key and source.last_updated_field in the output.</span>
@@ -1727,7 +1727,7 @@ in the target document.</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic update targets for Map Builder</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
@@ -1809,7 +1809,7 @@ is orphaned.</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">GroupBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Group source docs and produces merged documents for each group</span>
 <span class="sd">    Supports incremental building, where a source group gets (re)built only if</span>
 <span class="sd">    it has a newer (by last_updated_field) doc than the corresponding (by key) target doc.</span>
@@ -1830,7 +1830,7 @@ is orphaned.</p>
         <span class="n">retry_failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            source: source store</span>
 <span class="sd">            target: target store</span>
@@ -1861,7 +1861,7 @@ is orphaned.</p>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="p">[</span><span class="n">source</span><span class="p">],</span> <span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="n">target</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Ensures indicies on critical fields for GroupBuilder</span>
 <span class="sd">        which include the plural version of the target&#39;s key field</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1884,7 +1884,7 @@ is orphaned.</p>
             <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generic prechunk for group builder to perform domain-decompostion</span>
 <span class="sd">        by the grouping keys</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1957,7 +1957,7 @@ is orphaned.</p>
         <span class="k">return</span> <span class="n">processed</span>
 
     <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Generic update targets for Group Builder</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>
@@ -1970,7 +1970,7 @@ is orphaned.</p>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Processing function for GroupBuilder</span>
 
 <span class="sd">        Arguments:</span>
@@ -1983,7 +1983,7 @@ is orphaned.</p>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="nf">get_ids_to_process</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets the IDs that need to be processed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2023,7 +2023,7 @@ is orphaned.</p>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_ids</span> <span class="o">|</span> <span class="n">unprocessed_ids</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_groups_from_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get the groups by grouping_keys for these documents</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -2159,7 +2159,7 @@ previously failed</p></td>
     <span class="n">retry_failed</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        source: source store</span>
 <span class="sd">        target: target store</span>
@@ -2214,7 +2214,7 @@ which include the plural version of the target's key field</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Ensures indicies on critical fields for GroupBuilder</span>
 <span class="sd">    which include the plural version of the target&#39;s key field</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2260,7 +2260,7 @@ which include the plural version of the target's key field</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_groups_from_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the groups by grouping_keys for these documents</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -2310,7 +2310,7 @@ which include the plural version of the target's key field</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_ids_to_process</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Gets the IDs that need to be processed</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -2436,7 +2436,7 @@ by the grouping keys</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic prechunk for group builder to perform domain-decompostion</span>
 <span class="sd">    by the grouping keys</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2602,7 +2602,7 @@ Default behavior is to return the item.</p>
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Processing function for GroupBuilder</span>
 
 <span class="sd">    Arguments:</span>
@@ -2638,7 +2638,7 @@ Default behavior is to return the item.</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Generic update targets for Group Builder</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">target</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span>

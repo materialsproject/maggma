@@ -787,7 +787,7 @@ the data processing is  limited to process_items</p>
         <details class="quote">
           <summary>Source code in <code>maggma/core/builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Builder</span><span class="p">(</span><span class="n">MSONable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base Builder class</span>
 <span class="sd">    At minimum this class should implement:</span>
 <span class="sd">    get_items - Get items from the sources</span>
@@ -803,7 +803,7 @@ the data processing is  limited to process_items</p>
         <span class="n">targets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Store</span><span class="p">],</span> <span class="n">Store</span><span class="p">],</span>
         <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the builder the framework.</span>
 
 <span class="sd">        Arguments:</span>
@@ -819,14 +819,14 @@ the data processing is  limited to process_items</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Connect to the builder sources and targets.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
             <span class="n">s</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Part of a domain-decomposition paradigm to allow the builder to operate on</span>
 <span class="sd">        multiple nodes by divinding up the IO as well as the compute</span>
 <span class="sd">        This function should return an iterator of dictionaries that can be distributed</span>
@@ -846,7 +846,7 @@ the data processing is  limited to process_items</p>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns all the items to process.</span>
 
 <span class="sd">        Returns:</span>
@@ -855,7 +855,7 @@ the data processing is  limited to process_items</p>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process an item. There should be no database operations in this method.</span>
 <span class="sd">        Default behavior is to return the item.</span>
 <span class="sd">        Arguments:</span>
@@ -868,7 +868,7 @@ the data processing is  limited to process_items</p>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Takes a list of items from process item and updates the targets with them.</span>
 <span class="sd">        Can also perform other book keeping in the process such as storing gridfs oids, etc.</span>
 
@@ -881,7 +881,7 @@ the data processing is  limited to process_items</p>
         <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Perform any final clean up.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Close any Mongo connections.</span>
@@ -892,7 +892,7 @@ the data processing is  limited to process_items</p>
                 <span class="k">continue</span>
 
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the builder serially</span>
 <span class="sd">        This is only intended for diagnostic purposes</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -997,7 +997,7 @@ the data processing is  limited to process_items</p>
     <span class="n">targets</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Store</span><span class="p">],</span> <span class="n">Store</span><span class="p">],</span>
     <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Initialize the builder the framework.</span>
 
 <span class="sd">    Arguments:</span>
@@ -1037,7 +1037,7 @@ the data processing is  limited to process_items</p>
         <details class="quote">
           <summary>Source code in <code>maggma/core/builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect to the builder sources and targets.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">sources</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">targets</span><span class="p">:</span>
@@ -1067,7 +1067,7 @@ the data processing is  limited to process_items</p>
         <details class="quote">
           <summary>Source code in <code>maggma/core/builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform any final clean up.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Close any Mongo connections.</span>
@@ -1117,7 +1117,7 @@ the data processing is  limited to process_items</p>
           <summary>Source code in <code>maggma/core/builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns all the items to process.</span>
 
 <span class="sd">    Returns:</span>
@@ -1171,7 +1171,7 @@ to multiple instances of the builder to get/process/udpate on</p>
         <details class="quote">
           <summary>Source code in <code>maggma/core/builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">prechunk</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number_splits</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Part of a domain-decomposition paradigm to allow the builder to operate on</span>
 <span class="sd">    multiple nodes by divinding up the IO as well as the compute</span>
 <span class="sd">    This function should return an iterator of dictionaries that can be distributed</span>
@@ -1248,7 +1248,7 @@ Default behavior is to return the item.</p>
         <details class="quote">
           <summary>Source code in <code>maggma/core/builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process an item. There should be no database operations in this method.</span>
 <span class="sd">    Default behavior is to return the item.</span>
 <span class="sd">    Arguments:</span>
@@ -1284,7 +1284,7 @@ This is only intended for diagnostic purposes</p>
         <details class="quote">
           <summary>Source code in <code>maggma/core/builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run the builder serially</span>
 <span class="sd">    This is only intended for diagnostic purposes</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1355,7 +1355,7 @@ Can also perform other book keeping in the process such as storing gridfs oids, 
           <summary>Source code in <code>maggma/core/builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Takes a list of items from process item and updates the targets with them.</span>
 <span class="sd">    Can also perform other book keeping in the process such as storing gridfs oids, etc.</span>
 

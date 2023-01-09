@@ -654,7 +654,7 @@
 <h1 id="running-builders">Running Builders<a class="headerlink" href="#running-builders" title="Permanent link">&para;</a></h1>
 <p><code>maggma</code> is designed to run build-pipelines in a production environment. Builders can be run directly in a python environment, but this gives you none of the performance features such as multiprocessing. The base <code>Builder</code> class implements a simple <code>run</code> method that can be used to run that builder:</p>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -670,28 +670,28 @@
 <span class="n">dumpfn</span><span class="p">(</span><span class="n">my_builder</span><span class="p">,</span><span class="s2">&quot;my_builder.json&quot;</span><span class="p">)</span>
 </code></pre></div>
 <p>Then we can run the builder using <code>mrun</code>:</p>
-<div class="highlight"><pre><span></span><code>mrun my_builder.json
+<div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>my_builder.json
 </code></pre></div>
 <p><code>mrun</code> has a number of usefull options:</p>
-<div class="highlight"><pre><span></span><code>mrun --help
-Usage: mrun <span class="o">[</span>OPTIONS<span class="o">]</span> <span class="o">[</span>BUILDERS<span class="o">]</span>...
+<div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>--help
+Usage:<span class="w"> </span>mrun<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">[</span>BUILDERS<span class="o">]</span>...
 
 Options:
-  -v, --verbose                   Controls logging level per number of v<span class="err">&#39;</span>s
-  -n, --num-workers INTEGER RANGE
-                                  Number of worker processes. Defaults to
-                                  single processing
-  --help                          Show this message and exit.
+<span class="w">  </span>-v,<span class="w"> </span>--verbose<span class="w">                   </span>Controls<span class="w"> </span>logging<span class="w"> </span>level<span class="w"> </span>per<span class="w"> </span>number<span class="w"> </span>of<span class="w"> </span>v<span class="err">&#39;</span>s
+<span class="w">  </span>-n,<span class="w"> </span>--num-workers<span class="w"> </span>INTEGER<span class="w"> </span>RANGE
+<span class="w">                                  </span>Number<span class="w"> </span>of<span class="w"> </span>worker<span class="w"> </span>processes.<span class="w"> </span>Defaults<span class="w"> </span>to
+<span class="w">                                  </span>single<span class="w"> </span>processing
+<span class="w">  </span>--help<span class="w">                          </span>Show<span class="w"> </span>this<span class="w"> </span>message<span class="w"> </span>and<span class="w"> </span>exit.
 </code></pre></div>
 <p>We can use the <code>-n</code> option to control how many workers run <code>process_items</code> in parallel.
 Similarly, <code>-v</code> controls the logging verbosity from just WARNINGs to INFO to DEBUG output.</p>
 <p>The result will be something that looks like this:</p>
-<div class="highlight"><pre><span></span><code><span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,187 - Builder - INFO - Starting Builder Builder
-<span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,217 - Builder - INFO - Processing <span class="m">100</span> items
-Get: <span class="m">100</span>%<span class="p">|</span>██████████████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">15366</span>.00it/s<span class="o">]</span>
-<span class="m">2020</span>-01-08 <span class="m">14</span>:33:17,235 - MultiProcessor - INFO - Processing batch of <span class="m">1000</span> items
-Update Targets: <span class="m">100</span>%<span class="p">|</span>█████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">584</span>.51it/s<span class="o">]</span>
-Process Items: <span class="m">100</span>%<span class="p">|</span>██████████████████████████<span class="p">|</span> <span class="m">100</span>/100 <span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00, <span class="m">567</span>.39it/s<span class="o">]</span>
+<div class="highlight"><pre><span></span><code><span class="m">2020</span>-01-08<span class="w"> </span><span class="m">14</span>:33:17,187<span class="w"> </span>-<span class="w"> </span>Builder<span class="w"> </span>-<span class="w"> </span>INFO<span class="w"> </span>-<span class="w"> </span>Starting<span class="w"> </span>Builder<span class="w"> </span>Builder
+<span class="m">2020</span>-01-08<span class="w"> </span><span class="m">14</span>:33:17,217<span class="w"> </span>-<span class="w"> </span>Builder<span class="w"> </span>-<span class="w"> </span>INFO<span class="w"> </span>-<span class="w"> </span>Processing<span class="w"> </span><span class="m">100</span><span class="w"> </span>items
+Get:<span class="w"> </span><span class="m">100</span>%<span class="p">|</span>██████████████████████████████████<span class="p">|</span><span class="w"> </span><span class="m">100</span>/100<span class="w"> </span><span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00,<span class="w"> </span><span class="m">15366</span>.00it/s<span class="o">]</span>
+<span class="m">2020</span>-01-08<span class="w"> </span><span class="m">14</span>:33:17,235<span class="w"> </span>-<span class="w"> </span>MultiProcessor<span class="w"> </span>-<span class="w"> </span>INFO<span class="w"> </span>-<span class="w"> </span>Processing<span class="w"> </span>batch<span class="w"> </span>of<span class="w"> </span><span class="m">1000</span><span class="w"> </span>items
+Update<span class="w"> </span>Targets:<span class="w"> </span><span class="m">100</span>%<span class="p">|</span>█████████████████████████<span class="p">|</span><span class="w"> </span><span class="m">100</span>/100<span class="w"> </span><span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00,<span class="w"> </span><span class="m">584</span>.51it/s<span class="o">]</span>
+Process<span class="w"> </span>Items:<span class="w"> </span><span class="m">100</span>%<span class="p">|</span>██████████████████████████<span class="p">|</span><span class="w"> </span><span class="m">100</span>/100<span class="w"> </span><span class="o">[</span><span class="m">00</span>:00&lt;<span class="m">00</span>:00,<span class="w"> </span><span class="m">567</span>.39it/s<span class="o">]</span>
 </code></pre></div>
 <p>There are progress bars for each of the three steps, which lets you understand what the slowest step is and the overall progress of the system.</p>
 <h2 id="running-distributed">Running Distributed<a class="headerlink" href="#running-distributed" title="Permanent link">&para;</a></h2>
@@ -712,7 +712,7 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
 <p><code>mrun</code> will run the whole python/jupyter file, grab the builders in these variables and adds these builders to the builder queue.</p>
 <p>Assuming you have a builder in a python file: <code>my_builder.py</code>
 <div class="highlight"><pre><span></span><code><span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -721,11 +721,11 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
 <span class="n">__builder__</span> <span class="o">=</span> <span class="n">MultiplyBuilder</span><span class="p">(</span><span class="n">source_store</span><span class="p">,</span><span class="n">target_store</span><span class="p">,</span><span class="n">multiplier</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 </code></pre></div></p>
 <p>You can use <code>mrun</code> to run this builder and parallelize for you:
-<div class="highlight"><pre><span></span><code>mrun -n <span class="m">2</span> -v my_builder.py
+<div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>-v<span class="w"> </span>my_builder.py
 </code></pre></div></p>
 <h2 id="running-multiple-builders">Running multiple builders<a class="headerlink" href="#running-multiple-builders" title="Permanent link">&para;</a></h2>
 <p><code>mrun</code> can run multiple builders. You can have multiple builders in a single file: <code>json</code>, <code>python</code>, or <code>jupyter-notebook</code>. Or you can chain multiple files in the order you want to run them:
-<div class="highlight"><pre><span></span><code>mrun -n <span class="m">32</span> -vv my_first_builder.json builder_2_and_3.py last_builder.ipynb
+<div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>-n<span class="w"> </span><span class="m">32</span><span class="w"> </span>-vv<span class="w"> </span>my_first_builder.json<span class="w"> </span>builder_2_and_3.py<span class="w"> </span>last_builder.ipynb
 </code></pre></div></p>
 <p><code>mrun</code> will then execute the builders in these files in order.</p>
 <h2 id="reporting-build-state">Reporting Build State<a class="headerlink" href="#reporting-build-state" title="Permanent link">&para;</a></h2>

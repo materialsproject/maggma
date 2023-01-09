@@ -688,11 +688,11 @@
 <li><code>update_targets</code>: This method should take a list of processed items and update the target stores.</li>
 </ul>
 <p>To make this less abstract, we will write a builder that multiplies the "a" sub-document by a pre-configured <code>multiplier</code>. Let's assume we have some source collection in MongoDB with documents that look like this:</p>
-<div class="highlight"><pre><span></span><code><span class="p">{</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;a&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span><span class="w"></span>
-<span class="w">    </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-11-3&quot;</span><span class="w"></span>
-<span class="p">}</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">{</span>
+<span class="w">    </span><span class="nt">&quot;id&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;a&quot;</span><span class="p">:</span><span class="w"> </span><span class="mi">3</span><span class="p">,</span>
+<span class="w">    </span><span class="nt">&quot;last_updated&quot;</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;2019-11-3&quot;</span>
+<span class="p">}</span>
 </code></pre></div>
 <h2 id="class-definition-and-__init__">Class definition and <code>__init__</code><a class="headerlink" href="#class-definition-and-__init__" title="Permanent link">&para;</a></h2>
 <p>A simple class definition for a Maggma-based builder looks like this:</p>
@@ -700,13 +700,13 @@
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
 <span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div>
 <p>The <code>__init__</code> for a builder can have any set of parameters. Generally, you want a source <code>Store</code> and a target <code>Store</code> along with any parameters that configure the builder. Due to the <code>MSONable</code> pattern, any parameters to <code>__init__</code> have to be stored as attributes. A simple <code>__init__</code> would look like this:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            source: the source store</span>
 <span class="sd">            target: the target store</span>
@@ -733,7 +733,7 @@
 <h2 id="get_items"><code>get_items</code><a class="headerlink" href="#get_items" title="Permanent link">&para;</a></h2>
 <p><code>get_items</code> is conceptually a simple method to implement, but in practice can easily be more code than the rest of the builder. All of the logic for getting data from the sources has to happen here, which requires some planning. <code>get_items</code> should also sort all of the data into induvidual <strong>items</strong> to process. This simple builder has a very easy <code>get_items</code>:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
@@ -741,7 +741,7 @@
 </code></pre></div>
 <p>Here, get items just returns the results of <code>query()</code> from the store. It could also have been written as a generator:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">():</span>
@@ -749,7 +749,7 @@
 </code></pre></div>
 <p>We could have also returned a list of items:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">())</span>
@@ -759,7 +759,7 @@
 <p><code>process_item</code> just has to do the parallelizable work on each item. Since the item is whatever comes out of <code>get_items</code>, you know exactly what it should be. It may be a single document, a list of documents, a mapping, a set, etc.</p>
 <p>Our simple process item just has to multiply one field by <code>self.mulitplier</code>:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">process_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies the &quot;a&quot; sub-document by self.multiplier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_item</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="n">item</span><span class="p">)</span>
@@ -769,7 +769,7 @@
 <h2 id="update_targets"><code>update_targets</code><a class="headerlink" href="#update_targets" title="Permanent link">&para;</a></h2>
 <p>Finally, we have to put the processed item in to the target store:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds the processed items into the target store</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
@@ -787,13 +787,13 @@ For instance, if <code>process_items</code> returns <code>str</code>, then <code
 <span class="kn">from</span> <span class="nn">maggma.core</span> <span class="kn">import</span> <span class="n">Store</span>
 
 <span class="k">class</span> <span class="nc">MultiplyBuilder</span><span class="p">(</span><span class="n">Builder</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Simple builder that multiplies the &quot;a&quot; sub-document by pre-set value</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            source: the source store</span>
 <span class="sd">            target: the target store</span>
@@ -807,13 +807,13 @@ For instance, if <code>process_items</code> returns <code>str</code>, then <code
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="n">source</span><span class="p">,</span><span class="n">targets</span><span class="o">=</span><span class="n">target</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">())</span>
 
     <span class="k">def</span> <span class="nf">process_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies the &quot;a&quot; sub-document by self.multiplier</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_item</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="o">**</span><span class="n">item</span><span class="p">)</span>
@@ -822,7 +822,7 @@ For instance, if <code>process_items</code> returns <code>str</code>, then <code
 
 
     <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">]):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Adds the processed items into the target store</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">items</span><span class="p">)</span>
@@ -832,7 +832,7 @@ For instance, if <code>process_items</code> returns <code>str</code>, then <code
 <p>The <code>Builder</code> must have a <code>prechunk</code> method defined. <code>prechunk</code> should do a subset of <code>get_items</code> to figure out what needs to be processed and then return dictionaries that modify the <code>Builder</code> in-place to only work on each subset.</p>
 <p>For example, if in the above example we'd first have to update the builder to be able to work on a subset of keys. One pattern is to define a generic <code>query</code> argument for the builder and use that in get items:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="n">Store</span><span class="p">,</span> <span class="n">multiplier</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span> <span class="n">query</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Arguments:</span>
 <span class="sd">            source: the source store</span>
 <span class="sd">            target: the target store</span>
@@ -847,7 +847,7 @@ For instance, if <code>process_items</code> returns <code>str</code>, then <code
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="n">source</span><span class="p">,</span><span class="n">targets</span><span class="o">=</span><span class="n">target</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="ow">or</span> <span class="p">{}</span>

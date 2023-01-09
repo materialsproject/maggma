@@ -919,12 +919,12 @@ some tags to the files named "input.in", use:</p>
 <span class="n">fs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
 <p>The above steps will result in the following contents being added to the .json file. This metadata will be automatically read back in next time you connect to the Store. </p>
-<div class="highlight"><pre><span></span><code><span class="p">[{</span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="s2">&quot;.../file_store_test/calculation2/input.in&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="nt">&quot;file_id&quot;</span><span class="p">:</span><span class="s2">&quot;3c3012f84c162e9ff9bb834c53dd1f58&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="nt">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]},</span><span class="w"></span>
-<span class="p">{</span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="s2">&quot;.../file_store_test/calculation1/input.in&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="nt">&quot;file_id&quot;</span><span class="p">:</span><span class="s2">&quot;fde43ea119034eb8732d6f3f0d9802ce&quot;</span><span class="p">,</span><span class="w"></span>
-<span class="nt">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]}]</span><span class="w"></span>
+<div class="highlight"><pre><span></span><code><span class="p">[{</span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="s2">&quot;.../file_store_test/calculation2/input.in&quot;</span><span class="p">,</span>
+<span class="nt">&quot;file_id&quot;</span><span class="p">:</span><span class="s2">&quot;3c3012f84c162e9ff9bb834c53dd1f58&quot;</span><span class="p">,</span>
+<span class="nt">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]},</span>
+<span class="p">{</span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="s2">&quot;.../file_store_test/calculation1/input.in&quot;</span><span class="p">,</span>
+<span class="nt">&quot;file_id&quot;</span><span class="p">:</span><span class="s2">&quot;fde43ea119034eb8732d6f3f0d9802ce&quot;</span><span class="p">,</span>
+<span class="nt">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]}]</span>
 </code></pre></div>
 <p>Notice that only the items modified with extra keys are written to the JSON (i.e., if you have 10 items in the store but add metadata to just two, only the two items will be written to the JSON). The purpose of this behavior is to prevent any duplication of data. The <code>file_id</code> and <code>path</code> are retained in the JSON file to make each metadata record manually identifiable.</p>
 <h3 id="add_metadata-convenience-method"><code>add_metadata</code> convenience method<a class="headerlink" href="#add_metadata-convenience-method" title="Permanent link">&para;</a></h3>
@@ -937,7 +937,7 @@ extract information from any key in a <code>FileStore</code> record and pass the
 <p>For example, to extract the date from files named like '2022-05-07_experiment.csv'
 and add it to the 'date' field:</p>
 <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="k">def</span> <span class="nf">get_date_from_filename</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Args:</span>
 <span class="sd">        d: An item returned from the `FileStore`</span>
 <span class="sd">    &quot;&quot;&quot;</span>
