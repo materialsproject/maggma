@@ -877,6 +877,7 @@ class MontyStore(MemoryStore):
         self.database_name = database_name
         self.collection_name = collection_name
         self._coll = None
+        self.default_sort = None
         self.ssh_tunnel = None  # This is to fix issues with the tunnel on close
         self.kwargs = kwargs
         self.storage = storage
