@@ -579,6 +579,7 @@ class MemoryStore(MongoStore):
             collection_name: name for the collection in memory
         """
         self.collection_name = collection_name
+        self.default_sort = None
         self._coll = None
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)  # noqa
@@ -717,6 +718,9 @@ class JSONStore(MemoryStore):
                 data: List[dict] = []
                 bytesdata = orjson.dumps(data)
                 f.write(bytesdata.decode("utf-8"))
+
+        self.default_sort = None
+
         super().__init__(**kwargs)
 
     def connect(self, force_reset=False):
