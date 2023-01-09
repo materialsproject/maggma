@@ -230,9 +230,7 @@ class MongoStore(Store):
 
         return cls(**db_creds, **kwargs)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -246,10 +244,7 @@ class MongoStore(Store):
             distinct_vals = self._collection.distinct(field, criteria)
         except (OperationFailure, DocumentTooLarge):
             distinct_vals = [
-                d["_id"]
-                for d in self._collection.aggregate(
-                    [{"$match": criteria}, {"$group": {"_id": f"${field}"}}]
-                )
+                d["_id"] for d in self._collection.aggregate([{"$match": criteria}, {"$group": {"_id": f"${field}"}}])
             ]
             if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
                 distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
@@ -348,12 +343,7 @@ class MongoStore(Store):
         criteria = criteria if criteria else {}
 
         hint_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in hint.items()
-            ]
-            if hint
-            else None
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
         )
 
         if hint_list is not None:  # pragma: no cover
@@ -369,7 +359,7 @@ class MongoStore(Store):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        **kwargs
+        **kwargs,
     ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
@@ -391,34 +381,22 @@ class MongoStore(Store):
         default_sort_formatted = None
 
         if self.default_sort is not None:
-            default_sort_formatted = [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in self.default_sort.items()]
+            default_sort_formatted = [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in self.default_sort.items()
+            ]
 
         sort_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in sort.items()
-            ]
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in sort.items()]
             if sort
             else default_sort_formatted
         )
 
         hint_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in hint.items()
-            ]
-            if hint
-            else None
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
         )
 
         for d in self._collection.find(
-            filter=criteria,
-            projection=properties,
-            skip=skip,
-            limit=limit,
-            sort=sort_list,
-            hint=hint_list,
-            **kwargs
+            filter=criteria, projection=properties, skip=skip, limit=limit, sort=sort_list, hint=hint_list, **kwargs
         ):
             yield d
 
@@ -560,9 +538,7 @@ class MongoURIStore(MongoStore):
         if database is None:
             d_uri = uri_parser.parse_uri(uri)
             if d_uri["database"] is None:
-                raise ConfigurationError(
-                    "If database name is not supplied, a database must be set in the uri"
-                )
+                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
             self.database = d_uri["database"]
         else:
             self.database = database
@@ -661,9 +637,7 @@ class MemoryStore(MongoStore):
             properties = list(properties.keys())
 
         data = [
-            doc
-            for doc in self.query(properties=keys + properties, criteria=criteria)
-            if all(has(doc, k) for k in keys)
+            doc for doc in self.query(properties=keys + properties, criteria=criteria) if all(has(doc, k) for k in keys)
         ]
 
         def grouping_keys(doc):
@@ -735,9 +709,7 @@ class JSONStore(MemoryStore):
         self.kwargs = kwargs
 
         if not self.read_only and len(paths) > 1:
-            raise RuntimeError(
-                "Cannot instantiate file-writable JSONStore with multiple JSON files."
-            )
+            raise RuntimeError("Cannot instantiate file-writable JSONStore with multiple JSON files.")
 
         # create the .json file if it does not exist
         if not self.read_only and not Path(self.paths[0]).exists():
