@@ -123,6 +123,7 @@ class MongoStore(Store):
         safe_update: bool = False,
         auth_source: Optional[str] = None,
         mongoclient_kwargs: Optional[Dict] = None,
+        default_sort: Optional[Dict[str, Union[Sort, int]]] = None,
         **kwargs,
     ):
         """
@@ -135,6 +136,8 @@ class MongoStore(Store):
             password: Password to connect with
             safe_update: fail gracefully on DocumentTooLarge errors on update
             auth_source: The database to authenticate on. Defaults to the database name.
+            default_sort: Default sort field and direction to use when querying. Can be used to
+                ensure determinacy in query results.
         """
         self.database = database
         self.collection_name = collection_name
@@ -144,6 +147,7 @@ class MongoStore(Store):
         self.password = password
         self.ssh_tunnel = ssh_tunnel
         self.safe_update = safe_update
+        self.default_sort = default_sort
         self._coll = None  # type: Any
         self.kwargs = kwargs
 
@@ -384,13 +388,18 @@ class MongoStore(Store):
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
 
+        default_sort_formatted = None
+
+        if self.default_sort is not None:
+            default_sort_formatted = [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in self.default_sort.items()]
+
         sort_list = (
             [
                 (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
                 for k, v in sort.items()
             ]
             if sort
-            else [("_id", 1)]
+            else default_sort_formatted
         )
 
         hint_list = (
@@ -531,6 +540,7 @@ class MongoURIStore(MongoStore):
         database: str = None,
         ssh_tunnel: Optional[SSHTunnel] = None,
         mongoclient_kwargs: Optional[Dict] = None,
+        default_sort: Optional[Dict[str, Union[Sort, int]]] = None,
         **kwargs,
     ):
         """
@@ -538,9 +548,12 @@ class MongoURIStore(MongoStore):
             uri: MongoDB+SRV URI
             database: database to connect to
             collection_name: The collection name
+            default_sort: Default sort field and direction to use when querying. Can be used to
+                ensure determinacy in query results.
         """
         self.uri = uri
         self.ssh_tunnel = ssh_tunnel
+        self.default_sort = default_sort
         self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         # parse the dbname from the uri
