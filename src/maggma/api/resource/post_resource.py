@@ -86,20 +86,14 @@ class PostOnlyResource(Resource):
             queries.pop("temp_response")  # type: ignore
 
             query_params = [
-                entry
-                for _, i in enumerate(self.query_operators)
-                for entry in signature(i.query).parameters
+                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
@@ -109,8 +103,36 @@ class PostOnlyResource(Resource):
 
             try:
                 with query_timeout(self.timeout):
-                    count = self.store.count(query["criteria"])
-                    data = list(self.store.query(**query))
+                    count = self.store.count(  # type: ignore
+                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
+                    )
+
+                    pipeline = [
+                        {"$match": query["criteria"]},
+                    ]
+
+                    sort_dict = {"$sort": {self.store.key: 1}}
+
+                    if query.get("sort", False):
+                        sort_dict["$sort"].update(query["sort"])
+
+                    projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
+
+                    if query.get("properties", False):
+                        projection_dict["$project"].update({p: 1 for p in query["properties"]})
+
+                    pipeline.append(sort_dict)
+                    pipeline.append(projection_dict)
+                    pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
+
+                    if query.get("limit", False):
+                        pipeline.append({"$limit": query["limit"]})
+
+                    data = list(
+                        self.store._collection.aggregate(
+                            pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                        )
+                    )
             except (NetworkTimeout, PyMongoError) as e:
                 if e.timeout:
                     raise HTTPException(
