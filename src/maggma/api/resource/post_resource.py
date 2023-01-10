@@ -112,22 +112,21 @@ class PostOnlyResource(Resource):
                     ]
 
                     sort_dict = {"$sort": {self.store.key: 1}}
-                    if "sort" in query:
-                        if query["sort"]:
-                            sort_dict["$sort"].update(query["sort"])
+
+                    if query.get("sort", False):
+                        sort_dict["$sort"].update(query["sort"])
 
                     projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
-                    if "properties" in query:
-                        if query["properties"]:
-                            projection_dict["$project"].update({p: 1 for p in query["properties"]})
+
+                    if query.get("properties", False):
+                        projection_dict["$project"].update({p: 1 for p in query["properties"]})
 
                     pipeline.append(sort_dict)
                     pipeline.append(projection_dict)
                     pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
 
-                    if "limit" in query:
-                        if query["limit"]:
-                            pipeline.append({"$limit": query["limit"]})
+                    if query.get("limit", False):
+                        pipeline.append({"$limit": query["limit"]})
 
                     data = list(
                         self.store._collection.aggregate(
