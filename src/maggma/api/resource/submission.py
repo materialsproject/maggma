@@ -60,12 +60,8 @@ class SubmissionResource(Resource):
             post_sub_path: POST sub-URL path for the resource.
         """
 
-        if isinstance(state_enum, Enum) and default_state not in [
-            entry.value for entry in state_enum  # type: ignore
-        ]:
-            raise RuntimeError(
-                "If data is stateful a state enum and valid default value must be provided"
-            )
+        if isinstance(state_enum, Enum) and default_state not in [entry.value for entry in state_enum]:  # type: ignore
+            raise RuntimeError("If data is stateful a state enum and valid default value must be provided")
 
         self.state_enum = state_enum
         self.default_state = default_state
@@ -74,8 +70,7 @@ class SubmissionResource(Resource):
         self.timeout = timeout
         self.post_query_operators = post_query_operators
         self.get_query_operators = (
-            [op for op in get_query_operators if op is not None]  # type: ignore
-            + [SubmissionQuery(state_enum)]
+            [op for op in get_query_operators if op is not None] + [SubmissionQuery(state_enum)]  # type: ignore
             if state_enum is not None
             else get_query_operators
         )
@@ -200,23 +195,43 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             self.store.connect(force_reset=True)
 
             try:
                 with query_timeout(self.timeout):
-                    count = self.store.count(query["criteria"])
-                    data = list(self.store.query(**query))  # type: ignore
+                    count = self.store.count(
+                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
+                    )
+
+                    pipeline = [
+                        {"$match": query["criteria"]},
+                    ]
+
+                    if "sort" in query:
+                        if query["sort"]:
+                            pipeline.append({"$sort": query["sort"]})
+
+                    projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
+                    if "properties" in query:
+                        projection_dict["$project"].update({p: 1 for p in query["properties"]})
+
+                    pipeline.append(projection_dict)
+
+                    pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
+                    pipeline.append({"$limit": query["limit"] if "limit" in query else 0})
+
+                    data = list(
+                        self.store._collection.aggregate(
+                            pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                        )
+                    )
             except (NetworkTimeout, PyMongoError) as e:
                 if e.timeout:
                     raise HTTPException(
@@ -224,7 +239,9 @@ class SubmissionResource(Resource):
                         detail="Server timed out trying to obtain data. Try again with a smaller request.",
                     )
                 else:
-                    raise HTTPException(status_code=500,)
+                    raise HTTPException(
+                        status_code=500,
+                    )
 
             meta = Meta(total_doc=count)
 
@@ -261,15 +278,11 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             self.store.connect(force_reset=True)
@@ -277,10 +290,7 @@ class SubmissionResource(Resource):
             # Check for duplicate entry
             if self.duplicate_fields_check:
                 duplicate = self.store.query_one(
-                    criteria={
-                        field: query["criteria"][field]
-                        for field in self.duplicate_fields_check
-                    }
+                    criteria={field: query["criteria"][field] for field in self.duplicate_fields_check}
                 )
 
                 if duplicate:
@@ -302,7 +312,8 @@ class SubmissionResource(Resource):
                 self.store.update(docs=query["criteria"])  # type: ignore
             except Exception:
                 raise HTTPException(
-                    status_code=400, detail="Problem when trying to post data.",
+                    status_code=400,
+                    detail="Problem when trying to post data.",
                 )
 
             response = {
