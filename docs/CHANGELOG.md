@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.49.13](https://github.com/materialsproject/maggma/tree/v0.49.13) (2023-01-10)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.12...v0.49.13)
+
+**Merged pull requests:**
+
+- Aggregation pipelines in resource classes [\#759](https://github.com/materialsproject/maggma/pull/759) ([munrojm](https://github.com/munrojm))
+
 ## [v0.49.12](https://github.com/materialsproject/maggma/tree/v0.49.12) (2023-01-09)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.11...v0.49.12)
