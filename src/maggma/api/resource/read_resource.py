@@ -247,7 +247,10 @@ class ReadOnlyResource(Resource):
                     pipeline.append(sort_dict)
                     pipeline.append(projection_dict)
                     pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
-                    pipeline.append({"$limit": query["limit"] if "limit" in query else 0})
+
+                    if "limit" in query:
+                        if query["limit"]:
+                            pipeline.append({"$limit": query["limit"]})
 
                     data = list(
                         self.store._collection.aggregate(
