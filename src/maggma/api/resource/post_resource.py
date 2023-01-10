@@ -103,7 +103,7 @@ class PostOnlyResource(Resource):
 
             try:
                 with query_timeout(self.timeout):
-                    count = self.store.count(
+                    count = self.store.count(  # type: ignore
                         **{field: query[field] for field in query if field in ["criteria", "hint"]}
                     )
 
@@ -111,16 +111,18 @@ class PostOnlyResource(Resource):
                         {"$match": query["criteria"]},
                     ]
 
+                    sort_dict = {"$sort": {self.store.key: 1}}
                     if "sort" in query:
                         if query["sort"]:
-                            pipeline.append({"$sort": query["sort"]})
+                            sort_dict["$sort"].update(query["sort"])
 
                     projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
                     if "properties" in query:
-                        projection_dict["$project"].update({p: 1 for p in query["properties"]})
+                        if query["properties"]:
+                            projection_dict["$project"].update({p: 1 for p in query["properties"]})
 
+                    pipeline.append(sort_dict)
                     pipeline.append(projection_dict)
-
                     pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
                     pipeline.append({"$limit": query["limit"] if "limit" in query else 0})
 
