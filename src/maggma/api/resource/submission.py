@@ -206,7 +206,7 @@ class SubmissionResource(Resource):
 
             try:
                 with query_timeout(self.timeout):
-                    count = self.store.count(
+                    count = self.store.count(  # type: ignore
                         **{field: query[field] for field in query if field in ["criteria", "hint"]}
                     )
 
