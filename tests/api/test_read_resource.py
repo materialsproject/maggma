@@ -53,9 +53,7 @@ def test_init(owner_store):
     resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=False)
     assert len(resource.router.routes) == 2
 
-    resource = ReadOnlyResource(
-        store=owner_store, model=Owner, enable_default_search=False
-    )
+    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False)
     assert len(resource.router.routes) == 2
 
 
@@ -162,7 +160,7 @@ def test_numeric_query_operator():
 
     # Checking int
     payload = {"age": 20, "_all_fields": True}
-    res, data = search_helper(payload=payload, base="/?", debug=True)z
+    res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200
     assert len(data) == 1
     assert data[0]["age"] == 20
