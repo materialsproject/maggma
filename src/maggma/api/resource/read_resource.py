@@ -233,7 +233,7 @@ class ReadOnlyResource(Resource):
                     pipeline = [
                         {"$match": query["criteria"]},
                     ]
-                    
+
                     sort_dict = {"$sort": {self.store.key: 1}}
                     if "sort" in query:
                         if query["sort"]:
