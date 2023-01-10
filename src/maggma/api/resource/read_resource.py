@@ -114,9 +114,7 @@ class ReadOnlyResource(Resource):
         model_name = self.model.__name__
 
         if self.key_fields is None:
-            field_input = SparseFieldsQuery(
-                self.model, [self.store.key, self.store.last_updated_field]
-            ).query
+            field_input = SparseFieldsQuery(self.model, [self.store.key, self.store.last_updated_field]).query
         else:
 
             def field_input():
@@ -126,7 +124,9 @@ class ReadOnlyResource(Resource):
             request: Request,
             temp_response: Response,
             key: str = Path(
-                ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
+                ...,
+                alias=key_name,
+                title=f"The {key_name} of the {model_name} to get",
             ),
             _fields: STORE_PARAMS = Depends(field_input),
         ):
@@ -172,9 +172,7 @@ class ReadOnlyResource(Resource):
             response = {"data": item}  # type: ignore
 
             if self.disable_validation:
-                response = Response(  # type: ignore
-                    orjson.dumps(response, default=serialization_helper)
-                )
+                response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
                 self.header_processor.process_header(temp_response, request)
@@ -200,14 +198,10 @@ class ReadOnlyResource(Resource):
             temp_response: Response = queries.pop("temp_response")  # type: ignore
 
             query_params = [
-                entry
-                for _, i in enumerate(self.query_operators)
-                for entry in signature(i.query).parameters
+                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 if "limit" in overlap or "skip" in overlap:
                     raise HTTPException(
@@ -219,9 +213,7 @@ class ReadOnlyResource(Resource):
                 else:
                     raise HTTPException(
                         status_code=400,
-                        detail="Request contains query parameters which cannot be used: {}".format(
-                            ", ".join(overlap)
-                        ),
+                        detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                     )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
@@ -235,19 +227,34 @@ class ReadOnlyResource(Resource):
             try:
                 with query_timeout(self.timeout):
                     count = self.store.count(
-                        **{
-                            field: query[field]
-                            for field in query
-                            if field in ["criteria", "hint"]
-                        }
+                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
                     )
 
-                    if self.query_disk_use:
-                        data = list(self.store.query(**query, allow_disk_use=True))  # type: ignore
-                    else:
-                        data = list(self.store.query(**query))
+                    pipeline = [
+                        {"$match": query["criteria"]},
+                    ]
+
+                    if "sort" in query:
+                        if query["sort"]:
+                            pipeline.append({"$sort": query["sort"]})
+
+                    projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
+                    if "properties" in query:
+                        projection_dict["$project"].update({p: 1 for p in query["properties"]})
+
+                    pipeline.append(projection_dict)
+
+                    pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
+                    pipeline.append({"$limit": query["limit"] if "limit" in query else 0})
+
+                    data = list(
+                        self.store._collection.aggregate(
+                            pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                        )
+                    )
 
             except (NetworkTimeout, PyMongoError) as e:
+
                 if e.timeout:
                     raise HTTPException(
                         status_code=504,
@@ -269,9 +276,7 @@ class ReadOnlyResource(Resource):
             response = {"data": data, "meta": {**meta.dict(), **operator_meta}}  # type: ignore
 
             if self.disable_validation:
-                response = Response(  # type: ignore
-                    orjson.dumps(response, default=serialization_helper)
-                )
+                response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
                 self.header_processor.process_header(temp_response, request)
