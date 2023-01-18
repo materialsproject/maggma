@@ -231,7 +231,6 @@ class ReadOnlyResource(Resource):
                     )
 
                     if isinstance(self.store, S3Store):
-                        
                         if self.query_disk_use:
                             data = list(self.store.query(**query, allow_disk_use=True))  # type: ignore
                         else:
