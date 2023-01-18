@@ -109,11 +109,7 @@ class PostOnlyResource(Resource):
                     )
 
                     if isinstance(self.store, S3Store):
-                        
-                        if self.query_disk_use:
-                            data = list(self.store.query(**query, allow_disk_use=True))  # type: ignore
-                        else:
-                            data = list(self.store.query(**query))
+                        data = list(self.store.query(**query))  # type: ignore
                     else:
                         pipeline = [
                             {"$match": query["criteria"]},
