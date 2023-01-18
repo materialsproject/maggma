@@ -14,7 +14,7 @@ from maggma.api.resource import Resource, HintScheme, HeaderProcessor
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries, serialization_helper
 from maggma.core import Store
-from maggma.stores.mongolike import MongoStore
+from maggma.stores import MongoStore, S3Store
 
 import orjson
 
@@ -39,7 +39,7 @@ class ReadOnlyResource(Resource):
         enable_get_by_key: bool = True,
         enable_default_search: bool = True,
         disable_validation: bool = False,
-        query_disk_use: bool = True,
+        query_disk_use: bool = False,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
     ):
@@ -230,32 +230,40 @@ class ReadOnlyResource(Resource):
                         **{field: query[field] for field in query if field in ["criteria", "hint"]}
                     )
 
-                    pipeline = [
-                        {"$match": query["criteria"]},
-                    ]
+                    if isinstance(self.store, S3Store):
+                        
+                        if self.query_disk_use:
+                            data = list(self.store.query(**query, allow_disk_use=True))  # type: ignore
+                        else:
+                            data = list(self.store.query(**query))
+                    else:
 
-                    sort_dict = {"$sort": {self.store.key: 1}}
+                        pipeline = [
+                            {"$match": query["criteria"]},
+                        ]
 
-                    if query.get("sort", False):
-                        sort_dict["$sort"].update(query["sort"])
+                        sort_dict = {"$sort": {self.store.key: 1}}
 
-                    projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
+                        if query.get("sort", False):
+                            sort_dict["$sort"].update(query["sort"])
 
-                    if query.get("properties", False):
-                        projection_dict["$project"].update({p: 1 for p in query["properties"]})
+                        projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
 
-                    pipeline.append(sort_dict)
-                    pipeline.append(projection_dict)
-                    pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
+                        if query.get("properties", False):
+                            projection_dict["$project"].update({p: 1 for p in query["properties"]})
 
-                    if query.get("limit", False):
-                        pipeline.append({"$limit": query["limit"]})
+                        pipeline.append(sort_dict)
+                        pipeline.append(projection_dict)
+                        pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
 
-                    data = list(
-                        self.store._collection.aggregate(
-                            pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                        if query.get("limit", False):
+                            pipeline.append({"$limit": query["limit"]})
+
+                        data = list(
+                            self.store._collection.aggregate(
+                                pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                            )
                         )
-                    )
 
             except (NetworkTimeout, PyMongoError) as e:
 
