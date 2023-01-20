@@ -83,7 +83,7 @@ def test_keys():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
         index = MemoryStore("index", key=1)
-        with pytest.raises(AssertionError, match=r"Since we are.*"):
+        with pytest.raises(TypeError, match=r"Since we are.*"):
             store = S3Store(index, "bucket1", s3_workers=4, key=1)
         index = MemoryStore("index", key="key1")
         with pytest.warns(UserWarning, match=r"The desired S3Store.*$"):

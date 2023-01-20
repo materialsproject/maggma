@@ -93,8 +93,8 @@ class S3Store(Store):
         if not isinstance(index.key, str):
             raise TypeError("Since we are using the key as a file name in S3, they key must be a string")
         if key != index.key:
-            raise ValueError(
-                f"The desired S3Store key {key} does not match the index key {index.key}"
+            warnings.warn(
+                f"The desired S3Store key {key} does not match the index key {index.key}. "
             )
         kwargs["key"] = str(index.key)
 
