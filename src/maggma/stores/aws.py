@@ -90,14 +90,11 @@ class S3Store(Store):
         self.store_hash = store_hash
 
         # Force the key to be the same as the index
-        assert isinstance(
-            index.key, str
-        ), "Since we are using the key as a file name in S3, they key must be a string"
+        if not isinstance(index.key, str):
+            raise TypeError("Since we are using the key as a file name in S3, they key must be a string")
         if key != index.key:
-            warnings.warn(
-                f'The desired S3Store key "{key}" does not match the index key "{index.key},"'
-                "the index key will be used",
-                UserWarning,
+            raise ValueError(
+                f"The desired S3Store key {key} does not match the index key {index.key}"
             )
         kwargs["key"] = str(index.key)
 
