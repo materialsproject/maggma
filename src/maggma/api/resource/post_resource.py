@@ -115,10 +115,12 @@ class PostOnlyResource(Resource):
                             {"$match": query["criteria"]},
                         ]
 
-                        sort_dict = {"$sort": {self.store.key: 1}}
+                        sort_dict = {"$sort": {}}  # type: dict
 
                         if query.get("sort", False):
                             sort_dict["$sort"].update(query["sort"])
+
+                        sort_dict["$sort"].update({self.store.key: 1})  # Ensures sort by key is last in dict
 
                         projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
 
