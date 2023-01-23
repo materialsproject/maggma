@@ -11,7 +11,7 @@ from maggma.api.models import Meta
 from maggma.api.models import Response as ResponseModel
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
 from maggma.api.resource import Resource, HintScheme, HeaderProcessor
-from maggma.api.resource.utils import attach_query_ops
+from maggma.api.resource.utils import attach_query_ops, generate_query_pipeline
 from maggma.api.utils import STORE_PARAMS, merge_queries, serialization_helper
 from maggma.core import Store
 from maggma.stores import MongoStore, S3Store
@@ -237,28 +237,7 @@ class ReadOnlyResource(Resource):
                             data = list(self.store.query(**query))
                     else:
 
-                        pipeline = [
-                            {"$match": query["criteria"]},
-                        ]
-
-                        sort_dict = {"$sort": {}}  # type: dict
-
-                        if query.get("sort", False):
-                            sort_dict["$sort"].update(query["sort"])
-
-                        sort_dict["$sort"].update({self.store.key: 1})  # Ensures sort by key is last in dict
-
-                        projection_dict = {"$project": {"_id": 0}}  # Do not return _id by default
-
-                        if query.get("properties", False):
-                            projection_dict["$project"].update({p: 1 for p in query["properties"]})
-
-                        pipeline.append(sort_dict)
-                        pipeline.append(projection_dict)
-                        pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
-
-                        if query.get("limit", False):
-                            pipeline.append({"$limit": query["limit"]})
+                        pipeline = generate_query_pipeline(query, self.store)
 
                         data = list(
                             self.store._collection.aggregate(
