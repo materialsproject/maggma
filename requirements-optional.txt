@@ -1,6 +1,6 @@
 uvicorn==0.18.3
 hvac==1.0.2
-IPython==7.31.1;python_version>"3.6"
+IPython==8.9.0;python_version>"3.6"
 nbformat==5.4.0
 regex==2022.9.13
 montydb==2.4.0
