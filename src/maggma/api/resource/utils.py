@@ -41,20 +41,22 @@ def generate_query_pipeline(query: dict, store: Store):
         {"$match": query["criteria"]},
     ]
 
-    sort_dict = {"$sort": {}}  # type: dict
+    sorting = query.get("sort", False)
 
-    if query.get("sort", False):
+    if sorting:
+        sort_dict = {"$sort": {}}  # type: dict
         sort_dict["$sort"].update(query["sort"])
-
-    sort_dict["$sort"].update({store.key: 1})  # Ensures sort by key is last in dict
+        sort_dict["$sort"].update({store.key: 1})  # Ensures sort by key is last in dict to fix determinacy
 
     projection_dict = {"_id": 0}  # Do not return _id by default
 
     if query.get("properties", False):
         projection_dict.update({p: 1 for p in query["properties"]})
 
-    pipeline.append({"$project": {**projection_dict, store.key: 1}})
-    pipeline.append(sort_dict)
+    if sorting:
+        pipeline.append({"$project": {**projection_dict, store.key: 1}})
+        pipeline.append(sort_dict)
+
     pipeline.append({"$project": projection_dict})
     pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
 

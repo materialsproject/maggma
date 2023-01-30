@@ -230,6 +230,8 @@ class SubmissionResource(Resource):
                 else:
                     raise HTTPException(
                         status_code=500,
+                        detail="Server timed out trying to obtain data. Try again with a smaller request, "
+                        "or remove sorting fields and sort data locally.",
                     )
 
             meta = Meta(total_doc=count)
