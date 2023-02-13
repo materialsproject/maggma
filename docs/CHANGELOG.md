@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.49.18](https://github.com/materialsproject/maggma/tree/v0.49.18) (2023-02-13)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.17...v0.49.18)
+
+**Merged pull requests:**
+
+- Add more heartbeat pings from worker [\#775](https://github.com/materialsproject/maggma/pull/775) ([munrojm](https://github.com/munrojm))
+
 ## [v0.49.17](https://github.com/materialsproject/maggma/tree/v0.49.17) (2023-01-30)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.16...v0.49.17)
@@ -287,19 +295,19 @@
 
 ## [v0.44.1](https://github.com/materialsproject/maggma/tree/v0.44.1) (2022-03-08)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.1)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.44.1)
 
 **Merged pull requests:**
 
 - added localhost test for MongoURIStore [\#595](https://github.com/materialsproject/maggma/pull/595) ([jmmshn](https://github.com/jmmshn))
 
-## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.43.0)
-
 ## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.0)
+
+## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.43.0)
 
 ## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
 
