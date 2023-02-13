@@ -90,9 +90,7 @@ class AsyncUnorderedMap:
     async def get_from_iterator(self):
         loop = get_event_loop()
         async for idx, item in enumerate(self.iterator):
-            future = loop.run_in_executor(
-                self.executor, safe_dispatch, (self.func, item)
-            )
+            future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
 
             self.tasks[idx] = future
 
@@ -208,18 +206,7 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
     )
 
     if socket:
-        await socket.send_string("PING")
-        try:
-            message = await wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
-            if message.decode("utf-8") != "PONG":
-                socket.close()
-                raise RuntimeError(
-                    "Stopping work as manager did not respond to heartbeat from worker."
-                )
-
-        except TimeoutError:
-            socket.close()
-            raise RuntimeError("Stopping work as manager is not responding.")
+        await ping_manager(socket)
 
     back_pressure_relief = back_pressured_get.release(processed_items)
 
@@ -243,6 +230,9 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
         builder.update_targets(processed_items)
         update_items.update(len(processed_items))
 
+        if socket:
+            await ping_manager(socket)
+
     logger.info(
         f"Ended multiprocessing: {builder.__class__.__name__}",
         extra={
@@ -257,3 +247,16 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
 
     update_items.close()
     builder.finalize()
+
+
+async def ping_manager(socket):
+    await socket.send_string("PING")
+    try:
+        message = await wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
+        if message.decode("utf-8") != "PONG":
+            socket.close()
+            raise RuntimeError("Stopping work as manager did not respond to heartbeat from worker.")
+
+    except TimeoutError:
+        socket.close()
+        raise RuntimeError("Stopping work as manager is not responding.")
