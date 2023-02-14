@@ -230,9 +230,6 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
         builder.update_targets(processed_items)
         update_items.update(len(processed_items))
 
-        if socket:
-            await ping_manager(socket)
-
     logger.info(
         f"Ended multiprocessing: {builder.__class__.__name__}",
         extra={
