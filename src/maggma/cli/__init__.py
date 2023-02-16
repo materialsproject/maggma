@@ -44,17 +44,14 @@ sys.meta_path.append(ScriptFinder())
     help="Store in JSON/YAML form to send reporting data to",
     type=click.Path(exists=True),
 )
-@click.option(
-    "-u", "--url", "url", default=None, type=str, help="URL for the distributed manager"
-)
+@click.option("-u", "--url", "url", default=None, type=str, help="URL for the distributed manager")
 @click.option(
     "-p",
     "--port",
     "port",
     default=None,
     type=int,
-    help="Port for distributed communication."
-    " mrun will find an open port if None is provided to the manager",
+    help="Port for distributed communication." " mrun will find an open port if None is provided to the manager",
 )
 @click.option(
     "-N",
@@ -72,12 +69,8 @@ sys.meta_path.append(ScriptFinder())
     type=int,
     help="Number of distributed workers to process chunks",
 )
-@click.option(
-    "--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations"
-)
-@click.option(
-    "--rabbitmq", is_flag=True, help="Enables the use of RabbitMQ as the work broker"
-)
+@click.option("--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations")
+@click.option("--rabbitmq", is_flag=True, help="Enables the use of RabbitMQ as the work broker")
 @click.option(
     "-q",
     "--queue_prefix",
@@ -111,9 +104,7 @@ def run(
     root = logging.getLogger()
     root.setLevel(level)
     ch = TqdmLoggingHandler()
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
@@ -158,24 +149,17 @@ def run(
                 )
 
         else:
-            # worker
-            loop = asyncio.get_event_loop()
+            # Worker
             if rabbitmq:
-                loop.run_until_complete(
-                    worker(
-                        url=url,
-                        port=port,
-                        num_processes=num_processes,
-                        no_bars=no_bars,
-                        queue_prefix=queue_prefix,
-                    )
+                worker(
+                    url=url,
+                    port=port,
+                    num_processes=num_processes,
+                    no_bars=no_bars,
+                    queue_prefix=queue_prefix,
                 )
             else:
-                loop.run_until_complete(
-                    worker(
-                        url=url, port=port, num_processes=num_processes, no_bars=no_bars
-                    )
-                )
+                worker(url=url, port=port, num_processes=num_processes, no_bars=no_bars)
     else:
         if num_processes == 1:
             for builder in builder_objects:
@@ -183,6 +167,4 @@ def run(
         else:
             loop = asyncio.get_event_loop()
             for builder in builder_objects:
-                loop.run_until_complete(
-                    multi(builder=builder, num_processes=num_processes, no_bars=no_bars)
-                )
+                loop.run_until_complete(multi(builder=builder, num_processes=num_processes, no_bars=no_bars))

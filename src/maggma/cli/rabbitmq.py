@@ -1,10 +1,11 @@
 #!/usr/bin/env python
 # coding utf-8
 
+import asyncio
 import json
 from logging import getLogger
 import socket as pysocket
-from typing import List
+from typing import List, Literal
 import numpy as np
 from time import perf_counter
 from random import randint
@@ -14,15 +15,14 @@ from monty.serialization import MontyDecoder
 
 from maggma.cli.multiprocessing import multi, MANAGER_TIMEOUT
 from maggma.core import Builder
-from maggma.utils import tqdm
+from maggma.utils import tqdm, Timeout
 
 try:
     import pika
-    import aio_pika
 except ImportError:
     raise ImportError("Both pika and aio-pika are required to use RabbitMQ as a broker")
 
-WORKER_TIMEOUT = 5400  # max timeout in seconds for a worker
+WORKER_TIMEOUT = 3600  # max timeout in seconds for a worker
 
 
 def find_port():
@@ -53,7 +53,7 @@ def manager(
     logger.info(f"Binding to Manager URL {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
-    connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port)
+    connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port, "work")
 
     workers = {}  # type: ignore
 
@@ -97,7 +97,6 @@ def manager(
 
             if body is not None:
                 msg = body.decode("utf-8")
-
                 identity = msg.split("_")[-1]
 
                 if "READY" in msg:
@@ -110,7 +109,7 @@ def manager(
                             "work_index": -1,
                         }
 
-                elif "DONE":
+                elif "DONE" in msg:
                     workers[identity]["working"] = False
                     work_ind = workers[identity]["work_index"]
                     if work_ind != -1:
@@ -158,7 +157,7 @@ def manager(
     attempt_graceful_shutdown(connection, workers, channel, worker_queue)
 
 
-def setup_rabbitmq(url, queue_prefix, port):
+def setup_rabbitmq(url: str, queue_prefix: str, port: int, outbound_queue: Literal["status", "work"]):
     connection = pika.BlockingConnection(pika.ConnectionParameters(url, port))
     channel = connection.channel()
     channel.basic_qos(prefetch_count=1, global_qos=True)
@@ -170,8 +169,11 @@ def setup_rabbitmq(url, queue_prefix, port):
     channel.queue_declare(queue=status_queue, auto_delete=True)
     channel.queue_declare(queue=worker_queue, auto_delete=True)
 
-    # Clear out work queue
-    channel.queue_purge(queue=worker_queue)
+    # Clear out outbound queue
+    if outbound_queue == "work":
+        channel.queue_purge(queue=worker_queue)
+    else:
+        channel.queue_purge(queue=status_queue)
 
     return connection, channel, status_queue, worker_queue
 
@@ -217,7 +219,7 @@ def handle_dead_workers(connection, workers, channel, worker_queue):
                     raise RuntimeError("At least one worker has timed out. Stopping distributed build.")
 
 
-async def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix: str):
+def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix: str):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
@@ -230,52 +232,37 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_p
     logger.info(f"Connnecting to Manager at {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
-    connection: aio_pika.abc.AbstractRobustConnection = await aio_pika.connect_robust(host=url, port=port)
-    channel: aio_pika.abc.AbstractChannel = await connection.channel()
-    await channel.set_qos(prefetch_count=1, global_=True)
-
-    # Ensure both worker status and work distribution queues exist
-    status_queue_name = queue_prefix + "_status"
-    work_queue_name = queue_prefix + "_work"
-
-    status_queue: aio_pika.abc.AbstractQueue = await channel.declare_queue(status_queue_name, auto_delete=True)
-    work_queue: aio_pika.abc.AbstractQueue = await channel.declare_queue(work_queue_name, auto_delete=True)
-
-    # Purge queues
-    await status_queue.purge()
+    connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port, "status")
 
     # Send ready signal to status queue
-    await channel.default_exchange.publish(
-        aio_pika.Message(body="READY_{}".format(identity).encode("utf-8")),
-        routing_key=status_queue_name,
-    )
+    channel.basic_publish(exchange="", routing_key=status_queue, body="READY_{}".format(identity).encode("utf-8"))
 
     try:
         running = True
         while running:
             # Wait for work from manager
-            raw_message: aio_pika.abc.AbstractIncomingMessage = await work_queue.get(
-                no_ack=True, timeout=MANAGER_TIMEOUT, fail=False
-            )  # type: ignore
+            with Timeout(seconds=MANAGER_TIMEOUT):
+                _, _, body = channel.basic_get(queue=worker_queue, auto_ack=True)
 
-            if raw_message is not None:
-                async with raw_message.process(ignore_processed=True):
-                    message = raw_message.body.decode("utf-8")
+            if body is not None:
 
-                    if "@class" in message and "@module" in message:
-                        # We have a valid builder
-                        work = json.loads(message)
-                        builder = MontyDecoder().process_decoded(work)
+                message = body.decode("utf-8")
 
-                        logger.info("Working on builder {}".format(builder.__class__))
-                        await channel.default_exchange.publish(
-                            aio_pika.Message(body="WORKING_{}".format(identity).encode("utf-8")),
-                            routing_key=status_queue_name,
-                        )
+                if "@class" in message and "@module" in message:
+                    # We have a valid builder
+                    work = json.loads(message)
+                    builder = MontyDecoder().process_decoded(work)
 
-                        work = json.loads(message)
-                        builder = MontyDecoder().process_decoded(work)
-                        await multi(
+                    logger.info("Working on builder {}".format(builder.__class__))
+
+                    channel.basic_publish(
+                        exchange="", routing_key=status_queue, body="WORKING_{}".format(identity).encode("utf-8")
+                    )
+                    work = json.loads(message)
+                    builder = MontyDecoder().process_decoded(work)
+
+                    asyncio.run(
+                        multi(
                             builder,
                             num_processes,
                             no_bars=no_bars,
@@ -283,37 +270,26 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_p
                             heartbeat_func_kwargs={
                                 "channel": channel,
                                 "identity": identity,
-                                "status_queue_name": status_queue_name,
+                                "status_queue": status_queue,
                             },
                         )
-                        await channel.default_exchange.publish(
-                            aio_pika.Message(body="DONE_{}".format(identity).encode("utf-8")),
-                            routing_key=status_queue_name,
-                        )
+                    )
 
-                    elif message == "EXIT":
-                        # End the worker
-                        running = False
+                    channel.basic_publish(
+                        exchange="", routing_key=status_queue, body="DONE_{}".format(identity).encode("utf-8")
+                    )
 
-        # try:
-        #     bmessage: bytes = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)  # type: ignore
-        # except asyncio.TimeoutError:
-        #     socket.close()
-        #     raise RuntimeError("Stopping work as manager timed out.")
+                elif message == "EXIT":
+                    # End the worker
+                    running = False
 
     except Exception as e:
         logger.error(f"A worker failed with error: {repr(e)}")
-        await channel.default_exchange.publish(
-            aio_pika.Message(body="ERROR_{}".format(repr(e)).encode("utf-8")),
-            routing_key=status_queue_name,
-        )
-        await connection.close()
+        channel.basic_publish(exchange="", routing_key=status_queue, body="ERROR_{}".format(identity).encode("utf-8"))
+        connection.close()
 
-    await connection.close()
+    connection.close()
 
 
-async def ping_manager(channel, identity, status_queue_name):
-    await channel.default_exchange.publish(
-        aio_pika.Message(body="PING_{}".format(identity).encode("utf-8")),
-        routing_key=status_queue_name,
-    )
+def ping_manager(channel, identity, status_queue):
+    channel.basic_publish(exchange="", routing_key=status_queue, body="PING_{}".format(identity).encode("utf-8"))

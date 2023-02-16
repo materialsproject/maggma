@@ -17,7 +17,7 @@ from tqdm import tqdm
 
 from maggma.utils import primed
 
-MANAGER_TIMEOUT = 5400  # max timeout in seconds for manager
+MANAGER_TIMEOUT = 300  # max timeout in seconds for manager
 
 logger = getLogger("MultiProcessor")
 
@@ -89,9 +89,7 @@ class AsyncUnorderedMap:
     async def get_from_iterator(self):
         loop = get_event_loop()
         async for idx, item in enumerate(self.iterator):
-            future = loop.run_in_executor(
-                self.executor, safe_dispatch, (self.func, item)
-            )
+            future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
 
             self.tasks[idx] = future
 
@@ -158,7 +156,7 @@ async def multi(
     builder,
     num_processes,
     no_bars=False,
-    heartbeat_func: Optional[Callable[..., Awaitable[Any]]] = None,
+    heartbeat_func: Optional[Callable[..., Any]] = None,
     heartbeat_func_kwargs: Dict[Any, Any] = {},
 ):
     builder.connect()
@@ -212,7 +210,7 @@ async def multi(
     )
 
     if heartbeat_func:
-        await heartbeat_func(**heartbeat_func_kwargs)  # type: ignore
+        heartbeat_func(**heartbeat_func_kwargs)
 
     back_pressure_relief = back_pressured_get.release(processed_items)
 
@@ -234,6 +232,9 @@ async def multi(
         processed_items = [item for item in chunk if item is not None]
         builder.update_targets(processed_items)
         update_items.update(len(processed_items))
+
+        if heartbeat_func:
+            heartbeat_func(**heartbeat_func_kwargs)
 
     logger.info(
         f"Ended multiprocessing: {builder.__class__.__name__}",
