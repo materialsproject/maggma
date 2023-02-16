@@ -134,8 +134,6 @@ def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_w
                     workers[identity]["last_ping"] = perf_counter()
                     workers[identity]["heartbeats"] += 1
 
-                print(workers)
-
             # Decide if any workers are dead and need to be removed
             handle_dead_workers(workers, socket)
 
