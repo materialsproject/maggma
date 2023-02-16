@@ -6,12 +6,11 @@ from asyncio import (
     Queue,
     gather,
     get_event_loop,
-    wait_for,
-    TimeoutError,
 )
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
+from typing import Any, Awaitable, Callable, Dict, Optional
 
 from aioitertools import enumerate
 from tqdm import tqdm
@@ -90,7 +89,9 @@ class AsyncUnorderedMap:
     async def get_from_iterator(self):
         loop = get_event_loop()
         async for idx, item in enumerate(self.iterator):
-            future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
+            future = loop.run_in_executor(
+                self.executor, safe_dispatch, (self.func, item)
+            )
 
             self.tasks[idx] = future
 
@@ -153,8 +154,13 @@ def safe_dispatch(val):
         return None
 
 
-async def multi(builder, num_processes, no_bars=False, socket=None):
-
+async def multi(
+    builder,
+    num_processes,
+    no_bars=False,
+    heartbeat_func: Optional[Callable[..., Awaitable[Any]]] = None,
+    heartbeat_func_kwargs: Dict[Any, Any] = {},
+):
     builder.connect()
     cursor = builder.get_items()
     executor = ProcessPoolExecutor(num_processes)
@@ -205,15 +211,14 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
         disable=no_bars,
     )
 
-    if socket:
-        await ping_manager(socket)
+    if heartbeat_func:
+        await heartbeat_func(**heartbeat_func_kwargs)  # type: ignore
 
     back_pressure_relief = back_pressured_get.release(processed_items)
 
     update_items = tqdm(total=total, desc="Update Targets", disable=no_bars)
 
     async for chunk in grouper(back_pressure_relief, n=builder.chunk_size):
-
         logger.info(
             "Processed batch of {} items".format(builder.chunk_size),
             extra={
@@ -244,16 +249,3 @@ async def multi(builder, num_processes, no_bars=False, socket=None):
 
     update_items.close()
     builder.finalize()
-
-
-async def ping_manager(socket):
-    await socket.send_string("PING")
-    try:
-        message = await wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
-        if message.decode("utf-8") != "PONG":
-            socket.close()
-            raise RuntimeError("Stopping work as manager did not respond to heartbeat from worker.")
-
-    except TimeoutError:
-        socket.close()
-        raise RuntimeError("Stopping work as manager is not responding.")

@@ -10,7 +10,7 @@ from itertools import chain
 import click
 from monty.serialization import loadfn
 
-from maggma.cli.distributed import find_port, manager, worker
+from maggma.cli.distributed import find_port
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
 from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
@@ -75,6 +75,17 @@ sys.meta_path.append(ScriptFinder())
 @click.option(
     "--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations"
 )
+@click.option(
+    "--rabbitmq", is_flag=True, help="Enables the use of RabbitMQ as the work broker"
+)
+@click.option(
+    "-q",
+    "--queue_prefix",
+    "queue_prefix",
+    default="builder",
+    type=str,
+    help="Prefix to use in queue names when RabbitMQ is select as the broker",
+)
 def run(
     builders,
     verbosity,
@@ -85,7 +96,14 @@ def run(
     num_chunks,
     no_bars,
     num_processes,
+    rabbitmq,
+    queue_prefix,
 ):
+    # Import proper manager and worker
+    if rabbitmq:
+        from maggma.cli.rabbitmq import manager, worker
+    else:
+        from maggma.cli.distributed import manager, worker
 
     # Set Logging
     levels = [logging.WARNING, logging.INFO, logging.DEBUG]
@@ -121,20 +139,43 @@ def run(
                 port = find_port()
                 root.critical(f"Using random port for mrun manager: {port}")
 
-            manager(
-                url=url,
-                port=port,
-                builders=builder_objects,
-                num_chunks=num_chunks,
-                num_workers=num_workers,
-            )
+            if rabbitmq:
+                manager(
+                    url=url,
+                    port=port,
+                    builders=builder_objects,
+                    num_chunks=num_chunks,
+                    num_workers=num_workers,
+                    queue_prefix=queue_prefix,
+                )
+            else:
+                manager(
+                    url=url,
+                    port=port,
+                    builders=builder_objects,
+                    num_chunks=num_chunks,
+                    num_workers=num_workers,
+                )
 
         else:
             # worker
             loop = asyncio.get_event_loop()
-            loop.run_until_complete(
-                worker(url=url, port=port, num_processes=num_processes, no_bars=no_bars)
-            )
+            if rabbitmq:
+                loop.run_until_complete(
+                    worker(
+                        url=url,
+                        port=port,
+                        num_processes=num_processes,
+                        no_bars=no_bars,
+                        queue_prefix=queue_prefix,
+                    )
+                )
+            else:
+                loop.run_until_complete(
+                    worker(
+                        url=url, port=port, num_processes=num_processes, no_bars=no_bars
+                    )
+                )
     else:
         if num_processes == 1:
             for builder in builder_objects:

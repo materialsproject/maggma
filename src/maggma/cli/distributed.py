@@ -90,7 +90,6 @@ def manager(
         completed = False
 
         while not completed:
-
             completed = all(chunk["completed"] for chunk in chunk_dicts)
 
             if num_workers <= 0:
@@ -151,7 +150,6 @@ def manager(
 
             for work_index, chunk_dict in enumerate(chunk_dicts):
                 if not chunk_dict["distributed"]:
-
                     temp_builder_dict = dict(**builder_dict)
                     temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
                     temp_builder_dict = jsanitize(temp_builder_dict)
@@ -159,7 +157,6 @@ def manager(
                     # Send work for available workers
                     for identity in workers:
                         if not workers[identity]["working"]:
-
                             # Send out a chunk to idle worker
                             socket.send_multipart(
                                 [
@@ -251,7 +248,13 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
                 # We have a valid builder
                 work = json.loads(message)
                 builder = MontyDecoder().process_decoded(work)
-                await multi(builder, num_processes, socket=socket, no_bars=no_bars)
+                await multi(
+                    builder,
+                    num_processes,
+                    no_bars=no_bars,
+                    heartbeat_func=ping_manager,
+                    heartbeat_func_kwargs={"socket": socket},
+                )
             elif message == "EXIT":
                 # End the worker
                 running = False
@@ -262,3 +265,18 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
         socket.close()
 
     socket.close()
+
+
+async def ping_manager(socket):
+    await socket.send_string("PING")
+    try:
+        message = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)
+        if message.decode("utf-8") != "PONG":
+            socket.close()
+            raise RuntimeError(
+                "Stopping work as manager did not respond to heartbeat from worker."
+            )
+
+    except TimeoutError:
+        socket.close()
+        raise RuntimeError("Stopping work as manager is not responding.")
