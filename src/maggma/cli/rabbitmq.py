@@ -91,7 +91,7 @@ def manager(
 
         completed = False
 
-        while not completed:
+        while not (completed and workers):
             completed = all(chunk["completed"] for chunk in chunk_dicts)
 
             if num_workers <= 0:
@@ -124,8 +124,8 @@ def manager(
                         chunk_dicts[work_ind]["completed"] = True  # type: ignore
                         pbar_completed.update(1)
 
-                        # If everything is distributed, send EXIT to the worker
-                        if all(chunk["distributed"] for chunk in chunk_dicts):
+                        # If everything is completed, send EXIT to the worker
+                        if all(chunk["completed"] for chunk in chunk_dicts):
                             logger.debug(
                                 f"Sending exit signal to worker: {msg.split('_')[1]}"
                             )
