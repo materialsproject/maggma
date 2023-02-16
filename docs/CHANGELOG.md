@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.50.0](https://github.com/materialsproject/maggma/tree/v0.50.0) (2023-02-16)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.18...v0.50.0)
+
+**Merged pull requests:**
+
+- Overhaul distributed framework and add RabbitMQ support [\#776](https://github.com/materialsproject/maggma/pull/776) ([munrojm](https://github.com/munrojm))
+
 ## [v0.49.18](https://github.com/materialsproject/maggma/tree/v0.49.18) (2023-02-13)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.17...v0.49.18)
