@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.50.1](https://github.com/materialsproject/maggma/tree/v0.50.1) (2023-02-16)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.0...v0.50.1)
+
+**Merged pull requests:**
+
+- Remove stray print in worker debug [\#777](https://github.com/materialsproject/maggma/pull/777) ([munrojm](https://github.com/munrojm))
+
 ## [v0.50.0](https://github.com/materialsproject/maggma/tree/v0.50.0) (2023-02-16)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.18...v0.50.0)
@@ -82,19 +90,19 @@
 
 ## [v0.49.9](https://github.com/materialsproject/maggma/tree/v0.49.9) (2022-11-01)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.8...v0.49.9)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.7...v0.49.9)
 
 **Merged pull requests:**
 
 - Parse datetime with dateutil [\#741](https://github.com/materialsproject/maggma/pull/741) ([munrojm](https://github.com/munrojm))
 
-## [v0.49.8](https://github.com/materialsproject/maggma/tree/v0.49.8) (2022-10-25)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.7...v0.49.8)
-
 ## [v0.49.7](https://github.com/materialsproject/maggma/tree/v0.49.7) (2022-10-25)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.6...v0.49.7)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.8...v0.49.7)
+
+## [v0.49.8](https://github.com/materialsproject/maggma/tree/v0.49.8) (2022-10-25)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.6...v0.49.8)
 
 **Merged pull requests:**
 
