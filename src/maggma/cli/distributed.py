@@ -29,9 +29,7 @@ def find_port():
     return sock.getsockname()[1]
 
 
-def manager(
-    url: str, port: int, builders: List[Builder], num_chunks: int, num_workers: int
-):
+def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_workers: int):
     """
     Really simple manager for distributed processing that uses a builder prechunk to modify
     the builder and send out modified builders for each worker to run.
@@ -65,10 +63,7 @@ def manager(
 
         try:
             builder.connect()
-            chunk_dicts = [
-                {"chunk": d, "distributed": False, "completed": False}
-                for d in builder.prechunk(num_chunks)
-            ]
+            chunk_dicts = [{"chunk": d, "distributed": False, "completed": False} for d in builder.prechunk(num_chunks)]
             pbar_distributed = tqdm(
                 total=len(chunk_dicts),
                 desc="Distributed chunks for {}".format(builder.__class__.__name__),
@@ -83,14 +78,11 @@ def manager(
 
         except NotImplementedError:
             attempt_graceful_shutdown(workers, socket)
-            raise RuntimeError(
-                f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists."
-            )
+            raise RuntimeError(f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists.")
 
         completed = False
 
         while not completed:
-
             completed = all(chunk["completed"] for chunk in chunk_dicts)
 
             if num_workers <= 0:
@@ -125,9 +117,7 @@ def manager(
 
                             # If everything is distributed, send EXIT to the worker
                             if all(chunk["distributed"] for chunk in chunk_dicts):
-                                logger.debug(
-                                    f"Sending exit signal to worker: {msg.split('_')[1]}"
-                                )
+                                logger.debug(f"Sending exit signal to worker: {msg.split('_')[1]}")
                                 socket.send_multipart([identity, b"", b"EXIT"])
                                 workers.pop(identity)
 
@@ -135,9 +125,7 @@ def manager(
                     # Remove worker and requeue work sent to it
                     attempt_graceful_shutdown(workers, socket)
                     raise RuntimeError(
-                        "At least one worker has stopped with error message: {}".format(
-                            msg.split("_")[1]
-                        )
+                        "At least one worker has stopped with error message: {}".format(msg.split("_")[1])
                     )
 
                 elif msg == "PING":
@@ -146,12 +134,13 @@ def manager(
                     workers[identity]["last_ping"] = perf_counter()
                     workers[identity]["heartbeats"] += 1
 
+                print(workers)
+
             # Decide if any workers are dead and need to be removed
             handle_dead_workers(workers, socket)
 
             for work_index, chunk_dict in enumerate(chunk_dicts):
                 if not chunk_dict["distributed"]:
-
                     temp_builder_dict = dict(**builder_dict)
                     temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
                     temp_builder_dict = jsanitize(temp_builder_dict)
@@ -159,7 +148,6 @@ def manager(
                     # Send work for available workers
                     for identity in workers:
                         if not workers[identity]["working"]:
-
                             # Send out a chunk to idle worker
                             socket.send_multipart(
                                 [
@@ -213,12 +201,10 @@ def handle_dead_workers(workers, socket):
                 z_score = 0.6745 * (workers[identity]["heartbeats"] - median) / mad
                 if z_score <= -3.5:
                     attempt_graceful_shutdown(workers, socket)
-                    raise RuntimeError(
-                        "At least one worker has timed out. Stopping distributed build."
-                    )
+                    raise RuntimeError("At least one worker has timed out. Stopping distributed build.")
 
 
-async def worker(url: str, port: int, num_processes: int, no_bars: bool):
+def worker(url: str, port: int, num_processes: int, no_bars: bool):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
@@ -227,11 +213,14 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
     logger = getLogger(f"Worker {identity}")
 
     logger.info(f"Connnecting to Manager at {url}:{port}")
-    context = azmq.Context()
-    socket = context.socket(zmq.REQ)
+    context = zmq.Context()
+    socket: zmq.Socket = context.socket(zmq.REQ)
 
     socket.setsockopt_string(zmq.IDENTITY, identity)
     socket.connect(f"{url}:{port}")
+
+    poller = zmq.Poller()
+    poller.register(socket, zmq.POLLIN)
 
     # Initial message package
     hostname = pysocket.gethostname()
@@ -239,26 +228,53 @@ async def worker(url: str, port: int, num_processes: int, no_bars: bool):
     try:
         running = True
         while running:
-            await socket.send("READY_{}".format(hostname).encode("utf-8"))
-            try:
-                bmessage: bytes = await asyncio.wait_for(socket.recv(), timeout=MANAGER_TIMEOUT)  # type: ignore
-            except asyncio.TimeoutError:
+            socket.send("READY_{}".format(hostname).encode("utf-8"))
+
+            # Poll for MANAGER_TIMEOUT seconds, if nothing is given then assume manager is dead and timeout
+            connections = dict(poller.poll(MANAGER_TIMEOUT * 1000))
+            if not connections:
                 socket.close()
                 raise RuntimeError("Stopping work as manager timed out.")
+
+            bmessage: bytes = socket.recv()
 
             message = bmessage.decode("utf-8")
             if "@class" in message and "@module" in message:
                 # We have a valid builder
                 work = json.loads(message)
                 builder = MontyDecoder().process_decoded(work)
-                await multi(builder, num_processes, socket=socket, no_bars=no_bars)
+
+                asyncio.run(
+                    multi(
+                        builder,
+                        num_processes,
+                        no_bars=no_bars,
+                        heartbeat_func=ping_manager,
+                        heartbeat_func_kwargs={"socket": socket, "poller": poller},
+                    )
+                )
             elif message == "EXIT":
                 # End the worker
                 running = False
 
     except Exception as e:
         logger.error(f"A worker failed with error: {e}")
-        await socket.send("ERROR_{}".format(e).encode("utf-8"))
+        socket.send("ERROR_{}".format(e).encode("utf-8"))
         socket.close()
 
     socket.close()
+
+
+def ping_manager(socket, poller):
+    socket.send_string("PING")
+
+    # Poll for MANAGER_TIMEOUT seconds, if nothing is given then assume manager is dead and timeout
+    connections = dict(poller.poll(MANAGER_TIMEOUT * 1000))
+    if not connections:
+        socket.close()
+        raise RuntimeError("Stopping work as manager timed out.")
+
+    message: bytes = socket.recv()
+    if message.decode("utf-8") != "PONG":
+        socket.close()
+        raise RuntimeError("Stopping work as manager did not respond to heartbeat from worker.")
