@@ -53,9 +53,7 @@ def manager(
     logger.info(f"Binding to Manager URL {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
-    connection, channel, status_queue, worker_queue = setup_rabbitmq(
-        url, queue_prefix, port
-    )
+    connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port)
 
     workers = {}  # type: ignore
 
@@ -67,10 +65,7 @@ def manager(
 
         try:
             builder.connect()
-            chunk_dicts = [
-                {"chunk": d, "distributed": False, "completed": False}
-                for d in builder.prechunk(num_chunks)
-            ]
+            chunk_dicts = [{"chunk": d, "distributed": False, "completed": False} for d in builder.prechunk(num_chunks)]
             pbar_distributed = tqdm(
                 total=len(chunk_dicts),
                 desc="Distributed chunks for {}".format(builder.__class__.__name__),
@@ -85,13 +80,11 @@ def manager(
 
         except NotImplementedError:
             attempt_graceful_shutdown(connection, workers, channel, worker_queue)
-            raise RuntimeError(
-                f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists."
-            )
+            raise RuntimeError(f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists.")
 
         completed = False
 
-        while not (completed and workers):
+        while not completed:
             completed = all(chunk["completed"] for chunk in chunk_dicts)
 
             if num_workers <= 0:
@@ -124,28 +117,11 @@ def manager(
                         chunk_dicts[work_ind]["completed"] = True  # type: ignore
                         pbar_completed.update(1)
 
-                        # If everything is completed, send EXIT to the worker
-                        if all(chunk["completed"] for chunk in chunk_dicts):
-                            logger.debug(
-                                f"Sending exit signal to worker: {msg.split('_')[1]}"
-                            )
-                            channel.basic_publish(
-                                exchange="",
-                                routing_key=worker_queue,
-                                body="EXIT".encode("utf-8"),
-                            )
-
-                            workers.pop(identity)
-
                 elif "ERROR" in msg:
                     # Remove worker and requeue work sent to it
-                    attempt_graceful_shutdown(
-                        connection, workers, channel, worker_queue
-                    )
+                    attempt_graceful_shutdown(connection, workers, channel, worker_queue)
                     raise RuntimeError(
-                        "At least one worker has stopped with error message: {}".format(
-                            msg.split("_")[1]
-                        )
+                        "At least one worker has stopped with error message: {}".format(msg.split("_")[1])
                     )
 
                 elif "PING" in msg:
@@ -237,17 +213,11 @@ def handle_dead_workers(connection, workers, channel, worker_queue):
             for identity in list(workers.keys()):
                 z_score = 0.6745 * (workers[identity]["heartbeats"] - median) / mad
                 if z_score <= -3.5:
-                    attempt_graceful_shutdown(
-                        connection, workers, channel, worker_queue
-                    )
-                    raise RuntimeError(
-                        "At least one worker has timed out. Stopping distributed build."
-                    )
+                    attempt_graceful_shutdown(connection, workers, channel, worker_queue)
+                    raise RuntimeError("At least one worker has timed out. Stopping distributed build.")
 
 
-async def worker(
-    url: str, port: int, num_processes: int, no_bars: bool, queue_prefix: str
-):
+async def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix: str):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
@@ -260,9 +230,7 @@ async def worker(
     logger.info(f"Connnecting to Manager at {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
-    connection: aio_pika.abc.AbstractRobustConnection = await aio_pika.connect_robust(
-        host=url, port=port
-    )
+    connection: aio_pika.abc.AbstractRobustConnection = await aio_pika.connect_robust(host=url, port=port)
     channel: aio_pika.abc.AbstractChannel = await connection.channel()
     await channel.set_qos(prefetch_count=1, global_=True)
 
@@ -270,12 +238,8 @@ async def worker(
     status_queue_name = queue_prefix + "_status"
     work_queue_name = queue_prefix + "_work"
 
-    status_queue: aio_pika.abc.AbstractQueue = await channel.declare_queue(
-        status_queue_name, auto_delete=True
-    )
-    work_queue: aio_pika.abc.AbstractQueue = await channel.declare_queue(
-        work_queue_name, auto_delete=True
-    )
+    status_queue: aio_pika.abc.AbstractQueue = await channel.declare_queue(status_queue_name, auto_delete=True)
+    work_queue: aio_pika.abc.AbstractQueue = await channel.declare_queue(work_queue_name, auto_delete=True)
 
     # Purge queues
     await status_queue.purge()
@@ -305,9 +269,7 @@ async def worker(
 
                         logger.info("Working on builder {}".format(builder.__class__))
                         await channel.default_exchange.publish(
-                            aio_pika.Message(
-                                body="WORKING_{}".format(identity).encode("utf-8")
-                            ),
+                            aio_pika.Message(body="WORKING_{}".format(identity).encode("utf-8")),
                             routing_key=status_queue_name,
                         )
 
@@ -325,11 +287,10 @@ async def worker(
                             },
                         )
                         await channel.default_exchange.publish(
-                            aio_pika.Message(
-                                body="DONE_{}".format(identity).encode("utf-8")
-                            ),
+                            aio_pika.Message(body="DONE_{}".format(identity).encode("utf-8")),
                             routing_key=status_queue_name,
                         )
+
                     elif message == "EXIT":
                         # End the worker
                         running = False
