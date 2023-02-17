@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.50.2](https://github.com/materialsproject/maggma/tree/v0.50.2) (2023-02-17)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.1...v0.50.2)
+
+**Merged pull requests:**
+
+- Pydantic CLI settings [\#778](https://github.com/materialsproject/maggma/pull/778) ([munrojm](https://github.com/munrojm))
+
 ## [v0.50.1](https://github.com/materialsproject/maggma/tree/v0.50.1) (2023-02-16)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.0...v0.50.1)
