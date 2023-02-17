@@ -25,6 +25,7 @@ except ImportError:
 
 settings = CLISettings()
 
+
 def find_port():
     sock = pysocket.socket()
     sock.bind(("", 0))
