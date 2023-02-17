@@ -13,14 +13,14 @@ from random import randint
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
 
-from maggma.cli.multiprocessing import multi, MANAGER_TIMEOUT
+from maggma.cli.multiprocessing import multi
+from maggma.cli.settings import CLISettings
 from maggma.core import Builder
 from maggma.utils import tqdm
 
 import zmq
-import zmq.asyncio as azmq
 
-WORKER_TIMEOUT = 5400  # max timeout in seconds for a worker
+settings = CLISettings()
 
 
 def find_port():
@@ -175,7 +175,7 @@ def handle_dead_workers(workers, socket):
     if len(workers) == 1:
         # Use global timeout
         identity = list(workers.keys())[0]
-        if (perf_counter() - workers[identity]["last_ping"]) >= WORKER_TIMEOUT:
+        if (perf_counter() - workers[identity]["last_ping"]) >= settings.WORKER_TIMEOUT:
             attempt_graceful_shutdown(workers, socket)
             raise RuntimeError("Worker has timed out. Stopping distributed build.")
 
@@ -229,7 +229,7 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool):
             socket.send("READY_{}".format(hostname).encode("utf-8"))
 
             # Poll for MANAGER_TIMEOUT seconds, if nothing is given then assume manager is dead and timeout
-            connections = dict(poller.poll(MANAGER_TIMEOUT * 1000))
+            connections = dict(poller.poll(settings.MANAGER_TIMEOUT * 1000))
             if not connections:
                 socket.close()
                 raise RuntimeError("Stopping work as manager timed out.")
@@ -267,7 +267,7 @@ def ping_manager(socket, poller):
     socket.send_string("PING")
 
     # Poll for MANAGER_TIMEOUT seconds, if nothing is given then assume manager is dead and timeout
-    connections = dict(poller.poll(MANAGER_TIMEOUT * 1000))
+    connections = dict(poller.poll(settings.MANAGER_TIMEOUT * 1000))
     if not connections:
         socket.close()
         raise RuntimeError("Stopping work as manager timed out.")

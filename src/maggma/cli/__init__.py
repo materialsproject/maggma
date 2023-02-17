@@ -17,7 +17,7 @@ from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
 
 sys.meta_path.append(ScriptFinder())
-
+ 
 
 @click.command()
 @click.argument("builders", nargs=-1, type=click.Path(exists=True), required=True)
