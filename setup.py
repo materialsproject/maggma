@@ -27,6 +27,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "setuptools",
+        "pydantic",
         "pymongo>=4.2.0",
         "monty>=1.0.2",
         "mongomock>=3.10.0",
