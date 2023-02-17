@@ -13,17 +13,17 @@ from random import randint
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
 
-from maggma.cli.multiprocessing import multi, MANAGER_TIMEOUT
+from maggma.cli.multiprocessing import multi
 from maggma.core import Builder
 from maggma.utils import tqdm, Timeout
+from maggma.cli import CLISettings
 
 try:
     import pika
 except ImportError:
     raise ImportError("Both pika and aio-pika are required to use RabbitMQ as a broker")
 
-WORKER_TIMEOUT = 3600  # max timeout in seconds for a worker
-
+settings = CLISettings()
 
 def find_port():
     sock = pysocket.socket()
@@ -192,7 +192,7 @@ def handle_dead_workers(connection, workers, channel, worker_queue):
     if len(workers) == 1:
         # Use global timeout
         identity = list(workers.keys())[0]
-        if (perf_counter() - workers[identity]["last_ping"]) >= WORKER_TIMEOUT:
+        if (perf_counter() - workers[identity]["last_ping"]) >= settings.WORKER_TIMEOUT:
             attempt_graceful_shutdown(connection, workers, channel, worker_queue)
             raise RuntimeError("Worker has timed out. Stopping distributed build.")
 
@@ -241,7 +241,7 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
         running = True
         while running:
             # Wait for work from manager
-            with Timeout(seconds=MANAGER_TIMEOUT):
+            with Timeout(seconds=settings.MANAGER_TIMEOUT):
                 _, _, body = channel.basic_get(queue=worker_queue, auto_ack=True)
 
             if body is not None:

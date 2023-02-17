@@ -16,8 +16,28 @@ from maggma.cli.serial import serial
 from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
 
+
+from pydantic import BaseSettings, Field
+
 sys.meta_path.append(ScriptFinder())
 
+
+class CLISettings(BaseSettings):
+    
+    WORKER_TIMEOUT: int = Field(
+        3600,
+        description="Timeout in seconds for a distributed worker",
+    )
+    
+    MANAGER_TIMEOUT: int = Field(
+        900,
+        description="Timeout in seconds for the worker manager",
+    )
+    
+    class Config:
+        env_prefix = "MAGGMA_"
+        extra = "ignore"
+    
 
 @click.command()
 @click.argument("builders", nargs=-1, type=click.Path(exists=True), required=True)

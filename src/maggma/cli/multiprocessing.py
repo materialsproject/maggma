@@ -16,8 +16,7 @@ from aioitertools import enumerate
 from tqdm import tqdm
 
 from maggma.utils import primed
-
-MANAGER_TIMEOUT = 300  # max timeout in seconds for manager
+from maggma.cli import CLISettings
 
 logger = getLogger("MultiProcessor")
 
