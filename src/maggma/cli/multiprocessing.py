@@ -231,9 +231,6 @@ async def multi(
         builder.update_targets(processed_items)
         update_items.update(len(processed_items))
 
-        if heartbeat_func:
-            heartbeat_func(**heartbeat_func_kwargs)
-
     logger.info(
         f"Ended multiprocessing: {builder.__class__.__name__}",
         extra={
