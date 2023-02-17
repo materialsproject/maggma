@@ -14,9 +14,9 @@ from monty.json import jsanitize
 from monty.serialization import MontyDecoder
 
 from maggma.cli.multiprocessing import multi
+from maggma.cli.settings import CLISettings
 from maggma.core import Builder
 from maggma.utils import tqdm, Timeout
-from maggma.cli import CLISettings
 
 try:
     import pika

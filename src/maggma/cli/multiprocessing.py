@@ -16,7 +16,6 @@ from aioitertools import enumerate
 from tqdm import tqdm
 
 from maggma.utils import primed
-from maggma.cli import CLISettings
 
 logger = getLogger("MultiProcessor")
 
