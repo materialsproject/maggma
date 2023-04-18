@@ -24,7 +24,7 @@ from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailur
 from sshtunnel import SSHTunnelForwarder
 
 from maggma.core import Sort, Store, StoreError
-from maggma.utils import confirm_field_index
+from maggma.utils import confirm_field_index, to_dt
 
 try:
     import montydb
@@ -123,6 +123,7 @@ class MongoStore(Store):
         safe_update: bool = False,
         auth_source: Optional[str] = None,
         mongoclient_kwargs: Optional[Dict] = None,
+        default_sort: Optional[Dict[str, Union[Sort, int]]] = None,
         **kwargs,
     ):
         """
@@ -135,6 +136,8 @@ class MongoStore(Store):
             password: Password to connect with
             safe_update: fail gracefully on DocumentTooLarge errors on update
             auth_source: The database to authenticate on. Defaults to the database name.
+            default_sort: Default sort field and direction to use when querying. Can be used to
+                ensure determinacy in query results.
         """
         self.database = database
         self.collection_name = collection_name
@@ -144,6 +147,7 @@ class MongoStore(Store):
         self.password = password
         self.ssh_tunnel = ssh_tunnel
         self.safe_update = safe_update
+        self.default_sort = default_sort
         self._coll = None  # type: Any
         self.kwargs = kwargs
 
@@ -226,9 +230,7 @@ class MongoStore(Store):
 
         return cls(**db_creds, **kwargs)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -242,10 +244,7 @@ class MongoStore(Store):
             distinct_vals = self._collection.distinct(field, criteria)
         except (OperationFailure, DocumentTooLarge):
             distinct_vals = [
-                d["_id"]
-                for d in self._collection.aggregate(
-                    [{"$match": criteria}, {"$group": {"_id": f"${field}"}}]
-                )
+                d["_id"] for d in self._collection.aggregate([{"$match": criteria}, {"$group": {"_id": f"${field}"}}])
             ]
             if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
                 distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
@@ -344,12 +343,7 @@ class MongoStore(Store):
         criteria = criteria if criteria else {}
 
         hint_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in hint.items()
-            ]
-            if hint
-            else None
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
         )
 
         if hint_list is not None:  # pragma: no cover
@@ -365,6 +359,7 @@ class MongoStore(Store):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
+        **kwargs,
     ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
@@ -378,35 +373,30 @@ class MongoStore(Store):
                 Keys are field names and values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
+            mongoclient_kwargs: Dict of extra kwargs to pass to pymongo find.
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
 
-        sort_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in sort.items()
+        default_sort_formatted = None
+
+        if self.default_sort is not None:
+            default_sort_formatted = [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in self.default_sort.items()
             ]
+
+        sort_list = (
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in sort.items()]
             if sort
-            else None
+            else default_sort_formatted
         )
 
         hint_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in hint.items()
-            ]
-            if hint
-            else None
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
         )
 
         for d in self._collection.find(
-            filter=criteria,
-            projection=properties,
-            skip=skip,
-            limit=limit,
-            sort=sort_list,
-            hint=hint_list,
+            filter=criteria, projection=properties, skip=skip, limit=limit, sort=sort_list, hint=hint_list, **kwargs
         ):
             yield d
 
@@ -528,6 +518,7 @@ class MongoURIStore(MongoStore):
         database: str = None,
         ssh_tunnel: Optional[SSHTunnel] = None,
         mongoclient_kwargs: Optional[Dict] = None,
+        default_sort: Optional[Dict[str, Union[Sort, int]]] = None,
         **kwargs,
     ):
         """
@@ -535,18 +526,19 @@ class MongoURIStore(MongoStore):
             uri: MongoDB+SRV URI
             database: database to connect to
             collection_name: The collection name
+            default_sort: Default sort field and direction to use when querying. Can be used to
+                ensure determinacy in query results.
         """
         self.uri = uri
         self.ssh_tunnel = ssh_tunnel
+        self.default_sort = default_sort
         self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         # parse the dbname from the uri
         if database is None:
             d_uri = uri_parser.parse_uri(uri)
             if d_uri["database"] is None:
-                raise ConfigurationError(
-                    "If database name is not supplied, a database must be set in the uri"
-                )
+                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
             self.database = d_uri["database"]
         else:
             self.database = database
@@ -587,6 +579,7 @@ class MemoryStore(MongoStore):
             collection_name: name for the collection in memory
         """
         self.collection_name = collection_name
+        self.default_sort = None
         self._coll = None
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)  # noqa
@@ -645,9 +638,7 @@ class MemoryStore(MongoStore):
             properties = list(properties.keys())
 
         data = [
-            doc
-            for doc in self.query(properties=keys + properties, criteria=criteria)
-            if all(has(doc, k) for k in keys)
+            doc for doc in self.query(properties=keys + properties, criteria=criteria) if all(has(doc, k) for k in keys)
         ]
 
         def grouping_keys(doc):
@@ -677,7 +668,10 @@ class JSONStore(MemoryStore):
     """
 
     def __init__(
-        self, paths: Union[str, List[str]], read_only: bool = True, **kwargs,
+        self,
+        paths: Union[str, List[str]],
+        read_only: bool = True,
+        **kwargs,
     ):
         """
         Args:
@@ -716,9 +710,7 @@ class JSONStore(MemoryStore):
         self.kwargs = kwargs
 
         if not self.read_only and len(paths) > 1:
-            raise RuntimeError(
-                "Cannot instantiate file-writable JSONStore with multiple JSON files."
-            )
+            raise RuntimeError("Cannot instantiate file-writable JSONStore with multiple JSON files.")
 
         # create the .json file if it does not exist
         if not self.read_only and not Path(self.paths[0]).exists():
@@ -726,6 +718,9 @@ class JSONStore(MemoryStore):
                 data: List[dict] = []
                 bytesdata = orjson.dumps(data)
                 f.write(bytesdata.decode("utf-8"))
+
+        self.default_sort = None
+
         super().__init__(**kwargs)
 
     def connect(self, force_reset=False):
@@ -759,6 +754,14 @@ class JSONStore(MemoryStore):
             data = data.decode() if isinstance(data, bytes) else data
             objects = orjson.loads(data)
             objects = [objects] if not isinstance(objects, list) else objects
+            # datetime objects deserialize to str. Try to convert the last_updated
+            # field back to datetime.
+            # # TODO - there may still be problems caused if a JSONStore is init'ed from
+            # documents that don't contain a last_updated field
+            # See Store.last_updated in store.py.
+            for obj in objects:
+                if obj.get(self.last_updated_field):
+                    obj[self.last_updated_field] = to_dt(obj[self.last_updated_field])
 
         return objects
 
@@ -874,6 +877,7 @@ class MontyStore(MemoryStore):
         self.database_name = database_name
         self.collection_name = collection_name
         self._coll = None
+        self.default_sort = None
         self.ssh_tunnel = None  # This is to fix issues with the tunnel on close
         self.kwargs = kwargs
         self.storage = storage

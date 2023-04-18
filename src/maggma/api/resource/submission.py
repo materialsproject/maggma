@@ -12,9 +12,10 @@ from pymongo.errors import NetworkTimeout, PyMongoError
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import QueryOperator, SubmissionQuery
 from maggma.api.resource import Resource
-from maggma.api.resource.utils import attach_query_ops
+from maggma.api.resource.utils import attach_query_ops, generate_query_pipeline
 from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
+from maggma.stores import S3Store
 
 
 class SubmissionResource(Resource):
@@ -60,12 +61,8 @@ class SubmissionResource(Resource):
             post_sub_path: POST sub-URL path for the resource.
         """
 
-        if isinstance(state_enum, Enum) and default_state not in [
-            entry.value for entry in state_enum  # type: ignore
-        ]:
-            raise RuntimeError(
-                "If data is stateful a state enum and valid default value must be provided"
-            )
+        if isinstance(state_enum, Enum) and default_state not in [entry.value for entry in state_enum]:  # type: ignore
+            raise RuntimeError("If data is stateful a state enum and valid default value must be provided")
 
         self.state_enum = state_enum
         self.default_state = default_state
@@ -74,8 +71,7 @@ class SubmissionResource(Resource):
         self.timeout = timeout
         self.post_query_operators = post_query_operators
         self.get_query_operators = (
-            [op for op in get_query_operators if op is not None]  # type: ignore
-            + [SubmissionQuery(state_enum)]
+            [op for op in get_query_operators if op is not None] + [SubmissionQuery(state_enum)]  # type: ignore
             if state_enum is not None
             else get_query_operators
         )
@@ -129,7 +125,7 @@ class SubmissionResource(Resource):
 
         key_name = "submission_id" if self.calculate_submission_id else self.store.key
 
-        async def get_by_key(
+        def get_by_key(
             key: str = Path(
                 ...,
                 alias=key_name,
@@ -187,7 +183,7 @@ class SubmissionResource(Resource):
 
         model_name = self.model.__name__
 
-        async def search(**queries: STORE_PARAMS):
+        def search(**queries: STORE_PARAMS):
 
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
@@ -200,23 +196,31 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             self.store.connect(force_reset=True)
 
             try:
                 with query_timeout(self.timeout):
-                    count = self.store.count(query["criteria"])
-                    data = list(self.store.query(**query))  # type: ignore
+                    count = self.store.count(  # type: ignore
+                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
+                    )
+                    if isinstance(self.store, S3Store):
+                        data = list(self.store.query(**query))  # type: ignore
+                    else:
+
+                        pipeline = generate_query_pipeline(query, self.store)
+
+                        data = list(
+                            self.store._collection.aggregate(
+                                pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                            )
+                        )
             except (NetworkTimeout, PyMongoError) as e:
                 if e.timeout:
                     raise HTTPException(
@@ -224,7 +228,11 @@ class SubmissionResource(Resource):
                         detail="Server timed out trying to obtain data. Try again with a smaller request.",
                     )
                 else:
-                    raise HTTPException(status_code=500,)
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Server timed out trying to obtain data. Try again with a smaller request, "
+                        "or remove sorting fields and sort data locally.",
+                    )
 
             meta = Meta(total_doc=count)
 
@@ -248,7 +256,7 @@ class SubmissionResource(Resource):
     def build_post_data(self):
         model_name = self.model.__name__
 
-        async def post_data(**queries: STORE_PARAMS):
+        def post_data(**queries: STORE_PARAMS):
 
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
@@ -261,15 +269,11 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             self.store.connect(force_reset=True)
@@ -277,10 +281,7 @@ class SubmissionResource(Resource):
             # Check for duplicate entry
             if self.duplicate_fields_check:
                 duplicate = self.store.query_one(
-                    criteria={
-                        field: query["criteria"][field]
-                        for field in self.duplicate_fields_check
-                    }
+                    criteria={field: query["criteria"][field] for field in self.duplicate_fields_check}
                 )
 
                 if duplicate:
@@ -302,7 +303,8 @@ class SubmissionResource(Resource):
                 self.store.update(docs=query["criteria"])  # type: ignore
             except Exception:
                 raise HTTPException(
-                    status_code=400, detail="Problem when trying to post data.",
+                    status_code=400,
+                    detail="Problem when trying to post data.",
                 )
 
             response = {

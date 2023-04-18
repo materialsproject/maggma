@@ -137,7 +137,7 @@ def test_orphaned_metadata(test_dir):
 
     # re-init the store with a different max_depth parameter
     # this will result in orphaned metadata
-    # with include_orphans=True, this should be returend in queries
+    # with include_orphans=True, this should be returned in queries
     fs = FileStore(test_dir, read_only=True, max_depth=1, include_orphans=True)
     with pytest.warns(
         UserWarning, match="Orphaned metadata was found in FileStore.json"
@@ -145,8 +145,9 @@ def test_orphaned_metadata(test_dir):
         fs.connect()
     assert len(list(fs.query())) == 6
     assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
-    # all items, including orphans, should have a path
-    assert len(list(fs.query({"path": {"$exists": True}}))) == 6
+    # all items, including orphans, should have a file_id and path_relative
+    assert len(list(fs.query({"file_id": {"$exists": True}}))) == 6
+    assert len(list(fs.query({"path_relative": {"$exists": True}}))) == 6
     assert len(list(fs.query({"orphan": True}))) == 1
     fs.close()
 
@@ -186,6 +187,7 @@ def test_store_files_moved(test_dir):
     # the orphan field should be populated for all documents, and False
     assert len(list(fs.query({"orphan": False}))) == 6
     original_file_ids = {f["file_id"] for f in fs.query()}
+    original_paths = {f["path"] for f in fs.query()}
     fs.close()
 
     # now copy the entire FileStore to a new directory and re-initialize
@@ -194,6 +196,10 @@ def test_store_files_moved(test_dir):
     fs.connect()
     assert len(list(fs.query({"orphan": False}))) == 6
     assert {f["file_id"] for f in fs.query()} == original_file_ids
+    # absolute paths should change to follow the FileStore
+    assert {f["path"] for f in fs.query()} != original_paths
+    for d in fs.query(properties=["path"]):
+        assert str(d["path"]).startswith(str(fs.path))
 
 
 def test_file_filters(test_dir):
@@ -290,11 +296,17 @@ def test_metadata(test_dir):
     4. close the store, init a new one
     5. confirm metadata correctly associated with the files
     """
-    fs = FileStore(test_dir, read_only=False)
+    fs = FileStore(test_dir, read_only=False, last_updated_field="last_change")
     fs.connect()
     query = {"name": "input.in", "parent": "calculation1"}
     key = list(fs.query(query))[0][fs.key]
-    fs.add_metadata({"metadata": {"experiment date": "2022-01-18"}}, query)
+    fs.add_metadata(
+        {
+            "metadata": {"experiment date": "2022-01-18"},
+            fs.last_updated_field: "this should not be here",
+        },
+        query,
+    )
 
     # make sure metadata has been added to the item without removing other contents
     item_from_store = list(fs.query({"file_id": key}))[0]
@@ -309,7 +321,9 @@ def test_metadata(test_dir):
     item_from_file = [d for d in data if d["file_id"] == key][0]
     assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
     assert not item_from_file.get("name")
-    assert item_from_file.get("path")
+    assert not item_from_file.get("path")
+    assert not item_from_file.get(fs.last_updated_field)
+    assert item_from_file.get("path_relative")
 
     # make sure metadata is preserved after reconnecting
     fs2 = FileStore(test_dir, read_only=True)
