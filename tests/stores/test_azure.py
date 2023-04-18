@@ -182,7 +182,7 @@ def test_count(blobstore_two_docs):
     assert blobstore_two_docs.count({"task_id": "mp-3"}) == 1
 
 
-def test_qeuery(blobstore_two_docs):
+def test_query(blobstore_two_docs):
     assert blobstore_two_docs.query_one(criteria={"task_id": "mp-2"}) is None
     assert blobstore_two_docs.query_one(criteria={"task_id": "mp-1"})["data"] == "asd"
     assert blobstore_two_docs.query_one(criteria={"task_id": "mp-3"})["data"] == "sdf"
