@@ -379,7 +379,7 @@ class AzureBlobStore(Store):
             msg = f"Could not instantiate BlobServiceClient from azure_client_info: {self.azure_client_info}"
             raise RuntimeError(msg)
 
-    def _get_container(self) -> ContainerClient:
+    def _get_container(self) -> Optional[ContainerClient]:
         """
         If on the main thread return the container created above, else create a new
         container on each thread.
