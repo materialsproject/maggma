@@ -271,7 +271,7 @@ def test_remove(blobstore_two_docs):
 def test_close(blobstore_two_docs):
     list(blobstore_two_docs.query())
     blobstore_two_docs.close()
-    with pytest.raises(AttributeError):
+    with pytest.raises(RuntimeError):
         list(blobstore_two_docs.query())
 
 
