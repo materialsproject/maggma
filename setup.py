@@ -49,6 +49,7 @@ setup(
         "vault": ["hvac>=0.9.5"],
         "montydb": ["montydb>=2.3.12"],
         "notebook_runner": ["IPython>=7.16", "nbformat>=5.0", "regex>=2020.6"],
+        "azure": ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"]
     },
     classifiers=[
         "Programming Language :: Python :: 3",

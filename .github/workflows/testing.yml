@@ -55,6 +55,11 @@ jobs:
         ports:
           - 27017:27017
 
+      azurite:
+        image: mcr.microsoft.com/azure-storage/azurite
+        ports:
+          - 10000:10000
+
     strategy:
       max-parallel: 6
       matrix:
