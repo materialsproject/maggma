@@ -44,7 +44,7 @@ class AzureBlobStore(Store):
         container_name: str,
         azure_client_info: Optional[Union[str, dict]] = None,
         compress: bool = False,
-        sub_dir: str = None,
+        sub_dir: Optional[str] = None,
         workers: int = 1,
         azure_resource_kwargs: Optional[dict] = None,
         key: str = "fs_id",
@@ -93,8 +93,8 @@ class AzureBlobStore(Store):
         self.azure_client_info = azure_client_info
         self.compress = compress
         self.sub_dir = sub_dir.rstrip("/") + "/" if sub_dir else ""
-        self.service = None  # type: BlobServiceClient
-        self.container = None  # type: ContainerClient
+        self.service = None  # type: Optional[BlobServiceClient]
+        self.container = None  # type: Optional[ContainerClient]
         self.workers = workers
         self.azure_resource_kwargs = (
             azure_resource_kwargs if azure_resource_kwargs is not None else {}
@@ -207,6 +207,10 @@ class AzureBlobStore(Store):
             limit: limit on total number of documents returned
 
         """
+
+        if self.container is None or self.service is None:
+            raise RuntimeError("The store has not been connected")
+
         prop_keys = set()
         if isinstance(properties, dict):
             prop_keys = set(properties.keys())
@@ -234,9 +238,9 @@ class AzureBlobStore(Store):
                     )
 
                     if self.last_updated_field in doc:
-                        data[self.last_updated_field] = doc[self.last_updated_field]
+                        data[self.last_updated_field] = doc[self.last_updated_field]  # type: ignore
 
-                yield data
+                yield data  # type: ignore
 
     @staticmethod
     def _unpack(data: bytes, compressed: bool):
@@ -329,6 +333,10 @@ class AzureBlobStore(Store):
                  field is to be used
             additional_metadata: field(s) to include in the blob store's metadata
         """
+
+        if self.container is None or self.service is None:
+            raise RuntimeError("The store has not been connected")
+
         if not isinstance(docs, list):
             docs = [docs]
 
@@ -402,6 +410,8 @@ class AzureBlobStore(Store):
             index db
         """
         container = self._get_container()
+        if container is None:
+            raise RuntimeError("The store has not been connected")
 
         search_doc = {k: doc[k] for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
@@ -471,6 +481,9 @@ class AzureBlobStore(Store):
             criteria: query dictionary to match
             remove_blob_object: whether to remove the actual blob Object or not
         """
+        if self.container is None or self.service is None:
+            raise RuntimeError("The store has not been connected")
+
         if not remove_blob_object:
             self.index.remove_docs(criteria=criteria)
         else:
@@ -536,13 +549,15 @@ class AzureBlobStore(Store):
             # TODO maybe it can be avoided to reupload the data, since it is paid
             self.update(unpacked_data, **kwargs)
 
-    def rebuild_metadata_from_index(self, index_query: dict = None):
+    def rebuild_metadata_from_index(self, index_query: Optional[Dict] = None):
         """
         Read data from the index store and populate the metadata of the Azure Blob.
         Force all of the keys to be lower case to be Minio compatible
         Args:
             index_query: query on the index store
         """
+        if self.container is None or self.service is None:
+            raise RuntimeError("The store has not been connected")
 
         qq = {} if index_query is None else index_query
         for index_doc in self.index.query(qq):

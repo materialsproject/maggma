@@ -1,3 +1,11 @@
+"""
+Azure testing requires Azurite.
+It can be set up according to the instructions:
+https://github.com/Azure/Azurite
+With docker can be started by running:
+docker run -p 10000:10000 mcr.microsoft.com/azure-storage/azurite azurite-blob --blobHost 0.0.0.0
+"""
+
 import time
 from datetime import datetime
 from contextlib import contextmanager
