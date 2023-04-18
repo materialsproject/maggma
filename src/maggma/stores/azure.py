@@ -79,7 +79,7 @@ class AzureBlobStore(Store):
                 of the keys in metadata, since they should adhere to the naming rules
                 for C# identifiers. If None the AZURE_KEY_SANITIZE default will be used
                 to handle the most common cases.
-            create_container: if True the Stor creates the container, in case it does
+            create_container: if True the Store creates the container, in case it does
                 not exist.
             kwargs: keywords for the base Store.
         """
