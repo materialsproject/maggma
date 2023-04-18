@@ -20,7 +20,7 @@ from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
     import azure.storage.blob as azure_blob
-    from azure.storage.blob import BlobServiceClient
+    from azure.storage.blob import BlobServiceClient, ContainerClient
     from azure.identity import DefaultAzureCredential
     from azure.core.exceptions import ResourceExistsError
     import azure
@@ -93,8 +93,8 @@ class AzureBlobStore(Store):
         self.azure_client_info = azure_client_info
         self.compress = compress
         self.sub_dir = sub_dir.rstrip("/") + "/" if sub_dir else ""
-        self.service = None  # type: Any
-        self.container = None  # type: Any
+        self.service = None  # type: Optional[BlobServiceClient]
+        self.container = None  # type: Optional[ContainerClient]
         self.workers = workers
         self.azure_resource_kwargs = (
             azure_resource_kwargs if azure_resource_kwargs is not None else {}
@@ -379,7 +379,7 @@ class AzureBlobStore(Store):
             msg = f"Could not instantiate BlobServiceClient from azure_client_info: {self.azure_client_info}"
             raise RuntimeError(msg)
 
-    def _get_container(self):
+    def _get_container(self) -> ContainerClient:
         """
         If on the main thread return the container created above, else create a new
         container on each thread.
@@ -569,6 +569,5 @@ class AzureBlobStore(Store):
         if not isinstance(other, AzureBlobStore):
             return False
 
-        # TODO should contain also sub_dir?
         fields = ["index", "container_name", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
