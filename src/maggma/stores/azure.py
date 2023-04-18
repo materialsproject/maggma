@@ -112,7 +112,7 @@ class AzureBlobStore(Store):
         # Force the key to be the same as the index
         assert isinstance(
             index.key, str
-        ), "Since we are using the key as a file name in Azure Blob, they key must be a string"
+        ), "Since we are using the key as a file name in Azure Blob, the key must be a string"
         if key != index.key:
             warnings.warn(
                 f'The desired AzureBlobStore key "{key}" does not match the index key "{index.key},"'
