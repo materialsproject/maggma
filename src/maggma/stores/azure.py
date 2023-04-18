@@ -8,7 +8,7 @@ import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 from json import dumps
 import os
 
@@ -20,7 +20,7 @@ from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
     import azure.storage.blob as azure_blob
-    from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+    from azure.storage.blob import BlobServiceClient
     from azure.identity import DefaultAzureCredential
     from azure.core.exceptions import ResourceExistsError
     import azure
@@ -28,10 +28,7 @@ except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
 
 
-AZURE_KEY_SANITIZE = {
-    "-": "_",
-    ".": "_"
-}
+AZURE_KEY_SANITIZE = {"-": "_", ".": "_"}
 
 
 class AzureBlobStore(Store):
@@ -87,7 +84,9 @@ class AzureBlobStore(Store):
             kwargs: keywords for the base Store.
         """
         if azure_blob is None:
-            raise RuntimeError("azure-storage-blob and azure-identity are required for AzureBlobStore")
+            raise RuntimeError(
+                "azure-storage-blob and azure-identity are required for AzureBlobStore"
+            )
 
         self.index = index
         self.container_name = container_name
@@ -151,7 +150,9 @@ class AzureBlobStore(Store):
                     except ResourceExistsError:
                         pass
                 else:
-                    raise RuntimeError(f"Container not present on Azure: {self.container_name}")
+                    raise RuntimeError(
+                        f"Container not present on Azure: {self.container_name}"
+                    )
 
             self.container = container
         self.index.connect(*args, **kwargs)
@@ -219,8 +220,10 @@ class AzureBlobStore(Store):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
                 try:
-                    data = self.container.download_blob(self.sub_dir + str(doc[self.key])).readall()
-                except azure.core.exceptions.ResourceNotFoundError as e:
+                    data = self.container.download_blob(
+                        self.sub_dir + str(doc[self.key])
+                    ).readall()
+                except azure.core.exceptions.ResourceNotFoundError:
                     self.logger.error(
                         "Could not find Blob object {}".format(doc[self.key])
                     )
@@ -237,7 +240,6 @@ class AzureBlobStore(Store):
 
     @staticmethod
     def _unpack(data: bytes, compressed: bool):
-
         if compressed:
             data = zlib.decompress(data)
         # requires msgpack-python to be installed to fix string encoding problem
@@ -363,12 +365,16 @@ class AzureBlobStore(Store):
             if isinstance(self.azure_client_info, str):
                 # assume it is the account_url and that the connection is passwordless
                 default_credential = DefaultAzureCredential()
-                return BlobServiceClient(self.azure_client_info, credential=default_credential)
+                return BlobServiceClient(
+                    self.azure_client_info, credential=default_credential
+                )
 
             elif isinstance(self.azure_client_info, dict):
                 connection_string = self.azure_client_info.get("connection_string")
                 if connection_string:
-                    return BlobServiceClient.from_connection_string(conn_str=connection_string)
+                    return BlobServiceClient.from_connection_string(
+                        conn_str=connection_string
+                    )
 
             msg = f"Could not instantiate BlobServiceClient from azure_client_info: {self.azure_client_info}"
             raise RuntimeError(msg)
@@ -432,7 +438,7 @@ class AzureBlobStore(Store):
             name=self.sub_dir + str(doc[self.key]),
             data=data,
             metadata={blob_to_mongo_keys[k]: str(v) for k, v in search_doc.items()},
-            overwrite=True
+            overwrite=True,
         )
 
         if lu_info is not None:
@@ -527,7 +533,7 @@ class AzureBlobStore(Store):
             if self.compress:
                 data = zlib.decompress(data)
             unpacked_data = msgpack.unpackb(data, raw=False)
-            #TODO maybe it can be avoided to reupload the data, since it is paid
+            # TODO maybe it can be avoided to reupload the data, since it is paid
             self.update(unpacked_data, **kwargs)
 
     def rebuild_metadata_from_index(self, index_query: dict = None):
@@ -543,7 +549,9 @@ class AzureBlobStore(Store):
             key_ = self.sub_dir + index_doc[self.key]
             blob = self.container.get_blob_client(key_)
             properties = blob.get_blob_properties()
-            new_meta = {self._sanitize_key(k): v for k, v in properties.metadata.items()}
+            new_meta = {
+                self._sanitize_key(k): v for k, v in properties.metadata.items()
+            }
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
@@ -561,6 +569,6 @@ class AzureBlobStore(Store):
         if not isinstance(other, AzureBlobStore):
             return False
 
-        #TODO should contain also sub_dir?
+        # TODO should contain also sub_dir?
         fields = ["index", "container_name", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)

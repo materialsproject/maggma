@@ -7,7 +7,7 @@ from maggma.stores import MemoryStore, MongoStore, AzureBlobStore
 
 try:
     import azure.storage.blob as azure_blob
-    from azure.storage.blob import BlobServiceClient, BlobClient, ContainerClient
+    from azure.storage.blob import BlobServiceClient
 except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
 
@@ -38,7 +38,9 @@ def azurite_container(container_name=AZURITE_CONTAINER_NAME, create_container=Tr
     if azure_blob is None:
         pytest.skip("azure-storage-blob is required to test AzureBlobStore")
 
-    blob_service_client = BlobServiceClient.from_connection_string(AZURITE_CONNECTION_STRING)
+    blob_service_client = BlobServiceClient.from_connection_string(
+        AZURITE_CONNECTION_STRING
+    )
 
     container_client = blob_service_client.get_container_client(container_name)
     if container_client.exists():
@@ -56,13 +58,12 @@ def azurite_container(container_name=AZURITE_CONTAINER_NAME, create_container=Tr
 
 @pytest.fixture
 def blobstore():
-
     with azurite_container():
         index = MemoryStore("index", key="task_id")
         store = AzureBlobStore(
             index,
             container_name=AZURITE_CONTAINER_NAME,
-            azure_client_info={"connection_string": AZURITE_CONNECTION_STRING}
+            azure_client_info={"connection_string": AZURITE_CONNECTION_STRING},
         )
         store.connect()
 
@@ -92,6 +93,7 @@ def blobstore_two_docs(blobstore):
 
     yield blobstore
 
+
 @pytest.fixture
 def blobstore_w_subdir():
     with azurite_container():
@@ -100,7 +102,7 @@ def blobstore_w_subdir():
             index,
             container_name=AZURITE_CONTAINER_NAME,
             azure_client_info={"connection_string": AZURITE_CONNECTION_STRING},
-            sub_dir="subdir1"
+            sub_dir="subdir1",
         )
         store.connect()
 
@@ -109,7 +111,6 @@ def blobstore_w_subdir():
 
 @pytest.fixture
 def blobstore_multi(blobstore):
-
     blobstore.workers = 4
 
     yield blobstore
@@ -122,8 +123,13 @@ def test_keys():
             store = AzureBlobStore(index, AZURITE_CONTAINER_NAME, workers=4, key=1)
         index = MemoryStore("index", key="key1")
         with pytest.warns(UserWarning, match=r"The desired .*key.*$"):
-            store = AzureBlobStore(index, AZURITE_CONTAINER_NAME, workers=4, key="key2",
-                                   azure_client_info={"connection_string": AZURITE_CONNECTION_STRING})
+            store = AzureBlobStore(
+                index,
+                AZURITE_CONTAINER_NAME,
+                workers=4,
+                key="key2",
+                azure_client_info={"connection_string": AZURITE_CONNECTION_STRING},
+            )
         store.connect()
         store.update({"key1": "mp-1", "data": "1234"})
         with pytest.raises(KeyError):
@@ -209,15 +215,15 @@ def test_rebuild_meta_from_index(blobstore_two_docs):
 def test_rebuild_index(blobstore_two_docs):
     blobstore_two_docs.update([{"task_id": "mp-2", "data": "asd"}])
     assert (
-            blobstore_two_docs.index.query_one({"task_id": "mp-2"})["obj_hash"]
-            == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
+        blobstore_two_docs.index.query_one({"task_id": "mp-2"})["obj_hash"]
+        == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
     )
     blobstore_two_docs.index.remove_docs({})
     assert blobstore_two_docs.index.query_one({"task_id": "mp-2"}) is None
     blobstore_two_docs.rebuild_index_from_blob_data()
     assert (
-            blobstore_two_docs.index.query_one({"task_id": "mp-2"})["obj_hash"]
-            == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
+        blobstore_two_docs.index.query_one({"task_id": "mp-2"})["obj_hash"]
+        == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
     )
 
 
@@ -304,7 +310,6 @@ def test_remove_subdir(blobstore_w_subdir):
 
 
 def test_searchable_fields(blobstore_two_docs):
-
     tic = datetime(2018, 4, 12, 16)
 
     data = [
@@ -316,7 +321,12 @@ def test_searchable_fields(blobstore_two_docs):
     blobstore_two_docs.update(data, key="a")
 
     # This should only work if the searchable field was put into the index store
-    assert set(blobstore_two_docs.distinct("task_id")) == {"mp-0", "mp-1", "mp-2", "mp-3"}
+    assert set(blobstore_two_docs.distinct("task_id")) == {
+        "mp-0",
+        "mp-1",
+        "mp-2",
+        "mp-3",
+    }
 
 
 def test_newer_in(blobstore):
@@ -330,7 +340,7 @@ def test_newer_in(blobstore):
         old_store = AzureBlobStore(
             index_old,
             name_old,
-            azure_client_info={"connection_string": AZURITE_CONNECTION_STRING}
+            azure_client_info={"connection_string": AZURITE_CONNECTION_STRING},
         )
         old_store.connect()
         old_store.update([{"task_id": "mp-1", "last_updated": tic}])
@@ -340,7 +350,7 @@ def test_newer_in(blobstore):
         new_store = AzureBlobStore(
             index_new,
             name_new,
-            azure_client_info={"connection_string": AZURITE_CONNECTION_STRING}
+            azure_client_info={"connection_string": AZURITE_CONNECTION_STRING},
         )
         new_store.connect()
         new_store.update([{"task_id": "mp-1", "last_updated": tic2}])
@@ -354,7 +364,6 @@ def test_newer_in(blobstore):
 
 
 def test_additional_metadata(blobstore_two_docs):
-
     tic = datetime(2018, 4, 12, 16)
 
     data = [
@@ -365,17 +374,21 @@ def test_additional_metadata(blobstore_two_docs):
     blobstore_two_docs.update(data, key="a", additional_metadata="task_id")
 
     # This should only work if the searchable field was put into the index store
-    assert set(blobstore_two_docs.distinct("task_id")) == {"mp-0", "mp-1", "mp-2", "mp-3"}
+    assert set(blobstore_two_docs.distinct("task_id")) == {
+        "mp-0",
+        "mp-1",
+        "mp-2",
+        "mp-3",
+    }
 
 
 def test_no_container():
     with azurite_container(create_container=False):
-
         index = MemoryStore("index")
         store = AzureBlobStore(
             index,
             AZURITE_CONTAINER_NAME,
-            azure_client_info={"connection_string": AZURITE_CONNECTION_STRING}
+            azure_client_info={"connection_string": AZURITE_CONNECTION_STRING},
         )
         with pytest.raises(RuntimeError, match=r".*Container not present.*"):
             store.connect()
@@ -385,7 +398,7 @@ def test_no_container():
             index,
             AZURITE_CONTAINER_NAME,
             azure_client_info={"connection_string": AZURITE_CONNECTION_STRING},
-            create_container=True
+            create_container=True,
         )
         store.connect()
 
@@ -407,5 +420,7 @@ def test_no_login():
             azure_client_info={},
         )
 
-    with pytest.raises(RuntimeError, match=r".*Could not instantiate BlobServiceClient.*"):
+    with pytest.raises(
+        RuntimeError, match=r".*Could not instantiate BlobServiceClient.*"
+    ):
         store.connect()
