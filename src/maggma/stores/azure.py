@@ -93,8 +93,8 @@ class AzureBlobStore(Store):
         self.azure_client_info = azure_client_info
         self.compress = compress
         self.sub_dir = sub_dir.rstrip("/") + "/" if sub_dir else ""
-        self.service = None  # type: Optional[BlobServiceClient]
-        self.container = None  # type: Optional[ContainerClient]
+        self.service = None  # type: BlobServiceClient
+        self.container = None  # type: ContainerClient
         self.workers = workers
         self.azure_resource_kwargs = (
             azure_resource_kwargs if azure_resource_kwargs is not None else {}
