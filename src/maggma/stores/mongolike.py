@@ -20,7 +20,6 @@ from monty.json import MSONable, jsanitize
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne, uri_parser
-from pymongo.collection import Collection
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 from sshtunnel import SSHTunnelForwarder
 
@@ -148,7 +147,7 @@ class MongoStore(Store):
         self.ssh_tunnel = ssh_tunnel
         self.safe_update = safe_update
         self.default_sort = default_sort
-        self._coll = None
+        self._coll = None  # type: ignore
         self.kwargs = kwargs
 
         if auth_source is None:
@@ -190,7 +189,7 @@ class MongoStore(Store):
                 else MongoClient(host, port, **self.mongoclient_kwargs)
             )
             db = conn[self.database]
-            self._coll = db[self.collection_name]
+            self._coll = db[self.collection_name]  # type: ignore
 
     def __hash__(self) -> int:
         """Hash for MongoStore"""
@@ -300,7 +299,7 @@ class MongoStore(Store):
         group_id = {letter: f"${key}" for letter, key in zip(alpha, keys)}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
         for d in self._collection.aggregate(pipeline, allowDiskUse=True):
-            id_doc = {}
+            id_doc = {}  # type: ignore
             for letter, key in group_id.items():
                 if has(d["_id"], letter):
                     set_(id_doc, key[1:], d["_id"][letter])
@@ -321,7 +320,7 @@ class MongoStore(Store):
         db_name = collection.database.name
 
         store = cls(db_name, coll_name)
-        store._coll: Collection = collection
+        store._coll = collection
         return store
 
     @property
@@ -679,7 +678,7 @@ class MemoryStore(MongoStore):
             return tuple(get(doc, k) for k in keys)
 
         for vals, group in groupby(sorted(data, key=grouping_keys), key=grouping_keys):
-            doc = {}
+            doc = {}  # type: ignore
             for k, v in zip(keys, vals):
                 set_(doc, k, v)
             yield doc, list(group)
@@ -912,7 +911,7 @@ class MontyStore(MemoryStore):
         self.database_path = database_path
         self.database_name = database_name
         self.collection_name = collection_name
-        self._coll = None
+        self._coll = None  # type: ignore
         self.default_sort = None
         self.ssh_tunnel = None  # This is to fix issues with the tunnel on close
         self.kwargs = kwargs
