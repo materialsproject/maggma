@@ -594,7 +594,7 @@ class MongoURIStore(MongoStore):
         if self._coll is None or force_reset:  # pragma: no cover
             conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
             db = conn[self.database]
-            self._coll = db[self.collection_name]
+            self._coll = db[self.collection_name]  # type: ignore
 
 
 class MemoryStore(MongoStore):
@@ -621,7 +621,7 @@ class MemoryStore(MongoStore):
         """
 
         if self._coll is None or force_reset:
-            self._coll = mongomock.MongoClient().db[self.name]
+            self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
 
     def close(self):
         """Close up all collections"""
