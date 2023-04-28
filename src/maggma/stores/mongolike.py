@@ -10,7 +10,7 @@ import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 import mongomock
 import orjson
@@ -20,6 +20,7 @@ from monty.json import MSONable, jsanitize
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne, uri_parser
+from pymongo.collection import Collection
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 from sshtunnel import SSHTunnelForwarder
 
@@ -33,7 +34,6 @@ except ImportError:
 
 
 class SSHTunnel(MSONable):
-
     __TUNNELS: Dict[str, SSHTunnelForwarder] = {}
 
     def __init__(
@@ -230,7 +230,9 @@ class MongoStore(Store):
 
         return cls(**db_creds, **kwargs)
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def distinct(
+        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
+    ) -> List:
         """
         Get all distinct values for a field
 
@@ -244,7 +246,10 @@ class MongoStore(Store):
             distinct_vals = self._collection.distinct(field, criteria)
         except (OperationFailure, DocumentTooLarge):
             distinct_vals = [
-                d["_id"] for d in self._collection.aggregate([{"$match": criteria}, {"$group": {"_id": f"${field}"}}])
+                d["_id"]
+                for d in self._collection.aggregate(
+                    [{"$match": criteria}, {"$group": {"_id": f"${field}"}}]
+                )
             ]
             if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
                 distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
@@ -316,14 +321,16 @@ class MongoStore(Store):
         db_name = collection.database.name
 
         store = cls(db_name, coll_name)
-        store._coll = collection
+        store._coll: Collection = collection
         return store
 
     @property
     def _collection(self):
         """Property referring to underlying pymongo collection"""
         if self._coll is None:
-            raise StoreError("Must connect Mongo-like store before attemping to use it")
+            raise StoreError(
+                "Must connect Mongo-like store before attempting to use it"
+            )
         return self._coll
 
     def count(
@@ -343,13 +350,22 @@ class MongoStore(Store):
         criteria = criteria if criteria else {}
 
         hint_list = (
-            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in hint.items()
+            ]
+            if hint
+            else None
         )
 
         if hint_list is not None:  # pragma: no cover
             return self._collection.count_documents(filter=criteria, hint=hint_list)
 
-        return self._collection.count_documents(filter=criteria)
+        return (
+            self._collection.count_documents(filter=criteria)
+            if criteria
+            else self._collection.estimated_document_count()
+        )
 
     def query(  # type: ignore
         self,
@@ -382,27 +398,42 @@ class MongoStore(Store):
 
         if self.default_sort is not None:
             default_sort_formatted = [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in self.default_sort.items()
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in self.default_sort.items()
             ]
 
         sort_list = (
-            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in sort.items()]
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in sort.items()
+            ]
             if sort
             else default_sort_formatted
         )
 
         hint_list = (
-            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in hint.items()
+            ]
+            if hint
+            else None
         )
 
         for d in self._collection.find(
-            filter=criteria, projection=properties, skip=skip, limit=limit, sort=sort_list, hint=hint_list, **kwargs
+            filter=criteria,
+            projection=properties,
+            skip=skip,
+            limit=limit,
+            sort=sort_list,
+            hint=hint_list,
+            **kwargs,
         ):
             yield d
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded
         Args:
             key: single key to index
             unique: Whether or not this index contains only unique keys
@@ -438,7 +469,6 @@ class MongoStore(Store):
             docs = [docs]
 
         for d in docs:
-
             d = jsanitize(d, allow_bson=True)
 
             # document-level validation is optional
@@ -538,7 +568,9 @@ class MongoURIStore(MongoStore):
         if database is None:
             d_uri = uri_parser.parse_uri(uri)
             if d_uri["database"] is None:
-                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
+                raise ConfigurationError(
+                    "If database name is not supplied, a database must be set in the uri"
+                )
             self.database = d_uri["database"]
         else:
             self.database = database
@@ -628,7 +660,7 @@ class MemoryStore(MongoStore):
             limit: limit on total number of documents returned
 
         Returns:
-            generator returning tuples of (key, list of elemnts)
+            generator returning tuples of (key, list of elements)
         """
         keys = keys if isinstance(keys, list) else [keys]
 
@@ -638,7 +670,9 @@ class MemoryStore(MongoStore):
             properties = list(properties.keys())
 
         data = [
-            doc for doc in self.query(properties=keys + properties, criteria=criteria) if all(has(doc, k) for k in keys)
+            doc
+            for doc in self.query(properties=keys + properties, criteria=criteria)
+            if all(has(doc, k) for k in keys)
         ]
 
         def grouping_keys(doc):
@@ -710,7 +744,9 @@ class JSONStore(MemoryStore):
         self.kwargs = kwargs
 
         if not self.read_only and len(paths) > 1:
-            raise RuntimeError("Cannot instantiate file-writable JSONStore with multiple JSON files.")
+            raise RuntimeError(
+                "Cannot instantiate file-writable JSONStore with multiple JSON files."
+            )
 
         # create the .json file if it does not exist
         if not self.read_only and not Path(self.paths[0]).exists():
