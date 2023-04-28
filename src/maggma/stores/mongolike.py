@@ -28,7 +28,7 @@ from maggma.core import Sort, Store, StoreError
 from maggma.utils import confirm_field_index, to_dt
 
 try:
-    import montydb
+    import montydb  # type: ignore
 except ImportError:
     montydb = None
 
@@ -148,7 +148,7 @@ class MongoStore(Store):
         self.ssh_tunnel = ssh_tunnel
         self.safe_update = safe_update
         self.default_sort = default_sort
-        self._coll = None  # type: Any
+        self._coll = None
         self.kwargs = kwargs
 
         if auth_source is None:
@@ -300,7 +300,7 @@ class MongoStore(Store):
         group_id = {letter: f"${key}" for letter, key in zip(alpha, keys)}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
         for d in self._collection.aggregate(pipeline, allowDiskUse=True):
-            id_doc = {}  # type: Dict[str,Any]
+            id_doc = {}
             for letter, key in group_id.items():
                 if has(d["_id"], letter):
                     set_(id_doc, key[1:], d["_id"][letter])
@@ -679,7 +679,7 @@ class MemoryStore(MongoStore):
             return tuple(get(doc, k) for k in keys)
 
         for vals, group in groupby(sorted(data, key=grouping_keys), key=grouping_keys):
-            doc = {}  # type: Dict[Any,Any]
+            doc = {}
             for k, v in zip(keys, vals):
                 set_(doc, k, v)
             yield doc, list(group)
@@ -931,7 +931,7 @@ class MontyStore(MemoryStore):
         Args:
             force_reset: Force connection reset.
         """
-        from montydb import set_storage, MontyClient
+        from montydb import set_storage, MontyClient  # type: ignore
 
         set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
         client = MontyClient(self.database_path, **self.client_kwargs)
