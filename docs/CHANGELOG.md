@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.50.4](https://github.com/materialsproject/maggma/tree/v0.50.4) (2023-04-28)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.3...v0.50.4)
+
+**Merged pull requests:**
+
+- Update MongoStore `count` method [\#785](https://github.com/materialsproject/maggma/pull/785) ([munrojm](https://github.com/munrojm))
+
 ## [v0.50.3](https://github.com/materialsproject/maggma/tree/v0.50.3) (2023-02-17)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.2...v0.50.3)
@@ -327,15 +335,11 @@
 
 ## [v0.44.1](https://github.com/materialsproject/maggma/tree/v0.44.1) (2022-03-08)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.1)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.1)
 
 **Merged pull requests:**
 
 - added localhost test for MongoURIStore [\#595](https://github.com/materialsproject/maggma/pull/595) ([jmmshn](https://github.com/jmmshn))
-
-## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
 
 ## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
 
@@ -343,7 +347,11 @@
 
 ## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.44.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.0)
+
+## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
 
 **Merged pull requests:**
 
