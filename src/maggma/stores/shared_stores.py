@@ -14,7 +14,7 @@ class MultiStoreFacade(Store):
     multistore = MultiStore()
 
     # Add a store to the multistore and create a facade to access it
-    first_store = MultiStoreFacade(MongoStore(..., collection_name="collection_one"), 
+    first_store = MultiStoreFacade(MongoStore(..., collection_name="collection_one"),
                                    multistore)
 
     # Add a second store to the multistore and create a facade to access it
@@ -227,11 +227,11 @@ class MultiStore():
     intent of pooling connections to make sure that the same connection is used
     when accessing as store many times (from different processes).
 
-    Notes: 
+    Notes:
         1) While this class implements the abstract methods of a Store, it is not a store.
            The additional `store` argument does not conform with the abstract base class.
         2) The stores should not be directly accessed via MultiStore()._stores.
-           The MultiStore must be used with the MultiStoreFacade class, which is consistent 
+           The MultiStore must be used with the MultiStoreFacade class, which is consistent
            with other Stores.
 
     An example of usage is as follows:
@@ -549,4 +549,3 @@ class MultiStore():
                                         properties=[field],
                                         criteria=criteria,
                                         **kwargs)
-
