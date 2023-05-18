@@ -8,11 +8,11 @@ from typing import Dict, Iterator, List, Optional, Tuple, Union
 from pydash import get
 
 
-class MultiStoreAccessor(Store):
+class MultiStoreFacade(Store):
 
     def __init__(self, store, multistore):
-        # We keep this store here to check equality, but will never
-        # connect to it
+        # We keep this store here to check equality,
+        # but will never connect to it
         self.store = store
 
         self.multistore = multistore
@@ -197,59 +197,121 @@ class MultiStoreAccessor(Store):
 
 class MultiStore():
     """
-    This class enables the caching of maggma Store instances. 
-    This is useful in conjunction with a multiprocessing.Manager
-    to utilize connection pooling.
+    A container for multiple maggma stores. When adding stores to a MultiStore,
+    a check will be performed to see if the store (or a equivalent) already exists.
+    If it does, it will not be added again. This enables the caching of Stores with the
+    intent of pooling connections to make sure that the same connection is used
+    when accessing as store many times (from different processes).
 
-    This implements the attributes templated in the maggma Store abstract class.
-    Use this in 
+    Notes: 
+        1) While this class implements the abstract methods of a Store, it is not a store.
+           The additional `store` argument does not conform with the abstract base class.
+        2) The stores should not be directly accessed via MultiStore()._stores.
+           The MultiStore must be used with the MultiStoreFacade class, which is consistent 
+           with other Stores.
+
+    An example of usage is as follows:
+    ```
+    # Create the multistore
+    multistore = MultiStore()
+
+    # Add a store to the multistore
+    first_store = MongoStore(..., collection_name="collection_one")
+    multistore.ensure_store(first_store)
+    multistore.count_stores() # Returns 1, since there is one store added
+
+    # Add a second store to the multistore
+    second_store = MongoStore(..., collection_name="collection_two")
+    multistore.ensure_store(second_store)
+    multistore.count_stores() # Returns 2, since there are two stores added
+
+    # Attempt to add a duplicate store
+    third_store = MongoStore(..., collection_name="collection_two")
+    multistore.ensure_store(second_store) # The store will not be added since it already exists
+    multistore.count_stores() # Returns 2
+    ```
     """
-
     def __init__(self, **kwargs):
-        super().__init__(**kwargs)
+        """
+        Initializes a MultiStore
+        """
+        # Keep a list of stores, since there is no way to hash a store (to use a dict)
         self._stores = []
         self._multistore_lock = Lock()
+        super().__init__(**kwargs)
 
-    def get_store_index(self, store):
+    def get_store_index(self, store: Store) -> int | None:
+        """
+        Gets the index of the store in the list of stores.
+        If it doesn't exist, returns None
+
+        Note: this is not a search for an instance of a store,
+            but rather a search for a equivalent store
+        Args:
+            store: The store to find
+
+        Returns:
+            The index of the store in the internal list of cached stores
+        """
         # check host, port, name, and username
         for i, _store in enumerate(self._stores):
             if store == _store:
                 return i
         return None
 
-    def add_store(self, store):
-        self._multistore_lock.acquire()
+    def add_store(self, store: Store):
+        """
+        Adds a store to the list of cached stores
 
-        # Check if the store exists, else just return it
-        maybe_store_exists = self.get_store_index(store)
-        if maybe_store_exists is None:
-            # Make a new instance of it, so it doesn't get
-            # modified outside of this process unintentionally
-            self._stores.append(MontyDecoder().process_decoded(
-                store.as_dict()))
-            self._stores[-1].connect()
+        Args:
+            store: The store to cache
 
-        self._multistore_lock.release()
-        return True
+        Returns:
+            True if the store was added or if it already exists
+        """
+        # We are writing to the _stores list, so a lock
+        # must be used to ensure no simultaneous writes
+        with self._multistore_lock:
+            # Check if the store exists, just a double check
+            # in case another process added it before this lock was acquired
+            maybe_store_exists = self.get_store_index(store)
+            if maybe_store_exists is None:
+                # Make a new instance of it, so it doesn't get
+                # modified outside of this process unintentionally
+                self._stores.append(MontyDecoder().process_decoded(
+                    store.as_dict()))
+                self._stores[-1].connect()
+                return True
+            else:
+                # Store already exists, we don't need to add it
+                return True
 
-    def ensure_store(self, store):
+    def ensure_store(self, store: Store) -> bool:
+        """
+        Tries to add the store to the list of cached stores and return true
+        if it succeeded.
+
+        Args:
+            store: The store to cache
+
+        Returns:
+            bool indicating if the store exists/was created
+        """
         if self.get_store_index(store) is None:
             # Store doesn't exist here, we should add it
             return self.add_store(store)
         return True
 
-    def count_stores(self):
+    def count_stores(self) -> int:
+        """
+        Returns the number of stores in the multistore
+
+        Returns:
+            int indicating the number of stores
+        """
         return len(self._stores)
 
-    # These are maggma stores attributes we must override
-    @property
-    def _collection(self):
-        return None
-
-    @property
-    def name(self) -> str:
-        return None
-
+    # These are maggma stores attributes we must provide access to
     def store_collection(self, store):
         store_id = self.get_store_index(store)
         return self._stores[store_id]._collection
@@ -259,16 +321,46 @@ class MultiStore():
         return self._stores[store_id].name
 
     def connect(self, store, force_reset: bool = False):
-        self._multistore_lock.acquire()
-        store_id = self.get_store_index(store)
-        self._stores[store_id].connect(force_reset)
-        self._multistore_lock.release()
+        """
+        For a given store, connect to the source data
 
-    def close(self, store):
-        self._multistore_lock.acquire()
-        store_id = self.get_store_index(store)
-        self._stores[store_id].close()
-        self._multistore_lock.release()
+        Args:
+            store: the store to connect to the source data
+            force_reset: whether to reset the connection or not
+        """
+        with self._multistore_lock:
+            store_id = self.get_store_index(store)
+            self._stores[store_id].connect(force_reset)
+
+    def close(self, store: Store):
+        """
+        For a given store, close any connections
+
+        Args:
+            store: the store to close connections to
+        """
+        with self._multistore_lock:
+            store_id = self.get_store_index(store)
+            self._stores[store_id].close()
+
+    def connect_all(self, force_reset: bool = False):
+        """
+        Connects to all stores
+
+        Args:
+            force_reset: whether to reset the connection or not
+        """
+        with self._multistore_lock:
+            for store in self._stores:
+                store.connect(force_reset)
+
+    def close_all(self):
+        """
+        Closes all connections
+        """
+        with self._multistore_lock:
+            for store in self._stores:
+                store.close()
 
     def count(self,
               store: Store,
@@ -434,13 +526,3 @@ class MultiStore():
                                         criteria=criteria,
                                         **kwargs)
 
-
-class StoreServer(BaseManager):
-
-    @classmethod
-    def setup(cls, test_object):
-        StoreServer.register("MultiStore", callable=lambda: test_object)
-        m = StoreServer(address=("127.0.0.1", 0),
-                        authkey=b'abc')  # random port
-        m.start()
-        return m
