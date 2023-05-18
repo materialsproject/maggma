@@ -84,8 +84,7 @@ class MultiStoreFacade(Store):
               properties: Union[Dict, List, None] = None,
               sort: Optional[Dict[str, Union[Sort, int]]] = None,
               skip: int = 0,
-              limit: int = 0,
-              **kwargs) -> List[Dict]:
+              limit: int = 0) -> List[Dict]:
         """
         Queries the Store for a set of documents
 
@@ -102,8 +101,7 @@ class MultiStoreFacade(Store):
                                      properties=properties,
                                      sort=sort,
                                      skip=skip,
-                                     limit=limit,
-                                     **kwargs)
+                                     limit=limit)
 
     def update(self,
                docs: Union[List[Dict], Dict],
@@ -216,6 +214,7 @@ class MultiStoreFacade(Store):
         return self.multistore.distinct(self.store,
                                         field=field,
                                         criteria=criteria,
+                                        all_exist=all_exist,
                                         **kwargs)
 
 
@@ -264,7 +263,7 @@ class MultiStore():
         self._multistore_lock = Lock()
         super().__init__(**kwargs)
 
-    def get_store_index(self, store: Store) -> int | None:
+    def get_store_index(self, store: Store) -> Optional[int]:
         """
         Gets the index of the store in the list of stores.
         If it doesn't exist, returns None
@@ -545,7 +544,8 @@ class MultiStore():
             criteria: PyMongo filter for documents to search in
         """
         store_id = self.get_store_index(store)
-        self._stores[store_id].distinct(field=field,
-                                        properties=[field],
-                                        criteria=criteria,
-                                        **kwargs)
+        return self._stores[store_id].distinct(field=field,
+                                               properties=[field],
+                                               criteria=criteria,
+                                               all_exist=all_exist,
+                                               **kwargs)
