@@ -1,21 +1,45 @@
-from multiprocessing.managers import BaseManager
-import time
 from monty.json import MontyDecoder
 from threading import Lock
-from maggma.core.store import Store, Sort, DateTimeFormat
-from types import GeneratorType
+from maggma.core.store import Store, Sort
 from typing import Dict, Iterator, List, Optional, Tuple, Union
-from pydash import get
 
 
 class MultiStoreFacade(Store):
+    """
+    This class provides a way to access a single store within a MultiStore with the
+    same attributes as any ordinary maggma store.
 
+    ```
+    # Create the multistore
+    multistore = MultiStore()
+
+    # Add a store to the multistore and create a facade to access it
+    first_store = MultiStoreFacade(MongoStore(..., collection_name="collection_one"), 
+                                   multistore)
+
+    # Add a second store to the multistore and create a facade to access it
+    second_store = MultiStoreFacade(MongoStore(..., collection_name="collection_two"),
+                                    multistore)
+
+    # Attempt to add a duplicate store and create a facade to access an equivalent store
+    third_store = MultiStoreFacade(MongoStore(..., collection_name="collection_two"),
+                                   multistore)
+
+    multistore.count_stores() # Returns 2, since only 2 unique stores were added
+
+    # We can then use the stores as we would normally do
+    first_store.query(criteria={}, properties=[])
+    second_store.update()
+    third_store.remove_docs()
+    ```
+    """
     def __init__(self, store, multistore):
-        # We keep this store here to check equality,
-        # but will never connect to it
+        # Keep track of this store for the purposes of checking
+        # equality, but it will never be connected to
         self.store = store
 
         self.multistore = multistore
+        self.multistore.ensure_store(self.store)
 
     @property
     def _collection(self):
