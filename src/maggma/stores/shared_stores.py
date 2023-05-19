@@ -558,7 +558,6 @@ class MultiStore():
         """
         This class will actually call an attribute/method on the class instance
         
-
         Args:
             name: The name of a function or attribute to access
             store: The store to access the attribute of
