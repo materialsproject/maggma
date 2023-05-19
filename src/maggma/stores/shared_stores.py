@@ -1,7 +1,8 @@
 from monty.json import MontyDecoder
 from threading import Lock
 from maggma.core.store import Store, Sort
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union, Callable
+from functools import partial
 
 
 class StoreFacade(Store):
@@ -552,3 +553,39 @@ class MultiStore():
                                                criteria=criteria,
                                                all_exist=all_exist,
                                                **kwargs)
+
+    def call_attr(self, name: str, store: Store, **kwargs):
+        """
+        This class will actually call an attribute/method on the class instance
+        
+
+        Args:
+            name: The name of a function or attribute to access
+            store: The store to access the attribute of
+
+        Returns:
+            The result of the attribute or function call
+        """
+        store_id = self.get_store_index(store)
+        return getattr(self._stores[store_id], name)(**kwargs)
+
+    def _proxy_attribute(self, name: str, store) -> Union[Any, Callable]:
+        """
+        This function will take care of the StoreFacade accessing attributes
+        or functions of the store that are not required by the Store abstract
+        class.
+        
+        Args:
+            name: The name of a function or attribute to access
+            store: The store to access the attribute of
+        
+        Returns:
+            The attribute or a partial function which gives access to
+            the attribute
+        """
+        store_id = self.get_store_index(store)
+        maybe_fn = getattr(self._stores[store_id], name)
+        if callable(maybe_fn):
+            return partial(self.call_attr, name=name, store=store)
+        else:
+            return maybe_fn
