@@ -557,7 +557,7 @@ class MultiStore():
     def call_attr(self, name: str, store: Store, **kwargs):
         """
         This class will actually call an attribute/method on the class instance
-        
+
         Args:
             name: The name of a function or attribute to access
             store: The store to access the attribute of
@@ -573,11 +573,11 @@ class MultiStore():
         This function will take care of the StoreFacade accessing attributes
         or functions of the store that are not required by the Store abstract
         class.
-        
+
         Args:
             name: The name of a function or attribute to access
             store: The store to access the attribute of
-        
+
         Returns:
             The attribute or a partial function which gives access to
             the attribute
