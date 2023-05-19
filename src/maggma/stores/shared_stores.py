@@ -4,7 +4,7 @@ from maggma.core.store import Store, Sort
 from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 
-class MultiStoreFacade(Store):
+class StoreFacade(Store):
     """
     This class provides a way to access a single store within a MultiStore with the
     same attributes as any ordinary maggma store.
@@ -14,15 +14,15 @@ class MultiStoreFacade(Store):
     multistore = MultiStore()
 
     # Add a store to the multistore and create a facade to access it
-    first_store = MultiStoreFacade(MongoStore(..., collection_name="collection_one"),
+    first_store = StoreFacade(MongoStore(..., collection_name="collection_one"),
                                    multistore)
 
     # Add a second store to the multistore and create a facade to access it
-    second_store = MultiStoreFacade(MongoStore(..., collection_name="collection_two"),
+    second_store = StoreFacade(MongoStore(..., collection_name="collection_two"),
                                     multistore)
 
     # Attempt to add a duplicate store and create a facade to access an equivalent store
-    third_store = MultiStoreFacade(MongoStore(..., collection_name="collection_two"),
+    third_store = StoreFacade(MongoStore(..., collection_name="collection_two"),
                                    multistore)
 
     multistore.count_stores() # Returns 2, since only 2 unique stores were added
@@ -230,7 +230,7 @@ class MultiStore():
         1) While this class implements the abstract methods of a Store, it is not a store.
            The additional `store` argument does not conform with the abstract base class.
         2) The stores should not be directly accessed via MultiStore()._stores.
-           The MultiStore must be used with the MultiStoreFacade class, which is consistent
+           The MultiStore must be used with the StoreFacade class, which is consistent
            with other Stores.
 
     An example of usage is as follows:
@@ -292,6 +292,10 @@ class MultiStore():
         Returns:
             True if the store was added or if it already exists
         """
+        # Check that the store is actually a store
+        if not isinstance(store, Store):
+            raise TypeError("store must be a Store")
+
         # We are writing to the _stores list, so a lock
         # must be used to ensure no simultaneous writes
         with self._multistore_lock:
