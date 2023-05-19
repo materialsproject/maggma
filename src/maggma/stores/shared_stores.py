@@ -84,7 +84,7 @@ class StoreFacade(Store):
               properties: Union[Dict, List, None] = None,
               sort: Optional[Dict[str, Union[Sort, int]]] = None,
               skip: int = 0,
-              limit: int = 0) -> List[Dict]:
+              limit: int = 0) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
 
