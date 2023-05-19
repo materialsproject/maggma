@@ -1,7 +1,8 @@
 import pytest
 
-from maggma.stores import GridFSStore, MongoStore
+from maggma.stores import GridFSStore, MongoStore, MemoryStore
 from maggma.stores.shared_stores import MultiStore, StoreFacade
+from maggma.validators import JSONSchemaValidator
 
 @pytest.fixture
 def mongostore():
@@ -54,7 +55,7 @@ def test_add_stores(multistore, mongostore, gridfsstore):
     # Add the GridFSStore to the MultiStore()
     multistore.ensure_store(gridfsstore)
     assert multistore.count_stores() == 2
-    assert multistore.get_store_index(mongostore) == 1
+    assert multistore.get_store_index(gridfsstore) == 1
 
 def test_store_facade(multistore, mongostore, gridfsstore):
     StoreFacade(mongostore, multistore)

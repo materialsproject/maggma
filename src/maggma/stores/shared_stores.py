@@ -549,7 +549,6 @@ class MultiStore():
         """
         store_id = self.get_store_index(store)
         return self._stores[store_id].distinct(field=field,
-                                               properties=[field],
                                                criteria=criteria,
                                                all_exist=all_exist,
                                                **kwargs)
