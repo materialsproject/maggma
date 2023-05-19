@@ -19,10 +19,19 @@ def gridfsstore():
     store._files_collection.drop()
     store._chunks_collection.drop()
 
+
 @pytest.fixture
 def multistore():
     store = MultiStore()
     yield store
+
+
+@pytest.fixture
+def memorystore():
+    store = MemoryStore()
+    store.connect()
+    return store
+
 
 def test_add_stores(multistore, mongostore, gridfsstore):
     # Should be empty at the start
@@ -57,6 +66,131 @@ def test_store_facade(multistore, mongostore, gridfsstore):
     assert multistore.get_store_index(gridfsstore) == 1
 
 
+def test_multistore_query(multistore, mongostore, memorystore):
+    memorystore_facade = StoreFacade(memorystore, multistore)
+    mongostore_facade = StoreFacade(memorystore, multistore)
+
+    memorystore_facade._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    assert memorystore_facade.query_one(properties=["a"])["a"] == 1
+    assert memorystore_facade.query_one(properties=["a"])["a"] == 1
+    assert memorystore_facade.query_one(properties=["b"])["b"] == 2
+    assert memorystore_facade.query_one(properties=["c"])["c"] == 3
+    
+    mongostore_facade._collection.insert_one({"a": 4, "b": 5, "c": 6})
+    assert mongostore_facade.query_one(properties=["a"])["a"] == 4
+    assert mongostore_facade.query_one(properties=["a"])["a"] == 4
+    assert mongostore_facade.query_one(properties=["b"])["b"] == 5
+    assert mongostore_facade.query_one(properties=["c"])["c"] == 6
+
+def test_multistore_count(multistore, mongostore, memorystore):
+    memorystore_facade = StoreFacade(memorystore, multistore)
+
+    memorystore_facade._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    assert memorystore_facade.count() == 1
+    memorystore_facade._collection.insert_one({"aa": 1, "b": 2, "c": 3})
+    assert memorystore_facade.count() == 2
+    assert memorystore_facade.count({"a": 1}) == 1
+
+def test_multistore_distinct(multistore, mongostore):
+    mongostore_facade = StoreFacade(mongostore, multistore)
+
+    mongostore_facade._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    mongostore_facade._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
+    assert set(mongostore_facade.distinct("a")) == {1, 4}
+
+    # Test list distinct functionality
+    mongostore_facade._collection.insert_one({"a": 4, "d": 6, "e": 7})
+    mongostore_facade._collection.insert_one({"a": 4, "d": 6, "g": {"h": 2}})
+
+    # Test distinct subdocument functionality
+    ghs = mongostore_facade.distinct("g.h")
+    assert set(ghs) == {1, 2}
+
+    # Test when key doesn't exist
+    assert mongostore_facade.distinct("blue") == []
+
+    # Test when null is a value
+    mongostore_facade._collection.insert_one({"i": None})
+    assert mongostore_facade.distinct("i") == [None]
+
+    # Test to make sure DocumentTooLarge errors get dealt with properly using built in distinct
+    mongostore_facade._collection.insert_many([{"key": [f"mp-{i}"]} for i in range(1000000)])
+    vals = mongostore_facade.distinct("key")
+    # Test to make sure distinct on array field is unraveled when using manual distinct
+    assert len(vals) == len(list(range(1000000)))
+    assert all([isinstance(v, str) for v in vals])
+
+    # Test to make sure manual distinct uses the criteria query
+    mongostore_facade._collection.insert_many(
+        [{"key": f"mp-{i}", "a": 2} for i in range(1000001, 2000001)]
+    )
+    vals = mongostore_facade.distinct("key", {"a": 2})
+    assert len(vals) == len(list(range(1000001, 2000001)))
+
+def test_multistore_update(multistore, mongostore):
+    mongostore_facade = StoreFacade(mongostore, multistore)
+
+    mongostore_facade.update({"e": 6, "d": 4}, key="e")
+    assert (
+        mongostore_facade.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
+    )
+
+    mongostore_facade.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
+    assert mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 7
+
+    mongostore_facade.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
+    assert mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 11
+
+    test_schema = {
+        "type": "object",
+        "properties": {"e": {"type": "integer"}},
+        "required": ["e"],
+    }
+    mongostore_facade.validator = JSONSchemaValidator(schema=test_schema)
+    mongostore_facade.update({"e": 100, "d": 3}, key="e")
+
+    # Continue to update doc when validator is not set to strict mode
+    mongostore_facade.update({"e": "abc", "d": 3}, key="e")
+
+    # ensure safe_update works to not throw DocumentTooLarge errors
+    large_doc = {f"mp-{i}": f"mp-{i}" for i in range(1000000)}
+    large_doc["e"] = 999
+    with pytest.raises((OperationFailure, DocumentTooLarge)):
+        mongostore_facade.update([large_doc, {"e": 1001}], key="e")
+
+    mongostore_facade.safe_update = True
+    mongostore_facade.update([large_doc, {"e": 1001}], key="e")
+    assert mongostore_facade.query_one({"e": 1001}) is not None
 
 
+def test_multistore_groupby(multistore, mongostore):
+    mongostore_facade = StoreFacade(mongostore, multistore)
 
+    mongostore_facade.update(
+        [
+            {"e": 7, "d": 9, "f": 9},
+            {"e": 7, "d": 9, "f": 10},
+            {"e": 8, "d": 9, "f": 11},
+            {"e": 9, "d": 10, "f": 12},
+        ],
+        key="f",
+    )
+    data = list(mongostore_facade.groupby("d"))
+    assert len(data) == 2
+    grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
+    assert len(grouped_by_9) == 3
+    grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
+    assert len(grouped_by_10) == 1
+
+    data = list(mongostore_facade.groupby(["e", "d"]))
+    assert len(data) == 3
+
+
+def test_multistore_remove_docs(multistore, mongostore):
+    mongostore_facade = StoreFacade(mongostore, multistore)
+
+    mongostore_facade._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    mongostore_facade._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
+    mongostore_facade.remove_docs({"a": 1})
+    assert len(list(mongostore_facade.query({"a": 4}))) == 1
+    assert len(list(mongostore_facade.query({"a": 1}))) == 0
