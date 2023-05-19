@@ -52,11 +52,23 @@ def test_add_stores(multistore, mongostore, gridfsstore):
     multistore.ensure_store(temp_mongostore)
     assert multistore.count_stores() == 1
     assert multistore.get_store_index(temp_mongostore) == 0
+    # Add this copy again, but don't use ensure_store
+    # This tests the case in which a prior thread added 
+    # the store, but this current process was already
+    # waiting for the lock acquisition
+    multistore.add_store(temp_mongostore)
+    assert multistore.count_store() == 1
 
     # Add the GridFSStore to the MultiStore()
     multistore.ensure_store(gridfsstore)
     assert multistore.count_stores() == 2
     assert multistore.get_store_index(gridfsstore) == 1
+
+    # Add something that isn't a store
+    class DummyObject():
+        def __init__(self, a: int):
+            self.a = a
+    multistore.ensure_store(DummyObject(1))
 
 def test_store_facade(multistore, mongostore, gridfsstore):
     StoreFacade(mongostore, multistore)
@@ -167,10 +179,9 @@ def test_multistore_update(multistore, mongostore):
     with pytest.raises((OperationFailure, DocumentTooLarge)):
         mongostore_facade.update([large_doc, {"e": 1001}], key="e")
 
-    # Skip this Test for now
-    # mongostore_facade.safe_update = True
-    # mongostore_facade.update([large_doc, {"e": 1001}], key="e")
-    # assert mongostore_facade.query_one({"e": 1001}) is not None
+    mongostore_facade.safe_update = True
+    mongostore_facade.update([large_doc, {"e": 1001}], key="e")
+    assert mongostore_facade.query_one({"e": 1001}) is not None
 
 
 def test_multistore_groupby(multistore, mongostore):
@@ -204,3 +215,30 @@ def test_multistore_remove_docs(multistore, mongostore):
     mongostore_facade.remove_docs({"a": 1})
     assert len(list(mongostore_facade.query({"a": 4}))) == 1
     assert len(list(mongostore_facade.query({"a": 1}))) == 0
+
+
+def test_multistore_connect_reconnect(multistore, mongostore):
+    mongostore_facade = StoreFacade(mongostore, multistore)
+
+    assert isinstance(mongostore_facade._collection, pymongo.collection.Collection)
+    mongostore_facade.close()
+    assert mongostore_facade._coll is None
+    mongostore_facade.connect()
+
+    # Test using the multistore to close connections
+    multistore.close_all()
+    assert mongostore_facade._coll is None
+    multistore.connect_all()
+    assert isinstance(mongostore_facade._collection, pymongo.collection.Collection)
+
+
+def test_multistore_name(multistore, mongostore):
+    mongostore_facade = StoreFacade(mongostore, multistore)
+
+    assert mongostore_facade.name == "mongo://localhost/maggma_test/test"
+
+
+def test_multistore_ensure_index(multistore, mongostore):
+    mongostore_facade = StoreFacade(mongostore, multistore)
+    assert mongostore_facade.ensure_index("test_key")
+    # TODO: How to check for exception?
