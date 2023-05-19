@@ -1,4 +1,5 @@
 import pytest
+from pymongo.errors import DocumentTooLarge, OperationFailure
 
 from maggma.stores import GridFSStore, MongoStore, MemoryStore
 from maggma.stores.shared_stores import MultiStore, StoreFacade
@@ -69,7 +70,9 @@ def test_store_facade(multistore, mongostore, gridfsstore):
 
 def test_multistore_query(multistore, mongostore, memorystore):
     memorystore_facade = StoreFacade(memorystore, multistore)
-    mongostore_facade = StoreFacade(memorystore, multistore)
+    mongostore_facade = StoreFacade(mongostore, multistore)
+    temp_mongostore_facade = StoreFacade(MongoStore.from_dict(mongostore.as_dict()),
+                                         multistore)
 
     memorystore_facade._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert memorystore_facade.query_one(properties=["a"])["a"] == 1
@@ -82,6 +85,11 @@ def test_multistore_query(multistore, mongostore, memorystore):
     assert mongostore_facade.query_one(properties=["a"])["a"] == 4
     assert mongostore_facade.query_one(properties=["b"])["b"] == 5
     assert mongostore_facade.query_one(properties=["c"])["c"] == 6
+    
+    assert temp_mongostore_facade.query_one(properties=["a"])["a"] == 4
+    assert temp_mongostore_facade.query_one(properties=["a"])["a"] == 4
+    assert temp_mongostore_facade.query_one(properties=["b"])["b"] == 5
+    assert temp_mongostore_facade.query_one(properties=["c"])["c"] == 6
 
 def test_multistore_count(multistore, mongostore, memorystore):
     memorystore_facade = StoreFacade(memorystore, multistore)
