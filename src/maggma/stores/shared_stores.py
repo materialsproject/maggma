@@ -1,7 +1,7 @@
 from monty.json import MontyDecoder
 from threading import Lock
 from maggma.core.store import Store, Sort
-from typing import Dict, Iterator, List, Optional, Tuple, Union, Callable
+from typing import Dict, Iterator, List, Optional, Tuple, Union, Callable, Any
 from functools import partial
 
 
