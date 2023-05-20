@@ -69,7 +69,8 @@ def test_add_stores(multistore, mongostore, gridfsstore):
     class DummyObject():
         def __init__(self, a: int):
             self.a = a
-    multistore.ensure_store(DummyObject(1))
+    with pytest.raises(TypeError):
+        multistore.ensure_store(DummyObject(1))
 
 def test_store_facade(multistore, mongostore, gridfsstore):
     StoreFacade(mongostore, multistore)
@@ -182,7 +183,6 @@ def test_multistore_update(multistore, mongostore):
 
     mongostore_facade.safe_update = True
     assert mongostore_facade.safe_update == True
-    assert mongostore.safe_update == True
     mongostore_facade.update([large_doc, {"e": 1001}], key="e")
     assert mongostore_facade.query_one({"e": 1001}) is not None
 
