@@ -1,5 +1,6 @@
 import pytest
 from pymongo.errors import DocumentTooLarge, OperationFailure
+import pymongo
 
 from maggma.stores import GridFSStore, MongoStore, MemoryStore
 from maggma.stores.shared_stores import MultiStore, StoreFacade
@@ -57,7 +58,7 @@ def test_add_stores(multistore, mongostore, gridfsstore):
     # the store, but this current process was already
     # waiting for the lock acquisition
     multistore.add_store(temp_mongostore)
-    assert multistore.count_store() == 1
+    assert multistore.count_stores() == 1
 
     # Add the GridFSStore to the MultiStore()
     multistore.ensure_store(gridfsstore)
@@ -180,6 +181,8 @@ def test_multistore_update(multistore, mongostore):
         mongostore_facade.update([large_doc, {"e": 1001}], key="e")
 
     mongostore_facade.safe_update = True
+    assert mongostore_facade.safe_update == True
+    assert mongostore.safe_update == True
     mongostore_facade.update([large_doc, {"e": 1001}], key="e")
     assert mongostore_facade.query_one({"e": 1001}) is not None
 

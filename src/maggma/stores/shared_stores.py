@@ -3,6 +3,7 @@ from threading import Lock
 from maggma.core.store import Store, Sort
 from typing import Dict, Iterator, List, Optional, Tuple, Union, Callable, Any
 from functools import partial
+from multiprocessing.managers import BaseManager
 
 
 class StoreFacade(Store):
@@ -41,6 +42,16 @@ class StoreFacade(Store):
 
         self.multistore = multistore
         self.multistore.ensure_store(self.store)
+
+    def __getattr__(self, name: str) -> Any:
+        if name not in dir(self):
+            return self.multistore._proxy_attribute(name, self.store)
+
+    def __setattr__(self, name: str, value: Any):
+        if name not in ['store', 'multistore']:
+            self.multistore.set_store_attribute(self.store, name, value)
+        else:
+            super().__setattr__(name, value)
 
     @property
     def _collection(self):
@@ -554,6 +565,18 @@ class MultiStore():
                                                all_exist=all_exist,
                                                **kwargs)
 
+    def set_store_attribute(self, store: Store, name: str, value: Any):
+        """
+        A method to set an attribute of a store
+
+        Args:
+            name: The name of a function or attribute to access
+            store: The store to access the attribute of
+            value: New value of the attribute
+        """
+        store_id = self.get_store_index(store)
+        setattr(self._stores[store_id], name, value)
+
     def call_attr(self, name: str, store: Store, **kwargs):
         """
         This class will actually call an attribute/method on the class instance
@@ -588,3 +611,26 @@ class MultiStore():
             return partial(self.call_attr, name=name, store=store)
         else:
             return maybe_fn
+
+
+class MultiStoreManager(BaseManager):
+    """
+    Provide a server that can host shared objects between multiprocessing
+    Processes (that normally can't share data). For example, a common MultiStore is
+    shared between processes and access is coordinated to limit DB hits.
+
+    # Adapted from fireworks/utilities/fw_utilities.py
+    """
+    @classmethod
+    def setup(cls, multistore):
+        """
+        Args:
+            multistore: A multistore to share between processes
+
+        Returns:
+            A manager
+        """
+        MultiStoreManager.register('MultiStore', callable=lambda: multistore)
+        m = MultiStoreManager(address=("127.0.0.1", 0), authkey=b"abcd")
+        m.start()
+        return m
