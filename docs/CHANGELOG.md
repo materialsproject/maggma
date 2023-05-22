@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.51.1](https://github.com/materialsproject/maggma/tree/v0.51.1) (2023-05-22)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.0...v0.51.1)
+
+**Merged pull requests:**
+
+- Add ruamel-yaml as a dependency [\#789](https://github.com/materialsproject/maggma/pull/789) ([sivonxay](https://github.com/sivonxay))
+
 ## [v0.51.0](https://github.com/materialsproject/maggma/tree/v0.51.0) (2023-05-22)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.4...v0.51.0)
