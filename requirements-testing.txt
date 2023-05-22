@@ -13,4 +13,3 @@ responses<0.22.0
 types-PyYAML==6.0.11
 types-setuptools==65.4.0.0
 types-python-dateutil==2.8.19.2
-ruamel.yaml<18.0
