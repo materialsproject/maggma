@@ -6,7 +6,7 @@ various utilities
 """
 
 from pathlib import Path
-import yaml
+from ruamel import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings

@@ -8,7 +8,7 @@ various utillities
 import copy
 import json
 import zlib
-import yaml
+from ruamel import yaml
 from datetime import datetime
 from pymongo.errors import ConfigurationError
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
