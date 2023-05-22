@@ -6,7 +6,7 @@ various utilities
 """
 
 from pathlib import Path
-import yaml
+from ruamel import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings
@@ -218,7 +218,7 @@ class MongoStore(Store):
         Returns:
         """
         with open(lp_file, "r") as f:
-            lp_creds = yaml.load(f, Loader=yaml.FullLoader)
+            lp_creds = yaml.safe_load(f.read())
 
         db_creds = lp_creds.copy()
         db_creds["database"] = db_creds["name"]
