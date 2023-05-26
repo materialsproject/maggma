@@ -26,6 +26,7 @@ try:
     import azure
 except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
+    ContainerClient = None
 
 
 AZURE_KEY_SANITIZE = {"-": "_", ".": "_"}
@@ -493,7 +494,7 @@ class AzureBlobStore(Store):
             # Can remove up to 256 items at a time
             to_remove_chunks = list(grouper(to_remove, n=256))
             for chunk_to_remove in to_remove_chunks:
-                objlist = {"name": f"{self.sub_dir}{obj}" for obj in chunk_to_remove}
+                objlist = [{"name": f"{self.sub_dir}{obj}"} for obj in chunk_to_remove]
                 self.container.delete_blobs(*objlist)
 
     @property
