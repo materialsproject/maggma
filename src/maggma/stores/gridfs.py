@@ -8,7 +8,7 @@ various utillities
 import copy
 import json
 import zlib
-import yaml
+from ruamel import yaml
 from datetime import datetime
 from pymongo.errors import ConfigurationError
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
@@ -107,7 +107,7 @@ class GridFSStore(Store):
         Returns:
         """
         with open(lp_file, "r") as f:
-            lp_creds = yaml.load(f, Loader=yaml.FullLoader)
+            lp_creds = yaml.safe_load(f.read())
 
         db_creds = lp_creds.copy()
         db_creds["database"] = db_creds["name"]
