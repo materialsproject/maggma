@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.51.2](https://github.com/materialsproject/maggma/tree/v0.51.2) (2023-05-29)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.2)
+
+**Merged pull requests:**
+
+- Add orjson options in JSONStore [\#791](https://github.com/materialsproject/maggma/pull/791) ([gpetretto](https://github.com/gpetretto))
+- Implementation of an AzureBlobStore for Azure blobs [\#790](https://github.com/materialsproject/maggma/pull/790) ([gpetretto](https://github.com/gpetretto))
+
 ## [v0.51.1](https://github.com/materialsproject/maggma/tree/v0.51.1) (2023-05-22)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.0...v0.51.1)
@@ -130,19 +139,19 @@
 
 ## [v0.49.9](https://github.com/materialsproject/maggma/tree/v0.49.9) (2022-11-01)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.7...v0.49.9)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.8...v0.49.9)
 
 **Merged pull requests:**
 
 - Parse datetime with dateutil [\#741](https://github.com/materialsproject/maggma/pull/741) ([munrojm](https://github.com/munrojm))
 
-## [v0.49.7](https://github.com/materialsproject/maggma/tree/v0.49.7) (2022-10-25)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.8...v0.49.7)
-
 ## [v0.49.8](https://github.com/materialsproject/maggma/tree/v0.49.8) (2022-10-25)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.6...v0.49.8)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.7...v0.49.8)
+
+## [v0.49.7](https://github.com/materialsproject/maggma/tree/v0.49.7) (2022-10-25)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.6...v0.49.7)
 
 **Merged pull requests:**
 
