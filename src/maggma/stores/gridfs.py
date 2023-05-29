@@ -2,7 +2,7 @@
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
-various utillities
+various utilities
 """
 
 import copy
@@ -11,7 +11,7 @@ import zlib
 from ruamel import yaml
 from datetime import datetime
 from pymongo.errors import ConfigurationError
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 import gridfs
 from monty.json import jsanitize
@@ -162,7 +162,9 @@ class GridFSStore(Store):
     def _collection(self):
         """Property referring to underlying pymongo collection"""
         if self._coll is None:
-            raise StoreError("Must connect Mongo-like store before attemping to use it")
+            raise StoreError(
+                "Must connect Mongo-like store before attempting to use it"
+            )
         return self._coll
 
     @property
@@ -244,7 +246,6 @@ class GridFSStore(Store):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
-
                 metadata = doc.get("metadata", {})
 
                 data = self._collection.find_one(
@@ -354,7 +355,7 @@ class GridFSStore(Store):
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded
         Currently operators on the GridFS files collection
         Args:
             key: single key to index
@@ -447,7 +448,8 @@ class GridFSStore(Store):
             self._collection.delete(_id)
 
     def close(self):
-        self._collection.database.client.close()
+        self._files_store.close()
+        self._coll = None
         if self.ssh_tunnel is not None:
             self.ssh_tunnel.stop()
 
