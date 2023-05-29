@@ -10,7 +10,7 @@ from ruamel import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union, Any
 
 import mongomock
 import orjson
@@ -704,6 +704,8 @@ class JSONStore(MemoryStore):
         self,
         paths: Union[str, List[str]],
         read_only: bool = True,
+        serialization_option: Optional[int] = None,
+        serialization_default: Any = None,
         **kwargs,
     ):
         """
@@ -720,6 +722,10 @@ class JSONStore(MemoryStore):
                        Note that when read_only=False, JSONStore only supports a single JSON
                        file. If the file does not exist, it will be automatically created
                        when the JSONStore is initialized.
+            serialization_option:
+                option that will be passed to the orjson.dump when saving to the json the file.
+            serialization_default:
+                default that will be passed to the orjson.dump when saving to the json the file.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
@@ -755,6 +761,8 @@ class JSONStore(MemoryStore):
                 f.write(bytesdata.decode("utf-8"))
 
         self.default_sort = None
+        self.serialization_option = serialization_option
+        self.serialization_default = serialization_default
 
         super().__init__(**kwargs)
 
@@ -838,7 +846,11 @@ class JSONStore(MemoryStore):
             data = [d for d in self.query()]
             for d in data:
                 d.pop("_id")
-            bytesdata = orjson.dumps(data)
+            bytesdata = orjson.dumps(
+                data,
+                option=self.serialization_option,
+                default=self.serialization_default,
+            )
             f.write(bytesdata.decode("utf-8"))
 
     def __hash__(self):
