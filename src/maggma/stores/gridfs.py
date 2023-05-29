@@ -11,7 +11,7 @@ import zlib
 from ruamel import yaml
 from datetime import datetime
 from pymongo.errors import ConfigurationError
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import gridfs
 from monty.json import jsanitize
@@ -81,7 +81,7 @@ class GridFSStore(Store):
         self.port = port
         self.username = username
         self.password = password
-        self._coll = None  # type: Any
+        self._coll: Any = None
         self.compression = compression
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
@@ -509,7 +509,7 @@ class GridFSURIStore(GridFSStore):
             self.database = database
 
         self.collection_name = collection_name
-        self._coll = None  # type: Any
+        self._coll: Any = None
         self.compression = compression
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
