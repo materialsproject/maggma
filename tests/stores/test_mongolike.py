@@ -1,3 +1,4 @@
+import orjson
 import os
 import shutil
 from datetime import datetime
@@ -43,7 +44,6 @@ def memorystore():
 
 @pytest.fixture
 def jsonstore(test_dir):
-
     files = []
     for f in ["a.json", "b.json"]:
         files.append(test_dir / "test_set" / f)
@@ -501,6 +501,28 @@ def test_json_store_writeable(test_dir):
             assert jsonstore.count() == 2
             jsonstore.close()
             update_json_file_mock.assert_not_called()
+
+
+def test_jsonstore_orjson_options(test_dir):
+    class SubFloat(float):
+        pass
+
+    with ScratchDir("."):
+        jsonstore = JSONStore("d.json", read_only=False)
+        jsonstore.connect()
+        with pytest.raises(orjson.JSONEncodeError):
+            jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
+        jsonstore.close()
+
+        jsonstore = JSONStore(
+            "a.json",
+            read_only=False,
+            serialization_option=None,
+            serialization_default="test",
+        )
+        jsonstore.connect()
+        jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
+        jsonstore.close()
 
 
 def test_jsonstore_last_updated(test_dir):
