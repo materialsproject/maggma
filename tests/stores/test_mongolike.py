@@ -518,7 +518,7 @@ def test_jsonstore_orjson_options(test_dir):
             "a.json",
             read_only=False,
             serialization_option=None,
-            serialization_default="test",
+            serialization_default=lambda x: "test",
         )
         jsonstore.connect()
         jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})

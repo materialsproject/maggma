@@ -704,8 +704,8 @@ class JSONStore(MemoryStore):
         self,
         paths: Union[str, List[str]],
         read_only: bool = True,
-        serialization_option: int | None = None,
-        serialization_default: Any | None = None,
+        serialization_option: Optional[int] = None,
+        serialization_default: Any = None,
         **kwargs,
     ):
         """
