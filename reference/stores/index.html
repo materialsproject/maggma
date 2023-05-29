@@ -3098,6 +3098,8 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
         <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">serialization_option</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">serialization_default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3114,6 +3116,10 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 <span class="sd">                       Note that when read_only=False, JSONStore only supports a single JSON</span>
 <span class="sd">                       file. If the file does not exist, it will be automatically created</span>
 <span class="sd">                       when the JSONStore is initialized.</span>
+<span class="sd">            serialization_option:</span>
+<span class="sd">                option that will be passed to the orjson.dump when saving to the json the file.</span>
+<span class="sd">            serialization_default:</span>
+<span class="sd">                default that will be passed to the orjson.dump when saving to the json the file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span>
@@ -3149,6 +3155,8 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">bytesdata</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">default_sort</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serialization_option</span> <span class="o">=</span> <span class="n">serialization_option</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">serialization_default</span> <span class="o">=</span> <span class="n">serialization_default</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -3232,7 +3240,11 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
             <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">()]</span>
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
                 <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;_id&quot;</span><span class="p">)</span>
-            <span class="n">bytesdata</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="n">bytesdata</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="n">data</span><span class="p">,</span>
+                <span class="n">option</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">serialization_option</span><span class="p">,</span>
+                <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">serialization_default</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">bytesdata</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -3329,7 +3341,7 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 
 
 <h3 class="doc doc-heading" id="maggma.stores.mongolike.JSONStore.__init__">
-<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">paths</span><span class="p">,</span> <span class="n">read_only</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">serialization_option</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">serialization_default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></code>
 
   <span class="doc doc-properties">
       <small class="doc doc-property doc-property-special"><code>special</code></small>
@@ -3373,6 +3385,18 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 </code></pre></div></td>
         <td><code>True</code></td>
       </tr>
+      <tr>
+        <td><code>serialization_option</code></td>
+        <td><code>Optional[int]</code></td>
+        <td><p>option that will be passed to the orjson.dump when saving to the json the file.</p></td>
+        <td><code>None</code></td>
+      </tr>
+      <tr>
+        <td><code>serialization_default</code></td>
+        <td><code>Any</code></td>
+        <td><p>default that will be passed to the orjson.dump when saving to the json the file.</p></td>
+        <td><code>None</code></td>
+      </tr>
   </tbody>
 </table>
         <details class="quote">
@@ -3381,6 +3405,8 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">paths</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span>
     <span class="n">read_only</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">serialization_option</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">serialization_default</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -3397,6 +3423,10 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
 <span class="sd">                   Note that when read_only=False, JSONStore only supports a single JSON</span>
 <span class="sd">                   file. If the file does not exist, it will be automatically created</span>
 <span class="sd">                   when the JSONStore is initialized.</span>
+<span class="sd">        serialization_option:</span>
+<span class="sd">            option that will be passed to the orjson.dump when saving to the json the file.</span>
+<span class="sd">        serialization_default:</span>
+<span class="sd">            default that will be passed to the orjson.dump when saving to the json the file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">paths</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span> <span class="k">else</span> <span class="p">[</span><span class="n">paths</span><span class="p">]</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">paths</span> <span class="o">=</span> <span class="n">paths</span>
@@ -3432,6 +3462,8 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">bytesdata</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">default_sort</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">serialization_option</span> <span class="o">=</span> <span class="n">serialization_option</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">serialization_default</span> <span class="o">=</span> <span class="n">serialization_default</span>
 
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
@@ -3699,7 +3731,11 @@ a list of docs.</p>
         <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">()]</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
             <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;_id&quot;</span><span class="p">)</span>
-        <span class="n">bytesdata</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+        <span class="n">bytesdata</span> <span class="o">=</span> <span class="n">orjson</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+            <span class="n">data</span><span class="p">,</span>
+            <span class="n">option</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">serialization_option</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">serialization_default</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">bytesdata</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;utf-8&quot;</span><span class="p">))</span>
 </code></pre></div>
         </details>
@@ -8408,7 +8444,7 @@ retained to make each document in the JSON file identifiable by manual inspectio
 
       <p>Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
-various utillities</p>
+various utilities</p>
 
 
 
@@ -8484,7 +8520,7 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
         <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">compression</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
@@ -8565,7 +8601,9 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
     <span class="k">def</span> <span class="nf">_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Property referring to underlying pymongo collection&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span><span class="s2">&quot;Must connect Mongo-like store before attemping to use it&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">StoreError</span><span class="p">(</span>
+                <span class="s2">&quot;Must connect Mongo-like store before attempting to use it&quot;</span>
+            <span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span>
 
     <span class="nd">@property</span>
@@ -8647,7 +8685,6 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
             <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">prop_keys</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
                 <span class="k">yield</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">}</span>
             <span class="k">else</span><span class="p">:</span>
-
                 <span class="n">metadata</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
                 <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
@@ -8757,7 +8794,7 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
 
     <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Tries to create an index and return true if it suceeded</span>
+<span class="sd">        Tries to create an index and return true if it succeeded</span>
 <span class="sd">        Currently operators on the GridFS files collection</span>
 <span class="sd">        Args:</span>
 <span class="sd">            key: single key to index</span>
@@ -8850,7 +8887,8 @@ GridFSStore            (<a class="autorefs autorefs-internal" title="maggma.core
             <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">_id</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_files_store</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 
@@ -9102,7 +9140,7 @@ This is the string portion before the GridFS extensions</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">=</span> <span class="n">port</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="n">username</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">password</span> <span class="o">=</span> <span class="n">password</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">compression</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
@@ -9142,7 +9180,8 @@ This is the string portion before the GridFS extensions</p></td>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/gridfs.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_files_store</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ssh_tunnel</span><span class="o">.</span><span class="n">stop</span><span class="p">()</span>
 </code></pre></div>
@@ -9350,7 +9389,7 @@ on the metadata in the files collection</p>
 
     <div class="doc doc-contents ">
 
-      <p>Tries to create an index and return true if it suceeded
+      <p>Tries to create an index and return true if it succeeded
 Currently operators on the GridFS files collection</p>
 
 <p><strong>Parameters:</strong></p>
@@ -9397,7 +9436,7 @@ Currently operators on the GridFS files collection</p>
           <summary>Source code in <code>maggma/stores/gridfs.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Tries to create an index and return true if it suceeded</span>
+<span class="sd">    Tries to create an index and return true if it succeeded</span>
 <span class="sd">    Currently operators on the GridFS files collection</span>
 <span class="sd">    Args:</span>
 <span class="sd">        key: single key to index</span>
@@ -9718,7 +9757,6 @@ values are 1 for ascending or -1 for descending.</p></td>
         <span class="k">if</span> <span class="n">properties</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">prop_keys</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">keys</span><span class="p">())):</span>
             <span class="k">yield</span> <span class="p">{</span><span class="n">p</span><span class="p">:</span> <span class="n">doc</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">properties</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">doc</span><span class="p">}</span>
         <span class="k">else</span><span class="p">:</span>
-
             <span class="n">metadata</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">,</span> <span class="p">{})</span>
 
             <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_collection</span><span class="o">.</span><span class="n">find_one</span><span class="p">(</span>
@@ -10066,7 +10104,7 @@ via TXT records</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">compression</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
@@ -10209,7 +10247,7 @@ via TXT records</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Any</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">compression</span> <span class="o">=</span> <span class="n">compression</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_metadata</span> <span class="o">=</span> <span class="n">ensure_metadata</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">searchable_fields</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">searchable_fields</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">searchable_fields</span>
