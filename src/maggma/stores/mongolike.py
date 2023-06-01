@@ -10,7 +10,7 @@ from ruamel import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings
-from typing import Dict, Iterator, List, Optional, Tuple, Union, Any
+from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable
 
 import mongomock
 import orjson
@@ -705,7 +705,7 @@ class JSONStore(MemoryStore):
         paths: Union[str, List[str]],
         read_only: bool = True,
         serialization_option: Optional[int] = None,
-        serialization_default: Any = None,
+        serialization_default: Optional[Callable[[Any], Any]] = None,
         **kwargs,
     ):
         """
@@ -753,13 +753,6 @@ class JSONStore(MemoryStore):
                 "Cannot instantiate file-writable JSONStore with multiple JSON files."
             )
 
-        # create the .json file if it does not exist
-        if not self.read_only and not Path(self.paths[0]).exists():
-            with zopen(self.paths[0], "w") as f:
-                data: List[dict] = []
-                bytesdata = orjson.dumps(data)
-                f.write(bytesdata.decode("utf-8"))
-
         self.default_sort = None
         self.serialization_option = serialization_option
         self.serialization_default = serialization_default
@@ -771,6 +764,14 @@ class JSONStore(MemoryStore):
         Loads the files into the collection in memory
         """
         super().connect(force_reset=force_reset)
+
+        # create the .json file if it does not exist
+        if not self.read_only and not Path(self.paths[0]).exists():
+            with zopen(self.paths[0], "w") as f:
+                data: List[dict] = []
+                bytesdata = orjson.dumps(data)
+                f.write(bytesdata.decode("utf-8"))
+
         for path in self.paths:
             objects = self.read_json_file(path)
             try:
