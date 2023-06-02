@@ -442,8 +442,8 @@ def test_json_store_writeable(test_dir):
     with ScratchDir("."):
         # if the .json does not exist, it should be created
         jsonstore = JSONStore("a.json", read_only=False)
-        assert Path("a.json").exists()
         jsonstore.connect()
+        assert Path("a.json").exists()
         # confirm RunTimeError with multiple paths
         with pytest.raises(RuntimeError, match="multiple JSON"):
             jsonstore = JSONStore(["a.json", "d.json"], read_only=False)
