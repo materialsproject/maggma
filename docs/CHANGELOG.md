@@ -1,8 +1,20 @@
 # Changelog
 
+## [v0.51.4](https://github.com/materialsproject/maggma/tree/v0.51.4) (2023-06-02)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.4)
+
+**Merged pull requests:**
+
+- modify JSONStore file creation [\#792](https://github.com/materialsproject/maggma/pull/792) ([gpetretto](https://github.com/gpetretto))
+
 ## [v0.51.2](https://github.com/materialsproject/maggma/tree/v0.51.2) (2023-05-29)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.2)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.3...v0.51.2)
+
+## [v0.51.3](https://github.com/materialsproject/maggma/tree/v0.51.3) (2023-05-29)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.3)
 
 **Merged pull requests:**
 
@@ -360,23 +372,23 @@
 
 ## [v0.44.1](https://github.com/materialsproject/maggma/tree/v0.44.1) (2022-03-08)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.44.1)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.1)
 
 **Merged pull requests:**
 
 - added localhost test for MongoURIStore [\#595](https://github.com/materialsproject/maggma/pull/595) ([jmmshn](https://github.com/jmmshn))
 
-## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
+## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
 
 ## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.43.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.43.0)
 
-## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
+## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.44.0)
 
 **Merged pull requests:**
 
