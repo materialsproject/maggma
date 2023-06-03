@@ -6,7 +6,6 @@ import asyncio
 import logging
 import sys
 from itertools import chain
-from contextlib import nullcontext
 
 import click
 from monty.serialization import loadfn
@@ -114,14 +113,17 @@ def run(
     memray,
 ):
     if memray:
+        follow_fork = False
+        if num_processes > 1:
+            follow_fork = True
         ctx.obj = ctx.with_resource(
             Tracker(
                 destination=FileDestination(
-                    "/home/tsmathis/dev/fermi_builder/memray_logs/log_test.bin"
+                    "/home/tsmathis/dev/fermi_builder/memray_logs/mp_log_test.bin"
                 ),
                 native_traces=False,
                 trace_python_allocators=False,
-                follow_fork=False,
+                follow_fork=follow_fork,
             )
         )
     # Import proper manager and worker
