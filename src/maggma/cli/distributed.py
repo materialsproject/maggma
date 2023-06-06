@@ -45,15 +45,9 @@ def manager(
         raise ValueError("Both num_chunks and num_workers must be non-zero")
 
     logger.info(f"Binding to Manager URL {url}:{port}")
-    context = zmq.Context()
-    context.setsockopt(opt=zmq.SocketOption.ROUTER_MANDATORY, value=1)
-    context.setsockopt(opt=zmq.SNDHWM, value=0)
-    context.setsockopt(opt=zmq.RCVHWM, value=0)
-    socket = context.socket(zmq.ROUTER)
-    socket.bind(f"{url}:{port}")
 
-    poll = zmq.Poller()
-    poll.register(socket, zmq.POLLIN)
+    # Setup socket and polling
+    socket, poll = setup(url, port)
 
     workers = {}  # type: ignore
 
@@ -175,6 +169,19 @@ def manager(
     # Send EXIT to any remaining workers
     logger.info("Sending exit messages to workers once they are done")
     attempt_graceful_shutdown(workers, socket)
+
+
+def setup(url, port):
+    context = zmq.Context()
+    context.setsockopt(opt=zmq.SocketOption.ROUTER_MANDATORY, value=1)
+    context.setsockopt(opt=zmq.SNDHWM, value=0)
+    context.setsockopt(opt=zmq.RCVHWM, value=0)
+    socket = context.socket(zmq.ROUTER)
+    socket.bind(f"{url}:{port}")
+
+    poll = zmq.Poller()
+    poll.register(socket, zmq.POLLIN)
+    return socket, poll
 
 
 def attempt_graceful_shutdown(workers, socket):
