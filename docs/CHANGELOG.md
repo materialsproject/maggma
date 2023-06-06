@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.51.5](https://github.com/materialsproject/maggma/tree/v0.51.5) (2023-06-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.4...v0.51.5)
+
+**Merged pull requests:**
+
+- Disable worker timeouts by default [\#793](https://github.com/materialsproject/maggma/pull/793) ([munrojm](https://github.com/munrojm))
+
 ## [v0.51.4](https://github.com/materialsproject/maggma/tree/v0.51.4) (2023-06-02)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.4)
