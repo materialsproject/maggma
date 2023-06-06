@@ -6,6 +6,7 @@ import asyncio
 import logging
 import sys
 from itertools import chain
+from datetime import datetime
 
 import click
 from monty.serialization import loadfn
@@ -14,11 +15,14 @@ from maggma.cli.distributed import find_port
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
 from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
+from maggma.cli.settings import CLISettings
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
 
 from memray import Tracker, FileDestination
 
 sys.meta_path.append(ScriptFinder())
+
+settings = CLISettings()
 
 
 @click.command()
@@ -119,7 +123,7 @@ def run(
         ctx.obj = ctx.with_resource(
             Tracker(
                 destination=FileDestination(
-                    "/home/tsmathis/dev/fermi_builder/memray_logs/mp_log_test.bin"
+                    f"{settings.TEMP_DIR}/{builders[0]}_{datetime.now().isoformat()}.bin"
                 ),
                 native_traces=False,
                 trace_python_allocators=False,
