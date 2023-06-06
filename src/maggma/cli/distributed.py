@@ -29,7 +29,9 @@ def find_port():
     return sock.getsockname()[1]
 
 
-def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_workers: int):
+def manager(
+    url: str, port: int, builders: List[Builder], num_chunks: int, num_workers: int
+):
     """
     Really simple manager for distributed processing that uses a builder prechunk to modify
     the builder and send out modified builders for each worker to run.
@@ -63,7 +65,10 @@ def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_w
 
         try:
             builder.connect()
-            chunk_dicts = [{"chunk": d, "distributed": False, "completed": False} for d in builder.prechunk(num_chunks)]
+            chunk_dicts = [
+                {"chunk": d, "distributed": False, "completed": False}
+                for d in builder.prechunk(num_chunks)
+            ]
             pbar_distributed = tqdm(
                 total=len(chunk_dicts),
                 desc="Distributed chunks for {}".format(builder.__class__.__name__),
@@ -78,7 +83,9 @@ def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_w
 
         except NotImplementedError:
             attempt_graceful_shutdown(workers, socket)
-            raise RuntimeError(f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists.")
+            raise RuntimeError(
+                f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists."
+            )
 
         completed = False
 
@@ -117,7 +124,9 @@ def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_w
 
                             # If everything is distributed, send EXIT to the worker
                             if all(chunk["distributed"] for chunk in chunk_dicts):
-                                logger.debug(f"Sending exit signal to worker: {msg.split('_')[1]}")
+                                logger.debug(
+                                    f"Sending exit signal to worker: {msg.split('_')[1]}"
+                                )
                                 socket.send_multipart([identity, b"", b"EXIT"])
                                 workers.pop(identity)
 
@@ -125,7 +134,9 @@ def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_w
                     # Remove worker and requeue work sent to it
                     attempt_graceful_shutdown(workers, socket)
                     raise RuntimeError(
-                        "At least one worker has stopped with error message: {}".format(msg.split("_")[1])
+                        "At least one worker has stopped with error message: {}".format(
+                            msg.split("_")[1]
+                        )
                     )
 
                 elif msg == "PING":
@@ -135,7 +146,8 @@ def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_w
                     workers[identity]["heartbeats"] += 1
 
             # Decide if any workers are dead and need to be removed
-            handle_dead_workers(workers, socket)
+            if settings.WORKER_TIMEOUT is not None:
+                handle_dead_workers(workers, socket)
 
             for work_index, chunk_dict in enumerate(chunk_dicts):
                 if not chunk_dict["distributed"]:
@@ -199,7 +211,9 @@ def handle_dead_workers(workers, socket):
                 z_score = 0.6745 * (workers[identity]["heartbeats"] - median) / mad
                 if z_score <= -3.5:
                     attempt_graceful_shutdown(workers, socket)
-                    raise RuntimeError("At least one worker has timed out. Stopping distributed build.")
+                    raise RuntimeError(
+                        "At least one worker has timed out. Stopping distributed build."
+                    )
 
 
 def worker(url: str, port: int, num_processes: int, no_bars: bool):
@@ -275,4 +289,6 @@ def ping_manager(socket, poller):
     message: bytes = socket.recv()
     if message.decode("utf-8") != "PONG":
         socket.close()
-        raise RuntimeError("Stopping work as manager did not respond to heartbeat from worker.")
+        raise RuntimeError(
+            "Stopping work as manager did not respond to heartbeat from worker."
+        )

@@ -2,9 +2,8 @@ from pydantic import BaseSettings, Field
 
 
 class CLISettings(BaseSettings):
-
     WORKER_TIMEOUT: int = Field(
-        3600,
+        None,
         description="Timeout in seconds for a distributed worker",
     )
 
