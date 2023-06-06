@@ -8,7 +8,7 @@ class CLISettings(BaseSettings):
     )
 
     MANAGER_TIMEOUT: int = Field(
-        900,
+        3600,
         description="Timeout in seconds for the worker manager",
     )
 
