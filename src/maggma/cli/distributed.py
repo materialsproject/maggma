@@ -231,7 +231,7 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool):
     identity = "%04X-%04X" % (randint(0, 0x10000), randint(0, 0x10000))
     logger = getLogger(f"Worker {identity}")
 
-    logger.info(f"Connnecting to Manager at {url}:{port}")
+    logger.info(f"Connecting to Manager at {url}:{port}")
     context = zmq.Context()
     socket: zmq.Socket = context.socket(zmq.REQ)
 
