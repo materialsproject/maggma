@@ -29,7 +29,7 @@ def find_port():
     return sock.getsockname()[1]
 
 
-def manager(
+def manager(  # noqa: C901
     url: str, port: int, builders: List[Builder], num_chunks: int, num_workers: int
 ):
     """
