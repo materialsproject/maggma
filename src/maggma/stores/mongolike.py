@@ -6,11 +6,11 @@ various utilities
 """
 
 from pathlib import Path
-import yaml
+from ruamel import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable
 
 import mongomock
 import orjson
@@ -218,7 +218,7 @@ class MongoStore(Store):
         Returns:
         """
         with open(lp_file, "r") as f:
-            lp_creds = yaml.load(f, Loader=yaml.FullLoader)
+            lp_creds = yaml.safe_load(f.read())
 
         db_creds = lp_creds.copy()
         db_creds["database"] = db_creds["name"]
@@ -704,6 +704,8 @@ class JSONStore(MemoryStore):
         self,
         paths: Union[str, List[str]],
         read_only: bool = True,
+        serialization_option: Optional[int] = None,
+        serialization_default: Optional[Callable[[Any], Any]] = None,
         **kwargs,
     ):
         """
@@ -720,6 +722,10 @@ class JSONStore(MemoryStore):
                        Note that when read_only=False, JSONStore only supports a single JSON
                        file. If the file does not exist, it will be automatically created
                        when the JSONStore is initialized.
+            serialization_option:
+                option that will be passed to the orjson.dump when saving to the json the file.
+            serialization_default:
+                default that will be passed to the orjson.dump when saving to the json the file.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
@@ -747,14 +753,9 @@ class JSONStore(MemoryStore):
                 "Cannot instantiate file-writable JSONStore with multiple JSON files."
             )
 
-        # create the .json file if it does not exist
-        if not self.read_only and not Path(self.paths[0]).exists():
-            with zopen(self.paths[0], "w") as f:
-                data: List[dict] = []
-                bytesdata = orjson.dumps(data)
-                f.write(bytesdata.decode("utf-8"))
-
         self.default_sort = None
+        self.serialization_option = serialization_option
+        self.serialization_default = serialization_default
 
         super().__init__(**kwargs)
 
@@ -763,6 +764,14 @@ class JSONStore(MemoryStore):
         Loads the files into the collection in memory
         """
         super().connect(force_reset=force_reset)
+
+        # create the .json file if it does not exist
+        if not self.read_only and not Path(self.paths[0]).exists():
+            with zopen(self.paths[0], "w") as f:
+                data: List[dict] = []
+                bytesdata = orjson.dumps(data)
+                f.write(bytesdata.decode("utf-8"))
+
         for path in self.paths:
             objects = self.read_json_file(path)
             try:
@@ -838,7 +847,11 @@ class JSONStore(MemoryStore):
             data = [d for d in self.query()]
             for d in data:
                 d.pop("_id")
-            bytesdata = orjson.dumps(data)
+            bytesdata = orjson.dumps(
+                data,
+                option=self.serialization_option,
+                default=self.serialization_default,
+            )
             f.write(bytesdata.decode("utf-8"))
 
     def __hash__(self):
