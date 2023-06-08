@@ -10,10 +10,10 @@ from asyncio import (
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
-from typing import Any, Awaitable, Callable, Dict, Optional
+from typing import Any, Callable, Dict, Optional
 
 from aioitertools import enumerate
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from maggma.utils import primed
 
@@ -87,7 +87,9 @@ class AsyncUnorderedMap:
     async def get_from_iterator(self):
         loop = get_event_loop()
         async for idx, item in enumerate(self.iterator):
-            future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
+            future = loop.run_in_executor(
+                self.executor, safe_dispatch, (self.func, item)
+            )
 
             self.tasks[idx] = future
 

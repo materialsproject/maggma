@@ -18,7 +18,7 @@ from pydash.utilities import to_path
 from pymongo.collection import Collection
 
 # import tqdm Jupyter widget if running inside Jupyter
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 
 def primed(iterable: Iterable) -> Iterable:
