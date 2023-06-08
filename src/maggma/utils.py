@@ -7,6 +7,7 @@ import logging
 import signal
 import uuid
 from datetime import datetime, timedelta
+from dateutil import parser
 from importlib import import_module
 from typing import Dict, Iterable, Optional, Union
 
@@ -17,7 +18,7 @@ from pydash.utilities import to_path
 from pymongo.collection import Collection
 
 # import tqdm Jupyter widget if running inside Jupyter
-from tqdm.autonotebook import tqdm
+from tqdm.auto import tqdm
 
 
 def primed(iterable: Iterable) -> Iterable:
@@ -85,11 +86,9 @@ def to_isoformat_ceil_ms(dt: Union[datetime, str]) -> str:
 
 def to_dt(s: Union[datetime, str]) -> datetime:
     """Convert an ISO 8601 string to a datetime."""
+
     if isinstance(s, str):
-        try:
-            return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S.%f")
-        except ValueError:
-            return datetime.strptime(s, "%Y-%m-%dT%H:%M:%S")
+        return parser.parse(s)
     elif isinstance(s, datetime):
         return s
 

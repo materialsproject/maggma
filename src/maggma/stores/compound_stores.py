@@ -72,7 +72,7 @@ class JointStore(Store):
         Args:
             force_reset: whether to forcibly reset the connection
         """
-        conn = (
+        conn: MongoClient = (
             MongoClient(
                 host=self.host,
                 port=self.port,

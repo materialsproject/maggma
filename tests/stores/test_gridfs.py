@@ -6,6 +6,7 @@ from datetime import datetime
 import numpy as np
 import numpy.testing.utils as nptu
 import pytest
+from maggma.core import StoreError
 
 from maggma.stores import GridFSStore, MongoStore
 from maggma.stores.gridfs import files_collection_fields, GridFSURIStore
@@ -218,7 +219,7 @@ def test_index(gridfsstore):
 
 def test_gfs_metadata(gridfsstore):
     """
-    Ensure metadata is put back in the docuemnt
+    Ensure metadata is put back in the document
     """
     tic = datetime(2018, 4, 12, 16)
 
@@ -244,7 +245,6 @@ def test_gridfsstore_from_launchpad_file(lp_file):
 
 
 def test_searchable_fields(gridfsstore):
-
     tic = datetime(2018, 4, 12, 16)
 
     data = [
@@ -259,7 +259,6 @@ def test_searchable_fields(gridfsstore):
 
 
 def test_additional_metadata(gridfsstore):
-
     tic = datetime(2018, 4, 12, 16)
 
     data = [
@@ -299,3 +298,12 @@ def test_gridfs_uri_dbname_parse():
     uri_with_db = "mongodb://uuu:xxxx@host:27017"
     with pytest.raises(ConfigurationError):
         GridFSURIStore(uri_with_db, "test")
+
+
+def test_close(gridfsstore):
+    assert gridfsstore.query_one() is None
+    gridfsstore.close()
+    with pytest.raises(StoreError):
+        gridfsstore.query_one()
+    # reconnect to allow the drop of the collection in the fixture
+    gridfsstore.connect()

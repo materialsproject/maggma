@@ -1,5 +1,295 @@
 # Changelog
 
+## [v0.51.6](https://github.com/materialsproject/maggma/tree/v0.51.6) (2023-06-08)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.5...v0.51.6)
+
+**Merged pull requests:**
+
+- Use tqdm.auto [\#795](https://github.com/materialsproject/maggma/pull/795) ([utf](https://github.com/utf))
+
+## [v0.51.5](https://github.com/materialsproject/maggma/tree/v0.51.5) (2023-06-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.4...v0.51.5)
+
+**Merged pull requests:**
+
+- Disable worker timeouts by default [\#793](https://github.com/materialsproject/maggma/pull/793) ([munrojm](https://github.com/munrojm))
+
+## [v0.51.4](https://github.com/materialsproject/maggma/tree/v0.51.4) (2023-06-02)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.3...v0.51.4)
+
+**Merged pull requests:**
+
+- modify JSONStore file creation [\#792](https://github.com/materialsproject/maggma/pull/792) ([gpetretto](https://github.com/gpetretto))
+
+## [v0.51.3](https://github.com/materialsproject/maggma/tree/v0.51.3) (2023-05-29)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.3)
+
+## [v0.51.2](https://github.com/materialsproject/maggma/tree/v0.51.2) (2023-05-29)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.2)
+
+**Merged pull requests:**
+
+- Add orjson options in JSONStore [\#791](https://github.com/materialsproject/maggma/pull/791) ([gpetretto](https://github.com/gpetretto))
+- Implementation of an AzureBlobStore for Azure blobs [\#790](https://github.com/materialsproject/maggma/pull/790) ([gpetretto](https://github.com/gpetretto))
+
+## [v0.51.1](https://github.com/materialsproject/maggma/tree/v0.51.1) (2023-05-22)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.0...v0.51.1)
+
+**Merged pull requests:**
+
+- Add ruamel-yaml as a dependency [\#789](https://github.com/materialsproject/maggma/pull/789) ([sivonxay](https://github.com/sivonxay))
+
+## [v0.51.0](https://github.com/materialsproject/maggma/tree/v0.51.0) (2023-05-22)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.4...v0.51.0)
+
+**Merged pull requests:**
+
+- Create a MultiStore object and a Store-like object to access it [\#787](https://github.com/materialsproject/maggma/pull/787) ([sivonxay](https://github.com/sivonxay))
+
+## [v0.50.4](https://github.com/materialsproject/maggma/tree/v0.50.4) (2023-04-28)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.3...v0.50.4)
+
+**Merged pull requests:**
+
+- Update MongoStore `count` method [\#785](https://github.com/materialsproject/maggma/pull/785) ([munrojm](https://github.com/munrojm))
+
+## [v0.50.3](https://github.com/materialsproject/maggma/tree/v0.50.3) (2023-02-17)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.2...v0.50.3)
+
+**Merged pull requests:**
+
+- Remove extra heartbeats from workers [\#779](https://github.com/materialsproject/maggma/pull/779) ([munrojm](https://github.com/munrojm))
+
+## [v0.50.2](https://github.com/materialsproject/maggma/tree/v0.50.2) (2023-02-17)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.1...v0.50.2)
+
+**Merged pull requests:**
+
+- Pydantic CLI settings [\#778](https://github.com/materialsproject/maggma/pull/778) ([munrojm](https://github.com/munrojm))
+
+## [v0.50.1](https://github.com/materialsproject/maggma/tree/v0.50.1) (2023-02-16)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.50.0...v0.50.1)
+
+**Merged pull requests:**
+
+- Remove stray print in worker debug [\#777](https://github.com/materialsproject/maggma/pull/777) ([munrojm](https://github.com/munrojm))
+
+## [v0.50.0](https://github.com/materialsproject/maggma/tree/v0.50.0) (2023-02-16)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.18...v0.50.0)
+
+**Merged pull requests:**
+
+- Overhaul distributed framework and add RabbitMQ support [\#776](https://github.com/materialsproject/maggma/pull/776) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.18](https://github.com/materialsproject/maggma/tree/v0.49.18) (2023-02-13)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.17...v0.49.18)
+
+**Merged pull requests:**
+
+- Add more heartbeat pings from worker [\#775](https://github.com/materialsproject/maggma/pull/775) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.17](https://github.com/materialsproject/maggma/tree/v0.49.17) (2023-01-30)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.16...v0.49.17)
+
+**Merged pull requests:**
+
+- Remove default sorting from API [\#770](https://github.com/materialsproject/maggma/pull/770) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.16](https://github.com/materialsproject/maggma/tree/v0.49.16) (2023-01-23)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.15...v0.49.16)
+
+**Merged pull requests:**
+
+- Query pipeline out of memory fix [\#767](https://github.com/materialsproject/maggma/pull/767) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.15](https://github.com/materialsproject/maggma/tree/v0.49.15) (2023-01-23)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.14...v0.49.15)
+
+**Merged pull requests:**
+
+- Fix server-side API sorting [\#766](https://github.com/materialsproject/maggma/pull/766) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.14](https://github.com/materialsproject/maggma/tree/v0.49.14) (2023-01-18)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.13...v0.49.14)
+
+**Merged pull requests:**
+
+- Fix S3 store queries in API [\#761](https://github.com/materialsproject/maggma/pull/761) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.13](https://github.com/materialsproject/maggma/tree/v0.49.13) (2023-01-10)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.12...v0.49.13)
+
+**Merged pull requests:**
+
+- Aggregation pipelines in resource classes [\#759](https://github.com/materialsproject/maggma/pull/759) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.12](https://github.com/materialsproject/maggma/tree/v0.49.12) (2023-01-09)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.11...v0.49.12)
+
+**Merged pull requests:**
+
+- Add default sort parameter to `MongoStore` [\#758](https://github.com/materialsproject/maggma/pull/758) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.11](https://github.com/materialsproject/maggma/tree/v0.49.11) (2022-12-15)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.10...v0.49.11)
+
+**Merged pull requests:**
+
+- Async to sync for fastapi funcs [\#750](https://github.com/materialsproject/maggma/pull/750) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.10](https://github.com/materialsproject/maggma/tree/v0.49.10) (2022-12-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.9...v0.49.10)
+
+**Merged pull requests:**
+
+- Enable disk use in mongo find [\#749](https://github.com/materialsproject/maggma/pull/749) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.9](https://github.com/materialsproject/maggma/tree/v0.49.9) (2022-11-01)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.8...v0.49.9)
+
+**Merged pull requests:**
+
+- Parse datetime with dateutil [\#741](https://github.com/materialsproject/maggma/pull/741) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.8](https://github.com/materialsproject/maggma/tree/v0.49.8) (2022-10-25)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.7...v0.49.8)
+
+## [v0.49.7](https://github.com/materialsproject/maggma/tree/v0.49.7) (2022-10-25)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.6...v0.49.7)
+
+**Merged pull requests:**
+
+- FileStore: fix metadata overwriting path [\#736](https://github.com/materialsproject/maggma/pull/736) ([rkingsbury](https://github.com/rkingsbury))
+- JSONStore: fix last\_updated serialization problem [\#735](https://github.com/materialsproject/maggma/pull/735) ([rkingsbury](https://github.com/rkingsbury))
+
+## [v0.49.6](https://github.com/materialsproject/maggma/tree/v0.49.6) (2022-10-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.5...v0.49.6)
+
+**Merged pull requests:**
+
+- Default sort on \_id for determinacy [\#732](https://github.com/materialsproject/maggma/pull/732) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.5](https://github.com/materialsproject/maggma/tree/v0.49.5) (2022-09-30)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.4...v0.49.5)
+
+**Merged pull requests:**
+
+- Up manager timeout [\#718](https://github.com/materialsproject/maggma/pull/718) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.4](https://github.com/materialsproject/maggma/tree/v0.49.4) (2022-09-28)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.3...v0.49.4)
+
+**Merged pull requests:**
+
+- Up worker timeout [\#717](https://github.com/materialsproject/maggma/pull/717) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.3](https://github.com/materialsproject/maggma/tree/v0.49.3) (2022-09-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.2...v0.49.3)
+
+**Merged pull requests:**
+
+- Update high water mark [\#716](https://github.com/materialsproject/maggma/pull/716) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.2](https://github.com/materialsproject/maggma/tree/v0.49.2) (2022-09-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.1...v0.49.2)
+
+**Merged pull requests:**
+
+- Fix stalling in distributed code [\#715](https://github.com/materialsproject/maggma/pull/715) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.1](https://github.com/materialsproject/maggma/tree/v0.49.1) (2022-09-26)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.49.0...v0.49.1)
+
+**Merged pull requests:**
+
+- Send proper exit message to workers [\#714](https://github.com/materialsproject/maggma/pull/714) ([munrojm](https://github.com/munrojm))
+
+## [v0.49.0](https://github.com/materialsproject/maggma/tree/v0.49.0) (2022-09-23)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.48.1...v0.49.0)
+
+**Merged pull requests:**
+
+- Enhance distributed builder code [\#711](https://github.com/materialsproject/maggma/pull/711) ([munrojm](https://github.com/munrojm))
+
+## [v0.48.1](https://github.com/materialsproject/maggma/tree/v0.48.1) (2022-09-02)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.48.0...v0.48.1)
+
+**Merged pull requests:**
+
+- Add ssh\_tunnel option to GridFSStore [\#707](https://github.com/materialsproject/maggma/pull/707) ([utf](https://github.com/utf))
+
+## [v0.48.0](https://github.com/materialsproject/maggma/tree/v0.48.0) (2022-08-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.6...v0.48.0)
+
+**Merged pull requests:**
+
+- Proposal: remove Drone class [\#669](https://github.com/materialsproject/maggma/pull/669) ([rkingsbury](https://github.com/rkingsbury))
+
+## [v0.47.6](https://github.com/materialsproject/maggma/tree/v0.47.6) (2022-08-04)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.5...v0.47.6)
+
+**Merged pull requests:**
+
+- Docs: add mermaid diagram support [\#677](https://github.com/materialsproject/maggma/pull/677) ([rkingsbury](https://github.com/rkingsbury))
+
+## [v0.47.5](https://github.com/materialsproject/maggma/tree/v0.47.5) (2022-07-26)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.4...v0.47.5)
+
+**Merged pull requests:**
+
+- Add pymongo timeout context to queries [\#691](https://github.com/materialsproject/maggma/pull/691) ([munrojm](https://github.com/munrojm))
+
+## [v0.47.4](https://github.com/materialsproject/maggma/tree/v0.47.4) (2022-07-25)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.3...v0.47.4)
+
+**Merged pull requests:**
+
+- Ensure all fields are properly sanitized [\#690](https://github.com/materialsproject/maggma/pull/690) ([munrojm](https://github.com/munrojm))
+
+## [v0.47.3](https://github.com/materialsproject/maggma/tree/v0.47.3) (2022-06-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.2...v0.47.3)
+
+**Merged pull requests:**
+
+- Fix header processing [\#679](https://github.com/materialsproject/maggma/pull/679) ([munrojm](https://github.com/munrojm))
+
 ## [v0.47.2](https://github.com/materialsproject/maggma/tree/v0.47.2) (2022-05-27)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.47.1...v0.47.2)
@@ -194,19 +484,19 @@
 
 ## [v0.36.0](https://github.com/materialsproject/maggma/tree/v0.36.0) (2021-12-06)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.35.0...v0.36.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.34.0...v0.36.0)
 
 **Merged pull requests:**
 
 - Added on-disk MongoDB compatible MontyStore [\#514](https://github.com/materialsproject/maggma/pull/514) ([utf](https://github.com/utf))
 
-## [v0.35.0](https://github.com/materialsproject/maggma/tree/v0.35.0) (2021-12-01)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.34.0...v0.35.0)
-
 ## [v0.34.0](https://github.com/materialsproject/maggma/tree/v0.34.0) (2021-12-01)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.2...v0.34.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.35.0...v0.34.0)
+
+## [v0.35.0](https://github.com/materialsproject/maggma/tree/v0.35.0) (2021-12-01)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.2...v0.35.0)
 
 **Merged pull requests:**
 

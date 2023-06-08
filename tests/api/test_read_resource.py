@@ -53,9 +53,7 @@ def test_init(owner_store):
     resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=False)
     assert len(resource.router.routes) == 2
 
-    resource = ReadOnlyResource(
-        store=owner_store, model=Owner, enable_default_search=False
-    )
+    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False)
     assert len(resource.router.routes) == 2
 
 

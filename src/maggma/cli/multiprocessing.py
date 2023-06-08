@@ -1,13 +1,19 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from asyncio import BoundedSemaphore, Queue, gather, get_event_loop, wait
+from asyncio import (
+    BoundedSemaphore,
+    Queue,
+    gather,
+    get_event_loop,
+)
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
+from typing import Any, Callable, Dict, Optional
 
 from aioitertools import enumerate
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from maggma.utils import primed
 
@@ -146,8 +152,13 @@ def safe_dispatch(val):
         return None
 
 
-async def multi(builder, num_processes, no_bars=False):
-
+async def multi(
+    builder,
+    num_processes,
+    no_bars=False,
+    heartbeat_func: Optional[Callable[..., Any]] = None,
+    heartbeat_func_kwargs: Dict[Any, Any] = {},
+):
     builder.connect()
     cursor = builder.get_items()
     executor = ProcessPoolExecutor(num_processes)
@@ -198,12 +209,14 @@ async def multi(builder, num_processes, no_bars=False):
         disable=no_bars,
     )
 
+    if heartbeat_func:
+        heartbeat_func(**heartbeat_func_kwargs)
+
     back_pressure_relief = back_pressured_get.release(processed_items)
 
     update_items = tqdm(total=total, desc="Update Targets", disable=no_bars)
 
     async for chunk in grouper(back_pressure_relief, n=builder.chunk_size):
-
         logger.info(
             "Processed batch of {} items".format(builder.chunk_size),
             extra={

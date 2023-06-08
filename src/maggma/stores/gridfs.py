@@ -2,13 +2,13 @@
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
-various utillities
+various utilities
 """
 
 import copy
 import json
 import zlib
-import yaml
+from ruamel import yaml
 from datetime import datetime
 from pymongo.errors import ConfigurationError
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
@@ -19,7 +19,7 @@ from pydash import get, has
 from pymongo import MongoClient, uri_parser
 
 from maggma.core import Sort, Store, StoreError
-from maggma.stores.mongolike import MongoStore
+from maggma.stores.mongolike import MongoStore, SSHTunnel
 
 # https://github.com/mongodb/specifications/
 #   blob/master/source/gridfs/gridfs-spec.rst#terms
@@ -55,6 +55,7 @@ class GridFSStore(Store):
         searchable_fields: List[str] = None,
         auth_source: Optional[str] = None,
         mongoclient_kwargs: Optional[Dict] = None,
+        ssh_tunnel: Optional[SSHTunnel] = None,
         **kwargs,
     ):
         """
@@ -71,6 +72,7 @@ class GridFSStore(Store):
             ensure_metadata: ensure returned documents have the metadata fields
             searchable_fields: fields to keep in the index store
             auth_source: The database to authenticate on. Defaults to the database name.
+            ssh_tunnel: An SSHTunnel object to use.
         """
 
         self.database = database
@@ -79,11 +81,12 @@ class GridFSStore(Store):
         self.port = port
         self.username = username
         self.password = password
-        self._coll = None  # type: Any
+        self._coll: Any = None
         self.compression = compression
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
         self.kwargs = kwargs
+        self.ssh_tunnel = ssh_tunnel
 
         if auth_source is None:
             auth_source = self.database
@@ -104,7 +107,7 @@ class GridFSStore(Store):
         Returns:
         """
         with open(lp_file, "r") as f:
-            lp_creds = yaml.load(f, Loader=yaml.FullLoader)
+            lp_creds = yaml.safe_load(f.read())
 
         db_creds = lp_creds.copy()
         db_creds["database"] = db_creds["name"]
@@ -126,17 +129,24 @@ class GridFSStore(Store):
         """
         Connect to the source data
         """
-        conn = (
+        if self.ssh_tunnel is None:
+            host = self.host
+            port = self.port
+        else:
+            self.ssh_tunnel.start()
+            host, port = self.ssh_tunnel.local_address
+
+        conn: MongoClient = (
             MongoClient(
-                host=self.host,
-                port=self.port,
+                host=host,
+                port=port,
                 username=self.username,
                 password=self.password,
                 authSource=self.auth_source,
                 **self.mongoclient_kwargs,
             )
             if self.username != ""
-            else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
+            else MongoClient(host, port, **self.mongoclient_kwargs)
         )
         if not self._coll or force_reset:
             db = conn[self.database]
@@ -152,7 +162,9 @@ class GridFSStore(Store):
     def _collection(self):
         """Property referring to underlying pymongo collection"""
         if self._coll is None:
-            raise StoreError("Must connect Mongo-like store before attemping to use it")
+            raise StoreError(
+                "Must connect Mongo-like store before attempting to use it"
+            )
         return self._coll
 
     @property
@@ -234,7 +246,6 @@ class GridFSStore(Store):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
-
                 metadata = doc.get("metadata", {})
 
                 data = self._collection.find_one(
@@ -345,7 +356,7 @@ class GridFSStore(Store):
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded
         Currently operators on the GridFS files collection
         Args:
             key: single key to index
@@ -438,7 +449,10 @@ class GridFSStore(Store):
             self._collection.delete(_id)
 
     def close(self):
-        self._collection.database.client.close()
+        self._files_store.close()
+        self._coll = None
+        if self.ssh_tunnel is not None:
+            self.ssh_tunnel.stop()
 
     def __eq__(self, other: object) -> bool:
         """
@@ -496,7 +510,7 @@ class GridFSURIStore(GridFSStore):
             self.database = database
 
         self.collection_name = collection_name
-        self._coll = None  # type: Any
+        self._coll: Any = None
         self.compression = compression
         self.ensure_metadata = ensure_metadata
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
@@ -512,7 +526,7 @@ class GridFSURIStore(GridFSStore):
         Connect to the source data
         """
         if not self._coll or force_reset:  # pragma: no cover
-            conn = MongoClient(self.uri, **self.mongoclient_kwargs)
+            conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
             db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db["{}.files".format(self.collection_name)]

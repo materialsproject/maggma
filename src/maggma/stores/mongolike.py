@@ -6,11 +6,11 @@ various utilities
 """
 
 from pathlib import Path
-import yaml
+from ruamel import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable
 
 import mongomock
 import orjson
@@ -24,16 +24,15 @@ from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailur
 from sshtunnel import SSHTunnelForwarder
 
 from maggma.core import Sort, Store, StoreError
-from maggma.utils import confirm_field_index
+from maggma.utils import confirm_field_index, to_dt
 
 try:
-    import montydb
+    import montydb  # type: ignore
 except ImportError:
     montydb = None
 
 
 class SSHTunnel(MSONable):
-
     __TUNNELS: Dict[str, SSHTunnelForwarder] = {}
 
     def __init__(
@@ -123,6 +122,7 @@ class MongoStore(Store):
         safe_update: bool = False,
         auth_source: Optional[str] = None,
         mongoclient_kwargs: Optional[Dict] = None,
+        default_sort: Optional[Dict[str, Union[Sort, int]]] = None,
         **kwargs,
     ):
         """
@@ -135,6 +135,8 @@ class MongoStore(Store):
             password: Password to connect with
             safe_update: fail gracefully on DocumentTooLarge errors on update
             auth_source: The database to authenticate on. Defaults to the database name.
+            default_sort: Default sort field and direction to use when querying. Can be used to
+                ensure determinacy in query results.
         """
         self.database = database
         self.collection_name = collection_name
@@ -144,7 +146,8 @@ class MongoStore(Store):
         self.password = password
         self.ssh_tunnel = ssh_tunnel
         self.safe_update = safe_update
-        self._coll = None  # type: Any
+        self.default_sort = default_sort
+        self._coll = None  # type: ignore
         self.kwargs = kwargs
 
         if auth_source is None:
@@ -173,7 +176,7 @@ class MongoStore(Store):
                 self.ssh_tunnel.start()
                 host, port = self.ssh_tunnel.local_address
 
-            conn = (
+            conn: MongoClient = (
                 MongoClient(
                     host=host,
                     port=port,
@@ -186,7 +189,7 @@ class MongoStore(Store):
                 else MongoClient(host, port, **self.mongoclient_kwargs)
             )
             db = conn[self.database]
-            self._coll = db[self.collection_name]
+            self._coll = db[self.collection_name]  # type: ignore
 
     def __hash__(self) -> int:
         """Hash for MongoStore"""
@@ -215,7 +218,7 @@ class MongoStore(Store):
         Returns:
         """
         with open(lp_file, "r") as f:
-            lp_creds = yaml.load(f, Loader=yaml.FullLoader)
+            lp_creds = yaml.safe_load(f.read())
 
         db_creds = lp_creds.copy()
         db_creds["database"] = db_creds["name"]
@@ -297,7 +300,7 @@ class MongoStore(Store):
         group_id = {letter: f"${key}" for letter, key in zip(alpha, keys)}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
         for d in self._collection.aggregate(pipeline, allowDiskUse=True):
-            id_doc = {}  # type: Dict[str,Any]
+            id_doc = {}  # type: ignore
             for letter, key in group_id.items():
                 if has(d["_id"], letter):
                     set_(id_doc, key[1:], d["_id"][letter])
@@ -325,7 +328,9 @@ class MongoStore(Store):
     def _collection(self):
         """Property referring to underlying pymongo collection"""
         if self._coll is None:
-            raise StoreError("Must connect Mongo-like store before attemping to use it")
+            raise StoreError(
+                "Must connect Mongo-like store before attempting to use it"
+            )
         return self._coll
 
     def count(
@@ -356,7 +361,11 @@ class MongoStore(Store):
         if hint_list is not None:  # pragma: no cover
             return self._collection.count_documents(filter=criteria, hint=hint_list)
 
-        return self._collection.count_documents(filter=criteria)
+        return (
+            self._collection.count_documents(filter=criteria)
+            if criteria
+            else self._collection.estimated_document_count()
+        )
 
     def query(  # type: ignore
         self,
@@ -366,6 +375,7 @@ class MongoStore(Store):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
+        **kwargs,
     ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
@@ -379,9 +389,18 @@ class MongoStore(Store):
                 Keys are field names and values are 1 for ascending or -1 for descending.
             skip: number documents to skip
             limit: limit on total number of documents returned
+            mongoclient_kwargs: Dict of extra kwargs to pass to pymongo find.
         """
         if isinstance(properties, list):
             properties = {p: 1 for p in properties}
+
+        default_sort_formatted = None
+
+        if self.default_sort is not None:
+            default_sort_formatted = [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in self.default_sort.items()
+            ]
 
         sort_list = (
             [
@@ -389,7 +408,7 @@ class MongoStore(Store):
                 for k, v in sort.items()
             ]
             if sort
-            else None
+            else default_sort_formatted
         )
 
         hint_list = (
@@ -408,12 +427,13 @@ class MongoStore(Store):
             limit=limit,
             sort=sort_list,
             hint=hint_list,
+            **kwargs,
         ):
             yield d
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded
         Args:
             key: single key to index
             unique: Whether or not this index contains only unique keys
@@ -449,7 +469,6 @@ class MongoStore(Store):
             docs = [docs]
 
         for d in docs:
-
             d = jsanitize(d, allow_bson=True)
 
             # document-level validation is optional
@@ -529,6 +548,7 @@ class MongoURIStore(MongoStore):
         database: str = None,
         ssh_tunnel: Optional[SSHTunnel] = None,
         mongoclient_kwargs: Optional[Dict] = None,
+        default_sort: Optional[Dict[str, Union[Sort, int]]] = None,
         **kwargs,
     ):
         """
@@ -536,9 +556,12 @@ class MongoURIStore(MongoStore):
             uri: MongoDB+SRV URI
             database: database to connect to
             collection_name: The collection name
+            default_sort: Default sort field and direction to use when querying. Can be used to
+                ensure determinacy in query results.
         """
         self.uri = uri
         self.ssh_tunnel = ssh_tunnel
+        self.default_sort = default_sort
         self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         # parse the dbname from the uri
@@ -570,9 +593,9 @@ class MongoURIStore(MongoStore):
         Connect to the source data
         """
         if self._coll is None or force_reset:  # pragma: no cover
-            conn = MongoClient(self.uri, **self.mongoclient_kwargs)
+            conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
             db = conn[self.database]
-            self._coll = db[self.collection_name]
+            self._coll = db[self.collection_name]  # type: ignore
 
 
 class MemoryStore(MongoStore):
@@ -588,6 +611,7 @@ class MemoryStore(MongoStore):
             collection_name: name for the collection in memory
         """
         self.collection_name = collection_name
+        self.default_sort = None
         self._coll = None
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)  # noqa
@@ -598,7 +622,7 @@ class MemoryStore(MongoStore):
         """
 
         if self._coll is None or force_reset:
-            self._coll = mongomock.MongoClient().db[self.name]
+            self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
 
     def close(self):
         """Close up all collections"""
@@ -634,6 +658,8 @@ class JSONStore(MemoryStore):
         self,
         paths: Union[str, List[str]],
         read_only: bool = True,
+        serialization_option: Optional[int] = None,
+        serialization_default: Optional[Callable[[Any], Any]] = None,
         **kwargs,
     ):
         """
@@ -650,6 +676,10 @@ class JSONStore(MemoryStore):
                        Note that when read_only=False, JSONStore only supports a single JSON
                        file. If the file does not exist, it will be automatically created
                        when the JSONStore is initialized.
+            serialization_option:
+                option that will be passed to the orjson.dump when saving to the json the file.
+            serialization_default:
+                default that will be passed to the orjson.dump when saving to the json the file.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
@@ -677,12 +707,10 @@ class JSONStore(MemoryStore):
                 "Cannot instantiate file-writable JSONStore with multiple JSON files."
             )
 
-        # create the .json file if it does not exist
-        if not self.read_only and not Path(self.paths[0]).exists():
-            with zopen(self.paths[0], "w") as f:
-                data: List[dict] = []
-                bytesdata = orjson.dumps(data)
-                f.write(bytesdata.decode("utf-8"))
+        self.default_sort = None
+        self.serialization_option = serialization_option
+        self.serialization_default = serialization_default
+
         super().__init__(**kwargs)
 
     def connect(self, force_reset=False):
@@ -690,6 +718,14 @@ class JSONStore(MemoryStore):
         Loads the files into the collection in memory
         """
         super().connect(force_reset=force_reset)
+
+        # create the .json file if it does not exist
+        if not self.read_only and not Path(self.paths[0]).exists():
+            with zopen(self.paths[0], "w") as f:
+                data: List[dict] = []
+                bytesdata = orjson.dumps(data)
+                f.write(bytesdata.decode("utf-8"))
+
         for path in self.paths:
             objects = self.read_json_file(path)
             try:
@@ -716,6 +752,14 @@ class JSONStore(MemoryStore):
             data = data.decode() if isinstance(data, bytes) else data
             objects = orjson.loads(data)
             objects = [objects] if not isinstance(objects, list) else objects
+            # datetime objects deserialize to str. Try to convert the last_updated
+            # field back to datetime.
+            # # TODO - there may still be problems caused if a JSONStore is init'ed from
+            # documents that don't contain a last_updated field
+            # See Store.last_updated in store.py.
+            for obj in objects:
+                if obj.get(self.last_updated_field):
+                    obj[self.last_updated_field] = to_dt(obj[self.last_updated_field])
 
         return objects
 
@@ -757,7 +801,11 @@ class JSONStore(MemoryStore):
             data = [d for d in self.query()]
             for d in data:
                 d.pop("_id")
-            bytesdata = orjson.dumps(data)
+            bytesdata = orjson.dumps(
+                data,
+                option=self.serialization_option,
+                default=self.serialization_default,
+            )
             f.write(bytesdata.decode("utf-8"))
 
     def __hash__(self):
@@ -830,7 +878,8 @@ class MontyStore(MemoryStore):
         self.database_path = database_path
         self.database_name = database_name
         self.collection_name = collection_name
-        self._coll = None
+        self._coll = None  # type: ignore
+        self.default_sort = None
         self.ssh_tunnel = None  # This is to fix issues with the tunnel on close
         self.kwargs = kwargs
         self.storage = storage
@@ -848,7 +897,7 @@ class MontyStore(MemoryStore):
         Args:
             force_reset: Force connection reset.
         """
-        from montydb import set_storage, MontyClient
+        from montydb import set_storage, MontyClient  # type: ignore
 
         set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
         client = MontyClient(self.database_path, **self.client_kwargs)
@@ -859,6 +908,36 @@ class MontyStore(MemoryStore):
     def name(self) -> str:
         """Return a string representing this data source."""
         return f"monty://{self.database_path}/{self.database}/{self.collection_name}"
+
+    def count(
+        self,
+        criteria: Optional[Dict] = None,
+        hint: Optional[Dict[str, Union[Sort, int]]] = None,
+    ) -> int:
+        """
+        Counts the number of documents matching the query criteria
+
+        Args:
+            criteria: PyMongo filter for documents to count in
+            hint: Dictionary of indexes to use as hints for query optimizer.
+                Keys are field names and values are 1 for ascending or -1 for descending.
+        """
+
+        criteria = criteria if criteria else {}
+
+        hint_list = (
+            [
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
+                for k, v in hint.items()
+            ]
+            if hint
+            else None
+        )
+
+        if hint_list is not None:  # pragma: no cover
+            return self._collection.count_documents(filter=criteria, hint=hint_list)
+
+        return self._collection.count_documents(filter=criteria)
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
