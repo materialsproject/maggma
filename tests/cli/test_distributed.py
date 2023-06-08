@@ -1,8 +1,6 @@
 import asyncio
 import json
-from multiprocessing.sharedctypes import Value
 import threading
-import time
 
 import pytest
 
@@ -71,17 +69,23 @@ def test_wrong_worker_input(log_to_stdout):
     )
 
 
-@pytest.mark.asyncio
-async def test_manager_and_worker(log_to_stdout):
+def test_manager_and_worker(log_to_stdout):
 
     manager_thread = threading.Thread(
         target=manager,
-        args=(SERVER_URL, SERVER_PORT, [DummyBuilder(dummy_prechunk=False)], 5, 5),
+        args=(SERVER_URL, SERVER_PORT, [DummyBuilder(dummy_prechunk=False)], 5, 3),
     )
     manager_thread.start()
 
-    tasks = [worker(SERVER_URL, SERVER_PORT, num_processes=1, no_bars=True) for _ in range(5)]
-    await asyncio.gather(*tasks)
+    worker_threads = [threading.Thread(
+        target=worker,
+        args=(SERVER_URL, SERVER_PORT, 1, True)) for _ in range(3)]
+
+    for worker_thread in worker_threads:
+        worker_thread.start()
+
+    for worker_thread in worker_threads:
+        worker_thread.join()
 
     manager_thread.join()
 
@@ -111,7 +115,11 @@ async def test_worker_error():
     socket = context.socket(REP)
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
-    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1, no_bars=True))
+    worker_task = threading.Thread(
+        target=worker,
+        args=(SERVER_URL, SERVER_PORT, 1, True))
+
+    worker_task.start()
 
     message = await socket.recv()
     assert message == "READY_{}".format(HOSTNAME).encode("utf-8")
@@ -129,7 +137,7 @@ async def test_worker_error():
     message = await socket.recv()
     assert message.decode("utf-8") == "ERROR_Dummy error"
 
-    worker_task.cancel()
+    worker_task.join()
 
 
 @pytest.mark.asyncio
@@ -138,16 +146,20 @@ async def test_worker_exit():
     socket = context.socket(REP)
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
-    worker_task = asyncio.create_task(worker(SERVER_URL, SERVER_PORT, num_processes=1, no_bars=True))
+    worker_task = threading.Thread(
+        target=worker,
+        args=(SERVER_URL, SERVER_PORT, 1, True))
+
+    worker_task.start()
 
     message = await socket.recv()
     assert message == "READY_{}".format(HOSTNAME).encode("utf-8")
     await asyncio.sleep(1)
     await socket.send(b"EXIT")
     await asyncio.sleep(1)
-    assert worker_task.done()
+    assert not worker_task.is_alive()
 
-    worker_task.cancel()
+    worker_task.join()
 
 
 @pytest.mark.xfail

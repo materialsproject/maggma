@@ -21,6 +21,7 @@ Current working and tested `Store` include:
 - `AliasingStore`: aliases keys from the underlying store to new names
 - `SandboxStore: provides permission control to documents via a `_sbxn` sandbox key
 - `JointStore`: joins several MongoDB collections together, merging documents with the same `key`, so they look like one collection
+- `AzureBlobStore`: provides an interface to Azure Blobs for the storage of large amount of data
 
 ## The `Store` interface
 
