@@ -100,7 +100,7 @@ mrun -n 2 -v my_builder.py
 ```
 
 
-## Running multiple builders
+## Running Multiple Builders
 
 `mrun` can run multiple builders. You can have multiple builders in a single file: `json`, `python`, or `jupyter-notebook`. Or you can chain multiple files in the order you want to run them:
 ``` shell
