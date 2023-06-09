@@ -19,5 +19,4 @@ orjson==3.8.14
 boto3==1.24.42
 python-dateutil==2.8.2
 pydantic
-memray==1.7.0
 ruamel.yaml<0.18
