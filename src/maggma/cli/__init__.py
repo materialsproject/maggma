@@ -118,13 +118,17 @@ def run(
 ):
     if memray:
         follow_fork = False
+
         if num_processes > 1:
             follow_fork = True
+
+        memray_file = (
+            f"{settings.TEMP_DIR}/{builders[0]}_{datetime.now().isoformat()}.bin"
+        )
+
         ctx.obj = ctx.with_resource(
             Tracker(
-                destination=FileDestination(
-                    f"{settings.TEMP_DIR}/{builders[0]}_{datetime.now().isoformat()}.bin"
-                ),
+                destination=FileDestination(memray_file),
                 native_traces=False,
                 trace_python_allocators=False,
                 follow_fork=follow_fork,
@@ -210,3 +214,8 @@ def run(
                 loop.run_until_complete(
                     multi(builder=builder, num_processes=num_processes, no_bars=no_bars)
                 )
+
+    if memray_file:
+        import subprocess
+
+        subprocess.run(["memray", "flamegraph", memray_file], shell=False)
