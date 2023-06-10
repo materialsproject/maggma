@@ -18,7 +18,6 @@ from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.cli.settings import CLISettings
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
 
-from memray import Tracker, FileDestination
 
 sys.meta_path.append(ScriptFinder())
 
@@ -100,6 +99,14 @@ settings = CLISettings()
     type=bool,
     help="Option to profile builder memory usage with Memray",
 )
+@click.option(
+    "-md",
+    "--memray-dir",
+    "memray_dir",
+    default=None,
+    type=str,
+    help="Directory to dump memory profiler output files. Only runs if --memray is True. Will create directory if directory does not exist, mimicking mkdir -p command. If not provided files will be dumped to system's temp directory",
+)
 @click.pass_context
 def run(
     ctx,
@@ -115,17 +122,29 @@ def run(
     rabbitmq,
     queue_prefix,
     memray,
+    memray_dir,
+    memray_file=None,
+    follow_fork=False,
 ):
+    # Import profiler and setup directories to dump profiler output
     if memray:
-        follow_fork = False
+        from memray import Tracker, FileDestination
+
+        if memray_dir:
+            import os
+
+            os.makedirs(memray_dir, exist_ok=True)
+
+            memray_file = f"{memray_dir}/{builders[0]}_{datetime.now().isoformat()}.bin"
+        else:
+            memray_file = (
+                f"{settings.TEMP_DIR}/{builders[0]}_{datetime.now().isoformat()}.bin"
+            )
 
         if num_processes > 1:
             follow_fork = True
 
-        memray_file = (
-            f"{settings.TEMP_DIR}/{builders[0]}_{datetime.now().isoformat()}.bin"
-        )
-
+        # Click context manager handles creation and clean up of profiler dump files for memray tracker
         ctx.obj = ctx.with_resource(
             Tracker(
                 destination=FileDestination(memray_file),
@@ -134,6 +153,7 @@ def run(
                 follow_fork=follow_fork,
             )
         )
+
     # Import proper manager and worker
     if rabbitmq:
         from maggma.cli.rabbitmq import manager, worker
