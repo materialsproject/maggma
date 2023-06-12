@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.51.7](https://github.com/materialsproject/maggma/tree/v0.51.7) (2023-06-12)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.6...v0.51.7)
+
+**Merged pull requests:**
+
+- Explicitly close s3 client connections in `S3Store` [\#805](https://github.com/materialsproject/maggma/pull/805) ([munrojm](https://github.com/munrojm))
+
 ## [v0.51.6](https://github.com/materialsproject/maggma/tree/v0.51.6) (2023-06-08)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.5...v0.51.6)
