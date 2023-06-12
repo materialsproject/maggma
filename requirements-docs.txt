@@ -1,6 +1,6 @@
 mkdocs==1.4.0
 mkdocs-material==8.3.9
 mkdocs-minify-plugin==0.5.0
-mkdocstrings==0.18.1
+mkdocstrings==0.22.0
 jinja2<3.2.0
 ruamel-yaml<18.0
