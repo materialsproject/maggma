@@ -10474,6 +10474,8 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 <span class="sd">        Closes any connections</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">s3</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">s3</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -11192,6 +11194,8 @@ Alternatively you can pass in a dictionary with the full credentials:
 <span class="sd">    Closes any connections</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">s3</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">s3</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span> <span class="o">=</span> <span class="kc">None</span>
 </code></pre></div>
