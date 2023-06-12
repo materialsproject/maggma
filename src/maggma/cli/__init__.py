@@ -105,8 +105,8 @@ settings = CLISettings()
     "memray_dir",
     default=None,
     type=str,
-    help="""Directory to dump memory profiler output files. Only runs if --memray is True. 
-    Will create directory if directory does not exist, mimicking mkdir -p command. 
+    help="""Directory to dump memory profiler output files. Only runs if --memray is True.
+    Will create directory if directory does not exist, mimicking mkdir -p command.
     If not provided files will be dumped to system's temp directory""",
 )
 @click.pass_context
