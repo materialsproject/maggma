@@ -138,4 +138,6 @@ The profiler will generate two files after the builder finishes:
 
 ***Note***: Different platforms/operating systems purge their system's `temp` directory at different intervals. It is recommended to move at least the `.bin` file to a more stable location. The `.bin` file can be used to recreate the flamegraph at anytime using the Memray CLI.
 
+Using the flag `--memray-dir` (`-md`) allows for specifying an output directory for the `.bin` and `.html` files created by the profiler. The provided directory will be created if the directory does not exist, mimicking the `mkdir -p` command.
+
 Further data visualization and transform examples can be found in Memray's documentation ([Memray reporters](https://bloomberg.github.io/memray/live.html)).
