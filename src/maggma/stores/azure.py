@@ -1,6 +1,6 @@
 # coding: utf-8
 """
-Advanced Stores for connecting to AWS data
+Advanced Stores for connecting to Microsoft Azure data
 """
 import threading
 import warnings
@@ -8,8 +8,9 @@ import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 from json import dumps
+import os
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -18,91 +19,111 @@ from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
-    import boto3
-    import botocore
-    from boto3.session import Session
-    from botocore.exceptions import ClientError
+    import azure.storage.blob as azure_blob
+    from azure.storage.blob import BlobServiceClient, ContainerClient
+    from azure.identity import DefaultAzureCredential
+    from azure.core.exceptions import ResourceExistsError
+    import azure
 except (ImportError, ModuleNotFoundError):
-    boto3 = None  # type: ignore
+    azure_blob = None  # type: ignore
+    ContainerClient = None
 
 
-class S3Store(Store):
+AZURE_KEY_SANITIZE = {"-": "_", ".": "_"}
+
+
+class AzureBlobStore(Store):
     """
-    GridFS like storage using Amazon S3 and a regular store for indexing
-    Assumes Amazon AWS key and secret key are set in environment or default config file
+    GridFS like storage using Azure Blob and a regular store for indexing.
+
+    Requires azure-storage-blob and azure-identity modules to be installed.
     """
 
     def __init__(
         self,
         index: Store,
-        bucket: str,
-        s3_profile: Optional[Union[str, dict]] = None,
+        container_name: str,
+        azure_client_info: Optional[Union[str, dict]] = None,
         compress: bool = False,
-        endpoint_url: str = None,
-        sub_dir: str = None,
-        s3_workers: int = 1,
-        s3_resource_kwargs: Optional[dict] = None,
+        sub_dir: Optional[str] = None,
+        workers: int = 1,
+        azure_resource_kwargs: Optional[dict] = None,
         key: str = "fs_id",
         store_hash: bool = True,
         unpack_data: bool = True,
         searchable_fields: Optional[List[str]] = None,
+        key_sanitize_dict: Optional[dict] = None,
+        create_container: bool = False,
         **kwargs,
     ):
         """
-        Initializes an S3 Store
+        Initializes an AzureBlob Store
 
         Args:
-            index: a store to use to index the S3 Bucket
-            bucket: name of the bucket
-            s3_profile: name of aws profile containing credentials for role.
-                Alternatively you can pass in a dictionary with the full credentials:
-                    aws_access_key_id (string) -- AWS access key ID
-                    aws_secret_access_key (string) -- AWS secret access key
-                    aws_session_token (string) -- AWS temporary session token
-                    region_name (string) -- Default region when creating new connections
+            index: a store to use to index the Azure blob
+            container_name: name of the container
+            azure_client_info: connection_url of the BlobServiceClient if a string.
+                Assumes that the access is passwordless in that case.
+                Otherwise, if a dictionary, options to instantiate the
+                BlobServiceClient.
+                Currently supported keywords:
+                    - connection_string: a connection string for the Azure blob
             compress: compress files inserted into the store
-            endpoint_url: endpoint_url to allow interface to minio service
-            sub_dir: (optional)  subdirectory of the s3 bucket to store the data
-            s3_workers: number of concurrent S3 puts to run
+            sub_dir: (optional)  subdirectory of the container to store the data.
+                When defined, a final "/" will be added if not already present.
+            workers: number of concurrent Azure puts to run
             store_hash: store the sha1 hash right before insertion to the database.
-            unpack_data: whether to decompress and unpack byte data when querying from the bucket.
+            unpack_data: whether to decompress and unpack byte data when querying from
+                the container.
             searchable_fields: fields to keep in the index store
+            key_sanitize_dict: a dictionary that allows to customize the sanitization
+                of the keys in metadata, since they should adhere to the naming rules
+                for C# identifiers. If None the AZURE_KEY_SANITIZE default will be used
+                to handle the most common cases.
+            create_container: if True the Store creates the container, in case it does
+                not exist.
+            kwargs: keywords for the base Store.
         """
-        if boto3 is None:
-            raise RuntimeError("boto3 and botocore are required for S3Store")
-        self.index = index
+        if azure_blob is None:
+            raise RuntimeError(
+                "azure-storage-blob and azure-identity are required for AzureBlobStore"
+            )
 
-        self.bucket = bucket
-        self.s3_profile = s3_profile
+        self.index = index
+        self.container_name = container_name
+        self.azure_client_info = azure_client_info
         self.compress = compress
-        self.endpoint_url = endpoint_url
-        self.sub_dir = sub_dir.strip("/") + "/" if sub_dir else ""
-        self.s3 = None  # type: Any
-        self.s3_bucket = None  # type: Any
-        self.s3_workers = s3_workers
-        self.s3_resource_kwargs = (
-            s3_resource_kwargs if s3_resource_kwargs is not None else {}
+        self.sub_dir = sub_dir.rstrip("/") + "/" if sub_dir else ""
+        self.service = None  # type: Optional[BlobServiceClient]
+        self.container = None  # type: Optional[ContainerClient]
+        self.workers = workers
+        self.azure_resource_kwargs = (
+            azure_resource_kwargs if azure_resource_kwargs is not None else {}
         )
         self.unpack_data = unpack_data
         self.searchable_fields = (
             searchable_fields if searchable_fields is not None else []
         )
         self.store_hash = store_hash
+        if key_sanitize_dict is None:
+            key_sanitize_dict = AZURE_KEY_SANITIZE
+        self.key_sanitize_dict = key_sanitize_dict
+        self.create_container = create_container
 
         # Force the key to be the same as the index
         assert isinstance(
             index.key, str
-        ), "Since we are using the key as a file name in S3, they key must be a string"
+        ), "Since we are using the key as a file name in Azure Blob, the key must be a string"
         if key != index.key:
             warnings.warn(
-                f'The desired S3Store key "{key}" does not match the index key "{index.key},"'
+                f'The desired AzureBlobStore key "{key}" does not match the index key "{index.key},"'
                 "the index key will be used",
                 UserWarning,
             )
         kwargs["key"] = str(index.key)
 
         self._thread_local = threading.local()
-        super(S3Store, self).__init__(**kwargs)
+        super(AzureBlobStore, self).__init__(**kwargs)
 
     @property
     def name(self) -> str:
@@ -110,26 +131,31 @@ class S3Store(Store):
         Returns:
             a string representing this data source
         """
-        return f"s3://{self.bucket}"
+        return f"container://{self.container_name}"
 
     def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
         """
         Connect to the source data
         """
 
-        session = self._get_session()
-        resource = session.resource(
-            "s3", endpoint_url=self.endpoint_url, **self.s3_resource_kwargs
-        )
+        service_client = self._get_service_client()
 
-        if not self.s3:
-            self.s3 = resource
-            try:
-                self.s3.meta.client.head_bucket(Bucket=self.bucket)
-            except ClientError:
-                raise RuntimeError("Bucket not present on AWS: {}".format(self.bucket))
+        if not self.service:
+            self.service = service_client
+            container = service_client.get_container_client(self.container_name)
+            if not container.exists():
+                if self.create_container:
+                    # catch the exception to avoid errors if already created
+                    try:
+                        container.create_container()
+                    except ResourceExistsError:
+                        pass
+                else:
+                    raise RuntimeError(
+                        f"Container not present on Azure: {self.container_name}"
+                    )
 
-            self.s3_bucket = resource.Bucket(self.bucket)
+            self.container = container
         self.index.connect(*args, **kwargs)
 
     def close(self):
@@ -137,10 +163,8 @@ class S3Store(Store):
         Closes any connections
         """
         self.index.close()
-
-        self.s3.meta.client.close()
-        self.s3 = None
-        self.s3_bucket = None
+        self.service = None
+        self.container = None
 
     @property
     def _collection(self):
@@ -184,6 +208,10 @@ class S3Store(Store):
             limit: limit on total number of documents returned
 
         """
+
+        if self.container is None or self.service is None:
+            raise RuntimeError("The store has not been connected")
+
         prop_keys = set()
         if isinstance(properties, dict):
             prop_keys = set(properties.keys())
@@ -197,23 +225,13 @@ class S3Store(Store):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
                 try:
-                    # TODO: THis is ugly and unsafe, do some real checking before pulling data
-                    data = (
-                        self.s3_bucket.Object(self.sub_dir + str(doc[self.key]))
-                        .get()["Body"]
-                        .read()
+                    data = self.container.download_blob(
+                        self.sub_dir + str(doc[self.key])
+                    ).readall()
+                except azure.core.exceptions.ResourceNotFoundError:
+                    self.logger.error(
+                        "Could not find Blob object {}".format(doc[self.key])
                     )
-                except botocore.exceptions.ClientError as e:
-                    # If a client error is thrown, then check that it was a 404 error.
-                    # If it was a 404 error, then the object does not exist.
-                    error_code = int(e.response["Error"]["Code"])
-                    if error_code == 404:
-                        self.logger.error(
-                            "Could not find S3 object {}".format(doc[self.key])
-                        )
-                        break
-                    else:
-                        raise e
 
                 if self.unpack_data:
                     data = self._unpack(
@@ -221,13 +239,12 @@ class S3Store(Store):
                     )
 
                     if self.last_updated_field in doc:
-                        data[self.last_updated_field] = doc[self.last_updated_field]
+                        data[self.last_updated_field] = doc[self.last_updated_field]  # type: ignore
 
-                yield data
+                yield data  # type: ignore
 
     @staticmethod
     def _unpack(data: bytes, compressed: bool):
-
         if compressed:
             data = zlib.decompress(data)
         # requires msgpack-python to be installed to fix string encoding problem
@@ -315,8 +332,12 @@ class S3Store(Store):
                  document, can be a list of multiple fields,
                  a single field, or None if the Store's key
                  field is to be used
-            additional_metadata: field(s) to include in the s3 store's metadata
+            additional_metadata: field(s) to include in the blob store's metadata
         """
+
+        if self.container is None or self.service is None:
+            raise RuntimeError("The store has not been connected")
+
         if not isinstance(docs, list):
             docs = [docs]
 
@@ -332,10 +353,10 @@ class S3Store(Store):
         else:
             additional_metadata = list(additional_metadata)
 
-        with ThreadPoolExecutor(max_workers=self.s3_workers) as pool:
+        with ThreadPoolExecutor(max_workers=self.workers) as pool:
             fs = {
                 pool.submit(
-                    self.write_doc_to_s3,
+                    self.write_doc_to_blob,
                     doc=itr_doc,
                     search_keys=key + additional_metadata + self.searchable_fields,
                 )
@@ -348,35 +369,50 @@ class S3Store(Store):
         # Use store's update to remove key clashes
         self.index.update(search_docs, key=self.key)
 
-    def _get_session(self):
-        if not hasattr(self._thread_local, "s3_bucket"):
-            if isinstance(self.s3_profile, dict):
-                return Session(**self.s3_profile)
-            else:
-                return Session(profile_name=self.s3_profile)
+    def _get_service_client(self):
+        if not hasattr(self._thread_local, "container"):
+            if isinstance(self.azure_client_info, str):
+                # assume it is the account_url and that the connection is passwordless
+                default_credential = DefaultAzureCredential()
+                return BlobServiceClient(
+                    self.azure_client_info, credential=default_credential
+                )
 
-    def _get_bucket(self):
+            elif isinstance(self.azure_client_info, dict):
+                connection_string = self.azure_client_info.get("connection_string")
+                if connection_string:
+                    return BlobServiceClient.from_connection_string(
+                        conn_str=connection_string
+                    )
+
+            msg = f"Could not instantiate BlobServiceClient from azure_client_info: {self.azure_client_info}"
+            raise RuntimeError(msg)
+
+    def _get_container(self) -> Optional[ContainerClient]:
         """
-        If on the main thread return the bucket created above, else create a new bucket on each thread
+        If on the main thread return the container created above, else create a new
+        container on each thread.
         """
         if threading.current_thread().name == "MainThread":
-            return self.s3_bucket
-        if not hasattr(self._thread_local, "s3_bucket"):
-            session = self._get_session()
-            resource = session.resource("s3", endpoint_url=self.endpoint_url)
-            self._thread_local.s3_bucket = resource.Bucket(self.bucket)
-        return self._thread_local.s3_bucket
+            return self.container
+        if not hasattr(self._thread_local, "container"):
+            service_client = self._get_service_client()
+            container = service_client.get_container_client(self.container_name)
+            self._thread_local.container = container
+        return self._thread_local.container
 
-    def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
+    def write_doc_to_blob(self, doc: Dict, search_keys: List[str]):
         """
-        Write the data to s3 and return the metadata to be inserted into the index db
+        Write the data to an Azure blob and return the metadata to be inserted into the index db
 
         Args:
             doc: the document
             search_keys: list of keys to pull from the docs and be inserted into the
             index db
         """
-        s3_bucket = self._get_bucket()
+        container = self._get_container()
+        if container is None:
+            raise RuntimeError("The store has not been connected")
 
         search_doc = {k: doc[k] for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
@@ -397,21 +433,23 @@ class S3Store(Store):
             data = zlib.compress(data)
 
         if self.last_updated_field in doc:
-            # need this conversion for aws metadata insert
+            # need this conversion for metadata insert
             search_doc[self.last_updated_field] = str(
                 to_isoformat_ceil_ms(doc[self.last_updated_field])
             )
 
         # keep a record of original keys, in case these are important for the individual researcher
         # it is not expected that this information will be used except in disaster recovery
-        s3_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc.keys()}
-        s3_to_mongo_keys["s3-to-mongo-keys"] = "s3-to-mongo-keys"  # inception
+        blob_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc.keys()}
+        blob_to_mongo_keys["blob_to_mongo_keys"] = "blob_to_mongo_keys"  # inception
         # encode dictionary since values have to be strings
-        search_doc["s3-to-mongo-keys"] = dumps(s3_to_mongo_keys)
-        s3_bucket.put_object(
-            Key=self.sub_dir + str(doc[self.key]),
-            Body=data,
-            Metadata={s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()},
+        search_doc["blob_to_mongo_keys"] = dumps(blob_to_mongo_keys)
+
+        container.upload_blob(
+            name=self.sub_dir + str(doc[self.key]),
+            data=data,
+            metadata={blob_to_mongo_keys[k]: str(v) for k, v in search_doc.items()},
+            overwrite=True,
         )
 
         if lu_info is not None:
@@ -424,42 +462,40 @@ class S3Store(Store):
             search_doc["obj_hash"] = obj_hash
         return search_doc
 
-    @staticmethod
-    def _sanitize_key(key):
+    def _sanitize_key(self, key):
         """
-        Sanitize keys to store in S3/MinIO metadata.
+        Sanitize keys to store metadata.
+        The metadata keys should adhere to the naming rules for C# identifiers.
         """
 
-        # Any underscores are encoded as double dashes in metadata, since keys with
-        # underscores may be result in the corresponding HTTP header being stripped
-        # by certain server configurations (e.g. default nginx), leading to:
-        # `botocore.exceptions.ClientError: An error occurred (AccessDenied) when
-        # calling the PutObject operation: There were headers present in the request
-        # which were not signed`
-        # Metadata stored in the MongoDB index (self.index) is stored unchanged.
+        new_key = str(key)
+        for k, v in self.key_sanitize_dict.items():
+            new_key = new_key.replace(k, v)
 
-        # Additionally, MinIO requires lowercase keys
-        return str(key).replace("_", "-").lower()
+        return new_key
 
-    def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
+    def remove_docs(self, criteria: Dict, remove_blob_object: bool = False):
         """
         Remove docs matching the query dictionary
 
         Args:
             criteria: query dictionary to match
-            remove_s3_object: whether to remove the actual S3 Object or not
+            remove_blob_object: whether to remove the actual blob Object or not
         """
-        if not remove_s3_object:
+        if self.container is None or self.service is None:
+            raise RuntimeError("The store has not been connected")
+
+        if not remove_blob_object:
             self.index.remove_docs(criteria=criteria)
         else:
             to_remove = self.index.distinct(self.key, criteria=criteria)
             self.index.remove_docs(criteria=criteria)
 
-            # Can remove up to 1000 items at a time via boto
-            to_remove_chunks = list(grouper(to_remove, n=1000))
+            # Can remove up to 256 items at a time
+            to_remove_chunks = list(grouper(to_remove, n=256))
             for chunk_to_remove in to_remove_chunks:
-                objlist = [{"Key": f"{self.sub_dir}{obj}"} for obj in chunk_to_remove]
-                self.s3_bucket.delete_objects(Delete={"Objects": objlist})
+                objlist = [{"name": f"{self.sub_dir}{obj}"} for obj in chunk_to_remove]
+                self.container.delete_blobs(*objlist)
 
     @property
     def last_updated(self):
@@ -489,38 +525,49 @@ class S3Store(Store):
             )
 
     def __hash__(self):
-        return hash((self.index.__hash__, self.bucket))
+        return hash((self.index.__hash__, self.container_name))
 
-    def rebuild_index_from_s3_data(self, **kwargs):
+    def rebuild_index_from_blob_data(self, **kwargs):
         """
-        Rebuilds the index Store from the data in S3
+        Rebuilds the index Store from the data in Azure
         Relies on the index document being stores as the metadata for the file
         This can help recover lost databases
         """
-        bucket = self.s3_bucket
-        objects = bucket.objects.filter(Prefix=self.sub_dir)
+
+        objects = self.container.list_blobs(name_starts_with=self.sub_dir)
         for obj in objects:
-            key_ = self.sub_dir + obj.key
-            data = self.s3_bucket.Object(key_).get()["Body"].read()
+            # handle the case where there are subdirs in the chosen container
+            # but are below the level of the current subdir
+            dir_name = os.path.dirname(obj.name)
+            if dir_name != self.sub_dir:
+                continue
+
+            data = self.container.download_blob(obj.name).readall()
 
             if self.compress:
                 data = zlib.decompress(data)
             unpacked_data = msgpack.unpackb(data, raw=False)
+            # TODO maybe it can be avoided to reupload the data, since it is paid
             self.update(unpacked_data, **kwargs)
 
-    def rebuild_metadata_from_index(self, index_query: dict = None):
+    def rebuild_metadata_from_index(self, index_query: Optional[Dict] = None):
         """
-        Read data from the index store and populate the metadata of the S3 bucket
+        Read data from the index store and populate the metadata of the Azure Blob.
         Force all of the keys to be lower case to be Minio compatible
         Args:
             index_query: query on the index store
         """
+        if self.container is None or self.service is None:
+            raise RuntimeError("The store has not been connected")
 
         qq = {} if index_query is None else index_query
         for index_doc in self.index.query(qq):
             key_ = self.sub_dir + index_doc[self.key]
-            s3_object = self.s3_bucket.Object(key_)
-            new_meta = {self._sanitize_key(k): v for k, v in s3_object.metadata.items()}
+            blob = self.container.get_blob_client(key_)
+            properties = blob.get_blob_properties()
+            new_meta = {
+                self._sanitize_key(k): v for k, v in properties.metadata.items()
+            }
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
@@ -528,20 +575,15 @@ class S3Store(Store):
                 new_meta[self.last_updated_field] = str(
                     to_isoformat_ceil_ms(new_meta[self.last_updated_field])
                 )
-            # s3_object.metadata.update(new_meta)
-            s3_object.copy_from(
-                CopySource={"Bucket": self.s3_bucket.name, "Key": key_},
-                Metadata=new_meta,
-                MetadataDirective="REPLACE",
-            )
+            blob.set_blob_metadata(new_meta)
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for S3Store
-        other: other S3Store to compare with
+        Check equality for AzureBlobStore
+        other: other AzureBlobStore to compare with
         """
-        if not isinstance(other, S3Store):
+        if not isinstance(other, AzureBlobStore):
             return False
 
-        fields = ["index", "bucket", "last_updated_field"]
+        fields = ["index", "container_name", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)

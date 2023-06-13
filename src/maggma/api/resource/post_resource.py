@@ -9,9 +9,10 @@ from pymongo.errors import NetworkTimeout, PyMongoError
 from maggma.api.models import Meta, Response
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
 from maggma.api.resource import Resource
-from maggma.api.resource.utils import attach_query_ops
+from maggma.api.resource.utils import attach_query_ops, generate_query_pipeline
 from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
+from maggma.stores import S3Store
 
 
 class PostOnlyResource(Resource):
@@ -81,25 +82,19 @@ class PostOnlyResource(Resource):
 
         model_name = self.model.__name__
 
-        async def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
+        def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
 
             query_params = [
-                entry
-                for _, i in enumerate(self.query_operators)
-                for entry in signature(i.query).parameters
+                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params.keys() if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
@@ -109,8 +104,21 @@ class PostOnlyResource(Resource):
 
             try:
                 with query_timeout(self.timeout):
-                    count = self.store.count(query["criteria"])
-                    data = list(self.store.query(**query))
+                    count = self.store.count(  # type: ignore
+                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
+                    )
+
+                    if isinstance(self.store, S3Store):
+                        data = list(self.store.query(**query))  # type: ignore
+                    else:
+
+                        pipeline = generate_query_pipeline(query, self.store)
+
+                        data = list(
+                            self.store._collection.aggregate(
+                                pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                            )
+                        )
             except (NetworkTimeout, PyMongoError) as e:
                 if e.timeout:
                     raise HTTPException(
@@ -118,7 +126,10 @@ class PostOnlyResource(Resource):
                         detail="Server timed out trying to obtain data. Try again with a smaller request.",
                     )
                 else:
-                    raise HTTPException(status_code=500)
+                    raise HTTPException(
+                        status_code=500,
+                        detail="Server timed out trying to obtain data. Try again with a smaller request, "
+                        "or remove sorting fields and sort data locally.",)
 
             operator_meta = {}
 

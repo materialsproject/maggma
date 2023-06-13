@@ -4,7 +4,7 @@
 import logging
 from types import GeneratorType
 
-from tqdm import tqdm
+from tqdm.auto import tqdm
 
 from maggma.core import Builder
 from maggma.utils import grouper, primed
