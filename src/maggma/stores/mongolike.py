@@ -921,6 +921,7 @@ class MontyStore(MemoryStore):
         if database_path is None:
             database_path = str(Path.cwd())
 
+        self.database = "MontyDB"
         self.database_path = database_path
         self.database_name = database_name
         self.collection_name = collection_name
