@@ -909,8 +909,8 @@ class MontyStore(MemoryStore):
 
         Args:
             collection_name: Name for the collection.
-            database_path: Path to on-disk database files. If None, the current working
-                directory will be used.
+            database_path: Path to the directory containing the on-disk database files.
+                If None, the current working directory will be used.
             database_name: The database name.
             storage: The storage type. Options include "sqlite", "lightning", "flatfile".
             storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.
