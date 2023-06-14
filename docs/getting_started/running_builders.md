@@ -100,7 +100,7 @@ mrun -n 2 -v my_builder.py
 ```
 
 
-## Running multiple builders
+## Running Multiple Builders
 
 `mrun` can run multiple builders. You can have multiple builders in a single file: `json`, `python`, or `jupyter-notebook`. Or you can chain multiple files in the order you want to run them:
 ``` shell
@@ -119,3 +119,25 @@ mrun -n 32 -vv my_first_builder.json builder_2_and_3.py last_builder.ipynb
 * `BUILD_ENDED` - This event tells us the build process finished this specific builder. It also indicates the total number of `errors` and `warnings` that were caught during the process.
 
 These event docs also contain the `builder`, a `build_id` which is unique for each time a builder is run and anonymous but unique ID for the machine the builder was run on.
+
+
+## Profiling Memory Usage of Builders
+
+`mrun` can optionally profile the memory usage of a running builder by using the Memray Python memory profiling tool ([Memray](https://github.com/bloomberg/memray)). To get started, Memray should be installed in the same environment as `maggma` using `pip install memray`.
+
+Setting the `--memray` (`-m`) option to `on`, or `True`, will signal `mrun` to profile the memory usage of any builders passed to `mrun` as the builders are running. The profiler also supports profiling of both single and forked processes. For example, spawning multiple processes in `mrun` with `-n` will signal the profiler to track any forked child processes spawned from the parent process.
+
+A basic invocation of the memory profiler using the `mrun` command line tool would look like this:
+``` shell
+mrun --memray on my_builder.json
+```
+
+The profiler will generate two files after the builder finishes: 
+1. An output `.bin` file that is dumped by default into the `temp` directory, which is platform/OS dependent. For Linux/MacOS this will be `/tmp/` and for Windows the target directory will be `C:\TEMP\`.The output file will have a generic naming pattern as follows: `BUILDER_NAME_PASSED_TO_MRUN + BUILDER_START_DATETIME_ISO.bin`, e.g., `my_builder.json_2023-06-09T13:57:48.446361.bin`. 
+2. A `.html` flamegraph file that will be written to the same directory as the `.bin` dump file. The flamegraph will have a naming pattern similar to the following: `memray-flamegraph-my_builder.json_2023-06-09T13:57:48.446361.html`. The flamegraph can be viewed using any web browser.
+
+***Note***: Different platforms/operating systems purge their system's `temp` directory at different intervals. It is recommended to move at least the `.bin` file to a more stable location. The `.bin` file can be used to recreate the flamegraph at anytime using the Memray CLI.
+
+Using the flag `--memray-dir` (`-md`) allows for specifying an output directory for the `.bin` and `.html` files created by the profiler. The provided directory will be created if the directory does not exist, mimicking the `mkdir -p` command.
+
+Further data visualization and transform examples can be found in Memray's documentation ([Memray reporters](https://bloomberg.github.io/memray/live.html)).
