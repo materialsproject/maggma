@@ -137,6 +137,8 @@ class S3Store(Store):
         Closes any connections
         """
         self.index.close()
+
+        self.s3.meta.client.close()
         self.s3 = None
         self.s3_bucket = None
 

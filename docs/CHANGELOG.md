@@ -1,5 +1,39 @@
 # Changelog
 
+## [Unreleased](https://github.com/materialsproject/maggma/tree/HEAD)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.8...HEAD)
+
+**Fixed bugs:**
+
+- python 3.11 CI test failure with AzureBlobStore [\#807](https://github.com/materialsproject/maggma/issues/807)
+
+## [v0.51.8](https://github.com/materialsproject/maggma/tree/v0.51.8) (2023-06-14)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.7...v0.51.8)
+
+**Implemented enhancements:**
+
+- Memray memory profiler support for mrun command line tool [\#794](https://github.com/materialsproject/maggma/pull/794) ([tsmathis](https://github.com/tsmathis))
+
+**Closed issues:**
+
+- `MontyStore` cannot be used with a pre-existing local DB [\#796](https://github.com/materialsproject/maggma/issues/796)
+
+**Merged pull requests:**
+
+- Fixing bug in azure multi worker test [\#808](https://github.com/materialsproject/maggma/pull/808) ([gpetretto](https://github.com/gpetretto))
+- Clarify docstring for `MontyDB` and add missing `self.database` property [\#806](https://github.com/materialsproject/maggma/pull/806) ([arosen93](https://github.com/arosen93))
+- Add CodeQL workflow for GitHub code scanning [\#743](https://github.com/materialsproject/maggma/pull/743) ([lgtm-com[bot]](https://github.com/apps/lgtm-com))
+
+## [v0.51.7](https://github.com/materialsproject/maggma/tree/v0.51.7) (2023-06-12)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.6...v0.51.7)
+
+**Merged pull requests:**
+
+- Explicitly close s3 client connections in `S3Store` [\#805](https://github.com/materialsproject/maggma/pull/805) ([munrojm](https://github.com/munrojm))
+
 ## [v0.51.6](https://github.com/materialsproject/maggma/tree/v0.51.6) (2023-06-08)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.5...v0.51.6)
@@ -484,19 +518,19 @@
 
 ## [v0.36.0](https://github.com/materialsproject/maggma/tree/v0.36.0) (2021-12-06)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.34.0...v0.36.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.35.0...v0.36.0)
 
 **Merged pull requests:**
 
 - Added on-disk MongoDB compatible MontyStore [\#514](https://github.com/materialsproject/maggma/pull/514) ([utf](https://github.com/utf))
 
-## [v0.34.0](https://github.com/materialsproject/maggma/tree/v0.34.0) (2021-12-01)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.35.0...v0.34.0)
-
 ## [v0.35.0](https://github.com/materialsproject/maggma/tree/v0.35.0) (2021-12-01)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.2...v0.35.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.34.0...v0.35.0)
+
+## [v0.34.0](https://github.com/materialsproject/maggma/tree/v0.34.0) (2021-12-01)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.2...v0.34.0)
 
 **Merged pull requests:**
 

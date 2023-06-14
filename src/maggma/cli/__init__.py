@@ -6,6 +6,7 @@ import asyncio
 import logging
 import sys
 from itertools import chain
+from datetime import datetime
 
 import click
 from monty.serialization import loadfn
@@ -14,10 +15,14 @@ from maggma.cli.distributed import find_port
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
 from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
+from maggma.cli.settings import CLISettings
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
 
+
 sys.meta_path.append(ScriptFinder())
- 
+
+settings = CLISettings()
+
 
 @click.command()
 @click.argument("builders", nargs=-1, type=click.Path(exists=True), required=True)
@@ -44,14 +49,17 @@ sys.meta_path.append(ScriptFinder())
     help="Store in JSON/YAML form to send reporting data to",
     type=click.Path(exists=True),
 )
-@click.option("-u", "--url", "url", default=None, type=str, help="URL for the distributed manager")
+@click.option(
+    "-u", "--url", "url", default=None, type=str, help="URL for the distributed manager"
+)
 @click.option(
     "-p",
     "--port",
     "port",
     default=None,
     type=int,
-    help="Port for distributed communication." " mrun will find an open port if None is provided to the manager",
+    help="Port for distributed communication."
+    " mrun will find an open port if None is provided to the manager",
 )
 @click.option(
     "-N",
@@ -69,8 +77,12 @@ sys.meta_path.append(ScriptFinder())
     type=int,
     help="Number of distributed workers to process chunks",
 )
-@click.option("--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations")
-@click.option("--rabbitmq", is_flag=True, help="Enables the use of RabbitMQ as the work broker")
+@click.option(
+    "--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations"
+)
+@click.option(
+    "--rabbitmq", is_flag=True, help="Enables the use of RabbitMQ as the work broker"
+)
 @click.option(
     "-q",
     "--queue_prefix",
@@ -79,7 +91,27 @@ sys.meta_path.append(ScriptFinder())
     type=str,
     help="Prefix to use in queue names when RabbitMQ is select as the broker",
 )
+@click.option(
+    "-m",
+    "--memray",
+    "memray",
+    default=False,
+    type=bool,
+    help="Option to profile builder memory usage with Memray",
+)
+@click.option(
+    "-md",
+    "--memray-dir",
+    "memray_dir",
+    default=None,
+    type=str,
+    help="""Directory to dump memory profiler output files. Only runs if --memray is True.
+    Will create directory if directory does not exist, mimicking mkdir -p command.
+    If not provided files will be dumped to system's temp directory""",
+)
+@click.pass_context
 def run(
+    ctx,
     builders,
     verbosity,
     reporting_store,
@@ -91,7 +123,39 @@ def run(
     num_processes,
     rabbitmq,
     queue_prefix,
+    memray,
+    memray_dir,
+    memray_file=None,
+    follow_fork=False,
 ):
+    # Import profiler and setup directories to dump profiler output
+    if memray:
+        from memray import Tracker, FileDestination
+
+        if memray_dir:
+            import os
+
+            os.makedirs(memray_dir, exist_ok=True)
+
+            memray_file = f"{memray_dir}/{builders[0]}_{datetime.now().isoformat()}.bin"
+        else:
+            memray_file = (
+                f"{settings.TEMP_DIR}/{builders[0]}_{datetime.now().isoformat()}.bin"
+            )
+
+        if num_processes > 1:
+            follow_fork = True
+
+        # Click context manager handles creation and clean up of profiler dump files for memray tracker
+        ctx.obj = ctx.with_resource(
+            Tracker(
+                destination=FileDestination(memray_file),
+                native_traces=False,
+                trace_python_allocators=False,
+                follow_fork=follow_fork,
+            )
+        )
+
     # Import proper manager and worker
     if rabbitmq:
         from maggma.cli.rabbitmq import manager, worker
@@ -104,7 +168,9 @@ def run(
     root = logging.getLogger()
     root.setLevel(level)
     ch = TqdmLoggingHandler()
-    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    )
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
@@ -167,4 +233,11 @@ def run(
         else:
             loop = asyncio.get_event_loop()
             for builder in builder_objects:
-                loop.run_until_complete(multi(builder=builder, num_processes=num_processes, no_bars=no_bars))
+                loop.run_until_complete(
+                    multi(builder=builder, num_processes=num_processes, no_bars=no_bars)
+                )
+
+    if memray_file:
+        import subprocess
+
+        subprocess.run(["memray", "flamegraph", memray_file], shell=False)

@@ -845,6 +845,10 @@ class MontyStore(MemoryStore):
     - flatfile: Uses a system of flat json files. This is not recommended as multiple
       simultaneous connections to the store will not work correctly.
 
+    Note that MontyDB (and, therefore, MontyStore) will write out a new database to
+    the disk but cannot be used to read an existing (e.g. SQLite) database that wasn't
+    formatted by MontyDB.
+
     See the MontyDB repository for more information: https://github.com/davidlatwe/montydb
     """
 
@@ -863,8 +867,8 @@ class MontyStore(MemoryStore):
 
         Args:
             collection_name: Name for the collection.
-            database_path: Path to on-disk database files. If None, the current working
-                directory will be used.
+            database_path: Path to the directory containing the on-disk database files.
+                If None, the current working directory will be used.
             database_name: The database name.
             storage: The storage type. Options include "sqlite", "lightning", "flatfile".
             storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.
@@ -875,6 +879,7 @@ class MontyStore(MemoryStore):
         if database_path is None:
             database_path = str(Path.cwd())
 
+        self.database = "MontyDB"
         self.database_path = database_path
         self.database_name = database_name
         self.collection_name = collection_name
