@@ -160,8 +160,8 @@ def test_multi_update(blobstore_two_docs, blobstore_multi):
         search_doc = {k: doc[k] for k in search_keys}
         return search_doc
 
-    blobstore_two_docs.write_doc_to_s3 = fake_writing
-    blobstore_multi.write_doc_to_s3 = fake_writing
+    blobstore_two_docs.write_doc_to_blob = fake_writing
+    blobstore_multi.write_doc_to_blob = fake_writing
 
     start = time.time()
     blobstore_multi.update(data, key=["task_id"])
