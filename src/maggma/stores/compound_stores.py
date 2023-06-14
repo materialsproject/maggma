@@ -281,8 +281,8 @@ class JointStore(Store):
         Get one document
 
         Args:
-            properties: properties to return in query
-            criteria: filter for matching
+            criteria: PyMongo filter for documents to search in
+            properties: fields to include in returned documents. By default, all fields are returned.
             kwargs: kwargs for collection.aggregate
 
         Returns:
