@@ -302,6 +302,7 @@ def test_monty_store_connect(tmp_dir):
     assert montystore._coll is None
     montystore.connect()
     assert montystore._collection is not None
+    asswer montystore.name is not None
 
 
 def test_monty_store_groupby(montystore):
