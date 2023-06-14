@@ -891,6 +891,10 @@ class MontyStore(MemoryStore):
     - flatfile: Uses a system of flat json files. This is not recommended as multiple
       simultaneous connections to the store will not work correctly.
 
+    Note that MontyDB (and, therefore, MontyStore) will write out a new database to
+    the disk but cannot be used to read an existing (e.g. SQLite) database that wasn't
+    formatted by MontyDB.
+
     See the MontyDB repository for more information: https://github.com/davidlatwe/montydb
     """
 
