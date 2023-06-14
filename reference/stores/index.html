@@ -6146,6 +6146,9 @@ options include:</p>
 <li>flatfile: Uses a system of flat json files. This is not recommended as multiple
   simultaneous connections to the store will not work correctly.</li>
 </ul>
+<p>Note that MontyDB (and, therefore, MontyStore) will write out a new database to
+the disk but cannot be used to read an existing (e.g. SQLite) database that wasn't
+formatted by MontyDB.</p>
 <p>See the MontyDB repository for more information: https://github.com/davidlatwe/montydb</p>
 
         <details class="quote">
@@ -6165,6 +6168,10 @@ options include:</p>
 <span class="sd">    - flatfile: Uses a system of flat json files. This is not recommended as multiple</span>
 <span class="sd">      simultaneous connections to the store will not work correctly.</span>
 
+<span class="sd">    Note that MontyDB (and, therefore, MontyStore) will write out a new database to</span>
+<span class="sd">    the disk but cannot be used to read an existing (e.g. SQLite) database that wasn&#39;t</span>
+<span class="sd">    formatted by MontyDB.</span>
+
 <span class="sd">    See the MontyDB repository for more information: https://github.com/davidlatwe/montydb</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -6183,8 +6190,8 @@ options include:</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            collection_name: Name for the collection.</span>
-<span class="sd">            database_path: Path to on-disk database files. If None, the current working</span>
-<span class="sd">                directory will be used.</span>
+<span class="sd">            database_path: Path to the directory containing the on-disk database files.</span>
+<span class="sd">                If None, the current working directory will be used.</span>
 <span class="sd">            database_name: The database name.</span>
 <span class="sd">            storage: The storage type. Options include &quot;sqlite&quot;, &quot;lightning&quot;, &quot;flatfile&quot;.</span>
 <span class="sd">            storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.</span>
@@ -6195,6 +6202,7 @@ options include:</p>
         <span class="k">if</span> <span class="n">database_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">database_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;MontyDB&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">database_path</span> <span class="o">=</span> <span class="n">database_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">database_name</span> <span class="o">=</span> <span class="n">database_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
@@ -6369,8 +6377,8 @@ options include:</p>
       <tr>
         <td><code>database_path</code></td>
         <td><code>str</code></td>
-        <td><p>Path to on-disk database files. If None, the current working
-directory will be used.</p></td>
+        <td><p>Path to the directory containing the on-disk database files.
+If None, the current working directory will be used.</p></td>
         <td><code>None</code></td>
       </tr>
       <tr>
@@ -6423,8 +6431,8 @@ constructor.</p></td>
 
 <span class="sd">    Args:</span>
 <span class="sd">        collection_name: Name for the collection.</span>
-<span class="sd">        database_path: Path to on-disk database files. If None, the current working</span>
-<span class="sd">            directory will be used.</span>
+<span class="sd">        database_path: Path to the directory containing the on-disk database files.</span>
+<span class="sd">            If None, the current working directory will be used.</span>
 <span class="sd">        database_name: The database name.</span>
 <span class="sd">        storage: The storage type. Options include &quot;sqlite&quot;, &quot;lightning&quot;, &quot;flatfile&quot;.</span>
 <span class="sd">        storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.</span>
@@ -6435,6 +6443,7 @@ constructor.</p></td>
     <span class="k">if</span> <span class="n">database_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">database_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
 
+    <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;MontyDB&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">database_path</span> <span class="o">=</span> <span class="n">database_path</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">database_name</span> <span class="o">=</span> <span class="n">database_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>

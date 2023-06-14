@@ -358,7 +358,7 @@
       
         <li class="md-nav__item">
   <a href="#running-multiple-builders" class="md-nav__link">
-    Running multiple builders
+    Running Multiple Builders
   </a>
   
 </li>
@@ -366,6 +366,13 @@
         <li class="md-nav__item">
   <a href="#reporting-build-state" class="md-nav__link">
     Reporting Build State
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling-memory-usage-of-builders" class="md-nav__link">
+    Profiling Memory Usage of Builders
   </a>
   
 </li>
@@ -621,7 +628,7 @@
       
         <li class="md-nav__item">
   <a href="#running-multiple-builders" class="md-nav__link">
-    Running multiple builders
+    Running Multiple Builders
   </a>
   
 </li>
@@ -629,6 +636,13 @@
         <li class="md-nav__item">
   <a href="#reporting-build-state" class="md-nav__link">
     Reporting Build State
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#profiling-memory-usage-of-builders" class="md-nav__link">
+    Profiling Memory Usage of Builders
   </a>
   
 </li>
@@ -723,7 +737,7 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
 <p>You can use <code>mrun</code> to run this builder and parallelize for you:
 <div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>-n<span class="w"> </span><span class="m">2</span><span class="w"> </span>-v<span class="w"> </span>my_builder.py
 </code></pre></div></p>
-<h2 id="running-multiple-builders">Running multiple builders<a class="headerlink" href="#running-multiple-builders" title="Permanent link">&para;</a></h2>
+<h2 id="running-multiple-builders">Running Multiple Builders<a class="headerlink" href="#running-multiple-builders" title="Permanent link">&para;</a></h2>
 <p><code>mrun</code> can run multiple builders. You can have multiple builders in a single file: <code>json</code>, <code>python</code>, or <code>jupyter-notebook</code>. Or you can chain multiple files in the order you want to run them:
 <div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>-n<span class="w"> </span><span class="m">32</span><span class="w"> </span>-vv<span class="w"> </span>my_first_builder.json<span class="w"> </span>builder_2_and_3.py<span class="w"> </span>last_builder.ipynb
 </code></pre></div></p>
@@ -736,6 +750,18 @@ Example: <code>tcp://127.0.0.1:8080</code></p>
 <li><code>BUILD_ENDED</code> - This event tells us the build process finished this specific builder. It also indicates the total number of <code>errors</code> and <code>warnings</code> that were caught during the process.</li>
 </ul>
 <p>These event docs also contain the <code>builder</code>, a <code>build_id</code> which is unique for each time a builder is run and anonymous but unique ID for the machine the builder was run on.</p>
+<h2 id="profiling-memory-usage-of-builders">Profiling Memory Usage of Builders<a class="headerlink" href="#profiling-memory-usage-of-builders" title="Permanent link">&para;</a></h2>
+<p><code>mrun</code> can optionally profile the memory usage of a running builder by using the Memray Python memory profiling tool (<a href="https://github.com/bloomberg/memray">Memray</a>). To get started, Memray should be installed in the same environment as <code>maggma</code> using <code>pip install memray</code>.</p>
+<p>Setting the <code>--memray</code> (<code>-m</code>) option to <code>on</code>, or <code>True</code>, will signal <code>mrun</code> to profile the memory usage of any builders passed to <code>mrun</code> as the builders are running. The profiler also supports profiling of both single and forked processes. For example, spawning multiple processes in <code>mrun</code> with <code>-n</code> will signal the profiler to track any forked child processes spawned from the parent process.</p>
+<p>A basic invocation of the memory profiler using the <code>mrun</code> command line tool would look like this:
+<div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>--memray<span class="w"> </span>on<span class="w"> </span>my_builder.json
+</code></pre></div></p>
+<p>The profiler will generate two files after the builder finishes: 
+1. An output <code>.bin</code> file that is dumped by default into the <code>temp</code> directory, which is platform/OS dependent. For Linux/MacOS this will be <code>/tmp/</code> and for Windows the target directory will be <code>C:\TEMP\</code>.The output file will have a generic naming pattern as follows: <code>BUILDER_NAME_PASSED_TO_MRUN + BUILDER_START_DATETIME_ISO.bin</code>, e.g., <code>my_builder.json_2023-06-09T13:57:48.446361.bin</code>. 
+2. A <code>.html</code> flamegraph file that will be written to the same directory as the <code>.bin</code> dump file. The flamegraph will have a naming pattern similar to the following: <code>memray-flamegraph-my_builder.json_2023-06-09T13:57:48.446361.html</code>. The flamegraph can be viewed using any web browser.</p>
+<p><strong><em>Note</em></strong>: Different platforms/operating systems purge their system's <code>temp</code> directory at different intervals. It is recommended to move at least the <code>.bin</code> file to a more stable location. The <code>.bin</code> file can be used to recreate the flamegraph at anytime using the Memray CLI.</p>
+<p>Using the flag <code>--memray-dir</code> (<code>-md</code>) allows for specifying an output directory for the <code>.bin</code> and <code>.html</code> files created by the profiler. The provided directory will be created if the directory does not exist, mimicking the <code>mkdir -p</code> command.</p>
+<p>Further data visualization and transform examples can be found in Memray's documentation (<a href="https://bloomberg.github.io/memray/live.html">Memray reporters</a>).</p>
 
               
             </article>
