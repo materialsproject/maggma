@@ -41,7 +41,7 @@ class SubmissionResource(Resource):
         calculate_submission_id: Optional[bool] = False,
         get_sub_path: Optional[str] = "/",
         post_sub_path: Optional[str] = "/",
-        patch_sub_path: Optional[str] = "/"
+        patch_sub_path: Optional[str] = "/",
     ):
         """
         Args:
@@ -66,7 +66,9 @@ class SubmissionResource(Resource):
         """
 
         if isinstance(state_enum, Enum) and default_state not in [entry.value for entry in state_enum]:  # type: ignore
-            raise RuntimeError("If data is stateful a state enum and valid default value must be provided")
+            raise RuntimeError(
+                "If data is stateful a state enum and valid default value must be provided"
+            )
 
         self.state_enum = state_enum
         self.default_state = default_state
@@ -189,11 +191,9 @@ class SubmissionResource(Resource):
         )(get_by_key)
 
     def build_search_data(self):
-
         model_name = self.model.__name__
 
         def search(**queries: STORE_PARAMS):
-
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
 
@@ -205,11 +205,15 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [
+                key for key in request.query_params.keys() if key not in query_params
+            ]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
+                    detail="Request contains query parameters which cannot be used: {}".format(
+                        ", ".join(overlap)
+                    ),
                 )
 
             self.store.connect(force_reset=True)
@@ -217,17 +221,25 @@ class SubmissionResource(Resource):
             try:
                 with query_timeout(self.timeout):
                     count = self.store.count(  # type: ignore
-                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
+                        **{
+                            field: query[field]
+                            for field in query
+                            if field in ["criteria", "hint"]
+                        }
                     )
                     if isinstance(self.store, S3Store):
                         data = list(self.store.query(**query))  # type: ignore
                     else:
-
                         pipeline = generate_query_pipeline(query, self.store)
 
                         data = list(
                             self.store._collection.aggregate(
-                                pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                                pipeline,
+                                **{
+                                    field: query[field]
+                                    for field in query
+                                    if field in ["hint"]
+                                },
                             )
                         )
             except (NetworkTimeout, PyMongoError) as e:
@@ -266,7 +278,6 @@ class SubmissionResource(Resource):
         model_name = self.model.__name__
 
         def post_data(**queries: STORE_PARAMS):
-
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
 
@@ -278,11 +289,15 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [
+                key for key in request.query_params.keys() if key not in query_params
+            ]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
+                    detail="Request contains query parameters which cannot be used: {}".format(
+                        ", ".join(overlap)
+                    ),
                 )
 
             self.store.connect(force_reset=True)
@@ -290,7 +305,10 @@ class SubmissionResource(Resource):
             # Check for duplicate entry
             if self.duplicate_fields_check:
                 duplicate = self.store.query_one(
-                    criteria={field: query["criteria"][field] for field in self.duplicate_fields_check}
+                    criteria={
+                        field: query["criteria"][field]
+                        for field in self.duplicate_fields_check
+                    }
                 )
 
                 if duplicate:
@@ -333,12 +351,10 @@ class SubmissionResource(Resource):
             include_in_schema=self.include_in_schema,
         )(attach_query_ops(post_data, self.post_query_operators))
 
-
     def build_patch_data(self):
         model_name = self.model.__name__
 
         def patch_data(**queries: STORE_PARAMS):
-
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
 
@@ -350,11 +366,15 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [
+                key for key in request.query_params.keys() if key not in query_params
+            ]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
-                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
+                    detail="Request contains query parameters which cannot be used: {}".format(
+                        ", ".join(overlap)
+                    ),
                 )
 
             self.store.connect(force_reset=True)
@@ -362,7 +382,10 @@ class SubmissionResource(Resource):
             # Check for duplicate entry
             if self.duplicate_fields_check:
                 duplicate = self.store.query_one(
-                    criteria={field: query["criteria"][field] for field in self.duplicate_fields_check}
+                    criteria={
+                        field: query["criteria"][field]
+                        for field in self.duplicate_fields_check
+                    }
                 )
 
                 if duplicate:
@@ -384,14 +407,14 @@ class SubmissionResource(Resource):
                 try:
                     self.store._collection.update_one(
                         filter=query["criteria"],
-                        update={'$set': query["update"]},
-                        upsert=False
+                        update={"$set": query["update"]},
+                        upsert=False,
                     )
                 except Exception:
                     raise HTTPException(
                         status_code=400,
                         detail="Problem when trying to patch data.",
-                )
+                    )
 
             response = {
                 "updated_data": query["update"],
