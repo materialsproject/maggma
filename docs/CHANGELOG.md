@@ -1,12 +1,16 @@
 # Changelog
 
-## [Unreleased](https://github.com/materialsproject/maggma/tree/HEAD)
+## [v0.51.9](https://github.com/materialsproject/maggma/tree/v0.51.9) (2023-06-22)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.8...HEAD)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.8...v0.51.9)
 
 **Fixed bugs:**
 
 - python 3.11 CI test failure with AzureBlobStore [\#807](https://github.com/materialsproject/maggma/issues/807)
+
+**Merged pull requests:**
+
+- add patch method for submission resource [\#809](https://github.com/materialsproject/maggma/pull/809) ([yang-ruoxi](https://github.com/yang-ruoxi))
 
 ## [v0.51.8](https://github.com/materialsproject/maggma/tree/v0.51.8) (2023-06-14)
 
@@ -52,19 +56,19 @@
 
 ## [v0.51.4](https://github.com/materialsproject/maggma/tree/v0.51.4) (2023-06-02)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.3...v0.51.4)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.4)
 
 **Merged pull requests:**
 
 - modify JSONStore file creation [\#792](https://github.com/materialsproject/maggma/pull/792) ([gpetretto](https://github.com/gpetretto))
 
-## [v0.51.3](https://github.com/materialsproject/maggma/tree/v0.51.3) (2023-05-29)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.3)
-
 ## [v0.51.2](https://github.com/materialsproject/maggma/tree/v0.51.2) (2023-05-29)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.2)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.3...v0.51.2)
+
+## [v0.51.3](https://github.com/materialsproject/maggma/tree/v0.51.3) (2023-05-29)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.3)
 
 **Merged pull requests:**
 
