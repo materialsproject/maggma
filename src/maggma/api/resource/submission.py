@@ -90,7 +90,7 @@ class SubmissionResource(Resource):
         self.post_sub_path = post_sub_path
         self.patch_sub_path = patch_sub_path
 
-        new_fields = {}  # type: dict
+        new_fields: dict = {}
         if self.calculate_submission_id:
             new_fields["submission_id"] = (
                 str,
