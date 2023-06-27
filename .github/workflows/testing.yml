@@ -29,8 +29,7 @@ jobs:
         run: |
           pip install pre-commit
           pre-commit run
-        
-
+  
   test:
     needs: lint
     services:

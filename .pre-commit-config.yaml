@@ -7,7 +7,7 @@ repos:
     rev: v0.0.275
     hooks:
       - id: ruff
-        args: [--fix, --ignore, "D,E501"]
+        args: [--fix, --ignore, D]
 
   - repo: https://github.com/psf/black
     rev: 23.3.0

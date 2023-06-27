@@ -5,10 +5,7 @@ pytest-cov==3.0.0
 pytest-mock==3.10.0
 pytest-xdist==2.5.0
 moto==3.1.17
-pydocstyle==6.1.1
-flake8==4.0.1
-mypy==0.971
-mypy-extensions==0.4.3
+ruff==0.0.280
 responses<0.22.0
 types-PyYAML==6.0.11
 types-setuptools==65.4.0.0
