@@ -26,7 +26,7 @@ class SubmissionQuery(QueryOperator):
             ),
         ) -> STORE_PARAMS:
 
-            crit = {}  # type: dict
+            crit: dict = {}
 
             if state:
                 s_dict = {"$expr": {"$eq": [{"$arrayElemAt": ["$state", -1]}, state.value]}}  # type: ignore

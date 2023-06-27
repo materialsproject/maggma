@@ -1,7 +1,7 @@
 """ Special stores that combine underlying Stores together """
 from datetime import datetime
 from itertools import groupby
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union, Any
 
 from pydash import set_
 from pymongo import MongoClient
@@ -48,7 +48,7 @@ class JointStore(Store):
         self.port = port
         self.username = username
         self.password = password
-        self._coll = None  # type: Any
+        self._coll: Any = None
         self.main = main or collection_names[0]
         self.merge_at_root = merge_at_root
         self.mongoclient_kwargs = mongoclient_kwargs or {}
@@ -265,7 +265,7 @@ class JointStore(Store):
         )
         if not isinstance(keys, list):
             keys = [keys]
-        group_id = {}  # type: Dict[str,Any]
+        group_id: Dict[str,Any] = {}
         for key in keys:
             set_(group_id, key, "${}".format(key))
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})

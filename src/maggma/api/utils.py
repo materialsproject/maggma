@@ -109,11 +109,11 @@ def api_sanitize(
         fields_to_leave: list of strings for model fields as "model__name__.field"
     """
 
-    models = [
+    models: List[Type[BaseModel]] = [
         model
         for model in get_flat_models_from_model(pydantic_model)
         if issubclass(model, BaseModel)
-    ]  # type: List[Type[BaseModel]]
+    ]
 
     fields_to_leave = fields_to_leave or []
     fields_tuples = [f.split(".") for f in fields_to_leave]

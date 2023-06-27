@@ -5,7 +5,7 @@ Module containing the core builder definition
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Iterable, List, Union
+from typing import Any, Dict, Iterable, List, Union, Optional
 
 from monty.json import MontyDecoder, MSONable
 
@@ -41,7 +41,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         self.sources = sources if isinstance(sources, list) else [sources]
         self.targets = targets if isinstance(targets, list) else [targets]
         self.chunk_size = chunk_size
-        self.total = None  # type: Optional[int]
+        self.total: Optional[int] = None
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
 
