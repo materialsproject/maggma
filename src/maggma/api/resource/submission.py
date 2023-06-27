@@ -417,7 +417,7 @@ class SubmissionResource(Resource):
                     )
 
             response = {
-                "updated_data": query["update"],
+                "data": query["update"],
                 "meta": "Submission successful",
             }
 
