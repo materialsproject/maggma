@@ -1,0 +1,42 @@
+[project]
+name = "maggma"
+dynamic = ["version", "readme"]
+description="Framework to develop datapipelines from files on disk to full dissemenation API"
+authors =[
+    {name = "The Materials Project", email = "feedback@materialsproject.org"}
+]
+
+[build-system]
+requires = ["setuptools>=61.0.0", "setuptools_scm[toml]>=5"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools_scm]
+version_scheme = "no-guess-dev"
+
+[tool.mypy]
+ignore_missing_imports = "True"
+
+[tool.ruff]
+# Never enforce `E471`
+ignore = ["E741"]
+# Set max line length
+line-length = 120
+# exclude some files
+exclude = [
+    ".git",
+    "__pycache__",
+    "docs",
+    "__init__.py"
+]
+
+[tool.pytest.ini_options]
+addopts = "--durations=30"
+testpaths = [
+    "tests",
+]
+
+[tool.pydocstyle]
+ignore = ["D105","D2","D4"]
