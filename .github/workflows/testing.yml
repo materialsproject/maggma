@@ -34,8 +34,10 @@ jobs:
         pip install mypy mypy-boto3
         mypy src/maggma
 
-    - name: Ruff
+    - name: Lint with Ruff
       uses: chartboost/ruff-action@v1
+      with:
+        args: check
         
 
   test:
