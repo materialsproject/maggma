@@ -8,7 +8,7 @@ import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 from json import dumps
 
 import msgpack  # type: ignore

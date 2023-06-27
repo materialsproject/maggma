@@ -1,7 +1,7 @@
 """ Special stores that combine underlying Stores together """
 from datetime import datetime
 from itertools import groupby
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from pydash import set_
 from pymongo import MongoClient

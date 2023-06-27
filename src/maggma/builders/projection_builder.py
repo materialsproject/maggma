@@ -1,7 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 from itertools import chain
-from typing import Dict, Iterable, List, Set, Union
+from typing import Dict, Iterable, List, Union
 
 from pydash import get
 

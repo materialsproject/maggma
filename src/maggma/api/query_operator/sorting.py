@@ -1,6 +1,6 @@
-from typing import Optional, List
+from typing import Optional
 
-from fastapi import HTTPException, Query
+from fastapi import Query
 
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS

@@ -182,7 +182,7 @@ def test_multistore_update(multistore, mongostore):
         mongostore_facade.update([large_doc, {"e": 1001}], key="e")
 
     mongostore_facade.safe_update = True
-    assert mongostore_facade.safe_update == True
+    assert mongostore_facade.safe_update is True
     mongostore_facade.update([large_doc, {"e": 1001}], key="e")
     assert mongostore_facade.query_one({"e": 1001}) is not None
 

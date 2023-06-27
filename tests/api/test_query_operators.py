@@ -4,12 +4,11 @@ from maggma.api.query_operator import (
     NumericQuery,
     PaginationQuery,
     SparseFieldsQuery,
-    NumericQuery,
     SortQuery,
 )
 
 from pydantic import BaseModel, Field
-from fastapi import HTTPException, Query
+from fastapi import HTTPException
 from datetime import datetime
 
 from monty.serialization import loadfn, dumpfn
