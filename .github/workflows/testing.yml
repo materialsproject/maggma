@@ -38,6 +38,7 @@ jobs:
       uses: chartboost/ruff-action@v1
       with:
         args: check
+        src: src/ tests/
         
 
   test:
