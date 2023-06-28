@@ -55,7 +55,7 @@ setup(
     },
     classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.7",
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",
@@ -67,5 +67,5 @@ setup(
     ],
     entry_points={"console_scripts": ["mrun = maggma.cli:run"]},
     tests_require=["pytest"],
-    python_requires=">=3.8",
+    python_requires=">=3.7",
 )
