@@ -144,8 +144,8 @@ class PostOnlyResource(Resource):
                         detail="Server timed out trying to obtain data. Try again with a smaller request, "
                         "or remove sorting fields and sort data locally.",
                     )
-
-            self.store.close()
+            if self.store._coll:
+                self.store.close()
 
             operator_meta = {}
 

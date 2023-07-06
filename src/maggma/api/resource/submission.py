@@ -174,7 +174,8 @@ class SubmissionResource(Resource):
                     detail=f"Item with submission ID = {key} not found",
                 )
 
-            self.store.close()
+            if self.store._coll:
+                self.store.close()
 
             for operator in self.get_query_operators:  # type: ignore
                 item = operator.post_process(item, {})
@@ -257,7 +258,8 @@ class SubmissionResource(Resource):
                         "or remove sorting fields and sort data locally.",
                     )
 
-            self.store.close()
+            if self.store._coll:
+                self.store.close()
 
             meta = Meta(total_doc=count)
 
