@@ -168,7 +168,7 @@ class ReadOnlyResource(Resource):
                     detail=f"Item with {self.store.key} = {key} not found",
                 )
 
-            if self.store._coll:
+            if self.store._coll is None:
                 self.store.close()
 
             for operator in self.query_operators:
@@ -276,7 +276,7 @@ class ReadOnlyResource(Resource):
                         " or remove sorting fields and sort data locally.",
                     )
 
-            if self.store._coll:
+            if self.store._coll is None:
                 self.store.close()
 
             operator_meta = {}

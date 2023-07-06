@@ -114,7 +114,7 @@ class S3URLResource(Resource):
                     ),
                 )
 
-            if self.store._coll:
+            if self.store._coll is None:
                 self.store.close()
 
             requested_datetime = datetime.utcnow()
