@@ -258,7 +258,7 @@ class SubmissionResource(Resource):
                         "or remove sorting fields and sort data locally.",
                     )
 
-            if self.store._coll:
+            if self.store._coll is None:
                 self.store.close()
 
             meta = Meta(total_doc=count)
