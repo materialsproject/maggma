@@ -231,14 +231,12 @@ def alias_store():
 
 
 def test_alias_count(alias_store):
-
     d = [{"b": 1}, {"e": 2}, {"g": {"h": 3}}]
     alias_store.store._collection.insert_many(d)
     assert alias_store.count({"a": 1}) == 1
 
 
 def test_aliasing_query(alias_store):
-
     d = [{"b": 1}, {"e": 2}, {"g": {"h": 3}}]
     alias_store.store._collection.insert_many(d)
 
@@ -251,7 +249,6 @@ def test_aliasing_query(alias_store):
 
 
 def test_aliasing_update(alias_store):
-
     alias_store.update(
         [
             {"task_id": "mp-3", "a": 4},
@@ -270,7 +267,6 @@ def test_aliasing_update(alias_store):
 
 
 def test_aliasing_remove_docs(alias_store):
-
     alias_store.update(
         [
             {"task_id": "mp-3", "a": 4},

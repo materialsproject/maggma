@@ -17,7 +17,8 @@ class Resource(MSONable, metaclass=ABCMeta):
     """
 
     def __init__(
-        self, model: Type[BaseModel],
+        self,
+        model: Type[BaseModel],
     ):
         """
         Args:
@@ -80,7 +81,6 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     @classmethod
     def from_dict(cls, d: Dict):
-
         if isinstance(d["model"], str):
             d["model"] = dynamic_import(d["model"])
         d = {k: MontyDecoder().process_decoded(v) for k, v in d.items()}

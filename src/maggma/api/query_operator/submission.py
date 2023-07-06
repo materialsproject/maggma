@@ -13,7 +13,6 @@ class SubmissionQuery(QueryOperator):
     """
 
     def __init__(self, status_enum):
-
         self.status_enum = status_enum
 
         def query(
@@ -25,7 +24,6 @@ class SubmissionQuery(QueryOperator):
                 description="Minimum datetime of status update for submission",
             ),
         ) -> STORE_PARAMS:
-
             crit = {}  # type: dict
 
             if state:

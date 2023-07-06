@@ -1,4 +1,3 @@
-import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
 
@@ -37,7 +36,6 @@ async def arange(n):
 
 @pytest.mark.asyncio
 async def test_backpressure():
-
     iterable = range(10)
     backpressure = BackPressure(iterable, 2)
 
@@ -67,7 +65,6 @@ async def test_backpressure():
 
 @pytest.mark.asyncio
 async def test_async_map():
-
     executor = ThreadPoolExecutor(1)
     amap = AsyncUnorderedMap(wait_and_return, arange(3), executor)
     true_values = {x * x for x in range(3)}

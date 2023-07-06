@@ -1,7 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 from itertools import chain
-from typing import Dict, Iterable, List, Set, Union
+from typing import Dict, Iterable, List, Union
 
 from pydash import get
 
@@ -150,7 +150,6 @@ class Projection_Builder(Builder):
 
             unsorted_items_to_process = []
             for store, projection in zip(self.sources, self.projection_mapping):
-
                 # project all fields from store if corresponding element
                 # in projection_mapping is an empty dict,
                 # else only project the specified fields

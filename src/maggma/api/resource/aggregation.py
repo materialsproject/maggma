@@ -63,7 +63,6 @@ class AggregationResource(Resource):
         self.build_dynamic_model_search()
 
     def build_dynamic_model_search(self):
-
         model_name = self.model.__name__
 
         def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:

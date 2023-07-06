@@ -114,7 +114,9 @@ class ReadOnlyResource(Resource):
         model_name = self.model.__name__
 
         if self.key_fields is None:
-            field_input = SparseFieldsQuery(self.model, [self.store.key, self.store.last_updated_field]).query
+            field_input = SparseFieldsQuery(
+                self.model, [self.store.key, self.store.last_updated_field]
+            ).query
         else:
 
             def field_input():
@@ -192,7 +194,6 @@ class ReadOnlyResource(Resource):
         )(get_by_key)
 
     def build_dynamic_model_search(self):
-
         model_name = self.model.__name__
 
         def search(**queries: Dict[str, STORE_PARAMS]) -> Union[Dict, Response]:
@@ -200,10 +201,14 @@ class ReadOnlyResource(Resource):
             temp_response: Response = queries.pop("temp_response")  # type: ignore
 
             query_params = [
-                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
+                entry
+                for _, i in enumerate(self.query_operators)
+                for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [
+                key for key in request.query_params.keys() if key not in query_params
+            ]
             if any(overlap):
                 if "limit" in overlap or "skip" in overlap:
                     raise HTTPException(
@@ -215,7 +220,9 @@ class ReadOnlyResource(Resource):
                 else:
                     raise HTTPException(
                         status_code=400,
-                        detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
+                        detail="Request contains query parameters which cannot be used: {}".format(
+                            ", ".join(overlap)
+                        ),
                     )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
@@ -229,7 +236,11 @@ class ReadOnlyResource(Resource):
             try:
                 with query_timeout(self.timeout):
                     count = self.store.count(  # type: ignore
-                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
+                        **{
+                            field: query[field]
+                            for field in query
+                            if field in ["criteria", "hint"]
+                        }
                     )
 
                     if isinstance(self.store, S3Store):
@@ -238,17 +249,20 @@ class ReadOnlyResource(Resource):
                         else:
                             data = list(self.store.query(**query))
                     else:
-
                         pipeline = generate_query_pipeline(query, self.store)
 
                         data = list(
                             self.store._collection.aggregate(
-                                pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                                pipeline,
+                                **{
+                                    field: query[field]
+                                    for field in query
+                                    if field in ["hint"]
+                                },
                             )
                         )
 
             except (NetworkTimeout, PyMongoError) as e:
-
                 if e.timeout:
                     raise HTTPException(
                         status_code=504,

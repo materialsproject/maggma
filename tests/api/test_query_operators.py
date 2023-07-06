@@ -9,7 +9,7 @@ from maggma.api.query_operator import (
 )
 
 from pydantic import BaseModel, Field
-from fastapi import HTTPException, Query
+from fastapi import HTTPException
 from datetime import datetime
 
 from monty.serialization import loadfn, dumpfn
@@ -26,7 +26,6 @@ class Owner(BaseModel):
 
 
 def test_pagination_functionality():
-
     op = PaginationQuery()
 
     assert op.query(_skip=10, _limit=20, _page=None, _per_page=None) == {
@@ -53,7 +52,6 @@ def test_pagination_functionality():
 
 
 def test_pagination_serialization():
-
     op = PaginationQuery()
 
     with ScratchDir("."):
@@ -66,7 +64,6 @@ def test_pagination_serialization():
 
 
 def test_sparse_query_functionality():
-
     op = SparseFieldsQuery(model=Owner)
 
     assert op.meta()["default_fields"] == ["name", "age", "weight", "last_updated"]
@@ -74,7 +71,6 @@ def test_sparse_query_functionality():
 
 
 def test_sparse_query_serialization():
-
     op = SparseFieldsQuery(model=Owner)
 
     with ScratchDir("."):
@@ -86,7 +82,6 @@ def test_sparse_query_serialization():
 
 
 def test_numeric_query_functionality():
-
     op = NumericQuery(model=Owner)
 
     assert op.meta() == {}
@@ -99,7 +94,6 @@ def test_numeric_query_functionality():
 
 
 def test_numeric_query_serialization():
-
     op = NumericQuery(model=Owner)
 
     with ScratchDir("."):
@@ -109,7 +103,6 @@ def test_numeric_query_serialization():
 
 
 def test_sort_query_functionality():
-
     op = SortQuery()
 
     assert op.query(_sort_fields="volume,-density") == {
@@ -118,7 +111,6 @@ def test_sort_query_functionality():
 
 
 def test_sort_serialization():
-
     op = SortQuery()
 
     with ScratchDir("."):
@@ -139,7 +131,6 @@ def status_enum():
 
 
 def test_submission_functionality(status_enum):
-
     op = SubmissionQuery(status_enum)
     dt = datetime.utcnow()
 

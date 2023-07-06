@@ -59,7 +59,6 @@ SERVER_PORT = 1234
 
 @pytest.mark.xfail(raises=ValueError)
 def test_wrong_worker_input(log_to_stdout):
-
     manager(
         SERVER_URL,
         SERVER_PORT,
@@ -70,16 +69,16 @@ def test_wrong_worker_input(log_to_stdout):
 
 
 def test_manager_and_worker(log_to_stdout):
-
     manager_thread = threading.Thread(
         target=manager,
         args=(SERVER_URL, SERVER_PORT, [DummyBuilder(dummy_prechunk=False)], 5, 3),
     )
     manager_thread.start()
 
-    worker_threads = [threading.Thread(
-        target=worker,
-        args=(SERVER_URL, SERVER_PORT, 1, True)) for _ in range(3)]
+    worker_threads = [
+        threading.Thread(target=worker, args=(SERVER_URL, SERVER_PORT, 1, True))
+        for _ in range(3)
+    ]
 
     for worker_thread in worker_threads:
         worker_thread.start()
@@ -92,7 +91,6 @@ def test_manager_and_worker(log_to_stdout):
 
 @pytest.mark.asyncio
 async def test_manager_worker_error(log_to_stdout):
-
     manager_thread = threading.Thread(
         target=manager,
         args=(SERVER_URL, SERVER_PORT, [DummyBuilder(dummy_prechunk=False)], 10, 1),
@@ -116,8 +114,8 @@ async def test_worker_error():
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
     worker_task = threading.Thread(
-        target=worker,
-        args=(SERVER_URL, SERVER_PORT, 1, True))
+        target=worker, args=(SERVER_URL, SERVER_PORT, 1, True)
+    )
 
     worker_task.start()
 
@@ -147,8 +145,8 @@ async def test_worker_exit():
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
     worker_task = threading.Thread(
-        target=worker,
-        args=(SERVER_URL, SERVER_PORT, 1, True))
+        target=worker, args=(SERVER_URL, SERVER_PORT, 1, True)
+    )
 
     worker_task.start()
 
