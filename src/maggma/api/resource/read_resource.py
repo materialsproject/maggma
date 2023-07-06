@@ -166,6 +166,8 @@ class ReadOnlyResource(Resource):
                     detail=f"Item with {self.store.key} = {key} not found",
                 )
 
+            self.store.close()
+
             for operator in self.query_operators:
                 item = operator.post_process(item, {})
 
@@ -258,6 +260,8 @@ class ReadOnlyResource(Resource):
                         detail="Server timed out trying to obtain data. Try again with a smaller request,"
                         " or remove sorting fields and sort data locally.",
                     )
+
+            self.store.close()
 
             operator_meta = {}
 

@@ -111,6 +111,8 @@ class S3URLResource(Resource):
                         self.store.key, key.split("/")[-1]
                     ),
                 )
+            
+            self.store.close()
 
             requested_datetime = datetime.utcnow()
             expiry_datetime = requested_datetime + timedelta(seconds=self.url_lifetime)
