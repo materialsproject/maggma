@@ -24,7 +24,6 @@ class TestBuilder(Builder):
 
 
 def test_serial():
-
     builder = TestBuilder()
 
     serial(builder)

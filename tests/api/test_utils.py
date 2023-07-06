@@ -44,7 +44,6 @@ class Owner(BaseModel):
 
 
 def test_api_sanitize():
-
     # Ensure model validation fails
     with pytest.raises(ValueError):
         Owner()

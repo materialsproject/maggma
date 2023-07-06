@@ -6,6 +6,7 @@ from maggma.stores import GridFSStore, MongoStore, MemoryStore
 from maggma.stores.shared_stores import MultiStore, StoreFacade
 from maggma.validators import JSONSchemaValidator
 
+
 @pytest.fixture
 def mongostore():
     store = MongoStore("maggma_test", "test")
@@ -39,7 +40,7 @@ def memorystore():
 def test_add_stores(multistore, mongostore, gridfsstore):
     # Should be empty at the start
     assert multistore.count_stores() == 0
-    
+
     multistore.ensure_store(mongostore)
     assert multistore.count_stores() == 1
     assert multistore.get_store_index(mongostore) == 0
@@ -54,7 +55,7 @@ def test_add_stores(multistore, mongostore, gridfsstore):
     assert multistore.count_stores() == 1
     assert multistore.get_store_index(temp_mongostore) == 0
     # Add this copy again, but don't use ensure_store
-    # This tests the case in which a prior thread added 
+    # This tests the case in which a prior thread added
     # the store, but this current process was already
     # waiting for the lock acquisition
     multistore.add_store(temp_mongostore)
@@ -66,11 +67,13 @@ def test_add_stores(multistore, mongostore, gridfsstore):
     assert multistore.get_store_index(gridfsstore) == 1
 
     # Add something that isn't a store
-    class DummyObject():
+    class DummyObject:
         def __init__(self, a: int):
             self.a = a
+
     with pytest.raises(TypeError):
         multistore.ensure_store(DummyObject(1))
+
 
 def test_store_facade(multistore, mongostore, gridfsstore):
     StoreFacade(mongostore, multistore)
@@ -85,25 +88,27 @@ def test_store_facade(multistore, mongostore, gridfsstore):
 def test_multistore_query(multistore, mongostore, memorystore):
     memorystore_facade = StoreFacade(memorystore, multistore)
     mongostore_facade = StoreFacade(mongostore, multistore)
-    temp_mongostore_facade = StoreFacade(MongoStore.from_dict(mongostore.as_dict()),
-                                         multistore)
+    temp_mongostore_facade = StoreFacade(
+        MongoStore.from_dict(mongostore.as_dict()), multistore
+    )
 
     memorystore_facade._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert memorystore_facade.query_one(properties=["a"])["a"] == 1
     assert memorystore_facade.query_one(properties=["a"])["a"] == 1
     assert memorystore_facade.query_one(properties=["b"])["b"] == 2
     assert memorystore_facade.query_one(properties=["c"])["c"] == 3
-    
+
     mongostore_facade._collection.insert_one({"a": 4, "b": 5, "c": 6})
     assert mongostore_facade.query_one(properties=["a"])["a"] == 4
     assert mongostore_facade.query_one(properties=["a"])["a"] == 4
     assert mongostore_facade.query_one(properties=["b"])["b"] == 5
     assert mongostore_facade.query_one(properties=["c"])["c"] == 6
-    
+
     assert temp_mongostore_facade.query_one(properties=["a"])["a"] == 4
     assert temp_mongostore_facade.query_one(properties=["a"])["a"] == 4
     assert temp_mongostore_facade.query_one(properties=["b"])["b"] == 5
     assert temp_mongostore_facade.query_one(properties=["c"])["c"] == 6
+
 
 def test_multistore_count(multistore, mongostore, memorystore):
     memorystore_facade = StoreFacade(memorystore, multistore)
@@ -113,6 +118,7 @@ def test_multistore_count(multistore, mongostore, memorystore):
     memorystore_facade._collection.insert_one({"aa": 1, "b": 2, "c": 3})
     assert memorystore_facade.count() == 2
     assert memorystore_facade.count({"a": 1}) == 1
+
 
 def test_multistore_distinct(multistore, mongostore):
     mongostore_facade = StoreFacade(mongostore, multistore)
@@ -137,7 +143,9 @@ def test_multistore_distinct(multistore, mongostore):
     assert mongostore_facade.distinct("i") == [None]
 
     # Test to make sure DocumentTooLarge errors get dealt with properly using built in distinct
-    mongostore_facade._collection.insert_many([{"key": [f"mp-{i}"]} for i in range(1000000)])
+    mongostore_facade._collection.insert_many(
+        [{"key": [f"mp-{i}"]} for i in range(1000000)]
+    )
     vals = mongostore_facade.distinct("key")
     # Test to make sure distinct on array field is unraveled when using manual distinct
     assert len(vals) == len(list(range(1000000)))
@@ -150,19 +158,29 @@ def test_multistore_distinct(multistore, mongostore):
     vals = mongostore_facade.distinct("key", {"a": 2})
     assert len(vals) == len(list(range(1000001, 2000001)))
 
+
 def test_multistore_update(multistore, mongostore):
     mongostore_facade = StoreFacade(mongostore, multistore)
 
     mongostore_facade.update({"e": 6, "d": 4}, key="e")
     assert (
-        mongostore_facade.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
+        mongostore_facade.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])[
+            "d"
+        ]
+        == 4
     )
 
     mongostore_facade.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
-    assert mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 7
+    assert (
+        mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"]
+        == 7
+    )
 
     mongostore_facade.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
-    assert mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 11
+    assert (
+        mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"]
+        == 11
+    )
 
     test_schema = {
         "type": "object",
@@ -182,7 +200,7 @@ def test_multistore_update(multistore, mongostore):
         mongostore_facade.update([large_doc, {"e": 1001}], key="e")
 
     mongostore_facade.safe_update = True
-    assert mongostore_facade.safe_update == True
+    assert mongostore_facade.safe_update is True
     mongostore_facade.update([large_doc, {"e": 1001}], key="e")
     assert mongostore_facade.query_one({"e": 1001}) is not None
 

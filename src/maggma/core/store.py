@@ -7,7 +7,7 @@ import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from datetime import datetime
 from enum import Enum
-from typing import Callable, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from monty.dev import deprecated
 from monty.json import MontyDecoder, MSONable

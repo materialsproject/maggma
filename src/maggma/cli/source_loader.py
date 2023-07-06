@@ -45,7 +45,6 @@ class NotebookLoader(Loader):
     """Module Loader for Jupyter Notebooks or Source Files"""
 
     def __init__(self, name=None, path=None):
-
         self.shell = InteractiveShell.instance()
 
         self.name = name
@@ -55,7 +54,6 @@ class NotebookLoader(Loader):
         return None
 
     def exec_module(self, module):
-
         module.__dict__["get_ipython"] = get_ipython
         module.__path__ = self.path
 
@@ -164,7 +162,7 @@ def find_matching_file(segments, curr_path="./"):
         current_segment = segments[0]
         remainder = segments[1:]
 
-        re = fr"({curr_path}[\s_]*{current_segment})"
+        re = rf"({curr_path}[\s_]*{current_segment})"
         pos_matches = [match(re, pos_path) for pos_path in glob(curr_path + "*")]
         pos_matches = {pmatch.group(1) for pmatch in pos_matches if pmatch}
         for new_path in pos_matches:

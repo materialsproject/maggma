@@ -30,7 +30,8 @@ class PaginationQuery(QueryOperator):
                 f" Limited to {max_limit}.",
             ),
             _skip: int = Query(
-                0, description="Number of entries to skip in the search.",
+                0,
+                description="Number of entries to skip in the search.",
             ),
             _limit: int = Query(
                 default_limit,
@@ -43,7 +44,6 @@ class PaginationQuery(QueryOperator):
             """
 
             if _page is not None:
-
                 if _per_page > max_limit:
                     raise HTTPException(
                         status_code=400,

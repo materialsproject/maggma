@@ -11,3 +11,20 @@ from maggma.stores.azure import AzureBlobStore
 from maggma.stores.compound_stores import ConcatStore, JointStore
 from maggma.stores.gridfs import GridFSStore
 from maggma.stores.mongolike import JSONStore, MemoryStore, MongoStore, MongoURIStore
+
+__all__ = [
+    "Store",
+    "AliasingStore",
+    "MongograntStore",
+    "SandboxStore",
+    "VaultStore",
+    "S3Store",
+    "AzureBlobStore",
+    "ConcatStore",
+    "JointStore",
+    "GridFSStore",
+    "JSONStore",
+    "MemoryStore",
+    "MongoStore",
+    "MongoURIStore",
+]

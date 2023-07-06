@@ -69,7 +69,9 @@ class S3URLResource(Resource):
             request: Request,
             temp_response: Response,
             key: str = Path(
-                ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
+                ...,
+                alias=key_name,
+                title=f"The {key_name} of the {model_name} to get",
             ),
         ):
             f"""
@@ -111,6 +113,8 @@ class S3URLResource(Resource):
                         self.store.key, key.split("/")[-1]
                     ),
                 )
+
+            self.store.close()
 
             requested_datetime = datetime.utcnow()
             expiry_datetime = requested_datetime + timedelta(seconds=self.url_lifetime)
