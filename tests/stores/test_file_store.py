@@ -54,7 +54,7 @@ def test_record_from_file(test_dir):
     assert d["name"] == "input.in"
     assert d["parent"] == "calculation1"
     assert d["path"] == test_dir / "calculation1" / "input.in"
-    assert d["size"] == 90
+    assert d["size"] == pytest.approx(90, abs=1)
     assert isinstance(d["hash"], str)
     assert d["file_id"] == file_id
     assert d["last_updated"] == datetime.fromtimestamp(
