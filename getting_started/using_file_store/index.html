@@ -855,7 +855,7 @@ and run <code>Builder</code> on it.</p>
 <span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 </code></pre></div>
 <p>On <code>connect()</code>, <code>FileStore</code> iterates through all files in the base directory and
-all subdirectories. For each file, it creates dict-like record based on the file's metadata such as name, size, last modification date, etc. These records are kept in 
+all subdirectories. For each file, it creates dict-like record based on the file's metadata such as name, size, last modification date, etc. These records are kept in
 memory using an internal <code>MemoryStore</code>. An example record is shown below.</p>
 <div class="highlight"><pre><span></span><code><span class="p">{</span><span class="s1">&#39;_id&#39;</span><span class="p">:</span> <span class="n">ObjectId</span><span class="p">(</span><span class="s1">&#39;625e581113cef6275a992abe&#39;</span><span class="p">),</span>
  <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;input.in&#39;</span><span class="p">,</span>
@@ -918,7 +918,7 @@ some tags to the files named "input.in", use:</p>
     <span class="n">d</span><span class="p">[</span><span class="s2">&quot;tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]</span>
 <span class="n">fs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">docs</span><span class="p">)</span>
 </code></pre></div>
-<p>The above steps will result in the following contents being added to the .json file. This metadata will be automatically read back in next time you connect to the Store. </p>
+<p>The above steps will result in the following contents being added to the .json file. This metadata will be automatically read back in next time you connect to the Store.</p>
 <div class="highlight"><pre><span></span><code><span class="p">[{</span><span class="nt">&quot;path&quot;</span><span class="p">:</span><span class="s2">&quot;.../file_store_test/calculation2/input.in&quot;</span><span class="p">,</span>
 <span class="nt">&quot;file_id&quot;</span><span class="p">:</span><span class="s2">&quot;3c3012f84c162e9ff9bb834c53dd1f58&quot;</span><span class="p">,</span>
 <span class="nt">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]},</span>
@@ -950,7 +950,7 @@ and add it to the 'date' field:</p>
 <h3 id="protected-keys">Protected Keys<a class="headerlink" href="#protected-keys" title="Permanent link">&para;</a></h3>
 <p>Note that when using any of the above methods, you cannot modify any keys that are populated by default (e.g. <code>name</code>, <code>parent</code>, <code>file_id</code>), because they are derived directly from the files on disk.</p>
 <h3 id="orphaned-metadata">Orphaned Metadata<a class="headerlink" href="#orphaned-metadata" title="Permanent link">&para;</a></h3>
-<p>In the course of working with <code>FileStore</code> you may encounter a situation where there are metadata records stored in the JSON file that no longer match files on disk. This can happen if, for example, you init a <code>FileStore</code> and later delete a file, or if you init the store with the default arguments but later restrict the file selection with <code>max_depth</code> or <code>file_filters</code>. </p>
+<p>In the course of working with <code>FileStore</code> you may encounter a situation where there are metadata records stored in the JSON file that no longer match files on disk. This can happen if, for example, you init a <code>FileStore</code> and later delete a file, or if you init the store with the default arguments but later restrict the file selection with <code>max_depth</code> or <code>file_filters</code>.</p>
 <p>These orphaned metadata records will appear in the <code>FileStore</code> with the field <code>{"orphan": True}</code>. The goal with this behavior is to preserve all metadata the user may have added and prevent data loss.</p>
 <p>By default, <strong>orphaned metadata is excluded from query results</strong>. There is an <code>include_orphans</code> keyword argument you can set on init if you want orphaned metadata
 to be returned in queries.</p>

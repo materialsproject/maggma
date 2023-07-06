@@ -10573,7 +10573,6 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_unpack</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">compressed</span><span class="p">:</span> <span class="nb">bool</span><span class="p">):</span>
-
         <span class="k">if</span> <span class="n">compressed</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">zlib</span><span class="o">.</span><span class="n">decompress</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="c1"># requires msgpack-python to be installed to fix string encoding problem</span>

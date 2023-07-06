@@ -639,7 +639,7 @@
 <p><code>maggma</code>'s core classes -- <a href="#store"><code>Store</code></a> and <a href="#builder"><code>Builder</code></a> -- provide building blocks for
 modular data pipelines. Data resides in one or more <code>Store</code> and is processed by a
 <code>Builder</code>. The results of the processing are saved in another <code>Store</code>, and so on:</p>
-<pre class="mermaid"><code>flowchart LR  
+<pre class="mermaid"><code>flowchart LR
     s1(Store 1) --Builder 1--&gt; s2(Store 2) --Builder 2--&gt; s3(Store 3)
 s2 -- Builder 3--&gt;s4(Store 4)</code></pre>
 <h2 id="store">Store<a class="headerlink" href="#store" title="Permanent link">&para;</a></h2>
