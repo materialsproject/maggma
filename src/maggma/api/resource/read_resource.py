@@ -15,7 +15,6 @@ from maggma.api.resource.utils import attach_query_ops, generate_query_pipeline
 from maggma.api.utils import STORE_PARAMS, merge_queries, serialization_helper
 from maggma.core import Store
 from maggma.stores import MongoStore, S3Store
-from maggma.core.store import StoreError
 
 import orjson
 
@@ -281,7 +280,7 @@ class ReadOnlyResource(Resource):
             if isinstance(self.store, S3Store):
                 if self.s3 is not None:
                     self.store.close()
-            
+
             operator_meta = {}
 
             for operator in self.query_operators:

@@ -13,7 +13,6 @@ from maggma.api.resource.utils import attach_query_ops, generate_query_pipeline
 from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
 from maggma.stores import S3Store
-from maggma.core.store import StoreError
 
 
 class PostOnlyResource(Resource):
