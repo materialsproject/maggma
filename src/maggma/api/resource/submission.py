@@ -16,6 +16,7 @@ from maggma.api.resource.utils import attach_query_ops, generate_query_pipeline
 from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store
 from maggma.stores import S3Store
+from maggma.core.store import StoreError
 
 
 class SubmissionResource(Resource):
@@ -174,8 +175,11 @@ class SubmissionResource(Resource):
                     detail=f"Item with submission ID = {key} not found",
                 )
 
-            if self.store._coll:
+            try:
                 self.store.close()
+            except (StoreError, AttributeError):
+                # If no connections are present, then move on
+                pass
 
             for operator in self.get_query_operators:  # type: ignore
                 item = operator.post_process(item, {})
@@ -258,8 +262,11 @@ class SubmissionResource(Resource):
                         "or remove sorting fields and sort data locally.",
                     )
 
-            if self.store._coll is None:
+            try:
                 self.store.close()
+            except (StoreError, AttributeError):
+                # If no connections are present, then move on
+                pass
 
             meta = Meta(total_doc=count)
 
