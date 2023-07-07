@@ -169,11 +169,9 @@ class ReadOnlyResource(Resource):
                     detail=f"Item with {self.store.key} = {key} not found",
                 )
 
-            try:
-                self.store.close()
-            except (StoreError, AttributeError):
-                # If no connections are present, then move on
-                pass
+            if isinstance(self.store, S3Store):
+                if self.s3 is not None:
+                    self.store.close()
 
             for operator in self.query_operators:
                 item = operator.post_process(item, {})
@@ -280,12 +278,10 @@ class ReadOnlyResource(Resource):
                         " or remove sorting fields and sort data locally.",
                     )
 
-            try:
-                self.store.close()
-            except (StoreError, AttributeError):
-                # If no connections are present, then move on
-                pass
-
+            if isinstance(self.store, S3Store):
+                if self.s3 is not None:
+                    self.store.close()
+            
             operator_meta = {}
 
             for operator in self.query_operators:

@@ -145,11 +145,9 @@ class PostOnlyResource(Resource):
                         detail="Server timed out trying to obtain data. Try again with a smaller request, "
                         "or remove sorting fields and sort data locally.",
                     )
-            try:
-                self.store.close()
-            except (StoreError, AttributeError):
-                # If no connections are present, then move on
-                pass
+            if isinstance(self.store, S3Store):
+                if self.s3 is not None:
+                    self.store.close()
 
             operator_meta = {}
 
