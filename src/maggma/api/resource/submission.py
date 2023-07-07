@@ -178,6 +178,7 @@ class SubmissionResource(Resource):
             try:
                 self.store.close()
             except (StoreError, AttributeError):
+                # If no connections are present, then move on
                 pass
 
             for operator in self.get_query_operators:  # type: ignore
@@ -264,6 +265,7 @@ class SubmissionResource(Resource):
             try:
                 self.store.close()
             except (StoreError, AttributeError):
+                # If no connections are present, then move on
                 pass
 
             meta = Meta(total_doc=count)

@@ -118,6 +118,7 @@ class S3URLResource(Resource):
             try:
                 self.store.close()
             except (StoreError, AttributeError):
+                # If no connections are present, then move on
                 pass
 
             requested_datetime = datetime.utcnow()

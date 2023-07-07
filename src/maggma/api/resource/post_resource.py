@@ -148,6 +148,7 @@ class PostOnlyResource(Resource):
             try:
                 self.store.close()
             except (StoreError, AttributeError):
+                # If no connections are present, then move on
                 pass
 
             operator_meta = {}
