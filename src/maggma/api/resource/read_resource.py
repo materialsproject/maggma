@@ -15,7 +15,6 @@ from maggma.api.resource.utils import attach_query_ops, generate_query_pipeline
 from maggma.api.utils import STORE_PARAMS, merge_queries, serialization_helper
 from maggma.core import Store
 from maggma.stores import MongoStore, S3Store
-from maggma.core.store import StoreError
 
 import orjson
 
@@ -169,12 +168,6 @@ class ReadOnlyResource(Resource):
                     detail=f"Item with {self.store.key} = {key} not found",
                 )
 
-            try:
-                self.store.close()
-            except (StoreError, AttributeError):
-                # If no connections are present, then move on
-                pass
-
             for operator in self.query_operators:
                 item = operator.post_process(item, {})
 
@@ -279,12 +272,6 @@ class ReadOnlyResource(Resource):
                         detail="Server timed out trying to obtain data. Try again with a smaller request,"
                         " or remove sorting fields and sort data locally.",
                     )
-
-            try:
-                self.store.close()
-            except (StoreError, AttributeError):
-                # If no connections are present, then move on
-                pass
 
             operator_meta = {}
 

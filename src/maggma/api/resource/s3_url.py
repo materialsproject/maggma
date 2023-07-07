@@ -10,7 +10,6 @@ from maggma.api.models import Response as ResponseModel
 from maggma.api.resource import Resource, HeaderProcessor
 from maggma.api.utils import serialization_helper
 from maggma.stores.aws import S3Store
-from maggma.core.store import StoreError
 
 import orjson
 
@@ -114,12 +113,6 @@ class S3URLResource(Resource):
                         self.store.key, key.split("/")[-1]
                     ),
                 )
-
-            try:
-                self.store.close()
-            except (StoreError, AttributeError):
-                # If no connections are present, then move on
-                pass
 
             requested_datetime = datetime.utcnow()
             expiry_datetime = requested_datetime + timedelta(seconds=self.url_lifetime)
