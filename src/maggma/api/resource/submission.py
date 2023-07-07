@@ -174,10 +174,6 @@ class SubmissionResource(Resource):
                     detail=f"Item with submission ID = {key} not found",
                 )
 
-            if isinstance(self.store, S3Store):
-                if self.s3 is not None:
-                    self.store.close()
-
             for operator in self.get_query_operators:  # type: ignore
                 item = operator.post_process(item, {})
 
@@ -258,10 +254,6 @@ class SubmissionResource(Resource):
                         detail="Server timed out trying to obtain data. Try again with a smaller request, "
                         "or remove sorting fields and sort data locally.",
                     )
-
-            if isinstance(self.store, S3Store):
-                if self.s3 is not None:
-                    self.store.close()
 
             meta = Meta(total_doc=count)
 
