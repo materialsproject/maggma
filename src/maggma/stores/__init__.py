@@ -10,7 +10,7 @@ from maggma.stores.aws import S3Store
 from maggma.stores.azure import AzureBlobStore
 from maggma.stores.compound_stores import ConcatStore, JointStore
 from maggma.stores.gridfs import GridFSStore
-from maggma.stores.mongolike import JSONStore, MemoryStore, MongoStore, MongoURIStore
+from maggma.stores.mongolike import JSONStore, MemoryStore, MongoStore, MongoURIStore, MontyStore
 
 __all__ = [
     "Store",
@@ -27,4 +27,5 @@ __all__ = [
     "MemoryStore",
     "MongoStore",
     "MongoURIStore",
+    "MontyStore",
 ]
