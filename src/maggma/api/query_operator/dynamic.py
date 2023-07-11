@@ -21,7 +21,6 @@ class DynamicQueryOperator(QueryOperator):
         fields: Optional[List[str]] = None,
         excluded_fields: Optional[List[str]] = None,
     ):
-
         self.model = model
         self.fields = fields
         self.excluded_fields = excluded_fields
@@ -119,7 +118,6 @@ class NumericQuery(DynamicQueryOperator):
     def field_to_operator(
         self, name: str, field: ModelField
     ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
-
         """
         Converts a PyDantic ModelField into a Tuple with the
         query_param name,
@@ -215,7 +213,6 @@ class StringQueryOperator(DynamicQueryOperator):
     def field_to_operator(
         self, name: str, field: ModelField
     ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
-
         """
         Converts a PyDantic ModelField into a Tuple with the
         query_param name,

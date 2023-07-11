@@ -1,5 +1,107 @@
 # Changelog
 
+## [v0.51.19](https://github.com/materialsproject/maggma/tree/v0.51.19) (2023-07-11)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.18...v0.51.19)
+
+**Merged pull requests:**
+
+- Update setup.py [\#822](https://github.com/materialsproject/maggma/pull/822) ([jmmshn](https://github.com/jmmshn))
+
+## [v0.51.18](https://github.com/materialsproject/maggma/tree/v0.51.18) (2023-07-10)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.17...v0.51.18)
+
+**Merged pull requests:**
+
+- Add `MontyStore` to `maggma.stores.__init__` [\#819](https://github.com/materialsproject/maggma/pull/819) ([arosen93](https://github.com/arosen93))
+
+## [v0.51.17](https://github.com/materialsproject/maggma/tree/v0.51.17) (2023-07-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.16...v0.51.17)
+
+**Merged pull requests:**
+
+- Revert store close apart from S3 [\#818](https://github.com/materialsproject/maggma/pull/818) ([munrojm](https://github.com/munrojm))
+
+## [v0.51.16](https://github.com/materialsproject/maggma/tree/v0.51.16) (2023-07-07)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.15...v0.51.16)
+
+**Merged pull requests:**
+
+- Fix s3 store collection close handling in resource classes [\#817](https://github.com/materialsproject/maggma/pull/817) ([munrojm](https://github.com/munrojm))
+
+## [v0.51.15](https://github.com/materialsproject/maggma/tree/v0.51.15) (2023-07-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.14...v0.51.15)
+
+**Merged pull requests:**
+
+- Fix collection check [\#816](https://github.com/materialsproject/maggma/pull/816) ([munrojm](https://github.com/munrojm))
+
+## [v0.51.14](https://github.com/materialsproject/maggma/tree/v0.51.14) (2023-07-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.13...v0.51.14)
+
+**Merged pull requests:**
+
+- Check for collection before closing in resources [\#815](https://github.com/materialsproject/maggma/pull/815) ([munrojm](https://github.com/munrojm))
+
+## [v0.51.13](https://github.com/materialsproject/maggma/tree/v0.51.13) (2023-07-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.12...v0.51.13)
+
+**Merged pull requests:**
+
+- Add explicit store close to resources [\#814](https://github.com/materialsproject/maggma/pull/814) ([munrojm](https://github.com/munrojm))
+
+## [v0.51.12](https://github.com/materialsproject/maggma/tree/v0.51.12) (2023-06-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.11...v0.51.12)
+
+## [v0.51.11](https://github.com/materialsproject/maggma/tree/v0.51.11) (2023-06-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.10...v0.51.11)
+
+## [v0.51.10](https://github.com/materialsproject/maggma/tree/v0.51.10) (2023-06-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.9...v0.51.10)
+
+**Merged pull requests:**
+
+- fix the response field [\#811](https://github.com/materialsproject/maggma/pull/811) ([yang-ruoxi](https://github.com/yang-ruoxi))
+
+## [v0.51.9](https://github.com/materialsproject/maggma/tree/v0.51.9) (2023-06-22)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.8...v0.51.9)
+
+**Fixed bugs:**
+
+- python 3.11 CI test failure with AzureBlobStore [\#807](https://github.com/materialsproject/maggma/issues/807)
+
+**Merged pull requests:**
+
+- add patch method for submission resource [\#809](https://github.com/materialsproject/maggma/pull/809) ([yang-ruoxi](https://github.com/yang-ruoxi))
+
+## [v0.51.8](https://github.com/materialsproject/maggma/tree/v0.51.8) (2023-06-14)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.7...v0.51.8)
+
+**Implemented enhancements:**
+
+- Memray memory profiler support for mrun command line tool [\#794](https://github.com/materialsproject/maggma/pull/794) ([tsmathis](https://github.com/tsmathis))
+
+**Closed issues:**
+
+- `MontyStore` cannot be used with a pre-existing local DB [\#796](https://github.com/materialsproject/maggma/issues/796)
+
+**Merged pull requests:**
+
+- Fixing bug in azure multi worker test [\#808](https://github.com/materialsproject/maggma/pull/808) ([gpetretto](https://github.com/gpetretto))
+- Clarify docstring for `MontyDB` and add missing `self.database` property [\#806](https://github.com/materialsproject/maggma/pull/806) ([arosen93](https://github.com/arosen93))
+- Add CodeQL workflow for GitHub code scanning [\#743](https://github.com/materialsproject/maggma/pull/743) ([lgtm-com[bot]](https://github.com/apps/lgtm-com))
+
 ## [v0.51.7](https://github.com/materialsproject/maggma/tree/v0.51.7) (2023-06-12)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.6...v0.51.7)
@@ -396,23 +498,23 @@
 
 ## [v0.44.1](https://github.com/materialsproject/maggma/tree/v0.44.1) (2022-03-08)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.44.1)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.1)
 
 **Merged pull requests:**
 
 - added localhost test for MongoURIStore [\#595](https://github.com/materialsproject/maggma/pull/595) ([jmmshn](https://github.com/jmmshn))
 
-## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
+## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
 
 ## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.43.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.43.0)
 
-## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
+## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.44.0)
 
 **Merged pull requests:**
 
@@ -492,19 +594,19 @@
 
 ## [v0.36.0](https://github.com/materialsproject/maggma/tree/v0.36.0) (2021-12-06)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.34.0...v0.36.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.35.0...v0.36.0)
 
 **Merged pull requests:**
 
 - Added on-disk MongoDB compatible MontyStore [\#514](https://github.com/materialsproject/maggma/pull/514) ([utf](https://github.com/utf))
 
-## [v0.34.0](https://github.com/materialsproject/maggma/tree/v0.34.0) (2021-12-01)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.35.0...v0.34.0)
-
 ## [v0.35.0](https://github.com/materialsproject/maggma/tree/v0.35.0) (2021-12-01)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.2...v0.35.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.34.0...v0.35.0)
+
+## [v0.34.0](https://github.com/materialsproject/maggma/tree/v0.34.0) (2021-12-01)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.2...v0.34.0)
 
 **Merged pull requests:**
 

@@ -25,27 +25,11 @@ jobs:
 
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade pip
-        pip install -r requirements.txt
-        pip install -r requirements-testing.txt
+        pip install pre-commit
 
-    - name: Lint with pycodestyle
+    - name: Run pre-commit
       run: |
-        pip install pycodestyle
-        pycodestyle src/maggma
-
-    - name: Lint with mypy
-      run: |
-        pip install mypy mypy-boto3
-        mypy src/maggma
-
-    - name: Lint with flake8
-      run: |
-        pip install flake8
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 --count --show-source --statistics src/maggma
-        # exit-zero treats all errors as warnings.
-        flake8 --count --exit-zero --max-complexity=20 --statistics src/maggma
+        pre-commit run --all-files --show-diff-on-failure
 
   test:
     needs: lint

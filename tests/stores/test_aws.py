@@ -1,12 +1,9 @@
 import time
-import zlib
 from datetime import datetime
 
 import boto3
-import msgpack
 import pytest
 from botocore.exceptions import ClientError
-from monty.msgpack import default, object_hook
 from moto import mock_s3
 
 from maggma.stores import MemoryStore, MongoStore, S3Store
@@ -280,7 +277,6 @@ def test_remove_subdir(s3store_w_subdir):
 
 
 def test_searchable_fields(s3store):
-
     tic = datetime(2018, 4, 12, 16)
 
     data = [
@@ -323,7 +319,6 @@ def test_newer_in(s3store):
 
 
 def test_additional_metadata(s3store):
-
     tic = datetime(2018, 4, 12, 16)
 
     data = [

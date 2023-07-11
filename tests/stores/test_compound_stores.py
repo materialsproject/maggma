@@ -33,7 +33,6 @@ def jointstore_test2():
 
 @pytest.fixture(scope="module")
 def jointstore(jointstore_test1, jointstore_test2):
-
     jointstore_test1.update(
         [
             {
@@ -201,13 +200,11 @@ def test_concat_store_groupby(concat_store):
 
 
 def test_concat_store_count(concat_store):
-
     assert concat_store.count() == 40
     assert concat_store.count({"prop": "3"}) == 4
 
 
 def test_concat_store_query(concat_store):
-
     docs = list(concat_store.query(properties=["task_id"]))
     t_ids = [d["task_id"] for d in docs]
     assert len(t_ids) == len(set(t_ids))
@@ -224,7 +221,6 @@ def test_eq(mongostore, jointstore, concat_store):
 
 
 def test_serialize(concat_store):
-
     d = concat_store.as_dict()
     new_concat_store = ConcatStore.from_dict(d)
 

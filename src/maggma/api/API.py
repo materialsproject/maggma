@@ -8,7 +8,6 @@ from fastapi.middleware.gzip import GZipMiddleware
 from monty.json import MSONable
 from starlette.responses import RedirectResponse
 
-from maggma import __version__
 from maggma.api.resource import Resource
 
 

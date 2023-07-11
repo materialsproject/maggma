@@ -19,14 +19,21 @@ else:
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
 STORE_PARAMS = Dict[
     Literal[
-        "criteria", "properties", "sort", "skip", "limit", "request", "pipeline", "hint"
+        "criteria",
+        "properties",
+        "sort",
+        "skip",
+        "limit",
+        "request",
+        "pipeline",
+        "hint",
+        "update",
     ],
     Any,
 ]
 
 
 def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
-
     criteria: STORE_PARAMS = {}
     properties: List[str] = []
 

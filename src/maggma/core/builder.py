@@ -5,7 +5,7 @@ Module containing the core builder definition
 
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Any, Dict, Iterable, List, Optional, Union
+from typing import Any, Dict, Iterable, List, Union
 
 from monty.json import MontyDecoder, MSONable
 

@@ -32,7 +32,6 @@ def reporting_store():
 
 
 def test_basic_run():
-
     runner = CliRunner()
     result = runner.invoke(run, ["--help"])
     assert result.exit_code == 0
@@ -43,7 +42,6 @@ def test_basic_run():
 
 
 def test_run_builder(mongostore):
-
     memorystore = MemoryStore("temp")
     builder = CopyBuilder(mongostore, memorystore)
 
@@ -81,7 +79,6 @@ def test_run_builder(mongostore):
 
 
 def test_run_builder_chain(mongostore):
-
     memorystore = MemoryStore("temp")
     builder1 = CopyBuilder(mongostore, memorystore)
     builder2 = CopyBuilder(mongostore, memorystore)
@@ -120,7 +117,6 @@ def test_run_builder_chain(mongostore):
 
 
 def test_reporting(mongostore, reporting_store):
-
     memorystore = MemoryStore("temp")
     builder = CopyBuilder(mongostore, memorystore)
 
@@ -156,7 +152,6 @@ def test_reporting(mongostore, reporting_store):
 
 
 def test_python_source():
-
     runner = CliRunner()
 
     with runner.isolated_filesystem():
@@ -170,7 +165,6 @@ def test_python_source():
 
 
 def test_python_notebook_source():
-
     runner = CliRunner()
 
     with runner.isolated_filesystem():
@@ -184,3 +178,65 @@ def test_python_notebook_source():
 
     assert result.exit_code == 0
     assert "Ended multiprocessing: DummyBuilder" in result.output
+
+
+def test_memray_run_builder(mongostore):
+    memorystore = MemoryStore("temp")
+    builder = CopyBuilder(mongostore, memorystore)
+
+    mongostore.update(
+        [
+            {mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()}
+            for i in range(10)
+        ]
+    )
+
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        dumpfn(builder, "test_builder.json")
+        result = runner.invoke(run, ["-v", "--memray", "on", "test_builder.json"])
+        assert result.exit_code == 0
+        assert "CopyBuilder" in result.output
+        assert "SerialProcessor" in result.output
+
+        result = runner.invoke(
+            run, ["-vvv", "--no_bars", "--memray", "on", "test_builder.json"]
+        )
+        assert result.exit_code == 0
+        assert "Get" not in result.output
+        assert "Update" not in result.output
+
+        result = runner.invoke(
+            run, ["-v", "-n", "2", "--memray", "on", "test_builder.json"]
+        )
+        assert result.exit_code == 0
+        assert "CopyBuilder" in result.output
+        assert "MultiProcessor" in result.output
+
+        result = runner.invoke(
+            run, ["-vvv", "-n", "2", "--no_bars", "--memray", "on", "test_builder.json"]
+        )
+        assert result.exit_code == 0
+        assert "Get" not in result.output
+        assert "Update" not in result.output
+
+
+def test_memray_user_output_dir(mongostore):
+    memorystore = MemoryStore("temp")
+    builder = CopyBuilder(mongostore, memorystore)
+
+    mongostore.update(
+        [
+            {mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()}
+            for i in range(10)
+        ]
+    )
+
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        dumpfn(builder, "test_builder.json")
+        result = runner.invoke(
+            run, ["--memray", "on", "-md", "memray_output_dir/", "test_builder.json"]
+        )
+        assert result.exit_code == 0
+        assert (Path.cwd() / "memray_output_dir").exists() is True

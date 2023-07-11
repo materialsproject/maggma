@@ -105,7 +105,6 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             yield {"query": dict(zip(self.grouping_keys, split))}
 
     def get_items(self):
-
         self.logger.info("Starting {} Builder".format(self.__class__.__name__))
 
         self.ensure_indexes()
@@ -129,7 +128,6 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             yield docs
 
     def process_item(self, item: List[Dict]) -> Dict[Tuple, Dict]:  # type: ignore
-
         keys = list(d[self.source.key] for d in item)
 
         self.logger.debug("Processing: {}".format(keys))

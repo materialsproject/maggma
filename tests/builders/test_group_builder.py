@@ -63,7 +63,6 @@ class DummyGrouper(GroupBuilder):
 
 
 def test_grouping(source, target, docs):
-
     builder = DummyGrouper(source, target, grouping_keys=["a"])
 
     assert len(docs) == len(builder.get_ids_to_process())

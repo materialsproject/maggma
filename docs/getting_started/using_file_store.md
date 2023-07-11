@@ -20,7 +20,7 @@ To create a `Filestore`, simply pass the path to the top-level directory that co
 ```
 
 On `connect()`, `FileStore` iterates through all files in the base directory and
-all subdirectories. For each file, it creates dict-like record based on the file's metadata such as name, size, last modification date, etc. These records are kept in 
+all subdirectories. For each file, it creates dict-like record based on the file's metadata such as name, size, last modification date, etc. These records are kept in
 memory using an internal `MemoryStore`. An example record is shown below.
 
 ```python
@@ -119,7 +119,7 @@ for d in docs:
 fs.update(docs)
 ```
 
-The above steps will result in the following contents being added to the .json file. This metadata will be automatically read back in next time you connect to the Store. 
+The above steps will result in the following contents being added to the .json file. This metadata will be automatically read back in next time you connect to the Store.
 
 ```json
 [{"path":".../file_store_test/calculation2/input.in",
@@ -167,7 +167,7 @@ Note that when using any of the above methods, you cannot modify any keys that a
 
 ### Orphaned Metadata
 
-In the course of working with `FileStore` you may encounter a situation where there are metadata records stored in the JSON file that no longer match files on disk. This can happen if, for example, you init a `FileStore` and later delete a file, or if you init the store with the default arguments but later restrict the file selection with `max_depth` or `file_filters`. 
+In the course of working with `FileStore` you may encounter a situation where there are metadata records stored in the JSON file that no longer match files on disk. This can happen if, for example, you init a `FileStore` and later delete a file, or if you init the store with the default arguments but later restrict the file selection with `max_depth` or `file_filters`.
 
 These orphaned metadata records will appear in the `FileStore` with the field `{"orphan": True}`. The goal with this behavior is to preserve all metadata the user may have added and prevent data loss.
 

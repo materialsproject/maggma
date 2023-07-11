@@ -27,7 +27,8 @@ setup(
     include_package_data=True,
     install_requires=[
         "setuptools",
-        "pydantic",
+        "pydantic<=1.10.11",
+        "pydantic>=0.32.2",
         "pymongo>=4.2.0",
         "monty>=1.0.2",
         "mongomock>=3.10.0",
@@ -37,7 +38,6 @@ setup(
         "mongogrant>=0.3.1",
         "aioitertools>=0.5.1",
         "numpy>=1.17.3",
-        "pydantic>=0.32.2",
         "fastapi>=0.42.0",
         "pyzmq==24.0.1",
         "dnspython>=1.16.0",
@@ -45,13 +45,13 @@ setup(
         "msgpack>=0.5.6",
         "orjson>=3.6.0",
         "boto3>=1.20.41",
-        "python-dateutil>=2.8.2"
+        "python-dateutil>=2.8.2",
     ],
     extras_require={
         "vault": ["hvac>=0.9.5"],
         "montydb": ["montydb>=2.3.12"],
         "notebook_runner": ["IPython>=7.16", "nbformat>=5.0", "regex>=2020.6"],
-        "azure": ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"]
+        "azure": ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"],
     },
     classifiers=[
         "Programming Language :: Python :: 3",

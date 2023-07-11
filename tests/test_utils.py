@@ -45,7 +45,6 @@ def test_timeout():
 
 
 def test_primed():
-
     global is_primed
     is_primed = False
 
@@ -70,7 +69,6 @@ def test_primed():
 
 
 def test_datetime_utils():
-
     assert (
         to_isoformat_ceil_ms(datetime(2019, 12, 13, 0, 23, 11, 9515))
         == "2019-12-13T00:23:11.010"
@@ -84,12 +82,10 @@ def test_datetime_utils():
 
 
 def test_dynamic_import():
-
     assert dynamic_import("maggma.stores", "MongoStore").__name__ == "MongoStore"
 
 
 def test_grouper():
-
     my_iterable = list(range(100))
 
     assert len(list(grouper(my_iterable, 10))) == 10
