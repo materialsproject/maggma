@@ -381,7 +381,7 @@ class FileStore(MemoryStore):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        contents_size_limit: Optional[int] = None,
+        contents_size_limit: Optional[int] = 0,
     ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
@@ -398,6 +398,9 @@ class FileStore(MemoryStore):
             contents_size_limit: Maximum file size in bytes for which to return contents.
                 The FileStore will attempt to read the file and populate the 'contents' key
                 with its content at query time, unless the file size is larger than this value.
+                By default, reading content is disabled. Note that enabling content reading
+                can substantially slow down the query operation, especially when there
+                are large numbers of files.
         """
         return_contents = False
         criteria = criteria if criteria else {}
@@ -413,10 +416,11 @@ class FileStore(MemoryStore):
 
         orig_properties = properties.copy() if properties else None
 
-        if properties is None or properties.get("contents"):
+        if properties is None:
+            # None means return all fields, including contents
             return_contents = True
-
-        if properties is not None and return_contents:
+        elif properties.get("contents"):
+            return_contents = True
             # remove contents b/c it isn't stored in the MemoryStore
             properties.pop("contents")
             # add size and path to query so that file can be read
@@ -432,7 +436,7 @@ class FileStore(MemoryStore):
             limit=limit,
         ):
             # add file contents to the returned documents, if appropriate
-            if return_contents:
+            if return_contents and not d.get("orphan"):
                 if contents_size_limit is None or d["size"] <= contents_size_limit:
                     # attempt to read the file contents and inject into the document
                     # TODO - could add more logic for detecting different file types
@@ -444,7 +448,7 @@ class FileStore(MemoryStore):
                         data = f"Unable to read: {e}"
 
                 elif d["size"] > contents_size_limit:
-                    data = "Unable to read: file too large"
+                    data = f"File exceeds size limit of {contents_size_limit} bytes"
                 else:
                     data = "Unable to read: Unknown error"
 
