@@ -27,7 +27,7 @@ setup(
     include_package_data=True,
     install_requires=[
         "setuptools",
-        "ruamel.yaml",
+        "ruamel.yaml<0.18",
         "pydantic<=1.10.11",
         "pydantic>=0.32.2",
         "pymongo>=4.2.0",
