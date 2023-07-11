@@ -222,10 +222,6 @@ class FileStore(MemoryStore):
             hash: str = Hash of the file contents
             orphan: bool = Whether this record is an orphan
         """
-        # make sure f is a Path object
-        if not isinstance(f, Path):
-            f = Path(f)
-
         # compute the file_id from the relative path
         relative_path = f.relative_to(self.path)
         digest = hashlib.md5()
@@ -234,26 +230,30 @@ class FileStore(MemoryStore):
 
         # hash the file contents
         digest2 = hashlib.md5()
-        block_size = 128 * digest2.block_size
+        b = bytearray(128 * 2056)
+        mv = memoryview(b)
         digest2.update(self.name.encode())
-        with open(f.as_posix(), "rb") as file:
-            buf = file.read(block_size)
-            digest2.update(buf)
-        content_hash = str(digest2.hexdigest())
+        with open(f.as_posix(), "rb", buffering=0) as file:
+            try:
+                digest2.update(hashlib.file_digest(f, "md5"))  # python >= 3.11
+            except AttributeError:
+                for n in iter(lambda: file.readinto(mv), 0):
+                    digest2.update(mv[:n])
 
-        d = {
+        content_hash = str(digest2.hexdigest())
+        stats = f.stat()
+
+        return {
             "name": f.name,
             "path": f,
             "path_relative": relative_path,
             "parent": f.parent.name,
-            "size": f.stat().st_size,
-            "last_updated": datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc),
+            "size": stats.st_size,
+            "last_updated": datetime.fromtimestamp(stats.st_mtime, tz=timezone.utc),
             "orphan": False,
             "hash": content_hash,
             self.key: file_id,
         }
-
-        return d
 
     def connect(self, force_reset: bool = False):
         """
