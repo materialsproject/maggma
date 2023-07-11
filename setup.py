@@ -43,7 +43,7 @@ setup(
         "dnspython>=1.16.0",
         "sshtunnel>=0.1.5",
         "msgpack>=0.5.6",
-        "orjson>=3.6.0",
+        "orjson>=3.9.0",
         "boto3>=1.20.41",
         "python-dateutil>=2.8.2",
     ],
