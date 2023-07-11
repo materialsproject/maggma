@@ -5,6 +5,9 @@ using typical maggma access patterns.
 """
 
 import hashlib
+import os
+import fnmatch
+import re
 
 import warnings
 from pathlib import Path
@@ -91,7 +94,10 @@ class FileStore(MemoryStore):
         self.path = Path(path) if isinstance(path, str) else path
 
         self.json_name = json_name
-        self.file_filters = file_filters if file_filters else ["*"]
+        file_filters = file_filters if file_filters else ["*"]
+        self.file_filters = re.compile(
+            "|".join(fnmatch.translate(p) for p in file_filters)
+        )
         self.collection_name = "file_store"
         self.key = "file_id"
         self.include_orphans = include_orphans
@@ -189,21 +195,21 @@ class FileStore(MemoryStore):
         """
         file_list = []
         # generate a list of files in subdirectories
-        for pattern in self.file_filters:
-            # list every file that matches the pattern
-            for f in self.path.rglob(pattern):
-                if f.is_file():
-                    # ignore the .json file created by the Store
-                    if f.name == self.json_name:
-                        continue
+        for root, dirs, files in os.walk(self.path):
+            # for pattern in self.file_filters:
+            for match in filter(self.file_filters.match, files):
+                # for match in fnmatch.filter(files, pattern):
+                path = Path(os.path.join(root, match))
+                # ignore the .json file created by the Store
+                if path.is_file() and path.name != self.json_name:
                     # filter based on depth
-                    depth = len(f.relative_to(self.path).parts) - 1
+                    depth = len(path.relative_to(self.path).parts) - 1
                     if self.max_depth is None or depth <= self.max_depth:
-                        file_list.append(self._create_record_from_file(f))
+                        file_list.append(self._create_record_from_file(path))
 
         return file_list
 
-    def _create_record_from_file(self, f: Union[str, Path]) -> Dict:
+    def _create_record_from_file(self, f: Path) -> Dict:
         """
         Given the path to a file, return a Dict that constitues a record of
         basic information about that file. The keys in the returned dict
