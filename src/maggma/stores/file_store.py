@@ -241,7 +241,7 @@ class FileStore(MemoryStore):
         digest2.update(self.name.encode())
         with open(f.as_posix(), "rb", buffering=0) as file:
             try:
-                digest2.update(hashlib.file_digest(f, "md5"))  # python >= 3.11
+                digest2.update(hashlib.file_digest(file, "md5"))  # python >= 3.11
             except AttributeError:
                 for n in iter(lambda: file.readinto(mv), 0):
                     digest2.update(mv[:n])
