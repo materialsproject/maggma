@@ -10,7 +10,22 @@ from ruamel import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings
-from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable, Literal
+
+try:
+    from typing import (
+        Dict,
+        Iterator,
+        List,
+        Optional,
+        Tuple,
+        Union,
+        Any,
+        Callable,
+        Literal,
+    )
+except ImportError:
+    from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable
+    from typing_extensions import Literal
 
 import mongomock
 import orjson
