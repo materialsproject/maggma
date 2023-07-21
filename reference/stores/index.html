@@ -6180,7 +6180,7 @@ formatted by MontyDB.</p>
         <span class="n">collection_name</span><span class="p">,</span>
         <span class="n">database_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">database_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;db&quot;</span><span class="p">,</span>
-        <span class="n">storage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sqlite&quot;</span><span class="p">,</span>
+        <span class="n">storage</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;sqlite&quot;</span><span class="p">,</span> <span class="s2">&quot;flatfile&quot;</span><span class="p">,</span> <span class="s2">&quot;lightning&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sqlite&quot;</span><span class="p">,</span>
         <span class="n">storage_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">client_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -6190,10 +6190,12 @@ formatted by MontyDB.</p>
 
 <span class="sd">        Args:</span>
 <span class="sd">            collection_name: Name for the collection.</span>
-<span class="sd">            database_path: Path to the directory containing the on-disk database files.</span>
-<span class="sd">                If None, the current working directory will be used.</span>
+<span class="sd">            database_path: Path to on-disk database files. If None, the current working</span>
+<span class="sd">                directory will be used.</span>
 <span class="sd">            database_name: The database name.</span>
-<span class="sd">            storage: The storage type. Options include &quot;sqlite&quot;, &quot;lightning&quot;, &quot;flatfile&quot;.</span>
+<span class="sd">            storage: The storage type. Options include &quot;sqlite&quot;, &quot;lightning&quot;, &quot;flatfile&quot;. Note that</span>
+<span class="sd">            although MontyDB supports in memory storage, this capability is disabled in maggma to avoid unintended behavior, since multiple</span>
+<span class="sd">            in-memory MontyStore would actually point to the same data.</span>
 <span class="sd">            storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.</span>
 <span class="sd">            client_kwargs: Keyword arguments passed to the ``montydb.MontyClient``</span>
 <span class="sd">                constructor.</span>
@@ -6202,7 +6204,6 @@ formatted by MontyDB.</p>
         <span class="k">if</span> <span class="n">database_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">database_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;MontyDB&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">database_path</span> <span class="o">=</span> <span class="n">database_path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">database_name</span> <span class="o">=</span> <span class="n">database_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
@@ -6212,8 +6213,8 @@ formatted by MontyDB.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">storage</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span> <span class="o">=</span> <span class="n">storage_kwargs</span> <span class="ow">or</span> <span class="p">{</span>
-            <span class="s2">&quot;use_bson&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-            <span class="s2">&quot;monty_version&quot;</span><span class="p">:</span> <span class="s2">&quot;4.0&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;use_bson&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># import pymongo&#39;s BSON; do not use montydb&#39;s</span>
+            <span class="s2">&quot;mongo_version&quot;</span><span class="p">:</span> <span class="s2">&quot;4.0&quot;</span><span class="p">,</span>
         <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">client_kwargs</span> <span class="o">=</span> <span class="n">client_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">MongoStore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># noqa</span>
@@ -6225,17 +6226,19 @@ formatted by MontyDB.</p>
 <span class="sd">        Args:</span>
 <span class="sd">            force_reset: Force connection reset.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">from</span> <span class="nn">montydb</span> <span class="kn">import</span> <span class="n">set_storage</span><span class="p">,</span> <span class="n">MontyClient</span>  <span class="c1"># type: ignore</span>
-
-        <span class="n">set_storage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span><span class="p">)</span>
+        <span class="c1"># TODO - workaround, may be obviated by a future montydb update</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database_path</span> <span class="o">!=</span> <span class="s2">&quot;:memory:&quot;</span><span class="p">:</span>
+            <span class="n">set_storage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span><span class="p">)</span>
         <span class="n">client</span> <span class="o">=</span> <span class="n">MontyClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">client_kwargs</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="s2">&quot;db&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database_name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a string representing this data source.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;monty://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;monty://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">count</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -6250,7 +6253,6 @@ formatted by MontyDB.</p>
 <span class="sd">            hint: Dictionary of indexes to use as hints for query optimizer.</span>
 <span class="sd">                Keys are field names and values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="k">if</span> <span class="n">criteria</span> <span class="k">else</span> <span class="p">{}</span>
 
         <span class="n">hint_list</span> <span class="o">=</span> <span class="p">(</span>
@@ -6377,8 +6379,8 @@ formatted by MontyDB.</p>
       <tr>
         <td><code>database_path</code></td>
         <td><code>str</code></td>
-        <td><p>Path to the directory containing the on-disk database files.
-If None, the current working directory will be used.</p></td>
+        <td><p>Path to on-disk database files. If None, the current working
+directory will be used.</p></td>
         <td><code>None</code></td>
       </tr>
       <tr>
@@ -6389,8 +6391,8 @@ If None, the current working directory will be used.</p></td>
       </tr>
       <tr>
         <td><code>storage</code></td>
-        <td><code>str</code></td>
-        <td><p>The storage type. Options include "sqlite", "lightning", "flatfile".</p></td>
+        <td><code>typing_extensions.Literal[&#39;sqlite&#39;, &#39;flatfile&#39;, &#39;lightning&#39;]</code></td>
+        <td><p>The storage type. Options include "sqlite", "lightning", "flatfile". Note that</p></td>
         <td><code>&#39;sqlite&#39;</code></td>
       </tr>
       <tr>
@@ -6421,7 +6423,7 @@ constructor.</p></td>
     <span class="n">collection_name</span><span class="p">,</span>
     <span class="n">database_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">database_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;db&quot;</span><span class="p">,</span>
-    <span class="n">storage</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sqlite&quot;</span><span class="p">,</span>
+    <span class="n">storage</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;sqlite&quot;</span><span class="p">,</span> <span class="s2">&quot;flatfile&quot;</span><span class="p">,</span> <span class="s2">&quot;lightning&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;sqlite&quot;</span><span class="p">,</span>
     <span class="n">storage_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">client_kwargs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
@@ -6431,10 +6433,12 @@ constructor.</p></td>
 
 <span class="sd">    Args:</span>
 <span class="sd">        collection_name: Name for the collection.</span>
-<span class="sd">        database_path: Path to the directory containing the on-disk database files.</span>
-<span class="sd">            If None, the current working directory will be used.</span>
+<span class="sd">        database_path: Path to on-disk database files. If None, the current working</span>
+<span class="sd">            directory will be used.</span>
 <span class="sd">        database_name: The database name.</span>
-<span class="sd">        storage: The storage type. Options include &quot;sqlite&quot;, &quot;lightning&quot;, &quot;flatfile&quot;.</span>
+<span class="sd">        storage: The storage type. Options include &quot;sqlite&quot;, &quot;lightning&quot;, &quot;flatfile&quot;. Note that</span>
+<span class="sd">        although MontyDB supports in memory storage, this capability is disabled in maggma to avoid unintended behavior, since multiple</span>
+<span class="sd">        in-memory MontyStore would actually point to the same data.</span>
 <span class="sd">        storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.</span>
 <span class="sd">        client_kwargs: Keyword arguments passed to the ``montydb.MontyClient``</span>
 <span class="sd">            constructor.</span>
@@ -6443,7 +6447,6 @@ constructor.</p></td>
     <span class="k">if</span> <span class="n">database_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">database_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="s2">&quot;MontyDB&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">database_path</span> <span class="o">=</span> <span class="n">database_path</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">database_name</span> <span class="o">=</span> <span class="n">database_name</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span> <span class="o">=</span> <span class="n">collection_name</span>
@@ -6453,8 +6456,8 @@ constructor.</p></td>
     <span class="bp">self</span><span class="o">.</span><span class="n">kwargs</span> <span class="o">=</span> <span class="n">kwargs</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">storage</span> <span class="o">=</span> <span class="n">storage</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span> <span class="o">=</span> <span class="n">storage_kwargs</span> <span class="ow">or</span> <span class="p">{</span>
-        <span class="s2">&quot;use_bson&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
-        <span class="s2">&quot;monty_version&quot;</span><span class="p">:</span> <span class="s2">&quot;4.0&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;use_bson&quot;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># import pymongo&#39;s BSON; do not use montydb&#39;s</span>
+        <span class="s2">&quot;mongo_version&quot;</span><span class="p">:</span> <span class="s2">&quot;4.0&quot;</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">client_kwargs</span> <span class="o">=</span> <span class="n">client_kwargs</span> <span class="ow">or</span> <span class="p">{}</span>
     <span class="nb">super</span><span class="p">(</span><span class="n">MongoStore</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># noqa</span>
@@ -6508,12 +6511,12 @@ constructor.</p></td>
 <span class="sd">    Args:</span>
 <span class="sd">        force_reset: Force connection reset.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">montydb</span> <span class="kn">import</span> <span class="n">set_storage</span><span class="p">,</span> <span class="n">MontyClient</span>  <span class="c1"># type: ignore</span>
-
-    <span class="n">set_storage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span><span class="p">)</span>
+    <span class="c1"># TODO - workaround, may be obviated by a future montydb update</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">database_path</span> <span class="o">!=</span> <span class="s2">&quot;:memory:&quot;</span><span class="p">:</span>
+        <span class="n">set_storage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="n">storage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">storage</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">storage_kwargs</span><span class="p">)</span>
     <span class="n">client</span> <span class="o">=</span> <span class="n">MontyClient</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">database_path</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">client_kwargs</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="ow">or</span> <span class="n">force_reset</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="s2">&quot;db&quot;</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_coll</span> <span class="o">=</span> <span class="n">client</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">database_name</span><span class="p">][</span><span class="bp">self</span><span class="o">.</span><span class="n">collection_name</span><span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -6577,7 +6580,6 @@ Keys are field names and values are 1 for ascending or -1 for descending.</p></t
 <span class="sd">        hint: Dictionary of indexes to use as hints for query optimizer.</span>
 <span class="sd">            Keys are field names and values are 1 for ascending or -1 for descending.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="k">if</span> <span class="n">criteria</span> <span class="k">else</span> <span class="p">{}</span>
 
     <span class="n">hint_list</span> <span class="o">=</span> <span class="p">(</span>
