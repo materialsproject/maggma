@@ -240,9 +240,12 @@ class FileStore(MemoryStore):
         mv = memoryview(b)
         digest2.update(self.name.encode())
         with open(f.as_posix(), "rb", buffering=0) as file:
-            try:
-                digest2.update(hashlib.file_digest(file, "md5"))  # python >= 3.11
-            except AttributeError:
+            # this block copied from the file_digest method in python 3.11+
+            # see https://github.com/python/cpython/blob/0ba07b2108d4763273f3fb85544dde34c5acd40a/Lib/hashlib.py#L213
+            if hasattr(file, "getbuffer"):
+                # io.BytesIO object, use zero-copy buffer
+                digest2.update(file.getbuffer())
+            else:
                 for n in iter(lambda: file.readinto(mv), 0):
                     digest2.update(mv[:n])
 
