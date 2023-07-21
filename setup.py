@@ -27,7 +27,9 @@ setup(
     include_package_data=True,
     install_requires=[
         "setuptools",
-        "pydantic",
+        "ruamel.yaml<0.18",
+        "pydantic<=1.10.11",
+        "pydantic>=0.32.2",
         "pymongo>=4.2.0",
         "monty>=1.0.2",
         "mongomock>=3.10.0",
@@ -37,7 +39,6 @@ setup(
         "mongogrant>=0.3.1",
         "aioitertools>=0.5.1",
         "numpy>=1.17.3",
-        "pydantic>=0.32.2",
         "fastapi>=0.42.0",
         "pyzmq==24.0.1",
         "dnspython>=1.16.0",

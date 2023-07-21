@@ -1,16 +1,14 @@
 from random import randint
-from urllib.parse import urlencode
-from pydantic.utils import get_model
 import json
 import pytest
-from fastapi import FastAPI, Body
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from starlette.testclient import TestClient
 
 from datetime import datetime
 from maggma.api.query_operator.core import QueryOperator
 
-from maggma.api.resource import SubmissionResource, post_resource
+from maggma.api.resource import SubmissionResource
 from maggma.api.query_operator import PaginationQuery
 
 from maggma.stores import MemoryStore
@@ -49,14 +47,15 @@ def post_query_op():
 
     return PostQuery()
 
+
 @pytest.fixture
 def patch_query_op():
     class PatchQuery(QueryOperator):
         def query(self, name, update):
-            return {"criteria": {"name": name},
-                    "update": update}
+            return {"criteria": {"name": name}, "update": update}
 
     return PatchQuery()
+
 
 def test_init(owner_store, post_query_op, patch_query_op):
     resource = SubmissionResource(
@@ -137,6 +136,7 @@ def test_key_fields(owner_store, post_query_op):
     assert client.get("/Person1/").status_code == 200
     assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
 
+
 def test_patch_submission(owner_store, post_query_op):
     endpoint = SubmissionResource(
         store=owner_store,
@@ -152,4 +152,3 @@ def test_patch_submission(owner_store, post_query_op):
 
     assert client.get("/Person1/").status_code == 200
     assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
-

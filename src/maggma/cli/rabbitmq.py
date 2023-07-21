@@ -54,7 +54,9 @@ def manager(
     logger.info(f"Binding to Manager URL {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
-    connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port, "work")
+    connection, channel, status_queue, worker_queue = setup_rabbitmq(
+        url, queue_prefix, port, "work"
+    )
 
     workers = {}  # type: ignore
 
@@ -66,7 +68,10 @@ def manager(
 
         try:
             builder.connect()
-            chunk_dicts = [{"chunk": d, "distributed": False, "completed": False} for d in builder.prechunk(num_chunks)]
+            chunk_dicts = [
+                {"chunk": d, "distributed": False, "completed": False}
+                for d in builder.prechunk(num_chunks)
+            ]
             pbar_distributed = tqdm(
                 total=len(chunk_dicts),
                 desc="Distributed chunks for {}".format(builder.__class__.__name__),
@@ -81,7 +86,9 @@ def manager(
 
         except NotImplementedError:
             attempt_graceful_shutdown(connection, workers, channel, worker_queue)
-            raise RuntimeError(f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists.")
+            raise RuntimeError(
+                f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists."
+            )
 
         completed = False
 
@@ -119,9 +126,13 @@ def manager(
 
                 elif "ERROR" in msg:
                     # Remove worker and requeue work sent to it
-                    attempt_graceful_shutdown(connection, workers, channel, worker_queue)
+                    attempt_graceful_shutdown(
+                        connection, workers, channel, worker_queue
+                    )
                     raise RuntimeError(
-                        "At least one worker has stopped with error message: {}".format(msg.split("_")[1])
+                        "At least one worker has stopped with error message: {}".format(
+                            msg.split("_")[1]
+                        )
                     )
 
                 elif "PING" in msg:
@@ -158,7 +169,9 @@ def manager(
     attempt_graceful_shutdown(connection, workers, channel, worker_queue)
 
 
-def setup_rabbitmq(url: str, queue_prefix: str, port: int, outbound_queue: Literal["status", "work"]):
+def setup_rabbitmq(
+    url: str, queue_prefix: str, port: int, outbound_queue: Literal["status", "work"]
+):
     connection = pika.BlockingConnection(pika.ConnectionParameters(url, port))
     channel = connection.channel()
     channel.basic_qos(prefetch_count=1, global_qos=True)
@@ -216,8 +229,12 @@ def handle_dead_workers(connection, workers, channel, worker_queue):
             for identity in list(workers.keys()):
                 z_score = 0.6745 * (workers[identity]["heartbeats"] - median) / mad
                 if z_score <= -3.5:
-                    attempt_graceful_shutdown(connection, workers, channel, worker_queue)
-                    raise RuntimeError("At least one worker has timed out. Stopping distributed build.")
+                    attempt_graceful_shutdown(
+                        connection, workers, channel, worker_queue
+                    )
+                    raise RuntimeError(
+                        "At least one worker has timed out. Stopping distributed build."
+                    )
 
 
 def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix: str):
@@ -233,10 +250,16 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
     logger.info(f"Connnecting to Manager at {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
-    connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port, "status")
+    connection, channel, status_queue, worker_queue = setup_rabbitmq(
+        url, queue_prefix, port, "status"
+    )
 
     # Send ready signal to status queue
-    channel.basic_publish(exchange="", routing_key=status_queue, body="READY_{}".format(identity).encode("utf-8"))
+    channel.basic_publish(
+        exchange="",
+        routing_key=status_queue,
+        body="READY_{}".format(identity).encode("utf-8"),
+    )
 
     try:
         running = True
@@ -246,7 +269,6 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                 _, _, body = channel.basic_get(queue=worker_queue, auto_ack=True)
 
             if body is not None:
-
                 message = body.decode("utf-8")
 
                 if "@class" in message and "@module" in message:
@@ -257,7 +279,9 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                     logger.info("Working on builder {}".format(builder.__class__))
 
                     channel.basic_publish(
-                        exchange="", routing_key=status_queue, body="WORKING_{}".format(identity).encode("utf-8")
+                        exchange="",
+                        routing_key=status_queue,
+                        body="WORKING_{}".format(identity).encode("utf-8"),
                     )
                     work = json.loads(message)
                     builder = MontyDecoder().process_decoded(work)
@@ -277,7 +301,9 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                     )
 
                     channel.basic_publish(
-                        exchange="", routing_key=status_queue, body="DONE_{}".format(identity).encode("utf-8")
+                        exchange="",
+                        routing_key=status_queue,
+                        body="DONE_{}".format(identity).encode("utf-8"),
                     )
 
                 elif message == "EXIT":
@@ -286,11 +312,19 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
 
     except Exception as e:
         logger.error(f"A worker failed with error: {repr(e)}")
-        channel.basic_publish(exchange="", routing_key=status_queue, body="ERROR_{}".format(identity).encode("utf-8"))
+        channel.basic_publish(
+            exchange="",
+            routing_key=status_queue,
+            body="ERROR_{}".format(identity).encode("utf-8"),
+        )
         connection.close()
 
     connection.close()
 
 
 def ping_manager(channel, identity, status_queue):
-    channel.basic_publish(exchange="", routing_key=status_queue, body="PING_{}".format(identity).encode("utf-8"))
+    channel.basic_publish(
+        exchange="",
+        routing_key=status_queue,
+        body="PING_{}".format(identity).encode("utf-8"),
+    )

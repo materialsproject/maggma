@@ -35,6 +35,7 @@ class StoreFacade(Store):
     third_store.remove_docs()
     ```
     """
+
     def __init__(self, store, multistore):
         # Keep track of this store for the purposes of checking
         # equality, but it will never be connected to
@@ -48,7 +49,7 @@ class StoreFacade(Store):
             return self.multistore._proxy_attribute(name, self.store)
 
     def __setattr__(self, name: str, value: Any):
-        if name not in ['store', 'multistore']:
+        if name not in ["store", "multistore"]:
             self.multistore.set_store_attribute(self.store, name, value)
         else:
             super().__setattr__(name, value)
@@ -91,12 +92,14 @@ class StoreFacade(Store):
         """
         return self.multistore.count(self.store, criteria=criteria)
 
-    def query(self,
-              criteria: Optional[Dict] = None,
-              properties: Union[Dict, List, None] = None,
-              sort: Optional[Dict[str, Union[Sort, int]]] = None,
-              skip: int = 0,
-              limit: int = 0) -> Iterator[Dict]:
+    def query(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+    ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
 
@@ -108,17 +111,21 @@ class StoreFacade(Store):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
-        return self.multistore.query(self.store,
-                                     criteria=criteria,
-                                     properties=properties,
-                                     sort=sort,
-                                     skip=skip,
-                                     limit=limit)
+        return self.multistore.query(
+            self.store,
+            criteria=criteria,
+            properties=properties,
+            sort=sort,
+            skip=skip,
+            limit=limit,
+        )
 
-    def update(self,
-               docs: Union[List[Dict], Dict],
-               key: Union[List, str, None] = None,
-               **kwargs):
+    def update(
+        self,
+        docs: Union[List[Dict], Dict],
+        key: Union[List, str, None] = None,
+        **kwargs
+    ):
         """
         Update documents into the Store
 
@@ -142,19 +149,20 @@ class StoreFacade(Store):
         Returns:
             bool indicating if the index exists/was created
         """
-        return self.multistore.ensure_index(self.store,
-                                            key=key,
-                                            unique=unique,
-                                            **kwargs)
+        return self.multistore.ensure_index(
+            self.store, key=key, unique=unique, **kwargs
+        )
 
-    def groupby(self,
-                keys: Union[List[str], str],
-                criteria: Optional[Dict] = None,
-                properties: Union[Dict, List, None] = None,
-                sort: Optional[Dict[str, Union[Sort, int]]] = None,
-                skip: int = 0,
-                limit: int = 0,
-                **kwargs) -> Iterator[Tuple[Dict, List[Dict]]]:
+    def groupby(
+        self,
+        keys: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+        **kwargs
+    ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
         Simple grouping function that will group documents
         by keys.
@@ -171,14 +179,16 @@ class StoreFacade(Store):
         Returns:
             generator returning tuples of (dict, list of docs)
         """
-        return self.multistore.groupby(self.store,
-                                       keys=keys,
-                                       criteria=criteria,
-                                       properties=properties,
-                                       sort=sort,
-                                       skip=skip,
-                                       limit=limit,
-                                       **kwargs)
+        return self.multistore.groupby(
+            self.store,
+            keys=keys,
+            criteria=criteria,
+            properties=properties,
+            sort=sort,
+            skip=skip,
+            limit=limit,
+            **kwargs
+        )
 
     def remove_docs(self, criteria: Dict, **kwargs):
         """
@@ -187,15 +197,15 @@ class StoreFacade(Store):
         Args:
             criteria: query dictionary to match
         """
-        return self.multistore.remove_docs(self.store,
-                                           criteria=criteria,
-                                           **kwargs)
+        return self.multistore.remove_docs(self.store, criteria=criteria, **kwargs)
 
-    def query_one(self,
-                  criteria: Optional[Dict] = None,
-                  properties: Union[Dict, List, None] = None,
-                  sort: Optional[Dict[str, Union[Sort, int]]] = None,
-                  **kwargs):
+    def query_one(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        **kwargs
+    ):
         """
         Queries the Store for a single document
 
@@ -205,17 +215,17 @@ class StoreFacade(Store):
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
         """
-        return self.multistore.query_one(self.store,
-                                         criteria=criteria,
-                                         properties=properties,
-                                         sort=sort,
-                                         **kwargs)
+        return self.multistore.query_one(
+            self.store, criteria=criteria, properties=properties, sort=sort, **kwargs
+        )
 
-    def distinct(self,
-                 field: str,
-                 criteria: Optional[Dict] = None,
-                 all_exist: bool = False,
-                 **kwargs) -> List:
+    def distinct(
+        self,
+        field: str,
+        criteria: Optional[Dict] = None,
+        all_exist: bool = False,
+        **kwargs
+    ) -> List:
         """
         Get all distinct values for a field
 
@@ -223,14 +233,12 @@ class StoreFacade(Store):
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
         """
-        return self.multistore.distinct(self.store,
-                                        field=field,
-                                        criteria=criteria,
-                                        all_exist=all_exist,
-                                        **kwargs)
+        return self.multistore.distinct(
+            self.store, field=field, criteria=criteria, all_exist=all_exist, **kwargs
+        )
 
 
-class MultiStore():
+class MultiStore:
     """
     A container for multiple maggma stores. When adding stores to a MultiStore,
     a check will be performed to see if the store (or a equivalent) already exists.
@@ -266,6 +274,7 @@ class MultiStore():
     multistore.count_stores() # Returns 2
     ```
     """
+
     def __init__(self, **kwargs):
         """
         Initializes a MultiStore
@@ -317,8 +326,7 @@ class MultiStore():
             if maybe_store_exists is None:
                 # Make a new instance of it, so it doesn't get
                 # modified outside of this process unintentionally
-                self._stores.append(MontyDecoder().process_decoded(
-                    store.as_dict()))
+                self._stores.append(MontyDecoder().process_decoded(store.as_dict()))
                 self._stores[-1].connect()
                 return True
             else:
@@ -401,10 +409,7 @@ class MultiStore():
             for store in self._stores:
                 store.close()
 
-    def count(self,
-              store: Store,
-              criteria: Optional[Dict] = None,
-              **kwargs) -> int:
+    def count(self, store: Store, criteria: Optional[Dict] = None, **kwargs) -> int:
         """
         Counts the number of documents matching the query criteria
 
@@ -414,14 +419,16 @@ class MultiStore():
         store_id = self.get_store_index(store)
         return self._stores[store_id].count(criteria=criteria, **kwargs)
 
-    def query(self,
-              store: Store,
-              criteria: Optional[Dict] = None,
-              properties: Union[Dict, List, None] = None,
-              sort: Optional[Dict[str, Union[Sort, int]]] = None,
-              skip: int = 0,
-              limit: int = 0,
-              **kwargs) -> List[Dict]:
+    def query(
+        self,
+        store: Store,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+        **kwargs
+    ) -> List[Dict]:
         """
         Queries the Store for a set of documents
 
@@ -435,18 +442,24 @@ class MultiStore():
         """
         store_id = self.get_store_index(store)
         # We must return a list, since a generator is not serializable
-        return list(self._stores[store_id].query(criteria=criteria,
-                                                 properties=properties,
-                                                 sort=sort,
-                                                 skip=skip,
-                                                 limit=limit,
-                                                 **kwargs))
+        return list(
+            self._stores[store_id].query(
+                criteria=criteria,
+                properties=properties,
+                sort=sort,
+                skip=skip,
+                limit=limit,
+                **kwargs
+            )
+        )
 
-    def update(self,
-               store: Store,
-               docs: Union[List[Dict], Dict],
-               key: Union[List, str, None] = None,
-               **kwargs):
+    def update(
+        self,
+        store: Store,
+        docs: Union[List[Dict], Dict],
+        key: Union[List, str, None] = None,
+        **kwargs
+    ):
         """
         Update documents into the Store
 
@@ -460,11 +473,9 @@ class MultiStore():
         store_id = self.get_store_index(store)
         return self._stores[store_id].update(docs=docs, key=key, **kwargs)
 
-    def ensure_index(self,
-                     store: Store,
-                     key: str,
-                     unique: bool = False,
-                     **kwargs) -> bool:
+    def ensure_index(
+        self, store: Store, key: str, unique: bool = False, **kwargs
+    ) -> bool:
         """
         Tries to create an index and return true if it suceeded
 
@@ -476,19 +487,19 @@ class MultiStore():
             bool indicating if the index exists/was created
         """
         store_id = self.get_store_index(store)
-        return self._stores[store_id].ensure_index(key=key,
-                                                   unique=unique,
-                                                   **kwargs)
+        return self._stores[store_id].ensure_index(key=key, unique=unique, **kwargs)
 
-    def groupby(self,
-                store: Store,
-                keys: Union[List[str], str],
-                criteria: Optional[Dict] = None,
-                properties: Union[Dict, List, None] = None,
-                sort: Optional[Dict[str, Union[Sort, int]]] = None,
-                skip: int = 0,
-                limit: int = 0,
-                **kwargs) -> Iterator[Tuple[Dict, List[Dict]]]:
+    def groupby(
+        self,
+        store: Store,
+        keys: Union[List[str], str],
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+        **kwargs
+    ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
         Simple grouping function that will group documents
         by keys.
@@ -506,13 +517,15 @@ class MultiStore():
             generator returning tuples of (dict, list of docs)
         """
         store_id = self.get_store_index(store)
-        return self._stores[store_id].groupby(keys=keys,
-                                              criteria=criteria,
-                                              properties=properties,
-                                              sort=sort,
-                                              skip=skip,
-                                              limit=limit,
-                                              **kwargs)
+        return self._stores[store_id].groupby(
+            keys=keys,
+            criteria=criteria,
+            properties=properties,
+            sort=sort,
+            skip=skip,
+            limit=limit,
+            **kwargs
+        )
 
     def remove_docs(self, store: Store, criteria: Dict, **kwargs):
         """
@@ -524,12 +537,14 @@ class MultiStore():
         store_id = self.get_store_index(store)
         return self._stores[store_id].remove_docs(criteria=criteria, **kwargs)
 
-    def query_one(self,
-                  store: Store,
-                  criteria: Optional[Dict] = None,
-                  properties: Union[Dict, List, None] = None,
-                  sort: Optional[Dict[str, Union[Sort, int]]] = None,
-                  **kwargs):
+    def query_one(
+        self,
+        store: Store,
+        criteria: Optional[Dict] = None,
+        properties: Union[Dict, List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        **kwargs
+    ):
         """
         Queries the Store for a single document
 
@@ -541,17 +556,20 @@ class MultiStore():
         """
         store_id = self.get_store_index(store)
         return next(
-            self._stores[store_id].query(criteria=criteria,
-                                         properties=properties,
-                                         sort=sort,
-                                         **kwargs), None)
+            self._stores[store_id].query(
+                criteria=criteria, properties=properties, sort=sort, **kwargs
+            ),
+            None,
+        )
 
-    def distinct(self,
-                 store: Store,
-                 field: str,
-                 criteria: Optional[Dict] = None,
-                 all_exist: bool = False,
-                 **kwargs) -> List:
+    def distinct(
+        self,
+        store: Store,
+        field: str,
+        criteria: Optional[Dict] = None,
+        all_exist: bool = False,
+        **kwargs
+    ) -> List:
         """
         Get all distinct values for a field
 
@@ -560,10 +578,9 @@ class MultiStore():
             criteria: PyMongo filter for documents to search in
         """
         store_id = self.get_store_index(store)
-        return self._stores[store_id].distinct(field=field,
-                                               criteria=criteria,
-                                               all_exist=all_exist,
-                                               **kwargs)
+        return self._stores[store_id].distinct(
+            field=field, criteria=criteria, all_exist=all_exist, **kwargs
+        )
 
     def set_store_attribute(self, store: Store, name: str, value: Any):
         """
@@ -621,6 +638,7 @@ class MultiStoreManager(BaseManager):
 
     # Adapted from fireworks/utilities/fw_utilities.py
     """
+
     @classmethod
     def setup(cls, multistore):
         """
@@ -630,7 +648,7 @@ class MultiStoreManager(BaseManager):
         Returns:
             A manager
         """
-        MultiStoreManager.register('MultiStore', callable=lambda: multistore)
+        MultiStoreManager.register("MultiStore", callable=lambda: multistore)
         m = MultiStoreManager(address=("127.0.0.1", 0), authkey=b"abcd")
         m.start()
         return m

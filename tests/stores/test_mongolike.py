@@ -12,8 +12,7 @@ import pytest
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
 from maggma.core import StoreError
-from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore
-from maggma.stores.mongolike import MontyStore
+from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore, MontyStore
 from maggma.validators import JSONSchemaValidator
 
 
@@ -304,6 +303,14 @@ def test_monty_store_connect(tmp_dir):
     assert montystore._collection is not None
     assert montystore.name is not None
 
+    # check that the kwargs work
+    with ScratchDir("."):
+        store = MontyStore("my_results", database_name="NotNamedDB")
+        store.connect()
+        store.update({"test": {"cow": "moo"}}, key="test")
+        store.close()
+        assert Path("NotNamedDB/my_results.collection").exists()
+
 
 def test_monty_store_groupby(montystore):
     montystore.update(
@@ -338,7 +345,7 @@ def test_monty_store_groupby(montystore):
     assert len(data) == 2
 
 
-def test_montystore_query(montystore):
+def test_monty_store_query(montystore):
     montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert montystore.query_one(properties=["a"])["a"] == 1
     assert montystore.query_one(properties=["a"])["a"] == 1
@@ -346,7 +353,7 @@ def test_montystore_query(montystore):
     assert montystore.query_one(properties=["c"])["c"] == 3
 
 
-def test_montystore_count(montystore):
+def test_monty_store_count(montystore):
     montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert montystore.count() == 1
     montystore._collection.insert_one({"aa": 1, "b": 2, "c": 3})
@@ -354,7 +361,7 @@ def test_montystore_count(montystore):
     assert montystore.count({"a": 1}) == 1
 
 
-def test_montystore_distinct(montystore):
+def test_monty_store_distinct(montystore):
     montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     montystore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
     assert set(montystore.distinct("a")) == {1, 4}
@@ -375,7 +382,7 @@ def test_montystore_distinct(montystore):
     assert montystore.distinct("i") == [None]
 
 
-def test_montystore_update(montystore):
+def test_monty_store_update(montystore):
     montystore.update({"e": 6, "d": 4}, key="e")
     assert (
         montystore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
@@ -399,7 +406,7 @@ def test_montystore_update(montystore):
     montystore.update({"e": "abc", "d": 3}, key="e")
 
 
-def test_montystore_remove_docs(montystore):
+def test_monty_store_remove_docs(montystore):
     montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     montystore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
     montystore.remove_docs({"a": 1})
@@ -407,7 +414,7 @@ def test_montystore_remove_docs(montystore):
     assert len(list(montystore.query({"a": 1}))) == 0
 
 
-def test_montystore_last_updated(montystore):
+def test_monty_store_last_updated(montystore):
     assert montystore.last_updated == datetime.min
     start_time = datetime.utcnow()
     montystore._collection.insert_one({montystore.key: 1, "a": 1})
