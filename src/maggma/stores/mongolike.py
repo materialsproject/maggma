@@ -482,9 +482,7 @@ class MongoStore(Store):
         if not isinstance(docs, list):
             docs = [docs]
 
-        for d in docs:
-            d = jsanitize(d, allow_bson=True)
-
+        for d in map(lambda x: jsanitize(x, allow_bson=True), docs):
             # document-level validation is optional
             validates = True
             if self.validator:

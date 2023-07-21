@@ -5,6 +5,9 @@ using typical maggma access patterns.
 """
 
 import hashlib
+import os
+import fnmatch
+import re
 
 import warnings
 from pathlib import Path
@@ -91,7 +94,10 @@ class FileStore(MemoryStore):
         self.path = Path(path) if isinstance(path, str) else path
 
         self.json_name = json_name
-        self.file_filters = file_filters if file_filters else ["*"]
+        file_filters = file_filters if file_filters else ["*"]
+        self.file_filters = re.compile(
+            "|".join(fnmatch.translate(p) for p in file_filters)
+        )
         self.collection_name = "file_store"
         self.key = "file_id"
         self.include_orphans = include_orphans
@@ -189,21 +195,21 @@ class FileStore(MemoryStore):
         """
         file_list = []
         # generate a list of files in subdirectories
-        for pattern in self.file_filters:
-            # list every file that matches the pattern
-            for f in self.path.rglob(pattern):
-                if f.is_file():
-                    # ignore the .json file created by the Store
-                    if f.name == self.json_name:
-                        continue
+        for root, dirs, files in os.walk(self.path):
+            # for pattern in self.file_filters:
+            for match in filter(self.file_filters.match, files):
+                # for match in fnmatch.filter(files, pattern):
+                path = Path(os.path.join(root, match))
+                # ignore the .json file created by the Store
+                if path.is_file() and path.name != self.json_name:
                     # filter based on depth
-                    depth = len(f.relative_to(self.path).parts) - 1
+                    depth = len(path.relative_to(self.path).parts) - 1
                     if self.max_depth is None or depth <= self.max_depth:
-                        file_list.append(self._create_record_from_file(f))
+                        file_list.append(self._create_record_from_file(path))
 
         return file_list
 
-    def _create_record_from_file(self, f: Union[str, Path]) -> Dict:
+    def _create_record_from_file(self, f: Path) -> Dict:
         """
         Given the path to a file, return a Dict that constitues a record of
         basic information about that file. The keys in the returned dict
@@ -222,10 +228,6 @@ class FileStore(MemoryStore):
             hash: str = Hash of the file contents
             orphan: bool = Whether this record is an orphan
         """
-        # make sure f is a Path object
-        if not isinstance(f, Path):
-            f = Path(f)
-
         # compute the file_id from the relative path
         relative_path = f.relative_to(self.path)
         digest = hashlib.md5()
@@ -234,26 +236,33 @@ class FileStore(MemoryStore):
 
         # hash the file contents
         digest2 = hashlib.md5()
-        block_size = 128 * digest2.block_size
+        b = bytearray(128 * 2056)
+        mv = memoryview(b)
         digest2.update(self.name.encode())
-        with open(f.as_posix(), "rb") as file:
-            buf = file.read(block_size)
-            digest2.update(buf)
-        content_hash = str(digest2.hexdigest())
+        with open(f.as_posix(), "rb", buffering=0) as file:
+            # this block copied from the file_digest method in python 3.11+
+            # see https://github.com/python/cpython/blob/0ba07b2108d4763273f3fb85544dde34c5acd40a/Lib/hashlib.py#L213
+            if hasattr(file, "getbuffer"):
+                # io.BytesIO object, use zero-copy buffer
+                digest2.update(file.getbuffer())
+            else:
+                for n in iter(lambda: file.readinto(mv), 0):
+                    digest2.update(mv[:n])
 
-        d = {
+        content_hash = str(digest2.hexdigest())
+        stats = f.stat()
+
+        return {
             "name": f.name,
             "path": f,
             "path_relative": relative_path,
             "parent": f.parent.name,
-            "size": f.stat().st_size,
-            "last_updated": datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc),
+            "size": stats.st_size,
+            "last_updated": datetime.fromtimestamp(stats.st_mtime, tz=timezone.utc),
             "orphan": False,
             "hash": content_hash,
             self.key: file_id,
         }
-
-        return d
 
     def connect(self, force_reset: bool = False):
         """
@@ -375,7 +384,7 @@ class FileStore(MemoryStore):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        contents_size_limit: Optional[int] = None,
+        contents_size_limit: Optional[int] = 0,
     ) -> Iterator[Dict]:
         """
         Queries the Store for a set of documents
@@ -392,6 +401,9 @@ class FileStore(MemoryStore):
             contents_size_limit: Maximum file size in bytes for which to return contents.
                 The FileStore will attempt to read the file and populate the 'contents' key
                 with its content at query time, unless the file size is larger than this value.
+                By default, reading content is disabled. Note that enabling content reading
+                can substantially slow down the query operation, especially when there
+                are large numbers of files.
         """
         return_contents = False
         criteria = criteria if criteria else {}
@@ -407,10 +419,11 @@ class FileStore(MemoryStore):
 
         orig_properties = properties.copy() if properties else None
 
-        if properties is None or properties.get("contents"):
+        if properties is None:
+            # None means return all fields, including contents
             return_contents = True
-
-        if properties is not None and return_contents:
+        elif properties.get("contents"):
+            return_contents = True
             # remove contents b/c it isn't stored in the MemoryStore
             properties.pop("contents")
             # add size and path to query so that file can be read
@@ -426,7 +439,7 @@ class FileStore(MemoryStore):
             limit=limit,
         ):
             # add file contents to the returned documents, if appropriate
-            if return_contents:
+            if return_contents and not d.get("orphan"):
                 if contents_size_limit is None or d["size"] <= contents_size_limit:
                     # attempt to read the file contents and inject into the document
                     # TODO - could add more logic for detecting different file types
@@ -438,7 +451,7 @@ class FileStore(MemoryStore):
                         data = f"Unable to read: {e}"
 
                 elif d["size"] > contents_size_limit:
-                    data = "Unable to read: file too large"
+                    data = f"File exceeds size limit of {contents_size_limit} bytes"
                 else:
                     data = "Unable to read: Unknown error"
 

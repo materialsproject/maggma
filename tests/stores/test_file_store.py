@@ -267,7 +267,7 @@ def test_query(test_dir):
         properties=["name", "contents"],
         contents_size_limit=50,
     )
-    assert d["contents"] == "Unable to read: file too large"
+    assert d["contents"] == "File exceeds size limit of 50 bytes"
     assert d.get("name")
 
 
