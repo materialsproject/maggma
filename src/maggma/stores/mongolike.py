@@ -10,7 +10,22 @@ from ruamel import yaml
 from itertools import chain, groupby
 from socket import socket
 import warnings
-from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable
+
+try:
+    from typing import (
+        Dict,
+        Iterator,
+        List,
+        Optional,
+        Tuple,
+        Union,
+        Any,
+        Callable,
+        Literal,
+    )
+except ImportError:
+    from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable
+    from typing_extensions import Literal
 
 import mongomock
 import orjson
@@ -27,9 +42,9 @@ from maggma.core import Sort, Store, StoreError
 from maggma.utils import confirm_field_index, to_dt
 
 try:
-    import montydb  # type: ignore
+    from montydb import MontyClient, set_storage  # type: ignore
 except ImportError:
-    montydb = None
+    MontyClient = None
 
 
 class SSHTunnel(MSONable):
@@ -870,7 +885,7 @@ class JSONStore(MemoryStore):
 
 
 @requires(
-    montydb,
+    MontyClient is not None,
     "MontyStore requires MontyDB to be installed. See the MontyDB repository for more "
     "information: https://github.com/davidlatwe/montydb",
 )
@@ -901,7 +916,7 @@ class MontyStore(MemoryStore):
         collection_name,
         database_path: str = None,
         database_name: str = "db",
-        storage: str = "sqlite",
+        storage: Literal["sqlite", "flatfile", "lightning"] = "sqlite",
         storage_kwargs: Optional[dict] = None,
         client_kwargs: Optional[dict] = None,
         **kwargs,
@@ -911,10 +926,12 @@ class MontyStore(MemoryStore):
 
         Args:
             collection_name: Name for the collection.
-            database_path: Path to the directory containing the on-disk database files.
-                If None, the current working directory will be used.
+            database_path: Path to on-disk database files. If None, the current working
+                directory will be used.
             database_name: The database name.
-            storage: The storage type. Options include "sqlite", "lightning", "flatfile".
+            storage: The storage type. Options include "sqlite", "lightning", "flatfile". Note that
+            although MontyDB supports in memory storage, this capability is disabled in maggma to avoid unintended behavior, since multiple
+            in-memory MontyStore would actually point to the same data.
             storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.
             client_kwargs: Keyword arguments passed to the ``montydb.MontyClient``
                 constructor.
@@ -923,7 +940,6 @@ class MontyStore(MemoryStore):
         if database_path is None:
             database_path = str(Path.cwd())
 
-        self.database = "MontyDB"
         self.database_path = database_path
         self.database_name = database_name
         self.collection_name = collection_name
@@ -933,8 +949,8 @@ class MontyStore(MemoryStore):
         self.kwargs = kwargs
         self.storage = storage
         self.storage_kwargs = storage_kwargs or {
-            "use_bson": True,
-            "monty_version": "4.0",
+            "use_bson": True,  # import pymongo's BSON; do not use montydb's
+            "mongo_version": "4.0",
         }
         self.client_kwargs = client_kwargs or {}
         super(MongoStore, self).__init__(**kwargs)  # noqa
@@ -946,17 +962,19 @@ class MontyStore(MemoryStore):
         Args:
             force_reset: Force connection reset.
         """
-        from montydb import set_storage, MontyClient  # type: ignore
-
-        set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
+        # TODO - workaround, may be obviated by a future montydb update
+        if self.database_path != ":memory:":
+            set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
         client = MontyClient(self.database_path, **self.client_kwargs)
         if not self._coll or force_reset:
-            self._coll = client["db"][self.collection_name]
+            self._coll = client[self.database_name][self.collection_name]
 
     @property
     def name(self) -> str:
         """Return a string representing this data source."""
-        return f"monty://{self.database_path}/{self.database}/{self.collection_name}"
+        return (
+            f"monty://{self.database_path}/{self.database_name}/{self.collection_name}"
+        )
 
     def count(
         self,
@@ -971,7 +989,6 @@ class MontyStore(MemoryStore):
             hint: Dictionary of indexes to use as hints for query optimizer.
                 Keys are field names and values are 1 for ascending or -1 for descending.
         """
-
         criteria = criteria if criteria else {}
 
         hint_list = (
