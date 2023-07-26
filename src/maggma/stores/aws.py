@@ -411,7 +411,9 @@ class S3Store(Store):
         s3_bucket.upload_fileobj(
             Fileobj=BytesIO(data),
             Key=self.sub_dir + str(doc[self.key]),
-            ExtraArgs={"Metadata": {s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()}},
+            ExtraArgs={
+                "Metadata": {s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()}
+            },
         )
 
         if lu_info is not None:
