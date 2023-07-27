@@ -105,7 +105,7 @@ class StoreFacade(Store):
 
         Args:
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in returned documents. By default, all fields are returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -170,7 +170,7 @@ class StoreFacade(Store):
         Args:
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -210,8 +210,8 @@ class StoreFacade(Store):
         Queries the Store for a single document
 
         Args:
-            criteria: PyMongo filter for documents to search
-            properties: properties to return in the document
+            criteria: PyMongo filter for documents to search in
+            properties: fields to include in returned documents. By default, all fields are returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
         """
@@ -434,7 +434,7 @@ class MultiStore:
 
         Args:
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in returned documents. By default, all fields are returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -507,7 +507,7 @@ class MultiStore:
         Args:
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -549,8 +549,8 @@ class MultiStore:
         Queries the Store for a single document
 
         Args:
-            criteria: PyMongo filter for documents to search
-            properties: properties to return in the document
+            criteria: PyMongo filter for documents to search in
+            properties: fields to include in returned documents. By default, all fields are returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
         """
