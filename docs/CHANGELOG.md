@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.51.25](https://github.com/materialsproject/maggma/tree/v0.51.25) (2023-07-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.24...v0.51.25)
+
+**Merged pull requests:**
+
+- Some cleanup: `isort`, updated classifiers, remove unused kwarg [\#833](https://github.com/materialsproject/maggma/pull/833) ([arosen93](https://github.com/arosen93))
+
 ## [v0.51.24](https://github.com/materialsproject/maggma/tree/v0.51.24) (2023-07-21)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.23...v0.51.24)
@@ -98,15 +106,15 @@
 
 ## [v0.51.12](https://github.com/materialsproject/maggma/tree/v0.51.12) (2023-06-27)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.11...v0.51.12)
-
-## [v0.51.11](https://github.com/materialsproject/maggma/tree/v0.51.11) (2023-06-27)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.10...v0.51.11)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.10...v0.51.12)
 
 ## [v0.51.10](https://github.com/materialsproject/maggma/tree/v0.51.10) (2023-06-27)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.9...v0.51.10)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.11...v0.51.10)
+
+## [v0.51.11](https://github.com/materialsproject/maggma/tree/v0.51.11) (2023-06-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.9...v0.51.11)
 
 **Merged pull requests:**
 
