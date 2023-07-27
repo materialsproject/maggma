@@ -28,7 +28,7 @@ setup(
     install_requires=[
         "setuptools",
         "ruamel.yaml<0.18",
-        "pydantic<=1.10.11",
+        "pydantic<2.0",
         "pydantic>=0.32.2",
         "pymongo>=4.2.0",
         "monty>=1.0.2",
