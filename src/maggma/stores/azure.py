@@ -2,15 +2,15 @@
 """
 Advanced Stores for connecting to Microsoft Azure data
 """
+import os
 import threading
 import warnings
 import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
-from typing import Dict, Iterator, List, Optional, Tuple, Union
 from json import dumps
-import os
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -19,11 +19,11 @@ from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
-    import azure.storage.blob as azure_blob
-    from azure.storage.blob import BlobServiceClient, ContainerClient
-    from azure.identity import DefaultAzureCredential
-    from azure.core.exceptions import ResourceExistsError
     import azure
+    import azure.storage.blob as azure_blob
+    from azure.core.exceptions import ResourceExistsError
+    from azure.identity import DefaultAzureCredential
+    from azure.storage.blob import BlobServiceClient, ContainerClient
 except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
     ContainerClient = None

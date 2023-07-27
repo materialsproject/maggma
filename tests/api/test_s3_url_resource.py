@@ -1,6 +1,7 @@
 import pytest
-from maggma.stores import MemoryStore
+
 from maggma.api.resource import S3URLResource
+from maggma.stores import MemoryStore
 
 
 @pytest.fixture

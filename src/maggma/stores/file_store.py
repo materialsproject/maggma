@@ -4,20 +4,20 @@ Module defining a FileStore that enables accessing files in a local directory
 using typical maggma access patterns.
 """
 
+import fnmatch
 import hashlib
 import os
-import fnmatch
 import re
-
 import warnings
-from pathlib import Path
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union, Iterator, Callable
+from pathlib import Path
+from typing import Callable, Dict, Iterator, List, Optional, Union
 
-from pymongo import UpdateOne
 from monty.io import zopen
-from maggma.core import StoreError, Sort
-from maggma.stores.mongolike import MemoryStore, JSONStore
+from pymongo import UpdateOne
+
+from maggma.core import Sort, StoreError
+from maggma.stores.mongolike import JSONStore, MemoryStore
 
 # These keys are automatically populated by the FileStore.read() method and
 # hence are not allowed to be manually overwritten
@@ -264,7 +264,7 @@ class FileStore(MemoryStore):
             self.key: file_id,
         }
 
-    def connect(self, force_reset: bool = False):
+    def connect(self):
         """
         Connect to the source data
 
@@ -273,9 +273,6 @@ class FileStore(MemoryStore):
 
         If there is a metadata .json file in the directory, read its
         contents into the MemoryStore
-
-        Args:
-            force_reset: whether to reset the connection or not
         """
         # read all files and place them in the MemoryStore
         # use super.update to bypass the read_only guard statement

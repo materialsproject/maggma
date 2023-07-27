@@ -5,23 +5,24 @@ Stores are a default access pattern to data and provide
 various utilities
 """
 
-from pathlib import Path
-from ruamel import yaml
-from itertools import chain, groupby
-from socket import socket
 import warnings
+from itertools import chain, groupby
+from pathlib import Path
+from socket import socket
+
+from ruamel import yaml
 
 try:
     from typing import (
+        Any,
+        Callable,
         Dict,
         Iterator,
         List,
+        Literal,
         Optional,
         Tuple,
         Union,
-        Any,
-        Callable,
-        Literal,
     )
 except ImportError:
     from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable

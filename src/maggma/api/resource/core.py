@@ -2,7 +2,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Type
 
-from fastapi import APIRouter, FastAPI, Response, Request
+from fastapi import APIRouter, FastAPI, Request, Response
 from monty.json import MontyDecoder, MSONable
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse

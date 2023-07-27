@@ -7,11 +7,12 @@ docker run -p 10000:10000 mcr.microsoft.com/azure-storage/azurite azurite-blob -
 """
 
 import time
-from datetime import datetime
 from contextlib import contextmanager
+from datetime import datetime
+
 import pytest
 
-from maggma.stores import MemoryStore, MongoStore, AzureBlobStore
+from maggma.stores import AzureBlobStore, MemoryStore, MongoStore
 
 try:
     import azure.storage.blob as azure_blob

@@ -1,14 +1,14 @@
-import orjson
 import os
 import shutil
 from datetime import datetime
-from unittest import mock
 from pathlib import Path
+from unittest import mock
 
 import mongomock.collection
-from monty.tempfile import ScratchDir
+import orjson
 import pymongo.collection
 import pytest
+from monty.tempfile import ScratchDir
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
 from maggma.core import StoreError

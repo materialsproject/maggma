@@ -1,8 +1,8 @@
 from inspect import signature
 from typing import Any, Dict, List, Optional, Type, Union
 
-from fastapi import Depends, HTTPException, Path, Request
-from fastapi import Response
+import orjson
+from fastapi import Depends, HTTPException, Path, Request, Response
 from pydantic import BaseModel
 from pymongo import timeout as query_timeout
 from pymongo.errors import NetworkTimeout, PyMongoError
@@ -10,13 +10,11 @@ from pymongo.errors import NetworkTimeout, PyMongoError
 from maggma.api.models import Meta
 from maggma.api.models import Response as ResponseModel
 from maggma.api.query_operator import PaginationQuery, QueryOperator, SparseFieldsQuery
-from maggma.api.resource import Resource, HintScheme, HeaderProcessor
+from maggma.api.resource import HeaderProcessor, HintScheme, Resource
 from maggma.api.resource.utils import attach_query_ops, generate_query_pipeline
 from maggma.api.utils import STORE_PARAMS, merge_queries, serialization_helper
 from maggma.core import Store
 from maggma.stores import MongoStore, S3Store
-
-import orjson
 
 
 class ReadOnlyResource(Resource):

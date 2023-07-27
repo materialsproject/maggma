@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Type
 
-from fastapi import HTTPException, Response, Request
+from fastapi import HTTPException, Request, Response
 from pydantic import BaseModel
 from pymongo import timeout as query_timeout
 from pymongo.errors import NetworkTimeout, PyMongoError
@@ -8,7 +8,7 @@ from pymongo.errors import NetworkTimeout, PyMongoError
 from maggma.api.models import Meta
 from maggma.api.models import Response as ResponseModel
 from maggma.api.query_operator import QueryOperator
-from maggma.api.resource import Resource, HeaderProcessor
+from maggma.api.resource import HeaderProcessor, Resource
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries
 from maggma.core import Store

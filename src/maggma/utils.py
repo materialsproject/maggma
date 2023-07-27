@@ -7,11 +7,11 @@ import logging
 import signal
 import uuid
 from datetime import datetime, timedelta
-from dateutil import parser
 from importlib import import_module
 from typing import Dict, Iterable, Optional, Union
 
 from bson.json_util import ObjectId
+from dateutil import parser
 from pydash.objects import get, has, set_
 from pydash.objects import unset as _unset
 from pydash.utilities import to_path
