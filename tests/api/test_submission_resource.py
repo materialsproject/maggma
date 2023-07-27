@@ -1,16 +1,15 @@
-from random import randint
 import json
+from datetime import datetime
+from random import randint
+
 import pytest
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from starlette.testclient import TestClient
 
-from datetime import datetime
-from maggma.api.query_operator.core import QueryOperator
-
-from maggma.api.resource import SubmissionResource
 from maggma.api.query_operator import PaginationQuery
-
+from maggma.api.query_operator.core import QueryOperator
+from maggma.api.resource import SubmissionResource
 from maggma.stores import MemoryStore
 
 

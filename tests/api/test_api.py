@@ -1,7 +1,7 @@
 from enum import Enum
 from random import choice, randint
+from typing import Any, Tuple
 from urllib.parse import urlencode
-from typing import Tuple, Any
 
 import pytest
 from fastapi.encoders import jsonable_encoder
@@ -11,10 +11,10 @@ from starlette.testclient import TestClient
 
 from maggma.api.API import API
 from maggma.api.query_operator import (
-    StringQueryOperator,
     NumericQuery,
-    SparseFieldsQuery,
     PaginationQuery,
+    SparseFieldsQuery,
+    StringQueryOperator,
 )
 from maggma.api.resource import ReadOnlyResource
 from maggma.stores import MemoryStore

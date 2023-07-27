@@ -1,9 +1,11 @@
-from monty.json import MontyDecoder
-from threading import Lock
-from maggma.core.store import Store, Sort
-from typing import Dict, Iterator, List, Optional, Tuple, Union, Callable, Any
 from functools import partial
 from multiprocessing.managers import BaseManager
+from threading import Lock
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+
+from monty.json import MontyDecoder
+
+from maggma.core.store import Sort, Store
 
 
 class StoreFacade(Store):

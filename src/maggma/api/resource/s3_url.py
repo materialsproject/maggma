@@ -1,17 +1,15 @@
 from datetime import datetime, timedelta
 from typing import List, Optional
-from botocore.exceptions import ClientError
-
-from fastapi import HTTPException, Path, Request
-from fastapi import Response
-
-from maggma.api.models import S3URLDoc
-from maggma.api.models import Response as ResponseModel
-from maggma.api.resource import Resource, HeaderProcessor
-from maggma.api.utils import serialization_helper
-from maggma.stores.aws import S3Store
 
 import orjson
+from botocore.exceptions import ClientError
+from fastapi import HTTPException, Path, Request, Response
+
+from maggma.api.models import Response as ResponseModel
+from maggma.api.models import S3URLDoc
+from maggma.api.resource import HeaderProcessor, Resource
+from maggma.api.utils import serialization_helper
+from maggma.stores.aws import S3Store
 
 
 class S3URLResource(Resource):

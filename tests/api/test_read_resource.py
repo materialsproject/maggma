@@ -1,3 +1,4 @@
+import inspect
 from datetime import datetime
 from random import randint
 from urllib.parse import urlencode
@@ -14,11 +15,8 @@ from maggma.api.query_operator import (
     StringQueryOperator,
 )
 from maggma.api.resource import ReadOnlyResource
-from maggma.stores import MemoryStore, AliasingStore
-
-import inspect
-
 from maggma.api.resource.core import HintScheme
+from maggma.stores import AliasingStore, MemoryStore
 
 
 class Owner(BaseModel):
