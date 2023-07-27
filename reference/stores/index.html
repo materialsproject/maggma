@@ -7235,7 +7235,7 @@ of the FileStore.</p>
             <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">file_id</span><span class="p">,</span>
         <span class="p">}</span>
 
-    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Connect to the source data</span>
 
@@ -7244,9 +7244,6 @@ of the FileStore.</p>
 
 <span class="sd">        If there is a metadata .json file in the directory, read its</span>
 <span class="sd">        contents into the MemoryStore</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            force_reset: whether to reset the connection or not</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># read all files and place them in the MemoryStore</span>
         <span class="c1"># use super.update to bypass the read_only guard statement</span>
@@ -7832,7 +7829,7 @@ from another field, such as name or path (see auto_data).</p>
 
 
 <h3 id="maggma.stores.file_store.FileStore.connect" class="doc doc-heading">
-<code class="codehilite language-python"><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></code>
+<code class="codehilite language-python"><span class="n">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></code>
 
 
 <a href="#maggma.stores.file_store.FileStore.connect" class="headerlink" title="Permanent link">&para;</a></h3>
@@ -7845,28 +7842,9 @@ items in the internal MemoryStore.</p>
 <p>If there is a metadata .json file in the directory, read its
 contents into the MemoryStore</p>
 
-<p><strong>Parameters:</strong></p>
-<table>
-  <thead>
-    <tr>
-      <th>Name</th>
-      <th>Type</th>
-      <th>Description</th>
-      <th>Default</th>
-    </tr>
-  </thead>
-  <tbody>
-      <tr>
-        <td><code>force_reset</code></td>
-        <td><code>bool</code></td>
-        <td><p>whether to reset the connection or not</p></td>
-        <td><code>False</code></td>
-      </tr>
-  </tbody>
-</table>
         <details class="quote">
           <summary>Source code in <code>maggma/stores/file_store.py</code></summary>
-          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Connect to the source data</span>
 
@@ -7875,9 +7853,6 @@ contents into the MemoryStore</p>
 
 <span class="sd">    If there is a metadata .json file in the directory, read its</span>
 <span class="sd">    contents into the MemoryStore</span>
-
-<span class="sd">    Args:</span>
-<span class="sd">        force_reset: whether to reset the connection or not</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># read all files and place them in the MemoryStore</span>
     <span class="c1"># use super.update to bypass the read_only guard statement</span>
