@@ -1,0 +1,154 @@
+# https://www.oddbird.net/2022/06/01/dependabot-single-pull-request/
+name: upgrade dependencies
+
+on:
+  workflow_dispatch: # Allow running on-demand
+  schedule:
+    # Runs every Monday at 8:00 UTC (4:00 Eastern)
+    - cron: '0 17 * * 1'
+
+jobs:
+  upgrade:
+    name: ${{ matrix.package }} (${{ matrix.os }}/py${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: ['ubuntu-latest']
+        package: ["optimade"]
+        python-version: ["3.10"]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: '**/requirements/${{ matrix.os }}_py${{ matrix.python-version }}.txt'
+      - name: Upgrade Python dependencies
+        shell: bash
+        run: |
+          python${{ matrix.python-version }} -m pip install --upgrade pip pip-tools
+          cd docker/${{ matrix.package }}
+          python${{ matrix.python-version }} -m piptools compile -q --resolver=backtracking --upgrade -o requirements/${{ matrix.os }}_py${{ matrix.python-version }}.txt
+      - name: Detect changes
+        id: changes
+        shell: bash
+        run: |
+          echo "count=`git diff --quiet docker/${{ matrix.package }}/requirements; echo $?`" >> $GITHUB_OUTPUT
+          echo "files=`git ls-files --exclude-standard --others docker/${{ matrix.package }}/requirements | wc -l | xargs`" >> $GITHUB_OUTPUT
+      - name: commit & push changes
+        if: steps.changes.outputs.count > 0 || steps.changes.outputs.files > 0
+        shell: bash
+        run: |
+          git config user.name github-actions
+          git config user.email github-actions@github.com
+          git add docker/${{ matrix.package }}/requirements
+          git commit -m "update dependencies for ${{ matrix.package }} (${{ matrix.os }}/py${{ matrix.python-version }})"
+          git push -f origin ${{ github.ref_name }}:auto-dependency-upgrades-${{ matrix.package }}-${{ matrix.os }}-py${{ matrix.python-version }}
+
+  pull_request:
+    name: Merge all branches and open PR
+    runs-on: ubuntu-latest
+    needs: [upgrade]
+    strategy:
+      matrix:
+        python-version: ["3.10"]
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          submodules: 'recursive'
+          token: ${{ secrets.PAT }}
+      - uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+          cache-dependency-path: '**/docker/python/requirements.txt'
+
+      - name: make new branch
+        run: |
+          git config --global user.name github-actions
+          git config --global user.email github-actions@github.com
+          git checkout -b auto-dependency-upgrades
+
+      - name: detect auto-upgrade-dependency branches
+        id: upgrade_changes
+        run: echo "count=$(git branch -r | grep auto-dependency-upgrades- | wc -l | xargs)" >> $GITHUB_OUTPUT
+
+      - name: merge all auto-dependency-upgrades branches
+        if: steps.upgrade_changes.outputs.count > 0
+        run: |
+          git branch -r | grep auto-dependency-upgrades- | xargs -I {} git merge {}
+          git rebase ${GITHUB_REF##*/}
+          git push -f origin auto-dependency-upgrades
+          git branch -r | grep auto-dependency-upgrades- | cut -d/ -f2 | xargs -I {} git push origin :{}
+
+      - name: submodule updates
+        run: git submodule update --remote
+
+      - name: compile docker/python dependencies
+        shell: bash
+        run: |
+          cd docker
+          python${{ matrix.python-version }} -m pip install --upgrade pip pip-tools
+          setup_packages="emmet/emmet-api emmet/emmet-core emmet/emmet-builders MPContribs/mpcontribs-api MPContribs/mpcontribs-client MPContribs/mpcontribs-portal"
+          pip_input=""; for i in `echo $setup_packages`; do pip_input="$pip_input $i/setup.py"; done
+          python${{ matrix.python-version }} -m piptools compile -q --resolver=backtracking --upgrade web/pyproject.toml MPContribs/mpcontribs-kernel-gateway/requirements.in `echo $pip_input` -o python/requirements-full.txt
+          grep -h -E "numpy==|scipy==|matplotlib==|pandas==" python/requirements-full.txt > python/requirements.txt
+          rm python/requirements-full.txt
+          python${{ matrix.python-version }} -m piptools compile -q --resolver=backtracking --upgrade python/requirements.txt web/pyproject.toml -o web/requirements/deployment.txt
+          cd web && git checkout main && git add requirements/deployment.txt && git commit -m "upgrade dependencies for deployment" && git push
+          cd -
+          python${{ matrix.python-version }} -m piptools compile -q --resolver=backtracking --upgrade python/requirements.txt MPContribs/mpcontribs-kernel-gateway/requirements.in -o MPContribs/mpcontribs-kernel-gateway/requirements/deployment.txt
+          for i in `echo $setup_packages`; do
+              python${{ matrix.python-version }} -m piptools compile -q --resolver=backtracking --upgrade python/requirements.txt $i/setup.py -o $i/requirements/deployment.txt
+          done
+          cd emmet && git checkout main && git add emmet-*/requirements/deployment.txt && git commit -m "upgrade dependencies for deployment" && git push
+          cd -
+          cd MPContribs && git checkout master && git add mpcontribs-*/requirements/deployment.txt && git commit -m "upgrade dependencies for deployment" && git push
+          cd -
+
+      - name: Detect changes
+        id: changes
+        shell: bash
+        run: |
+          echo "count=`git diff --quiet --ignore-submodules -- . ':!docker/python'; echo $?`" >> $GITHUB_OUTPUT
+          echo "countReq=`git diff --quiet docker/python/requirements.txt; echo $?`" >> $GITHUB_OUTPUT
+          echo "files=$(git ls-files --exclude-standard --others | wc -l | xargs)" >> $GITHUB_OUTPUT
+
+      - name: commit & push changes
+        if: steps.changes.outputs.count > 0 || steps.changes.outputs.files > 0 || steps.changes.outputs.countReq > 0
+        shell: bash
+        run: |
+          git add .
+          git commit -m "auto dependency upgrades"
+          git push origin auto-dependency-upgrades
+
+      - name: create and push tag to trigger python base image action
+        if: steps.changes.outputs.countReq > 0
+        shell: bash
+        run: |
+          ver=`grep FROM docker/python/Dockerfile | cut -d: -f2 | cut -d- -f1`
+          prefix=${ver%.*}${ver##*.}
+          patch=`git tag -l "python-${prefix}.*" | sort -V | tail -1 | cut -d. -f3`
+          [[ -z "$patch" ]] && tag="python-${prefix}.0" || tag="python-${prefix}.$((++patch))"
+          echo $tag
+          git tag $tag
+          git push --tags
+
+      - name: Open pull request if needed
+        if: steps.changes.outputs.count > 0 || steps.changes.outputs.files > 0 || steps.changes.outputs.countReq > 0
+        env:
+          GITHUB_TOKEN: ${{ secrets.PAT }}
+        # Only open a PR if the branch is not attached to an existing one
+        run: |
+          PR=$(gh pr list --head auto-dependency-upgrades --json number -q '.[0].number')
+          if [ -z $PR ]; then
+            gh pr create \
+            --head auto-dependency-upgrades \
+            --title "Automated dependency upgrades" \
+            --body "Full log: https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+          else
+            echo "Pull request already exists, won't create a new one."
+          fi
