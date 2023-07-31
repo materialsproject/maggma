@@ -1,14 +1,8 @@
 import base64
 import inspect
 import sys
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Optional,
-    Type,
-)
+from typing import Any, Callable, Dict, List, Optional, Type
+
 from bson.objectid import ObjectId
 from monty.json import MSONable
 from pydantic import BaseModel
