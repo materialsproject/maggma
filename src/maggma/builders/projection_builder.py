@@ -1,7 +1,7 @@
 from copy import deepcopy
 from datetime import datetime
 from itertools import chain
-from typing import Dict, Iterable, List, Union
+from typing import Dict, Iterable, List, Optional, Union
 
 from pydash import get
 
@@ -30,8 +30,8 @@ class Projection_Builder(Builder):
         source_stores: List[Store],
         target_store: Store,
         fields_to_project: Union[List[Union[List, Dict]], None] = None,
-        query_by_key: List = None,
-        **kwargs
+        query_by_key: Optional[List] = None,
+        **kwargs,
     ):
         """
         Args:
@@ -68,13 +68,9 @@ class Projection_Builder(Builder):
             raise TypeError("Input source_stores must be provided in a list")
         if isinstance(fields_to_project, list):
             if len(source_stores) != len(fields_to_project):
-                raise ValueError(
-                    "There must be an equal number of elements in source_stores and fields_to_project"
-                )
+                raise ValueError("There must be an equal number of elements in source_stores and fields_to_project")
         elif fields_to_project is not None:
-            raise TypeError(
-                "Input fields_to_project must be a list. E.g. [['str1','str2'],{'A':'str1','B':str2'}]"
-            )
+            raise TypeError("Input fields_to_project must be a list. E.g. [['str1','str2'],{'A':'str1','B':str2'}]")
 
         # interpret fields_to_project to create projection_mapping attribute
         projection_mapping: List[Dict]  # PEP 484 Type Hinting
@@ -122,7 +118,7 @@ class Projection_Builder(Builder):
         Returns:
             generator of items to process
         """
-        self.logger.info("Starting {} get_items...".format(self.__class__.__name__))
+        self.logger.info(f"Starting {self.__class__.__name__} get_items...")
 
         # get distinct key values
         if len(self.query_by_key) > 0:
@@ -134,19 +130,17 @@ class Projection_Builder(Builder):
                 unique_keys.update(store_keys)
                 if None in store_keys:
                     self.logger.debug(
-                        "None found as a key value for store {} with key {}".format(
-                            store.collection_name, store.key
-                        )
+                        f"None found as a key value for store {store.collection_name} with key {store.key}"
                     )
             keys = list(unique_keys)
-            self.logger.info("{} distinct key values found".format(len(keys)))
-            self.logger.debug("None found in key values? {}".format(None in keys))
+            self.logger.info(f"{len(keys)} distinct key values found")
+            self.logger.debug(f"None found in key values? {None in keys}")
 
         # for every key (in chunks), query from each store and
         # project fields specified by projection_mapping
         for chunked_keys in grouper(keys, self.chunk_size):
             chunked_keys = [k for k in chunked_keys if k is not None]
-            self.logger.debug("Querying by chunked_keys: {}".format(chunked_keys))
+            self.logger.debug(f"Querying by chunked_keys: {chunked_keys}")
 
             unsorted_items_to_process = []
             for store, projection in zip(self.sources, self.projection_mapping):
@@ -156,25 +150,15 @@ class Projection_Builder(Builder):
                 properties: Union[List, None]
                 if projection == {}:  # all fields are projected
                     properties = None
-                    self.logger.debug(
-                        "For store {} getting all properties".format(
-                            store.collection_name
-                        )
-                    )
+                    self.logger.debug(f"For store {store.collection_name} getting all properties")
                 else:  # only specified fields are projected
-                    properties = [v for v in projection.values()]
-                    self.logger.debug(
-                        "For {} store getting properties: {}".format(
-                            store.collection_name, properties
-                        )
-                    )
+                    properties = list(projection.values())
+                    self.logger.debug(f"For {store.collection_name} store getting properties: {properties}")
 
                 # get docs from store for given chunk of key values,
                 # rename fields if specified by projection mapping,
                 # and put in list of unsorted items to be processed
-                docs = store.query(
-                    criteria={store.key: {"$in": chunked_keys}}, properties=properties
-                )
+                docs = store.query(criteria={store.key: {"$in": chunked_keys}}, properties=properties)
                 for d in docs:
                     if properties is None:  # all fields are projected as is
                         item = deepcopy(d)
@@ -187,7 +171,7 @@ class Projection_Builder(Builder):
                     # key value stored under target_key is used for sorting
                     # items during the process_items step
                     for k in ["_id", store.last_updated_field]:
-                        if k in item.keys():
+                        if k in item:
                             del item[k]
                     item[self.target.key] = d[store.key]
 
@@ -225,8 +209,8 @@ class Projection_Builder(Builder):
 
         items_for_target = []
         for k, i_sorted in items_sorted_by_key.items():
-            self.logger.debug("Combined items for {}: {}".format(key, k))
-            target_doc = {}  # type: Dict
+            self.logger.debug(f"Combined items for {key}: {k}")
+            target_doc: Dict = {}
             for i in i_sorted:
                 target_doc.update(i)
             # last modification is adding key value avoid overwriting
@@ -248,7 +232,7 @@ class Projection_Builder(Builder):
         """
         items = list(filter(None, chain.from_iterable(items)))
         num_items = len(items)
-        self.logger.info("Updating target with {} items...".format(num_items))
+        self.logger.info(f"Updating target with {num_items} items...")
         target = self.target
 
         target_insertion_time = datetime.utcnow()

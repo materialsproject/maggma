@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Validator class for document-level validation on Stores. Attach an instance
 of a Validator subclass to a Store .schema variable to enable validation on

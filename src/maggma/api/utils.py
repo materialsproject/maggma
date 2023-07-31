@@ -48,12 +48,7 @@ def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
         if "properties" in sub_query:
             properties.extend(sub_query["properties"])
 
-    remainder = {
-        k: v
-        for query in queries
-        for k, v in query.items()
-        if k not in ["criteria", "properties"]
-    }
+    remainder = {k: v for query in queries for k, v in query.items() if k not in ["criteria", "properties"]}
 
     return {
         "criteria": criteria,
@@ -79,7 +74,7 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
             default=defaults.get(param, None),
             annotation=annotations.get(param, None),
         )
-        for param in annotations.keys()
+        for param in annotations
         if param not in defaults.keys()
     ]
 
@@ -90,12 +85,10 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
             default=defaults.get(param, None),
             annotation=annotations.get(param, None),
         )
-        for param in defaults.keys()
+        for param in defaults
     ]
 
-    setattr(
-        function, "__signature__", inspect.Signature(required_params + optional_params)
-    )
+    function.__signature__ = inspect.Signature(required_params + optional_params)
 
 
 def api_sanitize(
@@ -114,11 +107,9 @@ def api_sanitize(
         fields_to_leave: list of strings for model fields as "model__name__.field"
     """
 
-    models = [
-        model
-        for model in get_flat_models_from_model(pydantic_model)
-        if issubclass(model, BaseModel)
-    ]  # type: List[Type[BaseModel]]
+    models: List[Type[BaseModel]] = [
+        model for model in get_flat_models_from_model(pydantic_model) if issubclass(model, BaseModel)
+    ]
 
     fields_to_leave = fields_to_leave or []
     fields_tuples = [f.split(".") for f in fields_to_leave]
@@ -170,15 +161,13 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
                 errors.append("@class")
 
             if len(errors) > 0:
-                raise ValueError(
-                    "Missing Monty seriailzation fields in dictionary: {errors}"
-                )
+                raise ValueError("Missing Monty seriailzation fields in dictionary: {errors}")
 
             return v
         else:
             raise ValueError(f"Must provide {cls.__name__} or MSONable dictionary")
 
-    setattr(monty_cls, "validate_monty", classmethod(validate_monty))
+    monty_cls.validate_monty = classmethod(validate_monty)
 
     return monty_cls
 

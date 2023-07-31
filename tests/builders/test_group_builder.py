@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Tests for group builder
 """
@@ -7,7 +6,6 @@ from random import randint
 from typing import Dict, List
 
 import pytest
-
 from maggma.builders import GroupBuilder
 from maggma.stores import MemoryStore
 
@@ -17,12 +15,12 @@ def now():
     return datetime.utcnow()
 
 
-@pytest.fixture
+@pytest.fixture()
 def docs(now):
     return [{"k": i, "a": i % 3, "b": randint(0, i), "lu": now} for i in range(20)]
 
 
-@pytest.fixture
+@pytest.fixture()
 def source(docs):
     store = MemoryStore("source", key="k", last_updated_field="lu")
     store.connect()
@@ -32,7 +30,7 @@ def source(docs):
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def target():
     store = MemoryStore("target", key="ks", last_updated_field="lu")
     store.connect()
@@ -57,8 +55,8 @@ class DummyGrouper(GroupBuilder):
         """
         new_doc = {}
         for k in self.grouping_keys:
-            new_doc[k] = set(d[k] for d in items)
-        new_doc["b"] = list(d["b"] for d in items)
+            new_doc[k] = {d[k] for d in items}
+        new_doc["b"] = [d["b"] for d in items]
         return new_doc
 
 

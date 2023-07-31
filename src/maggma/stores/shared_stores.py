@@ -49,6 +49,7 @@ class StoreFacade(Store):
     def __getattr__(self, name: str) -> Any:
         if name not in dir(self):
             return self.multistore._proxy_attribute(name, self.store)
+        return None
 
     def __setattr__(self, name: str, value: Any):
         if name not in ["store", "multistore"]:
@@ -122,12 +123,7 @@ class StoreFacade(Store):
             limit=limit,
         )
 
-    def update(
-        self,
-        docs: Union[List[Dict], Dict],
-        key: Union[List, str, None] = None,
-        **kwargs
-    ):
+    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None, **kwargs):
         """
         Update documents into the Store
 
@@ -142,7 +138,7 @@ class StoreFacade(Store):
 
     def ensure_index(self, key: str, unique: bool = False, **kwargs) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded
 
         Args:
             key: single key to index
@@ -151,9 +147,7 @@ class StoreFacade(Store):
         Returns:
             bool indicating if the index exists/was created
         """
-        return self.multistore.ensure_index(
-            self.store, key=key, unique=unique, **kwargs
-        )
+        return self.multistore.ensure_index(self.store, key=key, unique=unique, **kwargs)
 
     def groupby(
         self,
@@ -182,14 +176,7 @@ class StoreFacade(Store):
             generator returning tuples of (dict, list of docs)
         """
         return self.multistore.groupby(
-            self.store,
-            keys=keys,
-            criteria=criteria,
-            properties=properties,
-            sort=sort,
-            skip=skip,
-            limit=limit,
-            **kwargs
+            self.store, keys=keys, criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit, **kwargs
         )
 
     def remove_docs(self, criteria: Dict, **kwargs):
@@ -217,17 +204,9 @@ class StoreFacade(Store):
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
         """
-        return self.multistore.query_one(
-            self.store, criteria=criteria, properties=properties, sort=sort, **kwargs
-        )
+        return self.multistore.query_one(self.store, criteria=criteria, properties=properties, sort=sort, **kwargs)
 
-    def distinct(
-        self,
-        field: str,
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-        **kwargs
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False, **kwargs) -> List:
         """
         Get all distinct values for a field
 
@@ -235,9 +214,7 @@ class StoreFacade(Store):
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
         """
-        return self.multistore.distinct(
-            self.store, field=field, criteria=criteria, all_exist=all_exist, **kwargs
-        )
+        return self.multistore.distinct(self.store, field=field, criteria=criteria, all_exist=all_exist, **kwargs)
 
 
 class MultiStore:
@@ -331,9 +308,9 @@ class MultiStore:
                 self._stores.append(MontyDecoder().process_decoded(store.as_dict()))
                 self._stores[-1].connect()
                 return True
-            else:
-                # Store already exists, we don't need to add it
-                return True
+
+            # Store already exists, we don't need to add it
+            return True
 
     def ensure_store(self, store: Store) -> bool:
         """
@@ -446,22 +423,11 @@ class MultiStore:
         # We must return a list, since a generator is not serializable
         return list(
             self._stores[store_id].query(
-                criteria=criteria,
-                properties=properties,
-                sort=sort,
-                skip=skip,
-                limit=limit,
-                **kwargs
+                criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit, **kwargs
             )
         )
 
-    def update(
-        self,
-        store: Store,
-        docs: Union[List[Dict], Dict],
-        key: Union[List, str, None] = None,
-        **kwargs
-    ):
+    def update(self, store: Store, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None, **kwargs):
         """
         Update documents into the Store
 
@@ -475,11 +441,9 @@ class MultiStore:
         store_id = self.get_store_index(store)
         return self._stores[store_id].update(docs=docs, key=key, **kwargs)
 
-    def ensure_index(
-        self, store: Store, key: str, unique: bool = False, **kwargs
-    ) -> bool:
+    def ensure_index(self, store: Store, key: str, unique: bool = False, **kwargs) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded
 
         Args:
             key: single key to index
@@ -520,13 +484,7 @@ class MultiStore:
         """
         store_id = self.get_store_index(store)
         return self._stores[store_id].groupby(
-            keys=keys,
-            criteria=criteria,
-            properties=properties,
-            sort=sort,
-            skip=skip,
-            limit=limit,
-            **kwargs
+            keys=keys, criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit, **kwargs
         )
 
     def remove_docs(self, store: Store, criteria: Dict, **kwargs):
@@ -558,19 +516,12 @@ class MultiStore:
         """
         store_id = self.get_store_index(store)
         return next(
-            self._stores[store_id].query(
-                criteria=criteria, properties=properties, sort=sort, **kwargs
-            ),
+            self._stores[store_id].query(criteria=criteria, properties=properties, sort=sort, **kwargs),
             None,
         )
 
     def distinct(
-        self,
-        store: Store,
-        field: str,
-        criteria: Optional[Dict] = None,
-        all_exist: bool = False,
-        **kwargs
+        self, store: Store, field: str, criteria: Optional[Dict] = None, all_exist: bool = False, **kwargs
     ) -> List:
         """
         Get all distinct values for a field
@@ -580,9 +531,7 @@ class MultiStore:
             criteria: PyMongo filter for documents to search in
         """
         store_id = self.get_store_index(store)
-        return self._stores[store_id].distinct(
-            field=field, criteria=criteria, all_exist=all_exist, **kwargs
-        )
+        return self._stores[store_id].distinct(field=field, criteria=criteria, all_exist=all_exist, **kwargs)
 
     def set_store_attribute(self, store: Store, name: str, value: Any):
         """
@@ -628,8 +577,7 @@ class MultiStore:
         maybe_fn = getattr(self._stores[store_id], name)
         if callable(maybe_fn):
             return partial(self.call_attr, name=name, store=store)
-        else:
-            return maybe_fn
+        return maybe_fn
 
 
 class MultiStoreManager(BaseManager):

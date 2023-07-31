@@ -83,7 +83,6 @@ isort.split-on-trailing-comma = false
 "src/maggma/api/*" = ["B008", "B021", "RET505", "RET506"]
 "tests/api/*" = ["B017", "B018"]
 "src/maggma/cli/*" = ["EXE001"] # triggered by ! at top of file
-"src/maggma/api/utils.py" = ["I001"] # to allow unsorted import block
 
 [tool.pytest.ini_options]
 addopts = "--color=yes -p no:warnings --import-mode=importlib --durations=30"
@@ -98,4 +97,5 @@ explicit_package_bases = true
 no_implicit_optional = false
 
 [tool.codespell]
-ignore-words-list = "ot"
+ignore-words-list = "ot,nin"
+skip = 'docs/CHANGELOG.md,tests/test_files/*'

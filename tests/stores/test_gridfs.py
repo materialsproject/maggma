@@ -5,14 +5,13 @@ from datetime import datetime
 import numpy as np
 import numpy.testing.utils as nptu
 import pytest
-from pymongo.errors import ConfigurationError
-
 from maggma.core import StoreError
 from maggma.stores import GridFSStore, MongoStore
 from maggma.stores.gridfs import GridFSURIStore, files_collection_fields
+from pymongo.errors import ConfigurationError
 
 
-@pytest.fixture
+@pytest.fixture()
 def mongostore():
     store = MongoStore("maggma_test", "test")
     store.connect()
@@ -20,7 +19,7 @@ def mongostore():
     store._collection.drop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def gridfsstore():
     store = GridFSStore("maggma_test", "test", key="task_id")
     store.connect()
@@ -34,47 +33,30 @@ def test_update(gridfsstore):
     data2 = np.random.rand(256)
     tic = datetime(2018, 4, 12, 16)
     # Test metadata storage
-    gridfsstore.update(
-        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
-    )
-    assert (
-        gridfsstore._files_collection.find_one({"metadata.task_id": "mp-1"}) is not None
-    )
+    gridfsstore.update([{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}])
+    assert gridfsstore._files_collection.find_one({"metadata.task_id": "mp-1"}) is not None
 
     # Test storing data
-    gridfsstore.update(
-        [{"task_id": "mp-1", "data": data2, gridfsstore.last_updated_field: tic}]
-    )
+    gridfsstore.update([{"task_id": "mp-1", "data": data2, gridfsstore.last_updated_field: tic}])
     assert len(list(gridfsstore.query({"task_id": "mp-1"}))) == 1
     assert "task_id" in gridfsstore.query_one({"task_id": "mp-1"})
-    nptu.assert_almost_equal(
-        gridfsstore.query_one({"task_id": "mp-1"})["data"], data2, 7
-    )
+    nptu.assert_almost_equal(gridfsstore.query_one({"task_id": "mp-1"})["data"], data2, 7)
 
     # Test storing compressed data
     gridfsstore = GridFSStore("maggma_test", "test", key="task_id", compression=True)
     gridfsstore.connect()
     gridfsstore.update([{"task_id": "mp-1", "data": data1}])
-    assert (
-        gridfsstore._files_collection.find_one({"metadata.compression": "zlib"})
-        is not None
-    )
+    assert gridfsstore._files_collection.find_one({"metadata.compression": "zlib"}) is not None
 
-    nptu.assert_almost_equal(
-        gridfsstore.query_one({"task_id": "mp-1"})["data"], data1, 7
-    )
+    nptu.assert_almost_equal(gridfsstore.query_one({"task_id": "mp-1"})["data"], data1, 7)
 
 
 def test_remove(gridfsstore):
     data1 = np.random.rand(256)
     data2 = np.random.rand(256)
     tic = datetime(2018, 4, 12, 16)
-    gridfsstore.update(
-        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
-    )
-    gridfsstore.update(
-        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}]
-    )
+    gridfsstore.update([{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}])
+    gridfsstore.update([{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}])
 
     assert gridfsstore.query_one(criteria={"task_id": "mp-1"})
     assert gridfsstore.query_one(criteria={"task_id": "mp-2"})
@@ -87,15 +69,11 @@ def test_count(gridfsstore):
     data1 = np.random.rand(256)
     data2 = np.random.rand(256)
     tic = datetime(2018, 4, 12, 16)
-    gridfsstore.update(
-        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
-    )
+    gridfsstore.update([{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}])
 
     assert gridfsstore.count() == 1
 
-    gridfsstore.update(
-        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}]
-    )
+    gridfsstore.update([{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}])
 
     assert gridfsstore.count() == 2
     assert gridfsstore.count({"task_id": "mp-2"}) == 1
@@ -105,12 +83,8 @@ def test_query(gridfsstore):
     data1 = np.random.rand(256)
     data2 = np.random.rand(256)
     tic = datetime(2018, 4, 12, 16)
-    gridfsstore.update(
-        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
-    )
-    gridfsstore.update(
-        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}]
-    )
+    gridfsstore.update([{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}])
+    gridfsstore.update([{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}])
 
     doc = gridfsstore.query_one(criteria={"task_id": "mp-1"})
     nptu.assert_almost_equal(doc["data"], data1, 7)
@@ -136,26 +110,18 @@ def test_last_updated(gridfsstore):
     data2 = np.random.rand(256)
     tic = datetime(2018, 4, 12, 16)
 
-    gridfsstore.update(
-        [{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}]
-    )
-    gridfsstore.update(
-        [{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}]
-    )
+    gridfsstore.update([{"task_id": "mp-1", "data": data1, gridfsstore.last_updated_field: tic}])
+    gridfsstore.update([{"task_id": "mp-2", "data": data2, gridfsstore.last_updated_field: tic}])
 
     assert gridfsstore.last_updated == tic
 
     toc = datetime(2019, 6, 12, 16)
-    gridfsstore.update(
-        [{"task_id": "mp-3", "data": data2, gridfsstore.last_updated_field: toc}]
-    )
+    gridfsstore.update([{"task_id": "mp-3", "data": data2, gridfsstore.last_updated_field: toc}])
 
     assert gridfsstore.last_updated == toc
 
     tic = datetime(2017, 6, 12, 16)
-    gridfsstore.update(
-        [{"task_id": "mp-4", "data": data2, gridfsstore.last_updated_field: tic}]
-    )
+    gridfsstore.update([{"task_id": "mp-4", "data": data2, gridfsstore.last_updated_field: tic}])
 
     assert gridfsstore.last_updated == toc
 
@@ -246,10 +212,7 @@ def test_gridfsstore_from_launchpad_file(lp_file):
 def test_searchable_fields(gridfsstore):
     tic = datetime(2018, 4, 12, 16)
 
-    data = [
-        {"task_id": f"mp-{i}", "a": i, gridfsstore.last_updated_field: tic}
-        for i in range(3)
-    ]
+    data = [{"task_id": f"mp-{i}", "a": i, gridfsstore.last_updated_field: tic} for i in range(3)]
     gridfsstore.searchable_fields = ["task_id"]
     gridfsstore.update(data, key="a")
 
@@ -260,10 +223,7 @@ def test_searchable_fields(gridfsstore):
 def test_additional_metadata(gridfsstore):
     tic = datetime(2018, 4, 12, 16)
 
-    data = [
-        {"task_id": f"mp-{i}", "a": i, gridfsstore.last_updated_field: tic}
-        for i in range(3)
-    ]
+    data = [{"task_id": f"mp-{i}", "a": i, gridfsstore.last_updated_field: tic} for i in range(3)]
 
     gridfsstore.update(data, key="a", additional_metadata="task_id")
 

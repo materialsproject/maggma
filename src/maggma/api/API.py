@@ -23,8 +23,8 @@ class API(MSONable):
         version: str = "v0.0.0",
         debug: bool = False,
         heartbeat_meta: Optional[Dict] = None,
-        description: str = None,
-        tags_meta: List[Dict] = None,
+        description: Optional[str] = None,
+        tags_meta: Optional[List[Dict]] = None,
     ):
         """
         Args:
@@ -33,7 +33,7 @@ class API(MSONable):
             version: the version for this API
             debug: turns debug on in FastAPI
             heartbeat_meta: dictionary of additional metadata to include in the heartbeat response
-            description: decription of the API to be used in the generated docs
+            description: description of the API to be used in the generated docs
             tags_meta: descriptions of tags to be used in the generated docs
         """
         self.title = title

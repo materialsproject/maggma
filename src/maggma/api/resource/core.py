@@ -38,7 +38,6 @@ class Resource(MSONable, metaclass=ABCMeta):
         """
         Callback to perform some work on resource initialization
         """
-        pass
 
     @abstractmethod
     def prepare_endpoint(self):
@@ -46,7 +45,6 @@ class Resource(MSONable, metaclass=ABCMeta):
         Internal method to prepare the endpoint by setting up default handlers
         for routes.
         """
-        pass
 
     def setup_redirect(self):
         @self.router.get("$", include_in_schema=False)

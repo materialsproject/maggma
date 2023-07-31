@@ -4,10 +4,9 @@ from typing import Union
 
 import pytest
 from bson import ObjectId
+from maggma.api.utils import api_sanitize, serialization_helper
 from monty.json import MSONable
 from pydantic import BaseModel, Field
-
-from maggma.api.utils import api_sanitize, serialization_helper
 
 
 class SomeEnum(Enum):
@@ -29,7 +28,7 @@ class AnotherPet(MSONable):
 
 
 class AnotherOwner(BaseModel):
-    name: str = Field(..., description="Ower name")
+    name: str = Field(..., description="Owner name")
     weight_or_pet: Union[float, AnotherPet] = Field(..., title="Owners weight or Pet")
 
 
@@ -96,7 +95,7 @@ def test_serialization_helper():
     assert serialization_helper(oid) == "60b7d47bb671aa7b01a2adf6"
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 def test_serialization_helper_xfail():
     oid = "test"
     serialization_helper(oid)

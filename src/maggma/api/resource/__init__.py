@@ -1,6 +1,7 @@
-from maggma.api.resource.core import Resource
-from maggma.api.resource.core import HintScheme
-from maggma.api.resource.core import HeaderProcessor
+# isort: off
+from maggma.api.resource.core import HeaderProcessor, HintScheme, Resource
+
+# isort: on
 
 from maggma.api.resource.aggregation import AggregationResource
 from maggma.api.resource.post_resource import PostOnlyResource

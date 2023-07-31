@@ -5,8 +5,8 @@ from pathlib import Path
 import pytest
 
 
-@pytest.fixture
-def tmp_dir():
+@pytest.fixture()
+def tmp_dir():  # noqa: PT004
     """
     Create a clean directory and cd into it.
 
@@ -24,36 +24,34 @@ def tmp_dir():
     shutil.rmtree(newpath)
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_dir():
     module_dir = Path(__file__).resolve().parent
     test_dir = module_dir / "test_files"
     return test_dir.resolve()
 
 
-@pytest.fixture
+@pytest.fixture()
 def db_json(test_dir):
     db_dir = test_dir / "settings_files"
     db_json = db_dir / "db.json"
     return db_json.resolve()
 
 
-@pytest.fixture
+@pytest.fixture()
 def lp_file(test_dir):
     db_dir = test_dir / "settings_files"
     lp_file = db_dir / "my_launchpad.yaml"
     return lp_file.resolve()
 
 
-@pytest.fixture
+@pytest.fixture()
 def log_to_stdout():
     # Set Logging
     root = logging.getLogger()
     root.setLevel(logging.DEBUG)
     ch = logging.StreamHandler(sys.stdout)
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     ch.setFormatter(formatter)
     root.addHandler(ch)
     return root
@@ -73,9 +71,3 @@ def pytest_itemcollected(item):
     doc = item.obj.__doc__.strip() if item.obj.__doc__ else ""
     if doc:
         item._nodeid = item._nodeid.split("::")[0] + "::" + doc
-
-
-if sys.version_info < (3, 7):
-    # Ignore API tests on python 3.6
-    collect_ignore = ["cli/test_distributed.py"]
-    collect_ignore_glob = ["api/*"]

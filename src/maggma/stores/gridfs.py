@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
@@ -52,7 +51,7 @@ class GridFSStore(Store):
         password: str = "",
         compression: bool = False,
         ensure_metadata: bool = False,
-        searchable_fields: List[str] = None,
+        searchable_fields: Optional[List[str]] = None,
         auth_source: Optional[str] = None,
         mongoclient_kwargs: Optional[Dict] = None,
         ssh_tunnel: Optional[SSHTunnel] = None,
@@ -106,7 +105,7 @@ class GridFSStore(Store):
 
         Returns:
         """
-        with open(lp_file, "r") as f:
+        with open(lp_file) as f:
             lp_creds = yaml.safe_load(f.read())
 
         db_creds = lp_creds.copy()
@@ -152,19 +151,17 @@ class GridFSStore(Store):
             db = conn[self.database]
 
             self._coll = gridfs.GridFS(db, self.collection_name)
-            self._files_collection = db["{}.files".format(self.collection_name)]
+            self._files_collection = db[f"{self.collection_name}.files"]
             self._files_store = MongoStore.from_collection(self._files_collection)
             self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
             self._files_store.key = self.key
-            self._chunks_collection = db["{}.chunks".format(self.collection_name)]
+            self._chunks_collection = db[f"{self.collection_name}.chunks"]
 
     @property
     def _collection(self):
         """Property referring to underlying pymongo collection"""
         if self._coll is None:
-            raise StoreError(
-                "Must connect Mongo-like store before attempting to use it"
-            )
+            raise StoreError("Must connect Mongo-like store before attempting to use it")
         return self._coll
 
     @property
@@ -184,9 +181,7 @@ class GridFSStore(Store):
         """
         new_criteria = dict()
         for field in criteria:
-            if field not in files_collection_fields and not field.startswith(
-                "metadata."
-            ):
+            if field not in files_collection_fields and not field.startswith("metadata."):
                 new_criteria["metadata." + field] = copy.copy(criteria[field])
             else:
                 new_criteria[field] = copy.copy(criteria[field])
@@ -240,9 +235,7 @@ class GridFSStore(Store):
         elif isinstance(properties, list):
             prop_keys = set(properties)
 
-        for doc in self._files_store.query(
-            criteria=criteria, sort=sort, limit=limit, skip=skip
-        ):
+        for doc in self._files_store.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
@@ -273,9 +266,7 @@ class GridFSStore(Store):
 
                 yield data
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field. This function only operates
         on the metadata in the files collection
@@ -284,17 +275,10 @@ class GridFSStore(Store):
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
         """
-        criteria = (
-            self.transform_criteria(criteria)
-            if isinstance(criteria, dict)
-            else criteria
-        )
+        criteria = self.transform_criteria(criteria) if isinstance(criteria, dict) else criteria
 
         field = (
-            f"metadata.{field}"
-            if field not in files_collection_fields
-            and not field.startswith("metadata.")
-            else field
+            f"metadata.{field}" if field not in files_collection_fields and not field.startswith("metadata.") else field
         )
 
         return self._files_store.distinct(field=field, criteria=criteria)
@@ -326,30 +310,15 @@ class GridFSStore(Store):
             generator returning tuples of (dict, list of docs)
         """
 
-        criteria = (
-            self.transform_criteria(criteria)
-            if isinstance(criteria, dict)
-            else criteria
-        )
+        criteria = self.transform_criteria(criteria) if isinstance(criteria, dict) else criteria
         keys = [keys] if not isinstance(keys, list) else keys
         keys = [
-            f"metadata.{k}"
-            if k not in files_collection_fields and not k.startswith("metadata.")
-            else k
-            for k in keys
+            f"metadata.{k}" if k not in files_collection_fields and not k.startswith("metadata.") else k for k in keys
         ]
-        for group, ids in self._files_store.groupby(
-            keys, criteria=criteria, properties=[f"metadata.{self.key}"]
-        ):
-            ids = [
-                get(doc, f"metadata.{self.key}")
-                for doc in ids
-                if has(doc, f"metadata.{self.key}")
-            ]
+        for group, ids in self._files_store.groupby(keys, criteria=criteria, properties=[f"metadata.{self.key}"]):
+            ids = [get(doc, f"metadata.{self.key}") for doc in ids if has(doc, f"metadata.{self.key}")]
 
-            group = {
-                k.replace("metadata.", ""): get(group, k) for k in keys if has(group, k)
-            }
+            group = {k.replace("metadata.", ""): get(group, k) for k in keys if has(group, k)}
 
             yield group, list(self.query(criteria={self.key: {"$in": ids}}))
 
@@ -366,10 +335,9 @@ class GridFSStore(Store):
         """
         # Transform key for gridfs first
         if key not in files_collection_fields:
-            files_col_key = "metadata.{}".format(key)
+            files_col_key = f"metadata.{key}"
             return self._files_store.ensure_index(files_col_key, unique=unique)
-        else:
-            return self._files_store.ensure_index(key, unique=unique)
+        return self._files_store.ensure_index(key, unique=unique)
 
     def update(
         self,
@@ -411,9 +379,7 @@ class GridFSStore(Store):
 
             metadata = {
                 k: get(d, k)
-                for k in [self.last_updated_field]
-                + additional_metadata
-                + self.searchable_fields
+                for k in [self.last_updated_field, *additional_metadata, *self.searchable_fields]
                 if has(d, k)
             }
             metadata.update(search_doc)
@@ -426,11 +392,7 @@ class GridFSStore(Store):
             search_doc = self.transform_criteria(search_doc)
 
             # Cleans up old gridfs entries
-            for fdoc in (
-                self._files_collection.find(search_doc, ["_id"])
-                .sort("uploadDate", -1)
-                .skip(1)
-            ):
+            for fdoc in self._files_collection.find(search_doc, ["_id"]).sort("uploadDate", -1).skip(1):
                 self._collection.delete(fdoc["_id"])
 
     def remove_docs(self, criteria: Dict):
@@ -477,10 +439,10 @@ class GridFSURIStore(GridFSStore):
         self,
         uri: str,
         collection_name: str,
-        database: str = None,
+        database: Optional[str] = None,
         compression: bool = False,
         ensure_metadata: bool = False,
-        searchable_fields: List[str] = None,
+        searchable_fields: Optional[List[str]] = None,
         mongoclient_kwargs: Optional[Dict] = None,
         **kwargs,
     ):
@@ -501,9 +463,7 @@ class GridFSURIStore(GridFSStore):
         if database is None:
             d_uri = uri_parser.parse_uri(uri)
             if d_uri["database"] is None:
-                raise ConfigurationError(
-                    "If database name is not supplied, a database must be set in the uri"
-                )
+                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
             self.database = d_uri["database"]
         else:
             self.database = database
@@ -528,8 +488,8 @@ class GridFSURIStore(GridFSStore):
             conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
             db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
-            self._files_collection = db["{}.files".format(self.collection_name)]
+            self._files_collection = db[f"{self.collection_name}.files"]
             self._files_store = MongoStore.from_collection(self._files_collection)
             self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
             self._files_store.key = self.key
-            self._chunks_collection = db["{}.chunks".format(self.collection_name)]
+            self._chunks_collection = db[f"{self.collection_name}.chunks"]

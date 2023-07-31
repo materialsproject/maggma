@@ -15,7 +15,7 @@ my_builder = MultiplyBuilder(source_store,target_store,multiplier=3)
 my_builder.run()
 ```
 
-A better way to run this builder would be to use the `mrun` command line tool. Since evrything in `maggma` is MSONable, we can use `monty` to dump the builders into a JSON file:
+A better way to run this builder would be to use the `mrun` command line tool. Since everything in `maggma` is MSONable, we can use `monty` to dump the builders into a JSON file:
 
 ``` python
 from monty.serialization import dumpfn
@@ -29,7 +29,7 @@ Then we can run the builder using `mrun`:
 mrun my_builder.json
 ```
 
-`mrun` has a number of usefull options:
+`mrun` has a number of useful options:
 
 ``` shell
 mrun --help

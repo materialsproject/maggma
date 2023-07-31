@@ -3,12 +3,11 @@ from random import randint
 
 import pytest
 from fastapi import FastAPI
-from pydantic import BaseModel, Field
-from starlette.testclient import TestClient
-
 from maggma.api.query_operator.core import QueryOperator
 from maggma.api.resource import AggregationResource
 from maggma.stores import MemoryStore
+from pydantic import BaseModel, Field
+from starlette.testclient import TestClient
 
 
 class Owner(BaseModel):
@@ -28,7 +27,7 @@ owners = (
 total_owners = len(owners)
 
 
-@pytest.fixture
+@pytest.fixture()
 def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -36,7 +35,7 @@ def owner_store():
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def pipeline_query_op():
     class PipelineQuery(QueryOperator):
         def query(self):
@@ -50,16 +49,12 @@ def pipeline_query_op():
 
 
 def test_init(owner_store, pipeline_query_op):
-    resource = AggregationResource(
-        store=owner_store, pipeline_query_operator=pipeline_query_op, model=Owner
-    )
+    resource = AggregationResource(store=owner_store, pipeline_query_operator=pipeline_query_op, model=Owner)
     assert len(resource.router.routes) == 2
 
 
 def test_msonable(owner_store, pipeline_query_op):
-    owner_resource = AggregationResource(
-        store=owner_store, pipeline_query_operator=pipeline_query_op, model=Owner
-    )
+    owner_resource = AggregationResource(store=owner_store, pipeline_query_operator=pipeline_query_op, model=Owner)
     endpoint_dict = owner_resource.as_dict()
 
     for k in ["@class", "@module", "store", "model"]:
@@ -70,9 +65,7 @@ def test_msonable(owner_store, pipeline_query_op):
 
 
 def test_aggregation_search(owner_store, pipeline_query_op):
-    endpoint = AggregationResource(
-        owner_store, pipeline_query_operator=pipeline_query_op, model=Owner
-    )
+    endpoint = AggregationResource(owner_store, pipeline_query_operator=pipeline_query_op, model=Owner)
     app = FastAPI()
     app.include_router(endpoint.router)
 

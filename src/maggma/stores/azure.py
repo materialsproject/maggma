@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Advanced Stores for connecting to Microsoft Azure data
 """
@@ -85,9 +84,7 @@ class AzureBlobStore(Store):
             kwargs: keywords for the base Store.
         """
         if azure_blob is None:
-            raise RuntimeError(
-                "azure-storage-blob and azure-identity are required for AzureBlobStore"
-            )
+            raise RuntimeError("azure-storage-blob and azure-identity are required for AzureBlobStore")
 
         self.index = index
         self.container_name = container_name
@@ -97,13 +94,9 @@ class AzureBlobStore(Store):
         self.service: Optional[BlobServiceClient] = None
         self.container: Optional[ContainerClient] = None
         self.workers = workers
-        self.azure_resource_kwargs = (
-            azure_resource_kwargs if azure_resource_kwargs is not None else {}
-        )
+        self.azure_resource_kwargs = azure_resource_kwargs if azure_resource_kwargs is not None else {}
         self.unpack_data = unpack_data
-        self.searchable_fields = (
-            searchable_fields if searchable_fields is not None else []
-        )
+        self.searchable_fields = searchable_fields if searchable_fields is not None else []
         self.store_hash = store_hash
         if key_sanitize_dict is None:
             key_sanitize_dict = AZURE_KEY_SANITIZE
@@ -123,7 +116,7 @@ class AzureBlobStore(Store):
         kwargs["key"] = str(index.key)
 
         self._thread_local = threading.local()
-        super(AzureBlobStore, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @property
     def name(self) -> str:
@@ -151,9 +144,7 @@ class AzureBlobStore(Store):
                     except ResourceExistsError:
                         pass
                 else:
-                    raise RuntimeError(
-                        f"Container not present on Azure: {self.container_name}"
-                    )
+                    raise RuntimeError(f"Container not present on Azure: {self.container_name}")
 
             self.container = container
         self.index.connect(*args, **kwargs)
@@ -218,25 +209,17 @@ class AzureBlobStore(Store):
         elif isinstance(properties, list):
             prop_keys = set(properties)
 
-        for doc in self.index.query(
-            criteria=criteria, sort=sort, limit=limit, skip=skip
-        ):
+        for doc in self.index.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
                 try:
-                    data = self.container.download_blob(
-                        self.sub_dir + str(doc[self.key])
-                    ).readall()
+                    data = self.container.download_blob(self.sub_dir + str(doc[self.key])).readall()
                 except azure.core.exceptions.ResourceNotFoundError:
-                    self.logger.error(
-                        "Could not find Blob object {}".format(doc[self.key])
-                    )
+                    self.logger.error(f"Could not find Blob object {doc[self.key]}")
 
                 if self.unpack_data:
-                    data = self._unpack(
-                        data=data, compressed=doc.get("compression", "") == "zlib"
-                    )
+                    data = self._unpack(data=data, compressed=doc.get("compression", "") == "zlib")
 
                     if self.last_updated_field in doc:
                         data[self.last_updated_field] = doc[self.last_updated_field]  # type: ignore
@@ -254,12 +237,9 @@ class AzureBlobStore(Store):
         # MontyDecoder().process_decode only goes until it finds a from_dict
         # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
         # Should just return the unpacked object then let the user run process_decoded
-        unpacked_data = msgpack.unpackb(data, raw=False)
-        return unpacked_data
+        return msgpack.unpackb(data, raw=False)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -306,7 +286,7 @@ class AzureBlobStore(Store):
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded
 
         Args:
             key: single key to index
@@ -374,19 +354,16 @@ class AzureBlobStore(Store):
             if isinstance(self.azure_client_info, str):
                 # assume it is the account_url and that the connection is passwordless
                 default_credential = DefaultAzureCredential()
-                return BlobServiceClient(
-                    self.azure_client_info, credential=default_credential
-                )
+                return BlobServiceClient(self.azure_client_info, credential=default_credential)
 
-            elif isinstance(self.azure_client_info, dict):
+            if isinstance(self.azure_client_info, dict):
                 connection_string = self.azure_client_info.get("connection_string")
                 if connection_string:
-                    return BlobServiceClient.from_connection_string(
-                        conn_str=connection_string
-                    )
+                    return BlobServiceClient.from_connection_string(conn_str=connection_string)
 
             msg = f"Could not instantiate BlobServiceClient from azure_client_info: {self.azure_client_info}"
             raise RuntimeError(msg)
+        return None
 
     def _get_container(self) -> Optional[ContainerClient]:
         """
@@ -434,13 +411,11 @@ class AzureBlobStore(Store):
 
         if self.last_updated_field in doc:
             # need this conversion for metadata insert
-            search_doc[self.last_updated_field] = str(
-                to_isoformat_ceil_ms(doc[self.last_updated_field])
-            )
+            search_doc[self.last_updated_field] = str(to_isoformat_ceil_ms(doc[self.last_updated_field]))
 
         # keep a record of original keys, in case these are important for the individual researcher
         # it is not expected that this information will be used except in disaster recovery
-        blob_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc.keys()}
+        blob_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc}
         blob_to_mongo_keys["blob_to_mongo_keys"] = "blob_to_mongo_keys"  # inception
         # encode dictionary since values have to be strings
         search_doc["blob_to_mongo_keys"] = dumps(blob_to_mongo_keys)
@@ -501,9 +476,7 @@ class AzureBlobStore(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def newer_in(
-        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
-    ) -> List[str]:
+    def newer_in(self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
@@ -516,13 +489,9 @@ class AzureBlobStore(Store):
                         that to filter out new items in
         """
         if hasattr(target, "index"):
-            return self.index.newer_in(
-                target=target.index, criteria=criteria, exhaustive=exhaustive
-            )
-        else:
-            return self.index.newer_in(
-                target=target, criteria=criteria, exhaustive=exhaustive
-            )
+            return self.index.newer_in(target=target.index, criteria=criteria, exhaustive=exhaustive)
+
+        return self.index.newer_in(target=target, criteria=criteria, exhaustive=exhaustive)
 
     def __hash__(self):
         return hash((self.index.__hash__, self.container_name))
@@ -565,16 +534,12 @@ class AzureBlobStore(Store):
             key_ = self.sub_dir + index_doc[self.key]
             blob = self.container.get_blob_client(key_)
             properties = blob.get_blob_properties()
-            new_meta = {
-                self._sanitize_key(k): v for k, v in properties.metadata.items()
-            }
+            new_meta = {self._sanitize_key(k): v for k, v in properties.metadata.items()}
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
             if self.last_updated_field in new_meta:
-                new_meta[self.last_updated_field] = str(
-                    to_isoformat_ceil_ms(new_meta[self.last_updated_field])
-                )
+                new_meta[self.last_updated_field] = str(to_isoformat_ceil_ms(new_meta[self.last_updated_field]))
             blob.set_blob_metadata(new_meta)
 
     def __eq__(self, other: object) -> bool:

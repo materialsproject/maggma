@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Tests for advanced stores
 """
@@ -12,25 +11,17 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
+from maggma.core import StoreError
+from maggma.stores import AliasingStore, MemoryStore, MongograntStore, MongoStore, SandboxStore, VaultStore
+from maggma.stores.advanced_stores import substitute
 from mongogrant import Client
 from mongogrant.client import check, seed
 from mongogrant.config import Config
 from pymongo import MongoClient
 from pymongo.collection import Collection
 
-from maggma.core import StoreError
-from maggma.stores import (
-    AliasingStore,
-    MemoryStore,
-    MongograntStore,
-    MongoStore,
-    SandboxStore,
-    VaultStore,
-)
-from maggma.stores.advanced_stores import substitute
 
-
-@pytest.fixture
+@pytest.fixture()
 def mongostore():
     store = MongoStore("maggma_test", "test")
     store.connect()
@@ -46,23 +37,16 @@ def mgrant_server():
     mdpath = tempfile.mkdtemp()
     mdport = 27020
     if not os.getenv("CONTINUOUS_INTEGRATION"):
-        basecmd = (
-            f"mongod --port {mdport} --dbpath {mdpath} --quiet --logpath {mdlogpath} "
-            "--bind_ip_all --auth"
-        )
+        basecmd = f"mongod --port {mdport} --dbpath {mdpath} --quiet --logpath {mdlogpath} --bind_ip_all --auth"
         mongod_process = subprocess.Popen(basecmd, shell=True, start_new_session=True)
         time.sleep(5)
         client = MongoClient(port=mdport)
-        client.admin.command(
-            "createUser", "mongoadmin", pwd="mongoadminpass", roles=["root"]
-        )
+        client.admin.command("createUser", "mongoadmin", pwd="mongoadminpass", roles=["root"])
         client.close()
     else:
         pytest.skip("Disabling mongogrant tests on CI for now")
     dbname = "test_" + uuid4().hex
-    db = MongoClient(f"mongodb://mongoadmin:mongoadminpass@127.0.0.1:{mdport}/admin")[
-        dbname
-    ]
+    db = MongoClient(f"mongodb://mongoadmin:mongoadminpass@127.0.0.1:{mdport}/admin")[dbname]
     db.command("createUser", "reader", pwd="readerpass", roles=["read"])
     db.command("createUser", "writer", pwd="writerpass", roles=["readWrite"])
     db.client.close()
@@ -105,16 +89,14 @@ def mgrant_user(mgrant_server):
 
 
 def connected_user(store):
-    return store._collection.database.command("connectionStatus")["authInfo"][
-        "authenticatedUsers"
-    ][0]["user"]
+    return store._collection.database.command("connectionStatus")["authInfo"]["authenticatedUsers"][0]["user"]
 
 
 def test_mgrant_init():
     with pytest.raises(StoreError):
         store = MongograntStore("", "", username="")
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT012
         store = MongograntStore("", "")
         store.connect()
 
@@ -122,15 +104,11 @@ def test_mgrant_init():
 def test_mgrant_connect(mgrant_server, mgrant_user):
     config_path, mdport, dbname = mgrant_server
     assert mgrant_user is not None
-    store = MongograntStore(
-        "ro:testhost/testdb", "tasks", mgclient_config_path=config_path
-    )
+    store = MongograntStore("ro:testhost/testdb", "tasks", mgclient_config_path=config_path)
     store.connect()
     assert isinstance(store._collection, Collection)
     assert connected_user(store) == "reader"
-    store = MongograntStore(
-        "rw:testhost/testdb", "tasks", mgclient_config_path=config_path
-    )
+    store = MongograntStore("rw:testhost/testdb", "tasks", mgclient_config_path=config_path)
     store.connect()
     assert isinstance(store._collection, Collection)
     assert connected_user(store) == "writer"
@@ -147,16 +125,10 @@ def test_mgrant_differences():
 def test_mgrant_equal(mgrant_server, mgrant_user):
     config_path, mdport, dbname = mgrant_server
     assert mgrant_user is not None
-    store1 = MongograntStore(
-        "ro:testhost/testdb", "tasks", mgclient_config_path=config_path
-    )
+    store1 = MongograntStore("ro:testhost/testdb", "tasks", mgclient_config_path=config_path)
     store1.connect()
-    store2 = MongograntStore(
-        "ro:testhost/testdb", "tasks", mgclient_config_path=config_path
-    )
-    store3 = MongograntStore(
-        "ro:testhost/testdb", "test", mgclient_config_path=config_path
-    )
+    store2 = MongograntStore("ro:testhost/testdb", "tasks", mgclient_config_path=config_path)
+    store3 = MongograntStore("ro:testhost/testdb", "test", mgclient_config_path=config_path)
     store2.connect()
     assert store1 == store2
     assert store1 != store3
@@ -179,9 +151,7 @@ def vault_store():
             "lease_duration": 2764800,
             "lease_id": "",
         }
-        v = VaultStore("test_coll", "secret/matgen/maggma")
-
-    return v
+        return VaultStore("test_coll", "secret/matgen/maggma")
 
 
 def test_vault_init():
@@ -222,12 +192,11 @@ def test_vault_missing_env():
         vault_store()
 
 
-@pytest.fixture
+@pytest.fixture()
 def alias_store():
     memorystore = MemoryStore("test")
     memorystore.connect()
-    alias_store = AliasingStore(memorystore, {"a": "b", "c.d": "e", "f": "g.h"})
-    return alias_store
+    return AliasingStore(memorystore, {"a": "b", "c.d": "e", "f": "g.h"})
 
 
 def test_alias_count(alias_store):
@@ -240,12 +209,10 @@ def test_aliasing_query(alias_store):
     d = [{"b": 1}, {"e": 2}, {"g": {"h": 3}}]
     alias_store.store._collection.insert_many(d)
 
-    assert "a" in list(alias_store.query(criteria={"a": {"$exists": 1}}))[0]
-    assert "c" in list(alias_store.query(criteria={"c.d": {"$exists": 1}}))[0]
-    assert "d" in list(alias_store.query(criteria={"c.d": {"$exists": 1}}))[0].get(
-        "c", {}
-    )
-    assert "f" in list(alias_store.query(criteria={"f": {"$exists": 1}}))[0]
+    assert "a" in next(iter(alias_store.query(criteria={"a": {"$exists": 1}})))
+    assert "c" in next(iter(alias_store.query(criteria={"c.d": {"$exists": 1}})))
+    assert "d" in next(iter(alias_store.query(criteria={"c.d": {"$exists": 1}}))).get("c", {})
+    assert "f" in next(iter(alias_store.query(criteria={"f": {"$exists": 1}})))
 
 
 def test_aliasing_update(alias_store):
@@ -256,14 +223,14 @@ def test_aliasing_update(alias_store):
             {"task_id": "mp-5", "f": 6},
         ]
     )
-    assert list(alias_store.query(criteria={"task_id": "mp-3"}))[0]["a"] == 4
-    assert list(alias_store.query(criteria={"task_id": "mp-4"}))[0]["c"]["d"] == 5
-    assert list(alias_store.query(criteria={"task_id": "mp-5"}))[0]["f"] == 6
+    assert next(iter(alias_store.query(criteria={"task_id": "mp-3"})))["a"] == 4
+    assert next(iter(alias_store.query(criteria={"task_id": "mp-4"})))["c"]["d"] == 5
+    assert next(iter(alias_store.query(criteria={"task_id": "mp-5"})))["f"] == 6
 
-    assert list(alias_store.store.query(criteria={"task_id": "mp-3"}))[0]["b"] == 4
-    assert list(alias_store.store.query(criteria={"task_id": "mp-4"}))[0]["e"] == 5
+    assert next(iter(alias_store.store.query(criteria={"task_id": "mp-3"})))["b"] == 4
+    assert next(iter(alias_store.store.query(criteria={"task_id": "mp-4"})))["e"] == 5
 
-    assert list(alias_store.store.query(criteria={"task_id": "mp-5"}))[0]["g"]["h"] == 6
+    assert next(iter(alias_store.store.query(criteria={"task_id": "mp-5"})))["g"]["h"] == 6
 
 
 def test_aliasing_remove_docs(alias_store):
@@ -312,7 +279,7 @@ def test_aliasing_distinct(alias_store):
     assert alias_store.distinct("f") == [3]
 
 
-@pytest.fixture
+@pytest.fixture()
 def sandbox_store():
     memstore = MemoryStore()
     store = SandboxStore(memstore, sandbox="test")
@@ -354,10 +321,7 @@ def test_sandbox_distinct(sandbox_store):
 def test_sandbox_update(sandbox_store):
     sandbox_store.connect()
     sandbox_store.update([{"e": 6, "d": 4}], key="e")
-    assert (
-        next(sandbox_store.query(criteria={"d": {"$exists": 1}}, properties=["d"]))["d"]
-        == 4
-    )
+    assert next(sandbox_store.query(criteria={"d": {"$exists": 1}}, properties=["d"]))["d"] == 4
     assert sandbox_store._collection.find_one({"e": 6})["sbxn"] == ["test"]
     sandbox_store.update([{"e": 7, "sbxn": ["core"]}], key="e")
     assert set(sandbox_store.query_one(criteria={"e": 7})["sbxn"]) == {"test", "core"}
@@ -372,33 +336,27 @@ def test_sandbox_remove_docs(sandbox_store):
     assert sandbox_store.query_one(criteria={"e": 7})
     sandbox_store.remove_docs(criteria={"d": 4})
 
-    assert (
-        sandbox_store.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])
-        is None
-    )
+    assert sandbox_store.query_one(criteria={"d": {"$exists": 1}}, properties=["d"]) is None
     assert sandbox_store.query_one(criteria={"e": 7})
 
 
-@pytest.fixture
+@pytest.fixture()
 def mgrantstore(mgrant_server, mgrant_user):
     config_path, mdport, dbname = mgrant_server
     assert mgrant_user is not None
-    store = MongograntStore(
-        "ro:testhost/testdb", "tasks", mgclient_config_path=config_path
-    )
+    store = MongograntStore("ro:testhost/testdb", "tasks", mgclient_config_path=config_path)
     store.connect()
 
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def vaultstore():
     os.environ["VAULT_ADDR"] = "https://fake:8200/"
     os.environ["VAULT_TOKEN"] = "dummy"
 
     # Just test that we successfully instantiated
-    v = vault_store()
-    return v
+    return vault_store()
 
 
 def test_eq_mgrant(mgrantstore, mongostore):
