@@ -1,19 +1,18 @@
-import pytest
+from datetime import datetime
 from enum import Enum
+
+import pytest
+from fastapi import HTTPException
+from monty.serialization import dumpfn, loadfn
+from monty.tempfile import ScratchDir
+from pydantic import BaseModel, Field
+
 from maggma.api.query_operator import (
     NumericQuery,
     PaginationQuery,
-    SparseFieldsQuery,
     SortQuery,
+    SparseFieldsQuery,
 )
-
-from pydantic import BaseModel, Field
-from fastapi import HTTPException
-from datetime import datetime
-
-from monty.serialization import loadfn, dumpfn
-from monty.tempfile import ScratchDir
-
 from maggma.api.query_operator.submission import SubmissionQuery
 
 

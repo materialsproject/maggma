@@ -5,8 +5,8 @@
 import asyncio
 import logging
 import sys
-from itertools import chain
 from datetime import datetime
+from itertools import chain
 
 import click
 from monty.serialization import loadfn
@@ -14,10 +14,9 @@ from monty.serialization import loadfn
 from maggma.cli.distributed import find_port
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
-from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.cli.settings import CLISettings
+from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
-
 
 sys.meta_path.append(ScriptFinder())
 
@@ -130,7 +129,7 @@ def run(
 ):
     # Import profiler and setup directories to dump profiler output
     if memray:
-        from memray import Tracker, FileDestination
+        from memray import FileDestination, Tracker
 
         if memray_dir:
             import os

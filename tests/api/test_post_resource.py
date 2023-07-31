@@ -1,3 +1,4 @@
+from datetime import datetime
 from random import randint
 
 import pytest
@@ -5,10 +6,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from starlette.testclient import TestClient
 
-from datetime import datetime
-
 from maggma.api.resource import PostOnlyResource
-
 from maggma.stores import MemoryStore
 
 

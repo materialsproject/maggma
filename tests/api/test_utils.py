@@ -1,14 +1,13 @@
 from datetime import datetime
 from enum import Enum
+from typing import Union
 
 import pytest
+from bson import ObjectId
 from monty.json import MSONable
 from pydantic import BaseModel, Field
 
 from maggma.api.utils import api_sanitize, serialization_helper
-from typing import Union
-
-from bson import ObjectId
 
 
 class SomeEnum(Enum):

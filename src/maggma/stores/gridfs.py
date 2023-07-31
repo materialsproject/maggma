@@ -8,15 +8,15 @@ various utilities
 import copy
 import json
 import zlib
-from ruamel import yaml
 from datetime import datetime
-from pymongo.errors import ConfigurationError
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
 import gridfs
 from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient, uri_parser
+from pymongo.errors import ConfigurationError
+from ruamel import yaml
 
 from maggma.core import Sort, Store, StoreError
 from maggma.stores.mongolike import MongoStore, SSHTunnel

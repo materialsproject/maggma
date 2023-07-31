@@ -1,8 +1,8 @@
+import pymongo
 import pytest
 from pymongo.errors import DocumentTooLarge, OperationFailure
-import pymongo
 
-from maggma.stores import GridFSStore, MongoStore, MemoryStore
+from maggma.stores import GridFSStore, MemoryStore, MongoStore
 from maggma.stores.shared_stores import MultiStore, StoreFacade
 from maggma.validators import JSONSchemaValidator
 

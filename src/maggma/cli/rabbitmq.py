@@ -3,20 +3,20 @@
 
 import asyncio
 import json
-from logging import getLogger
 import socket as pysocket
-from typing import List, Literal
-import numpy as np
-from time import perf_counter
+from logging import getLogger
 from random import randint
+from time import perf_counter
+from typing import List, Literal
 
+import numpy as np
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
 
 from maggma.cli.multiprocessing import multi
 from maggma.cli.settings import CLISettings
 from maggma.core import Builder
-from maggma.utils import tqdm, Timeout
+from maggma.utils import Timeout, tqdm
 
 try:
     import pika

@@ -1,15 +1,16 @@
 #!/usr/bin/env python
 # coding utf-8
 
-import json
-from logging import getLogger
-import socket as pysocket
-from typing import List
-import numpy as np
-from time import perf_counter
 import asyncio
+import json
+import socket as pysocket
+from logging import getLogger
 from random import randint
+from time import perf_counter
+from typing import List
 
+import numpy as np
+import zmq
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
 
@@ -17,8 +18,6 @@ from maggma.cli.multiprocessing import multi
 from maggma.cli.settings import CLISettings
 from maggma.core import Builder
 from maggma.utils import tqdm
-
-import zmq
 
 settings = CLISettings()
 

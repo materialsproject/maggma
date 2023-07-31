@@ -19,11 +19,12 @@ Desired behavior
   remain intact.
 """
 
+import hashlib
 from datetime import datetime, timezone
 from distutils.dir_util import copy_tree
 from pathlib import Path
+
 import pytest
-import hashlib
 
 from maggma.core import StoreError
 from maggma.stores.file_store import FileStore
@@ -267,7 +268,7 @@ def test_query(test_dir):
         properties=["name", "contents"],
         contents_size_limit=50,
     )
-    assert d["contents"] == "Unable to read: file too large"
+    assert d["contents"] == "File exceeds size limit of 50 bytes"
     assert d.get("name")
 
 

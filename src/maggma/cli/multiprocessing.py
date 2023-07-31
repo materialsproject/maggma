@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from asyncio import (
-    BoundedSemaphore,
-    Queue,
-    gather,
-    get_event_loop,
-)
+from asyncio import BoundedSemaphore, Queue, gather, get_event_loop
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType

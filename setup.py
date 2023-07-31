@@ -51,12 +51,16 @@ setup(
     extras_require={
         "vault": ["hvac>=0.9.5"],
         "montydb": ["montydb>=2.3.12"],
-        "notebook_runner": ["IPython>=7.16", "nbformat>=5.0", "regex>=2020.6"],
+        "notebook_runner": ["IPython>=8.11", "nbformat>=5.0", "regex>=2020.6"],
         "azure": ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"],
     },
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",

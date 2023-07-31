@@ -1,15 +1,14 @@
 import asyncio
 import json
+import socket as pysocket
 import threading
 
 import pytest
+import zmq.asyncio as zmq
+from zmq import REP, REQ
 
 from maggma.cli.distributed import find_port, manager, worker
 from maggma.core import Builder
-
-from zmq import REP, REQ
-import zmq.asyncio as zmq
-import socket as pysocket
 
 # TODO: Timeout errors?
 
