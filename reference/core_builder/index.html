@@ -830,7 +830,7 @@ the data processing is  limited to process_items</p>
 <span class="sd">        Part of a domain-decomposition paradigm to allow the builder to operate on</span>
 <span class="sd">        multiple nodes by divinding up the IO as well as the compute</span>
 <span class="sd">        This function should return an iterator of dictionaries that can be distributed</span>
-<span class="sd">        to multiple instances of the builder to get/process/udpate on</span>
+<span class="sd">        to multiple instances of the builder to get/process/update on</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            number_splits: The number of groups to split the documents to work on</span>
@@ -852,7 +852,6 @@ the data processing is  limited to process_items</p>
 <span class="sd">        Returns:</span>
 <span class="sd">            generator or list of items to process</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -878,7 +877,6 @@ the data processing is  limited to process_items</p>
 <span class="sd">        Returns:</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -900,9 +898,7 @@ the data processing is  limited to process_items</p>
         <span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
         <span class="n">root</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
         <span class="n">ch</span> <span class="o">=</span> <span class="n">TqdmLoggingHandler</span><span class="p">()</span>
-        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
-            <span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
-        <span class="p">)</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
         <span class="n">root</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
 
@@ -911,7 +907,7 @@ the data processing is  limited to process_items</p>
         <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_items</span><span class="p">()</span>
 
         <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">cursor</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing batch of </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing batch of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2"> items&quot;</span><span class="p">)</span>
             <span class="n">processed_chunk</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">process_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">]</span>
             <span class="n">processed_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">processed_chunk</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">update_targets</span><span class="p">(</span><span class="n">processed_items</span><span class="p">)</span>
@@ -1123,7 +1119,6 @@ the data processing is  limited to process_items</p>
 <span class="sd">    Returns:</span>
 <span class="sd">        generator or list of items to process</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">pass</span>
 </code></pre></div>
         </details>
     </div>
@@ -1147,7 +1142,7 @@ the data processing is  limited to process_items</p>
       <p>Part of a domain-decomposition paradigm to allow the builder to operate on
 multiple nodes by divinding up the IO as well as the compute
 This function should return an iterator of dictionaries that can be distributed
-to multiple instances of the builder to get/process/udpate on</p>
+to multiple instances of the builder to get/process/update on</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1175,7 +1170,7 @@ to multiple instances of the builder to get/process/udpate on</p>
 <span class="sd">    Part of a domain-decomposition paradigm to allow the builder to operate on</span>
 <span class="sd">    multiple nodes by divinding up the IO as well as the compute</span>
 <span class="sd">    This function should return an iterator of dictionaries that can be distributed</span>
-<span class="sd">    to multiple instances of the builder to get/process/udpate on</span>
+<span class="sd">    to multiple instances of the builder to get/process/update on</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        number_splits: The number of groups to split the documents to work on</span>
@@ -1292,9 +1287,7 @@ This is only intended for diagnostic purposes</p>
     <span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
     <span class="n">root</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">log_level</span><span class="p">)</span>
     <span class="n">ch</span> <span class="o">=</span> <span class="n">TqdmLoggingHandler</span><span class="p">()</span>
-    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span>
-        <span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
-    <span class="p">)</span>
+    <span class="n">formatter</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2"> - </span><span class="si">%(name)s</span><span class="s2"> - </span><span class="si">%(levelname)s</span><span class="s2"> - </span><span class="si">%(message)s</span><span class="s2">&quot;</span><span class="p">)</span>
     <span class="n">ch</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
     <span class="n">root</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">ch</span><span class="p">)</span>
 
@@ -1303,7 +1296,7 @@ This is only intended for diagnostic purposes</p>
     <span class="n">cursor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_items</span><span class="p">()</span>
 
     <span class="k">for</span> <span class="n">chunk</span> <span class="ow">in</span> <span class="n">grouper</span><span class="p">(</span><span class="n">tqdm</span><span class="p">(</span><span class="n">cursor</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing batch of </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing batch of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">chunk_size</span><span class="si">}</span><span class="s2"> items&quot;</span><span class="p">)</span>
         <span class="n">processed_chunk</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">process_item</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">chunk</span><span class="p">]</span>
         <span class="n">processed_items</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">processed_chunk</span> <span class="k">if</span> <span class="n">item</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">]</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_targets</span><span class="p">(</span><span class="n">processed_items</span><span class="p">)</span>
@@ -1365,7 +1358,6 @@ Can also perform other book keeping in the process such as storing gridfs oids, 
 <span class="sd">    Returns:</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">pass</span>
 </code></pre></div>
         </details>
     </div>

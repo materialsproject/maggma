@@ -1126,7 +1126,7 @@ document.</p>
 
     <span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Ensures indicies on critical fields for MapBuilder</span>
+<span class="sd">        Ensures indices on critical fields for MapBuilder</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index_checks</span> <span class="o">=</span> <span class="p">[</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">),</span>
@@ -1163,7 +1163,7 @@ document.</p>
 <span class="sd">        incremental building</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting </span><span class="si">{}</span><span class="s2"> Builder&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> Builder&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
 
@@ -1176,12 +1176,10 @@ document.</p>
             <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">failed_query</span><span class="p">)</span>
             <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">keys</span> <span class="o">+</span> <span class="n">failed_keys</span><span class="p">))</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span><span class="si">}</span><span class="s2"> items&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">:</span>
-            <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
-            <span class="p">)</span>
+            <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">({</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">projection</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1202,7 +1200,7 @@ document.</p>
 <span class="sd">        a map function</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
@@ -1225,9 +1223,7 @@ document.</p>
 
         <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
-                <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
-            <span class="p">),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())),</span>
         <span class="p">}</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_process_time</span><span class="p">:</span>
@@ -1258,9 +1254,7 @@ document.</p>
             <span class="n">target_keyvals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">))</span>
             <span class="n">to_delete</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">target_keyvals</span> <span class="o">-</span> <span class="n">source_keyvals</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">):</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s2">&quot;Finalize: Deleting </span><span class="si">{}</span><span class="s2"> orphans.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">))</span>
-                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finalize: Deleting </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">)</span><span class="si">}</span><span class="s2"> orphans.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">remove_docs</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">to_delete</span><span class="p">}})</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
 
@@ -1274,7 +1268,6 @@ document.</p>
 <span class="sd">                process_item and logged to the &quot;error&quot; field</span>
 <span class="sd">                in the target document.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">pass</span>
 </code></pre></div>
         </details>
 
@@ -1435,13 +1428,13 @@ previously failed</p></td>
 
     <div class="doc doc-contents ">
 
-      <p>Ensures indicies on critical fields for MapBuilder</p>
+      <p>Ensures indices on critical fields for MapBuilder</p>
 
         <details class="quote">
           <summary>Source code in <code>maggma/builders/map_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Ensures indicies on critical fields for MapBuilder</span>
+<span class="sd">    Ensures indices on critical fields for MapBuilder</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">index_checks</span> <span class="o">=</span> <span class="p">[</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">),</span>
@@ -1492,9 +1485,7 @@ previously failed</p></td>
         <span class="n">target_keyvals</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">))</span>
         <span class="n">to_delete</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">target_keyvals</span> <span class="o">-</span> <span class="n">source_keyvals</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                <span class="s2">&quot;Finalize: Deleting </span><span class="si">{}</span><span class="s2"> orphans.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">))</span>
-            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Finalize: Deleting </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">to_delete</span><span class="p">)</span><span class="si">}</span><span class="s2"> orphans.&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">remove_docs</span><span class="p">({</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="n">to_delete</span><span class="p">}})</span>
     <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">finalize</span><span class="p">()</span>
 </code></pre></div>
@@ -1528,7 +1519,7 @@ incremental building</p>
 <span class="sd">    incremental building</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting </span><span class="si">{}</span><span class="s2"> Builder&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> Builder&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
 
@@ -1541,12 +1532,10 @@ incremental building</p>
         <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">failed_query</span><span class="p">)</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">keys</span> <span class="o">+</span> <span class="n">failed_keys</span><span class="p">))</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Processing </span><span class="si">{}</span><span class="s2"> items&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span><span class="si">}</span><span class="s2"> items&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">:</span>
-        <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
-        <span class="p">)</span>
+        <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">({</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">})</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">projection</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -1627,7 +1616,7 @@ a map function</p>
 <span class="sd">    a map function</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">item</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
@@ -1650,9 +1639,7 @@ a map function</p>
 
     <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">item</span><span class="p">[</span><span class="n">key</span><span class="p">],</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
-            <span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())</span>
-        <span class="p">),</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">item</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcnow</span><span class="p">())),</span>
     <span class="p">}</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">store_process_time</span><span class="p">:</span>
@@ -1701,7 +1688,6 @@ in the target document.</p>
 <span class="sd">            process_item and logged to the &quot;error&quot; field</span>
 <span class="sd">            in the target document.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">pass</span>
 </code></pre></div>
         </details>
     </div>
@@ -1862,7 +1848,7 @@ is orphaned.</p>
 
     <span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Ensures indicies on critical fields for GroupBuilder</span>
+<span class="sd">        Ensures indices on critical fields for GroupBuilder</span>
 <span class="sd">        which include the plural version of the target&#39;s key field</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">index_checks</span> <span class="o">=</span> <span class="p">[</span>
@@ -1898,32 +1884,26 @@ is orphaned.</p>
             <span class="k">yield</span> <span class="p">{</span><span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grouping_keys</span><span class="p">,</span> <span class="n">split</span><span class="p">))}</span>
 
     <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting </span><span class="si">{}</span><span class="s2"> Builder&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> Builder&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
         <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ids_to_process</span><span class="p">()</span>
         <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_groups_from_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">:</span>
-            <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
-            <span class="p">)</span>
+            <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">({</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">})</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">projection</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
-            <span class="n">docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
-                    <span class="n">criteria</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grouping_keys</span><span class="p">,</span> <span class="n">group</span><span class="p">)),</span> <span class="n">properties</span><span class="o">=</span><span class="n">projection</span>
-                <span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grouping_keys</span><span class="p">,</span> <span class="n">group</span><span class="p">)),</span> <span class="n">properties</span><span class="o">=</span><span class="n">projection</span><span class="p">))</span>
             <span class="k">yield</span> <span class="n">docs</span>
 
     <span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>  <span class="c1"># type: ignore</span>
-        <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span><span class="p">)</span>
+        <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span><span class="p">]</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">keys</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
         <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
@@ -1937,9 +1917,7 @@ is orphaned.</p>
 
         <span class="n">time_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
-        <span class="n">last_updated</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span>
-        <span class="p">]</span>
+        <span class="n">last_updated</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span><span class="p">]</span>
 
         <span class="n">update_doc</span> <span class="o">=</span> <span class="p">{</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
@@ -1987,11 +1965,9 @@ is orphaned.</p>
 
         <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="ow">or</span> <span class="p">{}</span>
 
-        <span class="n">distinct_from_target</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">distinct_from_target</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">))</span>
         <span class="n">processed_ids</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="c1"># Not always gauranteed that MongoDB will unpack the list so we</span>
+        <span class="c1"># Not always guaranteed that MongoDB will unpack the list so we</span>
         <span class="c1"># have to make sure we do that</span>
         <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">distinct_from_target</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -2003,9 +1979,7 @@ is orphaned.</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> total docs in source&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed</span><span class="p">:</span>
-            <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">}</span>
-            <span class="p">)</span>
+            <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">})</span>
             <span class="n">unprocessed_ids</span> <span class="o">=</span> <span class="n">all_ids</span> <span class="o">-</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">processed_ids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed IDs in target&quot;</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -2013,9 +1987,7 @@ is orphaned.</p>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unprocessed_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> IDs to process&quot;</span><span class="p">)</span>
 
-        <span class="n">new_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">new_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated IDs to process&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_ids</span> <span class="o">|</span> <span class="n">unprocessed_ids</span><span class="p">)</span>
@@ -2037,9 +2009,7 @@ is orphaned.</p>
                 <span class="p">)</span>
             <span class="p">)</span>
 
-            <span class="n">sub_groups</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
-                <span class="nb">tuple</span><span class="p">(</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">grouping_keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span>
-            <span class="p">)</span>
+            <span class="n">sub_groups</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">grouping_keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">}</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sub_groups</span><span class="p">)</span><span class="si">}</span><span class="s2"> subgroups to process&quot;</span><span class="p">)</span>
 
             <span class="n">groups</span> <span class="o">|=</span> <span class="n">sub_groups</span>
@@ -2206,14 +2176,14 @@ previously failed</p></td>
 
     <div class="doc doc-contents ">
 
-      <p>Ensures indicies on critical fields for GroupBuilder
+      <p>Ensures indices on critical fields for GroupBuilder
 which include the plural version of the target's key field</p>
 
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Ensures indicies on critical fields for GroupBuilder</span>
+<span class="sd">    Ensures indices on critical fields for GroupBuilder</span>
 <span class="sd">    which include the plural version of the target&#39;s key field</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">index_checks</span> <span class="o">=</span> <span class="p">[</span>
@@ -2274,9 +2244,7 @@ which include the plural version of the target's key field</p>
             <span class="p">)</span>
         <span class="p">)</span>
 
-        <span class="n">sub_groups</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
-            <span class="nb">tuple</span><span class="p">(</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">grouping_keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span>
-        <span class="p">)</span>
+        <span class="n">sub_groups</span> <span class="o">=</span> <span class="p">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">grouping_keys</span><span class="p">)</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">docs</span><span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sub_groups</span><span class="p">)</span><span class="si">}</span><span class="s2"> subgroups to process&quot;</span><span class="p">)</span>
 
         <span class="n">groups</span> <span class="o">|=</span> <span class="n">sub_groups</span>
@@ -2314,11 +2282,9 @@ which include the plural version of the target's key field</p>
 
     <span class="n">query</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span> <span class="ow">or</span> <span class="p">{}</span>
 
-    <span class="n">distinct_from_target</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">distinct_from_target</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">))</span>
     <span class="n">processed_ids</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1"># Not always gauranteed that MongoDB will unpack the list so we</span>
+    <span class="c1"># Not always guaranteed that MongoDB will unpack the list so we</span>
     <span class="c1"># have to make sure we do that</span>
     <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">distinct_from_target</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -2330,9 +2296,7 @@ which include the plural version of the target's key field</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> total docs in source&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">retry_failed</span><span class="p">:</span>
-        <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">}</span>
-        <span class="p">)</span>
+        <span class="n">failed_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_target_keys_field</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;state&quot;</span><span class="p">:</span> <span class="s2">&quot;failed&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">query</span><span class="p">})</span>
         <span class="n">unprocessed_ids</span> <span class="o">=</span> <span class="n">all_ids</span> <span class="o">-</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">processed_ids</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_keys</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed IDs in target&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -2340,9 +2304,7 @@ which include the plural version of the target's key field</p>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unprocessed_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> IDs to process&quot;</span><span class="p">)</span>
 
-    <span class="n">new_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">new_ids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">exhaustive</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">new_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> updated IDs to process&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_ids</span> <span class="o">|</span> <span class="n">unprocessed_ids</span><span class="p">)</span>
@@ -2386,26 +2348,20 @@ which include the plural version of the target's key field</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Starting </span><span class="si">{}</span><span class="s2"> Builder&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Starting </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> Builder&quot;</span><span class="p">)</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_ids_to_process</span><span class="p">()</span>
     <span class="n">groups</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_groups_from_keys</span><span class="p">(</span><span class="n">keys</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">:</span>
-        <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span> <span class="o">+</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span>
-        <span class="p">)</span>
+        <span class="n">projection</span> <span class="o">=</span> <span class="nb">list</span><span class="p">({</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">projection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">})</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">projection</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">total</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">groups</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">group</span> <span class="ow">in</span> <span class="n">groups</span><span class="p">:</span>
-        <span class="n">docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
-                <span class="n">criteria</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grouping_keys</span><span class="p">,</span> <span class="n">group</span><span class="p">)),</span> <span class="n">properties</span><span class="o">=</span><span class="n">projection</span>
-            <span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">docs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">grouping_keys</span><span class="p">,</span> <span class="n">group</span><span class="p">)),</span> <span class="n">properties</span><span class="o">=</span><span class="n">projection</span><span class="p">))</span>
         <span class="k">yield</span> <span class="n">docs</span>
 </code></pre></div>
         </details>
@@ -2505,9 +2461,9 @@ Default behavior is to return the item.</p>
         <details class="quote">
           <summary>Source code in <code>maggma/builders/group_builder.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Tuple</span><span class="p">,</span> <span class="n">Dict</span><span class="p">]:</span>  <span class="c1"># type: ignore</span>
-    <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span><span class="p">)</span>
+    <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span><span class="p">]</span>
 
-    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s2">&quot;Processing: </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">keys</span><span class="p">))</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing: </span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="n">time_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
@@ -2521,9 +2477,7 @@ Default behavior is to return the item.</p>
 
     <span class="n">time_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
-    <span class="n">last_updated</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span>
-    <span class="p">]</span>
+    <span class="n">last_updated</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">])</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">item</span><span class="p">]</span>
 
     <span class="n">update_doc</span> <span class="o">=</span> <span class="p">{</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="n">keys</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>

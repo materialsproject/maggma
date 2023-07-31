@@ -678,7 +678,7 @@
 <span class="n">my_builder</span> <span class="o">=</span> <span class="n">MultiplyBuilder</span><span class="p">(</span><span class="n">source_store</span><span class="p">,</span><span class="n">target_store</span><span class="p">,</span><span class="n">multiplier</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
 <span class="n">my_builder</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 </code></pre></div>
-<p>A better way to run this builder would be to use the <code>mrun</code> command line tool. Since evrything in <code>maggma</code> is MSONable, we can use <code>monty</code> to dump the builders into a JSON file:</p>
+<p>A better way to run this builder would be to use the <code>mrun</code> command line tool. Since everything in <code>maggma</code> is MSONable, we can use <code>monty</code> to dump the builders into a JSON file:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">monty.serialization</span> <span class="kn">import</span> <span class="n">dumpfn</span>
 
 <span class="n">dumpfn</span><span class="p">(</span><span class="n">my_builder</span><span class="p">,</span><span class="s2">&quot;my_builder.json&quot;</span><span class="p">)</span>
@@ -686,7 +686,7 @@
 <p>Then we can run the builder using <code>mrun</code>:</p>
 <div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>my_builder.json
 </code></pre></div>
-<p><code>mrun</code> has a number of usefull options:</p>
+<p><code>mrun</code> has a number of useful options:</p>
 <div class="highlight"><pre><span></span><code>mrun<span class="w"> </span>--help
 Usage:<span class="w"> </span>mrun<span class="w"> </span><span class="o">[</span>OPTIONS<span class="o">]</span><span class="w"> </span><span class="o">[</span>BUILDERS<span class="o">]</span>...
 

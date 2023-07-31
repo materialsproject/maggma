@@ -1020,7 +1020,7 @@ Defines the interface for all data going in and out of a Builder</p>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;task_id&quot;</span><span class="p">,</span>
         <span class="n">last_updated_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
-        <span class="n">last_updated_type</span><span class="p">:</span> <span class="n">DateTimeFormat</span> <span class="o">=</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="s2">&quot;datetime&quot;</span><span class="p">),</span>
+        <span class="n">last_updated_type</span><span class="p">:</span> <span class="n">DateTimeFormat</span> <span class="o">=</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="s2">&quot;datetime&quot;</span><span class="p">),</span>  <span class="c1"># noqa: B008</span>
         <span class="n">validator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Validator</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1034,11 +1034,9 @@ Defines the interface for all data going in and out of a Builder</p>
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">=</span> <span class="n">last_updated_field</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_type</span> <span class="o">=</span> <span class="n">last_updated_type</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">LU_KEY_ISOFORMAT</span>
-            <span class="k">if</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="n">last_updated_type</span><span class="p">)</span> <span class="o">==</span> <span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">IsoFormat</span>
-            <span class="k">else</span> <span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span>
-        <span class="p">)</span>  <span class="c1"># type: Tuple[Callable, Callable]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">LU_KEY_ISOFORMAT</span> <span class="k">if</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="n">last_updated_type</span><span class="p">)</span> <span class="o">==</span> <span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">IsoFormat</span> <span class="k">else</span> <span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span>
+        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
@@ -1116,7 +1114,7 @@ Defines the interface for all data going in and out of a Builder</p>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Tries to create an index and return true if it suceeded</span>
+<span class="sd">        Tries to create an index and return true if it succeeded</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: single key to index</span>
@@ -1177,13 +1175,9 @@ Defines the interface for all data going in and out of a Builder</p>
 <span class="sd">            sort: Dictionary of sort order for fields. Keys are field names and</span>
 <span class="sd">                values are 1 for ascending or -1 for descending.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">),</span> <span class="kc">None</span>
-        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Get all distinct values for a field</span>
 
@@ -1193,11 +1187,8 @@ Defines the interface for all data going in and out of a Builder</p>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="ow">or</span> <span class="p">{}</span>
 
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
-        <span class="p">]</span>
-        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">results</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">last_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
@@ -1219,15 +1210,13 @@ Defines the interface for all data going in and out of a Builder</p>
                 <span class="s2">&quot;is a datetime field in your store that represents the time of &quot;</span>
                 <span class="s2">&quot;last update to each document.&quot;</span>
             <span class="p">)</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="n">doc</span> <span class="ow">or</span> <span class="n">get</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">doc</span> <span class="ow">or</span> <span class="n">get</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Handle when collection has docs but `NoneType` last_updated_field.</span>
             <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">get</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">))</span>
 
-    <span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="s2">&quot;Store&quot;</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">get</span><span class="p">(</span><span class="n">doc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="s2">&quot;Store&quot;</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns the keys of documents that are newer in the target</span>
 <span class="sd">        Store than this Store.</span>
@@ -1246,35 +1235,24 @@ Defines the interface for all data going in and out of a Builder</p>
             <span class="c1"># Get our current last_updated dates for each key value</span>
             <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
             <span class="n">dates</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
-                    <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
-                <span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">max</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
             <span class="p">}</span>
 
             <span class="c1"># Get the last_updated for the store we&#39;re comparing with</span>
             <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
             <span class="n">target_dates</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">d</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="n">target</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
-                    <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
-                <span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="n">target</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
             <span class="p">}</span>
 
             <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_dates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-            <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">key</span>
-                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">dates</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">target_dates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">date</span>
-            <span class="p">}</span>
+            <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">dates</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">target_dates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">date</span><span class="p">}</span>
 
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_keys</span> <span class="o">|</span> <span class="n">updated_keys</span><span class="p">)</span>
 
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">criteria</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$gt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated</span><span class="p">)}</span>
-            <span class="p">}</span>
-            <span class="k">return</span> <span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+        <span class="n">criteria</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$gt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated</span><span class="p">)}}</span>
+        <span class="k">return</span> <span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
 
     <span class="nd">@deprecated</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;Please use Store.newer_in&quot;</span><span class="p">)</span>
     <span class="k">def</span> <span class="nf">lu_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">targets</span><span class="p">):</span>
@@ -1453,7 +1431,7 @@ the documents in this Store</p>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">key</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;task_id&quot;</span><span class="p">,</span>
     <span class="n">last_updated_field</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;last_updated&quot;</span><span class="p">,</span>
-    <span class="n">last_updated_type</span><span class="p">:</span> <span class="n">DateTimeFormat</span> <span class="o">=</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="s2">&quot;datetime&quot;</span><span class="p">),</span>
+    <span class="n">last_updated_type</span><span class="p">:</span> <span class="n">DateTimeFormat</span> <span class="o">=</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="s2">&quot;datetime&quot;</span><span class="p">),</span>  <span class="c1"># noqa: B008</span>
     <span class="n">validator</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Validator</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
@@ -1467,11 +1445,9 @@ the documents in this Store</p>
     <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">=</span> <span class="n">last_updated_field</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_type</span> <span class="o">=</span> <span class="n">last_updated_type</span>
-    <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">LU_KEY_ISOFORMAT</span>
-        <span class="k">if</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="n">last_updated_type</span><span class="p">)</span> <span class="o">==</span> <span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">IsoFormat</span>
-        <span class="k">else</span> <span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span>
-    <span class="p">)</span>  <span class="c1"># type: Tuple[Callable, Callable]</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Callable</span><span class="p">,</span> <span class="n">Callable</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">LU_KEY_ISOFORMAT</span> <span class="k">if</span> <span class="n">DateTimeFormat</span><span class="p">(</span><span class="n">last_updated_type</span><span class="p">)</span> <span class="o">==</span> <span class="n">DateTimeFormat</span><span class="o">.</span><span class="n">IsoFormat</span> <span class="k">else</span> <span class="p">(</span><span class="n">identity</span><span class="p">,</span> <span class="n">identity</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">validator</span> <span class="o">=</span> <span class="n">validator</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NullHandler</span><span class="p">())</span>
@@ -1657,9 +1633,7 @@ the documents in this Store</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>maggma/core/store.py</code></summary>
-          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get all distinct values for a field</span>
 
@@ -1669,11 +1643,8 @@ the documents in this Store</p>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">criteria</span> <span class="o">=</span> <span class="n">criteria</span> <span class="ow">or</span> <span class="p">{}</span>
 
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
-    <span class="p">]</span>
-    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">results</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">[</span><span class="n">field</span><span class="p">],</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">results</span><span class="p">]</span>
 </code></pre></div>
         </details>
     </div>
@@ -1694,7 +1665,7 @@ the documents in this Store</p>
 
     <div class="doc doc-contents ">
 
-      <p>Tries to create an index and return true if it suceeded</p>
+      <p>Tries to create an index and return true if it succeeded</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -1741,7 +1712,7 @@ the documents in this Store</p>
           <div class="codehilite"><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Tries to create an index and return true if it suceeded</span>
+<span class="sd">    Tries to create an index and return true if it succeeded</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        key: single key to index</span>
@@ -1925,9 +1896,7 @@ Store than this Store.</p>
 </table>
         <details class="quote">
           <summary>Source code in <code>maggma/core/store.py</code></summary>
-          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="s2">&quot;Store&quot;</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+          <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">:</span> <span class="s2">&quot;Store&quot;</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">exhaustive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns the keys of documents that are newer in the target</span>
 <span class="sd">    Store than this Store.</span>
@@ -1946,35 +1915,24 @@ Store than this Store.</p>
         <span class="c1"># Get our current last_updated dates for each key value</span>
         <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
         <span class="n">dates</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
-                <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">max</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">max</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">properties</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
         <span class="p">}</span>
 
         <span class="c1"># Get the last_updated for the store we&#39;re comparing with</span>
         <span class="n">props</span> <span class="o">=</span> <span class="p">{</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;_id&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
         <span class="n">target_dates</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">d</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="n">target</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span>
-                <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">]:</span> <span class="n">target</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">0</span><span class="p">](</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">target</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">))</span>
             <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">target</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">props</span><span class="p">)</span>
         <span class="p">}</span>
 
         <span class="n">new_keys</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">target_dates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">dates</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
-        <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">key</span>
-            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">dates</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">target_dates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">date</span>
-        <span class="p">}</span>
+        <span class="n">updated_keys</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">date</span> <span class="ow">in</span> <span class="n">dates</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">target_dates</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">min</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">date</span><span class="p">}</span>
 
         <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_keys</span> <span class="o">|</span> <span class="n">updated_keys</span><span class="p">)</span>
 
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">criteria</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$gt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated</span><span class="p">)}</span>
-        <span class="p">}</span>
-        <span class="k">return</span> <span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
+    <span class="n">criteria</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$gt&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lu_func</span><span class="p">[</span><span class="mi">1</span><span class="p">](</span><span class="bp">self</span><span class="o">.</span><span class="n">last_updated</span><span class="p">)}}</span>
+    <span class="k">return</span> <span class="n">target</span><span class="o">.</span><span class="n">distinct</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>
@@ -2134,9 +2092,7 @@ values are 1 for ascending or -1 for descending.</p></td>
 <span class="sd">        sort: Dictionary of sort order for fields. Keys are field names and</span>
 <span class="sd">            values are 1 for ascending or -1 for descending.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">),</span> <span class="kc">None</span>
-    <span class="p">)</span>
+    <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">criteria</span><span class="o">=</span><span class="n">criteria</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="n">properties</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="n">sort</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
 </code></pre></div>
         </details>
     </div>

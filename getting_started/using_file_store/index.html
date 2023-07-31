@@ -893,7 +893,7 @@ identifiers for every file are necessary to enable <code>Builder</code> to work 
 and for associating custom metadata (See <a href="#adding-metadata">"Adding Metadata"</a> below). By using the relative path instead of the absolute path makes it possible to move the entire <code>FileStore</code> to a new location on disk without changing <code>file_id</code>  (as long as the relative paths don't change).</p>
 <h2 id="connecting-and-querying">Connecting and querying<a class="headerlink" href="#connecting-and-querying" title="Permanent link">&para;</a></h2>
 <p>As with any <code>Store</code>, you have to <code>connect()</code> before you can query any data from a <code>FileStore</code>. After that, you can use <code>query_one()</code> to examine a single document or
-<code>query()</code> to return an interator of matching documents. For example, let's print the
+<code>query()</code> to return an iterator of matching documents. For example, let's print the
 parent directory of each of the files named "input.in" in our example <code>FileStore</code>:</p>
 <div class="highlight"><pre><span></span><code><span class="o">&gt;&gt;&gt;</span> <span class="n">fs</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
 <span class="o">&gt;&gt;&gt;</span> <span class="p">[</span><span class="n">d</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">]</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">fs</span><span class="o">.</span><span class="n">query</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;input.in&quot;</span><span class="p">})]</span>
@@ -932,7 +932,7 @@ some tags to the files named "input.in", use:</p>
 <div class="highlight"><pre><span></span><code><span class="n">fs</span><span class="o">.</span><span class="n">add_metadata</span><span class="p">({</span><span class="s2">&quot;name&quot;</span><span class="p">:</span><span class="s2">&quot;input.in&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;tags&quot;</span><span class="p">:[</span><span class="s2">&quot;preliminary&quot;</span><span class="p">]})</span>
 </code></pre></div>
 <h3 id="automatic-metadata">Automatic metadata<a class="headerlink" href="#automatic-metadata" title="Permanent link">&para;</a></h3>
-<p>You can even define a function to automatically crate metadata from file or directory names. For example, if you prefix all your files with datestamps (e.g., '2022-05-07_experiment.csv'), you can write a simple string parsing function to
+<p>You can even define a function to automatically create metadata from file or directory names. For example, if you prefix all your files with datestamps (e.g., '2022-05-07_experiment.csv'), you can write a simple string parsing function to
 extract information from any key in a <code>FileStore</code> record and pass the function as an argument to <code>add_metadata</code>.</p>
 <p>For example, to extract the date from files named like '2022-05-07_experiment.csv'
 and add it to the 'date' field:</p>
@@ -970,7 +970,7 @@ to be returned in queries.</p>
 <p>Now that you can access your files on disk via a <code>FileStore</code>, it's time to write a <code>Builder</code> to read and process the data (see <a href="../simple_builder/">Writing a Builder</a>).
 Keep in mind that <code>get_items</code> will return documents like the one shown in (#creating-the-filestore). You can then use <code>process_items</code> to</p>
 <ul>
-<li>Create strucured data from the <code>contents</code></li>
+<li>Create structured data from the <code>contents</code></li>
 <li>Open the file for reading using a custom piece of code</li>
 <li>etc.</li>
 </ul>

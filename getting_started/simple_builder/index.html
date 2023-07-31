@@ -720,7 +720,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">sources</span><span class="o">=</span><span class="n">source</span><span class="p">,</span><span class="n">targets</span><span class="o">=</span><span class="n">target</span><span class="p">,</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
 <p>Python type annotations provide a really nice way of documenting the types we expect and being able to later type check using <code>mypy</code>. We defined the type for <code>source</code> and <code>target</code> as <code>Store</code> since we only care that implements that pattern. How exactly these <code>Store</code>s operate doesn't concern us here.</p>
-<p>Note that the <code>__init__</code> arguments: <code>source</code>, <code>target</code>, <code>multiplier</code>, and <code>kwargs</code> get saved as attributess:</p>
+<p>Note that the <code>__init__</code> arguments: <code>source</code>, <code>target</code>, <code>multiplier</code>, and <code>kwargs</code> get saved as attributes:</p>
 <div class="highlight"><pre><span></span><code>        <span class="bp">self</span><span class="o">.</span><span class="n">source</span> <span class="o">=</span> <span class="n">source</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">target</span> <span class="o">=</span> <span class="n">target</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">multiplier</span> <span class="o">=</span> <span class="n">multiplier</span>
@@ -862,7 +862,7 @@ For instance, if <code>process_items</code> returns <code>str</code>, then <code
                 <span class="s2">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">key</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;$in&quot;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">split</span><span class="p">)}}</span>
             <span class="p">}</span>
 </code></pre></div>
-<p>When distributed processing runs, it will modify the <code>Builder</code> dictionary in place by the prechunk dictionary. In this case, each builder distribute to a worker will get a modified <code>query</code> parameter that only runs on a subset of all posible keys.</p>
+<p>When distributed processing runs, it will modify the <code>Builder</code> dictionary in place by the prechunk dictionary. In this case, each builder distribute to a worker will get a modified <code>query</code> parameter that only runs on a subset of all possible keys.</p>
 
               
             </article>

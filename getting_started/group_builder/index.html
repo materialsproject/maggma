@@ -609,7 +609,7 @@
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">source</span><span class="o">=</span><span class="n">inventory</span><span class="p">,</span> <span class="n">target</span><span class="o">=</span><span class="n">resupply</span><span class="p">,</span> <span class="n">grouping_properties</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 </code></pre></div>
-<p>Note that unlike the previous <code>MapBuilder</code> example, we didn't call the source and target stores as such. Providing more usefull names is a good idea in writing builders to make it clearer what the underlying data should look like.</p>
+<p>Note that unlike the previous <code>MapBuilder</code> example, we didn't call the source and target stores as such. Providing more useful names is a good idea in writing builders to make it clearer what the underlying data should look like.</p>
 <p><code>GroupBuilder</code> inherits from <code>MapBuilder</code> so it has the same configurational parameters.</p>
 <ul>
 <li>projection: list of the fields you want to project. This can reduce the data transfer load if you only need certain fields or sub-documents from the source documents</li>
@@ -617,7 +617,7 @@
 <li>store_process_timeout: adds the process time into the target document for profiling</li>
 <li>retry_failed: retries running the process function on previously failed documents</li>
 </ul>
-<p>One parameter that doens't work in <code>GroupBuilder</code> is <code>delete_orphans</code>, since the Many-to-One relationshop makes determining orphaned documents very difficult.</p>
+<p>One parameter that doesn't work in <code>GroupBuilder</code> is <code>delete_orphans</code>, since the Many-to-One relationshop makes determining orphaned documents very difficult.</p>
 <p>Finally let's get to the hard part which is running our function. We do this by defining <code>unary_function</code></p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">unary_function</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
         <span class="n">resupply</span> <span class="o">=</span> <span class="p">{}</span>
@@ -629,7 +629,7 @@
                 <span class="n">resupply</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;resupply&quot;</span><span class="p">:</span> <span class="n">resupply</span><span class="p">}</span>
 </code></pre></div>
-<p>Just as in <code>MapBuilder</code>, we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source <code>key</code> and convert it to the target <code>key</code>. Same goes for the <code>last_updated_field</code>. <code>GroupBuilder</code> takes care of this, while also recording errors, processing time, and the Builder version.<code>GroupBuilder</code> also keeps a plural version of the <code>source.key</code> field, so in this example, all the <code>name</code> values wil be put together and kept in <code>names</code></p>
+<p>Just as in <code>MapBuilder</code>, we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source <code>key</code> and convert it to the target <code>key</code>. Same goes for the <code>last_updated_field</code>. <code>GroupBuilder</code> takes care of this, while also recording errors, processing time, and the Builder version.<code>GroupBuilder</code> also keeps a plural version of the <code>source.key</code> field, so in this example, all the <code>name</code> values will be put together and kept in <code>names</code></p>
 
               
             </article>
