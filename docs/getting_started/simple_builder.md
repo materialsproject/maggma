@@ -52,7 +52,7 @@ The `__init__` for a builder can have any set of parameters. Generally, you want
 
 Python type annotations provide a really nice way of documenting the types we expect and being able to later type check using `mypy`. We defined the type for `source` and `target` as `Store` since we only care that implements that pattern. How exactly these `Store`s operate doesn't concern us here.
 
-Note that the `__init__` arguments: `source`, `target`, `multiplier`, and `kwargs` get saved as attributess:
+Note that the `__init__` arguments: `source`, `target`, `multiplier`, and `kwargs` get saved as attributes:
 
 ``` python
         self.source = source
@@ -243,4 +243,4 @@ Then we can define a prechunk method that modifies the `Builder` dict in place t
             }
 ```
 
-When distributed processing runs, it will modify the `Builder` dictionary in place by the prechunk dictionary. In this case, each builder distribute to a worker will get a modified `query` parameter that only runs on a subset of all posible keys.
+When distributed processing runs, it will modify the `Builder` dictionary in place by the prechunk dictionary. In this case, each builder distribute to a worker will get a modified `query` parameter that only runs on a subset of all possible keys.

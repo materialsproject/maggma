@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Utilities to help with maggma functions
 """
@@ -80,8 +79,9 @@ def to_isoformat_ceil_ms(dt: Union[datetime, str]) -> str:
     """Helper to account for Mongo storing datetimes with only ms precision."""
     if isinstance(dt, datetime):
         return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
-    elif isinstance(dt, str):
+    if isinstance(dt, str):
         return dt
+    return None
 
 
 def to_dt(s: Union[datetime, str]) -> datetime:
@@ -89,8 +89,9 @@ def to_dt(s: Union[datetime, str]) -> datetime:
 
     if isinstance(s, str):
         return parser.parse(s)
-    elif isinstance(s, datetime):
+    if isinstance(s, datetime):
         return s
+    return None
 
 
 # This lu_key prioritizes not duplicating potentially expensive item
@@ -106,7 +107,7 @@ def recursive_update(d: Dict, u: Dict):
 
     Args:
         d (dict): dict to update
-        u (dict): updates to propogate
+        u (dict): updates to propagate
     """
 
     for k, v in u.items():
@@ -214,8 +215,7 @@ def dynamic_import(abs_module_path: str, class_name: Optional[str] = None):
         abs_module_path = ".".join(abs_module_path.split(".")[:-1])
 
     module_object = import_module(abs_module_path)
-    target_class = getattr(module_object, class_name)
-    return target_class
+    return getattr(module_object, class_name)
 
 
 class ReportingHandler(logging.Handler):

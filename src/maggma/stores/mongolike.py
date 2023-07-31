@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
@@ -13,19 +12,10 @@ from socket import socket
 from ruamel import yaml
 
 try:
-    from typing import (
-        Any,
-        Callable,
-        Dict,
-        Iterator,
-        List,
-        Literal,
-        Optional,
-        Tuple,
-        Union,
-    )
+    from typing import Any, Callable, Dict, Iterator, List, Literal, Optional, Tuple, Union
 except ImportError:
-    from typing import Dict, Iterator, List, Optional, Tuple, Union, Any, Callable
+    from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+
     from typing_extensions import Literal
 
 import mongomock
@@ -233,7 +223,7 @@ class MongoStore(Store):
 
         Returns:
         """
-        with open(lp_file, "r") as f:
+        with open(lp_file) as f:
             lp_creds = yaml.safe_load(f.read())
 
         db_creds = lp_creds.copy()
@@ -245,9 +235,7 @@ class MongoStore(Store):
 
         return cls(**db_creds, **kwargs)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -261,10 +249,7 @@ class MongoStore(Store):
             distinct_vals = self._collection.distinct(field, criteria)
         except (OperationFailure, DocumentTooLarge):
             distinct_vals = [
-                d["_id"]
-                for d in self._collection.aggregate(
-                    [{"$match": criteria}, {"$group": {"_id": f"${field}"}}]
-                )
+                d["_id"] for d in self._collection.aggregate([{"$match": criteria}, {"$group": {"_id": f"${field}"}}])
             ]
             if all(isinstance(d, list) for d in filter(None, distinct_vals)):  # type: ignore
                 distinct_vals = list(chain.from_iterable(filter(None, distinct_vals)))
@@ -343,9 +328,7 @@ class MongoStore(Store):
     def _collection(self):
         """Property referring to underlying pymongo collection"""
         if self._coll is None:
-            raise StoreError(
-                "Must connect Mongo-like store before attempting to use it"
-            )
+            raise StoreError("Must connect Mongo-like store before attempting to use it")
         return self._coll
 
     def count(
@@ -365,12 +348,7 @@ class MongoStore(Store):
         criteria = criteria if criteria else {}
 
         hint_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in hint.items()
-            ]
-            if hint
-            else None
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
         )
 
         if hint_list is not None:  # pragma: no cover
@@ -413,29 +391,20 @@ class MongoStore(Store):
 
         if self.default_sort is not None:
             default_sort_formatted = [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in self.default_sort.items()
+                (k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in self.default_sort.items()
             ]
 
         sort_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in sort.items()
-            ]
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in sort.items()]
             if sort
             else default_sort_formatted
         )
 
         hint_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in hint.items()
-            ]
-            if hint
-            else None
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
         )
 
-        for d in self._collection.find(
+        yield from self._collection.find(
             filter=criteria,
             projection=properties,
             skip=skip,
@@ -443,8 +412,7 @@ class MongoStore(Store):
             sort=sort_list,
             hint=hint_list,
             **kwargs,
-        ):
-            yield d
+        )
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
@@ -459,12 +427,12 @@ class MongoStore(Store):
 
         if confirm_field_index(self._collection, key):
             return True
-        else:
-            try:
-                self._collection.create_index(key, unique=unique, background=True)
-                return True
-            except Exception:
-                return False
+
+        try:
+            self._collection.create_index(key, unique=unique, background=True)
+            return True
+        except Exception:
+            return False
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
@@ -483,7 +451,7 @@ class MongoStore(Store):
         if not isinstance(docs, list):
             docs = [docs]
 
-        for d in map(lambda x: jsanitize(x, allow_bson=True), docs):
+        for d in (jsanitize(x, allow_bson=True) for x in docs):
             # document-level validation is optional
             validates = True
             if self.validator:
@@ -491,15 +459,11 @@ class MongoStore(Store):
                 if not validates:
                     if self.validator.strict:
                         raise ValueError(self.validator.validation_errors(d))
-                    else:
-                        self.logger.error(self.validator.validation_errors(d))
+                    self.logger.error(self.validator.validation_errors(d))
 
             if validates:
                 key = key or self.key
-                if isinstance(key, list):
-                    search_doc = {k: d[k] for k in key}
-                else:
-                    search_doc = {key: d[key]}
+                search_doc = {k: d[k] for k in key} if isinstance(key, list) else {key: d[key]}
 
                 requests.append(ReplaceOne(search_doc, d, upsert=True))
 
@@ -509,7 +473,6 @@ class MongoStore(Store):
             except (OperationFailure, DocumentTooLarge) as e:
                 if self.safe_update:
                     for req in requests:
-                        req._filter
                         try:
                             self._collection.bulk_write([req], ordered=False)
                         except (OperationFailure, DocumentTooLarge):
@@ -558,7 +521,7 @@ class MongoURIStore(MongoStore):
         self,
         uri: str,
         collection_name: str,
-        database: str = None,
+        database: Optional[str] = None,
         ssh_tunnel: Optional[SSHTunnel] = None,
         mongoclient_kwargs: Optional[Dict] = None,
         default_sort: Optional[Dict[str, Union[Sort, int]]] = None,
@@ -581,9 +544,7 @@ class MongoURIStore(MongoStore):
         if database is None:
             d_uri = uri_parser.parse_uri(uri)
             if d_uri["database"] is None:
-                raise ConfigurationError(
-                    "If database name is not supplied, a database must be set in the uri"
-                )
+                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
             self.database = d_uri["database"]
         else:
             self.database = database
@@ -627,7 +588,7 @@ class MemoryStore(MongoStore):
         self.default_sort = None
         self._coll = None
         self.kwargs = kwargs
-        super(MongoStore, self).__init__(**kwargs)  # noqa
+        super(MongoStore, self).__init__(**kwargs)
 
     def connect(self, force_reset: bool = False):
         """
@@ -683,9 +644,7 @@ class MemoryStore(MongoStore):
             properties = list(properties.keys())
 
         data = [
-            doc
-            for doc in self.query(properties=keys + properties, criteria=criteria)
-            if all(has(doc, k) for k in keys)
+            doc for doc in self.query(properties=keys + properties, criteria=criteria) if all(has(doc, k) for k in keys)
         ]
 
         def grouping_keys(doc):
@@ -763,9 +722,7 @@ class JSONStore(MemoryStore):
         self.kwargs = kwargs
 
         if not self.read_only and len(paths) > 1:
-            raise RuntimeError(
-                "Cannot instantiate file-writable JSONStore with multiple JSON files."
-            )
+            raise RuntimeError("Cannot instantiate file-writable JSONStore with multiple JSON files.")
 
         self.default_sort = None
         self.serialization_option = serialization_option
@@ -858,7 +815,7 @@ class JSONStore(MemoryStore):
         Updates the json file when a write-like operation is performed.
         """
         with zopen(self.paths[0], "w") as f:
-            data = [d for d in self.query()]
+            data = list(self.query())
             for d in data:
                 d.pop("_id")
             bytesdata = orjson.dumps(
@@ -915,7 +872,7 @@ class MontyStore(MemoryStore):
     def __init__(
         self,
         collection_name,
-        database_path: str = None,
+        database_path: Optional[str] = None,
         database_name: str = "db",
         storage: Literal["sqlite", "flatfile", "lightning"] = "sqlite",
         storage_kwargs: Optional[dict] = None,
@@ -931,8 +888,8 @@ class MontyStore(MemoryStore):
                 directory will be used.
             database_name: The database name.
             storage: The storage type. Options include "sqlite", "lightning", "flatfile". Note that
-            although MontyDB supports in memory storage, this capability is disabled in maggma to avoid unintended behavior, since multiple
-            in-memory MontyStore would actually point to the same data.
+            although MontyDB supports in memory storage, this capability is disabled in maggma to avoid unintended
+            behavior, since multiple in-memory MontyStore would actually point to the same data.
             storage_kwargs: Keyword arguments passed to ``montydb.set_storage``.
             client_kwargs: Keyword arguments passed to the ``montydb.MontyClient``
                 constructor.
@@ -954,7 +911,7 @@ class MontyStore(MemoryStore):
             "mongo_version": "4.0",
         }
         self.client_kwargs = client_kwargs or {}
-        super(MongoStore, self).__init__(**kwargs)  # noqa
+        super(MongoStore, self).__init__(**kwargs)
 
     def connect(self, force_reset: bool = False):
         """
@@ -973,9 +930,7 @@ class MontyStore(MemoryStore):
     @property
     def name(self) -> str:
         """Return a string representing this data source."""
-        return (
-            f"monty://{self.database_path}/{self.database_name}/{self.collection_name}"
-        )
+        return f"monty://{self.database_path}/{self.database_name}/{self.collection_name}"
 
     def count(
         self,
@@ -993,12 +948,7 @@ class MontyStore(MemoryStore):
         criteria = criteria if criteria else {}
 
         hint_list = (
-            [
-                (k, Sort(v).value) if isinstance(v, int) else (k, v.value)
-                for k, v in hint.items()
-            ]
-            if hint
-            else None
+            [(k, Sort(v).value) if isinstance(v, int) else (k, v.value) for k, v in hint.items()] if hint else None
         )
 
         if hint_list is not None:  # pragma: no cover
@@ -1030,15 +980,11 @@ class MontyStore(MemoryStore):
                 if not validates:
                     if self.validator.strict:
                         raise ValueError(self.validator.validation_errors(d))
-                    else:
-                        self.logger.error(self.validator.validation_errors(d))
+                    self.logger.error(self.validator.validation_errors(d))
 
             if validates:
                 key = key or self.key
-                if isinstance(key, list):
-                    search_doc = {k: d[k] for k in key}
-                else:
-                    search_doc = {key: d[key]}
+                search_doc = {k: d[k] for k in key} if isinstance(key, list) else {key: d[key]}
 
                 self._collection.replace_one(search_doc, d, upsert=True)
 

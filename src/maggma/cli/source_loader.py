@@ -58,7 +58,7 @@ class NotebookLoader(Loader):
         module.__path__ = self.path
 
         # load the notebook object
-        with open(self.path, "r", encoding="utf-8") as f:
+        with open(self.path, encoding="utf-8") as f:
             nb = nbformat.read(f, 4)
 
         # extra work to ensure that magics that would affect the user_ns
@@ -70,9 +70,7 @@ class NotebookLoader(Loader):
             for cell in nb.cells:
                 if cell.cell_type == "code":
                     # transform the input to executable Python
-                    code = self.shell.input_transformer_manager.transform_cell(
-                        cell.source
-                    )
+                    code = self.shell.input_transformer_manager.transform_cell(cell.source)
                     # run the code in themodule
                     exec(code, module.__dict__)
         finally:
@@ -95,30 +93,22 @@ def spec_from_source(file_path: str) -> ModuleSpec:
 
         spec = ModuleSpec(
             name=f"{_BASENAME}.{module_name}",
-            loader=SourceFileLoader(
-                fullname=f"{_BASENAME}.{module_name}", path=file_path_str
-            ),
+            loader=SourceFileLoader(fullname=f"{_BASENAME}.{module_name}", path=file_path_str),
             origin=file_path_str,
         )
         # spec._set_fileattr = True
     elif file_path_obj.parts[-1][-6:] == ".ipynb":
         # Gets module name from the filename without the .ipnb extension
-        module_name = (
-            "_".join(file_path_obj.parts).replace(" ", "_").replace(".ipynb", "")
-        )
+        module_name = "_".join(file_path_obj.parts).replace(" ", "_").replace(".ipynb", "")
 
         spec = ModuleSpec(
             name=f"{_BASENAME}.{module_name}",
-            loader=NotebookLoader(
-                name=f"{_BASENAME}.{module_name}", path=file_path_str
-            ),
+            loader=NotebookLoader(name=f"{_BASENAME}.{module_name}", path=file_path_str),
             origin=file_path_str,
         )
         # spec._set_fileattr = True
     else:
-        raise Exception(
-            "Can't load {file_path}. Must provide a python source file such as a .py or .ipynb file"
-        )
+        raise Exception("Can't load {file_path}. Must provide a python source file such as a .py or .ipynb file")
 
     return spec
 
@@ -135,13 +125,10 @@ def load_builder_from_source(file_path: str) -> List[Builder]:
     sys.modules[spec.name] = module_object
 
     if hasattr(module_object, "__builders__"):
-        return getattr(module_object, "__builders__")
-    elif hasattr(module_object, "__builder__"):
-        return getattr(module_object, "__builder__")
-    else:
-        raise Exception(
-            f"No __builders__ or __builder__ attribute found in {file_path}"
-        )
+        return module_object.__builders__
+    if hasattr(module_object, "__builder__"):
+        return module_object.__builder__
+    raise Exception(f"No __builders__ or __builder__ attribute found in {file_path}")
 
 
 def find_matching_file(segments, curr_path="./"):
@@ -167,9 +154,7 @@ def find_matching_file(segments, curr_path="./"):
         pos_matches = {pmatch.group(1) for pmatch in pos_matches if pmatch}
         for new_path in pos_matches:
             if Path(new_path).exists() and Path(new_path).is_dir:
-                for sub_match in find_matching_file(
-                    remainder, curr_path=new_path + "/"
-                ):
+                for sub_match in find_matching_file(remainder, curr_path=new_path + "/"):
                     yield sub_match
             for sub_match in find_matching_file(remainder, curr_path=new_path):
                 yield sub_match

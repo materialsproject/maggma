@@ -1,11 +1,9 @@
-# coding: utf-8
 """
 Tests the validators
 """
 import pytest
-from monty.json import MSONable
-
 from maggma.validators import JSONSchemaValidator, ValidationError, msonable_schema
+from monty.json import MSONable
 
 
 class LatticeMock(MSONable):
@@ -17,7 +15,7 @@ class LatticeMock(MSONable):
         self.a = a
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_schema():
     return {
         "type": "object",
@@ -69,10 +67,6 @@ def test_jsonschemevalidator(test_schema):
         "lattice: ['I am not a lattice!'] is not of type 'object'"
     ]
 
-    assert validator.validation_errors(invalid_doc_missing_key) == [
-        ": 'successful' is a required property"
-    ]
+    assert validator.validation_errors(invalid_doc_missing_key) == [": 'successful' is a required property"]
 
-    assert validator.validation_errors(invalid_doc_wrong_type) == [
-        "successful: 'true' is not of type 'boolean'"
-    ]
+    assert validator.validation_errors(invalid_doc_wrong_type) == ["successful: 'true' is not of type 'boolean'"]

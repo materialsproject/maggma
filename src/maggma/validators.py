@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Validator class for document-level validation on Stores. Attach an instance
 of a Validator subclass to a Store .schema variable to enable validation on
@@ -74,8 +73,7 @@ class JSONSchemaValidator(Validator):
         except ValidationError:
             if self.strict:
                 raise
-            else:
-                return False
+            return False
 
     def validation_errors(self, doc: Dict) -> List[str]:
         """
@@ -92,12 +90,7 @@ class JSONSchemaValidator(Validator):
             return []
 
         validator = validator_for(self.schema)(self.schema)
-        errors = [
-            "{}: {}".format(".".join(error.absolute_path), error.message)
-            for error in validator.iter_errors(doc)
-        ]
-
-        return errors
+        return ["{}: {}".format(".".join(error.absolute_path), error.message) for error in validator.iter_errors(doc)]
 
 
 def msonable_schema(cls):

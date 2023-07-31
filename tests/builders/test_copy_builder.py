@@ -1,16 +1,14 @@
-# coding: utf-8
 """
 Tests for MapBuilder
 """
 from datetime import datetime, timedelta
 
 import pytest
-
 from maggma.builders import CopyBuilder
 from maggma.stores import MemoryStore
 
 
-@pytest.fixture
+@pytest.fixture()
 def source():
     store = MemoryStore("source", key="k", last_updated_field="lu")
     store.connect()
@@ -19,7 +17,7 @@ def source():
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def target():
     store = MemoryStore("target", key="k", last_updated_field="lu")
     store.connect()
@@ -33,23 +31,21 @@ def now():
     return datetime.utcnow()
 
 
-@pytest.fixture
+@pytest.fixture()
 def old_docs(now):
     return [{"lu": now, "k": k, "v": "old"} for k in range(20)]
 
 
-@pytest.fixture
+@pytest.fixture()
 def new_docs(now):
     toc = now + timedelta(seconds=1)
     return [{"lu": toc, "k": k, "v": "new"} for k in range(0, 10)]
 
 
-@pytest.fixture
+@pytest.fixture()
 def some_failed_old_docs(now):
     docs = [{"lu": now, "k": k, "v": "old", "state": "failed"} for k in range(3)]
-    docs.extend(
-        [{"lu": now, "k": k, "v": "old", "state": "failed"} for k in range(18, 20)]
-    )
+    docs.extend([{"lu": now, "k": k, "v": "old", "state": "failed"} for k in range(18, 20)])
     return docs
 
 

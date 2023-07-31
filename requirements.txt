@@ -11,6 +11,7 @@ fastapi==0.79.0
 numpy==1.18.0;python_version<"3.8"
 numpy==1.23.0;python_version>="3.8"
 typing_extensions;python_version<"3.8"
+typing_compat;python_version<"3.8" # required for get_args()
 pyzmq==24.0.1
 dnspython==2.2.1
 uvicorn==0.18.3

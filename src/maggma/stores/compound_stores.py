@@ -54,7 +54,7 @@ class JointStore(Store):
         self.mongoclient_kwargs = mongoclient_kwargs or {}
         self.kwargs = kwargs
 
-        super(JointStore, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @property
     def name(self) -> str:
@@ -85,9 +85,7 @@ class JointStore(Store):
         )
         db = conn[self.database]
         self._coll = db[self.main]
-        self._has_merge_objects = (
-            self._collection.database.client.server_info()["version"] > "3.6"
-        )
+        self._has_merge_objects = self._collection.database.client.server_info()["version"] > "3.6"
 
     def close(self):
         """
@@ -99,7 +97,7 @@ class JointStore(Store):
     def _collection(self):
         """Property referring to the root pymongo collection"""
         if self._coll is None:
-            raise StoreError("Must connect Mongo-like store before attemping to use it")
+            raise StoreError("Must connect Mongo-like store before attempting to use it")
         return self._coll
 
     @property
@@ -173,16 +171,14 @@ class JointStore(Store):
 
             if self.merge_at_root:
                 if not self._has_merge_objects:
-                    raise Exception(
-                        "MongoDB server version too low to use $mergeObjects."
-                    )
+                    raise Exception("MongoDB server version too low to use $mergeObjects.")
 
                 pipeline.append(
                     {
                         "$replaceRoot": {
                             "newRoot": {
                                 "$mergeObjects": [
-                                    {"$arrayElemAt": ["${}".format(cname), 0]},
+                                    {"$arrayElemAt": [f"${cname}", 0]},
                                     "$$ROOT",
                                 ]
                             }
@@ -193,20 +189,15 @@ class JointStore(Store):
                 pipeline.append(
                     {
                         "$unwind": {
-                            "path": "${}".format(cname),
+                            "path": f"${cname}",
                             "preserveNullAndEmptyArrays": True,
                         }
                     }
                 )
 
         # Do projection for max last_updated
-        lu_max_fields = ["${}".format(self.last_updated_field)]
-        lu_max_fields.extend(
-            [
-                "${}.{}".format(cname, self.last_updated_field)
-                for cname in self.collection_names
-            ]
-        )
+        lu_max_fields = [f"${self.last_updated_field}"]
+        lu_max_fields.extend([f"${cname}.{self.last_updated_field}" for cname in self.collection_names])
         lu_proj = {self.last_updated_field: {"$max": lu_max_fields}}
         pipeline.append({"$addFields": lu_proj})
 
@@ -244,12 +235,9 @@ class JointStore(Store):
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
-        pipeline = self._get_pipeline(
-            criteria=criteria, properties=properties, skip=skip, limit=limit
-        )
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties, skip=skip, limit=limit)
         agg = self._collection.aggregate(pipeline)
-        for d in agg:
-            yield d
+        yield from agg
 
     def groupby(
         self,
@@ -260,14 +248,12 @@ class JointStore(Store):
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
-        pipeline = self._get_pipeline(
-            criteria=criteria, properties=properties, skip=skip, limit=limit
-        )
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties, skip=skip, limit=limit)
         if not isinstance(keys, list):
             keys = [keys]
         group_id = {}  # type: Dict[str,Any]
         for key in keys:
-            set_(group_id, key, "${}".format(key))
+            set_(group_id, key, f"${key}")
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
         agg = self._collection.aggregate(pipeline)
@@ -292,8 +278,7 @@ class JointStore(Store):
         # pipeline.append({"$limit": 1})
         query = self.query(criteria=criteria, properties=properties, **kwargs)
         try:
-            doc = next(query)
-            return doc
+            return next(query)
         except StopIteration:
             return None
 
@@ -339,7 +324,7 @@ class ConcatStore(Store):
         """
         self.stores = stores
         self.kwargs = kwargs
-        super(ConcatStore, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @property
     def name(self) -> str:
@@ -374,7 +359,7 @@ class ConcatStore(Store):
     def last_updated(self) -> datetime:
         """
         Finds the most recent last_updated across all the stores.
-        This might not be the most usefull way to do this for this type of Store
+        This might not be the most useful way to do this for this type of Store
         since it could very easily over-estimate the last_updated based on what stores
         are used
         """
@@ -398,9 +383,7 @@ class ConcatStore(Store):
         """
         raise NotImplementedError("No update method for ConcatStore")
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -425,7 +408,7 @@ class ConcatStore(Store):
         Returns:
             bool indicating if the index exists/was created on all stores
         """
-        return all([store.ensure_index(key, unique) for store in self.stores])
+        return all(store.ensure_index(key, unique) for store in self.stores)
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
@@ -502,17 +485,16 @@ class ConcatStore(Store):
                     limit=limit,
                 )
             )
-            for key, group in temp_docs:
+            for _key, group in temp_docs:
                 docs.extend(group)
 
         def key_set(d: Dict) -> Tuple:
             "index function based on passed in keys"
-            test_d = tuple(d.get(k, None) for k in keys)
-            return test_d
+            return tuple(d.get(k, None) for k in keys)
 
         sorted_docs = sorted(docs, key=key_set)
         for vals, group_iter in groupby(sorted_docs, key=key_set):
-            id_dict = {key: val for key, val in zip(keys, vals)}
+            id_dict = dict(zip(keys, vals))
             yield id_dict, list(group_iter)
 
     def remove_docs(self, criteria: Dict):

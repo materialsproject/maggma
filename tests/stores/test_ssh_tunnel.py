@@ -1,18 +1,13 @@
 import paramiko
 import pymongo
 import pytest
-from monty.serialization import dumpfn, loadfn
-from paramiko.ssh_exception import (
-    AuthenticationException,
-    NoValidConnectionsError,
-    SSHException,
-)
-
 from maggma.stores.mongolike import MongoStore, SSHTunnel
+from monty.serialization import dumpfn, loadfn
+from paramiko.ssh_exception import AuthenticationException, NoValidConnectionsError, SSHException
 
 
-@pytest.fixture
-def ssh_server_available():
+@pytest.fixture()
+def ssh_server_available():  # noqa: PT004
     """
     Fixture to determine if an SSH server is available
     to test the SSH tunnel

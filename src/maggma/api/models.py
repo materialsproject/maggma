@@ -20,8 +20,7 @@ class Meta(BaseModel):
 
     api_version: str = Field(
         __version__,
-        description="a string containing the version of the Materials API "
-        "implementation, e.g. v0.9.5",
+        description="a string containing the version of the Materials API implementation, e.g. v0.9.5",
     )
 
     time_stamp: datetime = Field(
@@ -29,9 +28,7 @@ class Meta(BaseModel):
         default_factory=datetime.utcnow,
     )
 
-    total_doc: Optional[int] = Field(
-        None, description="the total number of documents available for this query", ge=0
-    )
+    total_doc: Optional[int] = Field(None, description="the total number of documents available for this query", ge=0)
 
     class Config:
         extra = "allow"
@@ -56,9 +53,7 @@ class Response(GenericModel, Generic[DataT]):
     """
 
     data: Optional[List[DataT]] = Field(None, description="List of returned data")
-    errors: Optional[List[Error]] = Field(
-        None, description="Any errors on processing this query"
-    )
+    errors: Optional[List[Error]] = Field(None, description="Any errors on processing this query")
     meta: Optional[Meta] = Field(None, description="Extra information for the query")
 
     @validator("errors", always=True)
@@ -92,8 +87,6 @@ class S3URLDoc(BaseModel):
         description="Pre-signed download URL",
     )
 
-    requested_datetime: datetime = Field(
-        ..., description="Datetime for when URL was requested"
-    )
+    requested_datetime: datetime = Field(..., description="Datetime for when URL was requested")
 
     expiry_datetime: datetime = Field(..., description="Expiry datetime of the URL")

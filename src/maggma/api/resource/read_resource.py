@@ -112,9 +112,7 @@ class ReadOnlyResource(Resource):
         model_name = self.model.__name__
 
         if self.key_fields is None:
-            field_input = SparseFieldsQuery(
-                self.model, [self.store.key, self.store.last_updated_field]
-            ).query
+            field_input = SparseFieldsQuery(self.model, [self.store.key, self.store.last_updated_field]).query
         else:
 
             def field_input():
@@ -131,7 +129,7 @@ class ReadOnlyResource(Resource):
             _fields: STORE_PARAMS = Depends(field_input),
         ):
             f"""
-            Get's a document by the primary key in the store
+            Gets a document by the primary key in the store
 
             Args:
                 {key_name}: the id of a single {model_name}
@@ -197,14 +195,10 @@ class ReadOnlyResource(Resource):
             temp_response: Response = queries.pop("temp_response")  # type: ignore
 
             query_params = [
-                entry
-                for _, i in enumerate(self.query_operators)
-                for entry in signature(i.query).parameters
+                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params if key not in query_params]
             if any(overlap):
                 if "limit" in overlap or "skip" in overlap:
                     raise HTTPException(
@@ -216,9 +210,7 @@ class ReadOnlyResource(Resource):
                 else:
                     raise HTTPException(
                         status_code=400,
-                        detail="Request contains query parameters which cannot be used: {}".format(
-                            ", ".join(overlap)
-                        ),
+                        detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                     )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
@@ -232,11 +224,7 @@ class ReadOnlyResource(Resource):
             try:
                 with query_timeout(self.timeout):
                     count = self.store.count(  # type: ignore
-                        **{
-                            field: query[field]
-                            for field in query
-                            if field in ["criteria", "hint"]
-                        }
+                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
                     )
 
                     if isinstance(self.store, S3Store):
@@ -250,11 +238,7 @@ class ReadOnlyResource(Resource):
                         data = list(
                             self.store._collection.aggregate(
                                 pipeline,
-                                **{
-                                    field: query[field]
-                                    for field in query
-                                    if field in ["hint"]
-                                },
+                                **{field: query[field] for field in query if field in ["hint"]},
                             )
                         )
 

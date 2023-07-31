@@ -1,7 +1,5 @@
 # isort: off
-from maggma.api.resource.core import Resource
-from maggma.api.resource.core import HintScheme
-from maggma.api.resource.core import HeaderProcessor
+from maggma.api.resource.core import HeaderProcessor, HintScheme, Resource
 
 # isort: on
 

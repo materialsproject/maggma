@@ -5,10 +5,9 @@ import threading
 
 import pytest
 import zmq.asyncio as zmq
-from zmq import REP, REQ
-
 from maggma.cli.distributed import find_port, manager, worker
 from maggma.core import Builder
+from zmq import REP, REQ
 
 # TODO: Timeout errors?
 
@@ -74,10 +73,7 @@ def test_manager_and_worker(log_to_stdout):
     )
     manager_thread.start()
 
-    worker_threads = [
-        threading.Thread(target=worker, args=(SERVER_URL, SERVER_PORT, 1, True))
-        for _ in range(3)
-    ]
+    worker_threads = [threading.Thread(target=worker, args=(SERVER_URL, SERVER_PORT, 1, True)) for _ in range(3)]
 
     for worker_thread in worker_threads:
         worker_thread.start()
@@ -88,7 +84,7 @@ def test_manager_and_worker(log_to_stdout):
     manager_thread.join()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_manager_worker_error(log_to_stdout):
     manager_thread = threading.Thread(
         target=manager,
@@ -100,26 +96,24 @@ async def test_manager_worker_error(log_to_stdout):
     socket = context.socket(REQ)
     socket.connect(f"{SERVER_URL}:{SERVER_PORT}")
 
-    await socket.send("ERROR_testerror".encode("utf-8"))
+    await socket.send(b"ERROR_testerror")
     await asyncio.sleep(1)
 
     manager_thread.join()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_worker_error():
     context = zmq.Context()
     socket = context.socket(REP)
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
-    worker_task = threading.Thread(
-        target=worker, args=(SERVER_URL, SERVER_PORT, 1, True)
-    )
+    worker_task = threading.Thread(target=worker, args=(SERVER_URL, SERVER_PORT, 1, True))
 
     worker_task.start()
 
     message = await socket.recv()
-    assert message == "READY_{}".format(HOSTNAME).encode("utf-8")
+    assert message == f"READY_{HOSTNAME}".encode()
 
     dummy_work = {
         "@module": "tests.cli.test_distributed",
@@ -137,20 +131,18 @@ async def test_worker_error():
     worker_task.join()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_worker_exit():
     context = zmq.Context()
     socket = context.socket(REP)
     socket.bind(f"{SERVER_URL}:{SERVER_PORT}")
 
-    worker_task = threading.Thread(
-        target=worker, args=(SERVER_URL, SERVER_PORT, 1, True)
-    )
+    worker_task = threading.Thread(target=worker, args=(SERVER_URL, SERVER_PORT, 1, True))
 
     worker_task.start()
 
     message = await socket.recv()
-    assert message == "READY_{}".format(HOSTNAME).encode("utf-8")
+    assert message == f"READY_{HOSTNAME}".encode()
     await asyncio.sleep(1)
     await socket.send(b"EXIT")
     await asyncio.sleep(1)
@@ -159,7 +151,7 @@ async def test_worker_exit():
     worker_task.join()
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 def test_no_prechunk(caplog):
     manager(
         SERVER_URL,
