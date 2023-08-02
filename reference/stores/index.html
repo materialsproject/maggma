@@ -10547,10 +10547,12 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="s2">&quot;s3-to-mongo-keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;s3-to-mongo-keys&quot;</span>  <span class="c1"># inception</span>
         <span class="c1"># encode dictionary since values have to be strings</span>
         <span class="n">search_doc</span><span class="p">[</span><span class="s2">&quot;s3-to-mongo-keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">s3_to_mongo_keys</span><span class="p">)</span>
-        <span class="n">s3_bucket</span><span class="o">.</span><span class="n">put_object</span><span class="p">(</span>
+        <span class="n">s3_bucket</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
+            <span class="n">Fileobj</span><span class="o">=</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="n">Key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]),</span>
-            <span class="n">Body</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-            <span class="n">Metadata</span><span class="o">=</span><span class="p">{</span><span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+            <span class="n">ExtraArgs</span><span class="o">=</span><span class="p">{</span>
+                <span class="s2">&quot;Metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+            <span class="p">},</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">lu_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -11898,10 +11900,12 @@ Force all of the keys to be lower case to be Minio compatible</p>
     <span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="s2">&quot;s3-to-mongo-keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;s3-to-mongo-keys&quot;</span>  <span class="c1"># inception</span>
     <span class="c1"># encode dictionary since values have to be strings</span>
     <span class="n">search_doc</span><span class="p">[</span><span class="s2">&quot;s3-to-mongo-keys&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dumps</span><span class="p">(</span><span class="n">s3_to_mongo_keys</span><span class="p">)</span>
-    <span class="n">s3_bucket</span><span class="o">.</span><span class="n">put_object</span><span class="p">(</span>
+    <span class="n">s3_bucket</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
+        <span class="n">Fileobj</span><span class="o">=</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="n">Key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]),</span>
-        <span class="n">Body</span><span class="o">=</span><span class="n">data</span><span class="p">,</span>
-        <span class="n">Metadata</span><span class="o">=</span><span class="p">{</span><span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
+        <span class="n">ExtraArgs</span><span class="o">=</span><span class="p">{</span>
+            <span class="s2">&quot;Metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="p">},</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">lu_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
