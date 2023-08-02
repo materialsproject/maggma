@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Module containing the core Store definition
 """
@@ -7,7 +6,7 @@ import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
 from datetime import datetime
 from enum import Enum
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 from monty.dev import deprecated
 from monty.json import MontyDecoder, MSONable
@@ -41,7 +40,7 @@ class Store(MSONable, metaclass=ABCMeta):
         self,
         key: str = "task_id",
         last_updated_field: str = "last_updated",
-        last_updated_type: DateTimeFormat = DateTimeFormat("datetime"),
+        last_updated_type: DateTimeFormat = DateTimeFormat("datetime"),  # noqa: B008
         validator: Optional[Validator] = None,
     ):
         """
@@ -55,11 +54,9 @@ class Store(MSONable, metaclass=ABCMeta):
         self.key = key
         self.last_updated_field = last_updated_field
         self.last_updated_type = last_updated_type
-        self._lu_func = (
-            LU_KEY_ISOFORMAT
-            if DateTimeFormat(last_updated_type) == DateTimeFormat.IsoFormat
-            else (identity, identity)
-        )  # type: Tuple[Callable, Callable]
+        self._lu_func: Tuple[Callable, Callable] = (
+            LU_KEY_ISOFORMAT if DateTimeFormat(last_updated_type) == DateTimeFormat.IsoFormat else (identity, identity)
+        )
         self.validator = validator
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
@@ -137,7 +134,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded
 
         Args:
             key: single key to index
@@ -198,13 +195,9 @@ class Store(MSONable, metaclass=ABCMeta):
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
         """
-        return next(
-            self.query(criteria=criteria, properties=properties, sort=sort), None
-        )
+        return next(self.query(criteria=criteria, properties=properties, sort=sort), None)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field
 
@@ -214,11 +207,8 @@ class Store(MSONable, metaclass=ABCMeta):
         """
         criteria = criteria or {}
 
-        results = [
-            key for key, _ in self.groupby(field, properties=[field], criteria=criteria)
-        ]
-        results = [get(r, field) for r in results]
-        return results
+        results = [key for key, _ in self.groupby(field, properties=[field], criteria=criteria)]
+        return [get(r, field) for r in results]
 
     @property
     def last_updated(self) -> datetime:
@@ -240,15 +230,13 @@ class Store(MSONable, metaclass=ABCMeta):
                 "is a datetime field in your store that represents the time of "
                 "last update to each document."
             )
-        elif not doc or get(doc, self.last_updated_field) is None:
+        if not doc or get(doc, self.last_updated_field) is None:
             # Handle when collection has docs but `NoneType` last_updated_field.
             return datetime.min
-        else:
-            return self._lu_func[0](get(doc, self.last_updated_field))
 
-    def newer_in(
-        self, target: "Store", criteria: Optional[Dict] = None, exhaustive: bool = False
-    ) -> List[str]:
+        return self._lu_func[0](get(doc, self.last_updated_field))
+
+    def newer_in(self, target: "Store", criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
@@ -267,35 +255,24 @@ class Store(MSONable, metaclass=ABCMeta):
             # Get our current last_updated dates for each key value
             props = {self.key: 1, self.last_updated_field: 1, "_id": 0}
             dates = {
-                d[self.key]: self._lu_func[0](
-                    d.get(self.last_updated_field, datetime.max)
-                )
+                d[self.key]: self._lu_func[0](d.get(self.last_updated_field, datetime.max))
                 for d in self.query(properties=props)
             }
 
             # Get the last_updated for the store we're comparing with
             props = {target.key: 1, target.last_updated_field: 1, "_id": 0}
             target_dates = {
-                d[target.key]: target._lu_func[0](
-                    d.get(target.last_updated_field, datetime.min)
-                )
+                d[target.key]: target._lu_func[0](d.get(target.last_updated_field, datetime.min))
                 for d in target.query(criteria=criteria, properties=props)
             }
 
             new_keys = set(target_dates.keys()) - set(dates.keys())
-            updated_keys = {
-                key
-                for key, date in dates.items()
-                if target_dates.get(key, datetime.min) > date
-            }
+            updated_keys = {key for key, date in dates.items() if target_dates.get(key, datetime.min) > date}
 
             return list(new_keys | updated_keys)
 
-        else:
-            criteria = {
-                self.last_updated_field: {"$gt": self._lu_func[1](self.last_updated)}
-            }
-            return target.distinct(field=self.key, criteria=criteria)
+        criteria = {self.last_updated_field: {"$gt": self._lu_func[1](self.last_updated)}}
+        return target.distinct(field=self.key, criteria=criteria)
 
     @deprecated(message="Please use Store.newer_in")
     def lu_filter(self, targets):

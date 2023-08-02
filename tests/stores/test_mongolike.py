@@ -1,22 +1,21 @@
-import orjson
 import os
 import shutil
 from datetime import datetime
-from unittest import mock
 from pathlib import Path
+from unittest import mock
 
 import mongomock.collection
-from monty.tempfile import ScratchDir
+import orjson
 import pymongo.collection
 import pytest
-from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
-
 from maggma.core import StoreError
 from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore, MontyStore
 from maggma.validators import JSONSchemaValidator
+from monty.tempfile import ScratchDir
+from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
 
-@pytest.fixture
+@pytest.fixture()
 def mongostore():
     store = MongoStore(
         database="maggma_test",
@@ -27,21 +26,21 @@ def mongostore():
     store._collection.drop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def montystore(tmp_dir):
     store = MontyStore("maggma_test")
     store.connect()
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def memorystore():
     store = MemoryStore()
     store.connect()
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def jsonstore(test_dir):
     files = []
     for f in ["a.json", "b.json"]:
@@ -107,21 +106,17 @@ def test_mongostore_distinct(mongostore):
     vals = mongostore.distinct("key")
     # Test to make sure distinct on array field is unraveled when using manual distinct
     assert len(vals) == len(list(range(1000000)))
-    assert all([isinstance(v, str) for v in vals])
+    assert all(isinstance(v, str) for v in vals)
 
     # Test to make sure manual distinct uses the criteria query
-    mongostore._collection.insert_many(
-        [{"key": f"mp-{i}", "a": 2} for i in range(1000001, 2000001)]
-    )
+    mongostore._collection.insert_many([{"key": f"mp-{i}", "a": 2} for i in range(1000001, 2000001)])
     vals = mongostore.distinct("key", {"a": 2})
     assert len(vals) == len(list(range(1000001, 2000001)))
 
 
 def test_mongostore_update(mongostore):
     mongostore.update({"e": 6, "d": 4}, key="e")
-    assert (
-        mongostore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
-    )
+    assert mongostore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
 
     mongostore.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
     assert mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 7
@@ -163,9 +158,9 @@ def test_mongostore_groupby(mongostore):
     )
     data = list(mongostore.groupby("d"))
     assert len(data) == 2
-    grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
+    grouped_by_9 = next(g[1] for g in data if g[0]["d"] == 9)
     assert len(grouped_by_9) == 3
-    grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
+    grouped_by_10 = next(g[1] for g in data if g[0]["d"] == 10)
     assert len(grouped_by_10) == 1
 
     data = list(mongostore.groupby(["e", "d"]))
@@ -214,12 +209,10 @@ def test_mongostore_last_updated(mongostore):
     assert mongostore.last_updated == datetime.min
     start_time = datetime.utcnow()
     mongostore._collection.insert_one({mongostore.key: 1, "a": 1})
-    with pytest.raises(StoreError) as cm:
-        mongostore.last_updated
-    assert cm.match(mongostore.last_updated_field)
-    mongostore.update(
-        [{mongostore.key: 1, "a": 1, mongostore.last_updated_field: datetime.utcnow()}]
-    )
+    with pytest.raises(StoreError) as cm:  # noqa: PT012
+        mongostore.last_updated  # noqa: B018
+        assert cm.match(mongostore.last_updated_field)
+    mongostore.update([{mongostore.key: 1, "a": 1, mongostore.last_updated_field: datetime.utcnow()}])
     assert mongostore.last_updated > start_time
 
 
@@ -229,20 +222,10 @@ def test_mongostore_newer_in(mongostore):
 
     # make sure docs are newer in mongostore then target and check updated_keys
 
-    target.update(
-        [
-            {mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()}
-            for i in range(10)
-        ]
-    )
+    target.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
 
     # Update docs in source
-    mongostore.update(
-        [
-            {mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()}
-            for i in range(10)
-        ]
-    )
+    mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
 
     assert len(target.newer_in(mongostore)) == 10
     assert len(target.newer_in(mongostore, exhaustive=True)) == 10
@@ -271,11 +254,11 @@ def test_groupby(memorystore):
     )
     data = list(memorystore.groupby("d", properties={"e": 1, "f": 1}))
     assert len(data) == 2
-    grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
+    grouped_by_9 = next(g[1] for g in data if g[0]["d"] == 9)
     assert len(grouped_by_9) == 3
-    assert all([d.get("f", False) for d in grouped_by_9])
-    assert all([d.get("e", False) for d in grouped_by_9])
-    grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
+    assert all(d.get("f", False) for d in grouped_by_9)
+    assert all(d.get("e", False) for d in grouped_by_9)
+    grouped_by_10 = next(g[1] for g in data if g[0]["d"] == 10)
     assert len(grouped_by_10) == 1
 
     data = list(memorystore.groupby(["e", "d"]))
@@ -324,9 +307,9 @@ def test_monty_store_groupby(montystore):
     )
     data = list(montystore.groupby("d"))
     assert len(data) == 2
-    grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
+    grouped_by_9 = next(g[1] for g in data if g[0]["d"] == 9)
     assert len(grouped_by_9) == 3
-    grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
+    grouped_by_10 = next(g[1] for g in data if g[0]["d"] == 10)
     assert len(grouped_by_10) == 1
 
     data = list(montystore.groupby(["e", "d"]))
@@ -384,9 +367,7 @@ def test_monty_store_distinct(montystore):
 
 def test_monty_store_update(montystore):
     montystore.update({"e": 6, "d": 4}, key="e")
-    assert (
-        montystore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
-    )
+    assert montystore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
 
     montystore.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
     assert montystore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 7
@@ -418,12 +399,10 @@ def test_monty_store_last_updated(montystore):
     assert montystore.last_updated == datetime.min
     start_time = datetime.utcnow()
     montystore._collection.insert_one({montystore.key: 1, "a": 1})
-    with pytest.raises(StoreError) as cm:
-        montystore.last_updated
-    assert cm.match(montystore.last_updated_field)
-    montystore.update(
-        [{montystore.key: 1, "a": 1, montystore.last_updated_field: datetime.utcnow()}]
-    )
+    with pytest.raises(StoreError) as cm:  # noqa: PT012
+        montystore.last_updated  # noqa: B018
+        assert cm.match(montystore.last_updated_field)
+    montystore.update([{montystore.key: 1, "a": 1, montystore.last_updated_field: datetime.utcnow()}])
     assert montystore.last_updated > start_time
 
 
@@ -436,8 +415,8 @@ def test_json_store_load(jsonstore, test_dir):
     assert len(list(jsonstore.query())) == 20
 
     # confirm descriptive error raised if you get a KeyError
+    jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", key="random_key")
     with pytest.raises(KeyError, match="Key field 'random_key' not found"):
-        jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", key="random_key")
         jsonstore.connect()
 
     # if the .json does not exist, it should be created
@@ -491,18 +470,14 @@ def test_json_store_writeable(test_dir):
         jsonstore.connect()
         assert jsonstore.count() == 2
         jsonstore.close()
-        with mock.patch(
-            "maggma.stores.JSONStore.update_json_file"
-        ) as update_json_file_mock:
+        with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
             jsonstore = JSONStore("d.json", file_writable=False)
             jsonstore.connect()
             jsonstore.update({"new": "hello", "task_id": 5})
             assert jsonstore.count() == 3
             jsonstore.close()
             update_json_file_mock.assert_not_called()
-        with mock.patch(
-            "maggma.stores.JSONStore.update_json_file"
-        ) as update_json_file_mock:
+        with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
             jsonstore = JSONStore("d.json", file_writable=False)
             jsonstore.connect()
             jsonstore.remove_docs({"task_id": 5})

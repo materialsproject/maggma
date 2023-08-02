@@ -1,23 +1,17 @@
 from enum import Enum
 from random import choice, randint
+from typing import Any, Tuple
 from urllib.parse import urlencode
-from typing import Tuple, Any
 
 import pytest
 from fastapi.encoders import jsonable_encoder
+from maggma.api.API import API
+from maggma.api.query_operator import NumericQuery, PaginationQuery, SparseFieldsQuery, StringQueryOperator
+from maggma.api.resource import ReadOnlyResource
+from maggma.stores import MemoryStore
 from pydantic import BaseModel, Field
 from requests import Response
 from starlette.testclient import TestClient
-
-from maggma.api.API import API
-from maggma.api.query_operator import (
-    StringQueryOperator,
-    NumericQuery,
-    SparseFieldsQuery,
-    PaginationQuery,
-)
-from maggma.api.resource import ReadOnlyResource
-from maggma.stores import MemoryStore
 
 
 class PetType(str, Enum):
@@ -37,10 +31,7 @@ class Pet(BaseModel):
     owner_name: str = Field(..., title="Owner's name")
 
 
-owners = [
-    Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
-    for i in list(range(10))
-]
+owners = [Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200)) for i in list(range(10))]
 
 
 pets = [
@@ -53,7 +44,7 @@ pets = [
 ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -61,7 +52,7 @@ def owner_store():
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def pet_store():
     store = MemoryStore("pets", key="name")
     store.connect()
@@ -92,7 +83,7 @@ def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]
         debug: True = print out the url, false don't print anything
 
     Returns:
-        request.Response object that contains the response of the correspoding payload
+        request.Response object that contains the response of the corresponding payload
     """
     owner_store = MemoryStore("owners", key="name")
     owner_store.connect()

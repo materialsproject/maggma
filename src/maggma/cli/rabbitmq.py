@@ -3,20 +3,20 @@
 
 import asyncio
 import json
-from logging import getLogger
 import socket as pysocket
-from typing import List, Literal
-import numpy as np
-from time import perf_counter
+from logging import getLogger
 from random import randint
+from time import perf_counter
+from typing import List, Literal
 
+import numpy as np
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
 
 from maggma.cli.multiprocessing import multi
 from maggma.cli.settings import CLISettings
 from maggma.core import Builder
-from maggma.utils import tqdm, Timeout
+from maggma.utils import Timeout, tqdm
 
 try:
     import pika
@@ -54,9 +54,7 @@ def manager(
     logger.info(f"Binding to Manager URL {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
-    connection, channel, status_queue, worker_queue = setup_rabbitmq(
-        url, queue_prefix, port, "work"
-    )
+    connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port, "work")
 
     workers = {}  # type: ignore
 
@@ -68,27 +66,22 @@ def manager(
 
         try:
             builder.connect()
-            chunk_dicts = [
-                {"chunk": d, "distributed": False, "completed": False}
-                for d in builder.prechunk(num_chunks)
-            ]
+            chunk_dicts = [{"chunk": d, "distributed": False, "completed": False} for d in builder.prechunk(num_chunks)]
             pbar_distributed = tqdm(
                 total=len(chunk_dicts),
-                desc="Distributed chunks for {}".format(builder.__class__.__name__),
+                desc=f"Distributed chunks for {builder.__class__.__name__}",
             )
 
             pbar_completed = tqdm(
                 total=len(chunk_dicts),
-                desc="Completed chunks for {}".format(builder.__class__.__name__),
+                desc=f"Completed chunks for {builder.__class__.__name__}",
             )
 
             logger.info(f"Distributing {len(chunk_dicts)} chunks to workers")
 
         except NotImplementedError:
             attempt_graceful_shutdown(connection, workers, channel, worker_queue)
-            raise RuntimeError(
-                f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists."
-            )
+            raise RuntimeError(f"Can't distribute process {builder.__class__.__name__} as no prechunk method exists.")
 
         completed = False
 
@@ -126,13 +119,9 @@ def manager(
 
                 elif "ERROR" in msg:
                     # Remove worker and requeue work sent to it
-                    attempt_graceful_shutdown(
-                        connection, workers, channel, worker_queue
-                    )
+                    attempt_graceful_shutdown(connection, workers, channel, worker_queue)
                     raise RuntimeError(
-                        "At least one worker has stopped with error message: {}".format(
-                            msg.split("_")[1]
-                        )
+                        "At least one worker has stopped with error message: {}".format(msg.split("_")[1])
                     )
 
                 elif "PING" in msg:
@@ -169,9 +158,7 @@ def manager(
     attempt_graceful_shutdown(connection, workers, channel, worker_queue)
 
 
-def setup_rabbitmq(
-    url: str, queue_prefix: str, port: int, outbound_queue: Literal["status", "work"]
-):
+def setup_rabbitmq(url: str, queue_prefix: str, port: int, outbound_queue: Literal["status", "work"]):
     connection = pika.BlockingConnection(pika.ConnectionParameters(url, port))
     channel = connection.channel()
     channel.basic_qos(prefetch_count=1, global_qos=True)
@@ -197,7 +184,7 @@ def attempt_graceful_shutdown(connection, workers, channel, worker_queue):
         channel.basic_publish(
             exchange="",
             routing_key=worker_queue,
-            body="EXIT".encode("utf-8"),
+            body=b"EXIT",
         )
     connection.close()
 
@@ -205,14 +192,14 @@ def attempt_graceful_shutdown(connection, workers, channel, worker_queue):
 def handle_dead_workers(connection, workers, channel, worker_queue):
     if len(workers) == 1:
         # Use global timeout
-        identity = list(workers.keys())[0]
+        identity = next(iter(workers.keys()))
         if (perf_counter() - workers[identity]["last_ping"]) >= settings.WORKER_TIMEOUT:
             attempt_graceful_shutdown(connection, workers, channel, worker_queue)
             raise RuntimeError("Worker has timed out. Stopping distributed build.")
 
     elif len(workers) == 2:
         # Use 10% ratio between workers
-        workers_sorted = sorted(list(workers.items()), key=lambda x: x[1]["heartbeats"])
+        workers_sorted = sorted(workers.items(), key=lambda x: x[1]["heartbeats"])
 
         ratio = workers_sorted[1][1]["heartbeats"] / workers_sorted[0][1]["heartbeats"]
 
@@ -229,12 +216,8 @@ def handle_dead_workers(connection, workers, channel, worker_queue):
             for identity in list(workers.keys()):
                 z_score = 0.6745 * (workers[identity]["heartbeats"] - median) / mad
                 if z_score <= -3.5:
-                    attempt_graceful_shutdown(
-                        connection, workers, channel, worker_queue
-                    )
-                    raise RuntimeError(
-                        "At least one worker has timed out. Stopping distributed build."
-                    )
+                    attempt_graceful_shutdown(connection, workers, channel, worker_queue)
+                    raise RuntimeError("At least one worker has timed out. Stopping distributed build.")
 
 
 def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix: str):
@@ -242,23 +225,21 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
     Simple distributed worker that connects to a manager asks for work and deploys
     using multiprocessing
     """
-    identity = "%04X-%04X" % (randint(0, 0x10000), randint(0, 0x10000))
+    identity = f"{randint(0, 0x10000):04X}-{randint(0, 0x10000):04X}"
     logger = getLogger(f"Worker {identity}")
 
     url = url.split("//")[-1]
 
-    logger.info(f"Connnecting to Manager at {url}:{port}")
+    logger.info(f"Connecting to Manager at {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
-    connection, channel, status_queue, worker_queue = setup_rabbitmq(
-        url, queue_prefix, port, "status"
-    )
+    connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port, "status")
 
     # Send ready signal to status queue
     channel.basic_publish(
         exchange="",
         routing_key=status_queue,
-        body="READY_{}".format(identity).encode("utf-8"),
+        body=f"READY_{identity}".encode(),
     )
 
     try:
@@ -276,12 +257,12 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                     work = json.loads(message)
                     builder = MontyDecoder().process_decoded(work)
 
-                    logger.info("Working on builder {}".format(builder.__class__))
+                    logger.info(f"Working on builder {builder.__class__}")
 
                     channel.basic_publish(
                         exchange="",
                         routing_key=status_queue,
-                        body="WORKING_{}".format(identity).encode("utf-8"),
+                        body=f"WORKING_{identity}".encode(),
                     )
                     work = json.loads(message)
                     builder = MontyDecoder().process_decoded(work)
@@ -303,7 +284,7 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                     channel.basic_publish(
                         exchange="",
                         routing_key=status_queue,
-                        body="DONE_{}".format(identity).encode("utf-8"),
+                        body=f"DONE_{identity}".encode(),
                     )
 
                 elif message == "EXIT":
@@ -311,11 +292,11 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                     running = False
 
     except Exception as e:
-        logger.error(f"A worker failed with error: {repr(e)}")
+        logger.error(f"A worker failed with error: {e!r}")
         channel.basic_publish(
             exchange="",
             routing_key=status_queue,
-            body="ERROR_{}".format(identity).encode("utf-8"),
+            body=f"ERROR_{identity}".encode(),
         )
         connection.close()
 
@@ -326,5 +307,5 @@ def ping_manager(channel, identity, status_queue):
     channel.basic_publish(
         exchange="",
         routing_key=status_queue,
-        body="PING_{}".format(identity).encode("utf-8"),
+        body=f"PING_{identity}".encode(),
     )

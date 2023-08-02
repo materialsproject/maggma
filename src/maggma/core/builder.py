@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 Module containing the core builder definition
 """
@@ -57,7 +56,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         Part of a domain-decomposition paradigm to allow the builder to operate on
         multiple nodes by divinding up the IO as well as the compute
         This function should return an iterator of dictionaries that can be distributed
-        to multiple instances of the builder to get/process/udpate on
+        to multiple instances of the builder to get/process/update on
 
         Arguments:
             number_splits: The number of groups to split the documents to work on
@@ -79,7 +78,6 @@ class Builder(MSONable, metaclass=ABCMeta):
         Returns:
             generator or list of items to process
         """
-        pass
 
     def process_item(self, item: Any) -> Any:
         """
@@ -105,7 +103,6 @@ class Builder(MSONable, metaclass=ABCMeta):
         Returns:
 
         """
-        pass
 
     def finalize(self):
         """
@@ -127,9 +124,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         root = logging.getLogger()
         root.setLevel(log_level)
         ch = TqdmLoggingHandler()
-        formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        )
+        formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
         ch.setFormatter(formatter)
         root.addHandler(ch)
 
@@ -138,7 +133,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         cursor = self.get_items()
 
         for chunk in grouper(tqdm(cursor), self.chunk_size):
-            self.logger.info("Processing batch of {} items".format(self.chunk_size))
+            self.logger.info(f"Processing batch of {self.chunk_size} items")
             processed_chunk = [self.process_item(item) for item in chunk]
             processed_items = [item for item in processed_chunk if item is not None]
             self.update_targets(processed_items)

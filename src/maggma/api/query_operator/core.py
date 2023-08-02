@@ -8,7 +8,7 @@ from maggma.api.utils import STORE_PARAMS
 
 class QueryOperator(MSONable, metaclass=ABCMeta):
     """
-    Base Query Operator class for defining powerfull query language
+    Base Query Operator class for defining powerful query language
     in the Materials API
     """
 

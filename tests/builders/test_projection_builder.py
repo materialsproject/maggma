@@ -1,14 +1,12 @@
-# coding: utf-8
 """
 Tests for Projection_Builder
 """
 import pytest
-
 from maggma.builders.projection_builder import Projection_Builder
 from maggma.stores import MemoryStore
 
 
-@pytest.fixture
+@pytest.fixture()
 def source1():
     store = MemoryStore("source1", key="k", last_updated_field="lu")
     store.connect()
@@ -18,7 +16,7 @@ def source1():
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def source2():
     store = MemoryStore("source2", key="k", last_updated_field="lu")
     store.connect()
@@ -28,7 +26,7 @@ def source2():
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def target():
     store = MemoryStore("target", key="k", last_updated_field="lu")
     store.connect()
@@ -39,7 +37,7 @@ def target():
 
 def test_get_items(source1, source2, target):
     builder = Projection_Builder(source_stores=[source1, source2], target_store=target)
-    items = [i for i in builder.get_items()][0]
+    items = next(iter(builder.get_items()))
     assert len(items) == 25
 
 
@@ -50,14 +48,14 @@ def test_process_item(source1, source2, target):
         target_store=target,
         fields_to_project=[[], {}],
     )
-    items = [i for i in builder.get_items()][0]
+    items = next(iter(builder.get_items()))
     outputs = builder.process_item(items)
     assert len(outputs) == 15
-    output = [o for o in outputs if o["k"] < 10][0]
-    assert all([k in ["k", "a", "b", "c", "d"] for k in output.keys()])
-    output = [o for o in outputs if o["k"] > 9][0]
-    assert all([k in ["k", "c", "d"] for k in output.keys()])
-    assert all([k not in ["a", "b"] for k in output.keys()])
+    output = next(o for o in outputs if o["k"] < 10)
+    assert all(k in ["k", "a", "b", "c", "d"] for k in output)
+    output = next(o for o in outputs if o["k"] > 9)
+    assert all(k in ["k", "c", "d"] for k in output)
+    assert all(k not in ["a", "b"] for k in output)
 
     # test fields_to_project = lists
     builder = Projection_Builder(
@@ -65,11 +63,11 @@ def test_process_item(source1, source2, target):
         target_store=target,
         fields_to_project=[["a", "b"], ["d"]],
     )
-    items = [i for i in builder.get_items()][0]
+    items = next(iter(builder.get_items()))
     outputs = builder.process_item(items)
-    output = [o for o in outputs if o["k"] < 10][0]
-    assert all([k in ["k", "a", "b", "d"] for k in output.keys()])
-    assert all([k not in ["c"] for k in output.keys()])
+    output = next(o for o in outputs if o["k"] < 10)
+    assert all(k in ["k", "a", "b", "d"] for k in output)
+    assert all(k not in ["c"] for k in output)
 
     # test fields_to_project = dict and list
     builder = Projection_Builder(
@@ -77,11 +75,11 @@ def test_process_item(source1, source2, target):
         target_store=target,
         fields_to_project=[{"newa": "a", "b": "b"}, ["d"]],
     )
-    items = [i for i in builder.get_items()][0]
+    items = next(iter(builder.get_items()))
     outputs = builder.process_item(items)
-    output = [o for o in outputs if o["k"] < 10][0]
-    assert all([k in ["k", "newa", "b", "d"] for k in output.keys()])
-    assert all([k not in ["a", "c"] for k in output.keys()])
+    output = next(o for o in outputs if o["k"] < 10)
+    assert all(k in ["k", "newa", "b", "d"] for k in output)
+    assert all(k not in ["a", "c"] for k in output)
 
 
 def test_update_targets(source1, source2, target):

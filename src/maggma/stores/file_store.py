@@ -1,23 +1,22 @@
-# coding: utf-8
 """
 Module defining a FileStore that enables accessing files in a local directory
 using typical maggma access patterns.
 """
 
+import fnmatch
 import hashlib
 import os
-import fnmatch
 import re
-
 import warnings
-from pathlib import Path
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union, Iterator, Callable
+from pathlib import Path
+from typing import Callable, Dict, Iterator, List, Optional, Union
 
-from pymongo import UpdateOne
 from monty.io import zopen
-from maggma.core import StoreError, Sort
-from maggma.stores.mongolike import MemoryStore, JSONStore
+from pymongo import UpdateOne
+
+from maggma.core import Sort, StoreError
+from maggma.stores.mongolike import JSONStore, MemoryStore
 
 # These keys are automatically populated by the FileStore.read() method and
 # hence are not allowed to be manually overwritten
@@ -95,9 +94,7 @@ class FileStore(MemoryStore):
 
         self.json_name = json_name
         file_filters = file_filters if file_filters else ["*"]
-        self.file_filters = re.compile(
-            "|".join(fnmatch.translate(p) for p in file_filters)
-        )
+        self.file_filters = re.compile("|".join(fnmatch.translate(p) for p in file_filters))
         self.collection_name = "file_store"
         self.key = "file_id"
         self.include_orphans = include_orphans
@@ -128,9 +125,9 @@ class FileStore(MemoryStore):
 
     def add_metadata(
         self,
-        metadata: Dict = {},
+        metadata: Optional[Dict] = None,
         query: Optional[Dict] = None,
-        auto_data: Callable[[Dict], Dict] = None,
+        auto_data: Optional[Callable[[Dict], Dict]] = None,
         **kwargs,
     ):
         """
@@ -160,6 +157,8 @@ class FileStore(MemoryStore):
                     metadata is used.
             kwargs: kwargs passed to FileStore.query()
         """
+        if metadata is None:
+            metadata = {}
         # sanitize the metadata
         filtered_metadata = self._filter_data(metadata)
         updated_docs = []
@@ -195,7 +194,7 @@ class FileStore(MemoryStore):
         """
         file_list = []
         # generate a list of files in subdirectories
-        for root, dirs, files in os.walk(self.path):
+        for root, _dirs, files in os.walk(self.path):
             # for pattern in self.file_filters:
             for match in filter(self.file_filters.match, files):
                 # for match in fnmatch.filter(files, pattern):
@@ -211,7 +210,7 @@ class FileStore(MemoryStore):
 
     def _create_record_from_file(self, f: Path) -> Dict:
         """
-        Given the path to a file, return a Dict that constitues a record of
+        Given the path to a file, return a Dict that constitutes a record of
         basic information about that file. The keys in the returned dict
         are:
 
@@ -264,7 +263,7 @@ class FileStore(MemoryStore):
             self.key: file_id,
         }
 
-    def connect(self, force_reset: bool = False):
+    def connect(self):
         """
         Connect to the source data
 
@@ -273,9 +272,6 @@ class FileStore(MemoryStore):
 
         If there is a metadata .json file in the directory, read its
         contents into the MemoryStore
-
-        Args:
-            force_reset: whether to reset the connection or not
         """
         # read all files and place them in the MemoryStore
         # use super.update to bypass the read_only guard statement
@@ -286,7 +282,7 @@ class FileStore(MemoryStore):
         # now read any metadata from the .json file
         try:
             self.metadata_store.connect()
-            metadata = [d for d in self.metadata_store.query()]
+            metadata = list(self.metadata_store.query())
         except FileNotFoundError:
             metadata = []
             warnings.warn(
@@ -302,10 +298,7 @@ class FileStore(MemoryStore):
         key = self.key
         file_ids = self.distinct(self.key)
         for d in metadata:
-            if isinstance(key, list):
-                search_doc = {k: d[k] for k in key}
-            else:
-                search_doc = {key: d[key]}
+            search_doc = {k: d[k] for k in key} if isinstance(key, list) else {key: d[key]}
 
             if d[key] not in file_ids:
                 found_orphans = True
@@ -349,16 +342,13 @@ class FileStore(MemoryStore):
             )
 
         super().update(docs, key)
-        data = [d for d in self.query()]
+        data = list(self.query())
         filtered_data = []
         # remove fields that are populated by .read()
         for d in data:
             filtered_d = self._filter_data(d)
             # don't write records that contain only file_id
-            if (
-                len(set(filtered_d.keys()).difference(set(["path_relative", self.key])))
-                != 0
-            ):
+            if len(set(filtered_d.keys()).difference({"path_relative", self.key})) != 0:
                 filtered_data.append(filtered_d)
         self.metadata_store.update(filtered_data, self.key)
 
@@ -369,12 +359,7 @@ class FileStore(MemoryStore):
         Args:
             d: Dictionary whose keys are to be filtered
         """
-        filtered_d = {
-            k: v
-            for k, v in d.items()
-            if k not in PROTECTED_KEYS.union({self.last_updated_field})
-        }
-        return filtered_d
+        return {k: v for k, v in d.items() if k not in PROTECTED_KEYS.union({self.last_updated_field})}
 
     def query(  # type: ignore
         self,
@@ -407,9 +392,8 @@ class FileStore(MemoryStore):
         """
         return_contents = False
         criteria = criteria if criteria else {}
-        if criteria.get("orphan", None) is None:
-            if not self.include_orphans:
-                criteria.update({"orphan": False})
+        if criteria.get("orphan", None) is None and not self.include_orphans:
+            criteria.update({"orphan": False})
 
         if criteria.get("contents"):
             warnings.warn("'contents' is not a queryable field! Ignoring.")
@@ -505,11 +489,10 @@ class FileStore(MemoryStore):
         """
         if self.read_only:
             raise StoreError(
-                "This Store is read-only. To enable file I/O, re-initialize the "
-                "store with read_only=False."
+                "This Store is read-only. To enable file I/O, re-initialize the store with read_only=False."
             )
 
-        docs = [d for d in self.query(criteria)]
+        docs = list(self.query(criteria))
         # this ensures that any modifications to criteria made by self.query
         # (e.g., related to orphans or contents) are propagated through to the superclass
         new_criteria = {"file_id": {"$in": [d["file_id"] for d in docs]}}

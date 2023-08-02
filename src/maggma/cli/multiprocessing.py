@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from asyncio import (
-    BoundedSemaphore,
-    Queue,
-    gather,
-    get_event_loop,
-)
+from asyncio import BoundedSemaphore, Queue, gather, get_event_loop
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
@@ -57,7 +52,7 @@ class BackPressure:
 class AsyncUnorderedMap:
     """
     Async iterator that maps a function to an async iterator
-    usign an executor and returns items as they are done
+    using an executor and returns items as they are done
     This does not guarantee order
     """
 
@@ -87,9 +82,7 @@ class AsyncUnorderedMap:
     async def get_from_iterator(self):
         loop = get_event_loop()
         async for idx, item in enumerate(self.iterator):
-            future = loop.run_in_executor(
-                self.executor, safe_dispatch, (self.func, item)
-            )
+            future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
 
             self.tasks[idx] = future
 
@@ -106,8 +99,8 @@ class AsyncUnorderedMap:
 
         if item == self.done_sentinel:
             raise StopAsyncIteration
-        else:
-            return item
+
+        return item
 
 
 async def atqdm(async_iterator, *args, **kwargs):
@@ -157,7 +150,7 @@ async def multi(
     num_processes,
     no_bars=False,
     heartbeat_func: Optional[Callable[..., Any]] = None,
-    heartbeat_func_kwargs: Dict[Any, Any] = {},
+    heartbeat_func_kwargs: Optional[Dict[Any, Any]] = None,
 ):
     builder.connect()
     cursor = builder.get_items()
@@ -209,6 +202,8 @@ async def multi(
         disable=no_bars,
     )
 
+    if not heartbeat_func_kwargs:
+        heartbeat_func_kwargs = {}
     if heartbeat_func:
         heartbeat_func(**heartbeat_func_kwargs)
 
@@ -218,7 +213,7 @@ async def multi(
 
     async for chunk in grouper(back_pressure_relief, n=builder.chunk_size):
         logger.info(
-            "Processed batch of {} items".format(builder.chunk_size),
+            f"Processed batch of {builder.chunk_size} items",
             extra={
                 "maggma": {
                     "event": "UPDATE",

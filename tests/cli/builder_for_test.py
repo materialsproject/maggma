@@ -10,7 +10,7 @@ class DummyBuilder(Builder):
         self.total = total
 
     def get_items(self):
-        for i in range(self.total):
+        for _i in range(self.total):
             self.get_called += 1
             yield self.get_called
 

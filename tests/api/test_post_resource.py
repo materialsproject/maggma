@@ -1,15 +1,12 @@
+from datetime import datetime
 from random import randint
 
 import pytest
 from fastapi import FastAPI
+from maggma.api.resource import PostOnlyResource
+from maggma.stores import MemoryStore
 from pydantic import BaseModel, Field
 from starlette.testclient import TestClient
-
-from datetime import datetime
-
-from maggma.api.resource import PostOnlyResource
-
-from maggma.stores import MemoryStore
 
 
 class Owner(BaseModel):
@@ -29,7 +26,7 @@ owners = (
 total_owners = len(owners)
 
 
-@pytest.fixture
+@pytest.fixture()
 def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -63,7 +60,7 @@ def test_post_to_search(owner_store):
     assert client.post("/").status_code == 200
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 def test_problem_query_params(owner_store):
     endpoint = PostOnlyResource(owner_store, Owner)
     app = FastAPI()

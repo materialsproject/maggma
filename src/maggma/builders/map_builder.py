@@ -1,4 +1,3 @@
-# coding: utf-8
 """
 One-to-One Map Builder and a simple CopyBuilder implementation
 """
@@ -66,7 +65,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def ensure_indexes(self):
         """
-        Ensures indicies on critical fields for MapBuilder
+        Ensures indices on critical fields for MapBuilder
         """
         index_checks = [
             self.source.ensure_index(self.source.key),
@@ -103,7 +102,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         incremental building
         """
 
-        self.logger.info("Starting {} Builder".format(self.__class__.__name__))
+        self.logger.info(f"Starting {self.__class__.__name__} Builder")
 
         self.ensure_indexes()
 
@@ -116,12 +115,10 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             failed_keys = self.target.distinct(self.target.key, criteria=failed_query)
             keys = list(set(keys + failed_keys))
 
-        self.logger.info("Processing {} items".format(len(keys)))
+        self.logger.info(f"Processing {len(keys)} items")
 
         if self.projection:
-            projection = list(
-                set(self.projection + [self.source.key, self.source.last_updated_field])
-            )
+            projection = list({*self.projection, self.source.key, self.source.last_updated_field})
         else:
             projection = None
 
@@ -142,7 +139,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         a map function
         """
 
-        self.logger.debug("Processing: {}".format(item[self.source.key]))
+        self.logger.debug(f"Processing: {item[self.source.key]}")
 
         time_start = time()
 
@@ -165,9 +162,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         out = {
             self.target.key: item[key],
-            self.target.last_updated_field: self.source._lu_func[0](
-                item.get(last_updated_field, datetime.utcnow())
-            ),
+            self.target.last_updated_field: self.source._lu_func[0](item.get(last_updated_field, datetime.utcnow())),
         }
 
         if self.store_process_time:
@@ -198,9 +193,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
             target_keyvals = set(self.target.distinct(self.target.key))
             to_delete = list(target_keyvals - source_keyvals)
             if len(to_delete):
-                self.logger.info(
-                    "Finalize: Deleting {} orphans.".format(len(to_delete))
-                )
+                self.logger.info(f"Finalize: Deleting {len(to_delete)} orphans.")
             self.target.remove_docs({self.target.key: {"$in": to_delete}})
         super().finalize()
 
@@ -214,7 +207,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 process_item and logged to the "error" field
                 in the target document.
         """
-        pass
 
 
 class CopyBuilder(MapBuilder):

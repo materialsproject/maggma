@@ -4,12 +4,11 @@ from datetime import datetime
 import boto3
 import pytest
 from botocore.exceptions import ClientError
+from maggma.stores import MemoryStore, MongoStore, S3Store
 from moto import mock_s3
 
-from maggma.stores import MemoryStore, MongoStore, S3Store
 
-
-@pytest.fixture
+@pytest.fixture()
 def mongostore():
     store = MongoStore("maggma_test", "test")
     store.connect()
@@ -17,7 +16,7 @@ def mongostore():
     store._collection.drop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def s3store():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
@@ -49,7 +48,7 @@ def s3store():
         yield store
 
 
-@pytest.fixture
+@pytest.fixture()
 def s3store_w_subdir():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
@@ -62,7 +61,7 @@ def s3store_w_subdir():
         yield store
 
 
-@pytest.fixture
+@pytest.fixture()
 def s3store_multi():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
@@ -104,8 +103,7 @@ def test_multi_update(s3store, s3store_multi):
 
     def fake_writing(doc, search_keys):
         time.sleep(0.20)
-        search_doc = {k: doc[k] for k in search_keys}
-        return search_doc
+        return {k: doc[k] for k in search_keys}
 
     s3store.write_doc_to_s3 = fake_writing
     s3store_multi.write_doc_to_s3 = fake_writing
@@ -119,9 +117,7 @@ def test_multi_update(s3store, s3store_multi):
     s3store.update(data, key=["task_id"])
     end = time.time()
     time_single = end - start
-    assert time_single > time_multi * (s3store_multi.s3_workers - 1) / (
-        s3store.s3_workers
-    )
+    assert time_single > time_multi * (s3store_multi.s3_workers - 1) / (s3store.s3_workers)
 
 
 def test_count(s3store):
@@ -167,17 +163,11 @@ def test_rebuild_meta_from_index(s3store):
 
 def test_rebuild_index(s3store):
     s3store.update([{"task_id": "mp-2", "data": "asd"}])
-    assert (
-        s3store.index.query_one({"task_id": "mp-2"})["obj_hash"]
-        == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
-    )
+    assert s3store.index.query_one({"task_id": "mp-2"})["obj_hash"] == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
     s3store.index.remove_docs({})
     assert s3store.index.query_one({"task_id": "mp-2"}) is None
     s3store.rebuild_index_from_s3_data()
-    assert (
-        s3store.index.query_one({"task_id": "mp-2"})["obj_hash"]
-        == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
-    )
+    assert s3store.index.query_one({"task_id": "mp-2"})["obj_hash"] == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
 
 
 def tests_msonable_read_write(s3store):
@@ -218,8 +208,8 @@ def test_close(s3store):
 
 def test_bad_import(mocker):
     mocker.patch("maggma.stores.aws.boto3", None)
+    index = MemoryStore("index")
     with pytest.raises(RuntimeError):
-        index = MemoryStore("index")
         S3Store(index, "bucket1")
 
 
@@ -279,10 +269,7 @@ def test_remove_subdir(s3store_w_subdir):
 def test_searchable_fields(s3store):
     tic = datetime(2018, 4, 12, 16)
 
-    data = [
-        {"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic}
-        for i in range(4)
-    ]
+    data = [{"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic} for i in range(4)]
 
     s3store.searchable_fields = ["task_id"]
     s3store.update(data, key="a")
@@ -321,10 +308,7 @@ def test_newer_in(s3store):
 def test_additional_metadata(s3store):
     tic = datetime(2018, 4, 12, 16)
 
-    data = [
-        {"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic}
-        for i in range(4)
-    ]
+    data = [{"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic} for i in range(4)]
 
     s3store.update(data, key="a", additional_metadata="task_id")
 

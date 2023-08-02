@@ -1,13 +1,12 @@
-import pytest
-from pymongo.errors import DocumentTooLarge, OperationFailure
 import pymongo
-
-from maggma.stores import GridFSStore, MongoStore, MemoryStore
+import pytest
+from maggma.stores import GridFSStore, MemoryStore, MongoStore
 from maggma.stores.shared_stores import MultiStore, StoreFacade
 from maggma.validators import JSONSchemaValidator
+from pymongo.errors import DocumentTooLarge, OperationFailure
 
 
-@pytest.fixture
+@pytest.fixture()
 def mongostore():
     store = MongoStore("maggma_test", "test")
     store.connect()
@@ -15,7 +14,7 @@ def mongostore():
     store._collection.drop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def gridfsstore():
     store = GridFSStore("maggma_test", "test", key="task_id")
     store.connect()
@@ -24,13 +23,12 @@ def gridfsstore():
     store._chunks_collection.drop()
 
 
-@pytest.fixture
+@pytest.fixture()
 def multistore():
-    store = MultiStore()
-    yield store
+    return MultiStore()
 
 
-@pytest.fixture
+@pytest.fixture()
 def memorystore():
     store = MemoryStore()
     store.connect()
@@ -88,9 +86,7 @@ def test_store_facade(multistore, mongostore, gridfsstore):
 def test_multistore_query(multistore, mongostore, memorystore):
     memorystore_facade = StoreFacade(memorystore, multistore)
     mongostore_facade = StoreFacade(mongostore, multistore)
-    temp_mongostore_facade = StoreFacade(
-        MongoStore.from_dict(mongostore.as_dict()), multistore
-    )
+    temp_mongostore_facade = StoreFacade(MongoStore.from_dict(mongostore.as_dict()), multistore)
 
     memorystore_facade._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert memorystore_facade.query_one(properties=["a"])["a"] == 1
@@ -143,18 +139,14 @@ def test_multistore_distinct(multistore, mongostore):
     assert mongostore_facade.distinct("i") == [None]
 
     # Test to make sure DocumentTooLarge errors get dealt with properly using built in distinct
-    mongostore_facade._collection.insert_many(
-        [{"key": [f"mp-{i}"]} for i in range(1000000)]
-    )
+    mongostore_facade._collection.insert_many([{"key": [f"mp-{i}"]} for i in range(1000000)])
     vals = mongostore_facade.distinct("key")
     # Test to make sure distinct on array field is unraveled when using manual distinct
     assert len(vals) == len(list(range(1000000)))
-    assert all([isinstance(v, str) for v in vals])
+    assert all(isinstance(v, str) for v in vals)
 
     # Test to make sure manual distinct uses the criteria query
-    mongostore_facade._collection.insert_many(
-        [{"key": f"mp-{i}", "a": 2} for i in range(1000001, 2000001)]
-    )
+    mongostore_facade._collection.insert_many([{"key": f"mp-{i}", "a": 2} for i in range(1000001, 2000001)])
     vals = mongostore_facade.distinct("key", {"a": 2})
     assert len(vals) == len(list(range(1000001, 2000001)))
 
@@ -163,24 +155,13 @@ def test_multistore_update(multistore, mongostore):
     mongostore_facade = StoreFacade(mongostore, multistore)
 
     mongostore_facade.update({"e": 6, "d": 4}, key="e")
-    assert (
-        mongostore_facade.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])[
-            "d"
-        ]
-        == 4
-    )
+    assert mongostore_facade.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
 
     mongostore_facade.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
-    assert (
-        mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"]
-        == 7
-    )
+    assert mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 7
 
     mongostore_facade.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
-    assert (
-        mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"]
-        == 11
-    )
+    assert mongostore_facade.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 11
 
     test_schema = {
         "type": "object",
@@ -219,9 +200,9 @@ def test_multistore_groupby(multistore, mongostore):
     )
     data = list(mongostore_facade.groupby("d"))
     assert len(data) == 2
-    grouped_by_9 = [g[1] for g in data if g[0]["d"] == 9][0]
+    grouped_by_9 = next(g[1] for g in data if g[0]["d"] == 9)
     assert len(grouped_by_9) == 3
-    grouped_by_10 = [g[1] for g in data if g[0]["d"] == 10][0]
+    grouped_by_10 = next(g[1] for g in data if g[0]["d"] == 10)
     assert len(grouped_by_10) == 1
 
     data = list(mongostore_facade.groupby(["e", "d"]))

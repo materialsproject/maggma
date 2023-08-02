@@ -35,8 +35,7 @@ class PaginationQuery(QueryOperator):
             ),
             _limit: int = Query(
                 default_limit,
-                description="Max number of entries to return in a single query."
-                f" Limited to {max_limit}.",
+                description=f"Max number of entries to return in a single query. Limited to {max_limit}.",
             ),
         ) -> STORE_PARAMS:
             """
@@ -82,7 +81,6 @@ class PaginationQuery(QueryOperator):
 
     def query(self):
         "Stub query function for abstract class"
-        pass
 
     def meta(self) -> Dict:
         """

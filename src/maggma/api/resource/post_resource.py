@@ -86,20 +86,14 @@ class PostOnlyResource(Resource):
             queries.pop("temp_response")  # type: ignore
 
             query_params = [
-                entry
-                for _, i in enumerate(self.query_operators)
-                for entry in signature(i.query).parameters
+                entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
             ]
 
-            overlap = [
-                key for key in request.query_params.keys() if key not in query_params
-            ]
+            overlap = [key for key in request.query_params if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=400,
-                    detail="Request contains query parameters which cannot be used: {}".format(
-                        ", ".join(overlap)
-                    ),
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
@@ -110,11 +104,7 @@ class PostOnlyResource(Resource):
             try:
                 with query_timeout(self.timeout):
                     count = self.store.count(  # type: ignore
-                        **{
-                            field: query[field]
-                            for field in query
-                            if field in ["criteria", "hint"]
-                        }
+                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
                     )
 
                     if isinstance(self.store, S3Store):
@@ -125,11 +115,7 @@ class PostOnlyResource(Resource):
                         data = list(
                             self.store._collection.aggregate(
                                 pipeline,
-                                **{
-                                    field: query[field]
-                                    for field in query
-                                    if field in ["hint"]
-                                },
+                                **{field: query[field] for field in query if field in ["hint"]},
                             )
                         )
             except (NetworkTimeout, PyMongoError) as e:
@@ -152,8 +138,7 @@ class PostOnlyResource(Resource):
                 operator_meta.update(operator.meta())
 
             meta = Meta(total_doc=count)
-            response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
-            return response
+            return {"data": data, "meta": {**meta.dict(), **operator_meta}}
 
         self.router.post(
             self.sub_path,

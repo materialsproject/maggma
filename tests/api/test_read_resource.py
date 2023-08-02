@@ -1,24 +1,17 @@
+import inspect
 from datetime import datetime
 from random import randint
 from urllib.parse import urlencode
 
 import pytest
 from fastapi import FastAPI
+from maggma.api.query_operator import NumericQuery, SparseFieldsQuery, StringQueryOperator
+from maggma.api.resource import ReadOnlyResource
+from maggma.api.resource.core import HintScheme
+from maggma.stores import AliasingStore, MemoryStore
 from pydantic import BaseModel, Field
 from requests import Response
 from starlette.testclient import TestClient
-
-from maggma.api.query_operator import (
-    NumericQuery,
-    SparseFieldsQuery,
-    StringQueryOperator,
-)
-from maggma.api.resource import ReadOnlyResource
-from maggma.stores import MemoryStore, AliasingStore
-
-import inspect
-
-from maggma.api.resource.core import HintScheme
 
 
 class Owner(BaseModel):
@@ -38,7 +31,7 @@ owners = (
 total_owners = len(owners)
 
 
-@pytest.fixture
+@pytest.fixture()
 def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -53,9 +46,7 @@ def test_init(owner_store):
     resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=False)
     assert len(resource.router.routes) == 2
 
-    resource = ReadOnlyResource(
-        store=owner_store, model=Owner, enable_default_search=False
-    )
+    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False)
     assert len(resource.router.routes) == 2
 
 
@@ -94,7 +85,7 @@ def test_key_fields(owner_store):
     assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 def test_problem_query_params(owner_store):
     endpoint = ReadOnlyResource(owner_store, Owner)
     app = FastAPI()
@@ -105,7 +96,7 @@ def test_problem_query_params(owner_store):
     client.get("/?param=test").status_code
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 def test_problem_hint_scheme(owner_store):
     class TestHintScheme(HintScheme):
         def generate_hints(query):
@@ -127,7 +118,7 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
         debug: True = print out the url, false don't print anything
 
     Returns:
-        request.Response object that contains the response of the correspoding payload
+        request.Response object that contains the response of the corresponding payload
     """
     store = MemoryStore("owners", key="name")
     store.connect()

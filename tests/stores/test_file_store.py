@@ -19,17 +19,17 @@ Desired behavior
   remain intact.
 """
 
+import hashlib
 from datetime import datetime, timezone
 from distutils.dir_util import copy_tree
 from pathlib import Path
-import pytest
-import hashlib
 
+import pytest
 from maggma.core import StoreError
 from maggma.stores.file_store import FileStore
 
 
-@pytest.fixture
+@pytest.fixture()
 def test_dir(tmp_path):
     module_dir = Path(__file__).resolve().parent
     test_dir = module_dir / ".." / "test_files" / "file_store_test"
@@ -57,9 +57,7 @@ def test_record_from_file(test_dir):
     assert d["size"] == pytest.approx(90, abs=1)
     assert isinstance(d["hash"], str)
     assert d["file_id"] == file_id
-    assert d["last_updated"] == datetime.fromtimestamp(
-        f.stat().st_mtime, tz=timezone.utc
-    )
+    assert d["last_updated"] == datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
 
 
 def test_newer_in_on_local_update(test_dir):
@@ -139,9 +137,7 @@ def test_orphaned_metadata(test_dir):
     # this will result in orphaned metadata
     # with include_orphans=True, this should be returned in queries
     fs = FileStore(test_dir, read_only=True, max_depth=1, include_orphans=True)
-    with pytest.warns(
-        UserWarning, match="Orphaned metadata was found in FileStore.json"
-    ):
+    with pytest.warns(UserWarning, match="Orphaned metadata was found in FileStore.json"):
         fs.connect()
     assert len(list(fs.query())) == 6
     assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
@@ -155,13 +151,9 @@ def test_orphaned_metadata(test_dir):
     # this will result in orphaned metadata
     # with include_orphans=False (default), that metadata should be
     # excluded from query results
-    Path(test_dir / "calculation1" / "input.in").rename(
-        test_dir / "calculation1" / "input_renamed.in"
-    )
+    Path(test_dir / "calculation1" / "input.in").rename(test_dir / "calculation1" / "input_renamed.in")
     fs = FileStore(test_dir, read_only=True, include_orphans=False)
-    with pytest.warns(
-        UserWarning, match="Orphaned metadata was found in FileStore.json"
-    ):
+    with pytest.warns(UserWarning, match="Orphaned metadata was found in FileStore.json"):
         fs.connect()
     assert len(list(fs.query())) == 6
     assert len(list(fs.query({"tags": {"$exists": True}}))) == 5
@@ -223,8 +215,8 @@ def test_read_only(test_dir):
         fs = FileStore(test_dir, read_only=True, json_name="random.json")
         fs.connect()
     assert not Path(test_dir / "random.json").exists()
+    file_id = fs.query_one()["file_id"]
     with pytest.raises(StoreError, match="read-only"):
-        file_id = fs.query_one()["file_id"]
         fs.update({"file_id": file_id, "tags": "something"})
     with pytest.raises(StoreError, match="read-only"):
         fs.remove_docs({})
@@ -285,7 +277,7 @@ def test_remove(test_dir):
     assert not Path.exists(test_dir / "calculation1" / "input.in")
     assert not Path.exists(test_dir / "calculation2" / "input.in")
     fs.remove_docs({}, confirm=True)
-    assert not any([Path(p).exists() for p in paths])
+    assert not any(Path(p).exists() for p in paths)
 
 
 def test_metadata(test_dir):
@@ -299,7 +291,7 @@ def test_metadata(test_dir):
     fs = FileStore(test_dir, read_only=False, last_updated_field="last_change")
     fs.connect()
     query = {"name": "input.in", "parent": "calculation1"}
-    key = list(fs.query(query))[0][fs.key]
+    key = next(iter(fs.query(query)))[fs.key]
     fs.add_metadata(
         {
             "metadata": {"experiment date": "2022-01-18"},
@@ -309,7 +301,7 @@ def test_metadata(test_dir):
     )
 
     # make sure metadata has been added to the item without removing other contents
-    item_from_store = list(fs.query({"file_id": key}))[0]
+    item_from_store = next(iter(fs.query({"file_id": key})))
     assert item_from_store.get("name", False)
     assert item_from_store.get("metadata", False)
     fs.close()
@@ -318,7 +310,7 @@ def test_metadata(test_dir):
     # and it should not contain any of the protected keys
     data = fs.metadata_store.read_json_file(fs.path / fs.json_name)
     assert len(data) == 1
-    item_from_file = [d for d in data if d["file_id"] == key][0]
+    item_from_file = next(d for d in data if d["file_id"] == key)
     assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
     assert not item_from_file.get("name")
     assert not item_from_file.get("path")
@@ -329,11 +321,11 @@ def test_metadata(test_dir):
     fs2 = FileStore(test_dir, read_only=True)
     fs2.connect()
     data = fs2.metadata_store.read_json_file(fs2.path / fs2.json_name)
-    item_from_file = [d for d in data if d["file_id"] == key][0]
+    item_from_file = next(d for d in data if d["file_id"] == key)
     assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
 
     # make sure reconnected store properly merges in the metadata
-    item_from_store = [d for d in fs2.query({"file_id": key})][0]
+    item_from_store = next(iter(fs2.query({"file_id": key})))
     assert item_from_store["name"] == "input.in"
     assert item_from_store["parent"] == "calculation1"
     assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}
@@ -343,9 +335,9 @@ def test_metadata(test_dir):
     fs3 = FileStore(test_dir, read_only=False)
     fs3.connect()
     data = fs3.metadata_store.read_json_file(fs3.path / fs3.json_name)
-    item_from_file = [d for d in data if d["file_id"] == key][0]
+    item_from_file = next(d for d in data if d["file_id"] == key)
     assert item_from_file["metadata"] == {"experiment date": "2022-01-18"}
-    item_from_store = [d for d in fs3.query({"file_id": key})][0]
+    item_from_store = next(iter(fs3.query({"file_id": key})))
     assert item_from_store["name"] == "input.in"
     assert item_from_store["parent"] == "calculation1"
     assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}

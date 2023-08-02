@@ -1,17 +1,15 @@
-from random import randint
 import json
+from datetime import datetime
+from random import randint
+
 import pytest
 from fastapi import FastAPI
+from maggma.api.query_operator import PaginationQuery
+from maggma.api.query_operator.core import QueryOperator
+from maggma.api.resource import SubmissionResource
+from maggma.stores import MemoryStore
 from pydantic import BaseModel, Field
 from starlette.testclient import TestClient
-
-from datetime import datetime
-from maggma.api.query_operator.core import QueryOperator
-
-from maggma.api.resource import SubmissionResource
-from maggma.api.query_operator import PaginationQuery
-
-from maggma.stores import MemoryStore
 
 
 class Owner(BaseModel):
@@ -31,7 +29,7 @@ owners = (
 total_owners = len(owners)
 
 
-@pytest.fixture
+@pytest.fixture()
 def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -39,7 +37,7 @@ def owner_store():
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def post_query_op():
     class PostQuery(QueryOperator):
         def query(self, name):
@@ -48,7 +46,7 @@ def post_query_op():
     return PostQuery()
 
 
-@pytest.fixture
+@pytest.fixture()
 def patch_query_op():
     class PatchQuery(QueryOperator):
         def query(self, name, update):

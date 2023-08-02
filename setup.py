@@ -28,7 +28,7 @@ setup(
     install_requires=[
         "setuptools",
         "ruamel.yaml<0.18",
-        "pydantic<=1.10.11",
+        "pydantic<2.0",
         "pydantic>=0.32.2",
         "pymongo>=4.2.0",
         "monty>=1.0.2",
@@ -44,7 +44,7 @@ setup(
         "dnspython>=1.16.0",
         "sshtunnel>=0.1.5",
         "msgpack>=0.5.6",
-        "orjson>=3.6.0",
+        "orjson>=3.9.0",
         "boto3>=1.20.41",
         "python-dateutil>=2.8.2",
     ],
@@ -57,6 +57,10 @@ setup(
     classifiers=[
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",

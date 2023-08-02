@@ -11,14 +11,14 @@ fastapi==0.79.0
 numpy==1.18.0;python_version<"3.8"
 numpy==1.23.0;python_version>="3.8"
 typing_extensions;python_version<"3.8"
+typing_compat;python_version<"3.8" # required for get_args()
 pyzmq==24.0.1
 dnspython==2.2.1
 uvicorn==0.18.3
 sshtunnel==0.4.0
 msgpack==1.0.3
 msgpack-python==0.5.6
-orjson==3.8.14
+orjson==3.9.1
 boto3==1.24.42
 python-dateutil==2.8.2
-pydantic
 ruamel.yaml<0.18

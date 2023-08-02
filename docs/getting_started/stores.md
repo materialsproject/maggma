@@ -11,7 +11,7 @@ Current working and tested `Store` include:
 - `MongoStore`: interfaces to a MongoDB Collection
 - `MemoryStore`: just a Store that exists temporarily in memory
 - `JSONStore`: builds a MemoryStore and then populates it with the contents of the given JSON files
-- `FileStore`: query and add metadata to files stored on disk as if they were in a databsae
+- `FileStore`: query and add metadata to files stored on disk as if they were in a database
 - `GridFSStore`: interfaces to GridFS collection in MongoDB
 - `S3Store`: provides an interface to an S3 Bucket either on AWS or self-hosted solutions ([additional documentation](advanced_stores.md))
 - `ConcatStore`: concatenates several Stores together so they look like one Store
