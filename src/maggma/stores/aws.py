@@ -7,6 +7,8 @@ import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
+from io import BytesIO
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 from json import dumps
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
@@ -383,10 +385,12 @@ class S3Store(Store):
         s3_to_mongo_keys["s3-to-mongo-keys"] = "s3-to-mongo-keys"  # inception
         # encode dictionary since values have to be strings
         search_doc["s3-to-mongo-keys"] = dumps(s3_to_mongo_keys)
-        s3_bucket.put_object(
+        s3_bucket.upload_fileobj(
+            Fileobj=BytesIO(data),
             Key=self.sub_dir + str(doc[self.key]),
-            Body=data,
-            Metadata={s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()},
+            ExtraArgs={
+                "Metadata": {s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()}
+            },
         )
 
         if lu_info is not None:

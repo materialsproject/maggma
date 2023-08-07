@@ -25,7 +25,7 @@ try:
     from azure.storage.blob import BlobServiceClient, ContainerClient
 except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
-    # ContainerClient = None
+    ContainerClient = None
 
 
 AZURE_KEY_SANITIZE = {"-": "_", ".": "_"}
