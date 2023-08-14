@@ -16,9 +16,9 @@ bcrypt==4.0.1
     # via paramiko
 blinker==1.6.2
     # via flask
-boto3==1.28.20
+boto3==1.28.25
     # via maggma (setup.py)
-botocore==1.31.20
+botocore==1.31.25
     # via
     #   boto3
     #   s3transfer
@@ -36,7 +36,7 @@ click==8.1.6
     #   mongogrant
 cryptography==41.0.3
     # via paramiko
-dnspython==2.4.1
+dnspython==2.4.2
     # via
     #   maggma (setup.py)
     #   pymongo
@@ -68,13 +68,13 @@ mongogrant==0.3.3
     # via maggma (setup.py)
 mongomock==4.1.2
     # via maggma (setup.py)
-monty==2023.5.8
+monty==2023.8.8
     # via maggma (setup.py)
 msgpack==1.0.5
     # via maggma (setup.py)
 numpy==1.25.2
     # via maggma (setup.py)
-orjson==3.9.3
+orjson==3.9.4
     # via maggma (setup.py)
 packaging==23.1
     # via mongomock
@@ -126,7 +126,7 @@ sshtunnel==0.4.0
     # via maggma (setup.py)
 starlette==0.27.0
     # via fastapi
-tqdm==4.65.0
+tqdm==4.66.1
     # via maggma (setup.py)
 typing-extensions==4.7.1
     # via
