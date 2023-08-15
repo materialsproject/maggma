@@ -3378,9 +3378,9 @@ JSONStore            (<a class="autorefs autorefs-internal" title="maggma.stores
        if read_only=False (i.e., it is writeable), the JSON file
        will be automatically updated every time a write-like operation is
        performed.</p>
-<div class="codehilite"><pre><span></span><code><span class="w">   </span><span class="nv">Note</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">when</span><span class="w"> </span><span class="nv">read_only</span><span class="o">=</span><span class="nv">False</span>,<span class="w"> </span><span class="nv">JSONStore</span><span class="w"> </span><span class="nv">only</span><span class="w"> </span><span class="nv">supports</span><span class="w"> </span><span class="nv">a</span><span class="w"> </span><span class="nv">single</span><span class="w"> </span><span class="nv">JSON</span>
-<span class="w">   </span><span class="nv">file</span>.<span class="w"> </span><span class="k">If</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">file</span><span class="w"> </span><span class="nv">does</span><span class="w"> </span><span class="nv">not</span><span class="w"> </span><span class="nv">exist</span>,<span class="w"> </span><span class="nv">it</span><span class="w"> </span><span class="nv">will</span><span class="w"> </span><span class="nv">be</span><span class="w"> </span><span class="nv">automatically</span><span class="w"> </span><span class="nv">created</span>
-<span class="w">   </span><span class="nv">when</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">JSONStore</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">initialized</span>.
+<div class="codehilite"><pre><span></span><code>   Note that when read_only=False, JSONStore only supports a single JSON
+   file. If the file does not exist, it will be automatically created
+   when the JSONStore is initialized.
 </code></pre></div></td>
         <td><code>True</code></td>
       </tr>
@@ -7649,15 +7649,15 @@ from another field, such as name or path (see auto_data).</p>
     to assign metadata based on the name of a file. For example, for
     data files named like <code>2022-04-01_april_fool_experiment.txt</code>, the
     auto_data function could be:</p>
-<div class="codehilite"><pre><span></span><code><span class="nv">def</span><span class="w"> </span><span class="nv">get_metadata_from_filename</span><span class="ss">(</span><span class="nv">d</span><span class="ss">)</span>:
-<span class="w">    </span><span class="k">return</span><span class="w"> </span>{<span class="s2">&quot;date&quot;</span>:<span class="w"> </span><span class="nv">d</span>[<span class="s2">&quot;name&quot;</span>].<span class="nv">split</span><span class="ss">(</span><span class="s2">&quot;_&quot;</span><span class="ss">)</span>[<span class="mi">0</span>],
-<span class="w">            </span><span class="s2">&quot;test_name&quot;</span>:<span class="w"> </span><span class="nv">d</span>[<span class="s2">&quot;name&quot;</span>].<span class="nv">split</span><span class="ss">(</span><span class="s2">&quot;_&quot;</span><span class="ss">)</span>[<span class="mi">1</span>]
-<span class="w">            </span>}
+<div class="codehilite"><pre><span></span><code>def get_metadata_from_filename(d):
+    return {&quot;date&quot;: d[&quot;name&quot;].split(&quot;_&quot;)[0],
+            &quot;test_name&quot;: d[&quot;name&quot;].split(&quot;_&quot;)[1]
+            }
 
-<span class="nv">Note</span><span class="w"> </span><span class="nv">that</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">case</span><span class="w"> </span><span class="nv">of</span><span class="w"> </span><span class="nv">conflict</span><span class="w"> </span><span class="nv">between</span><span class="w"> </span><span class="nv">manual</span><span class="w"> </span><span class="nv">and</span><span class="w"> </span><span class="nv">automatically</span>
-<span class="nv">computed</span><span class="w"> </span><span class="nv">metadata</span><span class="w"> </span><span class="ss">(</span><span class="k">for</span><span class="w"> </span><span class="nv">example</span>,<span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nv">metadata</span><span class="o">=</span>{<span class="s2">&quot;name&quot;</span>:<span class="w"> </span><span class="s2">&quot;another_name&quot;</span>}<span class="w"> </span><span class="nv">was</span>
-<span class="nv">supplied</span><span class="w"> </span><span class="nv">alongside</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">auto_data</span><span class="w"> </span><span class="nv">function</span><span class="w"> </span><span class="nv">above</span><span class="ss">)</span>,<span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">manually</span><span class="o">-</span><span class="nv">supplied</span>
-<span class="nv">metadata</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="nv">used</span>.
+Note that in the case of conflict between manual and automatically
+computed metadata (for example, if metadata={&quot;name&quot;: &quot;another_name&quot;} was
+supplied alongside the auto_data function above), the manually-supplied
+metadata is used.
 </code></pre></div></td>
         <td><code>None</code></td>
       </tr>
@@ -10157,7 +10157,7 @@ via TXT records</p>
 <a id="maggma.stores.aws"></a>
     <div class="doc doc-contents first">
 
-      <p>Advanced Stores for connecting to AWS data</p>
+      <p>Advanced Stores for connecting to AWS data.</p>
 
 
 
@@ -10185,14 +10185,14 @@ S3Store            (<a class="autorefs autorefs-internal" title="maggma.core.sto
     <div class="doc doc-contents ">
 
       <p>GridFS like storage using Amazon S3 and a regular store for indexing
-Assumes Amazon AWS key and secret key are set in environment or default config file</p>
+Assumes Amazon AWS key and secret key are set in environment or default config file.</p>
 
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">S3Store</span><span class="p">(</span><span class="n">Store</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    GridFS like storage using Amazon S3 and a regular store for indexing</span>
-<span class="sd">    Assumes Amazon AWS key and secret key are set in environment or default config file</span>
+<span class="sd">    Assumes Amazon AWS key and secret key are set in environment or default config file.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -10212,7 +10212,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Initializes an S3 Store</span>
+<span class="sd">        Initializes an S3 Store.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            index: a store to use to index the S3 Bucket</span>
@@ -10265,15 +10265,12 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            a string representing this data source</span>
+<span class="sd">            a string representing this data source.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;s3://</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bucket</span><span class="si">}</span><span class="s2">&quot;</span>
 
     <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># lgtm[py/conflicting-attributes]</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Connect to the source data</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Connect to the source data.&quot;&quot;&quot;</span>
         <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span>
         <span class="n">resource</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">,</span> <span class="n">endpoint_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint_url</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">s3_resource_kwargs</span><span class="p">)</span>
 
@@ -10288,9 +10285,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Closes any connections</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Closes any connections.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">s3</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -10301,7 +10296,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
     <span class="k">def</span> <span class="nf">_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns:</span>
-<span class="sd">            a handle to the pymongo collection object</span>
+<span class="sd">            a handle to the pymongo collection object.</span>
 
 <span class="sd">        Important:</span>
 <span class="sd">            Not guaranteed to exist in the future</span>
@@ -10311,12 +10306,11 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
     <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Counts the number of documents matching the query criteria</span>
+<span class="sd">        Counts the number of documents matching the query criteria.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            criteria: PyMongo filter for documents to count in</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">criteria</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">query</span><span class="p">(</span>
@@ -10328,7 +10322,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Queries the Store for a set of documents</span>
+<span class="sd">        Queries the Store for a set of documents.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            criteria: PyMongo filter for documents to search in</span>
@@ -10353,12 +10347,15 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
                     <span class="c1"># TODO: THis is ugly and unsafe, do some real checking before pulling data</span>
                     <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                 <span class="k">except</span> <span class="n">botocore</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ClientError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                    <span class="c1"># If a client error is thrown, then check that it was a 404 error.</span>
-                    <span class="c1"># If it was a 404 error, then the object does not exist.</span>
-                    <span class="n">error_code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Code&quot;</span><span class="p">])</span>
-                    <span class="k">if</span> <span class="n">error_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find S3 object </span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="k">break</span>
+                    <span class="c1"># If a client error is thrown, then check that it was a NoSuchKey or NoSuchBucket error.</span>
+                    <span class="c1"># If it was a NoSuchKey error, then the object does not exist.</span>
+                    <span class="n">error_code</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Code&quot;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">error_code</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NoSuchKey&quot;</span><span class="p">,</span> <span class="s2">&quot;NoSuchBucket&quot;</span><span class="p">]:</span>
+                        <span class="n">error_message</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Message&quot;</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s2">&quot;S3 returned &#39;</span><span class="si">{</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&#39; while querying &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bucket</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                        <span class="p">)</span>
+                        <span class="k">continue</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="k">raise</span> <span class="n">e</span>
 
@@ -10385,7 +10382,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
     <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get all distinct values for a field</span>
+<span class="sd">        Get all distinct values for a field.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            field: the field(s) to get distinct values for</span>
@@ -10430,7 +10427,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
     <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Tries to create an index and return true if it succeeded</span>
+<span class="sd">        Tries to create an index and return true if it succeeded.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: single key to index</span>
@@ -10448,7 +10445,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update documents into the Store</span>
+<span class="sd">        Update documents into the Store.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            docs: the document or list of documents to update</span>
@@ -10497,9 +10494,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">_get_bucket</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        If on the main thread return the bucket created above, else create a new bucket on each thread</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;If on the main thread return the bucket created above, else create a new bucket on each thread.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;MainThread&quot;</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_thread_local</span><span class="p">,</span> <span class="s2">&quot;s3_bucket&quot;</span><span class="p">):</span>
@@ -10510,7 +10505,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
     <span class="k">def</span> <span class="nf">write_doc_to_s3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">search_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Write the data to s3 and return the metadata to be inserted into the index db</span>
+<span class="sd">        Write the data to s3 and return the metadata to be inserted into the index db.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            doc: the document</span>
@@ -10550,9 +10545,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
         <span class="n">s3_bucket</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
             <span class="n">Fileobj</span><span class="o">=</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
             <span class="n">Key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]),</span>
-            <span class="n">ExtraArgs</span><span class="o">=</span><span class="p">{</span>
-                <span class="s2">&quot;Metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-            <span class="p">},</span>
+            <span class="n">ExtraArgs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()}},</span>
         <span class="p">)</span>
 
         <span class="k">if</span> <span class="n">lu_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -10567,10 +10560,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_sanitize_key</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sanitize keys to store in S3/MinIO metadata.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Sanitize keys to store in S3/MinIO metadata.&quot;&quot;&quot;</span>
         <span class="c1"># Any underscores are encoded as double dashes in metadata, since keys with</span>
         <span class="c1"># underscores may be result in the corresponding HTTP header being stripped</span>
         <span class="c1"># by certain server configurations (e.g. default nginx), leading to:</span>
@@ -10584,7 +10574,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 
     <span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">remove_s3_object</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove docs matching the query dictionary</span>
+<span class="sd">        Remove docs matching the query dictionary.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            criteria: query dictionary to match</span>
@@ -10629,7 +10619,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Rebuilds the index Store from the data in S3</span>
 <span class="sd">        Relies on the index document being stores as the metadata for the file</span>
-<span class="sd">        This can help recover lost databases</span>
+<span class="sd">        This can help recover lost databases.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">bucket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span>
         <span class="n">objects</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span><span class="p">)</span>
@@ -10647,9 +10637,8 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
 <span class="sd">        Read data from the index store and populate the metadata of the S3 bucket</span>
 <span class="sd">        Force all of the keys to be lower case to be Minio compatible</span>
 <span class="sd">        Args:</span>
-<span class="sd">            index_query: query on the index store</span>
+<span class="sd">            index_query: query on the index store.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-
         <span class="n">qq</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">index_query</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">index_query</span>
         <span class="k">for</span> <span class="n">index_doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">qq</span><span class="p">):</span>
             <span class="n">key_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="n">index_doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
@@ -10670,7 +10659,7 @@ Assumes Amazon AWS key and secret key are set in environment or default config f
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Check equality for S3Store</span>
-<span class="sd">        other: other S3Store to compare with</span>
+<span class="sd">        other: other S3Store to compare with.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">S3Store</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
@@ -10741,7 +10730,7 @@ the documents in this Store</p>
   <tbody>
     <tr>
       <td><code>str</code></td>
-      <td><p>a string representing this data source</p></td>
+      <td><p>a string representing this data source.</p></td>
     </tr>
   </tbody>
 </table>    </div>
@@ -10769,14 +10758,14 @@ the documents in this Store</p>
     <div class="doc doc-contents ">
 
       <p>Check equality for S3Store
-other: other S3Store to compare with</p>
+other: other S3Store to compare with.</p>
 
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Check equality for S3Store</span>
-<span class="sd">    other: other S3Store to compare with</span>
+<span class="sd">    other: other S3Store to compare with.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">S3Store</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
@@ -10807,7 +10796,7 @@ other: other S3Store to compare with</p>
 
     <div class="doc doc-contents ">
 
-      <p>Initializes an S3 Store</p>
+      <p>Initializes an S3 Store.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -10906,7 +10895,7 @@ Alternatively you can pass in a dictionary with the full credentials:
     <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Initializes an S3 Store</span>
+<span class="sd">    Initializes an S3 Store.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        index: a store to use to index the S3 Bucket</span>
@@ -10974,14 +10963,12 @@ Alternatively you can pass in a dictionary with the full credentials:
 
     <div class="doc doc-contents ">
 
-      <p>Closes any connections</p>
+      <p>Closes any connections.</p>
 
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Closes any connections</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Closes any connections.&quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
 
     <span class="bp">self</span><span class="o">.</span><span class="n">s3</span><span class="o">.</span><span class="n">meta</span><span class="o">.</span><span class="n">client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -11007,15 +10994,12 @@ Alternatively you can pass in a dictionary with the full credentials:
 
     <div class="doc doc-contents ">
 
-      <p>Connect to the source data</p>
+      <p>Connect to the source data.</p>
 
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>  <span class="c1"># lgtm[py/conflicting-attributes]</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Connect to the source data</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Connect to the source data.&quot;&quot;&quot;</span>
     <span class="n">session</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_session</span><span class="p">()</span>
     <span class="n">resource</span> <span class="o">=</span> <span class="n">session</span><span class="o">.</span><span class="n">resource</span><span class="p">(</span><span class="s2">&quot;s3&quot;</span><span class="p">,</span> <span class="n">endpoint_url</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">endpoint_url</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">s3_resource_kwargs</span><span class="p">)</span>
 
@@ -11048,7 +11032,7 @@ Alternatively you can pass in a dictionary with the full credentials:
 
     <div class="doc doc-contents ">
 
-      <p>Counts the number of documents matching the query criteria</p>
+      <p>Counts the number of documents matching the query criteria.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -11073,12 +11057,11 @@ Alternatively you can pass in a dictionary with the full credentials:
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Counts the number of documents matching the query criteria</span>
+<span class="sd">    Counts the number of documents matching the query criteria.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to count in</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">criteria</span><span class="p">)</span>
 </code></pre></div>
         </details>
@@ -11100,7 +11083,7 @@ Alternatively you can pass in a dictionary with the full credentials:
 
     <div class="doc doc-contents ">
 
-      <p>Get all distinct values for a field</p>
+      <p>Get all distinct values for a field.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -11131,7 +11114,7 @@ Alternatively you can pass in a dictionary with the full credentials:
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get all distinct values for a field</span>
+<span class="sd">    Get all distinct values for a field.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        field: the field(s) to get distinct values for</span>
@@ -11159,7 +11142,7 @@ Alternatively you can pass in a dictionary with the full credentials:
 
     <div class="doc doc-contents ">
 
-      <p>Tries to create an index and return true if it succeeded</p>
+      <p>Tries to create an index and return true if it succeeded.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -11205,7 +11188,7 @@ Alternatively you can pass in a dictionary with the full credentials:
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Tries to create an index and return true if it succeeded</span>
+<span class="sd">    Tries to create an index and return true if it succeeded.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        key: single key to index</span>
@@ -11431,7 +11414,7 @@ Store than this Store.</p>
 
     <div class="doc doc-contents ">
 
-      <p>Queries the Store for a set of documents</p>
+      <p>Queries the Store for a set of documents.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -11488,7 +11471,7 @@ values are 1 for ascending or -1 for descending.</p></td>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Queries the Store for a set of documents</span>
+<span class="sd">    Queries the Store for a set of documents.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
@@ -11513,12 +11496,15 @@ values are 1 for ascending or -1 for descending.</p></td>
                 <span class="c1"># TODO: THis is ugly and unsafe, do some real checking before pulling data</span>
                 <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span><span class="o">.</span><span class="n">Object</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]))</span><span class="o">.</span><span class="n">get</span><span class="p">()[</span><span class="s2">&quot;Body&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
             <span class="k">except</span> <span class="n">botocore</span><span class="o">.</span><span class="n">exceptions</span><span class="o">.</span><span class="n">ClientError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="c1"># If a client error is thrown, then check that it was a 404 error.</span>
-                <span class="c1"># If it was a 404 error, then the object does not exist.</span>
-                <span class="n">error_code</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Code&quot;</span><span class="p">])</span>
-                <span class="k">if</span> <span class="n">error_code</span> <span class="o">==</span> <span class="mi">404</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find S3 object </span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="k">break</span>
+                <span class="c1"># If a client error is thrown, then check that it was a NoSuchKey or NoSuchBucket error.</span>
+                <span class="c1"># If it was a NoSuchKey error, then the object does not exist.</span>
+                <span class="n">error_code</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Code&quot;</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">error_code</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NoSuchKey&quot;</span><span class="p">,</span> <span class="s2">&quot;NoSuchBucket&quot;</span><span class="p">]:</span>
+                    <span class="n">error_message</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">response</span><span class="p">[</span><span class="s2">&quot;Error&quot;</span><span class="p">][</span><span class="s2">&quot;Message&quot;</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;S3 returned &#39;</span><span class="si">{</span><span class="n">error_message</span><span class="si">}</span><span class="s2">&#39; while querying &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">bucket</span><span class="si">}</span><span class="s2">&#39; for &#39;</span><span class="si">{</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span><span class="si">}</span><span class="s2">&#39;&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">continue</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="n">e</span>
 
@@ -11551,7 +11537,7 @@ values are 1 for ascending or -1 for descending.</p></td>
 
       <p>Rebuilds the index Store from the data in S3
 Relies on the index document being stores as the metadata for the file
-This can help recover lost databases</p>
+This can help recover lost databases.</p>
 
         <details class="quote">
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
@@ -11559,7 +11545,7 @@ This can help recover lost databases</p>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Rebuilds the index Store from the data in S3</span>
 <span class="sd">    Relies on the index document being stores as the metadata for the file</span>
-<span class="sd">    This can help recover lost databases</span>
+<span class="sd">    This can help recover lost databases.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">bucket</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">s3_bucket</span>
     <span class="n">objects</span> <span class="o">=</span> <span class="n">bucket</span><span class="o">.</span><span class="n">objects</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">Prefix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span><span class="p">)</span>
@@ -11608,7 +11594,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
       <tr>
         <td><code>index_query</code></td>
         <td><code>Optional[dict]</code></td>
-        <td><p>query on the index store</p></td>
+        <td><p>query on the index store.</p></td>
         <td><code>None</code></td>
       </tr>
   </tbody>
@@ -11620,9 +11606,8 @@ Force all of the keys to be lower case to be Minio compatible</p>
 <span class="sd">    Read data from the index store and populate the metadata of the S3 bucket</span>
 <span class="sd">    Force all of the keys to be lower case to be Minio compatible</span>
 <span class="sd">    Args:</span>
-<span class="sd">        index_query: query on the index store</span>
+<span class="sd">        index_query: query on the index store.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-
     <span class="n">qq</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">index_query</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">index_query</span>
     <span class="k">for</span> <span class="n">index_doc</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">qq</span><span class="p">):</span>
         <span class="n">key_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="n">index_doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]</span>
@@ -11659,7 +11644,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
 
     <div class="doc doc-contents ">
 
-      <p>Remove docs matching the query dictionary</p>
+      <p>Remove docs matching the query dictionary.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -11690,7 +11675,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">remove_s3_object</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove docs matching the query dictionary</span>
+<span class="sd">    Remove docs matching the query dictionary.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: query dictionary to match</span>
@@ -11727,7 +11712,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
 
     <div class="doc doc-contents ">
 
-      <p>Update documents into the Store</p>
+      <p>Update documents into the Store.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -11772,7 +11757,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
     <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update documents into the Store</span>
+<span class="sd">    Update documents into the Store.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        docs: the document or list of documents to update</span>
@@ -11832,7 +11817,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
 
     <div class="doc doc-contents ">
 
-      <p>Write the data to s3 and return the metadata to be inserted into the index db</p>
+      <p>Write the data to s3 and return the metadata to be inserted into the index db.</p>
 
 <p><strong>Parameters:</strong></p>
 <table>
@@ -11863,7 +11848,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
           <summary>Source code in <code>maggma/stores/aws.py</code></summary>
           <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_doc_to_s3</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">doc</span><span class="p">:</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">search_keys</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Write the data to s3 and return the metadata to be inserted into the index db</span>
+<span class="sd">    Write the data to s3 and return the metadata to be inserted into the index db.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        doc: the document</span>
@@ -11903,9 +11888,7 @@ Force all of the keys to be lower case to be Minio compatible</p>
     <span class="n">s3_bucket</span><span class="o">.</span><span class="n">upload_fileobj</span><span class="p">(</span>
         <span class="n">Fileobj</span><span class="o">=</span><span class="n">BytesIO</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="n">Key</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sub_dir</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">doc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">]),</span>
-        <span class="n">ExtraArgs</span><span class="o">=</span><span class="p">{</span>
-            <span class="s2">&quot;Metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-        <span class="p">},</span>
+        <span class="n">ExtraArgs</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Metadata&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">s3_to_mongo_keys</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">search_doc</span><span class="o">.</span><span class="n">items</span><span class="p">()}},</span>
     <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">lu_info</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
