@@ -182,11 +182,14 @@ class S3Store(Store):
                     # TODO: THis is ugly and unsafe, do some real checking before pulling data
                     data = self.s3_bucket.Object(self.sub_dir + str(doc[self.key])).get()["Body"].read()
                 except botocore.exceptions.ClientError as e:
-                    # If a client error is thrown, then check that it was a NoSuchKey error.
+                    # If a client error is thrown, then check that it was a NoSuchKey or NoSuchBucket error.
                     # If it was a NoSuchKey error, then the object does not exist.
                     error_code = e.response["Error"]["Code"]
-                    if error_code == "NoSuchKey":
-                        self.logger.error(f"Could not find S3 object {doc[self.key]}")
+                    if error_code in ["NoSuchKey", "NoSuchBucket"]:
+                        error_message = e.response["Error"]["Message"]
+                        self.logger.error(
+                            f"S3 returned '{error_message}' while querying '{self.bucket}' for '{doc[self.key]}'"
+                        )
                         continue
                     else:
                         raise e
