@@ -187,7 +187,7 @@ class S3Store(Store):
                     error_code = e.response["Error"]["Code"]
                     if error_code == "NoSuchKey":
                         self.logger.error(f"Could not find S3 object {doc[self.key]}")
-                        break
+                        continue
                     else:
                         raise e
 
