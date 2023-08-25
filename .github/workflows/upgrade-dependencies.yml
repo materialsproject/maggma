@@ -28,7 +28,7 @@ jobs:
       - name: Upgrade Python dependencies
         shell: bash
         run: |
-          python${{ matrix.python-version }} -m pip install --upgrade pip==23.1 pip-tools==23.1
+          python${{ matrix.python-version }} -m pip install --upgrade pip<23.2 pip-tools
           cd ${{ matrix.package }}
           python${{ matrix.python-version }} -m piptools compile -q --upgrade --resolver=backtracking -o requirements/${{ matrix.os }}_py${{ matrix.python-version }}.txt
           python${{ matrix.python-version }} -m piptools compile -q --upgrade --resolver=backtracking --all-extras -o requirements/${{ matrix.os }}_py${{ matrix.python-version }}_extras.txt
