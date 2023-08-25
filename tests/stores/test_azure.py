@@ -74,6 +74,7 @@ def blobstore():
         store.connect()
 
         yield store
+        store.close()
 
 
 @pytest.fixture()
@@ -113,6 +114,7 @@ def blobstore_w_subdir():
         store.connect()
 
         yield store
+        store.close()
 
 
 @pytest.fixture()
@@ -141,6 +143,7 @@ def test_keys():
         with pytest.raises(KeyError):
             store.update({"key2": "mp-2", "data": "1234"})
         assert store.key == store.index.key == "key1"
+        index.close()
 
 
 def test_multi_update(blobstore_two_docs, blobstore_multi):
@@ -275,6 +278,7 @@ def test_bad_import(mocker):
     index = MemoryStore("index")
     with pytest.raises(RuntimeError):
         AzureBlobStore(index, "bucket1")
+    index.close()
 
 
 def test_eq(mongostore, blobstore_two_docs):
@@ -398,6 +402,7 @@ def test_no_container():
             create_container=True,
         )
         store.connect()
+        index.close()
 
 
 def test_name(blobstore):
@@ -419,3 +424,4 @@ def test_no_login():
 
     with pytest.raises(RuntimeError, match=r".*Could not instantiate BlobServiceClient.*"):
         store.connect()
+    index.close()

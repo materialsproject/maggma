@@ -36,7 +36,8 @@ def montystore(tmp_dir):
 def memorystore():
     store = MemoryStore()
     store.connect()
-    return store
+    yield store
+    store.close()
 
 
 @pytest.fixture()

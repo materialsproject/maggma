@@ -104,7 +104,6 @@ class FileStore(MemoryStore):
         self.metadata_store = JSONStore(
             paths=[str(self.path / self.json_name)],
             read_only=self.read_only,
-            collection_name="metadata_" + self.collection_name,
             key=self.key,
         )
 

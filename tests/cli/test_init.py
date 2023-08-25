@@ -30,6 +30,13 @@ def reporting_store():
     store._collection.drop()
 
 
+@pytest.fixture()
+def memorystore():
+    store = MemoryStore("temp")
+    yield store
+    store.close()
+
+
 def test_basic_run():
     runner = CliRunner()
     result = runner.invoke(run, ["--help"])
@@ -40,8 +47,7 @@ def test_basic_run():
     assert result.exit_code != 0
 
 
-def test_run_builder(mongostore):
-    memorystore = MemoryStore("temp")
+def test_run_builder(mongostore, memorystore):
     builder = CopyBuilder(mongostore, memorystore)
 
     mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
@@ -70,8 +76,7 @@ def test_run_builder(mongostore):
         assert "Update" not in result.output
 
 
-def test_run_builder_chain(mongostore):
-    memorystore = MemoryStore("temp")
+def test_run_builder_chain(mongostore, memorystore):
     builder1 = CopyBuilder(mongostore, memorystore)
     builder2 = CopyBuilder(mongostore, memorystore)
 
@@ -101,8 +106,7 @@ def test_run_builder_chain(mongostore):
         assert "Update" not in result.output
 
 
-def test_reporting(mongostore, reporting_store):
-    memorystore = MemoryStore("temp")
+def test_reporting(mongostore, reporting_store, memorystore):
     builder = CopyBuilder(mongostore, memorystore)
 
     mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
@@ -154,8 +158,7 @@ def test_python_notebook_source():
     assert "Ended multiprocessing: DummyBuilder" in result.output
 
 
-def test_memray_run_builder(mongostore):
-    memorystore = MemoryStore("temp")
+def test_memray_run_builder(mongostore, memorystore):
     builder = CopyBuilder(mongostore, memorystore)
 
     mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
@@ -184,8 +187,7 @@ def test_memray_run_builder(mongostore):
         assert "Update" not in result.output
 
 
-def test_memray_user_output_dir(mongostore):
-    memorystore = MemoryStore("temp")
+def test_memray_user_output_dir(mongostore, memorystore):
     builder = CopyBuilder(mongostore, memorystore)
 
     mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
