@@ -278,7 +278,6 @@ def test_bad_import(mocker):
     index = MemoryStore("index")
     with pytest.raises(RuntimeError):
         AzureBlobStore(index, "bucket1")
-    index.close()
 
 
 def test_eq(mongostore, blobstore_two_docs):
@@ -366,6 +365,9 @@ def test_newer_in(blobstore):
     assert len(old_store.newer_in(new_store.index)) == 2
     assert len(new_store.newer_in(old_store.index)) == 0
 
+    old_store.close()
+    new_store.close()
+
 
 def test_additional_metadata(blobstore_two_docs):
     tic = datetime(2018, 4, 12, 16)
@@ -424,4 +426,3 @@ def test_no_login():
 
     with pytest.raises(RuntimeError, match=r".*Could not instantiate BlobServiceClient.*"):
         store.connect()
-    index.close()
