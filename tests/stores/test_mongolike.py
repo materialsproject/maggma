@@ -547,6 +547,29 @@ def test_eq(mongostore, memorystore, jsonstore):
     assert mongostore != jsonstore
     assert memorystore != jsonstore
 
+    # test case courtesy of @sivonxay
+
+    # two MemoryStore with the same collection name point to the same db in memory
+    store1 = MemoryStore()
+    store2 = MemoryStore()
+    store1.connect()
+    store2.connect()
+    assert store1 == store2
+    store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
+    assert store2.count() == 2
+
+    # with different collection names, they do not
+    store1 = MemoryStore(collection_name="store1")
+    store2 = MemoryStore(collection_name="store2")
+    assert store1 != store2
+
+    store1.connect()
+    store2.connect()
+
+    store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
+    assert store1.count() != store2.count()
+    assert store1 != store2  # Returns True
+
 
 @pytest.mark.skipif(
     "mongodb+srv" not in os.environ.get("MONGODB_SRV_URI", ""),
