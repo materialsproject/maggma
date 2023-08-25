@@ -70,6 +70,7 @@ jobs:
       env:
         CONTINUOUS_INTEGRATION: True
         MONGODB_SRV_URI: ${{ secrets.MONGODB_SRV_URI }}
+        PYMONGOIM__USE_LOCAL_MONGOD: False
       run: |
         pip install -e .
         pytest --cov=maggma --cov-report=xml
