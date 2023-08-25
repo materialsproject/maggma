@@ -4,7 +4,6 @@ from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
-import mongomock.collection
 import orjson
 import pymongo.collection
 import pytest
@@ -238,8 +237,9 @@ def test_mongostore_newer_in(mongostore):
 def test_memory_store_connect():
     memorystore = MemoryStore()
     assert memorystore._coll is None
+    assert "mem:" in memorystore.name
     memorystore.connect()
-    assert isinstance(memorystore._collection, mongomock.collection.Collection)
+    assert isinstance(memorystore._collection, pymongo.collection.Collection)
 
 
 def test_groupby(memorystore):
