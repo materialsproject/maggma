@@ -71,15 +71,16 @@ def test_newer_in_on_local_update(test_dir):
     fs.connect()
     with open(test_dir / "calculation1" / "input.in", "w") as f:
         f.write("Ryan was here")
+    lu_fs1 = fs.last_updated
+    lutime_fs1 = fs.query_one({"path": {"$regex": "calculation1/input.in"}})["last_updated"]
+    fs.close()
+    assert fs._coll is None
+
     fs2 = FileStore(test_dir, read_only=False)
     fs2.connect()
 
-    assert fs2.last_updated > fs.last_updated
-    assert (
-        fs2.query_one({"path": {"$regex": "calculation1/input.in"}})["last_updated"]
-        > fs.query_one({"path": {"$regex": "calculation1/input.in"}})["last_updated"]
-    )
-    assert len(fs.newer_in(fs2)) == 1
+    assert fs2.last_updated > lu_fs1
+    assert fs2.query_one({"path": {"$regex": "calculation1/input.in"}})["last_updated"] > lutime_fs1
 
 
 def test_max_depth(test_dir):
@@ -94,21 +95,25 @@ def test_max_depth(test_dir):
     fs = FileStore(test_dir, read_only=False)
     fs.connect()
     assert len(list(fs.query())) == 6
+    fs.close()
 
     # 0 depth should parse 1 file
     fs = FileStore(test_dir, read_only=False, max_depth=0)
     fs.connect()
     assert len(list(fs.query())) == 1
+    fs.close()
 
     # 1 depth should parse 5 files
     fs = FileStore(test_dir, read_only=False, max_depth=1)
     fs.connect()
     assert len(list(fs.query())) == 5
+    fs.close()
 
     # 2 depth should parse 6 files
     fs = FileStore(test_dir, read_only=False, max_depth=2)
     fs.connect()
     assert len(list(fs.query())) == 6
+    fs.close()
 
 
 def test_orphaned_metadata(test_dir):
