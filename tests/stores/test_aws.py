@@ -214,8 +214,8 @@ def test_bad_import(mocker):
 
 
 def test_aws_error(s3store):
-    def raise_exception_404(data):
-        error_response = {"Error": {"Code": 404}}
+    def raise_exception_NoSuchKey(data):
+        error_response = {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}}
         raise ClientError(error_response, "raise_exception")
 
     def raise_exception_other(data):
@@ -227,7 +227,7 @@ def test_aws_error(s3store):
         s3store.query_one()
 
     # Should just pass
-    s3store.s3_bucket.Object = raise_exception_404
+    s3store.s3_bucket.Object = raise_exception_NoSuchKey
     s3store.query_one()
 
 
