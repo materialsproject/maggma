@@ -702,7 +702,7 @@ class JSONStore(MemoryStore):
         self.serialization_option = serialization_option
         self.serialization_default = serialization_default
 
-        super().__init__(**kwargs)
+        super().__init__(collection_name=str(self.paths[0]), **kwargs)
 
     def connect(self, force_reset=False):
         """

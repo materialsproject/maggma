@@ -568,7 +568,6 @@ def test_eq(mongostore, memorystore, jsonstore):
 
     store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
     assert store1.count() != store2.count()
-    assert store1 != store2  # Returns True
 
 
 @pytest.mark.skipif(
