@@ -71,7 +71,7 @@ jobs:
         CONTINUOUS_INTEGRATION: True
         MONGODB_SRV_URI: ${{ secrets.MONGODB_SRV_URI }}
         PYMONGOIM__OPERATING_SYSTEM: ubuntu
-        PYMONGOIM__MONGO_VERSION: 4.2
+        PYMONGOIM__MONGO_VERSION: 6.0
       run: |
         pip install -e .
         pytest --cov=maggma --cov-report=xml
