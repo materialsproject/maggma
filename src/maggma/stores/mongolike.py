@@ -649,7 +649,8 @@ class MemoryStore(MongoStore):
         """
         Ensure collection is dropped from memory on object destruction, even if .close() has not been called.
         """
-        self._collection.drop()
+        if self._coll is not None:
+            self._collection.drop()
 
 
 class JSONStore(MemoryStore):
