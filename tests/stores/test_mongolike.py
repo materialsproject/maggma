@@ -26,7 +26,7 @@ def mongostore():
 
 
 @pytest.fixture()
-def montystore(tmp_dir):
+def montystore():
     store = MontyStore("maggma_test")
     store.connect()
     return store
@@ -279,7 +279,7 @@ def test_groupby(memorystore):
 
 
 # Monty store tests
-def test_monty_store_connect(tmp_dir):
+def test_monty_store_connect():
     montystore = MontyStore(collection_name="my_collection")
     assert montystore._coll is None
     montystore.connect()

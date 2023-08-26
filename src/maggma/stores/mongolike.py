@@ -506,7 +506,7 @@ class MongoStore(Store):
         Check equality for MongoStore
         other: other mongostore to compare with
         """
-        if not isinstance(other, MongoStore):
+        if not isinstance(other, self.__class__):
             return False
 
         fields = ["database", "collection_name", "host", "port", "last_updated_field"]
@@ -631,19 +631,10 @@ class MemoryStore(MongoStore):
             db = conn[self.database]
             self._coll = db[self.collection_name]  # type: ignore
 
-    # def close(self):
-    #     """
-    #     Close up all collections. In contrast to MongoStore, for MemoryStore the close()
-    #     method actually DROPS (erases) the underlying collection, in keeping with the
-    #     idea that MemoryStore is supposed to exist in memory and not persist after closing.
-    #     """
-    #     self._collection.drop()
-    #     super().close()
-
     @property
     def name(self):
         """Name for the store"""
-        return f"mem://{self.collection_name}"
+        return f"mem://{self.database}/{self.collection_name}"
 
     def __del__(self):
         """
@@ -820,7 +811,7 @@ class JSONStore(MemoryStore):
         Args:
             other: other JSONStore to compare with
         """
-        if not isinstance(other, JSONStore):
+        if not isinstance(other, self.__class__):
             return False
 
         fields = ["paths", "last_updated_field"]
@@ -1018,16 +1009,16 @@ class MontyStore(MongoStore):
                 set_(doc, k, v)
             yield doc, list(group)
 
-    # def __eq__(self, other: object) -> bool:
-    #     """
-    #     Check equality for MemoryStore
-    #     other: other MemoryStore to compare with
-    #     """
-    #     if not isinstance(other, MemoryStore):
-    #         return False
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for MontyStore
+        other: other Store to compare with
+        """
+        if not isinstance(other, self.__class__):
+            return False
 
-    #     fields = ["collection_name", "last_updated_field"]
-    #     return all(getattr(self, f) == getattr(other, f) for f in fields)
+        fields = ["database_name", "collection_name", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
 def _find_free_port(address="0.0.0.0"):
