@@ -36,8 +36,7 @@ def montystore(tmp_dir):
 def memorystore():
     store = MemoryStore()
     store.connect()
-    yield store
-    store.close()
+    return store
 
 
 @pytest.fixture()
@@ -441,7 +440,6 @@ def test_json_store_writeable(test_dir):
         assert jsonstore.count() == 2
         jsonstore.update({"new": "hello", "task_id": 2})
         assert jsonstore.count() == 3
-        jsonstore.close()
 
         # repeat the above with the deprecated file_writable kwarg
         # if the .json does not exist, it should be created
@@ -460,30 +458,30 @@ def test_json_store_writeable(test_dir):
         assert jsonstore.count() == 2
         jsonstore.update({"new": "hello", "task_id": 2})
         assert jsonstore.count() == 3
-        jsonstore.close()
+
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 3
         jsonstore.remove_docs({"a": 5})
         assert jsonstore.count() == 2
-        jsonstore.close()
+
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 2
-        jsonstore.close()
+
         with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
             jsonstore = JSONStore("d.json", file_writable=False)
             jsonstore.connect()
             jsonstore.update({"new": "hello", "task_id": 5})
             assert jsonstore.count() == 3
-            jsonstore.close()
+
             update_json_file_mock.assert_not_called()
         with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
             jsonstore = JSONStore("d.json", file_writable=False)
             jsonstore.connect()
             jsonstore.remove_docs({"task_id": 5})
             assert jsonstore.count() == 2
-            jsonstore.close()
+
             update_json_file_mock.assert_not_called()
 
 
@@ -496,7 +494,6 @@ def test_jsonstore_orjson_options(test_dir):
         jsonstore.connect()
         with pytest.raises(orjson.JSONEncodeError):
             jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
-        jsonstore.close()
 
         jsonstore = JSONStore(
             "a.json",
@@ -506,7 +503,6 @@ def test_jsonstore_orjson_options(test_dir):
         )
         jsonstore.connect()
         jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
-        jsonstore.close()
 
 
 def test_jsonstore_last_updated(test_dir):
@@ -551,8 +547,8 @@ def test_eq(mongostore, memorystore, jsonstore):
     # test case courtesy of @sivonxay
 
     # two MemoryStore with the same collection name point to the same db in memory
-    store1 = MemoryStore()
-    store2 = MemoryStore()
+    store1 = MemoryStore(collection_name="test_collection")
+    store2 = MemoryStore(collection_name="test_collection")
     store1.connect()
     store2.connect()
     assert store1 == store2
@@ -562,6 +558,17 @@ def test_eq(mongostore, memorystore, jsonstore):
     # with different collection names, they do not
     store1 = MemoryStore(collection_name="store1")
     store2 = MemoryStore(collection_name="store2")
+    assert store1 != store2
+
+    store1.connect()
+    store2.connect()
+
+    store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
+    assert store1.count() != store2.count()
+
+    # same with default collection name, which is unique per-instance
+    store1 = MemoryStore(collection_name=None)
+    store2 = MemoryStore(collection_name=None)
     assert store1 != store2
 
     store1.connect()

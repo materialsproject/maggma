@@ -71,16 +71,15 @@ def test_newer_in_on_local_update(test_dir):
     fs.connect()
     with open(test_dir / "calculation1" / "input.in", "w") as f:
         f.write("Ryan was here")
-    lu_fs1 = fs.last_updated
-    lutime_fs1 = fs.query_one({"path": {"$regex": "calculation1/input.in"}})["last_updated"]
-    fs.close()
-    assert fs._coll is None
-
     fs2 = FileStore(test_dir, read_only=False)
     fs2.connect()
 
-    assert fs2.last_updated > lu_fs1
-    assert fs2.query_one({"path": {"$regex": "calculation1/input.in"}})["last_updated"] > lutime_fs1
+    assert fs2.last_updated > fs.last_updated
+    assert (
+        fs2.query_one({"path": {"$regex": "calculation1/input.in"}})["last_updated"]
+        > fs.query_one({"path": {"$regex": "calculation1/input.in"}})["last_updated"]
+    )
+    assert len(fs.newer_in(fs2)) == 1
 
 
 def test_max_depth(test_dir):
@@ -95,25 +94,21 @@ def test_max_depth(test_dir):
     fs = FileStore(test_dir, read_only=False)
     fs.connect()
     assert len(list(fs.query())) == 6
-    fs.close()
 
     # 0 depth should parse 1 file
     fs = FileStore(test_dir, read_only=False, max_depth=0)
     fs.connect()
     assert len(list(fs.query())) == 1
-    fs.close()
 
     # 1 depth should parse 5 files
     fs = FileStore(test_dir, read_only=False, max_depth=1)
     fs.connect()
     assert len(list(fs.query())) == 5
-    fs.close()
 
     # 2 depth should parse 6 files
     fs = FileStore(test_dir, read_only=False, max_depth=2)
     fs.connect()
     assert len(list(fs.query())) == 6
-    fs.close()
 
 
 def test_orphaned_metadata(test_dir):
@@ -136,7 +131,6 @@ def test_orphaned_metadata(test_dir):
     assert len(list(fs.query({"tags": {"$exists": True}}))) == 6
     # the orphan field should be populated for all documents
     assert len(list(fs.query({"orphan": {"$exists": True}}))) == 6
-    fs.close()
 
     # re-init the store with a different max_depth parameter
     # this will result in orphaned metadata
@@ -150,7 +144,6 @@ def test_orphaned_metadata(test_dir):
     assert len(list(fs.query({"file_id": {"$exists": True}}))) == 6
     assert len(list(fs.query({"path_relative": {"$exists": True}}))) == 6
     assert len(list(fs.query({"orphan": True}))) == 1
-    fs.close()
 
     # re-init the store after renaming one of the files on disk
     # this will result in orphaned metadata
@@ -165,7 +158,6 @@ def test_orphaned_metadata(test_dir):
     assert len(list(fs.query({"path": {"$exists": True}}))) == 6
     # manually specifying orphan: True should still work
     assert len(list(fs.query({"orphan": True}))) == 1
-    fs.close()
 
 
 def test_store_files_moved(test_dir):
@@ -185,7 +177,6 @@ def test_store_files_moved(test_dir):
     assert len(list(fs.query({"orphan": False}))) == 6
     original_file_ids = {f["file_id"] for f in fs.query()}
     original_paths = {f["path"] for f in fs.query()}
-    fs.close()
 
     # now copy the entire FileStore to a new directory and re-initialize
     copy_tree(test_dir, str(test_dir / "new_store_location"))
@@ -309,7 +300,6 @@ def test_metadata(test_dir):
     item_from_store = next(iter(fs.query({"file_id": key})))
     assert item_from_store.get("name", False)
     assert item_from_store.get("metadata", False)
-    fs.close()
 
     # only the updated item should have been written to the JSON,
     # and it should not contain any of the protected keys
@@ -334,7 +324,6 @@ def test_metadata(test_dir):
     assert item_from_store["name"] == "input.in"
     assert item_from_store["parent"] == "calculation1"
     assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}
-    fs2.close()
 
     # make sure reconnecting with read_only=False doesn't remove metadata from the JSON
     fs3 = FileStore(test_dir, read_only=False)
@@ -346,7 +335,6 @@ def test_metadata(test_dir):
     assert item_from_store["name"] == "input.in"
     assert item_from_store["parent"] == "calculation1"
     assert item_from_store.get("metadata") == {"experiment date": "2022-01-18"}
-    fs3.close()
 
     # test automatic metadata assignment
     def add_data_from_name(d):

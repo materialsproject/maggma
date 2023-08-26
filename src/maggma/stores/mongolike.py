@@ -5,6 +5,7 @@ various utilities
 """
 
 import warnings
+from datetime import datetime
 from itertools import chain
 from pathlib import Path
 from socket import socket
@@ -583,7 +584,7 @@ class MemoryStore(MongoStore):
     def __init__(
         self,
         database: str = "mem",
-        collection_name: str = "memory_store",
+        collection_name: Optional[str] = None,
         host: str = "localhost",
         port: int = 27019,  # to avoid conflicts with localhost
         safe_update: bool = False,
@@ -594,7 +595,9 @@ class MemoryStore(MongoStore):
         """
         Args:
             database: The database name
-            collection_name: The collection name
+            collection_name: The collection name. If None (default) a unique collection name is set based
+                on the current date and time. This ensures that multiple Store instances can coexist without
+                overwriting one another.
             host: Hostname for the database
             port: TCP port to connect to
             safe_update: fail gracefully on DocumentTooLarge errors on update
@@ -602,6 +605,8 @@ class MemoryStore(MongoStore):
                 Can be used to ensure determinacy in query results.
             mongoclient_kwargs: Dict of extra kwargs to pass to MongoClient()
         """
+        if not collection_name:
+            collection_name = str(datetime.utcnow())
         super().__init__(
             database=database,
             collection_name=collection_name,
@@ -633,13 +638,18 @@ class MemoryStore(MongoStore):
         idea that MemoryStore is supposed to exist in memory and not persist after closing.
         """
         self._collection.drop()
-        self._collection.database.client.close()
-        self._coll = None
+        super().close()
 
     @property
     def name(self):
         """Name for the store"""
         return f"mem://{self.collection_name}"
+
+    def __del__(self):
+        """
+        Ensure collection is dropped from memory on object destruction, even if .close() has not been called.
+        """
+        self._collection.drop()
 
 
 class JSONStore(MemoryStore):
@@ -702,7 +712,7 @@ class JSONStore(MemoryStore):
         self.serialization_option = serialization_option
         self.serialization_default = serialization_default
 
-        super().__init__(collection_name=str(self.paths[0]), **kwargs)
+        super().__init__(**kwargs)
 
     def connect(self, force_reset=False):
         """
