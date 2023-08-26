@@ -102,6 +102,8 @@ def test_update_targets(source1, source2, target):
 def test_run(source1, source2, target):
     builder = Projection_Builder(source_stores=[source1, source2], target_store=target)
     builder.run()
+
+    target.connect()
     assert len(list(target.query())) == 15
     assert target.query_one(criteria={"k": 0})["a"] == "a"
     assert target.query_one(criteria={"k": 0})["d"] == "d"
@@ -117,4 +119,6 @@ def test_query(source1, source2, target):
         query_by_key=[0, 1, 2, 3, 4],
     )
     builder.run()
+
+    target.connect()
     assert len(list(target.query())) == 5
