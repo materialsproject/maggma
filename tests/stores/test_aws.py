@@ -46,7 +46,6 @@ def s3store():
         )
 
         yield store
-        store.close()
 
 
 @pytest.fixture()
@@ -60,7 +59,6 @@ def s3store_w_subdir():
         store.connect()
 
         yield store
-        store.close()
 
 
 @pytest.fixture()
@@ -74,7 +72,6 @@ def s3store_multi():
         store.connect()
 
         yield store
-        store.close()
 
 
 def test_keys():

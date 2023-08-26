@@ -535,14 +535,17 @@ def test_jsonstore_last_updated(test_dir):
         assert jsonstore.last_updated > start_time
 
 
-def test_eq(mongostore, memorystore, jsonstore):
+def test_eq(mongostore, memorystore, jsonstore, montystore):
+    assert montystore == montystore
     assert mongostore == mongostore
     assert memorystore == memorystore
     assert jsonstore == jsonstore
 
     assert mongostore != memorystore
+    assert mongostore != montystore
     assert mongostore != jsonstore
     assert memorystore != jsonstore
+    assert memorystore != montystore
 
     # test case courtesy of @sivonxay
 
