@@ -631,14 +631,14 @@ class MemoryStore(MongoStore):
             db = conn[self.database]
             self._coll = db[self.collection_name]  # type: ignore
 
-    def close(self):
-        """
-        Close up all collections. In contrast to MongoStore, for MemoryStore the close()
-        method actually DROPS (erases) the underlying collection, in keeping with the
-        idea that MemoryStore is supposed to exist in memory and not persist after closing.
-        """
-        self._collection.drop()
-        super().close()
+    # def close(self):
+    #     """
+    #     Close up all collections. In contrast to MongoStore, for MemoryStore the close()
+    #     method actually DROPS (erases) the underlying collection, in keeping with the
+    #     idea that MemoryStore is supposed to exist in memory and not persist after closing.
+    #     """
+    #     self._collection.drop()
+    #     super().close()
 
     @property
     def name(self):
