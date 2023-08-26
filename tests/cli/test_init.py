@@ -32,9 +32,7 @@ def reporting_store():
 
 @pytest.fixture()
 def memorystore():
-    store = MemoryStore("temp")
-    yield store
-    store.close()
+    return MemoryStore("temp")
 
 
 def test_basic_run():

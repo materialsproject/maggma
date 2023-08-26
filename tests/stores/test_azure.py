@@ -143,7 +143,6 @@ def test_keys():
         with pytest.raises(KeyError):
             store.update({"key2": "mp-2", "data": "1234"})
         assert store.key == store.index.key == "key1"
-        index.close()
 
 
 def test_multi_update(blobstore_two_docs, blobstore_multi):
@@ -365,9 +364,6 @@ def test_newer_in(blobstore):
     assert len(old_store.newer_in(new_store.index)) == 2
     assert len(new_store.newer_in(old_store.index)) == 0
 
-    old_store.close()
-    new_store.close()
-
 
 def test_additional_metadata(blobstore_two_docs):
     tic = datetime(2018, 4, 12, 16)
@@ -404,7 +400,6 @@ def test_no_container():
             create_container=True,
         )
         store.connect()
-        index.close()
 
 
 def test_name(blobstore):

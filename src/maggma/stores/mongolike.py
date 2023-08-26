@@ -622,14 +622,14 @@ class MemoryStore(MongoStore):
         """
         Connect to the source data
         """
-        conn: MemoryClient = MemoryClient(
-            host=self.host,
-            port=self.port,
-            **self.mongoclient_kwargs,
-        )
-
-        db = conn[self.database]
-        self._coll = db[self.collection_name]  # type: ignore
+        if self._coll is None or force_reset:
+            conn: MemoryClient = MemoryClient(
+                host=self.host,
+                port=self.port,
+                **self.mongoclient_kwargs,
+            )
+            db = conn[self.database]
+            self._coll = db[self.collection_name]  # type: ignore
 
     def close(self):
         """

@@ -307,9 +307,6 @@ def test_newer_in(s3store):
         assert len(old_store.newer_in(new_store.index)) == 2
         assert len(new_store.newer_in(old_store.index)) == 0
 
-        new_store.close()
-        old_store.close()
-
 
 def test_additional_metadata(s3store):
     tic = datetime(2018, 4, 12, 16)
