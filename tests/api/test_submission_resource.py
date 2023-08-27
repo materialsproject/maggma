@@ -34,7 +34,8 @@ def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
     store.update([d.dict() for d in owners])
-    return store
+    yield store
+    store._collection.drop()
 
 
 @pytest.fixture()
