@@ -313,11 +313,11 @@ def test_sandbox_distinct(sandbox_store):
     assert sandbox_store.distinct("a") == [1]
 
     sandbox_store._collection.insert_one({"a": 4, "d": 5, "e": 6, "sbxn": ["test"]})
-    assert sandbox_store.distinct("a") == [4, 1]
+    assert set(sandbox_store.distinct("a")) == {4, 1}
 
     sandbox_store._collection.insert_one({"a": 7, "d": 8, "e": 9, "sbxn": ["not_test"]})
     print(sandbox_store.distinct("a"))
-    assert sandbox_store.distinct("a") == [4, 1]
+    assert set(sandbox_store.distinct("a")) == {4, 1}
 
 
 def test_sandbox_update(sandbox_store):
