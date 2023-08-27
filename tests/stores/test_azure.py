@@ -74,7 +74,6 @@ def blobstore():
         store.connect()
 
         yield store
-        store.close()
 
 
 @pytest.fixture()
@@ -114,7 +113,6 @@ def blobstore_w_subdir():
         store.connect()
 
         yield store
-        store.close()
 
 
 @pytest.fixture()
