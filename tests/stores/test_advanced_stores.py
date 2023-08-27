@@ -316,7 +316,6 @@ def test_sandbox_distinct(sandbox_store):
     assert set(sandbox_store.distinct("a")) == {4, 1}
 
     sandbox_store._collection.insert_one({"a": 7, "d": 8, "e": 9, "sbxn": ["not_test"]})
-    print(sandbox_store.distinct("a"))
     assert set(sandbox_store.distinct("a")) == {4, 1}
 
 
