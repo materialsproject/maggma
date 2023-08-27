@@ -284,7 +284,8 @@ def sandbox_store():
     memstore = MemoryStore()
     store = SandboxStore(memstore, sandbox="test")
     store.connect()
-    return store
+    yield store
+    store._collection.drop()
 
 
 def test_sandbox_count(sandbox_store):
@@ -312,10 +313,11 @@ def test_sandbox_distinct(sandbox_store):
     assert sandbox_store.distinct("a") == [1]
 
     sandbox_store._collection.insert_one({"a": 4, "d": 5, "e": 6, "sbxn": ["test"]})
-    assert sandbox_store.distinct("a")[1] == 4
+    assert sandbox_store.distinct("a") == [4, 1]
 
     sandbox_store._collection.insert_one({"a": 7, "d": 8, "e": 9, "sbxn": ["not_test"]})
-    assert sandbox_store.distinct("a")[1] == 4
+    print(sandbox_store.distinct("a"))
+    assert sandbox_store.distinct("a") == [4, 1]
 
 
 def test_sandbox_update(sandbox_store):
