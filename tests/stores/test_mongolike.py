@@ -29,7 +29,8 @@ def mongostore():
 def montystore():
     store = MontyStore("maggma_test")
     store.connect()
-    return store
+    yield store
+    store._collection.drop()
 
 
 @pytest.fixture()

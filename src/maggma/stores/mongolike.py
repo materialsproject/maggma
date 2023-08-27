@@ -636,12 +636,12 @@ class MemoryStore(MongoStore):
         """Name for the store"""
         return f"mem://{self.database}/{self.collection_name}"
 
-    def __del__(self):
-        """
-        Ensure collection is dropped from memory on object destruction, even if .close() has not been called.
-        """
-        if self._coll is not None:
-            self._collection.drop()
+    # def __del__(self):
+    #     """
+    #     Ensure collection is dropped from memory on object destruction, even if .close() has not been called.
+    #     """
+    #     if self._coll is not None:
+    #         self._collection.drop()
 
 
 class JSONStore(MemoryStore):
