@@ -440,6 +440,7 @@ def test_json_store_writeable(test_dir):
         assert jsonstore.count() == 2
         jsonstore.update({"new": "hello", "task_id": 2})
         assert jsonstore.count() == 3
+        jsonstore.close()
 
         # repeat the above with the deprecated file_writable kwarg
         # if the .json does not exist, it should be created
@@ -458,30 +459,30 @@ def test_json_store_writeable(test_dir):
         assert jsonstore.count() == 2
         jsonstore.update({"new": "hello", "task_id": 2})
         assert jsonstore.count() == 3
-
+        jsonstore.close()
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 3
         jsonstore.remove_docs({"a": 5})
         assert jsonstore.count() == 2
-
+        jsonstore.close()
         jsonstore = JSONStore("d.json", file_writable=True)
         jsonstore.connect()
         assert jsonstore.count() == 2
-
+        jsonstore.close()
         with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
             jsonstore = JSONStore("d.json", file_writable=False)
             jsonstore.connect()
             jsonstore.update({"new": "hello", "task_id": 5})
             assert jsonstore.count() == 3
-
+            jsonstore.close()
             update_json_file_mock.assert_not_called()
         with mock.patch("maggma.stores.JSONStore.update_json_file") as update_json_file_mock:
             jsonstore = JSONStore("d.json", file_writable=False)
             jsonstore.connect()
             jsonstore.remove_docs({"task_id": 5})
             assert jsonstore.count() == 2
-
+            jsonstore.close()
             update_json_file_mock.assert_not_called()
 
 
@@ -494,6 +495,7 @@ def test_jsonstore_orjson_options(test_dir):
         jsonstore.connect()
         with pytest.raises(orjson.JSONEncodeError):
             jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
+        jsonstore.close()
 
         jsonstore = JSONStore(
             "a.json",
@@ -503,6 +505,7 @@ def test_jsonstore_orjson_options(test_dir):
         )
         jsonstore.connect()
         jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
+        jsonstore.close()
 
 
 def test_jsonstore_last_updated(test_dir):
