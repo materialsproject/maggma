@@ -16,7 +16,7 @@ attrs==23.1.0
     # via
     #   jsonschema
     #   referencing
-azure-core==1.29.2
+azure-core==1.29.3
     # via
     #   azure-identity
     #   azure-storage-blob
@@ -30,9 +30,9 @@ bcrypt==4.0.1
     # via paramiko
 blinker==1.6.2
     # via flask
-boto3==1.28.30
+boto3==1.28.35
     # via maggma (setup.py)
-botocore==1.31.30
+botocore==1.31.35
     # via
     #   boto3
     #   s3transfer
@@ -65,11 +65,11 @@ exceptiongroup==1.1.3
     # via anyio
 executing==1.2.0
     # via stack-data
-fastapi==0.101.1
+fastapi==0.103.0
     # via maggma (setup.py)
 fastjsonschema==2.18.0
     # via nbformat
-flask==2.3.2
+flask==2.3.3
     # via mongogrant
 hvac==1.1.1
     # via maggma (setup.py)
@@ -161,7 +161,7 @@ pyhcl==0.4.4
     # via hvac
 pyjwt[crypto]==2.8.0
     # via msal
-pymongo==4.4.1
+pymongo==4.5.0
     # via
     #   maggma (setup.py)
     #   mongogrant
