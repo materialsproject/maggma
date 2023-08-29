@@ -3,7 +3,7 @@ from datetime import datetime
 from random import randint
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, Query, Body
 from maggma.api.query_operator import PaginationQuery
 from maggma.api.query_operator.core import QueryOperator
 from maggma.api.resource import SubmissionResource
@@ -49,7 +49,8 @@ def post_query_op():
 @pytest.fixture()
 def patch_query_op():
     class PatchQuery(QueryOperator):
-        def query(self, name, update):
+        def query(self, name=Query(), update=Body()):
+            print("UPDATE:", update)
             return {"criteria": {"name": name}, "update": update}
 
     return PatchQuery()
@@ -112,10 +113,10 @@ def test_submission_patch(owner_store, post_query_op, patch_query_op):
     app.include_router(endpoint.router)
 
     client = TestClient(app)
-    update = json.dumps({"last_updated": "2023-06-22T17:32:11.645713"})
+    update = {"last_updated": "2023-06-22T17:32:11.645713"}
 
     assert client.get("/").status_code == 200
-    assert client.patch(f"/?name=PersonAge9&update={update}").status_code == 200
+    assert client.patch("/?name=PersonAge9", json=update).status_code == 200
 
 
 def test_key_fields(owner_store, post_query_op):
