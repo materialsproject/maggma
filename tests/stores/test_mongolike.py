@@ -7,6 +7,7 @@ from unittest import mock
 import orjson
 import pymongo.collection
 import pytest
+from bson.objectid import ObjectId
 from maggma.core import StoreError
 from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore, MontyStore
 from maggma.validators import JSONSchemaValidator
@@ -424,6 +425,12 @@ def test_json_store_load(jsonstore, test_dir):
     with pytest.warns(DeprecationWarning, match="file_writable is deprecated"):
         jsonstore = JSONStore("a.json", file_writable=False)
         assert jsonstore.read_only is True
+
+    # test loading an extended JSON file exported from MongoDB
+    js2 = JSONStore(test_dir / "test_set" / "extended_json.json")
+    js2.connect()
+    assert js2.count() == 1
+    assert js2.query_one()["_id"] == ObjectId("64ebee18bd0b1265fe418be2")
 
 
 def test_json_store_writeable(test_dir):

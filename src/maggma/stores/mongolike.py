@@ -19,6 +19,7 @@ except ImportError:
 
     from typing_extensions import Literal
 
+import bson
 import orjson
 from monty.dev import requires
 from monty.io import zopen
@@ -743,7 +744,7 @@ class JSONStore(MemoryStore):
         with zopen(path) as f:
             data = f.read()
             data = data.decode() if isinstance(data, bytes) else data
-            objects = orjson.loads(data)
+            objects = bson.json_util.loads(data) if "$oid" in data else orjson.loads(data)
             objects = [objects] if not isinstance(objects, list) else objects
             # datetime objects deserialize to str. Try to convert the last_updated
             # field back to datetime.
