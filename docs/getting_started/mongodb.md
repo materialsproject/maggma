@@ -1,6 +1,6 @@
 # Setting up MongoDB
 
-Many users find MongoDB to best suit their data storage needs. The easiest route to create a Mongo database is via a cloud storage solution called [MongoDB Atlas](https://www.mongodb.com/atlas), which has a free tier. The setup instructions are described below:
+Many users find MongoDB to best suit their data storage needs. While MongoDB [can be installed locally](https://www.mongodb.com/docs/manual/installation/), the easiest route is often to create a Mongo database via a cloud storage solution called [MongoDB Atlas](https://www.mongodb.com/atlas), which has a free tier. The setup instructions for using Maggma with MongoDB Atlas are described below:
 
 1. Sign up for a free account on [MongoDB Atlas](https://www.mongodb.com/atlas).
 2. Once logged in, select the "Create a Project" option and give your project a name (e.g. "MyProject"). Add your email address as the Project Owner.
