@@ -71,5 +71,5 @@ setup(
     ],
     entry_points={"console_scripts": ["mrun = maggma.cli:run"]},
     tests_require=["pytest"],
-    python_requires=">=3.7",
+    python_requires=">=3.8",
 )
