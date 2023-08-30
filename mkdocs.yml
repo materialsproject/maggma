@@ -16,6 +16,7 @@ nav:
     - Advanced Builders: getting_started/advanced_builder.md
     - Working with MapBuilder: getting_started/map_builder.md
     - Working with GroupBuilder: getting_started/group_builder.md
+    - Setting up MongoDB: getting_started/mongodb.md
   - Reference:
       Core:
         Store: reference/core_store.md
