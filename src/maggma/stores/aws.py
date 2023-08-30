@@ -1,6 +1,4 @@
-"""
-Advanced Stores for connecting to AWS data
-"""
+"""Advanced Stores for connecting to AWS data."""
 import threading
 import warnings
 import zlib
@@ -8,7 +6,6 @@ from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from io import BytesIO
-from typing import Dict, Iterator, List, Optional, Tuple, Union
 from json import dumps
 from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
 
@@ -30,7 +27,7 @@ except (ImportError, ModuleNotFoundError):
 class S3Store(Store):
     """
     GridFS like storage using Amazon S3 and a regular store for indexing
-    Assumes Amazon AWS key and secret key are set in environment or default config file
+    Assumes Amazon AWS key and secret key are set in environment or default config file.
     """
 
     def __init__(
@@ -50,7 +47,7 @@ class S3Store(Store):
         **kwargs,
     ):
         """
-        Initializes an S3 Store
+        Initializes an S3 Store.
 
         Args:
             index: a store to use to index the S3 Bucket
@@ -103,15 +100,12 @@ class S3Store(Store):
     def name(self) -> str:
         """
         Returns:
-            a string representing this data source
+            a string representing this data source.
         """
         return f"s3://{self.bucket}"
 
     def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
-        """
-        Connect to the source data
-        """
-
+        """Connect to the source data."""
         session = self._get_session()
         resource = session.resource("s3", endpoint_url=self.endpoint_url, **self.s3_resource_kwargs)
 
@@ -126,9 +120,7 @@ class S3Store(Store):
         self.index.connect(*args, **kwargs)
 
     def close(self):
-        """
-        Closes any connections
-        """
+        """Closes any connections."""
         self.index.close()
 
         self.s3.meta.client.close()
@@ -139,7 +131,7 @@ class S3Store(Store):
     def _collection(self):
         """
         Returns:
-            a handle to the pymongo collection object
+            a handle to the pymongo collection object.
 
         Important:
             Not guaranteed to exist in the future
@@ -149,12 +141,11 @@ class S3Store(Store):
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
         """
-
         return self.index.count(criteria)
 
     def query(
@@ -166,7 +157,7 @@ class S3Store(Store):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -191,12 +182,15 @@ class S3Store(Store):
                     # TODO: THis is ugly and unsafe, do some real checking before pulling data
                     data = self.s3_bucket.Object(self.sub_dir + str(doc[self.key])).get()["Body"].read()
                 except botocore.exceptions.ClientError as e:
-                    # If a client error is thrown, then check that it was a 404 error.
-                    # If it was a 404 error, then the object does not exist.
-                    error_code = int(e.response["Error"]["Code"])
-                    if error_code == 404:
-                        self.logger.error(f"Could not find S3 object {doc[self.key]}")
-                        break
+                    # If a client error is thrown, then check that it was a NoSuchKey or NoSuchBucket error.
+                    # If it was a NoSuchKey error, then the object does not exist.
+                    error_code = e.response["Error"]["Code"]
+                    if error_code in ["NoSuchKey", "NoSuchBucket"]:
+                        error_message = e.response["Error"]["Message"]
+                        self.logger.error(
+                            f"S3 returned '{error_message}' while querying '{self.bucket}' for '{doc[self.key]}'"
+                        )
+                        continue
                     else:
                         raise e
 
@@ -223,7 +217,7 @@ class S3Store(Store):
 
     def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -268,7 +262,7 @@ class S3Store(Store):
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
-        Tries to create an index and return true if it succeeded
+        Tries to create an index and return true if it succeeded.
 
         Args:
             key: single key to index
@@ -286,7 +280,7 @@ class S3Store(Store):
         additional_metadata: Union[str, List[str], None] = None,
     ):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -335,9 +329,7 @@ class S3Store(Store):
         return None
 
     def _get_bucket(self):
-        """
-        If on the main thread return the bucket created above, else create a new bucket on each thread
-        """
+        """If on the main thread return the bucket created above, else create a new bucket on each thread."""
         if threading.current_thread().name == "MainThread":
             return self.s3_bucket
         if not hasattr(self._thread_local, "s3_bucket"):
@@ -348,7 +340,7 @@ class S3Store(Store):
 
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
-        Write the data to s3 and return the metadata to be inserted into the index db
+        Write the data to s3 and return the metadata to be inserted into the index db.
 
         Args:
             doc: the document
@@ -388,9 +380,7 @@ class S3Store(Store):
         s3_bucket.upload_fileobj(
             Fileobj=BytesIO(data),
             Key=self.sub_dir + str(doc[self.key]),
-            ExtraArgs={
-                "Metadata": {s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()}
-            },
+            ExtraArgs={"Metadata": {s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()}},
         )
 
         if lu_info is not None:
@@ -405,10 +395,7 @@ class S3Store(Store):
 
     @staticmethod
     def _sanitize_key(key):
-        """
-        Sanitize keys to store in S3/MinIO metadata.
-        """
-
+        """Sanitize keys to store in S3/MinIO metadata."""
         # Any underscores are encoded as double dashes in metadata, since keys with
         # underscores may be result in the corresponding HTTP header being stripped
         # by certain server configurations (e.g. default nginx), leading to:
@@ -422,7 +409,7 @@ class S3Store(Store):
 
     def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -467,7 +454,7 @@ class S3Store(Store):
         """
         Rebuilds the index Store from the data in S3
         Relies on the index document being stores as the metadata for the file
-        This can help recover lost databases
+        This can help recover lost databases.
         """
         bucket = self.s3_bucket
         objects = bucket.objects.filter(Prefix=self.sub_dir)
@@ -485,9 +472,8 @@ class S3Store(Store):
         Read data from the index store and populate the metadata of the S3 bucket
         Force all of the keys to be lower case to be Minio compatible
         Args:
-            index_query: query on the index store
+            index_query: query on the index store.
         """
-
         qq = {} if index_query is None else index_query
         for index_doc in self.index.query(qq):
             key_ = self.sub_dir + index_doc[self.key]
@@ -508,7 +494,7 @@ class S3Store(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for S3Store
-        other: other S3Store to compare with
+        other: other S3Store to compare with.
         """
         if not isinstance(other, S3Store):
             return False
