@@ -34,6 +34,7 @@ click==8.1.7
     # via
     #   flask
     #   mongogrant
+    #   uvicorn
 cryptography==41.0.3
     # via paramiko
 dnspython==2.4.2
@@ -44,6 +45,8 @@ fastapi==0.103.0
     # via maggma (setup.py)
 flask==2.3.3
     # via mongogrant
+h11==0.14.0
+    # via uvicorn
 idna==3.4
     # via
     #   anyio
@@ -137,6 +140,8 @@ urllib3==1.26.16
     # via
     #   botocore
     #   requests
+uvicorn==0.23.2
+    # via maggma (setup.py)
 werkzeug==2.3.7
     # via flask
 
