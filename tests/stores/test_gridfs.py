@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 
 import numpy as np
-import numpy.testing.utils as nptu
+import numpy.testing as nptu
 import pytest
 from maggma.core import StoreError
 from maggma.stores import GridFSStore, MongoStore
