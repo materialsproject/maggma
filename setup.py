@@ -70,6 +70,6 @@ setup(
         "Topic :: Scientific/Engineering",
     ],
     entry_points={"console_scripts": ["mrun = maggma.cli:run"]},
-    tests_require=["pytest"],
+    tests_require=["pytest", "starlette[full]"],
     python_requires=">=3.8",
 )
