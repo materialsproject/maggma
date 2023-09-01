@@ -1,12 +1,12 @@
 # Maggma
 
-[![linting](https://github.com/materialsproject/maggma/workflows/linting/badge.svg)](https://github.com/materialsproject/maggma/actions?query=workflow%3Alinting) [![testing](https://github.com/materialsproject/maggma/workflows/testing/badge.svg)](https://github.com/materialsproject/maggma/actions?query=workflow%3Atesting) [![codecov](https://codecov.io/gh/materialsproject/maggma/branch/main/graph/badge.svg)](https://codecov.io/gh/materialsproject/maggma) [![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/materialsproject/maggma.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/materialsproject/maggma/context:python)
+[![Static Badge](https://img.shields.io/badge/documentation-blue?logo=github)](https://materialsproject.github.io/maggma) [![testing](https://github.com/materialsproject/maggma/workflows/testing/badge.svg)](https://github.com/materialsproject/maggma/actions?query=workflow%3Atesting) [![codecov](https://codecov.io/gh/materialsproject/maggma/branch/main/graph/badge.svg)](https://codecov.io/gh/materialsproject/maggma) [![python](https://img.shields.io/badge/Python-3.8+-blue.svg?logo=python&amp;logoColor=white)]()
 
 ## What is Maggma
 
 Maggma is a framework to build data pipelines from files on disk all the way to a REST API in scientific environments. Maggma has been developed by the Materials Project (MP) team at Lawrence Berkeley National Laboratory.
 
-Maggma is written in [Python](http://docs.python-guide.org/en/latest/) and supports Python 3.7+.
+Maggma is written in [Python](http://docs.python-guide.org/en/latest/) and supports Python 3.8+.
 
 ## Installation from PyPI
 
