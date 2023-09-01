@@ -20,7 +20,7 @@ version_scheme = "no-guess-dev"
 line-length = 120
 
 [tool.ruff]
-target-version = "py37"
+target-version = "py38"
 line-length = 120
 select = [
   "B",    # flake8-bugbear
@@ -75,6 +75,8 @@ ignore = [
 ]
 pydocstyle.convention = "google"
 isort.split-on-trailing-comma = false
+src = ["src"]
+
 
 [tool.ruff.per-file-ignores]
 "__init__.py" = ["F401"]
