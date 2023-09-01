@@ -65,7 +65,7 @@ setup(
             "pre-commit",
             "moto",
             "ruff",
-            "responses",
+            "responses<0.22.0",
             "types-pyYAML",
             "types-setuptools",
             "types-python-dateutil",
