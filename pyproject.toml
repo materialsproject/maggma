@@ -87,6 +87,7 @@ src = ["src"]
 "src/maggma/cli/*" = ["EXE001"] # triggered by ! at top of file
 
 [tool.pytest.ini_options]
+minversion = "6.0"
 addopts = "--color=yes -p no:warnings --import-mode=importlib --durations=30"
 testpaths = [
     "tests",
