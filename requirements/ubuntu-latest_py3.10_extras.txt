@@ -6,19 +6,11 @@
 #
 aioitertools==0.11.0
     # via maggma (setup.py)
-<<<<<<< HEAD
-anyio==4.0.0
-    # via
-    #   httpcore
-    #   starlette
-asttokens==2.2.1
-=======
 anyio==3.7.1
     # via
     #   fastapi
     #   starlette
 asttokens==2.3.0
->>>>>>> origin/main
     # via stack-data
 attrs==23.1.0
     # via
@@ -42,17 +34,9 @@ beautifulsoup4==4.12.2
     # via readtime
 blinker==1.6.2
     # via flask
-<<<<<<< HEAD
-boto3==1.28.39
-    # via
-    #   maggma (setup.py)
-    #   moto
-botocore==1.31.39
-=======
 boto3==1.28.40
     # via maggma (setup.py)
 botocore==1.31.40
->>>>>>> origin/main
     # via
     #   boto3
     #   moto
@@ -106,12 +90,6 @@ exceptiongroup==1.1.3
     # via
     #   anyio
     #   ipython
-<<<<<<< HEAD
-    #   pytest
-execnet==2.0.2
-    # via pytest-xdist
-=======
->>>>>>> origin/main
 executing==1.2.0
     # via stack-data
 fastapi==0.103.1
@@ -145,11 +123,6 @@ idna==3.4
     #   anyio
     #   httpx
     #   requests
-<<<<<<< HEAD
-iniconfig==2.0.0
-    # via pytest
-=======
->>>>>>> origin/main
 ipython==8.15.0
     # via maggma (setup.py)
 isodate==0.6.1
@@ -303,14 +276,7 @@ pydantic==1.10.12
 pydash==7.0.6
     # via maggma (setup.py)
 pygments==2.16.1
-<<<<<<< HEAD
-    # via
-    #   ipython
-    #   mkdocs-material
-    #   rich
-=======
     # via ipython
->>>>>>> origin/main
 pyhcl==0.4.5
     # via hvac
 pyjwt[crypto]==2.8.0
