@@ -24,10 +24,14 @@ azure-identity==1.14.0
     # via maggma (setup.py)
 azure-storage-blob==12.17.0
     # via maggma (setup.py)
+babel==2.12.1
+    # via mkdocs-material
 backcall==0.2.0
     # via ipython
 bcrypt==4.0.1
     # via paramiko
+beautifulsoup4==4.12.2
+    # via readtime
 blinker==1.6.2
     # via flask
 boto3==1.28.40
@@ -35,28 +39,49 @@ boto3==1.28.40
 botocore==1.31.40
     # via
     #   boto3
+    #   moto
     #   s3transfer
 certifi==2023.7.22
-    # via requests
+    # via
+    #   httpcore
+    #   httpx
+    #   requests
 cffi==1.15.1
     # via
     #   cryptography
     #   pynacl
+cfgv==3.4.0
+    # via pre-commit
 charset-normalizer==3.2.0
     # via requests
 click==8.1.7
     # via
     #   flask
+    #   mkdocs
     #   mongogrant
+    #   uvicorn
+colorama==0.4.6
+    # via
+    #   griffe
+    #   mkdocs-material
+coverage[toml]==7.3.0
+    # via pytest-cov
 cryptography==41.0.3
     # via
     #   azure-identity
     #   azure-storage-blob
+    #   moto
     #   msal
     #   paramiko
     #   pyjwt
+csscompressor==0.9.5
+    # via mkdocs-minify-plugin
+cssselect==1.2.0
+    # via pyquery
 decorator==5.1.1
     # via ipython
+distlib==0.3.7
+    # via virtualenv
 dnspython==2.4.2
     # via
     #   maggma (setup.py)
@@ -71,13 +96,32 @@ fastapi==0.103.1
     # via maggma (setup.py)
 fastjsonschema==2.18.0
     # via nbformat
+filelock==3.12.3
+    # via virtualenv
 flask==2.3.3
     # via mongogrant
+ghp-import==2.1.0
+    # via mkdocs
+griffe==0.35.2
+    # via mkdocstrings-python
+h11==0.14.0
+    # via
+    #   httpcore
+    #   uvicorn
+htmlmin2==0.1.13
+    # via mkdocs-minify-plugin
+httpcore==0.17.3
+    # via httpx
+httpx==0.24.1
+    # via starlette
 hvac==1.1.1
     # via maggma (setup.py)
+identify==2.5.27
+    # via pre-commit
 idna==3.4
     # via
     #   anyio
+    #   httpx
     #   requests
 importlib-metadata==6.8.0
     # via flask
@@ -86,15 +130,27 @@ ipython==8.15.0
 isodate==0.6.1
     # via azure-storage-blob
 itsdangerous==2.1.2
-    # via flask
+    # via
+    #   flask
+    #   starlette
 jedi==0.19.0
     # via ipython
 jinja2==3.1.2
-    # via flask
+    # via
+    #   flask
+    #   maggma (setup.py)
+    #   memray
+    #   mkdocs
+    #   mkdocs-material
+    #   mkdocstrings
+    #   moto
+    #   starlette
 jmespath==1.0.1
     # via
     #   boto3
     #   botocore
+jsmin==3.0.1
+    # via mkdocs-minify-plugin
 jsonschema==4.19.0
     # via
     #   maggma (setup.py)
@@ -103,12 +159,56 @@ jsonschema-specifications==2023.7.1
     # via jsonschema
 jupyter-core==5.3.1
     # via nbformat
+lxml==4.9.3
+    # via
+    #   mkdocs-material
+    #   pyquery
+markdown==3.4.4
+    # via
+    #   mkdocs
+    #   mkdocs-autorefs
+    #   mkdocs-material
+    #   mkdocstrings
+    #   pymdown-extensions
+markdown-it-py==3.0.0
+    # via rich
+markdown2==2.4.10
+    # via readtime
 markupsafe==2.1.3
     # via
     #   jinja2
+    #   mkdocs
+    #   mkdocstrings
     #   werkzeug
 matplotlib-inline==0.1.6
     # via ipython
+mdurl==0.1.2
+    # via markdown-it-py
+memray==1.9.1
+    # via maggma (setup.py)
+mergedeep==1.3.4
+    # via mkdocs
+mkdocs==1.5.2
+    # via
+    #   maggma (setup.py)
+    #   mkdocs-autorefs
+    #   mkdocs-material
+    #   mkdocs-minify-plugin
+    #   mkdocstrings
+mkdocs-autorefs==0.5.0
+    # via mkdocstrings
+mkdocs-material==9.2.6
+    # via maggma (setup.py)
+mkdocs-material-extensions==1.1.1
+    # via mkdocs-material
+mkdocs-minify-plugin==0.7.1
+    # via maggma (setup.py)
+mkdocstrings[python]==0.22.0
+    # via
+    #   maggma (setup.py)
+    #   mkdocstrings-python
+mkdocstrings-python==1.6.0
+    # via mkdocstrings
 mongogrant==0.3.3
     # via maggma (setup.py)
 mongomock==4.1.2
@@ -116,6 +216,8 @@ mongomock==4.1.2
 monty==2023.8.8
     # via maggma (setup.py)
 montydb==2.5.2
+    # via maggma (setup.py)
+moto==4.2.0
     # via maggma (setup.py)
 msal==1.23.0
     # via
@@ -127,24 +229,40 @@ msgpack==1.0.5
     # via maggma (setup.py)
 nbformat==5.9.2
     # via maggma (setup.py)
+nodeenv==1.8.0
+    # via pre-commit
 numpy==1.25.2
     # via maggma (setup.py)
 orjson==3.9.5
     # via maggma (setup.py)
 packaging==23.1
-    # via mongomock
+    # via
+    #   mkdocs
+    #   mongomock
+    #   pytest
+paginate==0.5.6
+    # via mkdocs-material
 paramiko==3.3.1
     # via sshtunnel
 parso==0.8.3
     # via jedi
+pathspec==0.11.2
+    # via mkdocs
 pexpect==4.8.0
     # via ipython
 pickleshare==0.7.5
     # via ipython
 platformdirs==3.10.0
-    # via jupyter-core
+    # via
+    #   jupyter-core
+    #   mkdocs
+    #   virtualenv
+pluggy==1.3.0
+    # via pytest
 portalocker==2.7.0
     # via msal-extensions
+pre-commit==3.3.3
+    # via maggma (setup.py)
 prompt-toolkit==3.0.39
     # via ipython
 ptyprocess==0.7.0
@@ -165,30 +283,77 @@ pyhcl==0.4.5
     # via hvac
 pyjwt[crypto]==2.8.0
     # via msal
+pymdown-extensions==10.2.1
+    # via
+    #   mkdocs-material
+    #   mkdocstrings
 pymongo==4.5.0
     # via
     #   maggma (setup.py)
     #   mongogrant
 pynacl==1.5.0
     # via paramiko
+pyquery==2.0.0
+    # via readtime
+pytest==7.4.0
+    # via
+    #   maggma (setup.py)
+    #   pytest-asyncio
+    #   pytest-cov
+    #   pytest-mock
+    #   pytest-xdist
+pytest-asyncio==0.21.1
+    # via maggma (setup.py)
+pytest-cov==4.1.0
+    # via maggma (setup.py)
+pytest-mock==3.11.1
+    # via maggma (setup.py)
+pytest-xdist==3.3.1
+    # via maggma (setup.py)
 python-dateutil==2.8.2
     # via
     #   botocore
+    #   ghp-import
     #   maggma (setup.py)
+    #   moto
+python-multipart==0.0.6
+    # via starlette
+pyyaml==6.0.1
+    # via
+    #   mkdocs
+    #   pre-commit
+    #   pymdown-extensions
+    #   pyyaml-env-tag
+    #   starlette
+pyyaml-env-tag==0.1
+    # via mkdocs
 pyzmq==24.0.1
     # via maggma (setup.py)
+readtime==3.0.0
+    # via mkdocs-material
 referencing==0.30.2
     # via
     #   jsonschema
     #   jsonschema-specifications
 regex==2023.8.8
-    # via maggma (setup.py)
+    # via
+    #   maggma (setup.py)
+    #   mkdocs-material
 requests==2.31.0
     # via
     #   azure-core
     #   hvac
+    #   mkdocs-material
     #   mongogrant
+    #   moto
     #   msal
+    #   responses
+responses==0.21.0
+    # via
+    #   maggma (setup.py)
+    #   moto
+rich==13.5.2
+    # via memray
 rpds-py==0.10.0
     # via
     #   jsonschema
@@ -197,6 +362,8 @@ ruamel-yaml==0.17.32
     # via maggma (setup.py)
 ruamel-yaml-clib==0.2.7
     # via ruamel-yaml
+ruff==0.0.286
+    # via maggma (setup.py)
 s3transfer==0.6.2
     # via boto3
 sentinels==1.0.0
@@ -208,13 +375,24 @@ six==1.16.0
     #   isodate
     #   python-dateutil
 sniffio==1.3.0
-    # via anyio
+    # via
+    #   anyio
+    #   httpcore
+    #   httpx
+soupsieve==2.4.1
+    # via beautifulsoup4
 sshtunnel==0.4.0
     # via maggma (setup.py)
 stack-data==0.6.2
     # via ipython
-starlette==0.27.0
-    # via fastapi
+starlette[full]==0.27.0
+    # via
+    #   fastapi
+    #   maggma (setup.py)
+tomli==2.0.1
+    # via
+    #   coverage
+    #   pytest
 tqdm==4.66.1
     # via maggma (setup.py)
 traitlets==5.9.0
@@ -223,24 +401,44 @@ traitlets==5.9.0
     #   jupyter-core
     #   matplotlib-inline
     #   nbformat
+types-python-dateutil==2.8.19.14
+    # via maggma (setup.py)
+types-pyyaml==6.0.12.11
+    # via maggma (setup.py)
+types-setuptools==68.1.0.1
+    # via maggma (setup.py)
 typing-extensions==4.7.1
     # via
     #   aioitertools
     #   azure-core
     #   azure-storage-blob
     #   fastapi
+    #   filelock
     #   ipython
+    #   mkdocstrings
     #   pydantic
     #   pydash
     #   starlette
+    #   uvicorn
 urllib3==1.26.16
     # via
     #   botocore
     #   requests
+    #   responses
+uvicorn==0.23.2
+    # via maggma (setup.py)
+virtualenv==20.24.4
+    # via pre-commit
+watchdog==3.0.0
+    # via mkdocs
 wcwidth==0.2.6
     # via prompt-toolkit
 werkzeug==2.3.7
-    # via flask
+    # via
+    #   flask
+    #   moto
+xmltodict==0.13.0
+    # via moto
 zipp==3.16.2
     # via importlib-metadata
 
