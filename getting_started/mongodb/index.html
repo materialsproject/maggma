@@ -10,13 +10,13 @@
       
       
       
-        <link rel="canonical" href="https://materialsproject.github.io/maggma/getting_started/advanced_builder/">
+        <link rel="canonical" href="https://materialsproject.github.io/maggma/getting_started/mongodb/">
       
       
-        <link rel="prev" href="../running_builders/">
+        <link rel="prev" href="../group_builder/">
       
       
-        <link rel="next" href="../map_builder/">
+        <link rel="next" href="../../reference/core_store/">
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
@@ -24,7 +24,7 @@
     
     
       
-        <title>Advanced Builders - Maggma Documentation</title>
+        <title>Setting up MongoDB - Maggma Documentation</title>
       
     
     
@@ -71,7 +71,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#advanced-builder-concepts" class="md-skip">
+        <a href="#setting-up-mongodb" class="md-skip">
           Skip to content
         </a>
       
@@ -107,7 +107,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Advanced Builders
+              Setting up MongoDB
             
           </span>
         </div>
@@ -372,29 +372,9 @@
                 
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          
-  
-  <span class="md-ellipsis">
-    Advanced Builders
-  </span>
-  
-
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../advanced_builder/" class="md-nav__link">
         
   
   <span class="md-ellipsis">
@@ -403,54 +383,6 @@
   
 
       </a>
-      
-        
-
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#logging" class="md-nav__link">
-    Logging
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#querying-for-updated-documents" class="md-nav__link">
-    Querying for Updated Documents
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#speeding-up-data-transfers" class="md-nav__link">
-    Speeding up Data Transfers
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#built-in-templates-for-advanced-builders" class="md-nav__link">
-    Built in Templates for Advanced Builders
-  </a>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -500,9 +432,18 @@
                 
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../mongodb/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         
   
   <span class="md-ellipsis">
@@ -511,6 +452,7 @@
   
 
       </a>
+      
     </li>
   
 
@@ -745,42 +687,6 @@
     
   
   
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#logging" class="md-nav__link">
-    Logging
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#querying-for-updated-documents" class="md-nav__link">
-    Querying for Updated Documents
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#speeding-up-data-transfers" class="md-nav__link">
-    Speeding up Data Transfers
-  </a>
-  
-</li>
-      
-        <li class="md-nav__item">
-  <a href="#built-in-templates-for-advanced-builders" class="md-nav__link">
-    Built in Templates for Advanced Builders
-  </a>
-  
-</li>
-      
-    </ul>
-  
 </nav>
                   </div>
                 </div>
@@ -797,35 +703,35 @@
   
 
 
-<h1 id="advanced-builder-concepts">Advanced Builder Concepts<a class="headerlink" href="#advanced-builder-concepts" title="Permanent link">&para;</a></h1>
-<p>There are a number of features in <code>maggma</code> designed to assist with advanced features:</p>
-<h2 id="logging">Logging<a class="headerlink" href="#logging" title="Permanent link">&para;</a></h2>
-<p><code>maggma</code> builders have a python <code>logger</code> object that is already setup to output to the correct level. You can directly use it to output <code>info</code>, <code>debug</code>, and <code>error</code> messages.</p>
-<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-        <span class="o">...</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">to_process_ids</span><span class="p">)</span><span class="si">}</span><span class="s2"> to process&quot;</span><span class="p">)</span>
-        <span class="o">...</span>
-</code></pre></div>
-<h2 id="querying-for-updated-documents">Querying for Updated Documents<a class="headerlink" href="#querying-for-updated-documents" title="Permanent link">&para;</a></h2>
-<p>One of the most important features in a builder is incremental building which allows the builder to just process new documents. One of the parameters for a maggma store is the <code>last_updated_field</code> and the <code>last_updated_type</code> which tell <code>maggma</code> how to deal with dates in the source and target documents. This allows us to get the <code>id</code> of any documents that are newer in the target than the newest document in the source:</p>
-<div class="highlight"><pre><span></span><code>        <span class="n">new_ids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">newer_in</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="p">)</span>
-</code></pre></div>
-<h2 id="speeding-up-data-transfers">Speeding up Data Transfers<a class="headerlink" href="#speeding-up-data-transfers" title="Permanent link">&para;</a></h2>
-<p>Since <code>maggma</code> is designed around Mongo style data sources and sinks, building indexes or in-memory copies of fields you want to search on is critical to get the fastest possible data input/output (IO). Since this is very builder and document style dependent, <code>maggma</code> provides a direct interface to <code>ensure_indexes</code> on a Store. A common paradigm is to do this in the beginning of <code>get_items</code>:</p>
-<div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">ensure_indexes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="s2">&quot;some_search_fields&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">target</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+<h1 id="setting-up-mongodb">Setting up MongoDB<a class="headerlink" href="#setting-up-mongodb" title="Permanent link">&para;</a></h1>
+<p>Many users find MongoDB to best suit their data storage needs. While MongoDB <a href="https://www.mongodb.com/docs/manual/installation/">can be installed locally</a>, the easiest route is often to create a Mongo database via a cloud storage solution called <a href="https://www.mongodb.com/atlas">MongoDB Atlas</a>, which has a free tier. The setup instructions for using Maggma with MongoDB Atlas are described below:</p>
+<ol>
+<li>Sign up for a free account on <a href="https://www.mongodb.com/atlas">MongoDB Atlas</a>.</li>
+<li>Once logged in, select the "Create a Project" option and give your project a name (e.g. "MyProject"). Add your email address as the Project Owner.</li>
+<li>Click the "Build a Database" button under the "Deployment &gt; Database" section and choose the free (i.e. M0) option. Give your cluster a unique name (e.g. "MyCluster").</li>
+<li>Select "Create" and enter your desired login credentials that you will use to access your database. You are probably best off not using special characters here since it will be URL-encoded. You should also use different credentials than your usual, since it's not uncommon to share credentials with trusted colleagues. Select "Finish and Close" when done.</li>
+<li>Go to the "Collections" tab of your cluster, which is where you will create a database (e.g. "my_database") and corresponding data collection (e.g. "my_collection") by clicking the "Add My Own Data" button.</li>
+<li>Under the "Security &gt; Network Access" section, edit the IP Access List to allow access from anywhere for maximum flexibility.</li>
+<li>Finally, retrieve your MongoDB URI, which is the address of your MongoDB cluster. You can find your database's URI by clicking the "Database" section in the sidebar and then selecting "Connect &gt; Compass" and copying the link of the form <code>mongodb+srv://&lt;username&gt;:&lt;password&gt;@&lt;host&gt;</code>.</li>
+</ol>
+<p>To test that you can connect to your database, run the following code:</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span> <span class="nn">maggma.stores</span> <span class="kn">import</span> <span class="n">MongoURIStore</span>
 
-    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">:</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ensure_indexes</span><span class="p">()</span>
-        <span class="o">...</span>
+<span class="c1"># Define your database credentials</span>
+<span class="n">store</span> <span class="o">=</span> <span class="n">MongoURIStore</span><span class="p">(</span>
+    <span class="s2">&quot;mongodb+srv://&lt;username&gt;:&lt;password&gt;@&lt;host&gt;&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;my_collection&quot;</span><span class="p">,</span>
+    <span class="n">database</span><span class="o">=</span><span class="s2">&quot;my_database&quot;</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="c1"># Query the database</span>
+<span class="k">with</span> <span class="n">store</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">store</span><span class="o">.</span><span class="n">count</span><span class="p">())</span>
 </code></pre></div>
-<h2 id="built-in-templates-for-advanced-builders">Built in Templates for Advanced Builders<a class="headerlink" href="#built-in-templates-for-advanced-builders" title="Permanent link">&para;</a></h2>
-<p><code>maggma</code> implements templates for builders that have many of these advanced features listed above:</p>
-<ul>
-<li><a href="../map_builder/">MapBuilder</a> Creates one-to-one document mapping of items in the source Store to the transformed documents in the target Store.</li>
-<li><a href="../group_builder/">GroupBuilder</a> Creates many-to-one document mapping of items in the source Store to transformed documents in the target Store</li>
-</ul>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you are using a self-hosted Mongo database, you will probably want to use a <a href="https://materialsproject.github.io/maggma/reference/stores/#maggma.stores.mongolike.MongoStore"><code>MongoStore</code></a> instead of the <a href="https://materialsproject.github.io/maggma/reference/stores/#maggma.stores.mongolike.MongoURIStore"><code>MongoURIStore</code></a>, which takes slightly different arguments.</p>
+</div>
 
 
 
