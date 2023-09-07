@@ -6,8 +6,8 @@ from typing import Any, Callable, Dict, List, Optional, Type
 from bson.objectid import ObjectId
 from monty.json import MSONable
 from pydantic import BaseModel
-from pydantic.schema import get_flat_models_from_model
-from pydantic.utils import lenient_issubclass
+from maggma.utils import get_flat_models_from_model
+from pydantic._internal._utils import lenient_issubclass
 from typing_extensions import Literal
 
 if sys.version_info >= (3, 8):
