@@ -83,10 +83,10 @@ class DynamicQueryOperator(QueryOperator):
 
     @abstractmethod
     def field_to_operator(
-        self, name: str, field: ModelField
+        self, name: str, field: FieldInfo
     ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
-        Converts a PyDantic ModelField into a Tuple with the
+        Converts a PyDantic FieldInfo into a Tuple with the
             - query param name,
             - query param type
             - FastAPI Query object,
@@ -114,10 +114,10 @@ class NumericQuery(DynamicQueryOperator):
     "Query Operator to enable searching on numeric fields"
 
     def field_to_operator(
-        self, name: str, field: ModelField
+        self, name: str, field: FieldInfo
     ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
-        Converts a PyDantic ModelField into a Tuple with the
+        Converts a PyDantic FieldInfo into a Tuple with the
         query_param name,
         default value,
         Query object,
@@ -125,29 +125,29 @@ class NumericQuery(DynamicQueryOperator):
         """
 
         ops = []
-        field_type = field.type_
+        field_type = field.annotation
 
         if field_type in [int, float]:
-            title: str = field.field_info.title or field.name
+            title: str = field.title or field.alias
 
             ops = [
                 (
-                    f"{field.name}_max",
+                    f"{field.title}_max",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for maximum value of {title}",
                     ),
-                    lambda val: {f"{field.name}": {"$lte": val}},
+                    lambda val: {f"{field.title}": {"$lte": val}},
                 ),
                 (
-                    f"{field.name}_min",
+                    f"{field.title}_min",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for minimum value of {title}",
                     ),
-                    lambda val: {f"{field.name}": {"$gte": val}},
+                    lambda val: {f"{field.title}": {"$gte": val}},
                 ),
             ]
 
@@ -155,38 +155,38 @@ class NumericQuery(DynamicQueryOperator):
             ops.extend(
                 [
                     (
-                        f"{field.name}",
+                        f"{field.title}",
                         field_type,
                         Query(
                             default=None,
                             description=f"Query for {title} being equal to an exact value",
                         ),
-                        lambda val: {f"{field.name}": val},
+                        lambda val: {f"{field.title}": val},
                     ),
                     (
-                        f"{field.name}_not_eq",
+                        f"{field.title}_not_eq",
                         field_type,
                         Query(
                             default=None,
                             description=f"Query for {title} being not equal to an exact value",
                         ),
-                        lambda val: {f"{field.name}": {"$ne": val}},
+                        lambda val: {f"{field.title}": {"$ne": val}},
                     ),
                     (
-                        f"{field.name}_eq_any",
+                        f"{field.title}_eq_any",
                         str,  # type: ignore
                         Query(
                             default=None,
                             description=f"Query for {title} being any of these values. Provide a comma separated list.",
                         ),
                         lambda val: {
-                            f"{field.name}": {
+                            f"{field.title}": {
                                 "$in": [int(entry.strip()) for entry in val.split(",")]
                             }
                         },
                     ),
                     (
-                        f"{field.name}_neq_any",
+                        f"{field.title}_neq_any",
                         str,  # type: ignore
                         Query(
                             default=None,
@@ -194,7 +194,7 @@ class NumericQuery(DynamicQueryOperator):
                             Provide a comma separated list.",
                         ),
                         lambda val: {
-                            f"{field.name}": {
+                            f"{field.title}": {
                                 "$nin": [int(entry.strip()) for entry in val.split(",")]
                             }
                         },
@@ -209,10 +209,10 @@ class StringQueryOperator(DynamicQueryOperator):
     "Query Operator to enable searching on numeric fields"
 
     def field_to_operator(
-        self, name: str, field: ModelField
+        self, name: str, field: FieldInfo
     ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
-        Converts a PyDantic ModelField into a Tuple with the
+        Converts a PyDantic FieldInfo into a Tuple with the
         query_param name,
         default value,
         Query object,
@@ -220,52 +220,52 @@ class StringQueryOperator(DynamicQueryOperator):
         """
 
         ops = []
-        field_type: type = field.type_
+        field_type: type = field.annotation
 
         if field_type in [str]:
-            title: str = field.field_info.title or field.name
+            title: str = field.title or field.title
 
             ops = [
                 (
-                    f"{field.name}",
+                    f"{field.title}",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for {title} being equal to a value",
                     ),
-                    lambda val: {f"{field.name}": val},
+                    lambda val: {f"{field.title}": val},
                 ),
                 (
-                    f"{field.name}_not_eq",
+                    f"{field.title}_not_eq",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for {title} being not equal to a value",
                     ),
-                    lambda val: {f"{field.name}": {"$ne": val}},
+                    lambda val: {f"{field.title}": {"$ne": val}},
                 ),
                 (
-                    f"{field.name}_eq_any",
+                    f"{field.title}_eq_any",
                     str,  # type: ignore
                     Query(
                         default=None,
                         description=f"Query for {title} being any of these values. Provide a comma separated list.",
                     ),
                     lambda val: {
-                        f"{field.name}": {
+                        f"{field.title}": {
                             "$in": [entry.strip() for entry in val.split(",")]
                         }
                     },
                 ),
                 (
-                    f"{field.name}_neq_any",
+                    f"{field.title}_neq_any",
                     str,  # type: ignore
                     Query(
                         default=None,
                         description=f"Query for {title} being not any of these values. Provide a comma separated list",
                     ),
                     lambda val: {
-                        f"{field.name}": {
+                        f"{field.title}": {
                             "$nin": [entry.strip() for entry in val.split(",")]
                         }
                     },
