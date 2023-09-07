@@ -5,7 +5,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Type
 from fastapi.params import Query
 from monty.json import MontyDecoder
 from pydantic import BaseModel
-from pydantic.fields import ModelField
+from pydantic.fields import FieldInfo
 
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
@@ -25,8 +25,10 @@ class DynamicQueryOperator(QueryOperator):
         self.fields = fields
         self.excluded_fields = excluded_fields
 
-        all_fields: Dict[str, ModelField] = model.__fields__
-        param_fields = fields or list(set(all_fields.keys()) - set(excluded_fields or []))
+        all_fields: Dict[str, FieldInfo] = model.model_fields
+        param_fields = fields or list(
+            set(all_fields.keys()) - set(excluded_fields or [])
+        )
 
         # Convert the fields into operator tuples
         ops = [
@@ -47,7 +49,9 @@ class DynamicQueryOperator(QueryOperator):
                     try:
                         criteria.append(self.mapping[k](v))
                     except KeyError:
-                        raise KeyError(f"Cannot find key {k} in current query to database mapping")
+                        raise KeyError(
+                            f"Cannot find key {k} in current query to database mapping"
+                        )
 
             final_crit = {}
             for entry in criteria:
@@ -78,7 +82,9 @@ class DynamicQueryOperator(QueryOperator):
         "Stub query function for abstract class"
 
     @abstractmethod
-    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(
+        self, name: str, field: ModelField
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
         Converts a PyDantic ModelField into a Tuple with the
             - query param name,
@@ -107,7 +113,9 @@ class DynamicQueryOperator(QueryOperator):
 class NumericQuery(DynamicQueryOperator):
     "Query Operator to enable searching on numeric fields"
 
-    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(
+        self, name: str, field: ModelField
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
         Converts a PyDantic ModelField into a Tuple with the
         query_param name,
@@ -171,7 +179,11 @@ class NumericQuery(DynamicQueryOperator):
                             default=None,
                             description=f"Query for {title} being any of these values. Provide a comma separated list.",
                         ),
-                        lambda val: {f"{field.name}": {"$in": [int(entry.strip()) for entry in val.split(",")]}},
+                        lambda val: {
+                            f"{field.name}": {
+                                "$in": [int(entry.strip()) for entry in val.split(",")]
+                            }
+                        },
                     ),
                     (
                         f"{field.name}_neq_any",
@@ -181,7 +193,11 @@ class NumericQuery(DynamicQueryOperator):
                             description=f"Query for {title} being not any of these values. \
                             Provide a comma separated list.",
                         ),
-                        lambda val: {f"{field.name}": {"$nin": [int(entry.strip()) for entry in val.split(",")]}},
+                        lambda val: {
+                            f"{field.name}": {
+                                "$nin": [int(entry.strip()) for entry in val.split(",")]
+                            }
+                        },
                     ),
                 ]
             )
@@ -192,7 +208,9 @@ class NumericQuery(DynamicQueryOperator):
 class StringQueryOperator(DynamicQueryOperator):
     "Query Operator to enable searching on numeric fields"
 
-    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(
+        self, name: str, field: ModelField
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
         Converts a PyDantic ModelField into a Tuple with the
         query_param name,
@@ -233,7 +251,11 @@ class StringQueryOperator(DynamicQueryOperator):
                         default=None,
                         description=f"Query for {title} being any of these values. Provide a comma separated list.",
                     ),
-                    lambda val: {f"{field.name}": {"$in": [entry.strip() for entry in val.split(",")]}},
+                    lambda val: {
+                        f"{field.name}": {
+                            "$in": [entry.strip() for entry in val.split(",")]
+                        }
+                    },
                 ),
                 (
                     f"{field.name}_neq_any",
@@ -242,7 +264,11 @@ class StringQueryOperator(DynamicQueryOperator):
                         default=None,
                         description=f"Query for {title} being not any of these values. Provide a comma separated list",
                     ),
-                    lambda val: {f"{field.name}": {"$nin": [entry.strip() for entry in val.split(",")]}},
+                    lambda val: {
+                        f"{field.name}": {
+                            "$nin": [entry.strip() for entry in val.split(",")]
+                        }
+                    },
                 ),
             ]
 
