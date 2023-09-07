@@ -1,6 +1,6 @@
 import inspect
 from abc import abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from fastapi.params import Query
 from monty.json import MontyDecoder
@@ -127,7 +127,7 @@ class NumericQuery(DynamicQueryOperator):
         ops = []
         field_type = field.annotation
 
-        if field_type in [int, float]:
+        if field_type in [int, float, Union[float, None], Union[int, None]] or :
             title: str = field.title or field.alias
 
             ops = [
@@ -151,7 +151,7 @@ class NumericQuery(DynamicQueryOperator):
                 ),
             ]
 
-        if field_type is int:
+        if field_type in [int, Union[int, None]]:
             ops.extend(
                 [
                     (
@@ -222,7 +222,7 @@ class StringQueryOperator(DynamicQueryOperator):
         ops = []
         field_type: type = field.annotation
 
-        if field_type in [str]:
+        if field_type in [str, Union[str, None]]:
             title: str = field.title or field.title
 
             ops = [

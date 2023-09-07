@@ -9,7 +9,7 @@ from pydantic import BaseModel
 from pydantic.fields import FieldInfo
 from maggma.utils import get_flat_models_from_model
 from pydantic._internal._utils import lenient_issubclass
-from typing_extensions import Literal
+from typing_extensions import Literal, Union
 
 if sys.version_info >= (3, 8):
     from typing import get_args
