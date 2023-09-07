@@ -150,7 +150,7 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
     Patch Monty to allow for dict values for MSONable
     """
 
-    def validate_monty(cls, v):
+    def validate_monty(cls, v, _):
         """
         Stub validator for MSONable as a dictionary only
         """
@@ -174,7 +174,7 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
         else:
             raise ValueError(f"Must provide {cls.__name__} or MSONable dictionary")
 
-    monty_cls.validate_monty = classmethod(validate_monty)
+    monty_cls.validate_monty_v2 = classmethod(validate_monty)
 
     return monty_cls
 

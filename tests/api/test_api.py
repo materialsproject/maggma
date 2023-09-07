@@ -142,7 +142,6 @@ def test_cluster_run(owner_store, pet_store):
 
     payload = {"name": "Person1", "_limit": 10, "_all_fields": True}
     res, data = search_helper(payload=payload, base="/owners/?")
-    print(res.text)
     assert res.status_code == 200
     assert len(data) == 1
     assert data[0]["name"] == "Person1"
