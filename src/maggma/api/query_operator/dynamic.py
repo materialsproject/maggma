@@ -127,27 +127,27 @@ class NumericQuery(DynamicQueryOperator):
         ops = []
         field_type = field.annotation
 
-        if field_type in [int, float, Union[float, None], Union[int, None]] or :
-            title: str = field.title or field.alias
+        if field_type in [int, float, Union[float, None], Union[int, None]]:
+            title: str = name or field.alias
 
             ops = [
                 (
-                    f"{field.title}_max",
+                    f"{title}_max",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for maximum value of {title}",
                     ),
-                    lambda val: {f"{field.title}": {"$lte": val}},
+                    lambda val: {f"{title}": {"$lte": val}},
                 ),
                 (
-                    f"{field.title}_min",
+                    f"{title}_min",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for minimum value of {title}",
                     ),
-                    lambda val: {f"{field.title}": {"$gte": val}},
+                    lambda val: {f"{title}": {"$gte": val}},
                 ),
             ]
 
@@ -155,38 +155,38 @@ class NumericQuery(DynamicQueryOperator):
             ops.extend(
                 [
                     (
-                        f"{field.title}",
+                        f"{title}",
                         field_type,
                         Query(
                             default=None,
                             description=f"Query for {title} being equal to an exact value",
                         ),
-                        lambda val: {f"{field.title}": val},
+                        lambda val: {f"{title}": val},
                     ),
                     (
-                        f"{field.title}_not_eq",
+                        f"{title}_not_eq",
                         field_type,
                         Query(
                             default=None,
                             description=f"Query for {title} being not equal to an exact value",
                         ),
-                        lambda val: {f"{field.title}": {"$ne": val}},
+                        lambda val: {f"{title}": {"$ne": val}},
                     ),
                     (
-                        f"{field.title}_eq_any",
+                        f"{title}_eq_any",
                         str,  # type: ignore
                         Query(
                             default=None,
                             description=f"Query for {title} being any of these values. Provide a comma separated list.",
                         ),
                         lambda val: {
-                            f"{field.title}": {
+                            f"{title}": {
                                 "$in": [int(entry.strip()) for entry in val.split(",")]
                             }
                         },
                     ),
                     (
-                        f"{field.title}_neq_any",
+                        f"{title}_neq_any",
                         str,  # type: ignore
                         Query(
                             default=None,
@@ -194,7 +194,7 @@ class NumericQuery(DynamicQueryOperator):
                             Provide a comma separated list.",
                         ),
                         lambda val: {
-                            f"{field.title}": {
+                            f"{title}": {
                                 "$nin": [int(entry.strip()) for entry in val.split(",")]
                             }
                         },
@@ -223,49 +223,49 @@ class StringQueryOperator(DynamicQueryOperator):
         field_type: type = field.annotation
 
         if field_type in [str, Union[str, None]]:
-            title: str = field.title or field.title
+            title: str = name
 
             ops = [
                 (
-                    f"{field.title}",
+                    f"{title}",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for {title} being equal to a value",
                     ),
-                    lambda val: {f"{field.title}": val},
+                    lambda val: {f"{title}": val},
                 ),
                 (
-                    f"{field.title}_not_eq",
+                    f"{title}_not_eq",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for {title} being not equal to a value",
                     ),
-                    lambda val: {f"{field.title}": {"$ne": val}},
+                    lambda val: {f"{title}": {"$ne": val}},
                 ),
                 (
-                    f"{field.title}_eq_any",
+                    f"{title}_eq_any",
                     str,  # type: ignore
                     Query(
                         default=None,
                         description=f"Query for {title} being any of these values. Provide a comma separated list.",
                     ),
                     lambda val: {
-                        f"{field.title}": {
+                        f"{title}": {
                             "$in": [entry.strip() for entry in val.split(",")]
                         }
                     },
                 ),
                 (
-                    f"{field.title}_neq_any",
+                    f"{title}_neq_any",
                     str,  # type: ignore
                     Query(
                         default=None,
                         description=f"Query for {title} being not any of these values. Provide a comma separated list",
                     ),
                     lambda val: {
-                        f"{field.title}": {
+                        f"{title}": {
                             "$nin": [entry.strip() for entry in val.split(",")]
                         }
                     },
