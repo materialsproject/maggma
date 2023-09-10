@@ -32,7 +32,7 @@ setup(
         "pydantic<2.0",
         "pydantic>=0.32.2",
         "pymongo>=4.2.0",
-        "pymongo-inmemory",
+        "pymongo-inmemory>=0.3.1",
         "monty>=1.0.2",
         "mongomock>=3.10.0",
         "pydash>=4.1.0",
