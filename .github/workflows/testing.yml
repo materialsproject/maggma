@@ -51,7 +51,9 @@ jobs:
       max-parallel: 6
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        # python-version: ["3.8", "3.9", "3.10", "3.11"]
+        # temporary workaround since pymongo-inmemory dropped 3.8 support
+        python-version: ["3.9", "3.10", "3.11"]
 
     runs-on: ${{ matrix.os }}
 
