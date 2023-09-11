@@ -51,7 +51,9 @@ jobs:
       max-parallel: 6
       matrix:
         os: [ubuntu-latest]
-        python-version: ["3.8", "3.9", "3.10", "3.11"]
+        # python-version: ["3.8", "3.9", "3.10", "3.11"]
+        # temporary workaround since pymongo-inmemory dropped 3.8 support
+        python-version: ["3.9", "3.10", "3.11"]
 
     runs-on: ${{ matrix.os }}
 
@@ -72,6 +74,8 @@ jobs:
       env:
         CONTINUOUS_INTEGRATION: True
         MONGODB_SRV_URI: ${{ secrets.MONGODB_SRV_URI }}
+        PYMONGOIM__OPERATING_SYSTEM: ubuntu
+        PYMONGOIM__MONGO_VERSION: 6.0
       run: |
         pip install -e .
         pytest --cov=maggma --cov-report=xml
