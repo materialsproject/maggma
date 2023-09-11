@@ -18,9 +18,9 @@ bcrypt==4.0.1
     # via paramiko
 blinker==1.6.2
     # via flask
-boto3==1.28.40
+boto3==1.28.44
     # via maggma (setup.py)
-botocore==1.31.40
+botocore==1.31.44
     # via
     #   boto3
     #   s3transfer
@@ -77,13 +77,13 @@ mongogrant==0.3.3
     # via maggma (setup.py)
 mongomock==4.1.2
     # via maggma (setup.py)
-monty==2023.8.8
+monty==2023.9.5
     # via maggma (setup.py)
 msgpack==1.0.5
     # via maggma (setup.py)
 numpy==1.25.2
     # via maggma (setup.py)
-orjson==3.9.5
+orjson==3.9.7
     # via maggma (setup.py)
 packaging==23.1
     # via mongomock
@@ -115,7 +115,7 @@ referencing==0.30.2
     #   jsonschema-specifications
 requests==2.31.0
     # via mongogrant
-rpds-py==0.10.0
+rpds-py==0.10.2
     # via
     #   jsonschema
     #   referencing
