@@ -2,6 +2,8 @@ name: Post-process
 
 on:
   workflow_run:
+    branches:
+      - main
     types:
       - completed
     workflows:
