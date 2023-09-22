@@ -31,7 +31,7 @@ setup(
         "ruamel.yaml<0.18",
         "pydantic>=2.0",
         "pymongo>=4.2.0",
-        "monty>=1.0.2",
+        "monty>=2023.9.5",
         "mongomock>=3.10.0",
         "pydash>=4.1.0",
         "jsonschema>=3.1.1",
