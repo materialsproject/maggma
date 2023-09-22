@@ -7,7 +7,7 @@ import signal
 import uuid
 from datetime import datetime, timedelta
 from importlib import import_module
-from typing import Dict, Iterable, Optional, Union
+from typing import Dict, Iterable, Optional, Union, Set
 
 from bson.json_util import ObjectId
 from dateutil import parser
@@ -264,7 +264,7 @@ class ReportingHandler(logging.Handler):
             maggma_record["build_id"] = self.build_id
             self.reporting_store.update(maggma_record, key="_id")
 
-def get_flat_models_from_model(model: BaseModel, known_models: set[BaseModel] = set()):
+def get_flat_models_from_model(model: BaseModel, known_models: Set[BaseModel] = set()):
     """Get all sub-models from a pydantic model.
 
     Args:
