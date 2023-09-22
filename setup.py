@@ -30,6 +30,7 @@ setup(
         "setuptools",
         "ruamel.yaml<0.18",
         "pydantic>=2.0",
+        "pydantic-settings>=2.0.3",
         "pymongo>=4.2.0",
         "monty>=2023.9.5",
         "mongomock>=3.10.0",
