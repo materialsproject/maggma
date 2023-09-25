@@ -32,7 +32,7 @@ setup(
         "pydantic>=2.0",
         "pydantic-settings>=2.0.3",
         "pymongo>=4.2.0",
-        "monty>=2023.9.5",
+        "monty>=2023.9.25",
         "mongomock>=3.10.0",
         "pydash>=4.1.0",
         "jsonschema>=3.1.1",
