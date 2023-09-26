@@ -88,7 +88,7 @@ def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]
     """
     owner_store = MemoryStore("owners", key="name")
     owner_store.connect()
-    owner_store.update([d.dict() for d in owners])
+    owner_store.update([d.model_dump() for d in owners])
 
     pets_store = MemoryStore("pets", key="name")
     pets_store.connect()

@@ -1,11 +1,11 @@
 import inspect
 from abc import abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Tuple, Type
+from typing import Any, Callable, Dict, List, Optional, Tuple, Type, Union
 
 from fastapi.params import Query
 from monty.json import MontyDecoder
 from pydantic import BaseModel
-from pydantic.fields import ModelField
+from pydantic.fields import FieldInfo
 
 from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS
@@ -25,8 +25,10 @@ class DynamicQueryOperator(QueryOperator):
         self.fields = fields
         self.excluded_fields = excluded_fields
 
-        all_fields: Dict[str, ModelField] = model.__fields__
-        param_fields = fields or list(set(all_fields.keys()) - set(excluded_fields or []))
+        all_fields: Dict[str, FieldInfo] = model.model_fields
+        param_fields = fields or list(
+            set(all_fields.keys()) - set(excluded_fields or [])
+        )
 
         # Convert the fields into operator tuples
         ops = [
@@ -47,7 +49,9 @@ class DynamicQueryOperator(QueryOperator):
                     try:
                         criteria.append(self.mapping[k](v))
                     except KeyError:
-                        raise KeyError(f"Cannot find key {k} in current query to database mapping")
+                        raise KeyError(
+                            f"Cannot find key {k} in current query to database mapping"
+                        )
 
             final_crit = {}
             for entry in criteria:
@@ -78,9 +82,11 @@ class DynamicQueryOperator(QueryOperator):
         "Stub query function for abstract class"
 
     @abstractmethod
-    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(
+        self, name: str, field: FieldInfo
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
-        Converts a PyDantic ModelField into a Tuple with the
+        Converts a PyDantic FieldInfo into a Tuple with the
             - query param name,
             - query param type
             - FastAPI Query object,
@@ -107,9 +113,11 @@ class DynamicQueryOperator(QueryOperator):
 class NumericQuery(DynamicQueryOperator):
     "Query Operator to enable searching on numeric fields"
 
-    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(
+        self, name: str, field: FieldInfo
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
-        Converts a PyDantic ModelField into a Tuple with the
+        Converts a PyDantic FieldInfo into a Tuple with the
         query_param name,
         default value,
         Query object,
@@ -117,71 +125,79 @@ class NumericQuery(DynamicQueryOperator):
         """
 
         ops = []
-        field_type = field.type_
+        field_type = field.annotation
 
-        if field_type in [int, float]:
-            title: str = field.field_info.title or field.name
+        if field_type in [int, float, Union[float, None], Union[int, None]]:
+            title: str = name or field.alias
 
             ops = [
                 (
-                    f"{field.name}_max",
+                    f"{title}_max",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for maximum value of {title}",
                     ),
-                    lambda val: {f"{field.name}": {"$lte": val}},
+                    lambda val: {f"{title}": {"$lte": val}},
                 ),
                 (
-                    f"{field.name}_min",
+                    f"{title}_min",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for minimum value of {title}",
                     ),
-                    lambda val: {f"{field.name}": {"$gte": val}},
+                    lambda val: {f"{title}": {"$gte": val}},
                 ),
             ]
 
-        if field_type is int:
+        if field_type in [int, Union[int, None]]:
             ops.extend(
                 [
                     (
-                        f"{field.name}",
+                        f"{title}",
                         field_type,
                         Query(
                             default=None,
                             description=f"Query for {title} being equal to an exact value",
                         ),
-                        lambda val: {f"{field.name}": val},
+                        lambda val: {f"{title}": val},
                     ),
                     (
-                        f"{field.name}_not_eq",
+                        f"{title}_not_eq",
                         field_type,
                         Query(
                             default=None,
                             description=f"Query for {title} being not equal to an exact value",
                         ),
-                        lambda val: {f"{field.name}": {"$ne": val}},
+                        lambda val: {f"{title}": {"$ne": val}},
                     ),
                     (
-                        f"{field.name}_eq_any",
+                        f"{title}_eq_any",
                         str,  # type: ignore
                         Query(
                             default=None,
                             description=f"Query for {title} being any of these values. Provide a comma separated list.",
                         ),
-                        lambda val: {f"{field.name}": {"$in": [int(entry.strip()) for entry in val.split(",")]}},
+                        lambda val: {
+                            f"{title}": {
+                                "$in": [int(entry.strip()) for entry in val.split(",")]
+                            }
+                        },
                     ),
                     (
-                        f"{field.name}_neq_any",
+                        f"{title}_neq_any",
                         str,  # type: ignore
                         Query(
                             default=None,
                             description=f"Query for {title} being not any of these values. \
                             Provide a comma separated list.",
                         ),
-                        lambda val: {f"{field.name}": {"$nin": [int(entry.strip()) for entry in val.split(",")]}},
+                        lambda val: {
+                            f"{title}": {
+                                "$nin": [int(entry.strip()) for entry in val.split(",")]
+                            }
+                        },
                     ),
                 ]
             )
@@ -192,9 +208,11 @@ class NumericQuery(DynamicQueryOperator):
 class StringQueryOperator(DynamicQueryOperator):
     "Query Operator to enable searching on numeric fields"
 
-    def field_to_operator(self, name: str, field: ModelField) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
+    def field_to_operator(
+        self, name: str, field: FieldInfo
+    ) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
-        Converts a PyDantic ModelField into a Tuple with the
+        Converts a PyDantic FieldInfo into a Tuple with the
         query_param name,
         default value,
         Query object,
@@ -202,47 +220,55 @@ class StringQueryOperator(DynamicQueryOperator):
         """
 
         ops = []
-        field_type: type = field.type_
+        field_type: type = field.annotation
 
-        if field_type in [str]:
-            title: str = field.field_info.title or field.name
+        if field_type in [str, Union[str, None]]:
+            title: str = name
 
             ops = [
                 (
-                    f"{field.name}",
+                    f"{title}",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for {title} being equal to a value",
                     ),
-                    lambda val: {f"{field.name}": val},
+                    lambda val: {f"{title}": val},
                 ),
                 (
-                    f"{field.name}_not_eq",
+                    f"{title}_not_eq",
                     field_type,
                     Query(
                         default=None,
                         description=f"Query for {title} being not equal to a value",
                     ),
-                    lambda val: {f"{field.name}": {"$ne": val}},
+                    lambda val: {f"{title}": {"$ne": val}},
                 ),
                 (
-                    f"{field.name}_eq_any",
+                    f"{title}_eq_any",
                     str,  # type: ignore
                     Query(
                         default=None,
                         description=f"Query for {title} being any of these values. Provide a comma separated list.",
                     ),
-                    lambda val: {f"{field.name}": {"$in": [entry.strip() for entry in val.split(",")]}},
+                    lambda val: {
+                        f"{title}": {
+                            "$in": [entry.strip() for entry in val.split(",")]
+                        }
+                    },
                 ),
                 (
-                    f"{field.name}_neq_any",
+                    f"{title}_neq_any",
                     str,  # type: ignore
                     Query(
                         default=None,
                         description=f"Query for {title} being not any of these values. Provide a comma separated list",
                     ),
-                    lambda val: {f"{field.name}": {"$nin": [entry.strip() for entry in val.split(",")]}},
+                    lambda val: {
+                        f"{title}": {
+                            "$nin": [entry.strip() for entry in val.split(",")]
+                        }
+                    },
                 ),
             ]
 
