@@ -41,7 +41,7 @@ setup(
         "aioitertools>=0.5.1",
         "numpy>=1.17.3",
         "fastapi>=0.42.0",
-        "pyzmq==24.0.1",
+        "pyzmq>=24.0.1",
         "dnspython>=1.16.0",
         "sshtunnel>=0.1.5",
         "msgpack>=0.5.6",
