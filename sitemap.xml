@@ -2,87 +2,87 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
     <url>
          <loc>https://materialsproject.github.io/maggma/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/CHANGELOG/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/concepts/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/advanced_builder/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/advanced_stores/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/group_builder/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/map_builder/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/mongodb/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/running_builders/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/simple_builder/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/stores/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/getting_started/using_file_store/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/reference/builders/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/reference/core_builder/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/reference/core_store/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/reference/core_validator/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
     <url>
          <loc>https://materialsproject.github.io/maggma/reference/stores/</loc>
-         <lastmod>2023-09-26</lastmod>
+         <lastmod>2023-10-05</lastmod>
          <changefreq>daily</changefreq>
     </url>
 </urlset>
