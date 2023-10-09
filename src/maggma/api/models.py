@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, Field, validator
-from pydantic.generics import GenericModel
 
 from maggma import __version__
 
@@ -47,7 +46,7 @@ class Error(BaseModel):
         pass
 
 
-class Response(GenericModel, Generic[DataT]):
+class Response(BaseModel, Generic[DataT]):
     """
     A Generic API Response
     """
