@@ -94,9 +94,10 @@ class AggregationResource(Resource):
 
             meta = Meta(total_doc=count)
             response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
+            response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
-                self.header_processor.process_header(temp_response, request)
+                self.header_processor.process_header(response, request)
 
             return response
 
