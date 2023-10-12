@@ -12,6 +12,7 @@ from maggma.api.query_operator import QueryOperator
 from maggma.api.resource import HeaderProcessor, Resource
 from maggma.api.resource.utils import attach_query_ops
 from maggma.api.utils import STORE_PARAMS, merge_queries
+from maggma.api.utils import serialization_helper
 from maggma.core import Store
 
 
