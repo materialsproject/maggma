@@ -1,4 +1,5 @@
 from typing import Any, Dict, List, Optional, Type
+import orjson
 
 from fastapi import HTTPException, Request, Response
 from pydantic import BaseModel
