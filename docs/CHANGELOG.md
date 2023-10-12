@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.57.3](https://github.com/materialsproject/maggma/tree/v0.57.3) (2023-10-12)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.57.2...v0.57.3)
+
+**Merged pull requests:**
+
+- Ensure header processor alters the correct object [\#870](https://github.com/materialsproject/maggma/pull/870) ([munrojm](https://github.com/munrojm))
+
 ## [v0.57.2](https://github.com/materialsproject/maggma/tree/v0.57.2) (2023-10-09)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.57.1...v0.57.2)
