@@ -173,7 +173,10 @@ class ReadOnlyResource(Resource):
                 response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
-                self.header_processor.process_header(response, request)
+                if self.disable_validation:
+                    self.header_processor.process_header(response, request)
+                else:
+                    self.header_processor.process_header(temp_response, request)
 
             return response
 
@@ -269,7 +272,10 @@ class ReadOnlyResource(Resource):
                 response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
-                self.header_processor.process_header(response, request)
+                if self.disable_validation:
+                    self.header_processor.process_header(response, request)
+                else:
+                    self.header_processor.process_header(temp_response, request)
 
             return response
 
