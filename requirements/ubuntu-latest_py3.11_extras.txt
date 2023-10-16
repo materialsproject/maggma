@@ -23,9 +23,9 @@ azure-core==1.29.4
     # via
     #   azure-identity
     #   azure-storage-blob
-azure-identity==1.14.0
+azure-identity==1.14.1
     # via maggma (setup.py)
-azure-storage-blob==12.18.2
+azure-storage-blob==12.18.3
     # via maggma (setup.py)
 babel==2.13.0
     # via mkdocs-material
@@ -35,11 +35,11 @@ bcrypt==4.0.1
     # via paramiko
 blinker==1.6.3
     # via flask
-boto3==1.28.62
+boto3==1.28.63
     # via
     #   maggma (setup.py)
     #   moto
-botocore==1.31.62
+botocore==1.31.63
     # via
     #   boto3
     #   moto
@@ -68,7 +68,9 @@ colorama==0.4.6
     #   griffe
     #   mkdocs-material
 coverage[toml]==7.3.2
-    # via pytest-cov
+    # via
+    #   coverage
+    #   pytest-cov
 cryptography==41.0.4
     # via
     #   azure-identity
@@ -101,7 +103,7 @@ flask==3.0.0
     # via mongogrant
 ghp-import==2.1.0
     # via mkdocs
-griffe==0.36.4
+griffe==0.36.5
     # via mkdocstrings-python
 h11==0.14.0
     # via
@@ -156,7 +158,7 @@ jsonschema==4.19.1
     #   nbformat
 jsonschema-specifications==2023.7.1
     # via jsonschema
-jupyter-core==5.3.2
+jupyter-core==5.4.0
     # via nbformat
 markdown==3.5
     # via
@@ -190,7 +192,7 @@ mkdocs==1.5.3
     #   mkdocstrings
 mkdocs-autorefs==0.5.0
     # via mkdocstrings
-mkdocs-material==9.4.4
+mkdocs-material==9.4.6
     # via maggma (setup.py)
 mkdocs-material-extensions==1.2
     # via mkdocs-material
@@ -199,8 +201,9 @@ mkdocs-minify-plugin==0.7.1
 mkdocstrings[python]==0.23.0
     # via
     #   maggma (setup.py)
+    #   mkdocstrings
     #   mkdocstrings-python
-mkdocstrings-python==1.7.2
+mkdocstrings-python==1.7.3
     # via mkdocstrings
 mongogrant==0.3.3
     # via maggma (setup.py)
@@ -210,7 +213,7 @@ monty==2023.9.25
     # via maggma (setup.py)
 montydb==2.5.2
     # via maggma (setup.py)
-moto==4.2.5
+moto==4.2.6
     # via maggma (setup.py)
 msal==1.24.1
     # via
@@ -224,9 +227,9 @@ nbformat==5.9.2
     # via maggma (setup.py)
 nodeenv==1.8.0
     # via pre-commit
-numpy==1.26.0
+numpy==1.26.1
     # via maggma (setup.py)
-orjson==3.9.7
+orjson==3.9.9
     # via maggma (setup.py)
 packaging==23.2
     # via
@@ -254,7 +257,7 @@ pluggy==1.3.0
     # via pytest
 portalocker==2.8.2
     # via msal-extensions
-pre-commit==3.4.0
+pre-commit==3.5.0
     # via maggma (setup.py)
 prompt-toolkit==3.0.39
     # via ipython
@@ -283,7 +286,9 @@ pygments==2.16.1
 pyhcl==0.4.5
     # via hvac
 pyjwt[crypto]==2.8.0
-    # via msal
+    # via
+    #   msal
+    #   pyjwt
 pymdown-extensions==10.3
     # via
     #   mkdocs-material
@@ -353,7 +358,7 @@ responses==0.21.0
     #   moto
 rich==13.6.0
     # via memray
-rpds-py==0.10.4
+rpds-py==0.10.6
     # via
     #   jsonschema
     #   referencing
