@@ -13,7 +13,7 @@ setup(
     name="maggma",
     use_scm_version=True,
     setup_requires=["setuptools_scm"],
-    description="Framework to develop datapipelines from files on disk to full dissemenation API",
+    description="Framework to develop datapipelines from files on disk to full dissemination API",
     long_description=long_desc,
     long_description_content_type="text/markdown",
     url="https://github.com/materialsproject/maggma",

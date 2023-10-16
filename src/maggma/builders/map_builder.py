@@ -86,7 +86,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def prechunk(self, number_splits: int) -> Iterator[Dict]:
         """
-        Generic prechunk for map builder to perform domain-decompostion
+        Generic prechunk for map builder to perform domain-decomposition
         by the key field
         """
         self.ensure_indexes()
