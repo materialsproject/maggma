@@ -413,7 +413,7 @@ typing-extensions==4.8.0
     #   pydantic
     #   pydantic-core
     #   pydash
-urllib3==2.0.6
+urllib3==1.26.18
     # via
     #   botocore
     #   requests
