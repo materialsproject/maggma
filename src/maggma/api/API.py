@@ -91,6 +91,7 @@ class API(MSONable):
         app.add_middleware(GZipMiddleware, minimum_size=1000)
 
         @app.get("/heartbeat", include_in_schema=False)
+        @app.head("/heartbeat", include_in_schema=False)
         def heartbeat():
             """API Heartbeat for Load Balancing"""
 
