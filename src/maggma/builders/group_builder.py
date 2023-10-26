@@ -91,7 +91,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
     def prechunk(self, number_splits: int) -> Iterator[Dict]:
         """
-        Generic prechunk for group builder to perform domain-decompostion
+        Generic prechunk for group builder to perform domain-decomposition
         by the grouping keys
         """
         self.ensure_indexes()

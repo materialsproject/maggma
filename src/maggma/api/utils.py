@@ -64,7 +64,7 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
     Args:
         function: callable function to attach the signature to
         defaults: dictionary of parameters -> default values
-        annotations: dictionary of type annoations for the parameters
+        annotations: dictionary of type annotations for the parameters
     """
 
     required_params = [
@@ -167,7 +167,7 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
 
             if len(errors) > 0:
                 raise ValueError(
-                    "Missing Monty seriailzation fields in dictionary: {errors}"
+                    "Missing Monty serialization fields in dictionary: {errors}"
                 )
 
             return v

@@ -54,7 +54,7 @@ class Builder(MSONable, metaclass=ABCMeta):
     def prechunk(self, number_splits: int) -> Iterable[Dict]:
         """
         Part of a domain-decomposition paradigm to allow the builder to operate on
-        multiple nodes by divinding up the IO as well as the compute
+        multiple nodes by dividing up the IO as well as the compute
         This function should return an iterator of dictionaries that can be distributed
         to multiple instances of the builder to get/process/update on
 
@@ -62,11 +62,11 @@ class Builder(MSONable, metaclass=ABCMeta):
             number_splits: The number of groups to split the documents to work on
         """
         self.logger.info(
-            f"{self.__class__.__name__} doesn't have distributed processing capabillities."
+            f"{self.__class__.__name__} doesn't have distributed processing capabilities."
             " Instead this builder will run on just one worker for all processing"
         )
         raise NotImplementedError(
-            f"{self.__class__.__name__} doesn't have distributed processing capabillities."
+            f"{self.__class__.__name__} doesn't have distributed processing capabilities."
             " Instead this builder will run on just one worker for all processing"
         )
 

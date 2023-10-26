@@ -38,7 +38,7 @@ files_collection_fields = (
 
 class GridFSStore(Store):
     """
-    A Store for GrdiFS backend. Provides a common access method consistent with other stores
+    A Store for GridFS backend. Provides a common access method consistent with other stores
     """
 
     def __init__(
@@ -58,7 +58,7 @@ class GridFSStore(Store):
         **kwargs,
     ):
         """
-        Initializes a GrdiFS Store for binary data
+        Initializes a GridFS Store for binary data
         Args:
             database: database name
             collection_name: The name of the collection.
@@ -447,7 +447,7 @@ class GridFSURIStore(GridFSStore):
         **kwargs,
     ):
         """
-        Initializes a GrdiFS Store for binary data
+        Initializes a GridFS Store for binary data
         Args:
             uri: MongoDB+SRV URI
             database: database to connect to

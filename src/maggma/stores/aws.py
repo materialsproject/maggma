@@ -179,7 +179,7 @@ class S3Store(Store):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
                 try:
-                    # TODO: THis is ugly and unsafe, do some real checking before pulling data
+                    # TODO: This is ugly and unsafe, do some real checking before pulling data
                     data = self.s3_bucket.Object(self.sub_dir + str(doc[self.key])).get()["Body"].read()
                 except botocore.exceptions.ClientError as e:
                     # If a client error is thrown, then check that it was a NoSuchKey or NoSuchBucket error.

@@ -7,7 +7,7 @@ from maggma.api.utils import STORE_PARAMS
 
 
 class PaginationQuery(QueryOperator):
-    """Query opertators to provides Pagination"""
+    """Query operators to provides Pagination"""
 
     def __init__(self, default_limit: int = 100, max_limit: int = 1000):
         """

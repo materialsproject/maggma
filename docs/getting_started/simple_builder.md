@@ -71,7 +71,7 @@ Calling the parent class `__init__` is a good practice as sub-classing builders 
 
 ## `get_items`
 
-`get_items` is conceptually a simple method to implement, but in practice can easily be more code than the rest of the builder. All of the logic for getting data from the sources has to happen here, which requires some planning. `get_items` should also sort all of the data into induvidual **items** to process. This simple builder has a very easy `get_items`:
+`get_items` is conceptually a simple method to implement, but in practice can easily be more code than the rest of the builder. All of the logic for getting data from the sources has to happen here, which requires some planning. `get_items` should also sort all of the data into individual **items** to process. This simple builder has a very easy `get_items`:
 
 ``` python
 
