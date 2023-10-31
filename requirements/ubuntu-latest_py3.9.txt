@@ -20,9 +20,9 @@ bcrypt==4.0.1
     # via paramiko
 blinker==1.6.3
     # via flask
-boto3==1.28.68
+boto3==1.28.73
     # via maggma (setup.py)
-botocore==1.31.68
+botocore==1.31.73
     # via
     #   boto3
     #   s3transfer
@@ -39,7 +39,7 @@ click==8.1.7
     #   flask
     #   mongogrant
     #   uvicorn
-cryptography==41.0.4
+cryptography==41.0.5
     # via paramiko
 dnspython==2.4.2
     # via
@@ -85,7 +85,7 @@ msgpack==1.0.7
     # via maggma (setup.py)
 numpy==1.26.1
     # via maggma (setup.py)
-orjson==3.9.9
+orjson==3.9.10
     # via maggma (setup.py)
 packaging==23.2
     # via mongomock

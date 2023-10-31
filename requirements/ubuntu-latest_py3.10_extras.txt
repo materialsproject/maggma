@@ -13,7 +13,7 @@ anyio==3.7.1
     #   fastapi
     #   httpcore
     #   starlette
-asttokens==2.4.0
+asttokens==2.4.1
     # via stack-data
 attrs==23.1.0
     # via
@@ -23,11 +23,11 @@ azure-core==1.29.5
     # via
     #   azure-identity
     #   azure-storage-blob
-azure-identity==1.14.1
+azure-identity==1.15.0
     # via maggma (setup.py)
 azure-storage-blob==12.18.3
     # via maggma (setup.py)
-babel==2.13.0
+babel==2.13.1
     # via mkdocs-material
 backcall==0.2.0
     # via ipython
@@ -35,11 +35,11 @@ bcrypt==4.0.1
     # via paramiko
 blinker==1.6.3
     # via flask
-boto3==1.28.68
+boto3==1.28.73
     # via
     #   maggma (setup.py)
     #   moto
-botocore==1.31.68
+botocore==1.31.73
     # via
     #   boto3
     #   moto
@@ -71,7 +71,7 @@ coverage[toml]==7.3.2
     # via
     #   coverage
     #   pytest-cov
-cryptography==41.0.4
+cryptography==41.0.5
     # via
     #   azure-identity
     #   azure-storage-blob
@@ -96,19 +96,19 @@ exceptiongroup==1.1.3
     #   pytest
 execnet==2.0.2
     # via pytest-xdist
-executing==2.0.0
+executing==2.0.1
     # via stack-data
 fastapi==0.104.0
     # via maggma (setup.py)
 fastjsonschema==2.18.1
     # via nbformat
-filelock==3.12.4
+filelock==3.13.0
     # via virtualenv
 flask==3.0.0
     # via mongogrant
 ghp-import==2.1.0
     # via mkdocs
-griffe==0.36.7
+griffe==0.36.9
     # via mkdocstrings-python
 h11==0.14.0
     # via
@@ -122,7 +122,7 @@ httpx==0.25.0
     # via starlette
 hvac==2.0.0
     # via maggma (setup.py)
-identify==2.5.30
+identify==2.5.31
     # via pre-commit
 idna==3.4
     # via
@@ -197,7 +197,7 @@ mkdocs==1.5.3
     #   mkdocstrings
 mkdocs-autorefs==0.5.0
     # via mkdocstrings
-mkdocs-material==9.4.6
+mkdocs-material==9.4.7
     # via maggma (setup.py)
 mkdocs-material-extensions==1.3
     # via mkdocs-material
@@ -218,7 +218,7 @@ monty==2023.9.25
     # via maggma (setup.py)
 montydb==2.5.2
     # via maggma (setup.py)
-moto==4.2.6
+moto==4.2.7
     # via maggma (setup.py)
 msal==1.24.1
     # via
@@ -234,7 +234,7 @@ nodeenv==1.8.0
     # via pre-commit
 numpy==1.26.1
     # via maggma (setup.py)
-orjson==3.9.9
+orjson==3.9.10
     # via maggma (setup.py)
 packaging==23.2
     # via
@@ -302,7 +302,7 @@ pymongo==4.5.0
     #   mongogrant
 pynacl==1.5.0
     # via paramiko
-pytest==7.4.2
+pytest==7.4.3
     # via
     #   maggma (setup.py)
     #   pytest-asyncio
@@ -369,7 +369,7 @@ ruamel-yaml==0.17.40
     # via maggma (setup.py)
 ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
-ruff==0.1.1
+ruff==0.1.3
     # via maggma (setup.py)
 s3transfer==0.7.0
     # via boto3
@@ -400,7 +400,7 @@ tomli==2.0.1
     #   pytest
 tqdm==4.66.1
     # via maggma (setup.py)
-traitlets==5.11.2
+traitlets==5.12.0
     # via
     #   ipython
     #   jupyter-core
@@ -428,7 +428,7 @@ urllib3==2.0.7
     #   responses
 uvicorn==0.23.2
     # via maggma (setup.py)
-virtualenv==20.24.5
+virtualenv==20.24.6
     # via pre-commit
 watchdog==3.0.0
     # via mkdocs
