@@ -936,11 +936,11 @@ class MontyStore(MemoryStore):
             force_reset: whether to reset the connection or not
         """
         if not self._coll or force_reset:
-            self._coll = client[self.database_name][self.collection_name]
             # TODO - workaround, may be obviated by a future montydb update
             if self.database_path != ":memory:":
                 set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
             client = MontyClient(self.database_path, **self.client_kwargs)
+            self._coll = client[self.database_name][self.collection_name]
 
     @property
     def name(self) -> str:
