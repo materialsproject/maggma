@@ -76,7 +76,8 @@ class StoreFacade(Store):
         Connect to the source data
 
         Args:
-            force_reset: whether to reset the connection or not
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         self.multistore.connect(self.store, force_reset=force_reset)
 
@@ -352,7 +353,8 @@ class MultiStore:
 
         Args:
             store: the store to connect to the source data
-            force_reset: whether to reset the connection or not
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         with self._multistore_lock:
             store_id = self.get_store_index(store)
@@ -374,7 +376,8 @@ class MultiStore:
         Connects to all stores
 
         Args:
-            force_reset: whether to reset the connection or not
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         with self._multistore_lock:
             for store in self._stores:

@@ -127,29 +127,32 @@ class GridFSStore(Store):
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
+
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
-        if self.ssh_tunnel is None:
-            host = self.host
-            port = self.port
-        else:
-            self.ssh_tunnel.start()
-            host, port = self.ssh_tunnel.local_address
-
-        conn: MongoClient = (
-            MongoClient(
-                host=host,
-                port=port,
-                username=self.username,
-                password=self.password,
-                authSource=self.auth_source,
-                **self.mongoclient_kwargs,
-            )
-            if self.username != ""
-            else MongoClient(host, port, **self.mongoclient_kwargs)
-        )
         if not self._coll or force_reset:
-            db = conn[self.database]
+            if self.ssh_tunnel is None:
+                host = self.host
+                port = self.port
+            else:
+                self.ssh_tunnel.start()
+                host, port = self.ssh_tunnel.local_address
 
+            conn: MongoClient = (
+                MongoClient(
+                    host=host,
+                    port=port,
+                    username=self.username,
+                    password=self.password,
+                    authSource=self.auth_source,
+                    **self.mongoclient_kwargs,
+                )
+                if self.username != ""
+                else MongoClient(host, port, **self.mongoclient_kwargs)
+            )
+            db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db[f"{self.collection_name}.files"]
             self._files_store = MongoStore.from_collection(self._files_collection)
@@ -483,6 +486,10 @@ class GridFSURIStore(GridFSStore):
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
+
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         if not self._coll or force_reset:  # pragma: no cover
             conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
