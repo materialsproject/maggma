@@ -179,14 +179,14 @@ class MongoStore(Store):
             force_reset: whether to reset the connection or not when the Store is
                 already connected.
         """
-        if self.ssh_tunnel is None:
-            host = self.host
-            port = self.port
-        else:
-            self.ssh_tunnel.start()
-            host, port = self.ssh_tunnel.local_address
-
         if self._coll is None or force_reset:
+            if self.ssh_tunnel is None:
+                host = self.host
+                port = self.port
+            else:
+                self.ssh_tunnel.start()
+                host, port = self.ssh_tunnel.local_address
+
             conn: MongoClient = (
                 MongoClient(
                     host=host,
