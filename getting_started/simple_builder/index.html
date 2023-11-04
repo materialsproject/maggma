@@ -20,7 +20,7 @@
       
       
       <link rel="icon" href="../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.4">
+      <meta name="generator" content="mkdocs-1.5.3, mkdocs-material-9.4.7">
     
     
       
@@ -28,7 +28,7 @@
       
     
     
-      <link rel="stylesheet" href="../../assets/stylesheets/main.bd3936ea.min.css">
+      <link rel="stylesheet" href="../../assets/stylesheets/main.4b4a2bd9.min.css">
       
       
 
@@ -883,7 +883,7 @@
 </code></pre></div>
 <p>Calling the parent class <code>__init__</code> is a good practice as sub-classing builders is a good way to encapsulate complex logic.</p>
 <h2 id="get_items"><code>get_items</code><a class="headerlink" href="#get_items" title="Permanent link">&para;</a></h2>
-<p><code>get_items</code> is conceptually a simple method to implement, but in practice can easily be more code than the rest of the builder. All of the logic for getting data from the sources has to happen here, which requires some planning. <code>get_items</code> should also sort all of the data into induvidual <strong>items</strong> to process. This simple builder has a very easy <code>get_items</code>:</p>
+<p><code>get_items</code> is conceptually a simple method to implement, but in practice can easily be more code than the rest of the builder. All of the logic for getting data from the sources has to happen here, which requires some planning. <code>get_items</code> should also sort all of the data into individual <strong>items</strong> to process. This simple builder has a very easy <code>get_items</code>:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">get_items</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Gets induvidual documents to multiply</span>
@@ -1060,7 +1060,7 @@ For instance, if <code>process_items</code> returns <code>str</code>, then <code
     <script id="__config" type="application/json">{"base": "../..", "features": [], "search": "../../assets/javascripts/workers/search.f886a092.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}}</script>
     
     
-      <script src="../../assets/javascripts/bundle.94c44541.min.js"></script>
+      <script src="../../assets/javascripts/bundle.aecac24b.min.js"></script>
       
     
   </body>
