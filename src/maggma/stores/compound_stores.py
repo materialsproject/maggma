@@ -66,26 +66,27 @@ class JointStore(Store):
 
     def connect(self, force_reset: bool = False):
         """
-        Connects the underlying Mongo database and
-        all collection connections
+        Connects the underlying Mongo database and all collection connections
 
         Args:
-            force_reset: whether to forcibly reset the connection
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
-        conn: MongoClient = (
-            MongoClient(
-                host=self.host,
-                port=self.port,
-                username=self.username,
-                password=self.password,
-                **self.mongoclient_kwargs,
+        if not self._coll or force_reset:
+            conn: MongoClient = (
+                MongoClient(
+                    host=self.host,
+                    port=self.port,
+                    username=self.username,
+                    password=self.password,
+                    **self.mongoclient_kwargs,
+                )
+                if self.username != ""
+                else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
             )
-            if self.username != ""
-            else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
-        )
-        db = conn[self.database]
-        self._coll = db[self.main]
-        self._has_merge_objects = self._collection.database.client.server_info()["version"] > "3.6"
+            db = conn[self.database]
+            self._coll = db[self.main]
+            self._has_merge_objects = self._collection.database.client.server_info()["version"] > "3.6"
 
     def close(self):
         """

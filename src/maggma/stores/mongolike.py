@@ -176,16 +176,17 @@ class MongoStore(Store):
         Connect to the source data
 
         Args:
-            force_reset: whether to reset the connection or not
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
-        if self._coll is None or force_reset:
-            if self.ssh_tunnel is None:
-                host = self.host
-                port = self.port
-            else:
-                self.ssh_tunnel.start()
-                host, port = self.ssh_tunnel.local_address
+        if self.ssh_tunnel is None:
+            host = self.host
+            port = self.port
+        else:
+            self.ssh_tunnel.start()
+            host, port = self.ssh_tunnel.local_address
 
+        if self._coll is None or force_reset:
             conn: MongoClient = (
                 MongoClient(
                     host=host,
@@ -571,7 +572,8 @@ class MongoURIStore(MongoStore):
         Connect to the source data
 
         Args:
-            force_reset: whether to reset the connection or not
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         if self._coll is None or force_reset:  # pragma: no cover
             conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
@@ -602,9 +604,9 @@ class MemoryStore(MongoStore):
         Connect to the source data
 
         Args:
-            force_reset: whether to reset the connection or not
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
-
         if self._coll is None or force_reset:
             self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
 
@@ -933,7 +935,8 @@ class MontyStore(MemoryStore):
         Connect to the database store.
 
         Args:
-            force_reset: whether to reset the connection or not
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         if not self._coll or force_reset:
             # TODO - workaround, may be obviated by a future montydb update
