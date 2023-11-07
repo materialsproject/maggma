@@ -12,6 +12,7 @@ class SSHTunnel(MSONable):
         self,
         tunnel_server_address: str,
         remote_server_address: str,
+        local_port: int = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         private_key: Optional[str] = None,
@@ -21,6 +22,8 @@ class SSHTunnel(MSONable):
         Args:
             tunnel_server_address: string address with port for the SSH tunnel server
             remote_server_address: string address with port for the server to connect to
+            local_port: optional port to use for the local address (127.0.0.1);
+                if `None`, a random open port will be automatically selected
             username: optional username for the ssh tunnel server
             password: optional password for the ssh tunnel server; If a private_key is
                 supplied this password is assumed to be the private key password
@@ -30,6 +33,7 @@ class SSHTunnel(MSONable):
 
         self.tunnel_server_address = tunnel_server_address
         self.remote_server_address = remote_server_address
+        self.local_port = local_port
         self.username = username
         self.password = password
         self.private_key = private_key
@@ -38,8 +42,9 @@ class SSHTunnel(MSONable):
         if remote_server_address in SSHTunnel.__TUNNELS:
             self.tunnel = SSHTunnel.__TUNNELS[remote_server_address]
         else:
-            open_port = _find_free_port("127.0.0.1")
-            local_bind_address = ("127.0.0.1", open_port)
+            if local_port is None:
+                local_port = _find_free_port("127.0.0.1")
+            local_bind_address = ("127.0.0.1", local_port)
 
             ssh_address, ssh_port = tunnel_server_address.split(":")
             ssh_port = int(ssh_port)  # type: ignore
