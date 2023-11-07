@@ -54,7 +54,6 @@ def generate_query_pipeline(query: dict, store: Store):
         projection_dict.update({p: 1 for p in query["properties"]})
 
     if sorting:
-        pipeline.append({"$project": {**projection_dict, store.key: 1}})
         pipeline.append(sort_dict)
 
     pipeline.append({"$project": projection_dict})
