@@ -14,6 +14,7 @@ from monty.msgpack import default as monty_default
 
 from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
+from maggma.stores.ssh_tunnel import SSHTunnel
 
 try:
     import boto3
@@ -40,6 +41,7 @@ class S3Store(Store):
         sub_dir: Optional[str] = None,
         s3_workers: int = 1,
         s3_resource_kwargs: Optional[dict] = None,
+        ssh_tunnel: Optional[SSHTunnel] = None,
         key: str = "fs_id",
         store_hash: bool = True,
         unpack_data: bool = True,
@@ -59,11 +61,16 @@ class S3Store(Store):
                     aws_session_token (string) -- AWS temporary session token
                     region_name (string) -- Default region when creating new connections
             compress: compress files inserted into the store
-            endpoint_url: endpoint_url to allow interface to minio service
-            sub_dir: (optional)  subdirectory of the s3 bucket to store the data
+            endpoint_url: endpoint_url to allow interface to minio service; ignored if
+                `ssh_tunnel` is provided, in which case the endpoint_url is inferred
+            sub_dir: (optional) subdirectory of the s3 bucket to store the data
             s3_workers: number of concurrent S3 puts to run
+            s3_resource_kwargs: additional kwargs to pass to the boto3 session resource
+            ssh_tunnel: optional SSH tunnel to use for the S3 connection
+            key: main key to index on
             store_hash: store the sha1 hash right before insertion to the database.
-            unpack_data: whether to decompress and unpack byte data when querying from the bucket.
+            unpack_data: whether to decompress and unpack byte data when querying from
+                the bucket
             searchable_fields: fields to keep in the index store
         """
         if boto3 is None:
@@ -79,6 +86,7 @@ class S3Store(Store):
         self.s3_bucket: Any = None
         self.s3_workers = s3_workers
         self.s3_resource_kwargs = s3_resource_kwargs if s3_resource_kwargs is not None else {}
+        self.ssh_tunnel = ssh_tunnel
         self.unpack_data = unpack_data
         self.searchable_fields = searchable_fields if searchable_fields is not None else []
         self.store_hash = store_hash
@@ -107,7 +115,8 @@ class S3Store(Store):
     def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
         """Connect to the source data."""
         session = self._get_session()
-        resource = session.resource("s3", endpoint_url=self.endpoint_url, **self.s3_resource_kwargs)
+        endpoint_url = self._get_endpoint_url()
+        resource = session.resource("s3", endpoint_url=endpoint_url, **self.s3_resource_kwargs)
 
         if not self.s3:
             self.s3 = resource
@@ -126,6 +135,9 @@ class S3Store(Store):
         self.s3.meta.client.close()
         self.s3 = None
         self.s3_bucket = None
+
+        if self.ssh_tunnel is not None:
+            self.ssh_tunnel.stop()
 
     @property
     def _collection(self):
@@ -266,7 +278,7 @@ class S3Store(Store):
 
         Args:
             key: single key to index
-            unique: Whether or not this index contains only unique keys
+            unique: whether or not this index contains only unique keys
 
         Returns:
             bool indicating if the index exists/was created
@@ -322,11 +334,21 @@ class S3Store(Store):
         self.index.update(search_docs, key=self.key)
 
     def _get_session(self):
+        if self.ssh_tunnel is not None:
+            self.ssh_tunnel.start()
+
         if not hasattr(self._thread_local, "s3_bucket"):
             if isinstance(self.s3_profile, dict):
                 return Session(**self.s3_profile)
             return Session(profile_name=self.s3_profile)
         return None
+
+    def _get_endpoint_url(self):
+        if self.ssh_tunnel is None:
+            return self.endpoint_url
+        else:
+            host, port = self.ssh_tunnel.local_address
+            return f"http://{host}:{port}"
 
     def _get_bucket(self):
         """If on the main thread return the bucket created above, else create a new bucket on each thread."""
@@ -334,7 +356,8 @@ class S3Store(Store):
             return self.s3_bucket
         if not hasattr(self._thread_local, "s3_bucket"):
             session = self._get_session()
-            resource = session.resource("s3", endpoint_url=self.endpoint_url)
+            endpoint_url = self._get_endpoint_url()
+            resource = session.resource("s3", endpoint_url=endpoint_url)
             self._thread_local.s3_bucket = resource.Bucket(self.bucket)
         return self._thread_local.s3_bucket
 
