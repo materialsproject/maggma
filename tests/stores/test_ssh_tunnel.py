@@ -1,7 +1,8 @@
 import paramiko
 import pymongo
 import pytest
-from maggma.stores.mongolike import MongoStore, SSHTunnel
+from maggma.stores.mongolike import MongoStore
+from maggma.stores.ssh_tunnel import SSHTunnel
 from monty.serialization import dumpfn, loadfn
 from paramiko.ssh_exception import AuthenticationException, NoValidConnectionsError, SSHException
 

@@ -18,7 +18,8 @@ from pymongo.errors import ConfigurationError
 from ruamel import yaml
 
 from maggma.core import Sort, Store, StoreError
-from maggma.stores.mongolike import MongoStore, SSHTunnel
+from maggma.stores.mongolike import MongoStore
+from maggma.stores.ssh_tunnel import SSHTunnel
 
 # https://github.com/mongodb/specifications/
 #   blob/master/source/gridfs/gridfs-spec.rst#terms
