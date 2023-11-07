@@ -226,9 +226,8 @@ class ReadOnlyResource(Resource):
 
             try:
                 with query_timeout(self.timeout):
-                    count = self.store.count(  # type: ignore
-                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
-                    )
+
+                    count = self.store.count(criteria = query.get("criteria"), hint = query.get("count_hint"))  # type: ignore
 
                     if isinstance(self.store, S3Store):
                         if self.query_disk_use:
@@ -241,7 +240,7 @@ class ReadOnlyResource(Resource):
                         data = list(
                             self.store._collection.aggregate(
                                 pipeline,
-                                **{field: query[field] for field in query if field in ["hint"]},
+                                hint = query.get("agg_hint"),
                             )
                         )
 
