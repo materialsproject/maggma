@@ -13,8 +13,8 @@ import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
 
 from maggma.core import Sort, Store
-from maggma.utils import grouper, to_isoformat_ceil_ms
 from maggma.stores.ssh_tunnel import SSHTunnel
+from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
     import boto3

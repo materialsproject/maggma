@@ -669,7 +669,7 @@ class JSONStore(MemoryStore):
 
         super().__init__(**kwargs)
 
-    def connect(self, force_reset: bool =False):
+    def connect(self, force_reset: bool = False):
         """
         Loads the files into the collection in memory
 
@@ -932,4 +932,3 @@ class MontyStore(MemoryStore):
                 search_doc = {k: d[k] for k in key} if isinstance(key, list) else {key: d[key]}
 
                 self._collection.replace_one(search_doc, d, upsert=True)
-

@@ -12,7 +12,7 @@ class SSHTunnel(MSONable):
         self,
         tunnel_server_address: str,
         remote_server_address: str,
-        local_port: int = None,
+        local_port: Optional[int] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         private_key: Optional[str] = None,
