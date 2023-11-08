@@ -237,10 +237,15 @@ class ReadOnlyResource(Resource):
                     else:
                         pipeline = generate_query_pipeline(query, self.store)
 
+                        agg_kwargs = {}
+
+                        if query.get("agg_hint"):
+                            agg_kwargs["hint"] = query["agg_hint"]
+
                         data = list(
                             self.store._collection.aggregate(
                                 pipeline,
-                                hint = query.get("agg_hint"),
+                                **agg_kwargs
                             )
                         )
 
