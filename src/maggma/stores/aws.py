@@ -112,21 +112,15 @@ class S3Store(Store):
         """
         return f"s3://{self.bucket}"
 
-    def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
-        """Connect to the source data."""
-        session = self._get_session()
-        endpoint_url = self._get_endpoint_url()
-        resource = session.resource("s3", endpoint_url=endpoint_url, **self.s3_resource_kwargs)
+    def connect(self, force_reset: bool = False):  # lgtm[py/conflicting-attributes]
+        """Connect to the source data.
 
-        if not self.s3:
-            self.s3 = resource
-            try:
-                self.s3.meta.client.head_bucket(Bucket=self.bucket)
-            except ClientError:
-                raise RuntimeError(f"Bucket not present on AWS: {self.bucket}")
-
-            self.s3_bucket = resource.Bucket(self.bucket)
-        self.index.connect(*args, **kwargs)
+        Args:
+            force_reset: whether to force a reset of the connection
+        """
+        if self.s3 is None or force_reset:
+            self.s3, self.s3_bucket = self._get_resource_and_bucket()
+        self.index.connect(force_reset=force_reset)
 
     def close(self):
         """Closes any connections."""
@@ -136,8 +130,7 @@ class S3Store(Store):
         self.s3 = None
         self.s3_bucket = None
 
-        if self.ssh_tunnel is not None:
-            self.ssh_tunnel.stop()
+        self.ssh_tunnel.stop()
 
     @property
     def _collection(self):
@@ -351,15 +344,29 @@ class S3Store(Store):
             return f"http://{host}:{port}"
 
     def _get_bucket(self):
-        """If on the main thread return the bucket created above, else create a new bucket on each thread."""
+        """If on the main thread return the bucket created above, else create a new
+        bucket on each thread."""
         if threading.current_thread().name == "MainThread":
             return self.s3_bucket
+
         if not hasattr(self._thread_local, "s3_bucket"):
-            session = self._get_session()
-            endpoint_url = self._get_endpoint_url()
-            resource = session.resource("s3", endpoint_url=endpoint_url)
-            self._thread_local.s3_bucket = resource.Bucket(self.bucket)
+            _, bucket = self._get_resource_and_bucket()
+            self._thread_local.s3_bucket = bucket
+
         return self._thread_local.s3_bucket
+
+    def _get_resource_and_bucket(self):
+        """Helper function to create the resource and bucket objects."""
+        session = self._get_session()
+        endpoint_url = self._get_endpoint_url()
+        resource = session.resource("s3", endpoint_url=endpoint_url, **self.s3_resource_kwargs)
+        try:
+            self.s3.meta.client.head_bucket(Bucket=self.bucket)
+        except ClientError:
+            raise RuntimeError(f"Bucket `{self.bucket}` not present on AWS")
+        bucket = resource.Bucket(self.bucket)
+
+        return resource, bucket
 
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
