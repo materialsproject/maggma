@@ -25,7 +25,7 @@ azure-core==1.29.5
     #   azure-storage-blob
 azure-identity==1.15.0
     # via maggma (setup.py)
-azure-storage-blob==12.18.3
+azure-storage-blob==12.19.0
     # via maggma (setup.py)
 babel==2.13.1
     # via mkdocs-material
@@ -35,11 +35,11 @@ bcrypt==4.0.1
     # via paramiko
 blinker==1.7.0
     # via flask
-boto3==1.28.78
+boto3==1.28.84
     # via
     #   maggma (setup.py)
     #   moto
-botocore==1.31.78
+botocore==1.31.84
     # via
     #   boto3
     #   moto
@@ -107,7 +107,7 @@ flask==3.0.0
     # via mongogrant
 ghp-import==2.1.0
     # via mkdocs
-griffe==0.36.9
+griffe==0.37.0
     # via mkdocstrings-python
 h11==0.14.0
     # via
@@ -115,7 +115,7 @@ h11==0.14.0
     #   uvicorn
 htmlmin2==0.1.13
     # via mkdocs-minify-plugin
-httpcore==1.0.1
+httpcore==1.0.2
     # via httpx
 httpx==0.25.1
     # via starlette
@@ -134,7 +134,7 @@ importlib-metadata==6.8.0
     #   markdown
     #   mkdocs
     #   mkdocstrings
-importlib-resources==6.1.0
+importlib-resources==6.1.1
     # via
     #   jsonschema
     #   jsonschema-specifications
@@ -217,7 +217,7 @@ mkdocstrings[python]==0.23.0
     #   maggma (setup.py)
     #   mkdocstrings
     #   mkdocstrings-python
-mkdocstrings-python==1.7.3
+mkdocstrings-python==1.7.4
     # via mkdocstrings
 mongogrant==0.3.3
     # via maggma (setup.py)
@@ -227,7 +227,7 @@ monty==2023.9.25
     # via maggma (setup.py)
 montydb==2.5.2
     # via maggma (setup.py)
-moto==4.2.7
+moto==4.2.8
     # via maggma (setup.py)
 msal==1.25.0
     # via
@@ -275,7 +275,7 @@ portalocker==2.8.2
     # via msal-extensions
 pre-commit==3.5.0
     # via maggma (setup.py)
-prompt-toolkit==3.0.39
+prompt-toolkit==3.0.40
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
@@ -303,7 +303,7 @@ pyjwt[crypto]==2.8.0
     # via
     #   msal
     #   pyjwt
-pymdown-extensions==10.3.1
+pymdown-extensions==10.4
     # via
     #   mkdocs-material
     #   mkdocstrings
@@ -326,7 +326,7 @@ pytest-cov==4.1.0
     # via maggma (setup.py)
 pytest-mock==3.12.0
     # via maggma (setup.py)
-pytest-xdist==3.3.1
+pytest-xdist==3.4.0
     # via maggma (setup.py)
 python-dateutil==2.8.2
     # via
@@ -382,7 +382,7 @@ ruamel-yaml==0.17.40
     # via maggma (setup.py)
 ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
-ruff==0.1.4
+ruff==0.1.5
     # via maggma (setup.py)
 s3transfer==0.7.0
     # via boto3
@@ -422,7 +422,7 @@ types-python-dateutil==2.8.19.14
     # via maggma (setup.py)
 types-pyyaml==6.0.12.12
     # via maggma (setup.py)
-types-setuptools==68.2.0.0
+types-setuptools==68.2.0.1
     # via maggma (setup.py)
 typing-extensions==4.8.0
     # via
