@@ -22,6 +22,7 @@ Current working and tested `Store` include:
 - `SandboxStore: provides permission control to documents via a `_sbxn` sandbox key
 - `JointStore`: joins several MongoDB collections together, merging documents with the same `key`, so they look like one collection
 - `AzureBlobStore`: provides an interface to Azure Blobs for the storage of large amount of data
+- `montystore`: provides an interface to montydb for in-memory or filesystem-based storage
 
 ## The `Store` interface
 
