@@ -20,9 +20,9 @@ bcrypt==4.0.1
     # via paramiko
 blinker==1.7.0
     # via flask
-boto3==1.28.78
+boto3==1.28.84
     # via maggma (setup.py)
-botocore==1.31.78
+botocore==1.31.84
     # via
     #   boto3
     #   s3transfer
@@ -59,7 +59,7 @@ idna==3.4
     #   requests
 importlib-metadata==6.8.0
     # via flask
-importlib-resources==6.1.0
+importlib-resources==6.1.1
     # via
     #   jsonschema
     #   jsonschema-specifications
