@@ -203,7 +203,7 @@ class S3Store(Store):
                 yield data
 
     def _read_data(self, data: bytes, compress_header: str):
-        self._unpack(data=data, compressed=compress_header == "zlib")
+        return self._unpack(data=data, compressed=compress_header == "zlib")
 
     @staticmethod
     def _unpack(data: bytes, compressed: bool):
