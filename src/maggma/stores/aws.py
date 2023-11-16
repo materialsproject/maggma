@@ -180,7 +180,7 @@ class S3Store(Store):
             else:
                 try:
                     # TODO: This is ugly and unsafe, do some real checking before pulling data
-                    data = self.s3_bucket.Object(self.sub_dir + str(doc[self.key])).get()["Body"].read()
+                    data = self.s3_bucket.Object(self._get_full_key_path(doc[self.key])).get()["Body"].read()
                 except botocore.exceptions.ClientError as e:
                     # If a client error is thrown, then check that it was a NoSuchKey or NoSuchBucket error.
                     # If it was a NoSuchKey error, then the object does not exist.
@@ -195,12 +195,15 @@ class S3Store(Store):
                         raise e
 
                 if self.unpack_data:
-                    data = self._unpack(data=data, compressed=doc.get("compression", "") == "zlib")
+                    data = self._read_data(data=data, compress_header=doc.get("compression", ""))
 
                     if self.last_updated_field in doc:
                         data[self.last_updated_field] = doc[self.last_updated_field]
 
                 yield data
+
+    def _read_data(self, data: bytes, compress_header: str):
+        self._unpack(data=data, compressed=compress_header == "zlib")
 
     @staticmethod
     def _unpack(data: bytes, compressed: bool):
@@ -334,9 +337,18 @@ class S3Store(Store):
             return self.s3_bucket
         if not hasattr(self._thread_local, "s3_bucket"):
             session = self._get_session()
-            resource = session.resource("s3", endpoint_url=self.endpoint_url)
+            resource = session.resource("s3", endpoint_url=self.endpoint_url, **self.s3_resource_kwargs)
             self._thread_local.s3_bucket = resource.Bucket(self.bucket)
         return self._thread_local.s3_bucket
+
+    def _get_full_key_path(self, id):
+        return self.sub_dir + str(id)
+
+    def _get_compression_function(self):
+        return zlib.compress
+
+    def _get_decompression_function(self):
+        return zlib.decompress
 
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
@@ -365,7 +377,7 @@ class S3Store(Store):
         if self.compress:
             # Compress with zlib if chosen
             search_doc["compression"] = "zlib"
-            data = zlib.compress(data)
+            data = self._get_compression_function()(data)
 
         if self.last_updated_field in doc:
             # need this conversion for aws metadata insert
@@ -379,7 +391,7 @@ class S3Store(Store):
         search_doc["s3-to-mongo-keys"] = dumps(s3_to_mongo_keys)
         s3_bucket.upload_fileobj(
             Fileobj=BytesIO(data),
-            Key=self.sub_dir + str(doc[self.key]),
+            Key=self._get_full_key_path(str(doc[self.key])),
             ExtraArgs={"Metadata": {s3_to_mongo_keys[k]: str(v) for k, v in search_doc.items()}},
         )
 
@@ -424,7 +436,7 @@ class S3Store(Store):
             # Can remove up to 1000 items at a time via boto
             to_remove_chunks = list(grouper(to_remove, n=1000))
             for chunk_to_remove in to_remove_chunks:
-                objlist = [{"Key": f"{self.sub_dir}{obj}"} for obj in chunk_to_remove]
+                objlist = [{"Key": self._get_full_key_path(obj)} for obj in chunk_to_remove]
                 self.s3_bucket.delete_objects(Delete={"Objects": objlist})
 
     @property
@@ -459,11 +471,11 @@ class S3Store(Store):
         bucket = self.s3_bucket
         objects = bucket.objects.filter(Prefix=self.sub_dir)
         for obj in objects:
-            key_ = self.sub_dir + obj.key
+            key_ = self._get_full_key_path(obj.key)
             data = self.s3_bucket.Object(key_).get()["Body"].read()
 
             if self.compress:
-                data = zlib.decompress(data)
+                data = self._get_decompression_function()(data)
             unpacked_data = msgpack.unpackb(data, raw=False)
             self.update(unpacked_data, **kwargs)
 
@@ -476,7 +488,7 @@ class S3Store(Store):
         """
         qq = {} if index_query is None else index_query
         for index_doc in self.index.query(qq):
-            key_ = self.sub_dir + index_doc[self.key]
+            key_ = self._get_full_key_path(index_doc[self.key])
             s3_object = self.s3_bucket.Object(key_)
             new_meta = {self._sanitize_key(k): v for k, v in s3_object.metadata.items()}
             for k, v in index_doc.items():
