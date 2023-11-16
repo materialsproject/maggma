@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.57.9](https://github.com/materialsproject/maggma/tree/v0.57.9) (2023-11-16)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.57.8...v0.57.9)
+
+**Merged pull requests:**
+
+- Remove hint in count for S3Store [\#888](https://github.com/materialsproject/maggma/pull/888) ([munrojm](https://github.com/munrojm))
+- Add missing `MontyStore` to list of stores [\#887](https://github.com/materialsproject/maggma/pull/887) ([Andrew-S-Rosen](https://github.com/Andrew-S-Rosen))
+
 ## [v0.57.8](https://github.com/materialsproject/maggma/tree/v0.57.8) (2023-11-09)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.57.7...v0.57.8)
@@ -159,19 +168,19 @@
 
 ## [v0.51.25](https://github.com/materialsproject/maggma/tree/v0.51.25) (2023-07-27)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.23...v0.51.25)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.24...v0.51.25)
 
 **Merged pull requests:**
 
 - Some cleanup: `isort`, updated classifiers, remove unused kwarg [\#833](https://github.com/materialsproject/maggma/pull/833) ([Andrew-S-Rosen](https://github.com/Andrew-S-Rosen))
 
-## [v0.51.23](https://github.com/materialsproject/maggma/tree/v0.51.23) (2023-07-21)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.24...v0.51.23)
-
 ## [v0.51.24](https://github.com/materialsproject/maggma/tree/v0.51.24) (2023-07-21)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.22...v0.51.24)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.23...v0.51.24)
+
+## [v0.51.23](https://github.com/materialsproject/maggma/tree/v0.51.23) (2023-07-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.22...v0.51.23)
 
 **Closed issues:**
 
@@ -333,19 +342,19 @@
 
 ## [v0.51.4](https://github.com/materialsproject/maggma/tree/v0.51.4) (2023-06-02)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.4)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.3...v0.51.4)
 
 **Merged pull requests:**
 
 - modify JSONStore file creation [\#792](https://github.com/materialsproject/maggma/pull/792) ([gpetretto](https://github.com/gpetretto))
 
-## [v0.51.2](https://github.com/materialsproject/maggma/tree/v0.51.2) (2023-05-29)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.3...v0.51.2)
-
 ## [v0.51.3](https://github.com/materialsproject/maggma/tree/v0.51.3) (2023-05-29)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.3)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.3)
+
+## [v0.51.2](https://github.com/materialsproject/maggma/tree/v0.51.2) (2023-05-29)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.2)
 
 **Merged pull requests:**
 
