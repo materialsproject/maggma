@@ -162,6 +162,9 @@ class OpenDataStore(S3Store):
         """
         search_doc = {k: doc[k] for k in search_keys}
         search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
+        # Ensure last updated field is in metada if it's present in the data
+        if self.last_updated_field in doc:
+            search_doc[self.last_updated_field] = doc[self.last_updated_field]
 
         data = orjson.dumps(doc, default=json_util.default)
         data = self._get_compression_function()(data)

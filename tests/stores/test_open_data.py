@@ -280,13 +280,13 @@ def test_newer_in(s3store):
         conn.create_bucket(Bucket="bucket")
 
         index_old = S3IndexStore(collection_name="index_old", bucket="bucket")
-        old_store = OpenDataStore(index=index_old, bucket="bucket", searchable_fields=["last_updated"])
+        old_store = OpenDataStore(index=index_old, bucket="bucket")
         old_store.connect()
         old_store.update([{"task_id": "mp-1", "last_updated": tic}])
         old_store.update([{"task_id": "mp-2", "last_updated": tic}])
 
         index_new = S3IndexStore(collection_name="index_new", bucket="bucket", prefix="new")
-        new_store = OpenDataStore(index=index_new, bucket="bucket", sub_dir="new", searchable_fields=["last_updated"])
+        new_store = OpenDataStore(index=index_new, bucket="bucket", sub_dir="new")
         new_store.connect()
         new_store.update([{"task_id": "mp-1", "last_updated": tic2}])
         new_store.update([{"task_id": "mp-2", "last_updated": tic2}])
