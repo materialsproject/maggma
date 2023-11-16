@@ -227,14 +227,16 @@ class ReadOnlyResource(Resource):
             try:
                 with query_timeout(self.timeout):
 
-                    count = self.store.count(criteria = query.get("criteria"), hint = query.get("count_hint"))  # type: ignore
-
                     if isinstance(self.store, S3Store):
+                        count = self.store.count(criteria = query.get("criteria"))  # type: ignore
+
                         if self.query_disk_use:
                             data = list(self.store.query(**query, allow_disk_use=True))  # type: ignore
                         else:
                             data = list(self.store.query(**query))
                     else:
+                        count = self.store.count(criteria = query.get("criteria"), hint = query.get("count_hint"))  # type: ignore
+
                         pipeline = generate_query_pipeline(query, self.store)
 
                         agg_kwargs = {}
