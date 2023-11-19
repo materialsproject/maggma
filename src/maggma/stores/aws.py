@@ -129,7 +129,8 @@ class S3Store(Store):
         self.s3 = None
         self.s3_bucket = None
 
-        self.ssh_tunnel.stop()
+        if self.ssh_tunnel is not None:
+            self.ssh_tunnel.stop()
 
     @property
     def _collection(self):
@@ -357,9 +358,9 @@ class S3Store(Store):
         endpoint_url = self._get_endpoint_url()
         resource = session.resource("s3", endpoint_url=endpoint_url, **self.s3_resource_kwargs)
         try:
-            self.s3.meta.client.head_bucket(Bucket=self.bucket)
+            resource.meta.client.head_bucket(Bucket=self.bucket)
         except ClientError:
-            raise RuntimeError(f"Bucket `{self.bucket}` not present on AWS")
+            raise RuntimeError(f"Bucket not present on AWS")
         bucket = resource.Bucket(self.bucket)
 
         return resource, bucket
