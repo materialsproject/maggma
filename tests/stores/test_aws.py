@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 from maggma.stores import MemoryStore, MongoStore, S3Store
 from maggma.stores.ssh_tunnel import SSHTunnel
 from moto import mock_s3
+from sshtunnel import BaseSSHTunnelForwarderError
 
 
 @pytest.fixture()
@@ -21,7 +22,7 @@ def mongostore():
 def ssh_tunnel():
     try:
         tunnel = SSHTunnel("127.0.0.1:22", "127.0.0.1:27017", local_port=9000)
-    except:
+    except (ValueError, BaseSSHTunnelForwarderError):
         # fallback to not use a tunnel if there is error in creating the tunnel
         tunnel = None
 
