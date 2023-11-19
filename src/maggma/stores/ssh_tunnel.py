@@ -6,6 +6,8 @@ from sshtunnel import SSHTunnelForwarder
 
 
 class SSHTunnel(MSONable):
+    """SSH tunnel to remote server."""
+
     __TUNNELS: Dict[str, SSHTunnelForwarder] = {}
 
     def __init__(
