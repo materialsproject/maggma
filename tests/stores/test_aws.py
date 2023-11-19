@@ -5,6 +5,7 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError
 from maggma.stores import MemoryStore, MongoStore, S3Store
+from maggma.stores.ssh_tunnel import SSHTunnel
 from moto import mock_s3
 
 
@@ -14,6 +15,17 @@ def mongostore():
     store.connect()
     yield store
     store._collection.drop()
+
+
+@pytest.fixture()
+def ssh_tunnel():
+    try:
+        tunnel = SSHTunnel("127.0.0.1:22", "127.0.0.1:27017", local_port=9000)
+    except:
+        # fallback to not use a tunnel if there is error in creating the tunnel
+        tunnel = None
+
+    return tunnel
 
 
 @pytest.fixture()
@@ -69,6 +81,19 @@ def s3store_multi():
 
         index = MemoryStore("index")
         store = S3Store(index, "bucket1", s3_workers=4)
+        store.connect()
+
+        yield store
+
+
+@pytest.fixture()
+def s3store_with_tunnel(ssh_tunnel):
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+
+        index = MemoryStore("index", key="task_id")
+        store = S3Store(index, "bucket1", key="task_id", ssh_tunnel=ssh_tunnel)
         store.connect()
 
         yield store
@@ -360,3 +385,18 @@ def test_force_reset(s3store):
     assert s3store.count({"task_id": "mp-4"}) == 1
 
     s3store.close()
+
+
+def test_ssh_tunnel(s3store_with_tunnel):
+    content = [
+        {
+            "task_id": "mp-4",
+            "data": "abc",
+            s3store_with_tunnel.last_updated_field: datetime.utcnow(),
+        }
+    ]
+
+    s3store_with_tunnel.update(content)
+    assert s3store_with_tunnel.count({"task_id": "mp-4"}) == 1
+
+    s3store_with_tunnel.close()
