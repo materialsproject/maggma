@@ -9,10 +9,7 @@ from paramiko.ssh_exception import AuthenticationException, NoValidConnectionsEr
 
 @pytest.fixture()
 def ssh_server_available():  # noqa: PT004
-    """
-    Fixture to determine if an SSH server is available
-    to test the SSH tunnel
-    """
+    """Fixture to determine if an SSH server is available to test the SSH tunnel."""
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
     try:

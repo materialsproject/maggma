@@ -80,7 +80,7 @@ def test_keys():
         conn.create_bucket(Bucket="bucket1")
         index = MemoryStore("index", key=1)
         with pytest.raises(AssertionError, match=r"Since we are.*"):
-            store = S3Store(index, "bucket1", s3_workers=4, key=1)
+            store = S3Store(index, "bucket1", s3_workers=4, key="1")
         index = MemoryStore("index", key="key1")
         with pytest.warns(UserWarning, match=r"The desired S3Store.*$"):
             store = S3Store(index, "bucket1", s3_workers=4, key="key2")
@@ -125,7 +125,7 @@ def test_count(s3store):
     assert s3store.count({"task_id": "mp-3"}) == 1
 
 
-def test_qeuery(s3store):
+def test_qeury(s3store):
     assert s3store.query_one(criteria={"task_id": "mp-2"}) is None
     assert s3store.query_one(criteria={"task_id": "mp-1"})["data"] == "asd"
     assert s3store.query_one(criteria={"task_id": "mp-3"})["data"] == "sdf"
@@ -339,3 +339,24 @@ def test_no_bucket():
         store = S3Store(index, "bucket2")
         with pytest.raises(RuntimeError, match=r".*Bucket not present.*"):
             store.connect()
+
+
+def test_force_reset(s3store):
+    content = [
+        {
+            "task_id": "mp-4",
+            "data": "abc",
+            s3store.last_updated_field: datetime.utcnow(),
+        }
+    ]
+
+    s3store.connect(force_reset=True)
+    s3store.update(content)
+    assert s3store.count({"task_id": "mp-4"}) == 1
+
+    s3store.s3 = None
+    s3store.connect()
+    s3store.update(content)
+    assert s3store.count({"task_id": "mp-4"}) == 1
+
+    s3store.close()
