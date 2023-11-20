@@ -1,16 +1,16 @@
 import gzip
-import orjson
-from bson import json_util
 from io import BytesIO
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from maggma.stores.mongolike import MemoryStore
-from maggma.stores.aws import S3Store
-
+import orjson
 from boto3 import Session
 from botocore import UNSIGNED
 from botocore.config import Config
 from botocore.exceptions import ClientError
+from bson import json_util
+
+from maggma.stores.aws import S3Store
+from maggma.stores.mongolike import MemoryStore
 
 
 class S3IndexStore(MemoryStore):
@@ -46,12 +46,12 @@ class S3IndexStore(MemoryStore):
     def _retrieve_manifest(self) -> List:
         try:
             response = self.client.get_object(Bucket=self.bucket, Key=self._get_full_key_path())
-            return orjson.loads(response["Body"].read().decode("utf-8"))
+            json_data = orjson.loads(response["Body"].read().decode("utf-8"))
+            return json_data if isinstance(json_data, list) else [json_data]
         except ClientError as ex:
             if ex.response["Error"]["Code"] == "NoSuchKey":
                 return []
-            else:
-                raise
+            raise
 
     def _load_index(self) -> None:
         super().connect()
@@ -102,7 +102,7 @@ class OpenDataStore(S3Store):
     Data is stored on S3 compatible storage using the format used by Materials Project on OpenData.
     The index is loaded from S3 compatible storage into memory.
 
-    Note that updates will only affect the in-memory represenation of the index - they will not be persisted.
+    Note that updates will only affect the in-memory representation of the index - they will not be persisted.
     This Store should not be used for applications that are distributed and rely on reading updated
     values from the index as data inconsistencied will arise.
     """
@@ -137,8 +137,7 @@ class OpenDataStore(S3Store):
             start_idx = key.index(prefix) + len(prefix)
             end_idx = key.index(suffix, start_idx)
             return key[start_idx:end_idx]
-        else:
-            return None
+        return ""
 
     def _get_compression_function(self):
         return gzip.compress
@@ -151,6 +150,14 @@ class OpenDataStore(S3Store):
             data = self._get_decompression_function()(data)
         return orjson.loads(data)
 
+    def _gather_indexable_data(self, doc: Dict, search_keys: List[str]):
+        index_doc = {k: doc[k] for k in search_keys}
+        index_doc[self.key] = doc[self.key]  # Ensure key is in metadata
+        # Ensure last updated field is in metada if it's present in the data
+        if self.last_updated_field in doc:
+            index_doc[self.last_updated_field] = doc[self.last_updated_field]
+        return index_doc
+
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
         Write the data to s3 and return the metadata to be inserted into the index db.
@@ -160,11 +167,7 @@ class OpenDataStore(S3Store):
             search_keys: list of keys to pull from the docs and be inserted into the
             index db (these will be only added to the volatile index)
         """
-        search_doc = {k: doc[k] for k in search_keys}
-        search_doc[self.key] = doc[self.key]  # Ensure key is in metadata
-        # Ensure last updated field is in metada if it's present in the data
-        if self.last_updated_field in doc:
-            search_doc[self.last_updated_field] = doc[self.last_updated_field]
+        search_doc = self._gather_indexable_data(doc, search_keys)
 
         data = orjson.dumps(doc, default=json_util.default)
         data = self._get_compression_function()(data)
@@ -192,8 +195,7 @@ class OpenDataStore(S3Store):
                 if key != self.index._get_full_key_path():
                     response = bucket.Object(key).get()
                     doc = self._read_data(response["Body"].read())
-                    index_doc = {k: doc[k] for k in self.searchable_fields}
-                    index_doc[self.key] = self._get_id_from_full_key_path(key)
+                    index_doc = self._gather_indexable_data(doc, self.searchable_fields)
                     all_index_docs.append(index_doc)
         self.index.store_manifest(all_index_docs)
         return all_index_docs
