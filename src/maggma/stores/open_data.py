@@ -199,3 +199,16 @@ class OpenDataStore(S3Store):
                     all_index_docs.append(index_doc)
         self.index.store_manifest(all_index_docs)
         return all_index_docs
+
+    def rebuild_index_from_data(self, docs):
+        """
+        Rebuilds the index Store from the provided data.
+        The provided data needs to include all of the documents in this data set.
+        Stores only the key and searchable fields in the index.
+        """
+        all_index_docs = []
+        for doc in docs:
+            index_doc = self._gather_indexable_data(doc, self.searchable_fields)
+            all_index_docs.append(index_doc)
+        self.index.store_manifest(all_index_docs)
+        return all_index_docs
