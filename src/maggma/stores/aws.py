@@ -379,10 +379,6 @@ class S3Store(Store):
             search_doc["compression"] = "zlib"
             data = self._get_compression_function()(data)
 
-        if self.last_updated_field in doc:
-            # need this conversion for aws metadata insert
-            search_doc[self.last_updated_field] = str(to_isoformat_ceil_ms(doc[self.last_updated_field]))
-
         # keep a record of original keys, in case these are important for the individual researcher
         # it is not expected that this information will be used except in disaster recovery
         s3_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc}
