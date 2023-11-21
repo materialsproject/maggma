@@ -1,8 +1,7 @@
 [project]
 name = "maggma"
-dynamic = ["version", "readme", "scripts", "classifiers", "dependencies","optional-dependencies"]
+dynamic = ["version", "readme", "scripts", "classifiers", "dependencies","optional-dependencies", "license"]
 requires-python = ">=3.8"
-license = "LICENSE"
 description="Framework to develop datapipelines from files on disk to full dissemenation API"
 authors =[
     {name = "The Materials Project", email = "feedback@materialsproject.org"}
