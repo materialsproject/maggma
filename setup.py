@@ -25,7 +25,6 @@ setup(
     package_data={"maggma": ["py.typed"]},
     zip_safe=False,
     include_package_data=True,
-    python_requires=">=3.8",
     install_requires=[
         "setuptools",
         "ruamel.yaml<0.18",

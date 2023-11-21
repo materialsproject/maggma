@@ -1,6 +1,7 @@
 [project]
 name = "maggma"
 dynamic = ["version", "readme"]
+requires-python = >=3.8
 description="Framework to develop datapipelines from files on disk to full dissemenation API"
 authors =[
     {name = "The Materials Project", email = "feedback@materialsproject.org"}
