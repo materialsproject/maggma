@@ -1,5 +1,17 @@
 # Changelog
 
+## [v0.58.0](https://github.com/materialsproject/maggma/tree/v0.58.0) (2023-11-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.57.10...v0.58.0)
+
+**Implemented enhancements:**
+
+- SSH tunnel support for S3Store [\#882](https://github.com/materialsproject/maggma/pull/882) ([mjwen](https://github.com/mjwen))
+
+**Merged pull requests:**
+
+- update package metadata in pyproject.toml [\#892](https://github.com/materialsproject/maggma/pull/892) ([rkingsbury](https://github.com/rkingsbury))
+
 ## [v0.57.10](https://github.com/materialsproject/maggma/tree/v0.57.10) (2023-11-17)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.57.9...v0.57.10)
