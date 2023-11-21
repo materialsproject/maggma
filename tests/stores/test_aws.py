@@ -151,7 +151,7 @@ def test_count(s3store):
     assert s3store.count({"task_id": "mp-3"}) == 1
 
 
-def test_qeury(s3store):
+def test_query(s3store):
     assert s3store.query_one(criteria={"task_id": "mp-2"}) is None
     assert s3store.query_one(criteria={"task_id": "mp-1"})["data"] == "asd"
     assert s3store.query_one(criteria={"task_id": "mp-3"})["data"] == "sdf"
