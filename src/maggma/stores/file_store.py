@@ -263,7 +263,7 @@ class FileStore(MemoryStore):
             self.key: file_id,
         }
 
-    def connect(self):
+    def connect(self, force_reset: bool = False):
         """
         Connect to the source data
 
@@ -272,16 +272,20 @@ class FileStore(MemoryStore):
 
         If there is a metadata .json file in the directory, read its
         contents into the MemoryStore
+
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         # read all files and place them in the MemoryStore
         # use super.update to bypass the read_only guard statement
         # because we want the file data to be populated in memory
-        super().connect()
+        super().connect(force_reset=force_reset)
         super().update(self.read())
 
         # now read any metadata from the .json file
         try:
-            self.metadata_store.connect()
+            self.metadata_store.connect(force_reset=force_reset)
             metadata = list(self.metadata_store.query())
         except FileNotFoundError:
             metadata = []

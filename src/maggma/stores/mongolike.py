@@ -174,6 +174,10 @@ class MongoStore(Store):
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
+
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         if self._coll is None or force_reset:
             if self.ssh_tunnel is None:
@@ -566,6 +570,10 @@ class MongoURIStore(MongoStore):
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
+
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         if self._coll is None or force_reset:  # pragma: no cover
             conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
@@ -594,8 +602,11 @@ class MemoryStore(MongoStore):
     def connect(self, force_reset: bool = False):
         """
         Connect to the source data
-        """
 
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
+        """
         if self._coll is None or force_reset:
             self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
 
@@ -731,32 +742,37 @@ class JSONStore(MemoryStore):
 
         super().__init__(**kwargs)
 
-    def connect(self, force_reset=False):
+    def connect(self, force_reset: bool =False):
         """
         Loads the files into the collection in memory
+
+        Args:
+            force_reset: whether to reset the connection or not. If False (default) and .connect() has been called previously, the .json file will not be read in again. This can improve performance
+            on systems with slow storage when multiple connect / disconnects are performed.
         """
-        super().connect(force_reset=force_reset)
+        if self._coll is None or force_reset:
+            self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
 
-        # create the .json file if it does not exist
-        if not self.read_only and not Path(self.paths[0]).exists():
-            with zopen(self.paths[0], "w") as f:
-                data: List[dict] = []
-                bytesdata = orjson.dumps(data)
-                f.write(bytesdata.decode("utf-8"))
+            # create the .json file if it does not exist
+            if not self.read_only and not Path(self.paths[0]).exists():
+                with zopen(self.paths[0], "w") as f:
+                    data: List[dict] = []
+                    bytesdata = orjson.dumps(data)
+                    f.write(bytesdata.decode("utf-8"))
 
-        for path in self.paths:
-            objects = self.read_json_file(path)
-            try:
-                self.update(objects)
-            except KeyError:
-                raise KeyError(
-                    f"""
-                    Key field '{self.key}' not found in {path.name}. This
-                    could mean that this JSONStore was initially created with a different key field.
-                    The keys found in the .json file are {list(objects[0].keys())}. Try
-                    re-initializing your JSONStore using one of these as the key arguments.
-                    """
-                )
+            for path in self.paths:
+                objects = self.read_json_file(path)
+                try:
+                    self.update(objects)
+                except KeyError:
+                    raise KeyError(
+                        f"""
+                        Key field '{self.key}' not found in {path.name}. This
+                        could mean that this JSONStore was initially created with a different key field.
+                        The keys found in the .json file are {list(objects[0].keys())}. Try
+                        re-initializing your JSONStore using one of these as the key arguments.
+                        """
+                    )
 
     def read_json_file(self, path) -> List:
         """
@@ -919,13 +935,14 @@ class MontyStore(MemoryStore):
         Connect to the database store.
 
         Args:
-            force_reset: Force connection reset.
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
-        # TODO - workaround, may be obviated by a future montydb update
-        if self.database_path != ":memory:":
-            set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
-        client = MontyClient(self.database_path, **self.client_kwargs)
         if not self._coll or force_reset:
+            # TODO - workaround, may be obviated by a future montydb update
+            if self.database_path != ":memory:":
+                set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
+            client = MontyClient(self.database_path, **self.client_kwargs)
             self._coll = client[self.database_name][self.collection_name]
 
     @property
