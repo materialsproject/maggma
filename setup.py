@@ -19,7 +19,6 @@ setup(
     url="https://github.com/materialsproject/maggma",
     author="The Materials Project",
     author_email="feedback@materialsproject.org",
-    license="modified BSD",
     packages=find_packages("src"),
     package_dir={"": "src"},
     package_data={"maggma": ["py.typed"]},
