@@ -308,6 +308,9 @@ class S3Store(Store):
         else:
             additional_metadata = list(additional_metadata)
 
+        self._write_to_s3_and_index(docs, key, additional_metadata)
+
+    def _write_to_s3_and_index(self, docs, key, additional_metadata):
         with ThreadPoolExecutor(max_workers=self.s3_workers) as pool:
             fs = {
                 pool.submit(

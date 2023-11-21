@@ -177,6 +177,11 @@ class OpenDataStore(S3Store):
         )
         return search_doc
 
+    def _index_for_doc_from_s3(self, bucket, key):
+        response = bucket.Object(key).get()
+        doc = self._read_data(response["Body"].read())
+        return self._gather_indexable_data(doc, self.searchable_fields)
+
     def rebuild_index_from_s3_data(self):
         """
         Rebuilds the index Store from the data in S3
@@ -193,9 +198,7 @@ class OpenDataStore(S3Store):
             for file in page["Contents"]:
                 key = file["Key"]
                 if key != self.index._get_full_key_path():
-                    response = bucket.Object(key).get()
-                    doc = self._read_data(response["Body"].read())
-                    index_doc = self._gather_indexable_data(doc, self.searchable_fields)
+                    index_doc = self._index_for_doc_from_s3(bucket, key)
                     all_index_docs.append(index_doc)
         self.index.store_manifest(all_index_docs)
         return all_index_docs
