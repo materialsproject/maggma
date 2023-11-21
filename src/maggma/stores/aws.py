@@ -331,6 +331,7 @@ class S3Store(Store):
             if isinstance(self.s3_profile, dict):
                 return Session(**self.s3_profile)
             return Session(profile_name=self.s3_profile)
+
         return None
 
     def _get_endpoint_url(self):

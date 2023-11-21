@@ -389,6 +389,11 @@ def test_force_reset(s3store):
 
 
 def test_ssh_tunnel(s3store_with_tunnel):
+    """This test will actually create a real tunnel to test the functionality.
+
+    The tunnel will be set to `None` if the tunnel cannot be created. As a result,
+    it becomes a test not testing the functionality of S3Store with the tunnel.
+    """
     content = [
         {
             "task_id": "mp-4",
@@ -401,3 +406,41 @@ def test_ssh_tunnel(s3store_with_tunnel):
     assert s3store_with_tunnel.count({"task_id": "mp-4"}) == 1
 
     s3store_with_tunnel.close()
+
+
+def test_ssh_tunnel_2():
+    """
+    This test mocks the SSHTunnel behavior by creating a fake tunnel.
+
+    The purpose is to check the behavior of the S3Store when the tunnel is not `None`.
+    This complements the `test_ssh_tunnel` test above.
+    """
+
+    class FakeTunnel:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def start(self):
+            pass
+
+        def stop(self):
+            pass
+
+        def local_address(self):
+            return "ADDRESS", "PORT"
+
+    def get_store():
+        with mock_s3():
+            conn = boto3.resource("s3", region_name="us-east-1")
+            conn.create_bucket(Bucket="bucket1")
+
+            index = MemoryStore("index", key="task_id")
+            store = S3Store(index, "bucket1", key="task_id", ssh_tunnel=FakeTunnel())
+            store.connect()
+            store._get_session()
+            assert store._get_endpoint_url() == "http://ADDRESS:PORT"
+            store.close()
+
+            yield store
+
+    get_store()
