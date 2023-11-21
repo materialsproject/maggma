@@ -5,7 +5,9 @@ import boto3
 import pytest
 from botocore.exceptions import ClientError
 from maggma.stores import MemoryStore, MongoStore, S3Store
+from maggma.stores.ssh_tunnel import SSHTunnel
 from moto import mock_s3
+from sshtunnel import BaseSSHTunnelForwarderError
 
 
 @pytest.fixture()
@@ -14,6 +16,17 @@ def mongostore():
     store.connect()
     yield store
     store._collection.drop()
+
+
+@pytest.fixture()
+def ssh_tunnel():
+    try:
+        tunnel = SSHTunnel("127.0.0.1:22", "127.0.0.1:27017", local_port=9000)
+    except (ValueError, BaseSSHTunnelForwarderError):
+        # fallback to not use a tunnel if there is error in creating the tunnel
+        tunnel = None
+
+    return tunnel
 
 
 @pytest.fixture()
@@ -74,13 +87,26 @@ def s3store_multi():
         yield store
 
 
+@pytest.fixture()
+def s3store_with_tunnel(ssh_tunnel):
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+
+        index = MemoryStore("index", key="task_id")
+        store = S3Store(index, "bucket1", key="task_id", ssh_tunnel=ssh_tunnel)
+        store.connect()
+
+        yield store
+
+
 def test_keys():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
         index = MemoryStore("index", key=1)
         with pytest.raises(AssertionError, match=r"Since we are.*"):
-            store = S3Store(index, "bucket1", s3_workers=4, key=1)
+            S3Store(index, "bucket1", s3_workers=4, key="1")
         index = MemoryStore("index", key="key1")
         with pytest.warns(UserWarning, match=r"The desired S3Store.*$"):
             store = S3Store(index, "bucket1", s3_workers=4, key="key2")
@@ -125,7 +151,7 @@ def test_count(s3store):
     assert s3store.count({"task_id": "mp-3"}) == 1
 
 
-def test_qeuery(s3store):
+def test_query(s3store):
     assert s3store.query_one(criteria={"task_id": "mp-2"}) is None
     assert s3store.query_one(criteria={"task_id": "mp-1"})["data"] == "asd"
     assert s3store.query_one(criteria={"task_id": "mp-3"})["data"] == "sdf"
@@ -339,3 +365,82 @@ def test_no_bucket():
         store = S3Store(index, "bucket2")
         with pytest.raises(RuntimeError, match=r".*Bucket not present.*"):
             store.connect()
+
+
+def test_force_reset(s3store):
+    content = [
+        {
+            "task_id": "mp-4",
+            "data": "abc",
+            s3store.last_updated_field: datetime.utcnow(),
+        }
+    ]
+
+    s3store.connect(force_reset=True)
+    s3store.update(content)
+    assert s3store.count({"task_id": "mp-4"}) == 1
+
+    s3store.s3 = None
+    s3store.connect()
+    s3store.update(content)
+    assert s3store.count({"task_id": "mp-4"}) == 1
+
+    s3store.close()
+
+
+def test_ssh_tunnel(s3store_with_tunnel):
+    """This test will actually create a real tunnel to test the functionality.
+
+    The tunnel will be set to `None` if the tunnel cannot be created. As a result,
+    it becomes a test not testing the functionality of S3Store with the tunnel.
+    """
+    content = [
+        {
+            "task_id": "mp-4",
+            "data": "abc",
+            s3store_with_tunnel.last_updated_field: datetime.utcnow(),
+        }
+    ]
+
+    s3store_with_tunnel.update(content)
+    assert s3store_with_tunnel.count({"task_id": "mp-4"}) == 1
+
+    s3store_with_tunnel.close()
+
+
+def test_ssh_tunnel_2():
+    """
+    This test mocks the SSHTunnel behavior by creating a fake tunnel.
+
+    The purpose is to check the behavior of the S3Store when the tunnel is not `None`.
+    This complements the `test_ssh_tunnel` test above.
+    """
+
+    class FakeTunnel:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def start(self):
+            pass
+
+        def stop(self):
+            pass
+
+        def local_address(self):
+            return "ADDRESS", "PORT"
+
+    def get_store():
+        with mock_s3():
+            conn = boto3.resource("s3", region_name="us-east-1")
+            conn.create_bucket(Bucket="bucket1")
+
+            index = MemoryStore("index", key="task_id")
+            store = S3Store(index, "bucket1", key="task_id", ssh_tunnel=FakeTunnel())
+            store.connect()
+            store._get_session()
+            assert store._get_endpoint_url() == "http://ADDRESS:PORT"
+            store.close()
+
+            yield store
+
+    get_store()

@@ -1,4 +1,5 @@
-"""Advanced Stores for connecting to AWS data."""
+"""Stores for connecting to AWS data."""
+
 import threading
 import warnings
 import zlib
@@ -13,6 +14,7 @@ import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
 
 from maggma.core import Sort, Store
+from maggma.stores.ssh_tunnel import SSHTunnel
 from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
@@ -26,7 +28,8 @@ except (ImportError, ModuleNotFoundError):
 
 class S3Store(Store):
     """
-    GridFS like storage using Amazon S3 and a regular store for indexing
+    GridFS like storage using Amazon S3 and a regular store for indexing.
+
     Assumes Amazon AWS key and secret key are set in environment or default config file.
     """
 
@@ -40,6 +43,7 @@ class S3Store(Store):
         sub_dir: Optional[str] = None,
         s3_workers: int = 1,
         s3_resource_kwargs: Optional[dict] = None,
+        ssh_tunnel: Optional[SSHTunnel] = None,
         key: str = "fs_id",
         store_hash: bool = True,
         unpack_data: bool = True,
@@ -50,21 +54,26 @@ class S3Store(Store):
         Initializes an S3 Store.
 
         Args:
-            index: a store to use to index the S3 Bucket
-            bucket: name of the bucket
-            s3_profile: name of aws profile containing credentials for role.
-                Alternatively you can pass in a dictionary with the full credentials:
+            index: a store to use to index the S3 bucket.
+            bucket: name of the bucket.
+            s3_profile: name of AWS profile containing the credentials. Alternatively
+                you can pass in a dictionary with the full credentials:
                     aws_access_key_id (string) -- AWS access key ID
                     aws_secret_access_key (string) -- AWS secret access key
                     aws_session_token (string) -- AWS temporary session token
                     region_name (string) -- Default region when creating new connections
-            compress: compress files inserted into the store
-            endpoint_url: endpoint_url to allow interface to minio service
-            sub_dir: (optional)  subdirectory of the s3 bucket to store the data
-            s3_workers: number of concurrent S3 puts to run
-            store_hash: store the sha1 hash right before insertion to the database.
-            unpack_data: whether to decompress and unpack byte data when querying from the bucket.
-            searchable_fields: fields to keep in the index store
+            compress: compress files inserted into the store.
+            endpoint_url: this allows the interface with minio service; ignored if
+                `ssh_tunnel` is provided, in which case it is inferred.
+            sub_dir: subdirectory of the S3 bucket to store the data.
+            s3_workers: number of concurrent S3 puts to run.
+            s3_resource_kwargs: additional kwargs to pass to the boto3 session resource.
+            ssh_tunnel: optional SSH tunnel to use for the S3 connection.
+            key: main key to index on.
+            store_hash: store the SHA1 hash right before insertion to the database.
+            unpack_data: whether to decompress and unpack byte data when querying from
+                the bucket.
+            searchable_fields: fields to keep in the index store.
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for S3Store")
@@ -79,6 +88,7 @@ class S3Store(Store):
         self.s3_bucket: Any = None
         self.s3_workers = s3_workers
         self.s3_resource_kwargs = s3_resource_kwargs if s3_resource_kwargs is not None else {}
+        self.ssh_tunnel = ssh_tunnel
         self.unpack_data = unpack_data
         self.searchable_fields = searchable_fields if searchable_fields is not None else []
         self.store_hash = store_hash
@@ -98,26 +108,18 @@ class S3Store(Store):
 
     @property
     def name(self) -> str:
-        """
-        Returns:
-            a string representing this data source.
-        """
+        """String representing this data source."""
         return f"s3://{self.bucket}"
 
-    def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
-        """Connect to the source data."""
-        session = self._get_session()
-        resource = session.resource("s3", endpoint_url=self.endpoint_url, **self.s3_resource_kwargs)
+    def connect(self, force_reset: bool = False):  # lgtm[py/conflicting-attributes]
+        """Connect to the source data.
 
-        if not self.s3:
-            self.s3 = resource
-            try:
-                self.s3.meta.client.head_bucket(Bucket=self.bucket)
-            except ClientError:
-                raise RuntimeError(f"Bucket not present on AWS: {self.bucket}")
-
-            self.s3_bucket = resource.Bucket(self.bucket)
-        self.index.connect(*args, **kwargs)
+        Args:
+            force_reset: whether to force a reset of the connection
+        """
+        if self.s3 is None or force_reset:
+            self.s3, self.s3_bucket = self._get_resource_and_bucket()
+        self.index.connect(force_reset=force_reset)
 
     def close(self):
         """Closes any connections."""
@@ -127,14 +129,16 @@ class S3Store(Store):
         self.s3 = None
         self.s3_bucket = None
 
+        if self.ssh_tunnel is not None:
+            self.ssh_tunnel.stop()
+
     @property
     def _collection(self):
         """
-        Returns:
-            a handle to the pymongo collection object.
+        A handle to the pymongo collection object.
 
         Important:
-            Not guaranteed to exist in the future
+            Not guaranteed to exist in the future.
         """
         # For now returns the index collection since that is what we would "search" on
         return self.index._collection
@@ -144,7 +148,7 @@ class S3Store(Store):
         Counts the number of documents matching the query criteria.
 
         Args:
-            criteria: PyMongo filter for documents to count in
+            criteria: PyMongo filter for documents to count in.
         """
         return self.index.count(criteria)
 
@@ -160,12 +164,12 @@ class S3Store(Store):
         Queries the Store for a set of documents.
 
         Args:
-            criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields. Keys are field names and
-                values are 1 for ascending or -1 for descending.
-            skip: number documents to skip
-            limit: limit on total number of documents returned
+            criteria: PyMongo filter for documents to search in.
+            properties: properties to return in grouped documents.
+            sort: Dictionary of sort order for fields. Keys are field names and values
+                are 1 for ascending or -1 for descending.
+            skip: number documents to skip.
+            limit: limit on total number of documents returned.
 
         """
         prop_keys = set()
@@ -220,8 +224,8 @@ class S3Store(Store):
         Get all distinct values for a field.
 
         Args:
-            field: the field(s) to get distinct values for
-            criteria: PyMongo filter for documents to search in
+            field: the field(s) to get distinct values for.
+            criteria: PyMongo filter for documents to search in.
         """
         # Index is a store so it should have its own distinct function
         return self.index.distinct(field, criteria=criteria)
@@ -236,17 +240,16 @@ class S3Store(Store):
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
-        Simple grouping function that will group documents
-        by keys.
+        Simple grouping function that will group documents by keys.
 
         Args:
-            keys: fields to group documents
-            criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields. Keys are field names and
-                values are 1 for ascending or -1 for descending.
-            skip: number documents to skip
-            limit: limit on total number of documents returned
+            keys: fields to group documents.
+            criteria: PyMongo filter for documents to search in.
+            properties: properties to return in grouped documents.
+            sort: Dictionary of sort order for fields. Keys are field names and values
+            are 1 for ascending or -1 for descending.
+            skip: number documents to skip.
+            limit: limit on total number of documents returned.
 
         Returns:
             generator returning tuples of (dict, list of docs)
@@ -265,11 +268,11 @@ class S3Store(Store):
         Tries to create an index and return true if it succeeded.
 
         Args:
-            key: single key to index
-            unique: Whether or not this index contains only unique keys
+            key: single key to index.
+            unique: whether this index contains only unique keys.
 
         Returns:
-            bool indicating if the index exists/was created
+            bool indicating if the index exists/was created.
         """
         return self.index.ensure_index(key, unique=unique)
 
@@ -283,12 +286,11 @@ class S3Store(Store):
         Update documents into the Store.
 
         Args:
-            docs: the document or list of documents to update
-            key: field name(s) to determine uniqueness for a
-                 document, can be a list of multiple fields,
-                 a single field, or None if the Store's key
-                 field is to be used
-            additional_metadata: field(s) to include in the s3 store's metadata
+            docs: the document or list of documents to update.
+            key: field name(s) to determine uniqueness for a document, can be a list of
+                multiple fields, a single field, or None if the Store's key field is to
+                be used.
+            additional_metadata: field(s) to include in the S3 store's metadata.
         """
         if not isinstance(docs, list):
             docs = [docs]
@@ -322,30 +324,56 @@ class S3Store(Store):
         self.index.update(search_docs, key=self.key)
 
     def _get_session(self):
+        if self.ssh_tunnel is not None:
+            self.ssh_tunnel.start()
+
         if not hasattr(self._thread_local, "s3_bucket"):
             if isinstance(self.s3_profile, dict):
                 return Session(**self.s3_profile)
             return Session(profile_name=self.s3_profile)
+
         return None
 
+    def _get_endpoint_url(self):
+        if self.ssh_tunnel is None:
+            return self.endpoint_url
+        else:
+            host, port = self.ssh_tunnel.local_address
+            return f"http://{host}:{port}"
+
     def _get_bucket(self):
-        """If on the main thread return the bucket created above, else create a new bucket on each thread."""
+        """If on the main thread return the bucket created above, else create a new
+        bucket on each thread."""
         if threading.current_thread().name == "MainThread":
             return self.s3_bucket
+
         if not hasattr(self._thread_local, "s3_bucket"):
-            session = self._get_session()
-            resource = session.resource("s3", endpoint_url=self.endpoint_url)
-            self._thread_local.s3_bucket = resource.Bucket(self.bucket)
+            _, bucket = self._get_resource_and_bucket()
+            self._thread_local.s3_bucket = bucket
+
         return self._thread_local.s3_bucket
+
+    def _get_resource_and_bucket(self):
+        """Helper function to create the resource and bucket objects."""
+        session = self._get_session()
+        endpoint_url = self._get_endpoint_url()
+        resource = session.resource("s3", endpoint_url=endpoint_url, **self.s3_resource_kwargs)
+        try:
+            resource.meta.client.head_bucket(Bucket=self.bucket)
+        except ClientError:
+            raise RuntimeError(f"Bucket not present on AWS")
+        bucket = resource.Bucket(self.bucket)
+
+        return resource, bucket
 
     def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
         """
         Write the data to s3 and return the metadata to be inserted into the index db.
 
         Args:
-            doc: the document
+            doc: the document.
             search_keys: list of keys to pull from the docs and be inserted into the
-            index db
+                index db.
         """
         s3_bucket = self._get_bucket()
 
@@ -412,8 +440,8 @@ class S3Store(Store):
         Remove docs matching the query dictionary.
 
         Args:
-            criteria: query dictionary to match
-            remove_s3_object: whether to remove the actual S3 Object or not
+            criteria: query dictionary to match.
+            remove_s3_object: whether to remove the actual S3 object or not.
         """
         if not remove_s3_object:
             self.index.remove_docs(criteria=criteria)
@@ -433,15 +461,13 @@ class S3Store(Store):
 
     def newer_in(self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
         """
-        Returns the keys of documents that are newer in the target
-        Store than this Store.
+        Returns the keys of documents that are newer in the target Store than this Store.
 
         Args:
-            target: target Store
-            criteria: PyMongo filter for documents to search in
-            exhaustive: triggers an item-by-item check vs. checking
-                        the last_updated of the target Store and using
-                        that to filter out new items in
+            target: target Store.
+            criteria: PyMongo filter for documents to search in.
+            exhaustive: triggers an item-by-item check vs. checking the last_updated of
+                the target Store and using that to filter out new items in.
         """
         if hasattr(target, "index"):
             return self.index.newer_in(target=target.index, criteria=criteria, exhaustive=exhaustive)
@@ -452,9 +478,10 @@ class S3Store(Store):
 
     def rebuild_index_from_s3_data(self, **kwargs):
         """
-        Rebuilds the index Store from the data in S3
-        Relies on the index document being stores as the metadata for the file
-        This can help recover lost databases.
+        Rebuilds the index Store from the data in S3.
+
+        Relies on the index document being stores as the metadata for the file. This can
+        help recover lost databases.
         """
         bucket = self.s3_bucket
         objects = bucket.objects.filter(Prefix=self.sub_dir)
@@ -469,8 +496,9 @@ class S3Store(Store):
 
     def rebuild_metadata_from_index(self, index_query: Optional[dict] = None):
         """
-        Read data from the index store and populate the metadata of the S3 bucket
-        Force all of the keys to be lower case to be Minio compatible
+        Read data from the index store and populate the metadata of the S3 bucket.
+        Force all the keys to be lower case to be Minio compatible.
+
         Args:
             index_query: query on the index store.
         """
@@ -493,7 +521,8 @@ class S3Store(Store):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for S3Store
+        Check equality for S3Store.
+
         other: other S3Store to compare with.
         """
         if not isinstance(other, S3Store):
