@@ -8,7 +8,7 @@ from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from io import BytesIO
 from json import dumps
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -206,7 +206,18 @@ class S3Store(Store):
 
                 yield data
 
-    def _read_data(self, data: bytes, compress_header: str):
+    def _read_data(self, data: bytes, compress_header: str) -> Dict:
+        """Reads the data and transforms it into a dictionary.
+        Allows for subclasses to apply custom schemes for transforming
+        the data retrieved from S3.
+
+        Args:
+            data (bytes): The raw byte representation of the data.
+            compress_header (str): String representing the type of compression used on the data.
+
+        Returns:
+            Dict: Dictionary representation of the data.
+        """
         return self._unpack(data=data, compressed=compress_header == "zlib")
 
     @staticmethod
@@ -310,15 +321,22 @@ class S3Store(Store):
         else:
             additional_metadata = list(additional_metadata)
 
-        self._write_to_s3_and_index(docs, key, additional_metadata)
+        self._write_to_s3_and_index(docs, key + additional_metadata + self.searchable_fields)
 
-    def _write_to_s3_and_index(self, docs, key, additional_metadata):
+    def _write_to_s3_and_index(self, docs: List[Dict], search_keys: List[str]):
+        """Implements updating of the provided documents in S3 and the index.
+        Allows for subclasses to apply custom approaches to parellizing the writing.
+
+        Args:
+            docs (List[Dict]): The documents to update
+            search_keys (List[str]): The keys of the information to be updated in the index
+        """
         with ThreadPoolExecutor(max_workers=self.s3_workers) as pool:
             fs = {
                 pool.submit(
                     self.write_doc_to_s3,
                     doc=itr_doc,
-                    search_keys=key + additional_metadata + self.searchable_fields,
+                    search_keys=search_keys,
                 )
                 for itr_doc in docs
             }
@@ -372,16 +390,26 @@ class S3Store(Store):
 
         return resource, bucket
 
-    def _get_full_key_path(self, id):
+    def _get_full_key_path(self, id: str) -> str:
+        """Produces the full key path for S3 items
+
+        Args:
+            id (str): The value of the key identifier.
+
+        Returns:
+            str: The full key path
+        """
         return self.sub_dir + str(id)
 
-    def _get_compression_function(self):
+    def _get_compression_function(self) -> Callable:
+        """Returns the function to use for compressing data."""
         return zlib.compress
 
-    def _get_decompression_function(self):
+    def _get_decompression_function(self) -> Callable:
+        """Returns the function to use for decompressing data."""
         return zlib.decompress
 
-    def write_doc_to_s3(self, doc: Dict, search_keys: List[str]):
+    def write_doc_to_s3(self, doc: Dict, search_keys: List[str]) -> Dict:
         """
         Write the data to s3 and return the metadata to be inserted into the index db.
 
@@ -389,6 +417,9 @@ class S3Store(Store):
             doc: the document.
             search_keys: list of keys to pull from the docs and be inserted into the
                 index db.
+
+        Returns:
+            Dict: The metadata to be inserted into the index db
         """
         s3_bucket = self._get_bucket()
 
