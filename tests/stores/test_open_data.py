@@ -97,6 +97,27 @@ def s3indexstore():
         yield store
 
 
+def test_missing_manifest():
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket2")
+        store = S3IndexStore(collection_name="index", bucket="bucket2", key="task_id")
+        store.connect()
+        assert store.count() == 0
+
+
+def test_boto_error_index():
+    with mock_s3():
+        store = S3IndexStore(collection_name="index", bucket="bucket2", key="task_id")
+        with pytest.raises(RuntimeError):
+            store.connect()
+
+
+def test_index_eq(memstore, s3indexstore):
+    assert s3indexstore == s3indexstore
+    assert memstore != s3indexstore
+
+
 def test_index_load_manifest(s3indexstore):
     assert s3indexstore.count() == 1
     assert s3indexstore.query_one({"task_id": "mp-1"}) is not None
@@ -190,6 +211,15 @@ def test_rebuild_index_from_s3_data(s3store):
     s3store.update([{"task_id": "mp-2", "data": "asd"}])
     index_docs = s3store.rebuild_index_from_s3_data()
     assert len(index_docs) == 3
+    for doc in index_docs:
+        for key in doc.keys():
+            assert key == "task_id" or key == "last_updated"
+
+
+def test_rebuild_index_from_data(s3store):
+    data = [{"task_id": "mp-2", "data": "asd", "last_updated": datetime.utcnow()}]
+    index_docs = s3store.rebuild_index_from_data(data)
+    assert len(index_docs) == 1
     for doc in index_docs:
         for key in doc.keys():
             assert key == "task_id" or key == "last_updated"
