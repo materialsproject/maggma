@@ -157,7 +157,7 @@ def test_rebuild_index_from_s3_data(s3store):
     assert len(index_docs) == 3
     for doc in index_docs:
         for key in doc.keys():
-            assert key == "task_id"
+            assert key == "task_id" or key == "last_updated"
 
 
 def tests_msonable_read_write(s3store):
