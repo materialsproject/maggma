@@ -69,9 +69,13 @@ class S3IndexStore(MemoryStore):
                 return []
             raise
 
-    def _load_index(self) -> None:
-        """Load the contents of the index stored in S3 into memory."""
-        super().connect()
+    def _load_index(self, force_reset: bool = False) -> None:
+        """Load the contents of the index stored in S3 into memory.
+
+        Args:
+            force_reset: whether to force a reset of the memory store prior to load
+        """
+        super().connect(force_reset=force_reset)
         super().update(self._retrieve_manifest())
 
     def store_manifest(self, data: List[Dict]) -> None:
@@ -90,9 +94,12 @@ class S3IndexStore(MemoryStore):
         super().connect(force_reset=True)
         super().update(data)
 
-    def connect(self):
+    def connect(self, force_reset: bool = False):
         """
         Sets up the S3 client and loads the contents of the index stored in S3 into memory.
+
+        Args:
+            force_reset: whether to force a reset of the memory store prior to load
         """
         # set up the S3 client
         if not self.session:
@@ -106,7 +113,7 @@ class S3IndexStore(MemoryStore):
             raise RuntimeError(f"Bucket not present on AWS: {self.bucket}")
 
         # load index
-        self._load_index()
+        self._load_index(force_reset=force_reset)
 
     def __hash__(self):
         return hash((self.collection_name, self.bucket, self.prefix))
