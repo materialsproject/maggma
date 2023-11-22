@@ -3,6 +3,9 @@ from datetime import datetime
 
 import boto3
 import pytest
+import orjson
+from bson import json_util
+
 from botocore.exceptions import ClientError
 from maggma.stores import MemoryStore
 from maggma.stores.open_data import OpenDataStore, S3IndexStore
@@ -73,6 +76,38 @@ def s3store_multi():
         store.connect()
 
         yield store
+
+
+@pytest.fixture()
+def s3indexstore():
+    data = [{"task_id": "mp-1", "last_updated": datetime.utcnow()}]
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+        client = boto3.client("s3", region_name="us-east-1")
+        client.put_object(
+            Bucket="bucket1",
+            Body=orjson.dumps(data, default=json_util.default),
+            Key="manifest.json",
+        )
+
+        store = S3IndexStore(collection_name="index", bucket="bucket1", key="task_id")
+        store.connect()
+
+        yield store
+
+
+def test_index_load_manifest(s3indexstore):
+    assert s3indexstore.count() == 1
+    assert s3indexstore.query_one({"task_id": "mp-1"}) is not None
+
+
+def test_index_store_manifest(s3indexstore):
+    data = [{"task_id": "mp-2", "last_updated": datetime.utcnow()}]
+    s3indexstore.store_manifest(data)
+    assert s3indexstore.count() == 1
+    assert s3indexstore.query_one({"task_id": "mp-1"}) is None
+    assert s3indexstore.query_one({"task_id": "mp-2"}) is not None
 
 
 def test_keys():

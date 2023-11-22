@@ -77,6 +77,7 @@ class S3IndexStore(MemoryStore):
     def store_manifest(self, data: List[Dict]) -> None:
         """Stores the provided data into the index stored in S3.
         This overwrites and fully replaces all of the contents of the previous index stored in S3.
+        It also rewrites the memory index with the provided data.
 
         Args:
             data (List[Dict]): The data to store in the index.
@@ -86,6 +87,8 @@ class S3IndexStore(MemoryStore):
             Body=orjson.dumps(data, default=json_util.default),
             Key=self._get_full_key_path(),
         )
+        super().connect(force_reset=True)
+        super().update(data)
 
     def connect(self):
         """
