@@ -39,7 +39,7 @@ click==8.1.7
     #   flask
     #   mongogrant
     #   uvicorn
-cryptography==41.0.5
+cryptography==41.0.6
     # via paramiko
 dnspython==2.4.2
     # via
