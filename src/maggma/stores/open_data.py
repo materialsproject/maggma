@@ -284,12 +284,10 @@ class OpenDataStore(S3Store):
     def __hash__(self):
         return hash(
             (
-                self.index.__hash__,
                 self.bucket,
                 self.compress,
                 self.endpoint_url,
                 self.key,
-                self.searchable_fields,
                 self.sub_dir,
             )
         )
