@@ -116,7 +116,7 @@ class S3IndexStore(MemoryStore):
         self._load_index(force_reset=force_reset)
 
     def __hash__(self):
-        return hash((self.collection_name, self.bucket, self.prefix))
+        return hash((self.collection_name, self.bucket, self.prefix, self.endpoint_url, self.manifest_key))
 
     def __eq__(self, other: object) -> bool:
         """
@@ -126,7 +126,7 @@ class S3IndexStore(MemoryStore):
         if not isinstance(other, S3IndexStore):
             return False
 
-        fields = ["collection_name", "bucket", "prefix", "last_updated_field"]
+        fields = ["collection_name", "bucket", "prefix", "endpoint_url", "manifest_key", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
@@ -145,6 +145,12 @@ class OpenDataStore(S3Store):
     def __init__(
         self,
         index: S3IndexStore,
+        bucket: str,
+        compress: bool = True,
+        endpoint_url: Optional[str] = None,
+        sub_dir: Optional[str] = None,
+        key: str = "fs_id",
+        searchable_fields: Optional[List[str]] = None,
         object_file_extension: str = ".json.gz",
         access_as_public_bucket: bool = False,
         **kwargs,
@@ -153,11 +159,23 @@ class OpenDataStore(S3Store):
 
         Args:
             index (S3IndexStore): The store that'll be used as the index, ie for queries pertaining to this store.
+            bucket: name of the bucket.
+            compress: compress files inserted into the store.
+            endpoint_url: this allows the interface with minio service
+            sub_dir: subdirectory of the S3 bucket to store the data.
+            key: main key to index on.
+            searchable_fields: fields to keep in the index store.
             object_file_extension (str, optional): The extension used for the data stored in S3. Defaults to ".json.gz".
             access_as_public_bucket (bool, optional): If True, the S3 bucket will be accessed without signing, ie as if it's a public bucket.
                 This is useful for end users. Defaults to False.
         """
         self.index = index
+        self.bucket = bucket
+        self.compress = compress
+        self.endpoint_url = endpoint_url
+        self.sub_dir = sub_dir.strip("/") + "/" if sub_dir else ""
+        self.key = key
+        self.searchable_fields = searchable_fields if searchable_fields is not None else []
         self.object_file_extension = object_file_extension
         self.access_as_public_bucket = access_as_public_bucket
         if access_as_public_bucket:
@@ -165,6 +183,12 @@ class OpenDataStore(S3Store):
             kwargs["s3_resource_kwargs"]["config"] = Config(signature_version=UNSIGNED)
 
         kwargs["index"] = index
+        kwargs["bucket"] = bucket
+        kwargs["compress"] = compress
+        kwargs["endpoint_url"] = endpoint_url
+        kwargs["sub_dir"] = sub_dir
+        kwargs["key"] = key
+        kwargs["searchable_fields"] = searchable_fields
         kwargs["unpack_data"] = True
         super().__init__(**kwargs)
 
@@ -256,3 +280,37 @@ class OpenDataStore(S3Store):
             all_index_docs.append(index_doc)
         self.index.store_manifest(all_index_docs)
         return all_index_docs
+
+    def __hash__(self):
+        return hash(
+            (
+                self.index.__hash__,
+                self.bucket,
+                self.compress,
+                self.endpoint_url,
+                self.key,
+                self.searchable_fields,
+                self.sub_dir,
+            )
+        )
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for OpenDataStore.
+
+        other: other OpenDataStore to compare with.
+        """
+        if not isinstance(other, OpenDataStore):
+            return False
+
+        fields = [
+            "index",
+            "bucket",
+            "compress",
+            "endpoint_url",
+            "key",
+            "searchable_fields",
+            "sub_dir",
+            "last_updated_field",
+        ]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
