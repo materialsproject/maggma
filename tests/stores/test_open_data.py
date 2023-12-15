@@ -1,6 +1,7 @@
 import time
 from datetime import datetime
 
+import pickle
 import boto3
 import pytest
 import orjson
@@ -288,7 +289,7 @@ def test_aws_error(s3store):
 
 def test_eq(memstore, s3store):
     assert s3store == s3store
-    assert memstore != s3store
+    assert s3store != memstore
 
 
 def test_count_subdir(s3store_w_subdir):
@@ -397,3 +398,14 @@ def test_no_bucket():
         store = OpenDataStore(index=index, bucket="bucket2")
         with pytest.raises(RuntimeError, match=r".*Bucket not present.*"):
             store.connect()
+
+
+def test_pickle(s3store_w_subdir):
+    sobj = pickle.dumps(s3store_w_subdir.index)
+    dobj = pickle.loads(sobj)
+    assert hash(dobj) == hash(s3store_w_subdir.index)
+    assert dobj == s3store_w_subdir.index
+    sobj = pickle.dumps(s3store_w_subdir)
+    dobj = pickle.loads(sobj)
+    assert hash(dobj) == hash(s3store_w_subdir)
+    assert dobj == s3store_w_subdir
