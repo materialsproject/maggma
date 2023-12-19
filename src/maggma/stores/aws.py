@@ -48,6 +48,7 @@ class S3Store(Store):
         store_hash: bool = True,
         unpack_data: bool = True,
         searchable_fields: Optional[List[str]] = None,
+        index_store_kwargs: Optional[dict] = None,
         **kwargs,
     ):
         """
@@ -74,10 +75,17 @@ class S3Store(Store):
             unpack_data: whether to decompress and unpack byte data when querying from
                 the bucket.
             searchable_fields: fields to keep in the index store.
+            index_store_kwargs: kwargs to pass to the index store. Allows the user to 
+                use kwargs here to update the index store.
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for S3Store")
-        self.index = index
+        if index_store_kwargs is not None:
+            d_ = index.as_dict()
+            d_.update(index_store_kwargs)
+            self.index = index.__class__.from_dict(d_)
+        else:
+            self.index = index
 
         self.bucket = bucket
         self.s3_profile = s3_profile
