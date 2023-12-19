@@ -2,6 +2,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
+
 from maggma.cli.multiprocessing import AsyncUnorderedMap, BackPressure, grouper, safe_dispatch
 
 

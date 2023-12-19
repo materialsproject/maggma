@@ -166,7 +166,8 @@ class OpenDataStore(S3Store):
             key: main key to index on.
             searchable_fields: fields to keep in the index store.
             object_file_extension (str, optional): The extension used for the data stored in S3. Defaults to ".json.gz".
-            access_as_public_bucket (bool, optional): If True, the S3 bucket will be accessed without signing, ie as if it's a public bucket.
+            access_as_public_bucket (bool, optional): If True, the S3 bucket will be accessed without signing,
+            ie as if it's a public bucket.
                 This is useful for end users. Defaults to False.
         """
         self.index = index

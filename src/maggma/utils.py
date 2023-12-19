@@ -7,16 +7,16 @@ import signal
 import uuid
 from datetime import datetime, timedelta
 from importlib import import_module
-from typing import Dict, Iterable, Optional, Union, Set
+from typing import Dict, Iterable, Optional, Set, Union
 
 from bson.json_util import ObjectId
 from dateutil import parser
+from pydantic import BaseModel
+from pydantic._internal._utils import lenient_issubclass
 from pydash.objects import get, has, set_
 from pydash.objects import unset as _unset
 from pydash.utilities import to_path
 from pymongo.collection import Collection
-from pydantic import BaseModel
-from pydantic._internal._utils import lenient_issubclass
 
 # import tqdm Jupyter widget if running inside Jupyter
 from tqdm.auto import tqdm
@@ -264,7 +264,8 @@ class ReportingHandler(logging.Handler):
             maggma_record["build_id"] = self.build_id
             self.reporting_store.update(maggma_record, key="_id")
 
-def get_flat_models_from_model(model: BaseModel, known_models: Set[BaseModel] = set()):
+
+def get_flat_models_from_model(model: BaseModel, known_models: Optional[Set[BaseModel]] = None):
     """Get all sub-models from a pydantic model.
 
     Args:
@@ -274,6 +275,7 @@ def get_flat_models_from_model(model: BaseModel, known_models: Set[BaseModel] = 
     Returns:
         (set[BaseModel]): Set of pydantic models
     """
+    known_models = known_models or set()
     known_models.add(model)
     for field_info in model.model_fields.values():
         field_type = field_info.annotation

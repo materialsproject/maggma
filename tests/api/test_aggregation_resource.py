@@ -3,11 +3,12 @@ from random import randint
 
 import pytest
 from fastapi import FastAPI
+from pydantic import BaseModel, Field
+from starlette.testclient import TestClient
+
 from maggma.api.query_operator.core import QueryOperator
 from maggma.api.resource import AggregationResource
 from maggma.stores import MemoryStore
-from pydantic import BaseModel, Field
-from starlette.testclient import TestClient
 
 
 class Owner(BaseModel):

@@ -6,6 +6,7 @@ from random import randint
 from typing import Dict, List
 
 import pytest
+
 from maggma.builders import GroupBuilder
 from maggma.stores import MemoryStore
 

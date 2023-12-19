@@ -2,6 +2,7 @@
 Tests for Projection_Builder
 """
 import pytest
+
 from maggma.builders.projection_builder import Projection_Builder
 from maggma.stores import MemoryStore
 

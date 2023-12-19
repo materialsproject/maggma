@@ -5,10 +5,11 @@ from datetime import datetime
 import numpy as np
 import numpy.testing as nptu
 import pytest
+from pymongo.errors import ConfigurationError
+
 from maggma.core import StoreError
 from maggma.stores import GridFSStore, MongoStore
 from maggma.stores.gridfs import GridFSURIStore, files_collection_fields
-from pymongo.errors import ConfigurationError
 
 
 @pytest.fixture()

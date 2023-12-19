@@ -1,16 +1,16 @@
+import pickle
 import time
 from datetime import datetime
 
-import pickle
 import boto3
-import pytest
 import orjson
-from bson import json_util
-
+import pytest
 from botocore.exceptions import ClientError
+from bson import json_util
+from moto import mock_s3
+
 from maggma.stores import MemoryStore
 from maggma.stores.open_data import OpenDataStore, S3IndexStore
-from moto import mock_s3
 
 
 @pytest.fixture()
@@ -213,7 +213,7 @@ def test_rebuild_index_from_s3_data(s3store):
     index_docs = s3store.rebuild_index_from_s3_data()
     assert len(index_docs) == 3
     for doc in index_docs:
-        for key in doc.keys():
+        for key in doc:
             assert key == "task_id" or key == "last_updated"
 
 
@@ -222,7 +222,7 @@ def test_rebuild_index_from_data(s3store):
     index_docs = s3store.rebuild_index_from_data(data)
     assert len(index_docs) == 1
     for doc in index_docs:
-        for key in doc.keys():
+        for key in doc:
             assert key == "task_id" or key == "last_updated"
 
 
