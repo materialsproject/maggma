@@ -4,10 +4,11 @@ from datetime import datetime
 import boto3
 import pytest
 from botocore.exceptions import ClientError
-from maggma.stores import MemoryStore, MongoStore, S3Store
-from maggma.stores.ssh_tunnel import SSHTunnel
 from moto import mock_s3
 from sshtunnel import BaseSSHTunnelForwarderError
+
+from maggma.stores import MemoryStore, MongoStore, S3Store
+from maggma.stores.ssh_tunnel import SSHTunnel
 
 
 @pytest.fixture()

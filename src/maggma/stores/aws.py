@@ -361,9 +361,8 @@ class S3Store(Store):
     def _get_endpoint_url(self):
         if self.ssh_tunnel is None:
             return self.endpoint_url
-        else:
-            host, port = self.ssh_tunnel.local_address
-            return f"http://{host}:{port}"
+        host, port = self.ssh_tunnel.local_address
+        return f"http://{host}:{port}"
 
     def _get_bucket(self):
         """If on the main thread return the bucket created above, else create a new
@@ -385,7 +384,7 @@ class S3Store(Store):
         try:
             resource.meta.client.head_bucket(Bucket=self.bucket)
         except ClientError:
-            raise RuntimeError(f"Bucket not present on AWS")
+            raise RuntimeError("Bucket not present on AWS")
         bucket = resource.Bucket(self.bucket)
 
         return resource, bucket
