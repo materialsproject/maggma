@@ -93,7 +93,7 @@ orjson==3.9.10
     # via maggma (setup.py)
 packaging==23.2
     # via mongomock
-paramiko==3.3.1
+paramiko==3.4.0
     # via sshtunnel
 pkgutil-resolve-name==1.3.10
     # via jsonschema
