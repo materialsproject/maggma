@@ -80,13 +80,13 @@ class S3Store(Store):
         """
         if boto3 is None:
             raise RuntimeError("boto3 and botocore are required for S3Store")
-        if index_store_kwargs is not None:
+        self.index_store_kwargs = index_store_kwargs or {}
+        if index_store_kwargs:
             d_ = index.as_dict()
             d_.update(index_store_kwargs)
             self.index = index.__class__.from_dict(d_)
         else:
             self.index = index
-
         self.bucket = bucket
         self.s3_profile = s3_profile
         self.compress = compress
