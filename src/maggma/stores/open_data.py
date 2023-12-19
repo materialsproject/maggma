@@ -169,7 +169,6 @@ class OpenDataStore(S3Store):
             access_as_public_bucket (bool, optional): If True, the S3 bucket will be accessed without signing, ie as if it's a public bucket.
                 This is useful for end users. Defaults to False.
         """
-        self.index = index
         self.bucket = bucket
         self.compress = compress
         self.endpoint_url = endpoint_url
@@ -190,7 +189,7 @@ class OpenDataStore(S3Store):
         kwargs["key"] = key
         kwargs["searchable_fields"] = searchable_fields
         kwargs["unpack_data"] = True
-        super().__init__(**kwargs)
+        super().__init__(index=index, **kwargs)
 
     def _get_full_key_path(self, id: str) -> str:
         return f"{self.sub_dir}{id}{self.object_file_extension}"
