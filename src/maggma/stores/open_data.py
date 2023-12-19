@@ -166,14 +166,11 @@ class OpenDataStore(S3Store):
             key: main key to index on.
             searchable_fields: fields to keep in the index store.
             object_file_extension (str, optional): The extension used for the data stored in S3. Defaults to ".json.gz".
-            access_as_public_bucket (bool, optional): If True, the S3 bucket will be accessed without signing, ie as if it's a public bucket.
+            access_as_public_bucket (bool, optional): If True, the S3 bucket will be accessed without signing,
+            ie as if it's a public bucket.
                 This is useful for end users. Defaults to False.
         """
-        self.bucket = bucket
-        self.compress = compress
-        self.endpoint_url = endpoint_url
         self.sub_dir = sub_dir.strip("/") + "/" if sub_dir else ""
-        self.key = key
         self.searchable_fields = searchable_fields if searchable_fields is not None else []
         self.object_file_extension = object_file_extension
         self.access_as_public_bucket = access_as_public_bucket
@@ -189,7 +186,7 @@ class OpenDataStore(S3Store):
         kwargs["key"] = key
         kwargs["searchable_fields"] = searchable_fields
         kwargs["unpack_data"] = True
-        super().__init__(index=index, **kwargs)
+        super().__init__(**kwargs)
 
     def _get_full_key_path(self, id: str) -> str:
         return f"{self.sub_dir}{id}{self.object_file_extension}"
