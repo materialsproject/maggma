@@ -158,7 +158,7 @@ class StoreFacade(Store):
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        **kwargs
+        **kwargs,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
         Simple grouping function that will group documents
@@ -194,7 +194,7 @@ class StoreFacade(Store):
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Queries the Store for a single document
@@ -409,7 +409,7 @@ class MultiStore:
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        **kwargs
+        **kwargs,
     ) -> List[Dict]:
         """
         Queries the Store for a set of documents
@@ -467,7 +467,7 @@ class MultiStore:
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        **kwargs
+        **kwargs,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
         """
         Simple grouping function that will group documents
@@ -506,7 +506,7 @@ class MultiStore:
         criteria: Optional[Dict] = None,
         properties: Union[Dict, List, None] = None,
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
-        **kwargs
+        **kwargs,
     ):
         """
         Queries the Store for a single document

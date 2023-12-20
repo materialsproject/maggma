@@ -674,7 +674,8 @@ class JSONStore(MemoryStore):
         Loads the files into the collection in memory
 
         Args:
-            force_reset: whether to reset the connection or not. If False (default) and .connect() has been called previously, the .json file will not be read in again. This can improve performance
+            force_reset: whether to reset the connection or not. If False (default) and .connect()
+            has been called previously, the .json file will not be read in again. This can improve performance
             on systems with slow storage when multiple connect / disconnects are performed.
         """
         if self._coll is None or force_reset:

@@ -32,7 +32,7 @@ jobs:
       - name: Run pre-commit
         run: |
           pip install pre-commit
-          pre-commit run
+          pre-commit run --all-files
 
   test:
     needs: lint

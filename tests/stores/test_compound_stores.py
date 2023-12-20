@@ -2,8 +2,9 @@ from datetime import datetime
 from itertools import chain
 
 import pytest
-from maggma.stores import ConcatStore, JointStore, MemoryStore, MongoStore
 from pydash import get
+
+from maggma.stores import ConcatStore, JointStore, MemoryStore, MongoStore
 
 
 @pytest.fixture()

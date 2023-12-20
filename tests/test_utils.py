@@ -5,6 +5,7 @@ from datetime import datetime
 from time import sleep
 
 import pytest
+
 from maggma.utils import (
     Timeout,  # dt_to_isoformat_ceil_ms,; isostr_to_dt,
     dynamic_import,

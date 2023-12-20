@@ -226,16 +226,17 @@ class ReadOnlyResource(Resource):
 
             try:
                 with query_timeout(self.timeout):
-
                     if isinstance(self.store, S3Store):
-                        count = self.store.count(criteria = query.get("criteria"))  # type: ignore
+                        count = self.store.count(criteria=query.get("criteria"))  # type: ignore
 
                         if self.query_disk_use:
                             data = list(self.store.query(**query, allow_disk_use=True))  # type: ignore
                         else:
                             data = list(self.store.query(**query))
                     else:
-                        count = self.store.count(criteria = query.get("criteria"), hint = query.get("count_hint"))  # type: ignore
+                        count = self.store.count(
+                            criteria=query.get("criteria"), hint=query.get("count_hint")
+                        )  # type: ignore
 
                         pipeline = generate_query_pipeline(query, self.store)
 
@@ -244,12 +245,7 @@ class ReadOnlyResource(Resource):
                         if query.get("agg_hint"):
                             agg_kwargs["hint"] = query["agg_hint"]
 
-                        data = list(
-                            self.store._collection.aggregate(
-                                pipeline,
-                                **agg_kwargs
-                            )
-                        )
+                        data = list(self.store._collection.aggregate(pipeline, **agg_kwargs))
 
             except (NetworkTimeout, PyMongoError) as e:
                 if e.timeout:

@@ -3,11 +3,12 @@ from enum import Enum
 
 import pytest
 from fastapi import HTTPException
-from maggma.api.query_operator import NumericQuery, PaginationQuery, SortQuery, SparseFieldsQuery
-from maggma.api.query_operator.submission import SubmissionQuery
 from monty.serialization import dumpfn, loadfn
 from monty.tempfile import ScratchDir
 from pydantic import BaseModel, Field
+
+from maggma.api.query_operator import NumericQuery, PaginationQuery, SortQuery, SparseFieldsQuery
+from maggma.api.query_operator.submission import SubmissionQuery
 
 
 class Owner(BaseModel):

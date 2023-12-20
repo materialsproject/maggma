@@ -11,14 +11,15 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
-from maggma.core import StoreError
-from maggma.stores import AliasingStore, MemoryStore, MongograntStore, MongoStore, SandboxStore, VaultStore
-from maggma.stores.advanced_stores import substitute
 from mongogrant import Client
 from mongogrant.client import check, seed
 from mongogrant.config import Config
 from pymongo import MongoClient
 from pymongo.collection import Collection
+
+from maggma.core import StoreError
+from maggma.stores import AliasingStore, MemoryStore, MongograntStore, MongoStore, SandboxStore, VaultStore
+from maggma.stores.advanced_stores import substitute
 
 
 @pytest.fixture()

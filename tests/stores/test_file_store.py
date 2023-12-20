@@ -25,6 +25,7 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 
 import pytest
+
 from maggma.core import StoreError
 from maggma.stores.file_store import FileStore
 

@@ -48,6 +48,6 @@ plugins:
   - search
   - minify
   - mkdocstrings:
-      handlers: 
-        python: 
+      handlers:
+        python:
           paths: [src]
