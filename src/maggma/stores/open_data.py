@@ -24,6 +24,7 @@ class S3IndexStore(MemoryStore):
 
     def __init__(
         self,
+        collection_name: str,
         bucket: str,
         prefix: str = "",
         endpoint_url: Optional[str] = None,
@@ -33,6 +34,7 @@ class S3IndexStore(MemoryStore):
         """Initializes an S3IndexStore
 
         Args:
+            collection_name (str): name of the collection
             bucket (str): Name of the bucket where the index is stored.
             prefix (str, optional): The prefix to add to the name of the index, i.e. the manifest key.
                 Defaults to "".
@@ -40,6 +42,7 @@ class S3IndexStore(MemoryStore):
                 Defaults to None, indicating to use the default configured AWS S3.
             manifest_key (str, optional): The name of the index. Defaults to "manifest.json".
         """
+        self.collection_name = collection_name
         self.bucket = bucket
         self.prefix = prefix
         self.endpoint_url = endpoint_url
@@ -48,6 +51,7 @@ class S3IndexStore(MemoryStore):
         self.s3_session_kwargs = {}
         self.manifest_key = manifest_key
 
+        kwargs["collection_name"] = collection_name
         super().__init__(**kwargs)
 
     def _get_full_key_path(self) -> str:
@@ -189,15 +193,16 @@ class OpenDataStore(S3Store):
         super().__init__(**kwargs)
 
     def _get_full_key_path(self, id: str) -> str:
-        return f"{self.sub_dir}{id}{self.object_file_extension}"
-
-    def _get_id_from_full_key_path(self, key: str) -> str:
-        prefix, suffix = self.sub_dir, self.object_file_extension
-        if prefix in key and suffix in key:
-            start_idx = key.index(prefix) + len(prefix)
-            end_idx = key.index(suffix, start_idx)
-            return key[start_idx:end_idx]
-        return ""
+        if self.index.collection_name == "thermo" and self.key == "thermo_id":
+            material_id, thermo_type = id.split("_", 1)
+            return f"{self.sub_dir}{thermo_type}/{material_id}{self.object_file_extension}"
+        elif self.index.collection_name == "xas" and self.key == "spectrum_id":
+            material_id, spectrum_type, absorbing_element, edge = id.rsplit("-", 3)
+            return f"{self.sub_dir}{edge}/{spectrum_type}/{absorbing_element}/{material_id}{self.object_file_extension}"
+        elif self.index.collection_name == "synth_descriptions" and self.key == "doi":
+            return f"{self.sub_dir}{id.replace('/', '_')}{self.object_file_extension}"
+        else:
+            return f"{self.sub_dir}{id}{self.object_file_extension}"
 
     def _get_compression_function(self) -> Callable:
         return gzip.compress

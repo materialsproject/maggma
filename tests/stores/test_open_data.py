@@ -409,3 +409,107 @@ def test_pickle(s3store_w_subdir):
     dobj = pickle.loads(sobj)
     assert hash(dobj) == hash(s3store_w_subdir)
     assert dobj == s3store_w_subdir
+
+
+@pytest.fixture()
+def thermo_store():
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+
+        index = S3IndexStore(collection_name="thermo", bucket="bucket1", key="thermo_id")
+        store = OpenDataStore(index=index, bucket="bucket1", key="thermo_id")
+        store.connect()
+
+        store.update(
+            [
+                {
+                    "thermo_id": "mp-1_R2SCAN",
+                    "data": "asd",
+                    store.last_updated_field: datetime.utcnow(),
+                }
+            ]
+        )
+
+        yield store
+
+
+def test_thermo_collection_special_handling(thermo_store):
+    assert thermo_store.s3_bucket.Object(thermo_store._get_full_key_path("mp-1_R2SCAN")).key == "R2SCAN/mp-1.json.gz"
+    thermo_store.update([{"thermo_id": "mp-2_RSCAN", "data": "asd"}])
+    index_docs = thermo_store.rebuild_index_from_s3_data()
+    assert len(index_docs) == 2
+    for doc in index_docs:
+        for key in doc:
+            assert key == "thermo_id" or key == "last_updated"
+
+
+@pytest.fixture()
+def xas_store():
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+
+        index = S3IndexStore(collection_name="xas", bucket="bucket1", key="spectrum_id")
+        store = OpenDataStore(index=index, bucket="bucket1", key="spectrum_id")
+        store.connect()
+
+        store.update(
+            [
+                {
+                    "spectrum_id": "mp-1-XAFS-Cr-K",
+                    "data": "asd",
+                    store.last_updated_field: datetime.utcnow(),
+                }
+            ]
+        )
+
+        yield store
+
+
+def test_xas_collection_special_handling(xas_store):
+    assert xas_store.s3_bucket.Object(xas_store._get_full_key_path("mp-1-XAFS-Cr-K")).key == "K/XAFS/Cr/mp-1.json.gz"
+    xas_store.update([{"spectrum_id": "mp-2-XAFS-Li-K", "data": "asd"}])
+    index_docs = xas_store.rebuild_index_from_s3_data()
+    assert len(index_docs) == 2
+    for doc in index_docs:
+        for key in doc:
+            assert key == "spectrum_id" or key == "last_updated"
+
+
+@pytest.fixture()
+def synth_descriptions_store():
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+
+        index = S3IndexStore(collection_name="synth_descriptions", bucket="bucket1", key="doi")
+        store = OpenDataStore(index=index, bucket="bucket1", key="doi")
+        store.connect()
+
+        store.update(
+            [
+                {
+                    "doi": "10.1149/2.051201jes",
+                    "data": "asd",
+                    store.last_updated_field: datetime.utcnow(),
+                }
+            ]
+        )
+
+        yield store
+
+
+def test_synth_descriptions_collection_special_handling(synth_descriptions_store):
+    assert (
+        synth_descriptions_store.s3_bucket.Object(
+            synth_descriptions_store._get_full_key_path("10.1149/2.051201jes")
+        ).key
+        == "10.1149_2.051201jes.json.gz"
+    )
+    synth_descriptions_store.update([{"doi": "10.1039/C5CP01095K", "data": "asd"}])
+    index_docs = synth_descriptions_store.rebuild_index_from_s3_data()
+    assert len(index_docs) == 2
+    for doc in index_docs:
+        for key in doc:
+            assert key == "doi" or key == "last_updated"
