@@ -196,13 +196,12 @@ class OpenDataStore(S3Store):
         if self.index.collection_name == "thermo" and self.key == "thermo_id":
             material_id, thermo_type = id.split("_", 1)
             return f"{self.sub_dir}{thermo_type}/{material_id}{self.object_file_extension}"
-        elif self.index.collection_name == "xas" and self.key == "spectrum_id":
+        if self.index.collection_name == "xas" and self.key == "spectrum_id":
             material_id, spectrum_type, absorbing_element, edge = id.rsplit("-", 3)
             return f"{self.sub_dir}{edge}/{spectrum_type}/{absorbing_element}/{material_id}{self.object_file_extension}"
-        elif self.index.collection_name == "synth_descriptions" and self.key == "doi":
+        if self.index.collection_name == "synth_descriptions" and self.key == "doi":
             return f"{self.sub_dir}{id.replace('/', '_')}{self.object_file_extension}"
-        else:
-            return f"{self.sub_dir}{id}{self.object_file_extension}"
+        return f"{self.sub_dir}{id}{self.object_file_extension}"
 
     def _get_compression_function(self) -> Callable:
         return gzip.compress
