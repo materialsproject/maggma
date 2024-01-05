@@ -1,5 +1,18 @@
 # Changelog
 
+## [v0.60.1](https://github.com/materialsproject/maggma/tree/v0.60.1) (2024-01-05)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.60.0...v0.60.1)
+
+**Implemented enhancements:**
+
+- Patch s3 kwarg [\#900](https://github.com/materialsproject/maggma/pull/900) ([jmmshn](https://github.com/jmmshn))
+
+**Merged pull requests:**
+
+- special casing for thermo, xas and synth\_descriptions collections in OpenData [\#904](https://github.com/materialsproject/maggma/pull/904) ([kbuma](https://github.com/kbuma))
+- linting fixes [\#901](https://github.com/materialsproject/maggma/pull/901) ([jmmshn](https://github.com/jmmshn))
+
 ## [v0.60.0](https://github.com/materialsproject/maggma/tree/v0.60.0) (2023-12-15)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.59.0...v0.60.0)
@@ -178,19 +191,19 @@
 
 ## [v0.53.0](https://github.com/materialsproject/maggma/tree/v0.53.0) (2023-08-02)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.1...v0.53.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.2...v0.53.0)
 
 **Merged pull requests:**
 
 - allow \>5GB and turn on multi-part uploads for AWS [\#829](https://github.com/materialsproject/maggma/pull/829) ([kbuma](https://github.com/kbuma))
 
-## [v0.52.1](https://github.com/materialsproject/maggma/tree/v0.52.1) (2023-08-02)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.2...v0.52.1)
-
 ## [v0.52.2](https://github.com/materialsproject/maggma/tree/v0.52.2) (2023-08-02)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.0...v0.52.2)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.1...v0.52.2)
+
+## [v0.52.1](https://github.com/materialsproject/maggma/tree/v0.52.1) (2023-08-02)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.0...v0.52.1)
 
 **Merged pull requests:**
 
@@ -378,19 +391,19 @@
 
 ## [v0.51.4](https://github.com/materialsproject/maggma/tree/v0.51.4) (2023-06-02)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.3...v0.51.4)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.4)
 
 **Merged pull requests:**
 
 - modify JSONStore file creation [\#792](https://github.com/materialsproject/maggma/pull/792) ([gpetretto](https://github.com/gpetretto))
 
-## [v0.51.3](https://github.com/materialsproject/maggma/tree/v0.51.3) (2023-05-29)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.2...v0.51.3)
-
 ## [v0.51.2](https://github.com/materialsproject/maggma/tree/v0.51.2) (2023-05-29)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.2)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.3...v0.51.2)
+
+## [v0.51.3](https://github.com/materialsproject/maggma/tree/v0.51.3) (2023-05-29)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.1...v0.51.3)
 
 **Merged pull requests:**
 
@@ -748,23 +761,23 @@
 
 ## [v0.44.1](https://github.com/materialsproject/maggma/tree/v0.44.1) (2022-03-08)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.44.1)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.44.1)
 
 **Merged pull requests:**
 
 - added localhost test for MongoURIStore [\#595](https://github.com/materialsproject/maggma/pull/595) ([jmmshn](https://github.com/jmmshn))
 
-## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
+## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.44.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.43.0...v0.42.0)
 
 ## [v0.43.0](https://github.com/materialsproject/maggma/tree/v0.43.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.42.0...v0.43.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.44.0...v0.43.0)
 
-## [v0.42.0](https://github.com/materialsproject/maggma/tree/v0.42.0) (2022-03-07)
+## [v0.44.0](https://github.com/materialsproject/maggma/tree/v0.44.0) (2022-03-07)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.42.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.41.1...v0.44.0)
 
 **Merged pull requests:**
 
@@ -844,19 +857,19 @@
 
 ## [v0.36.0](https://github.com/materialsproject/maggma/tree/v0.36.0) (2021-12-06)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.35.0...v0.36.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.34.0...v0.36.0)
 
 **Merged pull requests:**
 
 - Added on-disk MongoDB compatible MontyStore [\#514](https://github.com/materialsproject/maggma/pull/514) ([utf](https://github.com/utf))
 
-## [v0.35.0](https://github.com/materialsproject/maggma/tree/v0.35.0) (2021-12-01)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.34.0...v0.35.0)
-
 ## [v0.34.0](https://github.com/materialsproject/maggma/tree/v0.34.0) (2021-12-01)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.2...v0.34.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.35.0...v0.34.0)
+
+## [v0.35.0](https://github.com/materialsproject/maggma/tree/v0.35.0) (2021-12-01)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.33.2...v0.35.0)
 
 **Merged pull requests:**
 
