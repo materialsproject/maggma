@@ -26,7 +26,6 @@ class PandasMemoryStore(Store):
         **kwargs,
     ):
         self._data = None
-        self.kwargs = kwargs
         super().__init__(**kwargs)
 
     @property
@@ -144,7 +143,7 @@ class PandasMemoryStore(Store):
             limit: limit on total number of documents returned
 
         Returns:
-            Iterator[Dict]: an iterator over the documents that match the query paramaters
+            Iterator[Dict]: an iterator over the documents that match the query parameters
 
         Raises:
             AttributeError: if criteria exists and does not include a query key
