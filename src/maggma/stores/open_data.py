@@ -1,17 +1,17 @@
 import gzip
+from datetime import datetime
 from io import BytesIO
 from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
 
 import orjson
+import pandas as pd
 from boto3 import Session
 from botocore import UNSIGNED
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from bson import json_util
-from datetime import datetime
-import pandas as pd
-from maggma.core.store import Sort, Store
 
+from maggma.core.store import Sort, Store
 from maggma.stores.aws import S3Store
 
 
@@ -44,7 +44,7 @@ class PandasMemoryStore(Store):
         """
         Return a string representing this data source
         """
-        return f"imem://"
+        return "imem://"
 
     def connect(self, force_reset: bool = False):
         """
@@ -54,14 +54,14 @@ class PandasMemoryStore(Store):
         Args:
             force_reset: whether to reset the connection or not
         """
-        pass
+        return
 
     def close(self):
         """
         Closes any connections
         Not necessary for this type of store but here for compatibility.
         """
-        pass
+        return
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
@@ -259,8 +259,7 @@ class PandasMemoryStore(Store):
         """
         criteria = criteria or {}
 
-        results = [key for key, _ in self.groupby(field, properties=[field], criteria=criteria)]
-        return results
+        return [key for key, _ in self.groupby(field, properties=[field], criteria=criteria)]
 
     def groupby(
         self,

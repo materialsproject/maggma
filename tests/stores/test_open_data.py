@@ -9,16 +9,14 @@ from botocore.exceptions import ClientError
 from bson import json_util
 from moto import mock_s3
 
-from maggma.stores.open_data import PandasMemoryStore, OpenDataStore, S3IndexStore
-
-import pandas as pd
+from maggma.stores.open_data import OpenDataStore, PandasMemoryStore, S3IndexStore
 
 
 @pytest.fixture()
 def memstore():
     store = PandasMemoryStore(key="task_id")
     store.connect()
-    yield store
+    return store
 
 
 @pytest.fixture()
