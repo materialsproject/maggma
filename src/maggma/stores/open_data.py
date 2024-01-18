@@ -275,7 +275,9 @@ class PandasMemoryStore(Store):
 
         Args:
             keys: fields to group documents
-            criteria: PyMongo filter for documents to search in
+            criteria: the value of the `query` key will be used as the
+                Pandas string expression to query with;
+                all other data will be ignored
             properties: properties to return in grouped documents
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
