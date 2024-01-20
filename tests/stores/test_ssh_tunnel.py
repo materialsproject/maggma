@@ -1,10 +1,11 @@
 import paramiko
 import pymongo
 import pytest
-from maggma.stores.mongolike import MongoStore
-from maggma.stores.ssh_tunnel import SSHTunnel
 from monty.serialization import dumpfn, loadfn
 from paramiko.ssh_exception import AuthenticationException, NoValidConnectionsError, SSHException
+
+from maggma.stores.mongolike import MongoStore
+from maggma.stores.ssh_tunnel import SSHTunnel
 
 
 @pytest.fixture()
@@ -19,7 +20,7 @@ def ssh_server_available():  # noqa: PT004
         pytest.skip("No SSH server to test tunnel against")
 
 
-def local_port_available(local_port):  # noqa: PT004
+def local_port_available(local_port):
     """Fixture to determine if a local port is available to test the SSH tunnel."""
     client = paramiko.SSHClient()
     client.set_missing_host_key_policy(paramiko.AutoAddPolicy())

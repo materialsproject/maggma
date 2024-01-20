@@ -1,6 +1,6 @@
 from typing import Any, Dict, List, Optional, Type
-import orjson
 
+import orjson
 from fastapi import HTTPException, Request, Response
 from pydantic import BaseModel
 from pymongo import timeout as query_timeout
@@ -11,8 +11,7 @@ from maggma.api.models import Response as ResponseModel
 from maggma.api.query_operator import QueryOperator
 from maggma.api.resource import HeaderProcessor, Resource
 from maggma.api.resource.utils import attach_query_ops
-from maggma.api.utils import STORE_PARAMS, merge_queries
-from maggma.api.utils import serialization_helper
+from maggma.api.utils import STORE_PARAMS, merge_queries, serialization_helper
 from maggma.core import Store
 
 
@@ -69,7 +68,7 @@ class AggregationResource(Resource):
 
         def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
             request: Request = queries.pop("request")  # type: ignore
-            temp_response: Response = queries.pop("temp_response")  # type: ignore
+            queries.pop("temp_response")  # type: ignore
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 

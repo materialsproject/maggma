@@ -4,9 +4,10 @@ from typing import Union
 
 import pytest
 from bson import ObjectId
-from maggma.api.utils import api_sanitize, serialization_helper
 from monty.json import MSONable
 from pydantic import BaseModel, Field
+
+from maggma.api.utils import api_sanitize, serialization_helper
 
 
 class SomeEnum(Enum):

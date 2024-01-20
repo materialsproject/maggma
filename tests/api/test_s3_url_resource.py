@@ -1,4 +1,5 @@
 import pytest
+
 from maggma.api.resource import S3URLResource
 from maggma.stores import MemoryStore
 

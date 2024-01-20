@@ -5,13 +5,14 @@ from urllib.parse import urlencode
 
 import pytest
 from fastapi import FastAPI
+from pydantic import BaseModel, Field
+from requests import Response
+from starlette.testclient import TestClient
+
 from maggma.api.query_operator import NumericQuery, SparseFieldsQuery, StringQueryOperator
 from maggma.api.resource import ReadOnlyResource
 from maggma.api.resource.core import HintScheme
 from maggma.stores import AliasingStore, MemoryStore
-from pydantic import BaseModel, Field
-from requests import Response
-from starlette.testclient import TestClient
 
 
 class Owner(BaseModel):
