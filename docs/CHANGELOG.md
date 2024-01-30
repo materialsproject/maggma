@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.61.1](https://github.com/materialsproject/maggma/tree/v0.61.1) (2024-01-30)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.61.0...v0.61.1)
+
+**Merged pull requests:**
+
+- Make get by key default false [\#910](https://github.com/materialsproject/maggma/pull/910) ([munrojm](https://github.com/munrojm))
+
 ## [v0.61.0](https://github.com/materialsproject/maggma/tree/v0.61.0) (2024-01-19)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.60.2...v0.61.0)
@@ -261,7 +269,7 @@
 
 ## [v0.51.22](https://github.com/materialsproject/maggma/tree/v0.51.22) (2023-07-21)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.21...v0.51.22)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.20...v0.51.22)
 
 **Closed issues:**
 
@@ -271,13 +279,13 @@
 
 - misc. MontyStore improvements [\#827](https://github.com/materialsproject/maggma/pull/827) ([rkingsbury](https://github.com/rkingsbury))
 
-## [v0.51.21](https://github.com/materialsproject/maggma/tree/v0.51.21) (2023-07-11)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.20...v0.51.21)
-
 ## [v0.51.20](https://github.com/materialsproject/maggma/tree/v0.51.20) (2023-07-11)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.19...v0.51.20)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.21...v0.51.20)
+
+## [v0.51.21](https://github.com/materialsproject/maggma/tree/v0.51.21) (2023-07-11)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.19...v0.51.21)
 
 **Merged pull requests:**
 
@@ -333,19 +341,19 @@
 
 ## [v0.51.13](https://github.com/materialsproject/maggma/tree/v0.51.13) (2023-07-06)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.11...v0.51.13)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.12...v0.51.13)
 
 **Merged pull requests:**
 
 - Add explicit store close to resources [\#814](https://github.com/materialsproject/maggma/pull/814) ([munrojm](https://github.com/munrojm))
 
-## [v0.51.11](https://github.com/materialsproject/maggma/tree/v0.51.11) (2023-06-27)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.12...v0.51.11)
-
 ## [v0.51.12](https://github.com/materialsproject/maggma/tree/v0.51.12) (2023-06-27)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.10...v0.51.12)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.11...v0.51.12)
+
+## [v0.51.11](https://github.com/materialsproject/maggma/tree/v0.51.11) (2023-06-27)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.10...v0.51.11)
 
 ## [v0.51.10](https://github.com/materialsproject/maggma/tree/v0.51.10) (2023-06-27)
 
