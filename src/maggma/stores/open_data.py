@@ -151,6 +151,7 @@ class PandasMemoryStore(Store):
         ret = self._query(criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit)
         return (row.to_dict() for _, row in ret.iterrows())
 
+    @staticmethod
     def add_missing_items(to_dt: pd.DataFrame, from_dt: pd.DataFrame, on: List[str]) -> pd.DataFrame:
         orig_columns = to_dt.columns
         merged = to_dt.merge(from_dt, on=on, how="left", suffixes=("", "_B"))
