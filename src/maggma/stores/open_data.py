@@ -640,12 +640,12 @@ class OpenDataStore(S3Store):
         self.write_doc_to_s3(items, index)
         self.index.update(index)
 
-    def write_doc_to_s3(self, doc: Dict, search_keys: List[str]) -> Dict:
+    def write_doc_to_s3(self, doc, search_keys):
         if not isinstance(doc, pd.DataFrame):
-            raise NotImplementedError("doc paramater must be a Pandas DataFrame for the implementation for this store")
+            raise NotImplementedError("doc parameter must be a Pandas DataFrame for the implementation for this store")
         if not isinstance(search_keys, pd.DataFrame):
             raise NotImplementedError(
-                "search_keys paramater must be a Pandas DataFrame for the implementation for this store"
+                "search_keys parameter must be a Pandas DataFrame for the implementation for this store"
             )
         # def write_doc_to_s3(self, items: pd.DataFrame, index: pd.DataFrame) -> None:
         string_io = StringIO()
