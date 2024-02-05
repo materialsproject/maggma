@@ -9,7 +9,7 @@ from maggma.api.utils import STORE_PARAMS
 
 class SubmissionQuery(QueryOperator):
     """
-    Method to generate a query for submission data using status and datetime
+    Method to generate a query for submission data using status and datetime.
     """
 
     def __init__(self, status_enum):
@@ -40,4 +40,4 @@ class SubmissionQuery(QueryOperator):
         self.query = query
 
     def query(self):
-        "Stub query function for abstract class"
+        "Stub query function for abstract class."

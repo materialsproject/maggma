@@ -17,7 +17,7 @@ from maggma.core import Store
 
 class AggregationResource(Resource):
     """
-    Implements a REST Compatible Resource as a GET URL endpoint
+    Implements a REST Compatible Resource as a GET URL endpoint.
     """
 
     def __init__(
@@ -58,7 +58,7 @@ class AggregationResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         self.build_dynamic_model_search()

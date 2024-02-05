@@ -1,5 +1,5 @@
 """
-Advanced Stores for connecting to Microsoft Azure data
+Advanced Stores for connecting to Microsoft Azure data.
 """
 import os
 import threading
@@ -56,7 +56,7 @@ class AzureBlobStore(Store):
         **kwargs,
     ):
         """
-        Initializes an AzureBlob Store
+        Initializes an AzureBlob Store.
 
         Args:
             index: a store to use to index the Azure blob
@@ -122,13 +122,13 @@ class AzureBlobStore(Store):
     def name(self) -> str:
         """
         Returns:
-            a string representing this data source
+            a string representing this data source.
         """
         return f"container://{self.container_name}"
 
     def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
         """
-        Connect to the source data
+        Connect to the source data.
         """
 
         service_client = self._get_service_client()
@@ -151,7 +151,7 @@ class AzureBlobStore(Store):
 
     def close(self):
         """
-        Closes any connections
+        Closes any connections.
         """
         self.index.close()
         self.service = None
@@ -161,7 +161,7 @@ class AzureBlobStore(Store):
     def _collection(self):
         """
         Returns:
-            a handle to the pymongo collection object
+            a handle to the pymongo collection object.
 
         Important:
             Not guaranteed to exist in the future
@@ -171,7 +171,7 @@ class AzureBlobStore(Store):
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -188,7 +188,7 @@ class AzureBlobStore(Store):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -241,7 +241,7 @@ class AzureBlobStore(Store):
 
     def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -286,7 +286,7 @@ class AzureBlobStore(Store):
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
-        Tries to create an index and return true if it succeeded
+        Tries to create an index and return true if it succeeded.
 
         Args:
             key: single key to index
@@ -304,7 +304,7 @@ class AzureBlobStore(Store):
         additional_metadata: Union[str, List[str], None] = None,
     ):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -380,7 +380,7 @@ class AzureBlobStore(Store):
 
     def write_doc_to_blob(self, doc: Dict, search_keys: List[str]):
         """
-        Write the data to an Azure blob and return the metadata to be inserted into the index db
+        Write the data to an Azure blob and return the metadata to be inserted into the index db.
 
         Args:
             doc: the document
@@ -451,7 +451,7 @@ class AzureBlobStore(Store):
 
     def remove_docs(self, criteria: Dict, remove_blob_object: bool = False):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -500,7 +500,7 @@ class AzureBlobStore(Store):
         """
         Rebuilds the index Store from the data in Azure
         Relies on the index document being stores as the metadata for the file
-        This can help recover lost databases
+        This can help recover lost databases.
         """
 
         objects = self.container.list_blobs(name_starts_with=self.sub_dir)
@@ -523,8 +523,9 @@ class AzureBlobStore(Store):
         """
         Read data from the index store and populate the metadata of the Azure Blob.
         Force all of the keys to be lower case to be Minio compatible
+
         Args:
-            index_query: query on the index store
+            index_query: query on the index store.
         """
         if self.container is None or self.service is None:
             raise RuntimeError("The store has not been connected")
@@ -545,7 +546,7 @@ class AzureBlobStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for AzureBlobStore
-        other: other AzureBlobStore to compare with
+        other: other AzureBlobStore to compare with.
         """
         if not isinstance(other, AzureBlobStore):
             return False

@@ -1,5 +1,5 @@
 """
-Advanced Stores for behavior outside normal access patterns
+Advanced Stores for behavior outside normal access patterns.
 """
 import json
 import os
@@ -85,20 +85,20 @@ class MongograntStore(MongoStore):
     @classmethod
     def from_db_file(cls, file):
         """
-        Raises ValueError since MongograntStores can't be initialized from a file
+        Raises ValueError since MongograntStores can't be initialized from a file.
         """
         raise ValueError("MongograntStore doesn't implement from_db_file")
 
     @classmethod
     def from_collection(cls, collection):
         """
-        Raises ValueError since MongograntStores can't be initialized from a PyMongo collection
+        Raises ValueError since MongograntStores can't be initialized from a PyMongo collection.
         """
         raise ValueError("MongograntStore doesn't implement from_collection")
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for MongograntStore
+        Check equality for MongograntStore.
 
         Args:
             other: other MongograntStore to compare with
@@ -118,7 +118,7 @@ class MongograntStore(MongoStore):
 class VaultStore(MongoStore):
     """
     Extends MongoStore to read credentials out of Vault server
-    and uses these values to initialize MongoStore instance
+    and uses these values to initialize MongoStore instance.
     """
 
     @requires(hvac is not None, "hvac is required to use VaultStore")
@@ -126,7 +126,7 @@ class VaultStore(MongoStore):
         """
         Args:
             collection_name: name of mongo collection
-            vault_secret_path: path on vault server with mongo creds object
+            vault_secret_path: path on vault server with mongo creds object.
 
         Important:
             Environment variables that must be set prior to invocation
@@ -174,7 +174,7 @@ class VaultStore(MongoStore):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for VaultStore
+        Check equality for VaultStore.
 
         Args:
             other: other VaultStore to compare with
@@ -188,14 +188,14 @@ class VaultStore(MongoStore):
 
 class AliasingStore(Store):
     """
-    Special Store that aliases for the primary accessors
+    Special Store that aliases for the primary accessors.
     """
 
     def __init__(self, store: Store, aliases: Dict, **kwargs):
         """
         Args:
             store: the store to wrap around
-            aliases: dict of aliases of the form external key: internal key
+            aliases: dict of aliases of the form external key: internal key.
         """
         self.store = store
         # Given an external key tells what the internal key is
@@ -215,13 +215,13 @@ class AliasingStore(Store):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return self.store.name
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -239,7 +239,7 @@ class AliasingStore(Store):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -264,7 +264,7 @@ class AliasingStore(Store):
 
     def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -321,7 +321,7 @@ class AliasingStore(Store):
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -342,7 +342,7 @@ class AliasingStore(Store):
 
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -368,7 +368,7 @@ class AliasingStore(Store):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for AliasingStore
+        Check equality for AliasingStore.
 
         Args:
             other: other AliasingStore to compare with
@@ -382,7 +382,7 @@ class AliasingStore(Store):
 
 class SandboxStore(Store):
     """
-    Provides a sandboxed view to another store
+    Provides a sandboxed view to another store.
     """
 
     def __init__(self, store: Store, sandbox: str, exclusive: bool = False):
@@ -390,7 +390,7 @@ class SandboxStore(Store):
         Args:
             store: store to wrap sandboxing around
             sandbox: the corresponding sandbox
-            exclusive: whether to be exclusively in this sandbox or include global items
+            exclusive: whether to be exclusively in this sandbox or include global items.
         """
         self.store = store
         self.sandbox = sandbox
@@ -406,7 +406,7 @@ class SandboxStore(Store):
     def name(self) -> str:
         """
         Returns:
-            a string representing this data source
+            a string representing this data source.
         """
         return f"Sandbox[{self.store.name}][{self.sandbox}]"
 
@@ -414,7 +414,7 @@ class SandboxStore(Store):
     def sbx_criteria(self) -> Dict:
         """
         Returns:
-            the sandbox criteria dict used to filter the source store
+            the sandbox criteria dict used to filter the source store.
         """
         if self.exclusive:
             return {"sbxn": self.sandbox}
@@ -422,7 +422,7 @@ class SandboxStore(Store):
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -439,7 +439,7 @@ class SandboxStore(Store):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -483,7 +483,7 @@ class SandboxStore(Store):
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -502,7 +502,7 @@ class SandboxStore(Store):
 
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -526,7 +526,7 @@ class SandboxStore(Store):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for SandboxStore
+        Check equality for SandboxStore.
 
         Args:
             other: other SandboxStore to compare with

@@ -13,7 +13,7 @@ from maggma.utils import dynamic_import
 
 class Resource(MSONable, metaclass=ABCMeta):
     """
-    Base class for a REST Compatible Resource
+    Base class for a REST Compatible Resource.
     """
 
     def __init__(
@@ -22,7 +22,7 @@ class Resource(MSONable, metaclass=ABCMeta):
     ):
         """
         Args:
-            model: the pydantic model this Resource represents
+            model: the pydantic model this Resource represents.
         """
         if not issubclass(model, BaseModel):
             raise ValueError("The resource model has to be a PyDantic Model")
@@ -36,7 +36,7 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     def on_startup(self):
         """
-        Callback to perform some work on resource initialization
+        Callback to perform some work on resource initialization.
         """
 
     @abstractmethod
@@ -51,7 +51,7 @@ class Resource(MSONable, metaclass=ABCMeta):
         def redirect_unslashed():
             """
             Redirects unforward slashed url to resource
-            url with the forward slash
+            url with the forward slash.
             """
 
             url = self.router.url_path_for("/")
@@ -60,7 +60,7 @@ class Resource(MSONable, metaclass=ABCMeta):
     def run(self):  # pragma: no cover
         """
         Runs the Endpoint cluster locally
-        This is intended for testing not production
+        This is intended for testing not production.
         """
         import uvicorn
 
@@ -70,7 +70,7 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     def as_dict(self) -> Dict:
         """
-        Special as_dict implemented to convert pydantic models into strings
+        Special as_dict implemented to convert pydantic models into strings.
         """
 
         d = super().as_dict()  # Ensures sub-classes serialize correctly
@@ -87,19 +87,19 @@ class Resource(MSONable, metaclass=ABCMeta):
 
 class HintScheme(MSONable, metaclass=ABCMeta):
     """
-    Base class for generic hint schemes generation
+    Base class for generic hint schemes generation.
     """
 
     @abstractmethod
     def generate_hints(self, query: STORE_PARAMS) -> STORE_PARAMS:
         """
-        This method takes in a MongoDB query and returns hints
+        This method takes in a MongoDB query and returns hints.
         """
 
 
 class HeaderProcessor(MSONable, metaclass=ABCMeta):
     """
-    Base class for generic header processing
+    Base class for generic header processing.
     """
 
     @abstractmethod
@@ -107,5 +107,5 @@ class HeaderProcessor(MSONable, metaclass=ABCMeta):
         """
         This method takes in a FastAPI Response object and processes a new header for it in-place.
         It can use data in the upstream request to generate the header.
-        (https://fastapi.tiangolo.com/advanced/response-headers/#use-a-response-parameter)
+        (https://fastapi.tiangolo.com/advanced/response-headers/#use-a-response-parameter).
         """

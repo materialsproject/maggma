@@ -1,21 +1,38 @@
 import gzip
 from datetime import datetime
-from io import BytesIO
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+from io import BytesIO, StringIO
+from typing import Dict, Generator, List, Optional, Tuple, Union
 
-import orjson
+import jsonlines
+import numpy as np
 import pandas as pd
-from boto3 import Session
+from boto3 import client as boto_client
 from botocore import UNSIGNED
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from bson import json_util
 
-from maggma.core.store import Sort, Store
-from maggma.stores.aws import S3Store
+from maggma.core.store import Sort
+from maggma.utils import LU_KEY_ISOFORMAT
 
 
-class PandasMemoryStore(Store):
+def chunker(df: pd.DataFrame, chunk_size: int) -> Generator[pd.DataFrame, None, None]:
+    """
+    Creates a generator for a DataFrame to allow chunk processing.
+
+    Args:
+        df: the DataFrame to chunk
+        chunk_size: size of the chunks
+
+    Returns:
+        Generator[pd.DataFrame, None, None]: a generator for a DataFrame
+            to allow chunk processing.
+
+    """
+    return (df.iloc[pos : pos + chunk_size] for pos in range(0, len(df), chunk_size))
+
+
+class PandasMemoryStore:
     """
     A store that is backed by Pandas DataFrame.
 
@@ -23,191 +40,192 @@ class PandasMemoryStore(Store):
 
     def __init__(
         self,
-        **kwargs,
+        key: str = "task_id",
+        last_updated_field: str = "last_updated",
     ):
+        """
+        Args:
+            key: main key to index on
+            last_updated_field: field for date/time stamping the data.
+        """
         self._data = None
-        super().__init__(**kwargs)
+        self.key = key
+        self.last_updated_field = last_updated_field
 
     @property
-    def _collection(self):
-        """
-        Returns a handle to the pymongo collection object
+    def index_data(self):
+        return self._data
 
-        Raises:
-            NotImplementedError: always as this concept does not make sense for this type of store
-        """
-        raise NotImplementedError("Index memory store cannot be used with this property")
+    def set_index_data(self, new_index: pd.DataFrame):
+        self._data = new_index
 
-    @property
-    def name(self) -> str:
-        """
-        Return a string representing this data source
-        """
-        return "imem://"
-
-    def connect(self, force_reset: bool = False):
-        """
-        Connect to the source data.
-        Not necessary for this type of store but here for compatibility.
-
-        Args:
-            force_reset: whether to reset the connection or not
-        """
-        return
-
-    def close(self):
-        """
-        Closes any connections
-        Not necessary for this type of store but here for compatibility.
-        """
-        return
-
-    def count(self, criteria: Optional[Dict] = None) -> int:
-        """
-        Counts the number of documents matching the query criteria
-
-        Returns:
-            int: the number of documents matching the query criteria
-
-        Args:
-            criteria: the value of the `query` key will be used as the string expression to filter;
-                NotImplmentedError will be thrown if it's not None and this key/value pair does not exist
-        """
-        query_string = None
-        if criteria and "query" not in criteria:
-            raise NotImplementedError("Pandas memory store cannot handle PyMongo filters")
+    def _verify_criteria(self, criteria: Dict) -> Tuple[str, str, List]:
+        query_string, is_in_key, is_in_list = "", None, None
+        if criteria and "query" not in criteria and "is_in" not in criteria:
+            raise AttributeError("Pandas memory store only support query or is_in")
+        if criteria and "query" in criteria and "is_in" in criteria:
+            raise AttributeError("Pandas memory store cannot mix query and is_in; please just use one or the other")
         if criteria:
-            query_string = criteria["query"]
+            if "is_in" in criteria:
+                is_in_key, is_in_list = criteria["is_in"]
+                query_string = None
+            elif "query" in criteria:
+                query_string = criteria["query"]
+        return query_string, is_in_key, is_in_list
 
-        if self._data is None:
-            return 0
-        if query_string is None:
-            return len(self._data)
-        return len(self._data.query(query_string))
-
-    def _query(
+    def query(
         self,
         criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
+        properties: Union[List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+        criteria_fields: Union[List, None] = None,
+    ) -> pd.DataFrame:
+        """
+        Queries the Store for a set of documents.
+
+        Args:
+            criteria: if there's a `query` key, it's value will be used as the
+                Pandas string expression to query with; if there's a
+                'is_in' key, it's value will be used to perform an isin call
+                using the first item in that tuple for the column name and
+                the second item as the list across which to filter on; only
+                one valid key is accepted; all other data in the criteria
+                will be ignored
+            properties: subset of properties to return
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
+            skip: number documents to skip (from the start of the result set)
+            limit: limit on total number of documents returned
+            criteria_fields: if this value is not None, the in-memory index will
+                be used for the query if all the "criteria_fields" and "properties"
+                are present in the in-memory index; otherwise will default to
+                querying store type dependent implementation
+
+        Returns:
+            pd.DataFrame: DataFrame that contains all the documents that match
+                the query parameters
+
+        Raises:
+            AttributeError: if criteria exists and does not include a valid key;
+                also if more than one valid key is present
+        """
+        query_string, is_in_key, is_in_list = self._verify_criteria(criteria=criteria)
+        if properties is not None and not isinstance(properties, list):
+            raise AttributeError(f"Pandas query expects properties must be a list and not a {type(properties)}")
+
+        if self._data is None:
+            return pd.DataFrame()
+
+        return PandasMemoryStore._query(
+            index=self._data,
+            query_string=query_string,
+            is_in_key=is_in_key,
+            is_in_list=is_in_list,
+            properties=properties,
+            sort=sort,
+            skip=skip,
+            limit=limit,
+        )
+
+    @staticmethod
+    def _query(
+        index: pd.DataFrame,
+        query_string: str,
+        is_in_key: str,
+        is_in_list: List,
+        properties: Union[List, None] = None,
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> pd.DataFrame:
-        query_string = ""
-        if criteria and "query" not in criteria:
-            raise AttributeError("Pandas memory store cannot handle PyMongo filters")
-        if criteria:
-            query_string = criteria["query"]
-
-        if isinstance(properties, dict):
-            properties = [key for key, value in properties.items() if value == 1]
-
-        if self._data is None:
-            return iter([])
-
-        ret = self._data
+        ret = index
 
         if query_string:
             ret = ret.query(query_string)
-
-        if properties:
-            ret = ret[properties]
+        elif is_in_key is not None:
+            ret = ret[ret[is_in_key].isin(is_in_list)]
 
         if sort:
             sort_keys, sort_ascending = zip(*[(k, v == 1) for k, v in sort.items()])
             ret = ret.sort_values(by=list(sort_keys), ascending=list(sort_ascending))
+
+        if properties:
+            ret = ret[properties]
 
         ret = ret[skip:]
         if limit > 0:
             ret = ret[:limit]
         return ret
 
-    def query(
-        self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
-        skip: int = 0,
-        limit: int = 0,
-    ) -> Iterator[Dict]:
+    def count(self, criteria: Optional[Dict] = None, criteria_fields: Union[List, None] = None) -> int:
         """
-        Queries the Store for a set of documents
-
-        Args:
-            criteria: the value of the `query` key will be used as the Pandas string expression to query with;
-                all other data will be ignored
-            properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields. Keys are field names and
-                values are 1 for ascending or -1 for descending.
-            skip: number documents to skip (from the start of the result set)
-            limit: limit on total number of documents returned
+        Counts the number of documents matching the query criteria.
 
         Returns:
-            Iterator[Dict]: an iterator over the documents that match the query parameters
-
-        Raises:
-            AttributeError: if criteria exists and does not include a query key
-        """
-        ret = self._query(criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit)
-        return (row.to_dict() for _, row in ret.iterrows())
-
-    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None, clear_first: bool = False):
-        """
-        Update documents into the Store
+            int: the number of documents matching the query criteria
 
         Args:
-            docs: the document or list of documents to update
-            key: field name(s) to determine uniqueness for a
-                 document, can be a list of multiple fields,
-                 a single field, or None if the Store's key
-                 field is to be used
-            clear_first: if True clears the underlying data first, fully replacing the data with docs;
-                if False performs an upsert based on the parameters
+            criteria: see `query` method for details on how to construct
+            criteria_fields: see `query` method for details
         """
-        df = pd.DataFrame(docs)
-        if self._data is None or clear_first:
-            if not df.empty:
-                self._data = df
-            return
+        return len(self.query(criteria=criteria, criteria_fields=criteria_fields))
 
-        if key is None:
-            key = self.key
-
-        merged = self._data.merge(df, on=key, how="left", suffixes=("", "_B"))
-        for column in df.columns:
-            if column not in key:
-                merged[column] = merged[column + "_B"].combine_first(merged[column])
-        merged = merged[self._data.columns]
-        non_matching = df[~df.set_index(key).index.isin(self._data.set_index(key).index)]
-        self._data = pd.concat([merged, non_matching], ignore_index=True)
-
-    def ensure_index(self, key: str, unique: bool = False) -> bool:
+    def distinct(
+        self, field: str, criteria: Optional[Dict] = None, criteria_fields: Union[List, None] = None
+    ) -> pd.Series:
         """
-        Tries to create an index and return true if it succeeded
+        Get all distinct values for a field.
 
-        Raises:
-            NotImplementedError: always as this concept does not make sense for this type of store
+        Args:
+            field: the field(s) to get distinct values for
+            criteria: see `query` method for details on how to construct
+            criteria_fields: see `query` method for details
+
+        Returns:
+            pd.Series: Series of all the distinct values for the provided field
+                (after filtering by the provided criteria)
         """
-        raise NotImplementedError("Pandas memory store does not support this function")
+        ret = self.query(criteria=criteria, properties=[field], criteria_fields=criteria_fields)
+        return ret[field].drop_duplicates()
 
-    def _field_exists(self, key: str) -> bool:
-        return key in self._data
+    @property
+    def last_updated(self) -> datetime:
+        """
+        Provides the most recent last_updated date time stamp from
+        the documents in this Store.
+        """
+        if self._data is None:
+            return datetime.min
 
-    def newer_in(self, target: "Store", criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
+        max = self._data[self.last_updated_field].max()
+        if max is None:
+            return datetime.min
+
+        return LU_KEY_ISOFORMAT[0](max)
+
+    def newer_in(
+        self,
+        target: "PandasMemoryStore",
+        criteria: Optional[Dict] = None,
+        exhaustive: bool = False,
+        criteria_fields: Union[List, None] = None,
+    ) -> pd.Series:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
 
         Args:
             target: target Store to compare with
-            criteria: the value of the `query` key will be used as the Pandas string expression to query with;
-                all other data will be ignored; only valid when exhaustive is True
+            criteria: see `query` method for details on how to construct
             exhaustive: triggers an item-by-item check vs. checking
                         the last_updated of the target Store and using
                         that to filter out new items in
+            criteria_fields: see `query` method for details
 
         Returns:
-            List[str]: if no criteria is provided a list of the keys of documents in the target store
+            pd.Series: if no criteria is provided a Series of the keys of documents in the target store
                 whose last updated field value is greater than the 'newest' document in this store;
                 otherwise a list of the keys of documents in the target store that additionally meet the criteria
 
@@ -215,6 +233,9 @@ class PandasMemoryStore(Store):
             AttributeError: if the key and last updated fields are not both present in this store or
                 if criteria is provided when exhaustive is not set to True
         """
+        if self._data is None:
+            return target.query()
+
         if not (self._field_exists(self.key) and self._field_exists(self.last_updated_field)):
             raise AttributeError("This index store does not contain data with both key and last updated fields")
 
@@ -223,94 +244,70 @@ class PandasMemoryStore(Store):
 
         if exhaustive:
             # Get our current last_updated dates for each key value
-            props = {self.key: 1, self.last_updated_field: 1, "_id": 0}
+            props = [self.key, self.last_updated_field]
             dates = {
-                d[self.key]: self._lu_func[0](d.get(self.last_updated_field, datetime.max))
-                for d in self.query(properties=props)
+                d[self.key]: LU_KEY_ISOFORMAT[0](d.get(self.last_updated_field, datetime.max))
+                for _, d in self.query(properties=props, criteria_fields=criteria_fields).iterrows()
             }
-
             # Get the last_updated for the store we're comparing with
-            props = {target.key: 1, target.last_updated_field: 1, "_id": 0}
+            props = [target.key, target.last_updated_field]
             target_dates = {
-                d[target.key]: target._lu_func[0](d.get(target.last_updated_field, datetime.min))
-                for d in target.query(criteria=criteria, properties=props)
+                d[target.key]: LU_KEY_ISOFORMAT[0](d.get(target.last_updated_field, datetime.min))
+                for _, d in target.query(
+                    criteria=criteria, properties=props, criteria_fields=criteria_fields
+                ).iterrows()
             }
-
             new_keys = set(target_dates.keys()) - set(dates.keys())
             updated_keys = {key for key, date in dates.items() if target_dates.get(key, datetime.min) > date}
+            return pd.Series(data=list(new_keys | updated_keys), name=self.key)
 
-            return list(new_keys | updated_keys)
+        criteria = {"query": f"{self.last_updated_field} > '{LU_KEY_ISOFORMAT[1](self.last_updated)}'"}
+        return target.distinct(field=self.key, criteria=criteria, criteria_fields=[self.last_updated_field])
 
-        criteria = {"query": f"{self.last_updated_field} > '{self._lu_func[1](self.last_updated)}'"}
-        return target.distinct(field=self.key, criteria=criteria)
+    def get_merged_items(self, to_dt: pd.DataFrame, from_dt: pd.DataFrame) -> pd.DataFrame:
+        orig_columns = to_dt.columns
+        merged = to_dt.merge(from_dt, on=self.key, how="left", suffixes=("", "_B"))
+        for column in from_dt.columns:
+            if column not in self.key:
+                oc_dtype = merged[column].dtype
+                s = merged.pop(column + "_B")
+                s.name = column
+                merged.update(s)
+                merged[column].astype(oc_dtype)
+        return pd.concat(
+            (merged[orig_columns], from_dt[~from_dt.set_index(self.key).index.isin(to_dt.set_index(self.key).index)]),
+            ignore_index=True,
+        )
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def update(self, docs: pd.DataFrame) -> pd.DataFrame:
         """
-        Get all distinct values for a field
+        Update documents into the Store.
 
         Args:
-            field: the field(s) to get distinct values for
-            criteria: the value of the `query` key will be used as the Pandas string expression to query with;
-                all other data will be ignored
+            docs: the document or list of documents to update
 
         Returns:
-            List: a list of all the distinct values for the provided field (after filtering by the provided criteria)
+            pd.DataFrame the updated documents
         """
-        criteria = criteria or {}
+        if self._data is None:
+            if docs is not None and not docs.empty:
+                self._data = docs
+            return docs
 
-        return [key for key, _ in self.groupby(field, properties=[field], criteria=criteria)]
+        self._data = self.get_merged_items(to_dt=self._data, from_dt=docs)
+        return docs
 
-    def groupby(
-        self,
-        keys: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
-        skip: int = 0,
-        limit: int = 0,
-    ) -> Iterator[Tuple[Dict, List[Dict]]]:
-        """
-        Simple grouping function that will group documents
-        by keys.
-
-        Args:
-            keys: fields to group documents
-            criteria: the value of the `query` key will be used as the
-                Pandas string expression to query with;
-                all other data will be ignored
-            properties: properties to return in grouped documents
-            sort: Dictionary of sort order for fields. Keys are field names and
-                values are 1 for ascending or -1 for descending.
-            skip: number documents to skip
-            limit: limit on total number of documents returned
-
-        Returns:
-            Iterator[Tuple[Dict, List[Dict]]]: iterator returning tuples of (dict, list of docs)
-        """
-        ret = self._query(criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit)
-        grouped_tuples = [(name, group) for name, group in ret.groupby(keys)]
-        return iter(grouped_tuples)
-
-    def remove_docs(self, criteria: Dict):
-        """
-        Remove docs matching the query dictionary
-
-        Args:
-            criteria: query dictionary to match
-
-        Raises:
-            NotImplementedError: always as this concept is not used
-        """
-        raise NotImplementedError("Not implemented for this store")
+    def _field_exists(self, key: str) -> bool:
+        return key in self._data
 
     def __hash__(self):
-        """Hash for the store"""
+        """Hash for the store."""
         return hash((self.key, self.last_updated_field))
 
     def __eq__(self, other: object) -> bool:
         """
         Check equality for PandasMemoryStore
-        other: other PandasMemoryStore to compare with
+        other: other PandasMemoryStore to compare with.
         """
         if not isinstance(other, PandasMemoryStore):
             return False
@@ -323,9 +320,8 @@ class S3IndexStore(PandasMemoryStore):
     """
     A store that loads the index of the collection from an S3 file.
 
-    S3IndexStore can still apply MongoDB-like writable operations
-    (e.g. an update) because it behaves like a MemoryStore,
-    but it will not write those changes to S3.
+    Note that `update` calls will not write changes to S3, only to memory.
+    You must call `store_manifest` to store any updates applied during the session.
     """
 
     def __init__(
@@ -334,10 +330,10 @@ class S3IndexStore(PandasMemoryStore):
         bucket: str,
         prefix: str = "",
         endpoint_url: Optional[str] = None,
-        manifest_key: str = "manifest.json",
+        manifest_key: str = "manifest.jsonl",
         **kwargs,
     ):
-        """Initializes an S3IndexStore
+        """Initializes an S3IndexStore.
 
         Args:
             collection_name (str): name of the collection
@@ -346,81 +342,95 @@ class S3IndexStore(PandasMemoryStore):
                 Defaults to "".
             endpoint_url (Optional[str], optional): S3-compatible endpoint URL.
                 Defaults to None, indicating to use the default configured AWS S3.
-            manifest_key (str, optional): The name of the index. Defaults to "manifest.json".
+            manifest_key (str, optional): The name of the index. Defaults to "manifest.jsonl".
         """
         self.collection_name = collection_name
         self.bucket = bucket
-        self.prefix = prefix
+        self.prefix = prefix if prefix == "" else prefix.rstrip("/") + "/"
         self.endpoint_url = endpoint_url
-        self.client: Any = None
-        self.session: Any = None
-        self.s3_session_kwargs = {}
         self.manifest_key = manifest_key
         self.kwargs = kwargs
+        self._s3_client = None
 
         super().__init__(**kwargs)
 
-    def _get_full_key_path(self) -> str:
-        """Produces the full path for the index."""
-        return f"{self.prefix}{self.manifest_key}"
+    @property
+    def s3_client(self):
+        if self._s3_client is None:
+            self._s3_client = boto_client("s3", endpoint_url=self.endpoint_url)
+        return self._s3_client
 
-    def _retrieve_manifest(self) -> pd.DataFrame:
-        """Retrieves the contents of the index stored in S3.
-
-        Returns:
-            List[Dict]: The index contents with each item representing a document.
-        """
-        try:
-            response = self.client.get_object(Bucket=self.bucket, Key=self._get_full_key_path())
-            return pd.read_json(response["Body"], orient="records")
-        except ClientError as ex:
-            if ex.response["Error"]["Code"] == "NoSuchKey":
-                return []
-            raise
-
-    def _load_index(self, force_reset: bool = False) -> None:
-        """Load the contents of the index stored in S3 into memory.
-
-        Args:
-            force_reset: whether to force a reset of the memory store prior to load
-        """
-        super().update(self._retrieve_manifest(), clear_first=True)
-
-    def store_manifest(self, data: List[Dict]) -> None:
-        """Stores the provided data into the index stored in S3.
-        This overwrites and fully replaces all of the contents of the previous index stored in S3.
-        It also rewrites the memory index with the provided data.
-
-        Args:
-            data (List[Dict]): The data to store in the index.
-        """
-        self.client.put_object(
-            Bucket=self.bucket,
-            Body=orjson.dumps(data, default=json_util.default),
-            Key=self._get_full_key_path(),
-        )
-        super().update(data, clear_first=True)
-
-    def connect(self, force_reset: bool = False):
+    def connect(self):
         """
         Sets up the S3 client and loads the contents of the index stored in S3 into memory.
+        This will overwrite the local memory with the S3 data.
 
-        Args:
-            force_reset: whether to force a reset of the memory store prior to load
         """
-        # set up the S3 client
-        if not self.session:
-            self.session = Session(**self.s3_session_kwargs)
-
-        self.client = self.session.client("s3", endpoint_url=self.endpoint_url)
-
         try:
-            self.client.head_bucket(Bucket=self.bucket)
+            self.s3_client.head_bucket(Bucket=self.bucket)
         except ClientError:
             raise RuntimeError(f"Bucket not present on AWS: {self.bucket}")
 
         # load index
-        self._load_index(force_reset=force_reset)
+        self.set_index_data(self.retrieve_manifest())
+
+    def close(self):
+        """Closes any connections."""
+        if self._s3_client is not None:
+            self._s3_client.close()
+            self._s3_client = None
+
+    def retrieve_manifest(self) -> pd.DataFrame:
+        """Retrieves the contents of the index stored in S3.
+
+        Returns:
+            pd.DataFrame: The index contents read from the manifest file.
+                Returns None if a manifest file does not exist.
+        """
+        try:
+            response = self.s3_client.get_object(Bucket=self.bucket, Key=self._get_manifest_full_key_path())
+            df = pd.read_json(response["Body"], orient="records", lines=True)
+            return df.map(
+                lambda x: datetime.fromisoformat(x["$date"].rstrip("Z")) if isinstance(x, dict) and "$date" in x else x
+            )
+
+        except ClientError as ex:
+            if ex.response["Error"]["Code"] == "NoSuchKey":
+                return None
+            raise
+
+    def _get_manifest_full_key_path(self) -> str:
+        """Produces the full path for the index."""
+        return f"{self.prefix}{self.manifest_key}"
+
+    def store_manifest(self) -> None:
+        """Stores the existing data into the index stored in S3.
+        This overwrites and fully replaces all of the contents
+        of the previous index stored in S3 with the current contents
+        of the memory index.
+        """
+        string_io = StringIO()
+        with jsonlines.Writer(string_io, dumps=json_util.dumps) as writer:
+            for _, row in self._data.iterrows():
+                writer.write(row.to_dict())
+
+        self.s3_client.put_object(
+            Bucket=self.bucket,
+            Body=BytesIO(string_io.getvalue().encode("utf-8")),
+            Key=self._get_manifest_full_key_path(),
+        )
+
+    def __getstate__(self):
+        # Return the object's state excluding the _s3_client attribute
+        state = self.__dict__.copy()
+        state["_s3_client"] = None  # Exclude the client from serialization
+        return state
+
+    def __setstate__(self, state):
+        # Restore instance attributes (excluding the client)
+        self.__dict__.update(state)
+        # Initialize the client as None; it will be recreated on demand
+        self._s3_client = None
 
     def __hash__(self):
         return hash((self.collection_name, self.bucket, self.prefix, self.endpoint_url, self.manifest_key))
@@ -437,13 +447,13 @@ class S3IndexStore(PandasMemoryStore):
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
-class OpenDataStore(S3Store):
+class OpenDataStore(S3IndexStore):
     """
     Data is stored on S3 compatible storage using the format used by Materials Project on OpenData.
     The index is loaded from S3 compatible storage into memory.
 
     Note that updates will only affect the in-memory representation of the index - they will not be persisted.
-    To persist writes utilize the rebuild_index_* functions.
+    To persist index writes utilize the `store_manifest` function.
 
     This Store should not be used for applications that are distributed and rely on reading updated
     values from the index as data inconsistencied will arise.
@@ -451,148 +461,276 @@ class OpenDataStore(S3Store):
 
     def __init__(
         self,
-        index: S3IndexStore,
-        bucket: str,
-        compress: bool = True,
-        endpoint_url: Optional[str] = None,
-        sub_dir: Optional[str] = None,
-        key: str = "fs_id",
+        index: S3IndexStore = None,  # set _index to this and create property
         searchable_fields: Optional[List[str]] = None,
-        object_file_extension: str = ".json.gz",
+        object_file_extension: str = ".jsonl.gz",
         access_as_public_bucket: bool = False,
+        object_grouping: Optional[List[str]] = None,
         **kwargs,
     ):
-        """Initializes an OpenDataStore
+        """Initializes an OpenDataStore.
 
         Args:
-            index (S3IndexStore): The store that'll be used as the index, ie for queries pertaining to this store.
-            bucket: name of the bucket.
-            compress: compress files inserted into the store.
-            endpoint_url: this allows the interface with minio service
-            sub_dir: subdirectory of the S3 bucket to store the data.
-            key: main key to index on.
-            searchable_fields: fields to keep in the index store.
-            object_file_extension (str, optional): The extension used for the data stored in S3. Defaults to ".json.gz".
-            access_as_public_bucket (bool, optional): If True, the S3 bucket will be accessed without signing,
-            ie as if it's a public bucket.
+            index (S3IndexStore): The store that'll be used as the index,
+                ie for queries pertaining to this store. If None, will create
+                index from manifest located in same location as the data.
+            searchable_fields: additional fields to keep in the index store.
+                `key`, `last_updated_field` and the fields in `object_grouping`
+                are already added to the index by default
+            object_file_extension (str, optional): The extension used for the data
+                stored in S3. Defaults to ".jsonl.gz".
+            access_as_public_bucket (bool, optional): If True, the S3 bucket will
+                be accessed without signing, ie as if it's a public bucket.
                 This is useful for end users. Defaults to False.
         """
-        self.sub_dir = sub_dir.strip("/") + "/" if sub_dir else ""
+        self._index = index
         self.searchable_fields = searchable_fields if searchable_fields is not None else []
         self.object_file_extension = object_file_extension
         self.access_as_public_bucket = access_as_public_bucket
+        self.object_grouping = object_grouping if object_grouping is not None else ["nelements", "symmetry_number"]
+
         if access_as_public_bucket:
             kwargs["s3_resource_kwargs"] = kwargs["s3_resource_kwargs"] if "s3_resource_kwargs" in kwargs else {}
             kwargs["s3_resource_kwargs"]["config"] = Config(signature_version=UNSIGNED)
-
-        kwargs["index"] = index
-        kwargs["bucket"] = bucket
-        kwargs["compress"] = compress
-        kwargs["endpoint_url"] = endpoint_url
-        kwargs["sub_dir"] = sub_dir
-        kwargs["key"] = key
-        kwargs["searchable_fields"] = searchable_fields
-        kwargs["unpack_data"] = True
-        self.kwargs = kwargs
         super().__init__(**kwargs)
-
-    def _get_full_key_path(self, id: str) -> str:
-        if self.index.collection_name == "thermo" and self.key == "thermo_id":
-            material_id, thermo_type = id.split("_", 1)
-            return f"{self.sub_dir}{thermo_type}/{material_id}{self.object_file_extension}"
-        if self.index.collection_name == "xas" and self.key == "spectrum_id":
-            material_id, spectrum_type, absorbing_element, edge = id.rsplit("-", 3)
-            return f"{self.sub_dir}{edge}/{spectrum_type}/{absorbing_element}/{material_id}{self.object_file_extension}"
-        if self.index.collection_name == "synth_descriptions" and self.key == "doi":
-            return f"{self.sub_dir}{id.replace('/', '_')}{self.object_file_extension}"
-        return f"{self.sub_dir}{id}{self.object_file_extension}"
-
-    def _get_compression_function(self) -> Callable:
-        return gzip.compress
-
-    def _get_decompression_function(self) -> Callable:
-        return gzip.decompress
-
-    def _read_data(self, data: bytes, compress_header: str = "gzip") -> List[Dict]:
-        if compress_header is not None:
-            data = self._get_decompression_function()(data)
-        return orjson.loads(data)
-
-    def _gather_indexable_data(self, doc: Dict, search_keys: List[str]) -> Dict:
-        index_doc = {k: doc[k] for k in search_keys}
-        index_doc[self.key] = doc[self.key]  # Ensure key is in metadata
-        # Ensure last updated field is in metada if it's present in the data
-        if self.last_updated_field in doc:
-            index_doc[self.last_updated_field] = doc[self.last_updated_field]
-        return index_doc
-
-    def write_doc_to_s3(self, doc: Dict, search_keys: List[str]) -> Dict:
-        search_doc = self._gather_indexable_data(doc, search_keys)
-
-        data = orjson.dumps(doc, default=json_util.default)
-        data = self._get_compression_function()(data)
-        self._get_bucket().upload_fileobj(
-            Fileobj=BytesIO(data),
-            Key=self._get_full_key_path(str(doc[self.key])),
+        self.searchable_fields = list(
+            set(self.object_grouping) | set(self.searchable_fields) | {self.key, self.last_updated_field}
         )
-        return search_doc
 
-    def _index_for_doc_from_s3(self, bucket, key: str) -> Dict:
-        response = bucket.Object(key).get()
-        doc = self._read_data(response["Body"].read())
-        return self._gather_indexable_data(doc, self.searchable_fields)
+    @property
+    def index(self):
+        if self._index is None:
+            return super()
+        return self._index
 
-    def rebuild_index_from_s3_data(self) -> List[Dict]:
+    def update(
+        self,
+        docs: pd.DataFrame,
+    ) -> pd.DataFrame:
         """
-        Rebuilds the index Store from the data in S3
-        Stores only the key, last_updated_field and searchable_fields in the index.
+        Update documents in S3 and local in-memory index.
+
+        Args:
+            docs: the documents to update
 
         Returns:
-            List[Dict]: The set of docs representing the index data.
+            pd.DataFrame the index for the updated documents
         """
-        bucket = self._get_bucket()
-        paginator = bucket.meta.client.get_paginator("list_objects_v2")
+        # group docs to update by object grouping
+        docs_by_group = self._json_normalize_and_filter(docs=docs).groupby(self.object_grouping)
+        existing_index = self.index.index_data
+        ret = []
+        for group, group_docs_index in docs_by_group:
+            query_str = " and ".join([f"{col} == {val!r}" for col, val in zip(self.object_grouping, group)])
+            group_docs = docs[docs[self.key].isin(group_docs_index[self.key].to_list())]
+            merged_docs, merged_index = group_docs, group_docs_index
+            if existing_index is not None:
+                # fetch subsection of existing and docs_df and do outer merge with indicator=True
+                sub_existing = existing_index.query(query_str)
+                merged_index = self.get_merged_items(to_dt=sub_existing, from_dt=group_docs_index)
+                # if there's any rows in existing only need to fetch the S3 data and merge that in
+                if (~sub_existing[self.key].isin(group_docs_index[self.key])).any():
+                    ## fetch the S3 data and populate those rows in sub_docs_df
+                    s3_docs = self._read_doc_from_s3(self._get_full_key_path(sub_existing))
+                    merged_docs = self.get_merged_items(to_dt=s3_docs, from_dt=group_docs)
+            # write doc based on subsection
+            self._write_doc_and_update_index(merged_docs, merged_index)
+            ret.append(merged_index)
+        return pd.concat(ret)
+
+    def query(
+        self,
+        criteria: Optional[Dict] = None,
+        properties: Union[List, None] = None,
+        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        skip: int = 0,
+        limit: int = 0,
+        criteria_fields: Union[List, None] = None,
+    ) -> pd.DataFrame:
+        """
+        Queries the Store for a set of documents.
+
+        Args:
+            criteria: if there's a `query` key, it's value will be used as the
+                Pandas string expression to query with; if there's a
+                'is_in' key, it's value will be used to perform an isin call
+                using the first item in that tuple for the column name and
+                the second item as the list across which to filter on; only
+                one valid key is accepted; all other data in the criteria
+                will be ignored
+            properties: subset of properties to return
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
+            skip: number documents to skip (from the start of the result set)
+            limit: limit on total number of documents returned
+            criteria_fields: if this value is not None, the in-memory index will
+                be used for the query if all the "criteria_fields" and "properties"
+                are present in the in-memory index; otherwise will default to
+                querying against the S3 docs
+
+        Returns:
+            pd.DataFrame: DataFrame that contains all the documents that match
+                the query parameters
+
+        Raises:
+            AttributeError: if criteria exists and does not include a valid key;
+                also if more than one valid key is present
+        """
+        query_string, is_in_key, is_in_list = self._verify_criteria(criteria=criteria)
+        if properties is not None and not isinstance(properties, list):
+            raise AttributeError(f"OpenData query expects properties must be a list and not a {type(properties)}")
+
+        if self.index.index_data is None:
+            return pd.DataFrame()
+
+        # optimization if all required fields are in the index
+        if criteria_fields is not None and properties is not None:
+            query_fields = set(criteria_fields) | set(properties)
+            if all(item in self.index.index_data.columns for item in list(query_fields)):
+                return self.index.query(criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit)
+
+        results = []
+        for _, docs in self.index.index_data.groupby(self.object_grouping):
+            results.append(
+                PandasMemoryStore._query(
+                    index=self._read_doc_from_s3(self._get_full_key_path(docs)),
+                    query_string=query_string,
+                    is_in_key=is_in_key,
+                    is_in_list=is_in_list,
+                    properties=properties,
+                    sort=sort,
+                    skip=skip,
+                    limit=limit,
+                )
+            )
+        return pd.concat(results, ignore_index=True)
+
+    def _get_full_key_path(self, index: pd.DataFrame) -> str:
+        id = ""
+        for group in self.object_grouping:
+            id = f"{id}{group}={index[group].iloc[0]}/"
+        id = id.rstrip("/")
+        return f"{self.prefix}{id}{self.object_file_extension}"
+
+    def _gather_indexable_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        return df[self.searchable_fields]
+
+    def _json_normalize_and_filter(self, docs: pd.DataFrame) -> pd.DataFrame:
+        dfs = []
+        for chunk in chunker(df=docs, chunk_size=1000):
+            dfs.append(pd.json_normalize(chunk.to_dict(orient="records"), sep="_")[self.searchable_fields])
+        return pd.concat(dfs, ignore_index=True)
+
+    def _write_doc_and_update_index(self, items: pd.DataFrame, index: pd.DataFrame) -> None:
+        self._write_doc_to_s3(items, index)
+        self.index.update(index)
+
+    def _write_doc_to_s3(self, doc: pd.DataFrame, index: pd.DataFrame) -> None:
+        doc = doc.replace({pd.NaT: None}).replace({"NaT": None}).replace({np.NaN: None})
+
+        string_io = StringIO()
+        with jsonlines.Writer(string_io, dumps=json_util.dumps) as writer:
+            for _, row in doc.iterrows():
+                writer.write(row.to_dict())
+
+        data = gzip.compress(string_io.getvalue().encode("utf-8"))
+
+        self.s3_client.upload_fileobj(
+            Bucket=self.bucket,
+            Fileobj=BytesIO(data),
+            Key=self._get_full_key_path(index),
+        )
+
+    def _read_doc_from_s3(self, file_id: str) -> pd.DataFrame:
+        try:
+            response = self.s3_client.get_object(Bucket=self.bucket, Key=file_id)
+            df = pd.read_json(response["Body"], orient="records", lines=True, compression={"method": "gzip"})
+
+            def replace_nested_date_dict(obj):
+                if isinstance(obj, dict):
+                    if "$date" in obj:
+                        # Return the datetime string or convert it to a datetime object
+                        return datetime.fromisoformat(obj["$date"].rstrip("Z"))
+                    # Recursively process each key-value pair in the dictionary
+                    for key, value in obj.items():
+                        obj[key] = replace_nested_date_dict(value)
+                elif isinstance(obj, list):
+                    # Process each item in the list
+                    return [replace_nested_date_dict(item) for item in obj]
+                return obj
+
+            return df.map(replace_nested_date_dict)
+
+        except ClientError as ex:
+            if ex.response["Error"]["Code"] == "NoSuchKey":
+                return pd.DataFrame()
+            raise
+
+    def _index_for_doc_from_s3(self, key: str) -> pd.DataFrame:
+        doc = self._read_doc_from_s3(key)
+        return self._gather_indexable_data(doc)
+
+    def rebuild_index_from_s3_data(self) -> pd.DataFrame:
+        """
+        Rebuilds the index Store from the data in S3
+        Stores only the searchable_fields in the index.
+        Only updates the in-memory index and does not persist the index;
+        please call `store_manifest` with the returned values to persist.
+
+        Returns:
+            pd.DataFrame: The set of docs representing the index data.
+        """
+        paginator = self.s3_client.get_paginator("list_objects_v2")
 
         # Create a PageIterator from the Paginator
-        page_iterator = paginator.paginate(Bucket=self.bucket, Prefix=self.sub_dir.strip("/"))
+        page_iterator = paginator.paginate(Bucket=self.bucket, Prefix=self.prefix)
 
         all_index_docs = []
         for page in page_iterator:
             for file in page["Contents"]:
                 key = file["Key"]
-                if key != self.index._get_full_key_path():
-                    index_doc = self._index_for_doc_from_s3(bucket, key)
-                    all_index_docs.append(index_doc)
-        self.index.store_manifest(all_index_docs)
-        return all_index_docs
+                if key != self.index._get_manifest_full_key_path():
+                    all_index_docs.append(self._index_for_doc_from_s3(key))
+        ret = pd.concat(all_index_docs, ignore_index=True)
+        self.index.set_index_data(ret)
+        return ret
 
-    def rebuild_index_from_data(self, docs: List[Dict]) -> List[Dict]:
+    def rebuild_index_from_data(self, docs: pd.DataFrame) -> pd.DataFrame:
         """
         Rebuilds the index Store from the provided data.
         The provided data needs to include all of the documents in this data set.
-        Stores only the key, last_updated_field and searchable_fields in the index.
-
-        Args:
-            docs (List[Dict]): The data to build the index from.
+        Stores only the searchable_fields in the index.
+        Only updates the in-memory index and does not persist the index;
+        please call `store_manifest` with the returned values to persist.
 
         Returns:
-            List[Dict]: The set of docs representing the index data.
+            pd.DataFrame: The set of docs representing the index data.
         """
-        all_index_docs = []
-        for doc in docs:
-            index_doc = self._gather_indexable_data(doc, self.searchable_fields)
-            all_index_docs.append(index_doc)
-        self.index.store_manifest(all_index_docs)
-        return all_index_docs
+        ret = self._gather_indexable_data(docs)
+        self.index.set_index_data(ret)
+        return ret
+
+    def __getstate__(self):
+        # Return the object's state excluding the _s3_client attribute
+        state = self.__dict__.copy()
+        state["_s3_client"] = None  # Exclude the client from serialization
+        return state
+
+    def __setstate__(self, state):
+        # Restore instance attributes (excluding the client)
+        self.__dict__.update(state)
+        # Initialize the client as None; it will be recreated on demand
+        self._s3_client = None
 
     def __hash__(self):
         return hash(
             (
                 self.bucket,
-                self.compress,
                 self.endpoint_url,
                 self.key,
-                self.sub_dir,
+                self.prefix,
+                tuple(self.object_grouping),
+                tuple(self.searchable_fields),
             )
         )
 
@@ -606,13 +744,13 @@ class OpenDataStore(S3Store):
             return False
 
         fields = [
-            "index",
+            "_index",
             "bucket",
-            "compress",
             "endpoint_url",
             "key",
             "searchable_fields",
-            "sub_dir",
+            "prefix",
             "last_updated_field",
+            "object_grouping",
         ]
         return all(getattr(self, f) == getattr(other, f) for f in fields)

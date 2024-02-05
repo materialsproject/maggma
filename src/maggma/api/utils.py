@@ -58,7 +58,7 @@ def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
 
 def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
     """
-    Attaches signature for defaults and annotations for parameters to function
+    Attaches signature for defaults and annotations for parameters to function.
 
     Args:
         function: callable function to attach the signature to
@@ -142,12 +142,12 @@ def api_sanitize(
 
 def allow_msonable_dict(monty_cls: Type[MSONable]):
     """
-    Patch Monty to allow for dict values for MSONable
+    Patch Monty to allow for dict values for MSONable.
     """
 
     def validate_monty(cls, v, _):
         """
-        Stub validator for MSONable as a dictionary only
+        Stub validator for MSONable as a dictionary only.
         """
         if isinstance(v, cls):
             return v

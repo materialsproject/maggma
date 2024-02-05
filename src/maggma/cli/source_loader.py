@@ -21,7 +21,7 @@ _BASENAME = "maggma.cli.sources"
 
 class ScriptFinder(MetaPathFinder):
     """
-    Special Finder designed to find custom script builders
+    Special Finder designed to find custom script builders.
     """
 
     @classmethod
@@ -42,7 +42,7 @@ class ScriptFinder(MetaPathFinder):
 
 
 class NotebookLoader(Loader):
-    """Module Loader for Jupyter Notebooks or Source Files"""
+    """Module Loader for Jupyter Notebooks or Source Files."""
 
     def __init__(self, name=None, path=None):
         self.shell = InteractiveShell.instance()
@@ -82,7 +82,7 @@ def spec_from_source(file_path: str) -> ModuleSpec:
     """
     Returns a ModuleSpec from a filepath for importlib loading
     Specialized for loading python source files and notebooks into
-    a temporary maggma cli package to run as a builder
+    a temporary maggma cli package to run as a builder.
     """
     file_path_obj = Path(file_path).resolve().relative_to(Path(".").resolve())
     file_path_str = str(file_path_obj)
@@ -115,7 +115,7 @@ def spec_from_source(file_path: str) -> ModuleSpec:
 
 def load_builder_from_source(file_path: str) -> List[Builder]:
     """
-    Loads Maggma Builders from a Python source file
+    Loads Maggma Builders from a Python source file.
     """
     file_path = str(Path(file_path).resolve())
     spec = spec_from_source(file_path)
@@ -135,7 +135,7 @@ def find_matching_file(segments, curr_path="./"):
     """
     Finds file that has the right sequence of segments
     in the path relative to the current path
-    Requires all segments match the file path
+    Requires all segments match the file path.
     """
 
     # If we've gotten to the end of the segment match check to see if a file exists

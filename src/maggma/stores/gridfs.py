@@ -1,7 +1,7 @@
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
-various utilities
+various utilities.
 """
 
 import copy
@@ -39,7 +39,7 @@ files_collection_fields = (
 
 class GridFSStore(Store):
     """
-    A Store for GridFS backend. Provides a common access method consistent with other stores
+    A Store for GridFS backend. Provides a common access method consistent with other stores.
     """
 
     def __init__(
@@ -100,7 +100,7 @@ class GridFSStore(Store):
     @classmethod
     def from_launchpad_file(cls, lp_file, collection_name, **kwargs):
         """
-        Convenience method to construct a GridFSStore from a launchpad file
+        Convenience method to construct a GridFSStore from a launchpad file.
 
         Note: A launchpad file is a special formatted yaml file used in fireworks
 
@@ -121,13 +121,13 @@ class GridFSStore(Store):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return f"gridfs://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Args:
             force_reset: whether to reset the connection or not when the Store is
@@ -163,7 +163,7 @@ class GridFSStore(Store):
 
     @property
     def _collection(self):
-        """Property referring to underlying pymongo collection"""
+        """Property referring to underlying pymongo collection."""
         if self._coll is None:
             raise StoreError("Must connect Mongo-like store before attempting to use it")
         return self._coll
@@ -172,7 +172,7 @@ class GridFSStore(Store):
     def last_updated(self) -> datetime:
         """
         Provides the most recent last_updated date time stamp from
-        the documents in this Store
+        the documents in this Store.
         """
         return self._files_store.last_updated
 
@@ -180,6 +180,7 @@ class GridFSStore(Store):
     def transform_criteria(cls, criteria: Dict) -> Dict:
         """
         Allow client to not need to prepend 'metadata.' to query fields.
+
         Args:
             criteria: Query criteria
         """
@@ -194,7 +195,7 @@ class GridFSStore(Store):
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -273,7 +274,7 @@ class GridFSStore(Store):
     def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
         Get all distinct values for a field. This function only operates
-        on the metadata in the files collection
+        on the metadata in the files collection.
 
         Args:
             field: the field(s) to get distinct values for
@@ -299,7 +300,7 @@ class GridFSStore(Store):
         """
         Simple grouping function that will group documents
         by keys. Will only work if the keys are included in the files
-        collection for GridFS
+        collection for GridFS.
 
         Args:
             keys: fields to group documents
@@ -332,7 +333,7 @@ class GridFSStore(Store):
         Currently operators on the GridFS files collection
         Args:
             key: single key to index
-            unique: Whether or not this index contains only unique keys
+            unique: Whether or not this index contains only unique keys.
 
         Returns:
             bool indicating if the index exists/was created
@@ -350,7 +351,7 @@ class GridFSStore(Store):
         additional_metadata: Union[str, List[str], None] = None,
     ):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -387,7 +388,7 @@ class GridFSStore(Store):
                 if has(d, k)
             }
             metadata.update(search_doc)
-            data = json.dumps(jsanitize(d)).encode("UTF-8")
+            data = json.dumps(jsanitize(d, recursive_msonable=True)).encode("UTF-8")
             if self.compression:
                 data = zlib.compress(data)
                 metadata["compression"] = "zlib"
@@ -401,7 +402,7 @@ class GridFSStore(Store):
 
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -422,7 +423,7 @@ class GridFSStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for GridFSStore
-        other: other GridFSStore to compare with
+        other: other GridFSStore to compare with.
         """
         if not isinstance(other, GridFSStore):
             return False
@@ -451,14 +452,15 @@ class GridFSURIStore(GridFSStore):
         **kwargs,
     ):
         """
-        Initializes a GridFS Store for binary data
+        Initializes a GridFS Store for binary data.
+
         Args:
             uri: MongoDB+SRV URI
             database: database to connect to
             collection_name: The collection name
             compression: compress the data as it goes into GridFS
             ensure_metadata: ensure returned documents have the metadata fields
-            searchable_fields: fields to keep in the index store
+            searchable_fields: fields to keep in the index store.
         """
 
         self.uri = uri
@@ -486,7 +488,7 @@ class GridFSURIStore(GridFSStore):
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Args:
             force_reset: whether to reset the connection or not when the Store is
