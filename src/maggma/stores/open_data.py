@@ -13,6 +13,7 @@ from bson import json_util
 
 from maggma.core.store import Sort, Store
 from maggma.stores.aws import S3Store
+from maggma.utils import grouper
 
 
 class PandasMemoryStore(Store):
@@ -602,6 +603,13 @@ class OpenDataStore(S3Store):
             raise NotImplementedError("updating store with additional metadata is not supported")
         super().update(docs=docs, key=key)
 
+    @staticmethod
+    def json_normalize_and_filter(docs: List[Dict], object_grouping: List[str]) -> pd.DataFrame:
+        dfs = []
+        for chunk in grouper(iterable=docs, n=1000):
+            dfs.append(pd.json_normalize(chunk, sep="_")[object_grouping])
+        return pd.concat(dfs)
+
     def _write_to_s3_and_index(self, docs: List[Dict], search_keys: List[str]):
         """Implements updating of the provided documents in S3 and the index.
 
@@ -611,7 +619,7 @@ class OpenDataStore(S3Store):
         """
         # group docs to update by object grouping
         og = list(set(self.object_grouping) | set(search_keys))
-        df = pd.json_normalize(docs, sep="_")[og]
+        df = OpenDataStore.json_normalize_and_filter(docs=docs, object_grouping=og)
         df_grouped = df.groupby(self.object_grouping)
         existing = self.index._data
         docs_df = pd.DataFrame(docs)
