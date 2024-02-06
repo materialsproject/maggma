@@ -34,7 +34,7 @@ class ReadOnlyResource(Resource):
         hint_scheme: Optional[HintScheme] = None,
         header_processor: Optional[HeaderProcessor] = None,
         timeout: Optional[int] = None,
-        enable_get_by_key: bool = True,
+        enable_get_by_key: bool = False,
         enable_default_search: bool = True,
         disable_validation: bool = False,
         query_disk_use: bool = False,
@@ -53,7 +53,7 @@ class ReadOnlyResource(Resource):
                 before raising a timeout error
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
-            enable_get_by_key: Enable default key route for endpoint.
+            enable_get_by_key: Enable get by key route for endpoint.
             enable_default_search: Enable default endpoint search behavior.
             query_disk_use: Whether to use temporary disk space in large MongoDB queries.
             disable_validation: Whether to use ORJSON and provide a direct FastAPI response.
