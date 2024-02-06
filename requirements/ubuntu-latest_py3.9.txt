@@ -47,7 +47,7 @@ dnspython==2.4.2
     #   pymongo
 exceptiongroup==1.2.0
     # via anyio
-fastapi==0.104.1
+fastapi==0.109.1
     # via maggma (setup.py)
 flask==3.0.0
     # via mongogrant

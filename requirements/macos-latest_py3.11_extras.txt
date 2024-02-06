@@ -92,7 +92,7 @@ execnet==2.0.2
     # via pytest-xdist
 executing==2.0.1
     # via stack-data
-fastapi==0.104.1
+fastapi==0.109.1
     # via maggma (setup.py)
 fastjsonschema==2.19.0
     # via nbformat
