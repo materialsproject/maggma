@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.62.1](https://github.com/materialsproject/maggma/tree/v0.62.1) (2024-02-05)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.62.0...v0.62.1)
+
+**Merged pull requests:**
+
+- chunking for json normalization [\#914](https://github.com/materialsproject/maggma/pull/914) ([kbuma](https://github.com/kbuma))
+
 ## [v0.62.0](https://github.com/materialsproject/maggma/tree/v0.62.0) (2024-02-02)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.61.1...v0.62.0)
