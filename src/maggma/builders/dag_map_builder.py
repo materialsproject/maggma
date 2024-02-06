@@ -86,7 +86,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         """
         self.logger.info(f"Starting {self.__class__.__name__} Builder")
 
-        self.ensure_indexes()
+        # self.ensure_indexes()
 
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
         if self.retry_failed:
@@ -112,7 +112,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         all_docs = list(
             self.source.query(
-                criteria={self.source.key: {"$in": mats}},
+                # criteria={self.source.key: {"$in": mats}},
+                criteria={"is_in": (self.source.key, mats)},
                 properties=projection,
             )
         )
@@ -130,8 +131,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         for item in items:
             if not item:
                 continue
-
-            self.logger.debug(f"Processing: {item[self.source.key]}")
 
             time_start = time()
 
@@ -180,9 +179,11 @@ class MapBuilder(Builder, metaclass=ABCMeta):
                 del item["_id"]
 
         if len(items) > 0:
-            self.target.update(items)
+            docs = self.target.update(items)
 
         self.target.close()
+
+        return docs
 
     def finalize(self):
         """Finalize MapBuilder operations including removing orphaned documents."""
