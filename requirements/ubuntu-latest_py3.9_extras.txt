@@ -338,7 +338,7 @@ python-dateutil==2.8.2
     #   moto
 python-dotenv==1.0.0
     # via pydantic-settings
-python-multipart==0.0.6
+python-multipart==0.0.7
     # via starlette
 pyyaml==6.0.1
     # via
