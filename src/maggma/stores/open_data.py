@@ -363,10 +363,9 @@ class S3IndexStore(PandasMemoryStore):
         try:
             response = self.s3_client.get_object(Bucket=self.bucket, Key=self._get_manifest_full_key_path())
             df = pd.read_json(response["Body"], orient="records", lines=True)
-            df = df.map(
+            return df.map(
                 lambda x: datetime.fromisoformat(x["$date"].rstrip("Z")) if isinstance(x, dict) and "$date" in x else x
             )
-            return df
 
         except ClientError as ex:
             if ex.response["Error"]["Code"] == "NoSuchKey":
@@ -631,8 +630,7 @@ class OpenDataStore(S3IndexStore):
                     return [replace_nested_date_dict(item) for item in obj]
                 return obj
 
-            df = df.map(replace_nested_date_dict)
-            return df
+            return df.map(replace_nested_date_dict)
 
         except ClientError as ex:
             if ex.response["Error"]["Code"] == "NoSuchKey":
