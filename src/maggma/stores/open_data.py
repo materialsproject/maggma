@@ -625,10 +625,9 @@ class OpenDataStore(S3IndexStore):
                     if "$date" in obj:
                         # Return the datetime string or convert it to a datetime object
                         return datetime.fromisoformat(obj["$date"].rstrip("Z"))
-                    else:
-                        # Recursively process each key-value pair in the dictionary
-                        for key, value in obj.items():
-                            obj[key] = replace_nested_date_dict(value)
+                    # Recursively process each key-value pair in the dictionary
+                    for key, value in obj.items():
+                        obj[key] = replace_nested_date_dict(value)
                 elif isinstance(obj, list):
                     # Process each item in the list
                     return [replace_nested_date_dict(item) for item in obj]
