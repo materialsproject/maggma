@@ -1,7 +1,7 @@
 import gzip
 from datetime import datetime
 from io import BytesIO, StringIO
-from typing import Any, Dict, Generator, List, Optional, Tuple, Union
+from typing import Dict, Generator, List, Optional, Tuple, Union
 
 import jsonlines
 import pandas as pd
@@ -10,7 +10,6 @@ from botocore import UNSIGNED
 from botocore.config import Config
 from botocore.exceptions import ClientError
 from bson import json_util
-from pydash import get
 
 from maggma.core.store import Sort
 from maggma.utils import LU_KEY_ISOFORMAT
@@ -272,8 +271,7 @@ class PandasMemoryStore:
         if self._data is None:
             if docs is not None and not docs.empty:
                 self._data = docs
-            return
-        key = [self.key]
+            return docs
 
         self._data = self.get_merged_items(to_dt=self._data, from_dt=docs)
         return docs
