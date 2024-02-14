@@ -12,6 +12,8 @@ from moto import mock_s3
 
 from maggma.stores.open_data import OpenDataStore, PandasMemoryStore, S3IndexStore
 
+pd.set_option("future.no_silent_downcasting", True)
+
 
 # PandasMemoryStore tests
 @pytest.fixture()
@@ -24,11 +26,13 @@ def memstore():
                     store.key: "mp-1",
                     store.last_updated_field: datetime.utcnow(),
                     "data": "asd",
+                    "int_val": 1,
                 },
                 {
                     store.key: "mp-3",
                     store.last_updated_field: datetime.utcnow(),
                     "data": "sdf",
+                    "int_val": 3,
                 },
             ]
         )
@@ -170,12 +174,14 @@ def test_pdmems_update(memstore):
                 memstore.key: "mp-1",
                 memstore.last_updated_field: datetime.utcnow(),
                 "data": "boo",
+                "int_val": 1,
             }
         ]
     )
     df2 = memstore.update(df)
     assert len(memstore._data) == 2
     assert memstore.query(criteria={"query": f"{memstore.key} == 'mp-1'"})["data"].iloc[0] == "boo"
+    assert memstore.query(criteria={"query": f"{memstore.key} == 'mp-1'"})["int_val"].iloc[0] == 1
     assert df2.equals(df)
     df = pd.DataFrame(
         [
@@ -183,12 +189,14 @@ def test_pdmems_update(memstore):
                 memstore.key: "mp-2",
                 memstore.last_updated_field: datetime.utcnow(),
                 "data": "boo",
+                "int_val": 2,
             }
         ]
     )
     df2 = memstore.update(df)
     assert len(memstore._data) == 3
     assert memstore.query(criteria={"query": f"{memstore.key} == 'mp-2'"})["data"].iloc[0] == "boo"
+    assert memstore.query(criteria={"query": f"{memstore.key} == 'mp-2'"})["int_val"].iloc[0] == 2
     assert df2.equals(df)
 
 
@@ -238,7 +246,7 @@ def test_s3is_connect_retrieve_manifest(s3indexstore):
         assert s3is.count() == 0
 
 
-def test_s3is_store_manifest(s3indexstore):
+def test_s3is_store_manifest():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket2")
@@ -252,6 +260,18 @@ def test_s3is_store_manifest(s3indexstore):
         s3is.update(pd.DataFrame([{"task_id": "mp-3", "last_updated": "later"}]))
         df = s3is.retrieve_manifest()
         assert not df.equals(s3is._data)
+
+
+def test_s3is_close(s3indexstore):
+    s3indexstore.close()
+    assert len(s3indexstore.query()) == 1  # actions auto-reconnect
+    s3indexstore.update(pd.DataFrame([{"task_id": "mp-2", "last_updated": "now"}]))
+    assert len(s3indexstore.query()) == 2
+    s3indexstore.close()
+    assert len(s3indexstore.query()) == 2  # actions auto-reconnect
+    s3indexstore.close()
+    s3indexstore.connect()
+    assert len(s3indexstore.query()) == 1  # explicit connect reloads manifest
 
 
 @pytest.fixture()
