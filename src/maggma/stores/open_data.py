@@ -252,7 +252,10 @@ class PandasMemoryStore:
         merged = to_dt.merge(from_dt, on=self.key, how="left", suffixes=("", "_B"))
         for column in from_dt.columns:
             if column not in self.key:
-                merged[column].update(merged.pop(column + "_B"))
+                s = merged.pop(column + "_B")
+                s.name = column
+                merged.update(s)
+                merged.infer_objects(copy=False)
         return pd.concat(
             (merged[orig_columns], from_dt[~from_dt.set_index(self.key).index.isin(to_dt.set_index(self.key).index)]),
             ignore_index=True,
@@ -351,7 +354,13 @@ class S3IndexStore(PandasMemoryStore):
             raise RuntimeError(f"Bucket not present on AWS: {self.bucket}")
 
         # load index
-        super().update(self.retrieve_manifest())
+        self.set_index_data(self.retrieve_manifest())
+
+    def close(self):
+        """Closes any connections."""
+        if self._s3_client is not None:
+            self._s3_client.close()
+            self._s3_client = None
 
     def retrieve_manifest(self) -> pd.DataFrame:
         """Retrieves the contents of the index stored in S3.
