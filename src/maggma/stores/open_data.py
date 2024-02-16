@@ -100,7 +100,7 @@ class PandasMemoryStore:
             criteria_fields: if this value is not None, the in-memory index will
                 be used for the query if all the "criteria_fields" and "properties"
                 are present in the in-memory index; otherwise will default to
-                querying store type dependant implementation
+                querying store type dependent implementation
 
         Returns:
             pd.DataFrame: DataFrame that contains all the documents that match
