@@ -180,6 +180,7 @@ class GridFSStore(Store):
     def transform_criteria(cls, criteria: Dict) -> Dict:
         """
         Allow client to not need to prepend 'metadata.' to query fields.
+
         Args:
             criteria: Query criteria
         """

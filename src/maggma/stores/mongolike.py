@@ -706,6 +706,7 @@ class JSONStore(MemoryStore):
         """
         Helper method to read the contents of a JSON file and generate
         a list of docs.
+
         Args:
             path: Path to the JSON file to be read
         """

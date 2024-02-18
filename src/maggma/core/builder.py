@@ -83,6 +83,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         Process an item. There should be no database operations in this method.
         Default behavior is to return the item.
+
         Arguments:
             item:
 
