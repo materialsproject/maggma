@@ -1,5 +1,5 @@
 """
-Many-to-Many GroupBuilder
+Many-to-Many GroupBuilder.
 """
 import traceback
 from abc import ABCMeta, abstractmethod
@@ -50,7 +50,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             store_process_time: If True, add "_process_time" key to
                 document for profiling purposes
             retry_failed: If True, will retry building documents that
-                previously failed
+                previously failed.
         """
         self.source = source
         self.target = target
@@ -69,7 +69,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
     def ensure_indexes(self):
         """
         Ensures indices on critical fields for GroupBuilder
-        which include the plural version of the target's key field
+        which include the plural version of the target's key field.
         """
         index_checks = [
             self.source.ensure_index(self.source.key),
@@ -92,7 +92,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
     def prechunk(self, number_splits: int) -> Iterator[Dict]:
         """
         Generic prechunk for group builder to perform domain-decomposition
-        by the grouping keys
+        by the grouping keys.
         """
         self.ensure_indexes()
 
@@ -154,7 +154,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
     def update_targets(self, items: List[Dict]):
         """
-        Generic update targets for Group Builder
+        Generic update targets for Group Builder.
         """
         target = self.target
         for item in items:
@@ -167,7 +167,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
     @abstractmethod
     def unary_function(self, items: List[Dict]) -> Dict:
         """
-        Processing function for GroupBuilder
+        Processing function for GroupBuilder.
 
         Arguments:
             items: list of of documents with matching grouping keys
@@ -180,7 +180,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
     def get_ids_to_process(self) -> Iterable:
         """
-        Gets the IDs that need to be processed
+        Gets the IDs that need to be processed.
         """
 
         query = self.query or {}
@@ -214,7 +214,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
     def get_groups_from_keys(self, keys) -> Set[Tuple]:
         """
-        Get the groups by grouping_keys for these documents
+        Get the groups by grouping_keys for these documents.
         """
 
         grouping_keys = self.grouping_keys

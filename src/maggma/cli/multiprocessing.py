@@ -18,7 +18,7 @@ logger = getLogger("MultiProcessor")
 class BackPressure:
     """
     Wrapper for an iterator to provide
-    async access with backpressure
+    async access with backpressure.
     """
 
     def __init__(self, iterator, n):
@@ -38,7 +38,7 @@ class BackPressure:
 
     async def release(self, async_iterator):
         """
-        release iterator to pipeline the backpressure
+        release iterator to pipeline the backpressure.
         """
         async for item in async_iterator:
             try:
@@ -53,7 +53,7 @@ class AsyncUnorderedMap:
     """
     Async iterator that maps a function to an async iterator
     using an executor and returns items as they are done
-    This does not guarantee order
+    This does not guarantee order.
     """
 
     def __init__(self, func, async_iterator, executor):
@@ -105,7 +105,7 @@ class AsyncUnorderedMap:
 
 async def atqdm(async_iterator, *args, **kwargs):
     """
-    Wrapper around tqdm for async generators
+    Wrapper around tqdm for async generators.
     """
     _tqdm = tqdm(*args, **kwargs)
     async for item in async_iterator:
@@ -119,7 +119,7 @@ async def grouper(async_iterator, n: int):
     """
     Collect data into fixed-length chunks or blocks.
     >>> list(grouper(3, 'ABCDEFG'))
-    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
+    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']].
 
     Updated from:
     https://stackoverflow.com/questions/31164731/python-chunking-csv-file-multiproccessing/31170795#31170795

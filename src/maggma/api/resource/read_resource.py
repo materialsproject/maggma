@@ -21,7 +21,7 @@ class ReadOnlyResource(Resource):
     """
     Implements a REST Compatible Resource as a GET URL endpoint
     This class provides a number of convenience features
-    including full pagination, field projection
+    including full pagination, field projection.
     """
 
     def __init__(
@@ -98,7 +98,7 @@ class ReadOnlyResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         if self.enable_get_by_key:

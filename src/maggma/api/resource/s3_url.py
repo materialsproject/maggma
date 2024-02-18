@@ -54,7 +54,7 @@ class S3URLResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         self.build_get_by_key()

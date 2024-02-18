@@ -212,7 +212,7 @@ def handle_dead_workers(workers, socket):
 def worker(url: str, port: int, num_processes: int, no_bars: bool):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
-    using multiprocessing
+    using multiprocessing.
     """
     identity = f"{randint(0, 0x10000):04X}-{randint(0, 0x10000):04X}"
     logger = getLogger(f"Worker {identity}")

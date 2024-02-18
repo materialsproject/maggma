@@ -13,7 +13,7 @@ from maggma.utils import dynamic_import
 
 
 class DynamicQueryOperator(QueryOperator):
-    """Abstract Base class for dynamic query operators"""
+    """Abstract Base class for dynamic query operators."""
 
     def __init__(
         self,
@@ -75,7 +75,7 @@ class DynamicQueryOperator(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        "Stub query function for abstract class"
+        "Stub query function for abstract class."
 
     @abstractmethod
     def field_to_operator(self, name: str, field: FieldInfo) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
@@ -84,7 +84,7 @@ class DynamicQueryOperator(QueryOperator):
             - query param name,
             - query param type
             - FastAPI Query object,
-            - and callable to convert the value into a query dict
+            - and callable to convert the value into a query dict.
         """
 
     @classmethod
@@ -97,7 +97,7 @@ class DynamicQueryOperator(QueryOperator):
 
     def as_dict(self) -> Dict:
         """
-        Special as_dict implemented to convert pydantic models into strings
+        Special as_dict implemented to convert pydantic models into strings.
         """
         d = super().as_dict()  # Ensures sub-classes serialize correctly
         d["model"] = f"{self.model.__module__}.{self.model.__name__}"  # type: ignore
@@ -105,7 +105,7 @@ class DynamicQueryOperator(QueryOperator):
 
 
 class NumericQuery(DynamicQueryOperator):
-    "Query Operator to enable searching on numeric fields"
+    "Query Operator to enable searching on numeric fields."
 
     def field_to_operator(self, name: str, field: FieldInfo) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
@@ -113,7 +113,7 @@ class NumericQuery(DynamicQueryOperator):
         query_param name,
         default value,
         Query object,
-        and callable to convert it into a query dict
+        and callable to convert it into a query dict.
         """
 
         ops = []
@@ -190,7 +190,7 @@ class NumericQuery(DynamicQueryOperator):
 
 
 class StringQueryOperator(DynamicQueryOperator):
-    "Query Operator to enable searching on numeric fields"
+    "Query Operator to enable searching on numeric fields."
 
     def field_to_operator(self, name: str, field: FieldInfo) -> List[Tuple[str, Any, Query, Callable[..., Dict]]]:
         """
@@ -198,7 +198,7 @@ class StringQueryOperator(DynamicQueryOperator):
         query_param name,
         default value,
         Query object,
-        and callable to convert it into a query dict
+        and callable to convert it into a query dict.
         """
 
         ops = []

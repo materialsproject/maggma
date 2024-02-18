@@ -398,7 +398,7 @@ class S3Store(Store):
         return resource, bucket
 
     def _get_full_key_path(self, id: str) -> str:
-        """Produces the full key path for S3 items
+        """Produces the full key path for S3 items.
 
         Args:
             id (str): The value of the key identifier.

@@ -12,7 +12,7 @@ def attach_query_ops(
 ) -> Callable[[List[STORE_PARAMS]], Dict]:
     """
     Attach query operators to API compliant function
-    The function has to take a list of STORE_PARAMs as the only argument
+    The function has to take a list of STORE_PARAMs as the only argument.
 
     Args:
         function: the function to decorate
@@ -31,7 +31,7 @@ def attach_query_ops(
 
 def generate_query_pipeline(query: dict, store: Store):
     """
-    Generate the generic aggregation pipeline used in GET endpoint queries
+    Generate the generic aggregation pipeline used in GET endpoint queries.
 
     Args:
         query: Query parameters

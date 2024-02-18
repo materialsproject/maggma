@@ -119,7 +119,7 @@ class FileStore(MemoryStore):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return f"file://{self.path}"
 
@@ -265,7 +265,7 @@ class FileStore(MemoryStore):
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Read all the files in the directory, create corresponding File
         items in the internal MemoryStore.
@@ -358,7 +358,7 @@ class FileStore(MemoryStore):
 
     def _filter_data(self, d):
         """
-        Remove any protected keys from a dictionary
+        Remove any protected keys from a dictionary.
 
         Args:
             d: Dictionary whose keys are to be filtered
@@ -376,7 +376,7 @@ class FileStore(MemoryStore):
         contents_size_limit: Optional[int] = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -461,7 +461,7 @@ class FileStore(MemoryStore):
         contents_size_limit: Optional[int] = None,
     ):
         """
-        Queries the Store for a single document
+        Queries the Store for a single document.
 
         Args:
             criteria: PyMongo filter for documents to search

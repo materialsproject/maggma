@@ -1,7 +1,7 @@
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
-various utilities
+various utilities.
 """
 
 import warnings
@@ -41,7 +41,7 @@ except ImportError:
 
 class MongoStore(Store):
     """
-    A Store that connects to a Mongo collection
+    A Store that connects to a Mongo collection.
     """
 
     def __init__(
@@ -94,13 +94,13 @@ class MongoStore(Store):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Args:
             force_reset: whether to reset the connection or not when the Store is
@@ -130,14 +130,14 @@ class MongoStore(Store):
             self._coll = db[self.collection_name]  # type: ignore
 
     def __hash__(self) -> int:
-        """Hash for MongoStore"""
+        """Hash for MongoStore."""
         return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
     def from_db_file(cls, filename: str, **kwargs):
         """
         Convenience method to construct MongoStore from db_file
-        from old QueryEngine format
+        from old QueryEngine format.
         """
         kwargs = loadfn(filename)
         if "collection" in kwargs:
@@ -149,7 +149,7 @@ class MongoStore(Store):
     @classmethod
     def from_launchpad_file(cls, lp_file, collection_name, **kwargs):
         """
-        Convenience method to construct MongoStore from a launchpad file
+        Convenience method to construct MongoStore from a launchpad file.
 
         Note: A launchpad file is a special formatted yaml file used in fireworks
 
@@ -169,7 +169,7 @@ class MongoStore(Store):
 
     def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -243,7 +243,7 @@ class MongoStore(Store):
         """
         Generates a MongoStore from a pymongo collection object
         This is not a fully safe operation as it gives dummy information to the MongoStore
-        As a result, this will not serialize and can not reset its connection
+        As a result, this will not serialize and can not reset its connection.
 
         Args:
             collection: the PyMongo collection to create a MongoStore around
@@ -258,7 +258,7 @@ class MongoStore(Store):
 
     @property
     def _collection(self):
-        """Property referring to underlying pymongo collection"""
+        """Property referring to underlying pymongo collection."""
         if self._coll is None:
             raise StoreError("Must connect Mongo-like store before attempting to use it")
         return self._coll
@@ -269,7 +269,7 @@ class MongoStore(Store):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
     ) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -303,7 +303,7 @@ class MongoStore(Store):
         **kwargs,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -351,7 +351,7 @@ class MongoStore(Store):
         Tries to create an index and return true if it succeeded
         Args:
             key: single key to index
-            unique: Whether or not this index contains only unique keys
+            unique: Whether or not this index contains only unique keys.
 
         Returns:
             bool indicating if the index exists/was created
@@ -368,7 +368,7 @@ class MongoStore(Store):
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -416,7 +416,7 @@ class MongoStore(Store):
 
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -424,7 +424,7 @@ class MongoStore(Store):
         self._collection.delete_many(filter=criteria)
 
     def close(self):
-        """Close up all collections"""
+        """Close up all collections."""
         self._collection.database.client.close()
         self._coll = None
         if self.ssh_tunnel is not None:
@@ -433,7 +433,7 @@ class MongoStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for MongoStore
-        other: other mongostore to compare with
+        other: other mongostore to compare with.
         """
         if not isinstance(other, MongoStore):
             return False
@@ -446,7 +446,7 @@ class MongoURIStore(MongoStore):
     """
     A Store that connects to a Mongo collection via a URI
     This is expected to be a special mongodb+srv:// URIs that include
-    client parameters via TXT records
+    client parameters via TXT records.
     """
 
     def __init__(
@@ -489,14 +489,14 @@ class MongoURIStore(MongoStore):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         # TODO: This is not very safe since it exposes the username/password info
         return self.uri
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Args:
             force_reset: whether to reset the connection or not when the Store is
@@ -511,14 +511,14 @@ class MongoURIStore(MongoStore):
 class MemoryStore(MongoStore):
     """
     An in-memory Store that functions similarly
-    to a MongoStore
+    to a MongoStore.
     """
 
     def __init__(self, collection_name: str = "memory_db", **kwargs):
         """
         Initializes the Memory Store
         Args:
-            collection_name: name for the collection in memory
+            collection_name: name for the collection in memory.
         """
         self.collection_name = collection_name
         self.default_sort = None
@@ -528,7 +528,7 @@ class MemoryStore(MongoStore):
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Args:
             force_reset: whether to reset the connection or not when the Store is
@@ -538,16 +538,16 @@ class MemoryStore(MongoStore):
             self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
 
     def close(self):
-        """Close up all collections"""
+        """Close up all collections."""
         self._coll.database.client.close()
 
     @property
     def name(self):
-        """Name for the store"""
+        """Name for the store."""
         return f"mem://{self.collection_name}"
 
     def __hash__(self):
-        """Hash for the store"""
+        """Hash for the store."""
         return hash((self.name, self.last_updated_field))
 
     def groupby(
@@ -598,7 +598,7 @@ class MemoryStore(MongoStore):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for MemoryStore
-        other: other MemoryStore to compare with
+        other: other MemoryStore to compare with.
         """
         if not isinstance(other, MemoryStore):
             return False
@@ -609,7 +609,7 @@ class MemoryStore(MongoStore):
 
 class JSONStore(MemoryStore):
     """
-    A Store for access to a single or multiple JSON files
+    A Store for access to a single or multiple JSON files.
     """
 
     def __init__(
@@ -671,7 +671,7 @@ class JSONStore(MemoryStore):
 
     def connect(self, force_reset: bool = False):
         """
-        Loads the files into the collection in memory
+        Loads the files into the collection in memory.
 
         Args:
             force_reset: whether to reset the connection or not. If False (default) and .connect()
@@ -776,7 +776,7 @@ class JSONStore(MemoryStore):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for JSONStore
+        Check equality for JSONStore.
 
         Args:
             other: other JSONStore to compare with
@@ -885,7 +885,7 @@ class MontyStore(MemoryStore):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
     ) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in

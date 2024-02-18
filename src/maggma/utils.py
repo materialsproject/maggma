@@ -1,5 +1,5 @@
 """
-Utilities to help with maggma functions
+Utilities to help with maggma functions.
 """
 import itertools
 import logging
@@ -24,7 +24,7 @@ from tqdm.auto import tqdm
 
 def primed(iterable: Iterable) -> Iterable:
     """Preprimes an iterator so the first value is calculated immediately
-    but not returned until the first iteration
+    but not returned until the first iteration.
     """
     itr = iter(iterable)
     try:
@@ -36,18 +36,18 @@ def primed(iterable: Iterable) -> Iterable:
 
 class TqdmLoggingHandler(logging.Handler):
     """
-    Helper to enable routing tqdm progress around logging
+    Helper to enable routing tqdm progress around logging.
     """
 
     def __init__(self, level=logging.NOTSET):
         """
-        Initialize the Tqdm handler
+        Initialize the Tqdm handler.
         """
         super().__init__(level)
 
     def emit(self, record):
         """
-        Emit a record via Tqdm screen
+        Emit a record via Tqdm screen.
         """
         try:
             msg = self.format(record)
@@ -60,7 +60,7 @@ class TqdmLoggingHandler(logging.Handler):
 
 
 def confirm_field_index(collection: Collection, field: str) -> bool:
-    """Confirm index on store for at least one of fields
+    """Confirm index on store for at least one of fields.
 
     One can't simply ensure an index exists via
     `store.collection.create_index` because a Builder must assume
@@ -105,7 +105,7 @@ LU_KEY_ISOFORMAT = (to_dt, to_isoformat_ceil_ms)
 
 def recursive_update(d: Dict, u: Dict):
     """
-    Recursive updates d with values from u
+    Recursive updates d with values from u.
 
     Args:
         d (dict): dict to update
@@ -126,7 +126,7 @@ def grouper(iterable: Iterable, n: int) -> Iterable:
     """
     Collect data into fixed-length chunks or blocks.
     >>> list(grouper(3, 'ABCDEFG'))
-    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
+    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']].
 
     Updated from:
     https://stackoverflow.com/questions/31164731/python-chunking-csv-file-multiproccessing/31170795#31170795
@@ -137,7 +137,7 @@ def grouper(iterable: Iterable, n: int) -> Iterable:
 
 def lazy_substitute(d: Dict, aliases: Dict):
     """
-    Simple top level substitute that doesn't dive into mongo like strings
+    Simple top level substitute that doesn't dive into mongo like strings.
     """
     for alias, key in aliases.items():
         if key in d:
@@ -148,7 +148,7 @@ def lazy_substitute(d: Dict, aliases: Dict):
 def substitute(d: Dict, aliases: Dict):
     """
     Substitutes keys in dictionary
-    Accepts multilevel mongo like keys
+    Accepts multilevel mongo like keys.
     """
     for alias, key in aliases.items():
         if has(d, key):
@@ -158,7 +158,7 @@ def substitute(d: Dict, aliases: Dict):
 
 def unset(d: Dict, key: str):
     """
-    Unsets a key
+    Unsets a key.
     """
     _unset(d, key)
     path = to_path(key)
@@ -170,7 +170,7 @@ def unset(d: Dict, key: str):
 class Timeout:
     """
     Context manager that provides context.
-    implementation courtesy of https://stackoverflow.com/a/22348885/637562
+    implementation courtesy of https://stackoverflow.com/a/22348885/637562.
     """
 
     def __init__(self, seconds=14, error_message=""):
@@ -187,13 +187,13 @@ class Timeout:
 
     def handle_timeout(self, signum, frame):
         """
-        Raises an error on timeout
+        Raises an error on timeout.
         """
         raise TimeoutError(self.error_message)
 
     def __enter__(self):
         """
-        Enter context with timeout
+        Enter context with timeout.
         """
         if self.seconds:
             signal.signal(signal.SIGALRM, self.handle_timeout)
@@ -201,7 +201,7 @@ class Timeout:
 
     def __exit__(self, type, value, traceback):
         """
-        Exit context with timeout
+        Exit context with timeout.
         """
         if self.seconds:
             signal.alarm(0)
@@ -209,7 +209,7 @@ class Timeout:
 
 def dynamic_import(abs_module_path: str, class_name: Optional[str] = None):
     """
-    Dynamic class importer from: https://www.bnmetrics.com/blog/dynamic-import-in-python3
+    Dynamic class importer from: https://www.bnmetrics.com/blog/dynamic-import-in-python3.
     """
 
     if class_name is None:
@@ -223,12 +223,12 @@ def dynamic_import(abs_module_path: str, class_name: Optional[str] = None):
 class ReportingHandler(logging.Handler):
     """
     Helper to route reporting messages
-    This uses the NOTSET level to send reporting messages
+    This uses the NOTSET level to send reporting messages.
     """
 
     def __init__(self, reporting_store):
         """
-        Initialize the Reporting Logger
+        Initialize the Reporting Logger.
         """
         super().__init__(logging.NOTSET)
         self.reporting_store = reporting_store
@@ -239,7 +239,7 @@ class ReportingHandler(logging.Handler):
 
     def emit(self, record):
         """
-        Emit a record via Tqdm screen
+        Emit a record via Tqdm screen.
         """
         if "maggma" in record.__dict__:
             maggma_record = record.maggma

@@ -8,7 +8,7 @@ from maggma.api.utils import STORE_PARAMS
 
 class SortQuery(QueryOperator):
     """
-    Method to generate the sorting portion of a query
+    Method to generate the sorting portion of a query.
     """
 
     def query(

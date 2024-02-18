@@ -1,5 +1,5 @@
 """
-Module containing the core Store definition
+Module containing the core Store definition.
 """
 
 import logging
@@ -17,14 +17,14 @@ from maggma.utils import LU_KEY_ISOFORMAT
 
 
 class Sort(Enum):
-    """Enumeration for sorting order"""
+    """Enumeration for sorting order."""
 
     Ascending = 1
     Descending = -1
 
 
 class DateTimeFormat(Enum):
-    """Datetime format in store document"""
+    """Datetime format in store document."""
 
     DateTime = "datetime"
     IsoFormat = "isoformat"
@@ -33,7 +33,7 @@ class DateTimeFormat(Enum):
 class Store(MSONable, metaclass=ABCMeta):
     """
     Abstract class for a data Store
-    Defines the interface for all data going in and out of a Builder
+    Defines the interface for all data going in and out of a Builder.
     """
 
     def __init__(
@@ -49,7 +49,7 @@ class Store(MSONable, metaclass=ABCMeta):
             last_updated_field: field for date/time stamping the data
             last_updated_type: the date/time format for the last_updated_field.
                                 Can be "datetime" or "isoformat"
-            validator: Validator to validate documents going into the store
+            validator: Validator to validate documents going into the store.
         """
         self.key = key
         self.last_updated_field = last_updated_field
@@ -64,19 +64,19 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractproperty
     def _collection(self):
         """
-        Returns a handle to the pymongo collection object
+        Returns a handle to the pymongo collection object.
         """
 
     @abstractproperty
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
 
     @abstractmethod
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Args:
             force_reset: whether to reset the connection or not
@@ -85,13 +85,13 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def close(self):
         """
-        Closes any connections
+        Closes any connections.
         """
 
     @abstractmethod
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -107,7 +107,7 @@ class Store(MSONable, metaclass=ABCMeta):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -121,7 +121,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -134,7 +134,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
-        Tries to create an index and return true if it succeeded
+        Tries to create an index and return true if it succeeded.
 
         Args:
             key: single key to index
@@ -174,7 +174,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -187,7 +187,7 @@ class Store(MSONable, metaclass=ABCMeta):
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
     ):
         """
-        Queries the Store for a single document
+        Queries the Store for a single document.
 
         Args:
             criteria: PyMongo filter for documents to search
@@ -199,7 +199,7 @@ class Store(MSONable, metaclass=ABCMeta):
 
     def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -214,7 +214,7 @@ class Store(MSONable, metaclass=ABCMeta):
     def last_updated(self) -> datetime:
         """
         Provides the most recent last_updated date time stamp from
-        the documents in this Store
+        the documents in this Store.
         """
         doc = next(
             self.query(
@@ -295,7 +295,7 @@ class Store(MSONable, metaclass=ABCMeta):
     def updated_keys(self, target, criteria=None):
         """
         Returns keys for docs that are newer in the target store in comparison
-        with this store when comparing the last updated field (last_updated_field)
+        with this store when comparing the last updated field (last_updated_field).
 
         Args:
             target (Store): store to look for updated documents
@@ -329,7 +329,7 @@ class Store(MSONable, metaclass=ABCMeta):
 
 
 class StoreError(Exception):
-    """General Store-related error"""
+    """General Store-related error."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)
