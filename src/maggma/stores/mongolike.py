@@ -348,7 +348,8 @@ class MongoStore(Store):
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
-        Tries to create an index and return true if it succeeded
+        Tries to create an index and return true if it succeeded.
+
         Args:
             key: single key to index
             unique: Whether or not this index contains only unique keys.
@@ -516,7 +517,8 @@ class MemoryStore(MongoStore):
 
     def __init__(self, collection_name: str = "memory_db", **kwargs):
         """
-        Initializes the Memory Store
+        Initializes the Memory Store.
+
         Args:
             collection_name: name for the collection in memory.
         """

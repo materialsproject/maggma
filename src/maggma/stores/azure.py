@@ -523,6 +523,7 @@ class AzureBlobStore(Store):
         """
         Read data from the index store and populate the metadata of the Azure Blob.
         Force all of the keys to be lower case to be Minio compatible
+
         Args:
             index_query: query on the index store.
         """

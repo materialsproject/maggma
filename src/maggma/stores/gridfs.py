@@ -452,7 +452,8 @@ class GridFSURIStore(GridFSStore):
         **kwargs,
     ):
         """
-        Initializes a GridFS Store for binary data
+        Initializes a GridFS Store for binary data.
+
         Args:
             uri: MongoDB+SRV URI
             database: database to connect to

@@ -295,6 +295,7 @@ class JointStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for JointStore
+
         Args:
             other: other JointStore to compare with.
         """

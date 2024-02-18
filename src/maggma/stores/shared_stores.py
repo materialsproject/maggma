@@ -271,6 +271,7 @@ class MultiStore:
 
         Note: this is not a search for an instance of a store,
             but rather a search for a equivalent store
+
         Args:
             store: The store to find
 

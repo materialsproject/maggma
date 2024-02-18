@@ -110,7 +110,8 @@ def test_problem_hint_scheme(owner_store):
 
 def search_helper(payload, base: str = "/?", debug=True) -> Response:
     """
-    Helper function to directly query search endpoints
+    Helper function to directly query search endpoints.
+
     Args:
         store: store f
         base: base of the query, default to /query?

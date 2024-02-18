@@ -77,6 +77,7 @@ def test_msonable(owner_store, pet_store):
 def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]:
     """
     Helper function to directly query search endpoints
+
     Args:
         store: store f
         base: base of the query, default to /query?
