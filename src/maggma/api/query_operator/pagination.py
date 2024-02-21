@@ -7,13 +7,13 @@ from maggma.api.utils import STORE_PARAMS
 
 
 class PaginationQuery(QueryOperator):
-    """Query operators to provides Pagination"""
+    """Query operators to provides Pagination."""
 
     def __init__(self, default_limit: int = 100, max_limit: int = 1000):
         """
         Args:
             default_limit: the default number of documents to return
-            max_limit: max number of documents to return
+            max_limit: max number of documents to return.
         """
 
         self.default_limit = default_limit
@@ -39,7 +39,7 @@ class PaginationQuery(QueryOperator):
             ),
         ) -> STORE_PARAMS:
             """
-            Pagination parameters for the API Endpoint
+            Pagination parameters for the API Endpoint.
             """
 
             if _page is not None:
@@ -80,10 +80,10 @@ class PaginationQuery(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        "Stub query function for abstract class"
+        "Stub query function for abstract class."
 
     def meta(self) -> Dict:
         """
-        Metadata for the pagination params
+        Metadata for the pagination params.
         """
         return {"max_limit": self.max_limit}

@@ -60,20 +60,20 @@ class StoreFacade(Store):
     @property
     def _collection(self):
         """
-        Returns a handle to the pymongo collection object
+        Returns a handle to the pymongo collection object.
         """
         return self.multistore.store_collection(self.store)
 
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return self.multistore.store_name(self.store)
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Args:
             force_reset: whether to reset the connection or not when the Store is
@@ -83,13 +83,13 @@ class StoreFacade(Store):
 
     def close(self):
         """
-        Closes any connections
+        Closes any connections.
         """
         self.multistore.close(self.store)
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -105,7 +105,7 @@ class StoreFacade(Store):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -126,7 +126,7 @@ class StoreFacade(Store):
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None, **kwargs):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -139,7 +139,7 @@ class StoreFacade(Store):
 
     def ensure_index(self, key: str, unique: bool = False, **kwargs) -> bool:
         """
-        Tries to create an index and return true if it succeeded
+        Tries to create an index and return true if it succeeded.
 
         Args:
             key: single key to index
@@ -182,7 +182,7 @@ class StoreFacade(Store):
 
     def remove_docs(self, criteria: Dict, **kwargs):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -197,7 +197,7 @@ class StoreFacade(Store):
         **kwargs,
     ):
         """
-        Queries the Store for a single document
+        Queries the Store for a single document.
 
         Args:
             criteria: PyMongo filter for documents to search
@@ -209,7 +209,7 @@ class StoreFacade(Store):
 
     def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False, **kwargs) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -257,7 +257,7 @@ class MultiStore:
 
     def __init__(self, **kwargs):
         """
-        Initializes a MultiStore
+        Initializes a MultiStore.
         """
         # Keep a list of stores, since there is no way to hash a store (to use a dict)
         self._stores = []
@@ -267,10 +267,11 @@ class MultiStore:
     def get_store_index(self, store: Store) -> Optional[int]:
         """
         Gets the index of the store in the list of stores.
-        If it doesn't exist, returns None
+        If it doesn't exist, returns None.
 
         Note: this is not a search for an instance of a store,
             but rather a search for a equivalent store
+
         Args:
             store: The store to find
 
@@ -285,7 +286,7 @@ class MultiStore:
 
     def add_store(self, store: Store):
         """
-        Adds a store to the list of cached stores
+        Adds a store to the list of cached stores.
 
         Args:
             store: The store to cache
@@ -331,7 +332,7 @@ class MultiStore:
 
     def count_stores(self) -> int:
         """
-        Returns the number of stores in the multistore
+        Returns the number of stores in the multistore.
 
         Returns:
             int indicating the number of stores
@@ -349,7 +350,7 @@ class MultiStore:
 
     def connect(self, store, force_reset: bool = False):
         """
-        For a given store, connect to the source data
+        For a given store, connect to the source data.
 
         Args:
             store: the store to connect to the source data
@@ -362,7 +363,7 @@ class MultiStore:
 
     def close(self, store: Store):
         """
-        For a given store, close any connections
+        For a given store, close any connections.
 
         Args:
             store: the store to close connections to
@@ -373,7 +374,7 @@ class MultiStore:
 
     def connect_all(self, force_reset: bool = False):
         """
-        Connects to all stores
+        Connects to all stores.
 
         Args:
             force_reset: whether to reset the connection or not when the Store is
@@ -385,7 +386,7 @@ class MultiStore:
 
     def close_all(self):
         """
-        Closes all connections
+        Closes all connections.
         """
         with self._multistore_lock:
             for store in self._stores:
@@ -393,7 +394,7 @@ class MultiStore:
 
     def count(self, store: Store, criteria: Optional[Dict] = None, **kwargs) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -412,7 +413,7 @@ class MultiStore:
         **kwargs,
     ) -> List[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -432,7 +433,7 @@ class MultiStore:
 
     def update(self, store: Store, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None, **kwargs):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -446,7 +447,7 @@ class MultiStore:
 
     def ensure_index(self, store: Store, key: str, unique: bool = False, **kwargs) -> bool:
         """
-        Tries to create an index and return true if it succeeded
+        Tries to create an index and return true if it succeeded.
 
         Args:
             key: single key to index
@@ -492,7 +493,7 @@ class MultiStore:
 
     def remove_docs(self, store: Store, criteria: Dict, **kwargs):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -509,7 +510,7 @@ class MultiStore:
         **kwargs,
     ):
         """
-        Queries the Store for a single document
+        Queries the Store for a single document.
 
         Args:
             criteria: PyMongo filter for documents to search
@@ -527,7 +528,7 @@ class MultiStore:
         self, store: Store, field: str, criteria: Optional[Dict] = None, all_exist: bool = False, **kwargs
     ) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -538,7 +539,7 @@ class MultiStore:
 
     def set_store_attribute(self, store: Store, name: str, value: Any):
         """
-        A method to set an attribute of a store
+        A method to set an attribute of a store.
 
         Args:
             name: The name of a function or attribute to access
@@ -550,7 +551,7 @@ class MultiStore:
 
     def call_attr(self, name: str, store: Store, **kwargs):
         """
-        This class will actually call an attribute/method on the class instance
+        This class will actually call an attribute/method on the class instance.
 
         Args:
             name: The name of a function or attribute to access
@@ -596,7 +597,7 @@ class MultiStoreManager(BaseManager):
     def setup(cls, multistore):
         """
         Args:
-            multistore: A multistore to share between processes
+            multistore: A multistore to share between processes.
 
         Returns:
             A manager

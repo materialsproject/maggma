@@ -17,7 +17,7 @@ from maggma.stores import S3Store
 
 class PostOnlyResource(Resource):
     """
-    Implements a REST Compatible Resource as a POST URL endpoint
+    Implements a REST Compatible Resource as a POST URL endpoint.
     """
 
     def __init__(
@@ -73,7 +73,7 @@ class PostOnlyResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         self.build_dynamic_model_search()

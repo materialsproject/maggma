@@ -30,7 +30,7 @@ class SSHTunnel(MSONable):
             password: optional password for the ssh tunnel server; If a private_key is
                 supplied this password is assumed to be the private key password
             private_key: ssh private key to authenticate to the tunnel server
-            kwargs: any extra args passed to the SSHTunnelForwarder
+            kwargs: any extra args passed to the SSHTunnelForwarder.
         """
 
         self.tunnel_server_address = tunnel_server_address

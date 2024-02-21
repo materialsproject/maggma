@@ -57,7 +57,8 @@ class FileStore(MemoryStore):
         **kwargs,
     ):
         """
-        Initializes a FileStore
+        Initializes a FileStore.
+
         Args:
             path: parent directory containing all files and subdirectories to process
             file_filters: List of fnmatch patterns defining the files to be tracked by
@@ -119,7 +120,7 @@ class FileStore(MemoryStore):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return f"file://{self.path}"
 
@@ -177,20 +178,20 @@ class FileStore(MemoryStore):
         Iterate through all files in the Store folder and populate
         the Store with dictionaries containing basic information about each file.
 
-        The keys of the documents added to the Store are
+        The keys of the documents added to the Store are:
 
-            name: str = File name
-            path: Path = Absolute path of this file
-            parent: str = Name of the parent directory (if any)
-            file_id: str = Unique identifier for this file, computed from the hash
-                        of its path relative to the base FileStore directory and
-                        the file creation time. The key of this field is 'file_id'
-                        by default but can be changed via the 'key' kwarg to
-                        FileStore.__init__().
-            size: int = Size of this file in bytes
-            last_updated: datetime = Time this file was last modified
-            hash: str = Hash of the file contents
-            orphan: bool = Whether this record is an orphan
+        - name: str = File name
+        - path: Path = Absolute path of this file
+        - parent: str = Name of the parent directory (if any)
+        - file_id: str = Unique identifier for this file, computed from the hash
+                    of its path relative to the base FileStore directory and
+                    the file creation time. The key of this field is 'file_id'
+                    by default but can be changed via the 'key' kwarg to
+                    `FileStore.__init__()`.
+        - size: int = Size of this file in bytes
+        - last_updated: datetime = Time this file was last modified
+        - hash: str = Hash of the file contents
+        - orphan: bool = Whether this record is an orphan
         """
         file_list = []
         # generate a list of files in subdirectories
@@ -214,18 +215,18 @@ class FileStore(MemoryStore):
         basic information about that file. The keys in the returned dict
         are:
 
-            name: str = File name
-            path: Path = Absolute path of this file
-            parent: str = Name of the parent directory (if any)
-            file_id: str = Unique identifier for this file, computed from the hash
-                        of its path relative to the base FileStore directory and
-                        the file creation time. The key of this field is 'file_id'
-                        by default but can be changed via the 'key' kwarg to
-                        FileStore.__init__().
-            size: int = Size of this file in bytes
-            last_updated: datetime = Time this file was last modified
-            hash: str = Hash of the file contents
-            orphan: bool = Whether this record is an orphan
+        - name: str = File name
+        - path: Path = Absolute path of this file
+        - parent: str = Name of the parent directory (if any)
+        - file_id: str = Unique identifier for this file, computed from the hash
+                    of its path relative to the base FileStore directory and
+                    the file creation time. The key of this field is 'file_id'
+                    by default but can be changed via the 'key' kwarg to
+                    FileStore.__init__().
+        - size: int = Size of this file in bytes
+        - last_updated: datetime = Time this file was last modified
+        - hash: str = Hash of the file contents
+        - orphan: bool = Whether this record is an orphan
         """
         # compute the file_id from the relative path
         relative_path = f.relative_to(self.path)
@@ -265,7 +266,7 @@ class FileStore(MemoryStore):
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Read all the files in the directory, create corresponding File
         items in the internal MemoryStore.
@@ -358,7 +359,7 @@ class FileStore(MemoryStore):
 
     def _filter_data(self, d):
         """
-        Remove any protected keys from a dictionary
+        Remove any protected keys from a dictionary.
 
         Args:
             d: Dictionary whose keys are to be filtered
@@ -376,7 +377,7 @@ class FileStore(MemoryStore):
         contents_size_limit: Optional[int] = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -461,7 +462,7 @@ class FileStore(MemoryStore):
         contents_size_limit: Optional[int] = None,
     ):
         """
-        Queries the Store for a single document
+        Queries the Store for a single document.
 
         Args:
             criteria: PyMongo filter for documents to search

@@ -45,7 +45,7 @@ class PandasMemoryStore:
         """
         Args:
             key: main key to index on
-            last_updated_field: field for date/time stamping the data
+            last_updated_field: field for date/time stamping the data.
         """
         self._data = None
         self.key = key
@@ -82,7 +82,7 @@ class PandasMemoryStore:
         criteria_fields: Union[List, None] = None,
     ) -> pd.DataFrame:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: if there's a `query` key, it's value will be used as the
@@ -160,7 +160,7 @@ class PandasMemoryStore:
 
     def count(self, criteria: Optional[Dict] = None, criteria_fields: Union[List, None] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Returns:
             int: the number of documents matching the query criteria
@@ -175,7 +175,7 @@ class PandasMemoryStore:
         self, field: str, criteria: Optional[Dict] = None, criteria_fields: Union[List, None] = None
     ) -> pd.Series:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -193,7 +193,7 @@ class PandasMemoryStore:
     def last_updated(self) -> datetime:
         """
         Provides the most recent last_updated date time stamp from
-        the documents in this Store
+        the documents in this Store.
         """
         if self._data is None:
             return datetime.min
@@ -280,7 +280,7 @@ class PandasMemoryStore:
 
     def update(self, docs: pd.DataFrame) -> pd.DataFrame:
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -300,13 +300,13 @@ class PandasMemoryStore:
         return key in self._data
 
     def __hash__(self):
-        """Hash for the store"""
+        """Hash for the store."""
         return hash((self.key, self.last_updated_field))
 
     def __eq__(self, other: object) -> bool:
         """
         Check equality for PandasMemoryStore
-        other: other PandasMemoryStore to compare with
+        other: other PandasMemoryStore to compare with.
         """
         if not isinstance(other, PandasMemoryStore):
             return False
@@ -332,7 +332,7 @@ class S3IndexStore(PandasMemoryStore):
         manifest_key: str = "manifest.jsonl",
         **kwargs,
     ):
-        """Initializes an S3IndexStore
+        """Initializes an S3IndexStore.
 
         Args:
             collection_name (str): name of the collection
@@ -467,7 +467,7 @@ class OpenDataStore(S3IndexStore):
         object_grouping: Optional[List[str]] = None,
         **kwargs,
     ):
-        """Initializes an OpenDataStore
+        """Initializes an OpenDataStore.
 
         Args:
             index (S3IndexStore): The store that'll be used as the index,
@@ -547,7 +547,7 @@ class OpenDataStore(S3IndexStore):
         criteria_fields: Union[List, None] = None,
     ) -> pd.DataFrame:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: if there's a `query` key, it's value will be used as the
