@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.63.3](https://github.com/materialsproject/maggma/tree/v0.63.3) (2024-02-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.63.2...v0.63.3)
+
+**Implemented enhancements:**
+
+- Tweak docstrings to fix rendered docs [\#923](https://github.com/materialsproject/maggma/pull/923) ([ml-evs](https://github.com/ml-evs))
+
 ## [v0.63.2](https://github.com/materialsproject/maggma/tree/v0.63.2) (2024-02-16)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.63.1...v0.63.2)
@@ -259,19 +267,19 @@
 
 ## [v0.53.0](https://github.com/materialsproject/maggma/tree/v0.53.0) (2023-08-02)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.1...v0.53.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.2...v0.53.0)
 
 **Merged pull requests:**
 
 - allow \>5GB and turn on multi-part uploads for AWS [\#829](https://github.com/materialsproject/maggma/pull/829) ([kbuma](https://github.com/kbuma))
 
-## [v0.52.1](https://github.com/materialsproject/maggma/tree/v0.52.1) (2023-08-02)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.2...v0.52.1)
-
 ## [v0.52.2](https://github.com/materialsproject/maggma/tree/v0.52.2) (2023-08-02)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.0...v0.52.2)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.1...v0.52.2)
+
+## [v0.52.1](https://github.com/materialsproject/maggma/tree/v0.52.1) (2023-08-02)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.52.0...v0.52.1)
 
 **Merged pull requests:**
 
