@@ -1182,7 +1182,7 @@
 <a id="maggma.core.store"></a>
   <div class="doc doc-contents first">
   
-      <p>Module containing the core Store definition</p>
+      <p>Module containing the core Store definition.</p>
 
   
 
@@ -1212,7 +1212,7 @@
             Bases: <code><span title="enum.Enum">Enum</span></code></p>
 
   
-      <p>Datetime format in store document</p>
+      <p>Datetime format in store document.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/maggma/core/store.py</code></summary>
@@ -1221,7 +1221,7 @@
 <span class="normal">28</span>
 <span class="normal">29</span>
 <span class="normal">30</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">DateTimeFormat</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Datetime format in store document&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Datetime format in store document.&quot;&quot;&quot;</span>
 
     <span class="n">DateTime</span> <span class="o">=</span> <span class="s2">&quot;datetime&quot;</span>
     <span class="n">IsoFormat</span> <span class="o">=</span> <span class="s2">&quot;isoformat&quot;</span>
@@ -1265,7 +1265,7 @@
             Bases: <code><span title="enum.Enum">Enum</span></code></p>
 
   
-      <p>Enumeration for sorting order</p>
+      <p>Enumeration for sorting order.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/maggma/core/store.py</code></summary>
@@ -1274,7 +1274,7 @@
 <span class="normal">21</span>
 <span class="normal">22</span>
 <span class="normal">23</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Sort</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumeration for sorting order&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Enumeration for sorting order.&quot;&quot;&quot;</span>
 
     <span class="n">Ascending</span> <span class="o">=</span> <span class="mi">1</span>
     <span class="n">Descending</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -1319,7 +1319,7 @@
 
   
       <p>Abstract class for a data Store
-Defines the interface for all data going in and out of a Builder</p>
+Defines the interface for all data going in and out of a Builder.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/maggma/core/store.py</code></summary>
@@ -1621,7 +1621,7 @@ Defines the interface for all data going in and out of a Builder</p>
 <span class="normal">328</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Store</span><span class="p">(</span><span class="n">MSONable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Abstract class for a data Store</span>
-<span class="sd">    Defines the interface for all data going in and out of a Builder</span>
+<span class="sd">    Defines the interface for all data going in and out of a Builder.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -1637,7 +1637,7 @@ Defines the interface for all data going in and out of a Builder</p>
 <span class="sd">            last_updated_field: field for date/time stamping the data</span>
 <span class="sd">            last_updated_type: the date/time format for the last_updated_field.</span>
 <span class="sd">                                Can be &quot;datetime&quot; or &quot;isoformat&quot;</span>
-<span class="sd">            validator: Validator to validate documents going into the store</span>
+<span class="sd">            validator: Validator to validate documents going into the store.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">=</span> <span class="n">last_updated_field</span>
@@ -1652,19 +1652,19 @@ Defines the interface for all data going in and out of a Builder</p>
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span> <span class="nf">_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Returns a handle to the pymongo collection object</span>
+<span class="sd">        Returns a handle to the pymongo collection object.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractproperty</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Return a string representing this data source</span>
+<span class="sd">        Return a string representing this data source.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Connect to the source data</span>
+<span class="sd">        Connect to the source data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            force_reset: whether to reset the connection or not</span>
@@ -1673,13 +1673,13 @@ Defines the interface for all data going in and out of a Builder</p>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Closes any connections</span>
+<span class="sd">        Closes any connections.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Counts the number of documents matching the query criteria</span>
+<span class="sd">        Counts the number of documents matching the query criteria.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            criteria: PyMongo filter for documents to count in</span>
@@ -1695,7 +1695,7 @@ Defines the interface for all data going in and out of a Builder</p>
         <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Queries the Store for a set of documents</span>
+<span class="sd">        Queries the Store for a set of documents.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            criteria: PyMongo filter for documents to search in</span>
@@ -1709,7 +1709,7 @@ Defines the interface for all data going in and out of a Builder</p>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Update documents into the Store</span>
+<span class="sd">        Update documents into the Store.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            docs: the document or list of documents to update</span>
@@ -1722,7 +1722,7 @@ Defines the interface for all data going in and out of a Builder</p>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Tries to create an index and return true if it succeeded</span>
+<span class="sd">        Tries to create an index and return true if it succeeded.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: single key to index</span>
@@ -1762,7 +1762,7 @@ Defines the interface for all data going in and out of a Builder</p>
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Remove docs matching the query dictionary</span>
+<span class="sd">        Remove docs matching the query dictionary.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            criteria: query dictionary to match</span>
@@ -1775,7 +1775,7 @@ Defines the interface for all data going in and out of a Builder</p>
         <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Queries the Store for a single document</span>
+<span class="sd">        Queries the Store for a single document.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            criteria: PyMongo filter for documents to search</span>
@@ -1787,7 +1787,7 @@ Defines the interface for all data going in and out of a Builder</p>
 
     <span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Get all distinct values for a field</span>
+<span class="sd">        Get all distinct values for a field.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            field: the field(s) to get distinct values for</span>
@@ -1802,7 +1802,7 @@ Defines the interface for all data going in and out of a Builder</p>
     <span class="k">def</span> <span class="nf">last_updated</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">datetime</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Provides the most recent last_updated date time stamp from</span>
-<span class="sd">        the documents in this Store</span>
+<span class="sd">        the documents in this Store.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">doc</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">query</span><span class="p">(</span>
@@ -1883,7 +1883,7 @@ Defines the interface for all data going in and out of a Builder</p>
     <span class="k">def</span> <span class="nf">updated_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Returns keys for docs that are newer in the target store in comparison</span>
-<span class="sd">        with this store when comparing the last updated field (last_updated_field)</span>
+<span class="sd">        with this store when comparing the last updated field (last_updated_field).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            target (Store): store to look for updated documents</span>
@@ -1945,7 +1945,7 @@ Defines the interface for all data going in and out of a Builder</p>
   <div class="doc doc-contents ">
   
       <p>Provides the most recent last_updated date time stamp from
-the documents in this Store</p>
+the documents in this Store.</p>
   </div>
 
 </div>
@@ -2030,7 +2030,7 @@ the documents in this Store</p>
           </td>
           <td>
             <div class="doc-md-description">
-              <p>Validator to validate documents going into the store</p>
+              <p>Validator to validate documents going into the store.</p>
             </div>
           </td>
           <td>
@@ -2078,7 +2078,7 @@ the documents in this Store</p>
 <span class="sd">        last_updated_field: field for date/time stamping the data</span>
 <span class="sd">        last_updated_type: the date/time format for the last_updated_field.</span>
 <span class="sd">                            Can be &quot;datetime&quot; or &quot;isoformat&quot;</span>
-<span class="sd">        validator: Validator to validate documents going into the store</span>
+<span class="sd">        validator: Validator to validate documents going into the store.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">key</span> <span class="o">=</span> <span class="n">key</span>
     <span class="bp">self</span><span class="o">.</span><span class="n">last_updated_field</span> <span class="o">=</span> <span class="n">last_updated_field</span>
@@ -2113,7 +2113,7 @@ the documents in this Store</p>
 
   <div class="doc doc-contents ">
   
-      <p>Closes any connections</p>
+      <p>Closes any connections.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/maggma/core/store.py</code></summary>
@@ -2124,7 +2124,7 @@ the documents in this Store</p>
 <span class="normal">89</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Closes any connections</span>
+<span class="sd">    Closes any connections.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
           </details>
@@ -2150,7 +2150,7 @@ the documents in this Store</p>
 
   <div class="doc doc-contents ">
   
-      <p>Connect to the source data</p>
+      <p>Connect to the source data.</p>
 
 
 
@@ -2194,7 +2194,7 @@ the documents in this Store</p>
 <span class="normal">83</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">connect</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">force_reset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Connect to the source data</span>
+<span class="sd">    Connect to the source data.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        force_reset: whether to reset the connection or not</span>
@@ -2223,7 +2223,7 @@ the documents in this Store</p>
 
   <div class="doc doc-contents ">
   
-      <p>Counts the number of documents matching the query criteria</p>
+      <p>Counts the number of documents matching the query criteria.</p>
 
 
 
@@ -2267,7 +2267,7 @@ the documents in this Store</p>
 <span class="normal">98</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">count</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Counts the number of documents matching the query criteria</span>
+<span class="sd">    Counts the number of documents matching the query criteria.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to count in</span>
@@ -2292,7 +2292,7 @@ the documents in this Store</p>
 
   <div class="doc doc-contents ">
   
-      <p>Get all distinct values for a field</p>
+      <p>Get all distinct values for a field.</p>
 
 
 
@@ -2353,7 +2353,7 @@ the documents in this Store</p>
 <span class="normal">210</span>
 <span class="normal">211</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">distinct</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">all_exist</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Get all distinct values for a field</span>
+<span class="sd">    Get all distinct values for a field.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        field: the field(s) to get distinct values for</span>
@@ -2387,7 +2387,7 @@ the documents in this Store</p>
 
   <div class="doc doc-contents ">
   
-      <p>Tries to create an index and return true if it succeeded</p>
+      <p>Tries to create an index and return true if it succeeded.</p>
 
 
 
@@ -2473,7 +2473,7 @@ the documents in this Store</p>
 <span class="normal">145</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">ensure_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">unique</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Tries to create an index and return true if it succeeded</span>
+<span class="sd">    Tries to create an index and return true if it succeeded.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        key: single key to index</span>
@@ -2794,7 +2794,7 @@ than any document in targets.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Return a string representing this data source</p>
+      <p>Return a string representing this data source.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/maggma/core/store.py</code></summary>
@@ -2805,7 +2805,7 @@ than any document in targets.</p>
 <span class="normal">74</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractproperty</span>
 <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Return a string representing this data source</span>
+<span class="sd">    Return a string representing this data source.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 </code></pre></div></td></tr></table></div>
           </details>
@@ -2989,7 +2989,7 @@ Store than this Store.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Queries the Store for a set of documents</p>
+      <p>Queries the Store for a set of documents.</p>
 
 
 
@@ -3109,7 +3109,7 @@ values are 1 for ascending or -1 for descending.</p>
     <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">Dict</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Queries the Store for a set of documents</span>
+<span class="sd">    Queries the Store for a set of documents.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search in</span>
@@ -3139,7 +3139,7 @@ values are 1 for ascending or -1 for descending.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Queries the Store for a single document</p>
+      <p>Queries the Store for a single document.</p>
 
 
 
@@ -3224,7 +3224,7 @@ values are 1 for ascending or -1 for descending.</p>
     <span class="n">sort</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Sort</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Queries the Store for a single document</span>
+<span class="sd">    Queries the Store for a single document.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: PyMongo filter for documents to search</span>
@@ -3257,7 +3257,7 @@ values are 1 for ascending or -1 for descending.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Remove docs matching the query dictionary</p>
+      <p>Remove docs matching the query dictionary.</p>
 
 
 
@@ -3301,7 +3301,7 @@ values are 1 for ascending or -1 for descending.</p>
 <span class="normal">181</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">remove_docs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">criteria</span><span class="p">:</span> <span class="n">Dict</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Remove docs matching the query dictionary</span>
+<span class="sd">    Remove docs matching the query dictionary.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        criteria: query dictionary to match</span>
@@ -3330,7 +3330,7 @@ values are 1 for ascending or -1 for descending.</p>
 
   <div class="doc doc-contents ">
   
-      <p>Update documents into the Store</p>
+      <p>Update documents into the Store.</p>
 
 
 
@@ -3395,7 +3395,7 @@ values are 1 for ascending or -1 for descending.</p>
 <span class="normal">132</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">update</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">docs</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Dict</span><span class="p">],</span> <span class="n">Dict</span><span class="p">],</span> <span class="n">key</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Update documents into the Store</span>
+<span class="sd">    Update documents into the Store.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        docs: the document or list of documents to update</span>
@@ -3425,7 +3425,7 @@ values are 1 for ascending or -1 for descending.</p>
   <div class="doc doc-contents ">
   
       <p>Returns keys for docs that are newer in the target store in comparison
-with this store when comparing the last updated field (last_updated_field)</p>
+with this store when comparing the last updated field (last_updated_field).</p>
 
 
 
@@ -3516,7 +3516,7 @@ with this store when comparing the last updated field (last_updated_field)</p>
 <span class="k">def</span> <span class="nf">updated_keys</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">criteria</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Returns keys for docs that are newer in the target store in comparison</span>
-<span class="sd">    with this store when comparing the last updated field (last_updated_field)</span>
+<span class="sd">    with this store when comparing the last updated field (last_updated_field).</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        target (Store): store to look for updated documents</span>
@@ -3560,7 +3560,7 @@ with this store when comparing the last updated field (last_updated_field)</p>
             Bases: <code>Exception</code></p>
 
   
-      <p>General Store-related error</p>
+      <p>General Store-related error.</p>
 
             <details class="quote">
               <summary>Source code in <code>src/maggma/core/store.py</code></summary>
@@ -3569,7 +3569,7 @@ with this store when comparing the last updated field (last_updated_field)</p>
 <span class="normal">333</span>
 <span class="normal">334</span>
 <span class="normal">335</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">StoreError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;General Store-related error&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;General Store-related error.&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>

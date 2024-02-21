@@ -984,7 +984,7 @@
 <a id="maggma.core.builder"></a>
   <div class="doc doc-contents first">
   
-      <p>Module containing the core builder definition</p>
+      <p>Module containing the core builder definition.</p>
 
   
 
@@ -1017,7 +1017,7 @@
       <p>Base Builder class
 At minimum this class should implement:
 get_items - Get items from the sources
-update_targets - Updates the sources with results</p>
+update_targets - Updates the sources with results.</p>
 <p>Multiprocessing and MPI processing can be used if all
 the data processing is  limited to process_items</p>
 
@@ -1157,12 +1157,13 @@ the data processing is  limited to process_items</p>
 <span class="normal">146</span>
 <span class="normal">147</span>
 <span class="normal">148</span>
-<span class="normal">149</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Builder</span><span class="p">(</span><span class="n">MSONable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
+<span class="normal">149</span>
+<span class="normal">150</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">class</span> <span class="nc">Builder</span><span class="p">(</span><span class="n">MSONable</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ABCMeta</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Base Builder class</span>
 <span class="sd">    At minimum this class should implement:</span>
 <span class="sd">    get_items - Get items from the sources</span>
-<span class="sd">    update_targets - Updates the sources with results</span>
+<span class="sd">    update_targets - Updates the sources with results.</span>
 
 <span class="sd">    Multiprocessing and MPI processing can be used if all</span>
 <span class="sd">    the data processing is  limited to process_items</span>
@@ -1201,7 +1202,7 @@ the data processing is  limited to process_items</p>
 <span class="sd">        Part of a domain-decomposition paradigm to allow the builder to operate on</span>
 <span class="sd">        multiple nodes by dividing up the IO as well as the compute</span>
 <span class="sd">        This function should return an iterator of dictionaries that can be distributed</span>
-<span class="sd">        to multiple instances of the builder to get/process/update on</span>
+<span class="sd">        to multiple instances of the builder to get/process/update on.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            number_splits: The number of groups to split the documents to work on</span>
@@ -1228,6 +1229,7 @@ the data processing is  limited to process_items</p>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Process an item. There should be no database operations in this method.</span>
 <span class="sd">        Default behavior is to return the item.</span>
+
 <span class="sd">        Arguments:</span>
 <span class="sd">            item:</span>
 
@@ -1263,7 +1265,7 @@ the data processing is  limited to process_items</p>
     <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Run the builder serially</span>
-<span class="sd">        This is only intended for diagnostic purposes</span>
+<span class="sd">        This is only intended for diagnostic purposes.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Set up logging</span>
         <span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
@@ -1481,8 +1483,7 @@ the data processing is  limited to process_items</p>
 
           <details class="quote">
             <summary>Source code in <code>src/maggma/core/builder.py</code></summary>
-            <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">107</span>
-<span class="normal">108</span>
+            <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">108</span>
 <span class="normal">109</span>
 <span class="normal">110</span>
 <span class="normal">111</span>
@@ -1490,7 +1491,8 @@ the data processing is  limited to process_items</p>
 <span class="normal">113</span>
 <span class="normal">114</span>
 <span class="normal">115</span>
-<span class="normal">116</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="normal">116</span>
+<span class="normal">117</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Perform any final clean up.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1590,7 +1592,7 @@ the data processing is  limited to process_items</p>
       <p>Part of a domain-decomposition paradigm to allow the builder to operate on
 multiple nodes by dividing up the IO as well as the compute
 This function should return an iterator of dictionaries that can be distributed
-to multiple instances of the builder to get/process/update on</p>
+to multiple instances of the builder to get/process/update on.</p>
 
 
 
@@ -1646,7 +1648,7 @@ to multiple instances of the builder to get/process/update on</p>
 <span class="sd">    Part of a domain-decomposition paradigm to allow the builder to operate on</span>
 <span class="sd">    multiple nodes by dividing up the IO as well as the compute</span>
 <span class="sd">    This function should return an iterator of dictionaries that can be distributed</span>
-<span class="sd">    to multiple instances of the builder to get/process/update on</span>
+<span class="sd">    to multiple instances of the builder to get/process/update on.</span>
 
 <span class="sd">    Arguments:</span>
 <span class="sd">        number_splits: The number of groups to split the documents to work on</span>
@@ -1680,9 +1682,37 @@ to multiple instances of the builder to get/process/update on</p>
   <div class="doc doc-contents ">
   
       <p>Process an item. There should be no database operations in this method.
-Default behavior is to return the item.
-Arguments:
-    item:</p>
+Default behavior is to return the item.</p>
+
+
+
+  <p><strong>Parameters:</strong></p>
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Type</th>
+        <th>Description</th>
+        <th>Default</th>
+      </tr>
+    </thead>
+    <tbody>
+        <tr>
+          <td><code>item</code></td>
+          <td>
+                <code><span title="typing.Any">Any</span></code>
+          </td>
+          <td>
+            <div class="doc-md-description">
+              
+            </div>
+          </td>
+          <td>
+              <em>required</em>
+          </td>
+        </tr>
+    </tbody>
+  </table>
 
 
 
@@ -1720,10 +1750,12 @@ Arguments:
 <span class="normal">89</span>
 <span class="normal">90</span>
 <span class="normal">91</span>
-<span class="normal">92</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="normal">92</span>
+<span class="normal">93</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">process_item</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Process an item. There should be no database operations in this method.</span>
 <span class="sd">    Default behavior is to return the item.</span>
+
 <span class="sd">    Arguments:</span>
 <span class="sd">        item:</span>
 
@@ -1752,12 +1784,11 @@ Arguments:
   <div class="doc doc-contents ">
   
       <p>Run the builder serially
-This is only intended for diagnostic purposes</p>
+This is only intended for diagnostic purposes.</p>
 
           <details class="quote">
             <summary>Source code in <code>src/maggma/core/builder.py</code></summary>
-            <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">118</span>
-<span class="normal">119</span>
+            <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal">119</span>
 <span class="normal">120</span>
 <span class="normal">121</span>
 <span class="normal">122</span>
@@ -1779,10 +1810,11 @@ This is only intended for diagnostic purposes</p>
 <span class="normal">138</span>
 <span class="normal">139</span>
 <span class="normal">140</span>
-<span class="normal">141</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
+<span class="normal">141</span>
+<span class="normal">142</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">log_level</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run the builder serially</span>
-<span class="sd">    This is only intended for diagnostic purposes</span>
+<span class="sd">    This is only intended for diagnostic purposes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># Set up logging</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">()</span>
@@ -1863,8 +1895,7 @@ Can also perform other book keeping in the process such as storing gridfs oids, 
 
           <details class="quote">
             <summary>Source code in <code>src/maggma/core/builder.py</code></summary>
-            <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 94</span>
-<span class="normal"> 95</span>
+            <div class="codehilite"><table class="codehilitetable"><tr><td class="linenos"><div class="linenodiv"><pre><span></span><span class="normal"> 95</span>
 <span class="normal"> 96</span>
 <span class="normal"> 97</span>
 <span class="normal"> 98</span>
@@ -1874,7 +1905,8 @@ Can also perform other book keeping in the process such as storing gridfs oids, 
 <span class="normal">102</span>
 <span class="normal">103</span>
 <span class="normal">104</span>
-<span class="normal">105</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
+<span class="normal">105</span>
+<span class="normal">106</span></pre></div></td><td class="code"><div><pre><span></span><code><span class="nd">@abstractmethod</span>
 <span class="k">def</span> <span class="nf">update_targets</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">items</span><span class="p">:</span> <span class="n">List</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Takes a list of items from process item and updates the targets with them.</span>
