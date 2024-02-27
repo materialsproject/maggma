@@ -7,6 +7,7 @@ import logging
 import sys
 from datetime import datetime
 from itertools import chain
+from typing import List
 
 import click
 from monty.serialization import loadfn
@@ -21,6 +22,10 @@ from maggma.utils import ReportingHandler, TqdmLoggingHandler
 sys.meta_path.append(ScriptFinder())
 
 settings = CLISettings()
+
+
+class BrokerExcepton(Exception):
+    pass
 
 
 @click.command()
@@ -83,6 +88,52 @@ settings = CLISettings()
     type=str,
     help="Prefix to use in queue names when RabbitMQ is select as the broker",
 )
+@click.option("--dask", is_flag=True, help="Enables the use of Dask as the work broker")
+@click.option(
+    "--processes",
+    default=False,
+    is_flag=True,
+    help="""**only applies when running Dask on a single machine**\n
+    Whether or not the Dask cluster uses thread-based or process-based parallelism.""",
+)
+@click.option(
+    "--dask-workers",
+    "dask_workers",
+    default=1,
+    type=int,
+    help="""Number of 'workers' to start. If using a distributed cluster,
+    this will set the number of workers, or processes, per Dask Worker""",
+)
+@click.option(
+    "--memory-limit",
+    "memory_limit",
+    default=None,
+    type=str,
+    help="""Amount of memory ('512MB', '4GB', etc.) to be allocated to each worker (process) for Dask.
+        Default is no limit""",
+)
+@click.option(
+    "--scheduler-address",
+    "scheduler_address",
+    type=str,
+    default="127.0.0.1",
+    help="Address for Dask scheduler",
+)
+@click.option(
+    "--scheduler-port",
+    "scheduler_port",
+    default=8786,
+    type=int,
+    help="Port for the Dask scheduler to communicate with workers over",
+)
+@click.option(
+    "--hosts",
+    "hosts",
+    default=None,
+    type=click.Path(exists=True),
+    help="""Path to file containing addresses of host machines for creating a Dask SSHcluster.
+    A Dask LocalCluster will be created if no 'hosts' are provided""",
+)
 @click.option(
     "-m",
     "--memray",
@@ -114,6 +165,13 @@ def run(
     no_bars,
     num_processes,
     rabbitmq,
+    dask,
+    processes,
+    dask_workers,
+    memory_limit,
+    scheduler_address,
+    scheduler_port,
+    hosts,
     queue_prefix,
     memray,
     memray_dir,
@@ -147,8 +205,13 @@ def run(
         )
 
     # Import proper manager and worker
+    if rabbitmq and dask:
+        raise BrokerExcepton("Use of multiple work brokers is not supported")
+
     if rabbitmq:
         from maggma.cli.rabbitmq import manager, worker
+    elif dask:
+        from maggma.cli.dask_executor import dask_executor
     else:
         from maggma.cli.distributed import manager, worker
 
@@ -214,6 +277,15 @@ def run(
                 )
             else:
                 worker(url=url, port=port, num_processes=num_processes, no_bars=no_bars)
+    elif dask:
+        dask_executor(
+            scheduler_address=scheduler_address,
+            scheduler_port=scheduler_port,
+            dask_hosts=hosts,
+            builders=builder_objects,
+            dask_workers=dask_workers,
+            processes=-processes,
+        )
     else:
         if num_processes == 1:
             for builder in builder_objects:
