@@ -173,12 +173,14 @@ def run(
     num_processes,
     rabbitmq,
     dask,
-    processes,
+    dashboard_port,
+    dask_threads,
     dask_workers,
+    hostfile,
     memory_limit,
+    processes,
     scheduler_address,
     scheduler_port,
-    hostfile,
     queue_prefix,
     memray,
     memray_dir,
@@ -286,12 +288,15 @@ def run(
                 worker(url=url, port=port, num_processes=num_processes, no_bars=no_bars)
     elif dask:
         dask_executor(
+            builders=builder_objects,
+            dashboard_port=dashboard_port,
+            dask_threads=dask_threads,
+            dask_workers=dask_workers,
+            hostfile=hostfile,
+            memory_limit=memory_limit,
+            processes=-processes,
             scheduler_address=scheduler_address,
             scheduler_port=scheduler_port,
-            dask_hosts=hosts,
-            builders=builder_objects,
-            dask_workers=dask_workers,
-            processes=-processes,
         )
     else:
         if num_processes == 1:
