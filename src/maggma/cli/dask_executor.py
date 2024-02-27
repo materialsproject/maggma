@@ -2,7 +2,7 @@
 # coding utf-8
 
 from logging import getLogger
-from typing import List
+from typing import List, Union
 
 from maggma.cli.settings import CLISettings
 from maggma.core import Builder
@@ -17,12 +17,15 @@ settings = CLISettings()
 
 
 def dask_executor(
+    builders: List[Builder],
+    dashboard_port: int,
+    hostfile: str,
+    dask_threads: int,
+    dask_workers: int,
+    memory_limit,
+    processes: bool,
     scheduler_address: str,
     scheduler_port: int,
-    dask_hosts: str,
-    builders: List[Builder],
-    dask_workers: int,
-    processes: bool,
 ):
     """
     Dask executor for processing builders. Constructs Dask task graphs
@@ -31,19 +34,27 @@ def dask_executor(
     """
     logger = getLogger("Scheduler")
 
-    if dask_hosts:
-        with open(dask_hosts) as file:
-            dask_hosts = file.read().split()
+    if hostfile:
+        with open(hostfile) as file:
+            hostnames = file.read().split()
 
         logger.info(
-            f"""Starting distributed Dask cluster, with scheduler at {dask_hosts[0]}:{scheduler_port},
-            and workers at: {dask_hosts[1:]}:{scheduler_port}..."""
+            f"""Starting distributed Dask cluster, with scheduler at {hostnames[0]}:{scheduler_port},
+            and workers at: {hostnames[1:]}:{scheduler_port}..."""
         )
     else:
+        hostnames = None
         logger.info(f"Starting Dask LocalCluster with scheduler at: {scheduler_address}:{scheduler_port}...")
 
     client = setup_dask(
-        address=scheduler_address, port=scheduler_port, hosts=dask_hosts, n_workers=dask_workers, processes=processes
+        dashboard_port=dashboard_port,
+        hostnames=hostnames,
+        memory_limit=memory_limit,
+        n_workers=dask_workers,
+        nthreads=dask_threads,
+        processes=processes,
+        scheduler_address=scheduler_address,
+        scheduler_port=scheduler_port,
     )
 
     logger.info(f"Dask dashboard available at: {client.dashboard_link}")
@@ -65,15 +76,36 @@ def dask_executor(
     client.shutdown()
 
 
-def setup_dask(address: str, port: int, hosts: List[str], n_workers: int, processes: bool):
+def setup_dask(
+    dashboard_port: int,
+    hostnames: Union(List[str], None),
+    memory_limit,
+    n_workers: int,
+    nthreads: int,
+    processes: bool,
+    scheduler_address: str,
+    scheduler_port: int,
+):
     logger = getLogger("Cluster")
 
     logger.info("Starting clutser...")
 
-    if hosts:
-        cluster = SSHCluster(hosts=hosts, scheduler_port=port, n_workers=n_workers)
+    if hostnames:
+        cluster = SSHCluster(
+            hosts=hostnames,
+            scheduler_options={"port": scheduler_port, "dashboard_address": f":{dashboard_port}"},
+            worker_options={"n_workers": n_workers, "nthreads": nthreads, "memory_limit": memory_limit},
+        )
     else:
-        cluster = LocalCluster(host=address, scheduler_port=port, n_workers=n_workers, processes=processes)
+        cluster = LocalCluster(
+            dashboard_address=f":{dashboard_port}",
+            host=scheduler_address,
+            memory_limit=memory_limit,
+            n_workers=n_workers,
+            processes=processes,
+            scheduler_port=scheduler_port,
+            threads_per_worker=nthreads,
+        )
 
     logger.info(f"Cluster started with config: {cluster}")
 
