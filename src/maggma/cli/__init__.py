@@ -98,7 +98,6 @@ class BrokerExcepton(Exception):
 )
 @click.option(
     "--dask-workers",
-    "dask_workers",
     default=1,
     type=int,
     help="""Number of 'workers' to start. If using a distributed cluster,
@@ -106,7 +105,6 @@ class BrokerExcepton(Exception):
 )
 @click.option(
     "--memory-limit",
-    "memory_limit",
     default=None,
     type=str,
     help="""Amount of memory ('512MB', '4GB', etc.) to be allocated to each worker (process) for Dask.
@@ -114,21 +112,18 @@ class BrokerExcepton(Exception):
 )
 @click.option(
     "--scheduler-address",
-    "scheduler_address",
     type=str,
     default="127.0.0.1",
     help="Address for Dask scheduler",
 )
 @click.option(
     "--scheduler-port",
-    "scheduler_port",
     default=8786,
     type=int,
     help="Port for the Dask scheduler to communicate with workers over",
 )
 @click.option(
     "--hosts",
-    "hosts",
     default=None,
     type=click.Path(exists=True),
     help="""Path to file containing addresses of host machines for creating a Dask SSHcluster.
