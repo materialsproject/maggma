@@ -114,7 +114,8 @@ class BrokerExcepton(Exception):
     "--scheduler-address",
     type=str,
     default="127.0.0.1",
-    help="Address for Dask scheduler",
+    help="""Address for Dask scheduler. If a host file is provided,
+    the first entry in the file will be used for the scheduler""",
 )
 @click.option(
     "--scheduler-port",
