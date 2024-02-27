@@ -136,11 +136,10 @@ class BrokerExcepton(Exception):
 )
 @click.option("--dashboard-port", "dashboard_port", default=8787, type=int, help="")
 @click.option(
-    "--hosts",
+    "--hostfile",
     default=None,
     type=click.Path(exists=True),
-    help="""Path to file containing addresses of host machines for creating a Dask SSHcluster.
-    A Dask LocalCluster will be created if no 'hosts' are provided""",
+    help="Textfile with hostnames/IP addresses for creating Dask SSHCluster",
 )
 @click.option(
     "-m",
@@ -179,7 +178,7 @@ def run(
     memory_limit,
     scheduler_address,
     scheduler_port,
-    hosts,
+    hostfile,
     queue_prefix,
     memray,
     memray_dir,
