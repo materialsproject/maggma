@@ -134,6 +134,7 @@ class BrokerExcepton(Exception):
     type=int,
     help="Port for the Dask scheduler to communicate with workers over",
 )
+@click.option("--dashboard-port", "dashboard_port", default=8787, type=int, help="")
 @click.option(
     "--hosts",
     default=None,
