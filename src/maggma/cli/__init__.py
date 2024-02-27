@@ -113,10 +113,13 @@ class BrokerExcepton(Exception):
 )
 @click.option(
     "--memory-limit",
-    default=None,
-    type=str,
-    help="""Amount of memory ('512MB', '4GB', etc.) to be allocated to each worker (process) for Dask.
-        Default is no limit""",
+    default="auto",
+    show_default=True,
+    help="""Bytes of memory that the worker can use.
+    This can be an integer (bytes),
+    float (fraction of total system memory),
+    string (like '5GB' or '5000M'),
+    'auto', or 0, for no memory management""",
 )
 @click.option(
     "--scheduler-address",
