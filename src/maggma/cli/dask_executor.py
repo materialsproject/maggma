@@ -88,7 +88,7 @@ def setup_dask(
 ):
     logger = getLogger("Cluster")
 
-    logger.info("Starting clutser...")
+    logger.info("Starting cluster...")
 
     if hostnames:
         cluster = SSHCluster(
