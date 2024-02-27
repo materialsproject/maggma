@@ -104,6 +104,14 @@ class BrokerExcepton(Exception):
     this will set the number of workers, or processes, per Dask Worker""",
 )
 @click.option(
+    "--dask-threads",
+    default=0,
+    type=int,
+    help="""Number of threads per worker process.
+    Defaults to number of cores divided by the number of
+    processes per host.""",
+)
+@click.option(
     "--memory-limit",
     default=None,
     type=str,
