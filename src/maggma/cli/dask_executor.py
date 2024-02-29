@@ -78,7 +78,7 @@ def dask_executor(
 
 def setup_dask(
     dashboard_port: int,
-    hostnames: Union(List[str], None),
+    hostnames: Union[List[str], None],
     memory_limit,
     n_workers: int,
     nthreads: int,
