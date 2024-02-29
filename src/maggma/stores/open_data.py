@@ -4,6 +4,7 @@ from io import BytesIO, StringIO
 from typing import Dict, Generator, List, Optional, Tuple, Union
 
 import jsonlines
+import numpy as np
 import pandas as pd
 from boto3 import client as boto_client
 from botocore import UNSIGNED
@@ -625,6 +626,8 @@ class OpenDataStore(S3IndexStore):
         self.index.update(index)
 
     def _write_doc_to_s3(self, doc: pd.DataFrame, index: pd.DataFrame) -> None:
+        doc = doc.replace({pd.NaT: None}).replace({"NaT": None}).replace({np.NaN: None})
+
         string_io = StringIO()
         with jsonlines.Writer(string_io, dumps=json_util.dumps) as writer:
             for _, row in doc.iterrows():
