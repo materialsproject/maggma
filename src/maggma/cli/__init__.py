@@ -105,7 +105,7 @@ class BrokerExcepton(Exception):
 )
 @click.option(
     "--dask-threads",
-    default=0,
+    default=None,
     type=int,
     help="""Number of threads per worker process.
     Defaults to number of cores divided by the number of
