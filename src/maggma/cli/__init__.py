@@ -121,6 +121,8 @@ class BrokerExcepton(Exception):
     string (like '5GB' or '5000M'),
     'auto', or 0, for no memory management""",
 )
+@click.option("--perf-report", default=False, is_flag=True, help="Turn on to save diagnostic report for Dask dashboard")
+@click.option("--report-name", default="dask_report.html", help="File name for Dask diagnostic report")
 @click.option(
     "--scheduler-address",
     type=str,
@@ -179,6 +181,8 @@ def run(
     hostfile,
     memory_limit,
     processes,
+    perf_report,
+    report_name,
     scheduler_address,
     scheduler_port,
     queue_prefix,
@@ -295,6 +299,8 @@ def run(
             hostfile=hostfile,
             memory_limit=memory_limit,
             processes=-processes,
+            perf_report=perf_report,
+            report_name=report_name,
             scheduler_address=scheduler_address,
             scheduler_port=scheduler_port,
         )
