@@ -60,15 +60,23 @@ def dask_executor(
     logger.info(f"Dask dashboard available at: {client.dashboard_link}")
 
     for builder in builders:
-        logger.info(f"Working on {builder.__class__.__name__}")
+        builder_name = builder.__class__.__name__
+        logger.info(f"Working on {builder_name}")
         builder.connect()
         items = builder.get_items()
 
         task_graph = []
-        for chunk in items:
-            docs = dask.delayed(builder.get_processed_docs)(chunk)
-            built_docs = dask.delayed(builder.process_item)(docs)
-            update_store = dask.delayed(builder.update_targets)(built_docs)
+        for idx, chunk in enumerate(items):
+            chunk_token = dask.base.tokenize(idx)
+            docs = dask.delayed(builder.get_processed_docs)(
+                chunk, dask_key_name=f"{builder_name}.get_processed_docs-" + chunk_token
+            )
+            built_docs = dask.delayed(builder.process_item)(
+                docs, dask_key_name=f"{builder_name}.process_item-" + chunk_token
+            )
+            update_store = dask.delayed(builder.update_targets)(
+                built_docs, dask_key_name=f"{builder_name}.update_targets-" + chunk_token
+            )
             task_graph.append(update_store)
 
         dask.compute(*task_graph)
