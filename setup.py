@@ -49,6 +49,7 @@ setup(
     extras_require={
         "vault": ["hvac>=0.9.5"],
         "memray": ["memray>=1.7.0"],
+        "dask": ["dask>=2024.1.1", "distributed>=2024.1.1", "bokeh!=3.0.*,>=2.4.2", "asyncssh>=2.14.2"],
         "montydb": ["montydb>=2.3.12"],
         "notebook_runner": ["IPython>=8.11", "nbformat>=5.0", "regex>=2020.6"],
         "azure": ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"],

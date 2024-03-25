@@ -7,6 +7,7 @@ import logging
 import sys
 from datetime import datetime
 from itertools import chain
+from typing import List
 
 import click
 from monty.serialization import loadfn
@@ -21,6 +22,10 @@ from maggma.utils import ReportingHandler, TqdmLoggingHandler
 sys.meta_path.append(ScriptFinder())
 
 settings = CLISettings()
+
+
+class BrokerExcepton(Exception):
+    pass
 
 
 @click.command()
@@ -83,6 +88,61 @@ settings = CLISettings()
     type=str,
     help="Prefix to use in queue names when RabbitMQ is select as the broker",
 )
+@click.option("--dask", is_flag=True, help="Enables the use of Dask as the work broker")
+@click.option(
+    "--processes",
+    default=False,
+    is_flag=True,
+    help="""**only applies when running Dask on a single machine**\n
+    Whether or not the Dask cluster uses thread-based or process-based parallelism.""",
+)
+@click.option(
+    "--dask-workers",
+    default=1,
+    type=int,
+    help="""Number of 'workers' to start. If using a distributed cluster,
+    this will set the number of workers, or processes, per Dask Worker""",
+)
+@click.option(
+    "--dask-threads",
+    default=None,
+    type=int,
+    help="""Number of threads per worker process.
+    Defaults to number of cores divided by the number of
+    processes per host.""",
+)
+@click.option(
+    "--memory-limit",
+    default="auto",
+    show_default=True,
+    help="""Bytes of memory that the worker can use.
+    This can be an integer (bytes),
+    float (fraction of total system memory),
+    string (like '5GB' or '5000M'),
+    'auto', or 0, for no memory management""",
+)
+@click.option("--perf-report", default=False, is_flag=True, help="Turn on to save diagnostic report for Dask dashboard")
+@click.option("--report-name", default="dask_report.html", help="File name for Dask diagnostic report")
+@click.option(
+    "--scheduler-address",
+    type=str,
+    default="127.0.0.1",
+    help="""Address for Dask scheduler. If a host file is provided,
+    the first entry in the file will be used for the scheduler""",
+)
+@click.option(
+    "--scheduler-port",
+    default=8786,
+    type=int,
+    help="Port for the Dask scheduler to communicate with workers over",
+)
+@click.option("--dashboard-port", "dashboard_port", default=8787, type=int, help="")
+@click.option(
+    "--hostfile",
+    default=None,
+    type=click.Path(exists=True),
+    help="Textfile with hostnames/IP addresses for creating Dask SSHCluster",
+)
 @click.option(
     "-m",
     "--memray",
@@ -114,6 +174,17 @@ def run(
     no_bars,
     num_processes,
     rabbitmq,
+    dask,
+    dashboard_port,
+    dask_threads,
+    dask_workers,
+    hostfile,
+    memory_limit,
+    processes,
+    perf_report,
+    report_name,
+    scheduler_address,
+    scheduler_port,
     queue_prefix,
     memray,
     memray_dir,
@@ -147,8 +218,13 @@ def run(
         )
 
     # Import proper manager and worker
+    if rabbitmq and dask:
+        raise BrokerExcepton("Use of multiple work brokers is not supported")
+
     if rabbitmq:
         from maggma.cli.rabbitmq import manager, worker
+    elif dask:
+        from maggma.cli.dask_executor import dask_executor
     else:
         from maggma.cli.distributed import manager, worker
 
@@ -214,6 +290,20 @@ def run(
                 )
             else:
                 worker(url=url, port=port, num_processes=num_processes, no_bars=no_bars)
+    elif dask:
+        dask_executor(
+            builders=builder_objects,
+            dashboard_port=dashboard_port,
+            dask_threads=dask_threads,
+            dask_workers=dask_workers,
+            hostfile=hostfile,
+            memory_limit=memory_limit,
+            processes=-processes,
+            perf_report=perf_report,
+            report_name=report_name,
+            scheduler_address=scheduler_address,
+            scheduler_port=scheduler_port,
+        )
     else:
         if num_processes == 1:
             for builder in builder_objects:
