@@ -304,7 +304,7 @@ pymdown-extensions==10.5
     # via
     #   mkdocs-material
     #   mkdocstrings
-pymongo==4.6.1
+pymongo==4.6.3
     # via
     #   maggma (setup.py)
     #   mongogrant
