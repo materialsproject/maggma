@@ -51,7 +51,7 @@ flask==3.0.0
     # via mongogrant
 h11==0.14.0
     # via uvicorn
-idna==3.6
+idna==3.7
     # via
     #   anyio
     #   requests
