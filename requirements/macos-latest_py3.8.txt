@@ -41,7 +41,7 @@ click==8.1.7
     #   uvicorn
 cryptography==42.0.0
     # via paramiko
-dnspython==2.4.2
+dnspython==2.6.1
     # via
     #   maggma (setup.py)
     #   pymongo
