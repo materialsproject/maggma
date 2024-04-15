@@ -107,7 +107,7 @@ class GridFSStore(Store):
         Returns:
         """
         with open(lp_file) as f:
-            yaml = YAML(typ='safe', pure=True)
+            yaml = YAML(typ="safe", pure=True)
             lp_creds = yaml.load(f.read())
 
         db_creds = lp_creds.copy()
