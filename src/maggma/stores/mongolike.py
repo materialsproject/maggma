@@ -8,7 +8,7 @@ import warnings
 from itertools import chain, groupby
 from pathlib import Path
 
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from maggma.stores.ssh_tunnel import SSHTunnel
 
@@ -156,7 +156,8 @@ class MongoStore(Store):
         Returns:
         """
         with open(lp_file) as f:
-            lp_creds = yaml.safe_load(f.read())
+            yaml = YAML(typ='safe', pure=True)
+            lp_creds = yaml.load(f.read())
 
         db_creds = lp_creds.copy()
         db_creds["database"] = db_creds["name"]
