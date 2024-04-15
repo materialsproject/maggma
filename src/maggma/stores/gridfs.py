@@ -389,7 +389,7 @@ class GridFSStore(Store):
                 if has(d, k)
             }
             metadata.update(search_doc)
-            data = json.dumps(jsanitize(d)).encode("UTF-8")
+            data = json.dumps(jsanitize(d, recursive_msonable=True)).encode("UTF-8")
             if self.compression:
                 data = zlib.compress(data)
                 metadata["compression"] = "zlib"

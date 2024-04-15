@@ -136,7 +136,7 @@ def manager(
                 if not chunk_dict["distributed"]:
                     temp_builder_dict = dict(**builder_dict)
                     temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
-                    temp_builder_dict = jsanitize(temp_builder_dict)
+                    temp_builder_dict = jsanitize(temp_builder_dict, recursive_msonable=True)
 
                     # Send work for available workers
                     for identity in workers:
