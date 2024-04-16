@@ -15,7 +15,7 @@ from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient, uri_parser
 from pymongo.errors import ConfigurationError
-from ruamel import yaml
+from ruamel.yaml import YAML
 
 from maggma.core import Sort, Store, StoreError
 from maggma.stores.mongolike import MongoStore
@@ -107,7 +107,8 @@ class GridFSStore(Store):
         Returns:
         """
         with open(lp_file) as f:
-            lp_creds = yaml.safe_load(f.read())
+            yaml = YAML(typ="safe", pure=True)
+            lp_creds = yaml.load(f.read())
 
         db_creds = lp_creds.copy()
         db_creds["database"] = db_creds["name"]
