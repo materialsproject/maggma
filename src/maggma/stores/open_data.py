@@ -784,3 +784,6 @@ class TasksOpenDataStore(OpenDataStore):
         val = re.search(rf"{col}=(.+)\.jsonl\.gz", key).group(1)
         doc[col] = val
         return self._gather_indexable_data(doc)
+
+    def update(self, docs: pd.DataFrame) -> pd.DataFrame:
+        raise NotImplementedError("update is not supported for this store")
