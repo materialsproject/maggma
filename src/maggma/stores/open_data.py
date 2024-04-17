@@ -1,7 +1,7 @@
 import gzip
+import re
 from datetime import datetime
 from io import BytesIO, StringIO
-import re
 from typing import Dict, Generator, List, Optional, Tuple, Union
 
 import jsonlines
