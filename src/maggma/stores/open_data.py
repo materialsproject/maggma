@@ -613,7 +613,7 @@ class OpenDataStore(S3IndexStore):
         return f"{self.prefix}{id}{self.object_file_extension}"
 
     def _gather_indexable_data(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df[self.searchable_fields]
+        return self._json_normalize_and_filter(df)
 
     def _json_normalize_and_filter(self, docs: pd.DataFrame) -> pd.DataFrame:
         dfs = []
@@ -689,7 +689,7 @@ class OpenDataStore(S3IndexStore):
         for page in page_iterator:
             for file in page["Contents"]:
                 key = file["Key"]
-                if key != self.index._get_manifest_full_key_path():
+                if key != self.index._get_manifest_full_key_path() and key.endswith(self.object_file_extension):
                     all_index_docs.append(self._index_for_doc_from_s3(key))
         ret = pd.concat(all_index_docs, ignore_index=True)
         self.index.set_index_data(ret)
