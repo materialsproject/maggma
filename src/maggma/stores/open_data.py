@@ -1,6 +1,7 @@
 import gzip
 from datetime import datetime
 from io import BytesIO, StringIO
+import re
 from typing import Dict, Generator, List, Optional, Tuple, Union
 
 import jsonlines
@@ -754,3 +755,32 @@ class OpenDataStore(S3IndexStore):
             "object_grouping",
         ]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
+
+
+class TasksOpenDataStore(OpenDataStore):
+    """
+    Task data is stored on S3 compatible storage using the format used by Materials Project on OpenData.
+    The index is loaded from S3 compatible storage into memory.
+
+    Note that updates will only affect the in-memory representation of the index - they will not be persisted.
+    To persist index writes utilize the `store_manifest` function.
+
+    This Store should not be used for applications that are distributed and rely on reading updated
+    values from the index as data inconsistencied will arise.
+    """
+
+    def __init__(
+        self,
+        **kwargs,
+    ):
+        """Initializes a TaskOpenDataStore."""
+        super().__init__(**kwargs)
+
+    def _index_for_doc_from_s3(self, key: str) -> pd.DataFrame:
+        print(f"indexing doc with id: {key}")
+        doc = self._read_doc_from_s3(key)
+        # create an entry for the trailing object grouping field
+        col = self.object_grouping[-1]
+        val = re.search(rf"{col}=(.+)\.jsonl\.gz", key).group(1)
+        doc[col] = val
+        return self._gather_indexable_data(doc)
