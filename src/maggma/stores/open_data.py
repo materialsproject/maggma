@@ -777,7 +777,6 @@ class TasksOpenDataStore(OpenDataStore):
         super().__init__(**kwargs)
 
     def _index_for_doc_from_s3(self, key: str) -> pd.DataFrame:
-        print(f"indexing doc with id: {key}")
         doc = self._read_doc_from_s3(key)
         # create an entry for the trailing object grouping field
         col = self.object_grouping[-1]
