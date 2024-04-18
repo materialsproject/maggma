@@ -10,7 +10,7 @@ import pytest
 from bson import json_util
 from moto import mock_s3
 
-from maggma.stores.open_data import OpenDataStore, PandasMemoryStore, S3IndexStore
+from maggma.stores.open_data import OpenDataStore, PandasMemoryStore, S3IndexStore, TasksOpenDataStore
 
 pd.set_option("future.no_silent_downcasting", True)
 
@@ -280,7 +280,9 @@ def s3store():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
 
-        store = OpenDataStore(collection_name="index", bucket="bucket1", key="task_id", object_grouping=["task_id"])
+        store = OpenDataStore(
+            collection_name="index", bucket="bucket1", key="task_id", object_grouping=["group_level_two", "task_id"]
+        )
         store.connect()
 
         store.update(
@@ -290,11 +292,13 @@ def s3store():
                         "task_id": "mp-1",
                         "data": "asd",
                         store.last_updated_field: datetime.utcnow(),
+                        "group": {"level_two": 4},
                     },
                     {
                         "task_id": "mp-3",
                         "data": "sdf",
                         store.last_updated_field: datetime.utcnow(),
+                        "group": {"level_two": 4},
                     },
                 ]
             )
@@ -394,6 +398,7 @@ def test_update(s3store):
                 {
                     "task_id": "mp-199999",
                     "data": "asd",
+                    "group": {"level_two": 4},
                     s3store.last_updated_field: datetime.utcnow(),
                 }
             ]
@@ -409,6 +414,7 @@ def test_update(s3store):
                 {
                     "task_id": "mp-199999",
                     "data": "foo",
+                    "group": {"level_two": 4},
                     s3store.last_updated_field: datetime.utcnow(),
                 }
             ]
@@ -417,11 +423,12 @@ def test_update(s3store):
     assert len(s3store.index_data) == 3
     assert len(s3store.index_data.query("task_id == 'mp-199999'")) == 1
 
-    mp4 = [{"task_id": "mp-4", "data": "asd", s3store.last_updated_field: datetime.utcnow()}]
+    mp4 = [{"task_id": "mp-4", "data": "asd", "group": {"level_two": 4}, s3store.last_updated_field: datetime.utcnow()}]
     s3store.update(pd.DataFrame(mp4))
     assert len(s3store.index_data) == 4
-    assert s3store._get_full_key_path(pd.DataFrame(mp4)) == "task_id=mp-4.jsonl.gz"
-    s3store.s3_client.head_object(Bucket=s3store.bucket, Key=s3store._get_full_key_path(pd.DataFrame(mp4)))
+    mp4_index = [{"task_id": "mp-4", "group_level_two": 4, s3store.last_updated_field: datetime.utcnow()}]
+    assert s3store._get_full_key_path(pd.DataFrame(mp4_index)) == "group_level_two=4/task_id=mp-4.jsonl.gz"
+    s3store.s3_client.head_object(Bucket=s3store.bucket, Key=s3store._get_full_key_path(pd.DataFrame(mp4_index)))
 
 
 def test_query(s3store):
@@ -455,17 +462,34 @@ def test_query(s3store):
 
 
 def test_rebuild_index_from_s3_data(s3store):
-    data = [{"task_id": "mp-2", "data": "asd", s3store.last_updated_field: datetime.utcnow()}]
+    data = [
+        {"task_id": "mp-2", "data": "asd", s3store.last_updated_field: datetime.utcnow(), "group": {"level_two": 4}}
+    ]
     client = boto3.client("s3", region_name="us-east-1")
     string_io = StringIO()
     with jsonlines.Writer(string_io, dumps=json_util.dumps) as writer:
         for _, row in pd.DataFrame(data).iterrows():
             writer.write(row.to_dict())
 
+    data = [
+        {"task_id": "mp-99", "data": "asd", s3store.last_updated_field: datetime.utcnow(), "group": {"level_two": 4}}
+    ]
+    string_io2 = StringIO()
+    with jsonlines.Writer(string_io2, dumps=json_util.dumps) as writer:
+        for _, row in pd.DataFrame(data).iterrows():
+            writer.write(row.to_dict())
+
     client.put_object(
         Bucket="bucket1",
         Body=BytesIO(gzip.compress(string_io.getvalue().encode("utf-8"))),
-        Key="task_id=mp-2.jsonl.gz",
+        Key="group_level_two=4/task_id=mp-2.jsonl.gz",
+    )
+
+    # creating file that should not be indexed to test that it gets skipped
+    client.put_object(
+        Bucket="bucket1",
+        Body=BytesIO(gzip.compress(string_io2.getvalue().encode("utf-8"))),
+        Key="task_id=mp-99.gz",
     )
 
     assert len(s3store.index.index_data) == 2
@@ -473,16 +497,18 @@ def test_rebuild_index_from_s3_data(s3store):
     assert len(index_docs) == 3
     assert len(s3store.index.index_data) == 3
     for key in index_docs.columns:
-        assert key == "task_id" or key == "last_updated"
+        assert key == "task_id" or key == "last_updated" or key == "group_level_two"
 
 
 def test_rebuild_index_from_data(s3store):
-    data = [{"task_id": "mp-2", "data": "asd", s3store.last_updated_field: datetime.utcnow()}]
+    data = [
+        {"task_id": "mp-2", "data": "asd", s3store.last_updated_field: datetime.utcnow(), "group": {"level_two": 4}}
+    ]
     index_docs = s3store.rebuild_index_from_data(pd.DataFrame(data))
     assert len(index_docs) == 1
     assert len(s3store.index.index_data) == 1
     for key in index_docs.columns:
-        assert key == "task_id" or key == "last_updated"
+        assert key == "task_id" or key == "last_updated" or key == "group_level_two"
 
 
 def test_count_subdir(s3store_w_subdir):
@@ -530,3 +556,58 @@ def test_additional_metadata(s3store):
 
     with pytest.raises(TypeError):
         s3store.update(data, key="a", additional_metadata="task_id")
+
+
+def test_rebuild_index_from_s3_for_tasks_store():
+    data = [{"task_id": "mp-2", "data": "asd", "last_updated": datetime.utcnow(), "group": {"level_two": 4}}]
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+
+        string_io = StringIO()
+        with jsonlines.Writer(string_io, dumps=json_util.dumps) as writer:
+            for _, row in pd.DataFrame(data).iterrows():
+                writer.write(row.to_dict())
+
+        client = boto3.client("s3", region_name="us-east-1")
+        client.put_object(
+            Bucket="bucket1",
+            Body=BytesIO(gzip.compress(string_io.getvalue().encode("utf-8"))),
+            Key="group_level_two=4/dt=some_random_data.jsonl.gz",
+        )
+
+        store = TasksOpenDataStore(
+            collection_name="index", bucket="bucket1", key="task_id", object_grouping=["group_level_two", "dt"]
+        )
+        store.connect()
+
+        index_docs = store.rebuild_index_from_s3_data()
+        assert len(index_docs) == 1
+        assert len(store.index.index_data) == 1
+        for key in index_docs.columns:
+            assert key == "task_id" or key == "last_updated" or key == "group_level_two" or key == "dt"
+        assert index_docs["dt"].iloc[0] == "some_random_data"
+
+
+def test_no_update_for_tasks_store():
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+        store = TasksOpenDataStore(
+            collection_name="index", bucket="bucket1", key="task_id", object_grouping=["group_level_two", "dt"]
+        )
+        store.connect()
+
+        with pytest.raises(NotImplementedError):
+            store.update(
+                pd.DataFrame(
+                    [
+                        {
+                            "task_id": "mp-199999",
+                            "data": "foo",
+                            "group": {"level_two": 4},
+                            store.last_updated_field: datetime.utcnow(),
+                        }
+                    ]
+                )
+            )
