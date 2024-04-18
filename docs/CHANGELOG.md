@@ -1,12 +1,17 @@
 # Changelog
 
-## [Unreleased](https://github.com/materialsproject/maggma/tree/HEAD)
+## [v0.65.0](https://github.com/materialsproject/maggma/tree/v0.65.0) (2024-04-18)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.64.1...HEAD)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.64.1...v0.65.0)
 
 **Closed issues:**
 
 - \[Feature Request\]: support ruamel.yaml 0.18+ [\#938](https://github.com/materialsproject/maggma/issues/938)
+
+**Merged pull requests:**
+
+- Adding store support for tasks stored in open data [\#943](https://github.com/materialsproject/maggma/pull/943) ([kbuma](https://github.com/kbuma))
+- allow HEAD method for `/heartbeat` [\#874](https://github.com/materialsproject/maggma/pull/874) ([tschaume](https://github.com/tschaume))
 
 ## [v0.64.1](https://github.com/materialsproject/maggma/tree/v0.64.1) (2024-04-16)
 
