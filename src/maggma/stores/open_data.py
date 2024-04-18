@@ -1,4 +1,5 @@
 import gzip
+import re
 from datetime import datetime
 from io import BytesIO, StringIO
 from typing import Dict, Generator, List, Optional, Tuple, Union
@@ -613,7 +614,7 @@ class OpenDataStore(S3IndexStore):
         return f"{self.prefix}{id}{self.object_file_extension}"
 
     def _gather_indexable_data(self, df: pd.DataFrame) -> pd.DataFrame:
-        return df[self.searchable_fields]
+        return self._json_normalize_and_filter(df)
 
     def _json_normalize_and_filter(self, docs: pd.DataFrame) -> pd.DataFrame:
         dfs = []
@@ -689,7 +690,7 @@ class OpenDataStore(S3IndexStore):
         for page in page_iterator:
             for file in page["Contents"]:
                 key = file["Key"]
-                if key != self.index._get_manifest_full_key_path():
+                if key != self.index._get_manifest_full_key_path() and key.endswith(self.object_file_extension):
                     all_index_docs.append(self._index_for_doc_from_s3(key))
         ret = pd.concat(all_index_docs, ignore_index=True)
         self.index.set_index_data(ret)
@@ -754,3 +755,34 @@ class OpenDataStore(S3IndexStore):
             "object_grouping",
         ]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
+
+
+class TasksOpenDataStore(OpenDataStore):
+    """
+    Task data is stored on S3 compatible storage using the format used by Materials Project on OpenData.
+    The index is loaded from S3 compatible storage into memory.
+
+    Note that updates will only affect the in-memory representation of the index - they will not be persisted.
+    To persist index writes utilize the `store_manifest` function.
+
+    This Store should not be used for applications that are distributed and rely on reading updated
+    values from the index as data inconsistencied will arise.
+    """
+
+    def __init__(
+        self,
+        **kwargs,
+    ):
+        """Initializes a TaskOpenDataStore."""
+        super().__init__(**kwargs)
+
+    def _index_for_doc_from_s3(self, key: str) -> pd.DataFrame:
+        doc = self._read_doc_from_s3(key)
+        # create an entry for the trailing object grouping field
+        col = self.object_grouping[-1]
+        val = re.search(rf"{col}=(.+)\.jsonl\.gz", key).group(1)
+        doc[col] = val
+        return self._gather_indexable_data(doc)
+
+    def update(self, docs: pd.DataFrame) -> pd.DataFrame:
+        raise NotImplementedError("update is not supported for this store")
