@@ -361,7 +361,9 @@ class S3IndexStore(PandasMemoryStore):
     def s3_client(self):
         if self._s3_client is None:
             if self.access_as_public_bucket:
-                self._s3_client = boto_client("s3", endpoint_url=self.endpoint_url, config=Config(signature_version=UNSIGNED))
+                self._s3_client = boto_client(
+                    "s3", endpoint_url=self.endpoint_url, config=Config(signature_version=UNSIGNED)
+                )
             else:
                 self._s3_client = boto_client("s3", endpoint_url=self.endpoint_url)
         return self._s3_client
@@ -481,7 +483,7 @@ class OpenDataStore(S3IndexStore):
                 ie for queries pertaining to this store. If None, will create
                 index from manifest located in same location as the data.
             searchable_fields: additional fields to keep in the index store.
-                `key, `last_updated_field` and the fields in `object_grouping`
+                `key`, `last_updated_field` and the fields in `object_grouping`
                 are already added to the index by default
             object_file_extension (str, optional): The extension used for the data
                 stored in S3. Defaults to ".jsonl.gz".
@@ -655,7 +657,8 @@ class OpenDataStore(S3IndexStore):
             def replace_nested_date_dict(obj):
                 if isinstance(obj, dict):
                     if "$date" in obj:
-                        # Return the datetime string or convert it to a datet                        return datetime.fromisoformat(obj["$date"].rstrip("Z"))
+                        # Return the datetime string or convert it to a datetime object
+                        return datetime.fromisoformat(obj["$date"].rstrip("Z"))
                     # Recursively process each key-value pair in the dictionary
                     for key, value in obj.items():
                         obj[key] = replace_nested_date_dict(value)
