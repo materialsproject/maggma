@@ -332,6 +332,7 @@ class S3IndexStore(PandasMemoryStore):
         prefix: str = "",
         endpoint_url: Optional[str] = None,
         manifest_key: str = "manifest.jsonl",
+        access_as_public_bucket: bool = False,
         **kwargs,
     ):
         """Initializes an S3IndexStore.
@@ -350,6 +351,7 @@ class S3IndexStore(PandasMemoryStore):
         self.prefix = prefix if prefix == "" else prefix.rstrip("/") + "/"
         self.endpoint_url = endpoint_url
         self.manifest_key = manifest_key
+        self.access_as_public_bucket = access_as_public_bucket
         self.kwargs = kwargs
         self._s3_client = None
 
@@ -358,7 +360,10 @@ class S3IndexStore(PandasMemoryStore):
     @property
     def s3_client(self):
         if self._s3_client is None:
-            self._s3_client = boto_client("s3", endpoint_url=self.endpoint_url)
+            if self.access_as_public_bucket:
+                self._s3_client = boto_client("s3", endpoint_url=self.endpoint_url, config=Config(signature_version=UNSIGNED))
+            else:
+                self._s3_client = boto_client("s3", endpoint_url=self.endpoint_url)
         return self._s3_client
 
     def connect(self):
@@ -476,7 +481,7 @@ class OpenDataStore(S3IndexStore):
                 ie for queries pertaining to this store. If None, will create
                 index from manifest located in same location as the data.
             searchable_fields: additional fields to keep in the index store.
-                `key`, `last_updated_field` and the fields in `object_grouping`
+                `key, `last_updated_field` and the fields in `object_grouping`
                 are already added to the index by default
             object_file_extension (str, optional): The extension used for the data
                 stored in S3. Defaults to ".jsonl.gz".
@@ -490,9 +495,7 @@ class OpenDataStore(S3IndexStore):
         self.access_as_public_bucket = access_as_public_bucket
         self.object_grouping = object_grouping if object_grouping is not None else ["nelements", "symmetry_number"]
 
-        if access_as_public_bucket:
-            kwargs["s3_resource_kwargs"] = kwargs["s3_resource_kwargs"] if "s3_resource_kwargs" in kwargs else {}
-            kwargs["s3_resource_kwargs"]["config"] = Config(signature_version=UNSIGNED)
+        kwargs["access_as_public_bucket"] = self.access_as_public_bucket
         super().__init__(**kwargs)
         self.searchable_fields = list(
             set(self.object_grouping) | set(self.searchable_fields) | {self.key, self.last_updated_field}
@@ -585,12 +588,14 @@ class OpenDataStore(S3IndexStore):
             return pd.DataFrame()
 
         # optimization if all required fields are in the index
-        if criteria_fields is not None and properties is not None:
-            query_fields = set(criteria_fields) | set(properties)
-            if all(item in self.index.index_data.columns for item in list(query_fields)):
+        if properties is not None:
+            query_fields = set(criteria_fields if criteria_fields is not None else {}) | set(properties)
+            if query_fields.issubset(self.index.index_data.columns):
+                print(f"running optimized query")
                 return self.index.query(criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit)
 
         results = []
+        print("querying by fetching all data")
         for _, docs in self.index.index_data.groupby(self.object_grouping):
             results.append(
                 PandasMemoryStore._query(
@@ -626,7 +631,7 @@ class OpenDataStore(S3IndexStore):
         self._write_doc_to_s3(items, index)
         self.index.update(index)
 
-    def _write_doc_to_s3(self, doc: pd.DataFrame, index: pd.DataFrame) -> None:
+    def _write_doc_to_s3(self, doc: pd.DataFrame index: pd.DataFrame) -> None:
         doc = doc.replace({pd.NaT: None}).replace({"NaT": None}).replace({np.NaN: None})
 
         string_io = StringIO()
@@ -650,8 +655,7 @@ class OpenDataStore(S3IndexStore):
             def replace_nested_date_dict(obj):
                 if isinstance(obj, dict):
                     if "$date" in obj:
-                        # Return the datetime string or convert it to a datetime object
-                        return datetime.fromisoformat(obj["$date"].rstrip("Z"))
+                        # Return the datetime string or convert it to a datet                        return datetime.fromisoformat(obj["$date"].rstrip("Z"))
                     # Recursively process each key-value pair in the dictionary
                     for key, value in obj.items():
                         obj[key] = replace_nested_date_dict(value)
