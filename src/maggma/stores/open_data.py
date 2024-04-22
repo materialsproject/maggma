@@ -631,7 +631,7 @@ class OpenDataStore(S3IndexStore):
         self._write_doc_to_s3(items, index)
         self.index.update(index)
 
-    def _write_doc_to_s3(self, doc: pd.DataFrame index: pd.DataFrame) -> None:
+    def _write_doc_to_s3(self, doc: pd.DataFrame, index: pd.DataFrame) -> None:
         doc = doc.replace({pd.NaT: None}).replace({"NaT": None}).replace({np.NaN: None})
 
         string_io = StringIO()
