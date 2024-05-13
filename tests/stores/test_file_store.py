@@ -373,3 +373,12 @@ def test_this_dir():
     fs = FileStore(".")
     fs.connect()
     assert not fs.name.endswith(".")
+
+
+def test_encoding():
+    """
+    Make sure custom encoding works
+    """
+    fs = FileStore(".", read_only=False, encoding="utf8")
+    fs.connect()
+    assert Path("FileStore.json").exists()

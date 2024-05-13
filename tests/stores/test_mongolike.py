@@ -416,6 +416,11 @@ def test_json_store_load(jsonstore, test_dir):
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
 
+    # test with non-default encoding
+    jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", encoding="utf8")
+    jsonstore.connect()
+    assert len(list(jsonstore.query())) == 20
+
     # confirm descriptive error raised if you get a KeyError
     jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", key="random_key")
     with pytest.raises(KeyError, match="Key field 'random_key' not found"):

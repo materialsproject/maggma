@@ -54,6 +54,7 @@ class FileStore(MemoryStore):
         read_only: bool = True,
         include_orphans: bool = False,
         json_name: str = "FileStore.json",
+        encoding: Optional[str] = None,
         **kwargs,
     ):
         """
@@ -84,6 +85,11 @@ class FileStore(MemoryStore):
             json_name: Name of the .json file to which metadata is saved. If read_only
                 is False, this file will be created in the root directory of the
                 FileStore.
+            encoding: Character encoding of files to be tracked by the store. The default
+                (None) follows python's default behavior, which is to determine the character
+                encoding from the platform. This should work in the great majority of cases.
+                However, if you encounter a UnicodeDecodeError, consider setting the encoding
+                explicitly to 'utf8' or another encoding as appropriate.
             kwargs: kwargs passed to MemoryStore.__init__()
         """
         # this conditional block is needed in order to guarantee that the 'name'
@@ -101,6 +107,7 @@ class FileStore(MemoryStore):
         self.include_orphans = include_orphans
         self.read_only = read_only
         self.max_depth = max_depth
+        self.encoding = encoding
 
         self.metadata_store = JSONStore(
             paths=[str(self.path / self.json_name)],
@@ -434,7 +441,7 @@ class FileStore(MemoryStore):
                     # TODO - could add more logic for detecting different file types
                     # and more nuanced exception handling
                     try:
-                        with zopen(d["path"], "r") as f:
+                        with zopen(d["path"], "r", encoding=self.encoding) as f:
                             data = f.read()
                     except Exception as e:
                         data = f"Unable to read: {e}"
