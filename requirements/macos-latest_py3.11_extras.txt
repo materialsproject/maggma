@@ -438,7 +438,7 @@ watchdog==3.0.0
     # via mkdocs
 wcwidth==0.2.12
     # via prompt-toolkit
-werkzeug==3.0.1
+werkzeug==3.0.3
     # via
     #   flask
     #   moto
