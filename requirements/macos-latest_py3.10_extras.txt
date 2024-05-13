@@ -409,7 +409,7 @@ tomli==2.0.1
     # via
     #   coverage
     #   pytest
-tqdm==4.66.1
+tqdm==4.66.3
     # via maggma (setup.py)
 traitlets==5.14.0
     # via

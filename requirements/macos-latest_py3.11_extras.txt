@@ -400,7 +400,7 @@ starlette[full]==0.27.0
     #   maggma (setup.py)
 textual==0.44.1
     # via memray
-tqdm==4.66.1
+tqdm==4.66.3
     # via maggma (setup.py)
 traitlets==5.14.0
     # via
