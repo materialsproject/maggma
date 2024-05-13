@@ -621,6 +621,7 @@ class JSONStore(MemoryStore):
         read_only: bool = True,
         serialization_option: Optional[int] = None,
         serialization_default: Optional[Callable[[Any], Any]] = None,
+        encoding: Optional[str] = None,
         **kwargs,
     ):
         """
@@ -641,9 +642,15 @@ class JSONStore(MemoryStore):
                 option that will be passed to the orjson.dump when saving to the json the file.
             serialization_default:
                 default that will be passed to the orjson.dump when saving to the json the file.
+            encoding: Character encoding of files to be tracked by the store. The default
+                (None) follows python's default behavior, which is to determine the character
+                encoding from the platform. This should work in the great majority of cases.
+                However, if you encounter a UnicodeDecodeError, consider setting the encoding
+                explicitly to 'utf8' or another encoding as appropriate.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
+        self.encoding = encoding
 
         # file_writable overrides read_only for compatibility reasons
         if "file_writable" in kwargs:
@@ -686,7 +693,7 @@ class JSONStore(MemoryStore):
 
             # create the .json file if it does not exist
             if not self.read_only and not Path(self.paths[0]).exists():
-                with zopen(self.paths[0], "w") as f:
+                with zopen(self.paths[0], "w", encoding=self.encoding) as f:
                     data: List[dict] = []
                     bytesdata = orjson.dumps(data)
                     f.write(bytesdata.decode("utf-8"))
@@ -763,7 +770,7 @@ class JSONStore(MemoryStore):
         """
         Updates the json file when a write-like operation is performed.
         """
-        with zopen(self.paths[0], "w") as f:
+        with zopen(self.paths[0], "w", encoding=self.encoding) as f:
             data = list(self.query())
             for d in data:
                 d.pop("_id")
