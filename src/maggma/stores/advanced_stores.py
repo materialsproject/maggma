@@ -8,7 +8,7 @@ from typing import Dict, Iterator, List, Optional, Tuple, Union
 from mongogrant import Client
 from mongogrant.client import check
 from mongogrant.config import Config
-from monty.dev import requires
+from monty.dev import deprecated, requires
 
 from maggma.core import Sort, Store, StoreError
 from maggma.stores.mongolike import MongoStore
@@ -18,6 +18,10 @@ try:
     import hvac
 except ImportError:
     hvac = None
+try:
+    import mongogrant
+except ImportError:
+    mongogrant = None
 
 
 class MongograntStore(MongoStore):
@@ -29,6 +33,11 @@ class MongograntStore(MongoStore):
     mongogrant documentation: https://github.com/materialsproject/mongogrant
     """
 
+    @requires(
+        mongogrant is not None,
+        "mongogrant is required to use MongoGrantStore. Please run `pip install maggma[mongogrant]",
+    )
+    @deprecated(MongoStore, "MongograntStore is deprecated! Use MongoStore instead.")
     def __init__(
         self,
         mongogrant_spec: str,

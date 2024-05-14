@@ -33,7 +33,6 @@ setup(
         "pydash>=4.1.0",
         "jsonschema>=3.1.1",
         "tqdm>=4.19.6",
-        "mongogrant>=0.3.1",
         "aioitertools>=0.5.1",
         "numpy>=1.17.3",
         "fastapi>=0.42.0",
@@ -53,6 +52,7 @@ setup(
         "notebook_runner": ["IPython>=8.11", "nbformat>=5.0", "regex>=2020.6"],
         "azure": ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"],
         "open_data": ["pandas>=2.1.4", "jsonlines>=4.0.0"],
+        "mongogrant": ["mongogrant>=0.3.1"],
         "testing": [
             "pytest",
             "pytest-cov",
