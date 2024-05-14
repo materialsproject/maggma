@@ -1,11 +1,90 @@
 [project]
 name = "maggma"
-dynamic = ["version", "readme", "scripts", "classifiers", "dependencies","optional-dependencies", "license"]
+readme = "README.md"
 requires-python = ">=3.8"
 description="Framework to develop datapipelines from files on disk to full dissemenation API"
 authors =[
     {name = "The Materials Project", email = "feedback@materialsproject.org"}
 ]
+classifiers=[
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Development Status :: 5 - Production/Stable",
+        "Intended Audience :: Science/Research",
+        "Intended Audience :: System Administrators",
+        "Intended Audience :: Information Technology",
+        "Operating System :: OS Independent",
+        "Topic :: Other/Nonlisted Topic",
+        "Topic :: Database :: Front-Ends",
+        "Topic :: Scientific/Engineering",
+    ]
+license="modified BSD"
+dependencies = [
+        "setuptools",
+        "ruamel.yaml>=0.17",
+        "pydantic>=2.0",
+        "pydantic-settings>=2.0.3",
+        "pymongo>=4.2.0",
+        "monty>=2023.9.25",
+        "mongomock>=3.10.0",
+        "pydash>=4.1.0",
+        "jsonschema>=3.1.1",
+        "tqdm>=4.19.6",
+        "mongogrant>=0.3.1",
+        "aioitertools>=0.5.1",
+        "numpy>=1.17.3",
+        "fastapi>=0.42.0",
+        "pyzmq>=24.0.1",
+        "dnspython>=1.16.0",
+        "sshtunnel>=0.1.5",
+        "msgpack>=0.5.6",
+        "orjson>=3.9.0",
+        "boto3>=1.20.41",
+        "python-dateutil>=2.8.2",
+        "uvicorn>=0.18.3",
+    ]
+
+[project.urls]
+Docs = "https://materialsproject.github.io/maggma/"
+Repo = "https://github.com/materialsproject/maggma"
+Package = "https://pypi.org/project/maggma"
+
+[project.scripts]
+mrun = "maggma.cli:run"
+
+[project.optional-dependencies]
+vasp = ["pymatgen"]
+vault = ["hvac>=0.9.5"]
+memray = ["memray>=1.7.0"]
+montydb = ["montydb>=2.3.12"]
+notebook_runner = ["IPython>=8.11", "nbformat>=5.0", "regex>=2020.6"]
+azure = ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"]
+open_data = ["pandas>=2.1.4", "jsonlines>=4.0.0"]
+testing = [
+            "pytest",
+            "pytest-cov",
+            "pytest-mock",
+            "pytest-asyncio",
+            "pytest-xdist",
+            "pre-commit",
+            "moto",
+            "ruff",
+            "responses<0.22.0",
+            "types-pyYAML",
+            "types-setuptools",
+            "types-python-dateutil",
+            "starlette[full]"
+        ]
+docs = [
+            "mkdocs>=1.4.0",
+            "mkdocs-material>=8.3.9",
+            "mkdocs-minify-plugin>=0.5.0",
+            "mkdocstrings[python]>=0.18.1",
+            "jinja2<3.2.0",
+        ]
 
 [build-system]
 requires = ["setuptools>=61.0.0", "setuptools_scm[toml]>=5"]
