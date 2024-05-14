@@ -17,13 +17,13 @@ Current working and tested `Store` include:
 - `GridFSURIStore`: interfaces to GridFS collection in MongoDB using a "mongodb+srv://" URI.
 - `S3Store`: provides an interface to an S3 Bucket either on AWS or self-hosted solutions ([additional documentation](advanced_stores.md))
 - `ConcatStore`: concatenates several Stores together so they look like one Store
-- `MongograntStore`: (DEPRECATED) uses Mongogrant to get credentials for MongoDB database
 - `VaultStore`: uses Vault to get credentials for a MongoDB database
 - `AliasingStore`: aliases keys from the underlying store to new names
 - `SandboxStore: provides permission control to documents via a `_sbxn` sandbox key
 - `JointStore`: joins several MongoDB collections together, merging documents with the same `key`, so they look like one collection
 - `AzureBlobStore`: provides an interface to Azure Blobs for the storage of large amount of data
 - `MontyStore`: provides an interface to [montydb](https://github.com/davidlatwe/montydb) for in-memory or filesystem-based storage
+- `MongograntStore`: (DEPRECATED) uses Mongogrant to get credentials for MongoDB database
 
 ## The `Store` interface
 
