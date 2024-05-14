@@ -8,15 +8,16 @@ The benefit of the `Store` interface is that you only have to write a `Builder` 
 
 Current working and tested `Store` include:
 
-- `MongoStore`: interfaces to a MongoDB Collection
+- `MongoStore`: interfaces to a MongoDB Collection using port and hostname.
+- `MongoURIStore`: interfaces to a MongoDB Collection using a "mongodb+srv://" URI.
 - `MemoryStore`: just a Store that exists temporarily in memory
 - `JSONStore`: builds a MemoryStore and then populates it with the contents of the given JSON files
 - `FileStore`: query and add metadata to files stored on disk as if they were in a database
-- `GridFSStore`: interfaces to GridFS collection in MongoDB
+- `GridFSStore`: interfaces to GridFS collection in MongoDB using port and hostname.
+- `GridFSURIStore`: interfaces to GridFS collection in MongoDB using a "mongodb+srv://" URI.
 - `S3Store`: provides an interface to an S3 Bucket either on AWS or self-hosted solutions ([additional documentation](advanced_stores.md))
 - `ConcatStore`: concatenates several Stores together so they look like one Store
-- `MongoURIStore`: MongoDB Introduced advanced URIs including their special "mongodb+srv://" which uses a combination of SRV and TXT DNS records to fully setup the client. This store is to safely handle these kinds of URIs.
-- `MongograntStore`: uses Mongogrant to get credentials for MongoDB database
+- `MongograntStore`: (DEPRECATED) uses Mongogrant to get credentials for MongoDB database
 - `VaultStore`: uses Vault to get credentials for a MongoDB database
 - `AliasingStore`: aliases keys from the underlying store to new names
 - `SandboxStore: provides permission control to documents via a `_sbxn` sandbox key
