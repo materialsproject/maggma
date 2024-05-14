@@ -3,10 +3,8 @@ import inspect
 from typing import (
     Any,
     Callable,
-    Dict,
-    List,
     Optional,
-    Type,
+    Union,
     get_args,  # pragma: no cover
 )
 
@@ -15,12 +13,12 @@ from monty.json import MSONable
 from pydantic import BaseModel
 from pydantic._internal._utils import lenient_issubclass
 from pydantic.fields import FieldInfo
-from typing_extensions import Literal, Union
+from typing_extensions import Literal
 
 from maggma.utils import get_flat_models_from_model
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
-STORE_PARAMS = Dict[
+STORE_PARAMS = dict[
     Literal[
         "criteria",
         "properties",
@@ -37,9 +35,9 @@ STORE_PARAMS = Dict[
 ]
 
 
-def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
+def merge_queries(queries: list[STORE_PARAMS]) -> STORE_PARAMS:
     criteria: STORE_PARAMS = {}
-    properties: List[str] = []
+    properties: list[str] = []
 
     for sub_query in queries:
         if "criteria" in sub_query:
@@ -56,7 +54,7 @@ def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
     }
 
 
-def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
+def attach_signature(function: Callable, defaults: dict, annotations: dict):
     """
     Attaches signature for defaults and annotations for parameters to function.
 
@@ -70,19 +68,19 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
         inspect.Parameter(
             param,
             inspect.Parameter.POSITIONAL_OR_KEYWORD,
-            default=defaults.get(param, None),
-            annotation=annotations.get(param, None),
+            default=defaults.get(param),
+            annotation=annotations.get(param),
         )
         for param in annotations
-        if param not in defaults.keys()
+        if param not in defaults
     ]
 
     optional_params = [
         inspect.Parameter(
             param,
             inspect.Parameter.POSITIONAL_OR_KEYWORD,
-            default=defaults.get(param, None),
-            annotation=annotations.get(param, None),
+            default=defaults.get(param),
+            annotation=annotations.get(param),
         )
         for param in defaults
     ]
@@ -140,7 +138,7 @@ def api_sanitize(
     return pydantic_model
 
 
-def allow_msonable_dict(monty_cls: Type[MSONable]):
+def allow_msonable_dict(monty_cls: type[MSONable]):
     """
     Patch Monty to allow for dict values for MSONable.
     """

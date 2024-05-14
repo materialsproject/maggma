@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Generic, List, Optional, TypeVar
+from typing import Generic, Optional, TypeVar
 
 from pydantic import BaseModel, Field, validator
 
@@ -51,8 +51,8 @@ class Response(BaseModel, Generic[DataT]):
     A Generic API Response.
     """
 
-    data: Optional[List[DataT]] = Field(None, description="List of returned data")
-    errors: Optional[List[Error]] = Field(None, description="Any errors on processing this query")
+    data: Optional[list[DataT]] = Field(None, description="List of returned data")
+    errors: Optional[list[Error]] = Field(None, description="Any errors on processing this query")
     meta: Optional[Meta] = Field(None, description="Extra information for the query")
 
     @validator("errors", always=True)

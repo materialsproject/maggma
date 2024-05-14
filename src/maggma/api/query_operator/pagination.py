@@ -1,5 +1,3 @@
-from typing import Dict
-
 from fastapi import HTTPException, Query
 
 from maggma.api.query_operator import QueryOperator
@@ -82,7 +80,7 @@ class PaginationQuery(QueryOperator):
     def query(self):
         "Stub query function for abstract class."
 
-    def meta(self) -> Dict:
+    def meta(self) -> dict:
         """
         Metadata for the pagination params.
         """

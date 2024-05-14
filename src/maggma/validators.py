@@ -4,7 +4,6 @@ of a Validator subclass to a Store .schema variable to enable validation on
 that Store.
 """
 
-from typing import Dict, List
 
 from jsonschema import ValidationError, validate
 from jsonschema.validators import validator_for
@@ -23,7 +22,7 @@ class JSONSchemaValidator(Validator):
     JSON schema. See the tests for an example of this.
     """
 
-    def __init__(self, schema: Dict, strict: bool = False):
+    def __init__(self, schema: dict, strict: bool = False):
         """
         Args:
             strict: Informs Store how to treat Validator: if
@@ -45,7 +44,7 @@ class JSONSchemaValidator(Validator):
         return self._strict
 
     @property
-    def schema(self) -> Dict:
+    def schema(self) -> dict:
         """
         Defines a JSON schema for your document,
         which is used by the default `validate_doc()` method.
@@ -58,7 +57,7 @@ class JSONSchemaValidator(Validator):
         """
         return self._schema
 
-    def is_valid(self, doc: Dict) -> bool:
+    def is_valid(self, doc: dict) -> bool:
         """
         Returns True or False if validator initialized with
         strict=False, or returns True or raises ValidationError
@@ -75,7 +74,7 @@ class JSONSchemaValidator(Validator):
                 raise
             return False
 
-    def validation_errors(self, doc: Dict) -> List[str]:
+    def validation_errors(self, doc: dict) -> list[str]:
         """
         If document is not valid, provides a list of
         strings to display for why validation has failed.

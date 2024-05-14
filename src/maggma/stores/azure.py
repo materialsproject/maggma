@@ -5,11 +5,12 @@ import os
 import threading
 import warnings
 import zlib
+from collections.abc import Iterator
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from json import dumps
-from typing import Dict, Iterator, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -50,7 +51,7 @@ class AzureBlobStore(Store):
         key: str = "fs_id",
         store_hash: bool = True,
         unpack_data: bool = True,
-        searchable_fields: Optional[List[str]] = None,
+        searchable_fields: Optional[list[str]] = None,
         key_sanitize_dict: Optional[dict] = None,
         create_container: bool = False,
         **kwargs,
@@ -169,7 +170,7 @@ class AzureBlobStore(Store):
         # For now returns the index collection since that is what we would "search" on
         return self.index._collection
 
-    def count(self, criteria: Optional[Dict] = None) -> int:
+    def count(self, criteria: Optional[dict] = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -181,12 +182,12 @@ class AzureBlobStore(Store):
 
     def query(
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-    ) -> Iterator[Dict]:
+    ) -> Iterator[dict]:
         """
         Queries the Store for a set of documents.
 
@@ -239,7 +240,7 @@ class AzureBlobStore(Store):
         # Should just return the unpacked object then let the user run process_decoded
         return msgpack.unpackb(data, raw=False)
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field.
 
@@ -252,13 +253,13 @@ class AzureBlobStore(Store):
 
     def groupby(
         self,
-        keys: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        keys: Union[list[str], str],
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-    ) -> Iterator[Tuple[Dict, List[Dict]]]:
+    ) -> Iterator[tuple[dict, list[dict]]]:
         """
         Simple grouping function that will group documents
         by keys.
@@ -299,9 +300,9 @@ class AzureBlobStore(Store):
 
     def update(
         self,
-        docs: Union[List[Dict], Dict],
-        key: Union[List, str, None] = None,
-        additional_metadata: Union[str, List[str], None] = None,
+        docs: Union[list[dict], dict],
+        key: Union[list, str, None] = None,
+        additional_metadata: Union[str, list[str], None] = None,
     ):
         """
         Update documents into the Store.
@@ -378,7 +379,7 @@ class AzureBlobStore(Store):
             self._thread_local.container = container
         return self._thread_local.container
 
-    def write_doc_to_blob(self, doc: Dict, search_keys: List[str]):
+    def write_doc_to_blob(self, doc: dict, search_keys: list[str]):
         """
         Write the data to an Azure blob and return the metadata to be inserted into the index db.
 
@@ -449,7 +450,7 @@ class AzureBlobStore(Store):
 
         return new_key
 
-    def remove_docs(self, criteria: Dict, remove_blob_object: bool = False):
+    def remove_docs(self, criteria: dict, remove_blob_object: bool = False):
         """
         Remove docs matching the query dictionary.
 
@@ -476,7 +477,7 @@ class AzureBlobStore(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def newer_in(self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
+    def newer_in(self, target: Store, criteria: Optional[dict] = None, exhaustive: bool = False) -> list[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
@@ -519,7 +520,7 @@ class AzureBlobStore(Store):
             # TODO maybe it can be avoided to reupload the data, since it is paid
             self.update(unpacked_data, **kwargs)
 
-    def rebuild_metadata_from_index(self, index_query: Optional[Dict] = None):
+    def rebuild_metadata_from_index(self, index_query: Optional[dict] = None):
         """
         Read data from the index store and populate the metadata of the Azure Blob.
         Force all of the keys to be lower case to be Minio compatible

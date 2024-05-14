@@ -1,4 +1,4 @@
-from typing import Callable, Dict, List
+from typing import Callable
 
 from fastapi import Depends, Request, Response
 
@@ -8,8 +8,8 @@ from maggma.core.store import Store
 
 
 def attach_query_ops(
-    function: Callable[[List[STORE_PARAMS]], Dict], query_ops: List[QueryOperator]
-) -> Callable[[List[STORE_PARAMS]], Dict]:
+    function: Callable[[list[STORE_PARAMS]], dict], query_ops: list[QueryOperator]
+) -> Callable[[list[STORE_PARAMS]], dict]:
     """
     Attach query operators to API compliant function
     The function has to take a list of STORE_PARAMs as the only argument.

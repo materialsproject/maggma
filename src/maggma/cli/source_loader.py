@@ -4,7 +4,6 @@ from glob import glob
 from importlib.abc import Loader, MetaPathFinder
 from importlib.machinery import ModuleSpec, SourceFileLoader
 from pathlib import Path
-from typing import List
 
 from maggma.core import Builder
 
@@ -113,7 +112,7 @@ def spec_from_source(file_path: str) -> ModuleSpec:
     return spec
 
 
-def load_builder_from_source(file_path: str) -> List[Builder]:
+def load_builder_from_source(file_path: str) -> list[Builder]:
     """
     Loads Maggma Builders from a Python source file.
     """

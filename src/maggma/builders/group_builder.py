@@ -3,10 +3,11 @@ Many-to-Many GroupBuilder.
 """
 import traceback
 from abc import ABCMeta, abstractmethod
+from collections.abc import Iterable, Iterator
 from datetime import datetime
 from math import ceil
 from time import time
-from typing import Dict, Iterable, Iterator, List, Optional, Set, Tuple
+from typing import Optional
 
 from pydash import get
 
@@ -28,9 +29,9 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
         self,
         source: Store,
         target: Store,
-        grouping_keys: List[str],
-        query: Optional[Dict] = None,
-        projection: Optional[List] = None,
+        grouping_keys: list[str],
+        query: Optional[dict] = None,
+        projection: Optional[list] = None,
         timeout: int = 0,
         store_process_time: bool = True,
         retry_failed: bool = False,
@@ -89,7 +90,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
                 "for each of source and target."
             )
 
-    def prechunk(self, number_splits: int) -> Iterator[Dict]:
+    def prechunk(self, number_splits: int) -> Iterator[dict]:
         """
         Generic prechunk for group builder to perform domain-decomposition
         by the grouping keys.
@@ -120,7 +121,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             docs = list(self.source.query(criteria=dict(zip(self.grouping_keys, group)), properties=projection))
             yield docs
 
-    def process_item(self, item: List[Dict]) -> Dict[Tuple, Dict]:  # type: ignore
+    def process_item(self, item: list[dict]) -> dict[tuple, dict]:  # type: ignore
         keys = [d[self.source.key] for d in item]
 
         self.logger.debug(f"Processing: {keys}")
@@ -152,7 +153,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
         return processed
 
-    def update_targets(self, items: List[Dict]):
+    def update_targets(self, items: list[dict]):
         """
         Generic update targets for Group Builder.
         """
@@ -165,7 +166,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             target.update(items)
 
     @abstractmethod
-    def unary_function(self, items: List[Dict]) -> Dict:
+    def unary_function(self, items: list[dict]) -> dict:
         """
         Processing function for GroupBuilder.
 
@@ -212,14 +213,14 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
         self.logger.info(f"Found {len(new_ids)} updated IDs to process")
         return list(new_ids | unprocessed_ids)
 
-    def get_groups_from_keys(self, keys) -> Set[Tuple]:
+    def get_groups_from_keys(self, keys) -> set[tuple]:
         """
         Get the groups by grouping_keys for these documents.
         """
 
         grouping_keys = self.grouping_keys
 
-        groups: Set[Tuple] = set()
+        groups: set[tuple] = set()
 
         for chunked_keys in grouper(keys, self.chunk_size):
             docs = list(

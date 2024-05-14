@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Dict, List, Optional
+from typing import Optional
 
 import uvicorn
 from fastapi import FastAPI
@@ -18,13 +18,13 @@ class API(MSONable):
 
     def __init__(
         self,
-        resources: Dict[str, List[Resource]],
+        resources: dict[str, list[Resource]],
         title: str = "Generic API",
         version: str = "v0.0.0",
         debug: bool = False,
-        heartbeat_meta: Optional[Dict] = None,
+        heartbeat_meta: Optional[dict] = None,
         description: Optional[str] = None,
-        tags_meta: Optional[List[Dict]] = None,
+        tags_meta: Optional[list[dict]] = None,
     ):
         """
         Args:

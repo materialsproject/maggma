@@ -7,7 +7,7 @@ import socket as pysocket
 from logging import getLogger
 from random import randint
 from time import perf_counter
-from typing import List, Literal
+from typing import Literal
 
 import numpy as np
 from monty.json import jsanitize
@@ -34,7 +34,7 @@ def find_port():
 
 def manager(
     url: str,
-    builders: List[Builder],
+    builders: list[Builder],
     num_chunks: int,
     num_workers: int,
     queue_prefix: str,

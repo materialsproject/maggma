@@ -1,5 +1,5 @@
 from socket import socket
-from typing import Dict, Optional, Tuple
+from typing import Optional
 
 from monty.json import MSONable
 from sshtunnel import SSHTunnelForwarder
@@ -8,7 +8,7 @@ from sshtunnel import SSHTunnelForwarder
 class SSHTunnel(MSONable):
     """SSH tunnel to remote server."""
 
-    __TUNNELS: Dict[str, SSHTunnelForwarder] = {}
+    __TUNNELS: dict[str, SSHTunnelForwarder] = {}
 
     def __init__(
         self,
@@ -81,7 +81,7 @@ class SSHTunnel(MSONable):
             self.tunnel.stop()
 
     @property
-    def local_address(self) -> Tuple[str, int]:
+    def local_address(self) -> tuple[str, int]:
         return self.tunnel.local_bind_address
 
 

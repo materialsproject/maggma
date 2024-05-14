@@ -8,9 +8,10 @@ import hashlib
 import os
 import re
 import warnings
+from collections.abc import Iterator
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Callable, Dict, Iterator, List, Optional, Union
+from typing import Callable, Optional, Union
 
 from monty.io import zopen
 from pymongo import UpdateOne
@@ -49,7 +50,7 @@ class FileStore(MemoryStore):
     def __init__(
         self,
         path: Union[str, Path],
-        file_filters: Optional[List] = None,
+        file_filters: Optional[list] = None,
         max_depth: Optional[int] = None,
         read_only: bool = True,
         include_orphans: bool = False,
@@ -133,9 +134,9 @@ class FileStore(MemoryStore):
 
     def add_metadata(
         self,
-        metadata: Optional[Dict] = None,
-        query: Optional[Dict] = None,
-        auto_data: Optional[Callable[[Dict], Dict]] = None,
+        metadata: Optional[dict] = None,
+        query: Optional[dict] = None,
+        auto_data: Optional[Callable[[dict], dict]] = None,
         **kwargs,
     ):
         """
@@ -180,7 +181,7 @@ class FileStore(MemoryStore):
 
         self.update(updated_docs, key=self.key)
 
-    def read(self) -> List[Dict]:
+    def read(self) -> list[dict]:
         """
         Iterate through all files in the Store folder and populate
         the Store with dictionaries containing basic information about each file.
@@ -216,7 +217,7 @@ class FileStore(MemoryStore):
 
         return file_list
 
-    def _create_record_from_file(self, f: Path) -> Dict:
+    def _create_record_from_file(self, f: Path) -> dict:
         """
         Given the path to a file, return a Dict that constitutes a record of
         basic information about that file. The keys in the returned dict
@@ -328,7 +329,7 @@ class FileStore(MemoryStore):
         if len(requests) > 0:
             self._collection.bulk_write(requests, ordered=False)
 
-    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
+    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
         """
         Update items in the Store. Only possible if the store is not read only. Any new
         fields that are added will be written to the JSON file in the root directory
@@ -375,14 +376,14 @@ class FileStore(MemoryStore):
 
     def query(  # type: ignore
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
-        hint: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        hint: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
         contents_size_limit: Optional[int] = 0,
-    ) -> Iterator[Dict]:
+    ) -> Iterator[dict]:
         """
         Queries the Store for a set of documents.
 
@@ -463,9 +464,9 @@ class FileStore(MemoryStore):
 
     def query_one(
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         contents_size_limit: Optional[int] = None,
     ):
         """
@@ -490,7 +491,7 @@ class FileStore(MemoryStore):
             None,
         )
 
-    def remove_docs(self, criteria: Dict, confirm: bool = False):
+    def remove_docs(self, criteria: dict, confirm: bool = False):
         """
         Remove items matching the query dictionary.
 

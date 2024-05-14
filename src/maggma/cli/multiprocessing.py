@@ -5,7 +5,7 @@ from asyncio import BoundedSemaphore, Queue, gather, get_event_loop
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
-from typing import Any, Callable, Dict, Optional
+from typing import Any, Callable, Optional
 
 from aioitertools import enumerate
 from tqdm.auto import tqdm
@@ -150,7 +150,7 @@ async def multi(
     num_processes,
     no_bars=False,
     heartbeat_func: Optional[Callable[..., Any]] = None,
-    heartbeat_func_kwargs: Optional[Dict[Any, Any]] = None,
+    heartbeat_func_kwargs: Optional[dict[Any, Any]] = None,
 ):
     builder.connect()
     cursor = builder.get_items()

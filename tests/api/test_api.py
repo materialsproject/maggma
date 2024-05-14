@@ -1,7 +1,7 @@
 import json
 from enum import Enum
 from random import choice, randint
-from typing import Any, Tuple
+from typing import Any
 from urllib.parse import urlencode
 
 import pytest
@@ -74,7 +74,7 @@ def test_msonable(owner_store, pet_store):
         assert k in api_dict
 
 
-def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]:
+def search_helper(payload, base: str = "/?", debug=True) -> tuple[Response, Any]:
     """
     Helper function to directly query search endpoints
 

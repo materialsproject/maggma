@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from inspect import signature
-from typing import Any, List, Optional, Type
+from typing import Any, Optional
 from uuid import uuid4
 
 from fastapi import HTTPException, Path, Request
@@ -27,14 +27,14 @@ class SubmissionResource(Resource):
     def __init__(
         self,
         store: Store,
-        model: Type[BaseModel],
-        post_query_operators: List[QueryOperator],
-        get_query_operators: List[QueryOperator],
-        patch_query_operators: Optional[List[QueryOperator]] = None,
-        tags: Optional[List[str]] = None,
+        model: type[BaseModel],
+        post_query_operators: list[QueryOperator],
+        get_query_operators: list[QueryOperator],
+        patch_query_operators: Optional[list[QueryOperator]] = None,
+        tags: Optional[list[str]] = None,
         timeout: Optional[int] = None,
         include_in_schema: Optional[bool] = True,
-        duplicate_fields_check: Optional[List[str]] = None,
+        duplicate_fields_check: Optional[list[str]] = None,
         enable_default_search: Optional[bool] = True,
         state_enum: Optional[Enum] = None,
         default_state: Optional[Any] = None,
@@ -97,12 +97,12 @@ class SubmissionResource(Resource):
 
         if state_enum is not None:
             new_fields["state"] = (
-                List[state_enum],  # type: ignore
+                list[state_enum],  # type: ignore
                 Field(..., description="List of data status descriptions"),
             )
 
             new_fields["updated"] = (
-                List[datetime],
+                list[datetime],
                 Field(..., description="List of status update datetimes"),
             )
 

@@ -1,5 +1,5 @@
 from inspect import signature
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Optional
 
 from fastapi import HTTPException, Request
 from pydantic import BaseModel
@@ -23,11 +23,11 @@ class PostOnlyResource(Resource):
     def __init__(
         self,
         store: Store,
-        model: Type[BaseModel],
-        tags: Optional[List[str]] = None,
-        query_operators: Optional[List[QueryOperator]] = None,
-        key_fields: Optional[List[str]] = None,
-        query: Optional[Dict] = None,
+        model: type[BaseModel],
+        tags: Optional[list[str]] = None,
+        query_operators: Optional[list[QueryOperator]] = None,
+        key_fields: Optional[list[str]] = None,
+        query: Optional[dict] = None,
         timeout: Optional[int] = None,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
@@ -81,7 +81,7 @@ class PostOnlyResource(Resource):
     def build_dynamic_model_search(self):
         model_name = self.model.__name__
 
-        def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
+        def search(**queries: dict[str, STORE_PARAMS]) -> dict:
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
 
@@ -96,7 +96,7 @@ class PostOnlyResource(Resource):
                     detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                 )
 
-            query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
+            query: dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
             query["criteria"].update(self.query)
 
             self.store.connect()

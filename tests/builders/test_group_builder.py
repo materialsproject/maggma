@@ -3,7 +3,6 @@ Tests for group builder
 """
 from datetime import datetime
 from random import randint
-from typing import Dict, List
 
 import pytest
 
@@ -41,7 +40,7 @@ def target():
 
 
 class DummyGrouper(GroupBuilder):
-    def unary_function(self, items: List[Dict]) -> Dict:
+    def unary_function(self, items: list[dict]) -> dict:
         """
         Processing function for GroupBuilder
 

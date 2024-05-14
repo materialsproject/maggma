@@ -7,8 +7,9 @@ various utilities.
 import copy
 import json
 import zlib
+from collections.abc import Iterator
 from datetime import datetime
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Optional, Union
 
 import gridfs
 from monty.json import jsanitize
@@ -52,9 +53,9 @@ class GridFSStore(Store):
         password: str = "",
         compression: bool = False,
         ensure_metadata: bool = False,
-        searchable_fields: Optional[List[str]] = None,
+        searchable_fields: Optional[list[str]] = None,
         auth_source: Optional[str] = None,
-        mongoclient_kwargs: Optional[Dict] = None,
+        mongoclient_kwargs: Optional[dict] = None,
         ssh_tunnel: Optional[SSHTunnel] = None,
         **kwargs,
     ):
@@ -178,7 +179,7 @@ class GridFSStore(Store):
         return self._files_store.last_updated
 
     @classmethod
-    def transform_criteria(cls, criteria: Dict) -> Dict:
+    def transform_criteria(cls, criteria: dict) -> dict:
         """
         Allow client to not need to prepend 'metadata.' to query fields.
 
@@ -194,7 +195,7 @@ class GridFSStore(Store):
 
         return new_criteria
 
-    def count(self, criteria: Optional[Dict] = None) -> int:
+    def count(self, criteria: Optional[dict] = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -208,12 +209,12 @@ class GridFSStore(Store):
 
     def query(
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-    ) -> Iterator[Dict]:
+    ) -> Iterator[dict]:
         """
         Queries the GridFS Store for a set of documents.
         Will check to see if data can be returned from
@@ -272,7 +273,7 @@ class GridFSStore(Store):
 
                 yield data
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field. This function only operates
         on the metadata in the files collection.
@@ -291,13 +292,13 @@ class GridFSStore(Store):
 
     def groupby(
         self,
-        keys: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        keys: Union[list[str], str],
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-    ) -> Iterator[Tuple[Dict, List[Dict]]]:
+    ) -> Iterator[tuple[dict, list[dict]]]:
         """
         Simple grouping function that will group documents
         by keys. Will only work if the keys are included in the files
@@ -347,9 +348,9 @@ class GridFSStore(Store):
 
     def update(
         self,
-        docs: Union[List[Dict], Dict],
-        key: Union[List, str, None] = None,
-        additional_metadata: Union[str, List[str], None] = None,
+        docs: Union[list[dict], dict],
+        key: Union[list, str, None] = None,
+        additional_metadata: Union[str, list[str], None] = None,
     ):
         """
         Update documents into the Store.
@@ -401,7 +402,7 @@ class GridFSStore(Store):
             for fdoc in self._files_collection.find(search_doc, ["_id"]).sort("uploadDate", -1).skip(1):
                 self._collection.delete(fdoc["_id"])
 
-    def remove_docs(self, criteria: Dict):
+    def remove_docs(self, criteria: dict):
         """
         Remove docs matching the query dictionary.
 
@@ -448,8 +449,8 @@ class GridFSURIStore(GridFSStore):
         database: Optional[str] = None,
         compression: bool = False,
         ensure_metadata: bool = False,
-        searchable_fields: Optional[List[str]] = None,
-        mongoclient_kwargs: Optional[Dict] = None,
+        searchable_fields: Optional[list[str]] = None,
+        mongoclient_kwargs: Optional[dict] = None,
         **kwargs,
     ):
         """

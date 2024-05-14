@@ -1,7 +1,8 @@
+from collections.abc import Iterable
 from copy import deepcopy
 from datetime import datetime
 from itertools import chain
-from typing import Dict, Iterable, List, Optional, Union
+from typing import Optional, Union
 
 from pydash import get
 
@@ -27,10 +28,10 @@ class Projection_Builder(Builder):
 
     def __init__(
         self,
-        source_stores: List[Store],
+        source_stores: list[Store],
         target_store: Store,
-        fields_to_project: Union[List[Union[List, Dict]], None] = None,
-        query_by_key: Optional[List] = None,
+        fields_to_project: Union[list[Union[list, dict]], None] = None,
+        query_by_key: Optional[list] = None,
         **kwargs,
     ):
         """
@@ -73,7 +74,7 @@ class Projection_Builder(Builder):
             raise TypeError("Input fields_to_project must be a list. E.g. [['str1','str2'],{'A':'str1','B':str2'}]")
 
         # interpret fields_to_project to create projection_mapping attribute
-        projection_mapping: List[Dict]  # PEP 484 Type Hinting
+        projection_mapping: list[dict]  # PEP 484 Type Hinting
         if fields_to_project is None:
             projection_mapping = [{}] * len(source_stores)
         else:
@@ -147,7 +148,7 @@ class Projection_Builder(Builder):
                 # project all fields from store if corresponding element
                 # in projection_mapping is an empty dict,
                 # else only project the specified fields
-                properties: Union[List, None]
+                properties: Union[list, None]
                 if projection == {}:  # all fields are projected
                     properties = None
                     self.logger.debug(f"For store {store.collection_name} getting all properties")
@@ -178,14 +179,13 @@ class Projection_Builder(Builder):
                     unsorted_items_to_process.append(item)
 
                 self.logger.debug(
-                    "Example fields of one output item from {} store sent to process_items: {}".format(
-                        store.collection_name, item.keys()
-                    )
+                    f"Example fields of one output item from {store.collection_name} store sent to"
+                    "process_items: {item.keys()}"
                 )
 
             yield unsorted_items_to_process
 
-    def process_item(self, items: Union[List, Iterable]) -> List[Dict]:
+    def process_item(self, items: Union[list, Iterable]) -> list[dict]:
         """
         Takes a chunk of items belonging to a subset of key values
         and groups them by key value. Combines items for each
@@ -203,14 +203,14 @@ class Projection_Builder(Builder):
         items_sorted_by_key = {}  # type: Dict
         for i in items:
             key_value = i[key]
-            if key_value not in items_sorted_by_key.keys():
+            if key_value not in items_sorted_by_key:
                 items_sorted_by_key[key_value] = []
             items_sorted_by_key[key_value].append(i)
 
         items_for_target = []
         for k, i_sorted in items_sorted_by_key.items():
             self.logger.debug(f"Combined items for {key}: {k}")
-            target_doc: Dict = {}
+            target_doc: dict = {}
             for i in i_sorted:
                 target_doc.update(i)
             # last modification is adding key value avoid overwriting
@@ -220,7 +220,7 @@ class Projection_Builder(Builder):
 
         return items_for_target
 
-    def update_targets(self, items: List):
+    def update_targets(self, items: list):
         """
         Adds a last_updated field to items and then adds
         them to the target store.
