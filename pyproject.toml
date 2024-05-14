@@ -21,7 +21,7 @@ classifiers=[
         "Topic :: Database :: Front-Ends",
         "Topic :: Scientific/Engineering",
     ]
-license="LICENSE"
+license = { file = "LICENSE" }
 dependencies = [
         "setuptools",
         "ruamel.yaml>=0.17",
