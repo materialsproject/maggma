@@ -3,6 +3,7 @@ import inspect
 from typing import (
     Any,
     Callable,
+    Literal,
     Optional,
     Union,
     get_args,  # pragma: no cover
@@ -13,7 +14,6 @@ from monty.json import MSONable
 from pydantic import BaseModel
 from pydantic._internal._utils import lenient_issubclass
 from pydantic.fields import FieldInfo
-from typing_extensions import Literal
 
 from maggma.utils import get_flat_models_from_model
 

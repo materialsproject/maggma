@@ -5,21 +5,10 @@ various utilities.
 """
 
 import warnings
+from collections.abc import Iterator
 from itertools import chain, groupby
 from pathlib import Path
-
-from ruamel.yaml import YAML
-
-from maggma.stores.ssh_tunnel import SSHTunnel
-
-try:
-    from collections.abc import Iterator
-    from typing import Any, Callable, Literal, Optional, Union
-except ImportError:
-    from collections.abc import Iterator
-    from typing import Any, Callable, Optional, Union
-
-    from typing_extensions import Literal
+from typing import Any, Callable, Literal, Optional, Union
 
 import bson
 import mongomock
@@ -31,8 +20,10 @@ from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne, uri_parser
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
+from ruamel.yaml import YAML
 
 from maggma.core import Sort, Store, StoreError
+from maggma.stores.ssh_tunnel import SSHTunnel
 from maggma.utils import confirm_field_index, to_dt
 
 try:
