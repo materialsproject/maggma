@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 from random import randint
 
@@ -113,10 +112,10 @@ def test_submission_patch(owner_store, post_query_op, patch_query_op):
     app.include_router(endpoint.router)
 
     client = TestClient(app)
-    update = json.dumps({"last_updated": "2023-06-22T17:32:11.645713"})
+    update = {"last_updated": "2023-06-22T17:32:11.645713"}
 
     assert client.get("/").status_code == 200
-    assert client.patch(f"/?name=PersonAge9&update={update}").status_code == 200
+    assert client.patch("/?name=PersonAge9", json=update).status_code == 200
 
 
 def test_key_fields(owner_store, post_query_op):
