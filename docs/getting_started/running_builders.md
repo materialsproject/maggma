@@ -64,7 +64,7 @@ There are progress bars for each of the three steps, which lets you understand w
 
 `maggma` can distribute work across multiple computers. There are two steps to this:
 
-1. Run a `mrun` manager by providing it with a `--url` to listen for workers on and `--num-chunks`(`-N`) which tells `mrun` how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause `mrun` to call the builder's `prechunk` to get the distribution of work and run distributd work on all workers
+1. Run a `mrun` manager by providing it with a `--url` to listen for workers on and `--num-chunks`(`-N`) which tells `mrun` how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause `mrun` to call the builder's `prechunk` to get the distribution of work and run distributed work on all workers
 2. Run `mrun` workers b y providing it with a `--url` to listen for a manager and `--num-workers` (`-n`) to tell it how many processes to run in this worker.
 
 The `url` argument takes a fully qualified url including protocol. `tcp` is recommended:
@@ -112,7 +112,7 @@ mrun -n 32 -vv my_first_builder.json builder_2_and_3.py last_builder.ipynb
 
 ## Reporting Build State
 
-`mrun` has the ability to report the status of the build pipeline to a user-provided `Store`. To do this, you first have to save the `Store` as a JSON or YAML file. Then you can use the `-r` option to give this to `mrun`. It will then periodicially add documents to the `Store` for one of 3 different events:
+`mrun` has the ability to report the status of the build pipeline to a user-provided `Store`. To do this, you first have to save the `Store` as a JSON or YAML file. Then you can use the `-r` option to give this to `mrun`. It will then periodically add documents to the `Store` for one of 3 different events:
 
 * `BUILD_STARTED` - This event tells us that a new builder started, the names of the `sources` and `targets` as well as the `total` number of items the builder expects to process
 * `UPDATE` - This event tells us that a batch of items was processed and is going to `update_targets`. The number of items is stored in `items`.

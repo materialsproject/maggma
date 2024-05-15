@@ -11,6 +11,7 @@ from contextlib import contextmanager
 from datetime import datetime
 
 import pytest
+
 from maggma.stores import AzureBlobStore, MemoryStore, MongoStore
 
 try:

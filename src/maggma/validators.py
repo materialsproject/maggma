@@ -31,7 +31,7 @@ class JSONSchemaValidator(Validator):
             is found and raise a ValueError, if False will continue
             build but log an error message. In both cases, invalid
             documents will not be stored.
-            schema: A Python dict representation of a JSON
+            schema: A Python dict representation of a JSON.
         """
         self._schema = schema
         self._strict = strict
@@ -78,7 +78,7 @@ class JSONSchemaValidator(Validator):
     def validation_errors(self, doc: Dict) -> List[str]:
         """
         If document is not valid, provides a list of
-        strings to display for why validation has failed
+        strings to display for why validation has failed.
 
         Returns empty list if the document is valid
 

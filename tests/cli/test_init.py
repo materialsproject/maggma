@@ -4,10 +4,11 @@ from pathlib import Path
 
 import pytest
 from click.testing import CliRunner
+from monty.serialization import dumpfn
+
 from maggma.builders import CopyBuilder
 from maggma.cli import run
 from maggma.stores import MemoryStore, MongoStore
-from monty.serialization import dumpfn
 
 
 @pytest.fixture()

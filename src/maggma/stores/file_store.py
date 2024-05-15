@@ -54,10 +54,12 @@ class FileStore(MemoryStore):
         read_only: bool = True,
         include_orphans: bool = False,
         json_name: str = "FileStore.json",
+        encoding: Optional[str] = None,
         **kwargs,
     ):
         """
-        Initializes a FileStore
+        Initializes a FileStore.
+
         Args:
             path: parent directory containing all files and subdirectories to process
             file_filters: List of fnmatch patterns defining the files to be tracked by
@@ -83,6 +85,11 @@ class FileStore(MemoryStore):
             json_name: Name of the .json file to which metadata is saved. If read_only
                 is False, this file will be created in the root directory of the
                 FileStore.
+            encoding: Character encoding of files to be tracked by the store. The default
+                (None) follows python's default behavior, which is to determine the character
+                encoding from the platform. This should work in the great majority of cases.
+                However, if you encounter a UnicodeDecodeError, consider setting the encoding
+                explicitly to 'utf8' or another encoding as appropriate.
             kwargs: kwargs passed to MemoryStore.__init__()
         """
         # this conditional block is needed in order to guarantee that the 'name'
@@ -99,6 +106,7 @@ class FileStore(MemoryStore):
         self.include_orphans = include_orphans
         self.read_only = read_only
         self.max_depth = max_depth
+        self.encoding = encoding
 
         self.metadata_store = JSONStore(
             paths=[str(self.path / self.json_name)],
@@ -116,7 +124,7 @@ class FileStore(MemoryStore):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return f"file://{self.path}"
 
@@ -174,20 +182,20 @@ class FileStore(MemoryStore):
         Iterate through all files in the Store folder and populate
         the Store with dictionaries containing basic information about each file.
 
-        The keys of the documents added to the Store are
+        The keys of the documents added to the Store are:
 
-            name: str = File name
-            path: Path = Absolute path of this file
-            parent: str = Name of the parent directory (if any)
-            file_id: str = Unique identifier for this file, computed from the hash
-                        of its path relative to the base FileStore directory and
-                        the file creation time. The key of this field is 'file_id'
-                        by default but can be changed via the 'key' kwarg to
-                        FileStore.__init__().
-            size: int = Size of this file in bytes
-            last_updated: datetime = Time this file was last modified
-            hash: str = Hash of the file contents
-            orphan: bool = Whether this record is an orphan
+        - name: str = File name
+        - path: Path = Absolute path of this file
+        - parent: str = Name of the parent directory (if any)
+        - file_id: str = Unique identifier for this file, computed from the hash
+                    of its path relative to the base FileStore directory and
+                    the file creation time. The key of this field is 'file_id'
+                    by default but can be changed via the 'key' kwarg to
+                    `FileStore.__init__()`.
+        - size: int = Size of this file in bytes
+        - last_updated: datetime = Time this file was last modified
+        - hash: str = Hash of the file contents
+        - orphan: bool = Whether this record is an orphan
         """
         file_list = []
         # generate a list of files in subdirectories
@@ -211,18 +219,18 @@ class FileStore(MemoryStore):
         basic information about that file. The keys in the returned dict
         are:
 
-            name: str = File name
-            path: Path = Absolute path of this file
-            parent: str = Name of the parent directory (if any)
-            file_id: str = Unique identifier for this file, computed from the hash
-                        of its path relative to the base FileStore directory and
-                        the file creation time. The key of this field is 'file_id'
-                        by default but can be changed via the 'key' kwarg to
-                        FileStore.__init__().
-            size: int = Size of this file in bytes
-            last_updated: datetime = Time this file was last modified
-            hash: str = Hash of the file contents
-            orphan: bool = Whether this record is an orphan
+        - name: str = File name
+        - path: Path = Absolute path of this file
+        - parent: str = Name of the parent directory (if any)
+        - file_id: str = Unique identifier for this file, computed from the hash
+                    of its path relative to the base FileStore directory and
+                    the file creation time. The key of this field is 'file_id'
+                    by default but can be changed via the 'key' kwarg to
+                    FileStore.__init__().
+        - size: int = Size of this file in bytes
+        - last_updated: datetime = Time this file was last modified
+        - hash: str = Hash of the file contents
+        - orphan: bool = Whether this record is an orphan
         """
         # compute the file_id from the relative path
         relative_path = f.relative_to(self.path)
@@ -260,25 +268,29 @@ class FileStore(MemoryStore):
             self.key: file_id,
         }
 
-    def connect(self):
+    def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Read all the files in the directory, create corresponding File
         items in the internal MemoryStore.
 
         If there is a metadata .json file in the directory, read its
         contents into the MemoryStore
+
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         # read all files and place them in the MemoryStore
         # use super.update to bypass the read_only guard statement
         # because we want the file data to be populated in memory
-        super().connect()
+        super().connect(force_reset=force_reset)
         super().update(self.read())
 
         # now read any metadata from the .json file
         try:
-            self.metadata_store.connect()
+            self.metadata_store.connect(force_reset=force_reset)
             metadata = list(self.metadata_store.query())
         except FileNotFoundError:
             metadata = []
@@ -351,7 +363,7 @@ class FileStore(MemoryStore):
 
     def _filter_data(self, d):
         """
-        Remove any protected keys from a dictionary
+        Remove any protected keys from a dictionary.
 
         Args:
             d: Dictionary whose keys are to be filtered
@@ -369,7 +381,7 @@ class FileStore(MemoryStore):
         contents_size_limit: Optional[int] = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -426,7 +438,7 @@ class FileStore(MemoryStore):
                     # TODO - could add more logic for detecting different file types
                     # and more nuanced exception handling
                     try:
-                        with zopen(d["path"], "r") as f:
+                        with zopen(d["path"], "r", encoding=self.encoding) as f:
                             data = f.read()
                     except Exception as e:
                         data = f"Unable to read: {e}"
@@ -454,7 +466,7 @@ class FileStore(MemoryStore):
         contents_size_limit: Optional[int] = None,
     ):
         """
-        Queries the Store for a single document
+        Queries the Store for a single document.
 
         Args:
             criteria: PyMongo filter for documents to search

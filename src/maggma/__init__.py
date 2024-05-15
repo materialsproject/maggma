@@ -1,8 +1,8 @@
-""" Primary Maggma module """
-from pkg_resources import DistributionNotFound, get_distribution
+"""Primary Maggma module."""
+from importlib.metadata import PackageNotFoundError, version
 
 try:
-    __version__ = get_distribution(__name__).version
-except DistributionNotFound:  # pragma: no cover
+    __version__ = version("maggma")
+except PackageNotFoundError:  # pragma: no cover
     # package is not installed
     pass

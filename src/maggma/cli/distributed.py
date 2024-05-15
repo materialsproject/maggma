@@ -135,7 +135,7 @@ def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_w
                 if not chunk_dict["distributed"]:
                     temp_builder_dict = dict(**builder_dict)
                     temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
-                    temp_builder_dict = jsanitize(temp_builder_dict)
+                    temp_builder_dict = jsanitize(temp_builder_dict, recursive_msonable=True)
 
                     # Send work for available workers
                     for identity in workers:
@@ -212,7 +212,7 @@ def handle_dead_workers(workers, socket):
 def worker(url: str, port: int, num_processes: int, no_bars: bool):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
-    using multiprocessing
+    using multiprocessing.
     """
     identity = f"{randint(0, 0x10000):04X}-{randint(0, 0x10000):04X}"
     logger = getLogger(f"Worker {identity}")

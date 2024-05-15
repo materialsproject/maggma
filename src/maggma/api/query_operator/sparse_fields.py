@@ -13,7 +13,7 @@ class SparseFieldsQuery(QueryOperator):
         """
         Args:
             model: PyDantic Model that represents the underlying data source
-            default_fields: default fields to return in the API response if no fields are explicitly requested
+            default_fields: default fields to return in the API response if no fields are explicitly requested.
         """
 
         self.model = model
@@ -32,7 +32,7 @@ class SparseFieldsQuery(QueryOperator):
             _all_fields: bool = Query(False, description="Include all fields."),
         ) -> STORE_PARAMS:
             """
-            Pagination parameters for the API Endpoint
+            Pagination parameters for the API Endpoint.
             """
 
             properties = _fields.split(",") if isinstance(_fields, str) else self.default_fields
@@ -44,17 +44,17 @@ class SparseFieldsQuery(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        "Stub query function for abstract class"
+        "Stub query function for abstract class."
 
     def meta(self) -> Dict:
         """
-        Returns metadata for the Sparse field set
+        Returns metadata for the Sparse field set.
         """
         return {"default_fields": self.default_fields}
 
     def as_dict(self) -> Dict:
         """
-        Special as_dict implemented to convert pydantic models into strings
+        Special as_dict implemented to convert pydantic models into strings.
         """
 
         d = super().as_dict()  # Ensures sub-classes serialize correctly
@@ -64,7 +64,7 @@ class SparseFieldsQuery(QueryOperator):
     @classmethod
     def from_dict(cls, d):
         """
-        Special from_dict to autoload the pydantic model from the location string
+        Special from_dict to autoload the pydantic model from the location string.
         """
         model = d.get("model")
         if isinstance(model, str):

@@ -116,7 +116,7 @@ class SubmissionResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         if self.enable_default_search:

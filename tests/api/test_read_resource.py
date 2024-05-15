@@ -5,13 +5,14 @@ from urllib.parse import urlencode
 
 import pytest
 from fastapi import FastAPI
+from pydantic import BaseModel, Field
+from requests import Response
+from starlette.testclient import TestClient
+
 from maggma.api.query_operator import NumericQuery, SparseFieldsQuery, StringQueryOperator
 from maggma.api.resource import ReadOnlyResource
 from maggma.api.resource.core import HintScheme
 from maggma.stores import AliasingStore, MemoryStore
-from pydantic import BaseModel, Field
-from requests import Response
-from starlette.testclient import TestClient
 
 
 class Owner(BaseModel):
@@ -40,13 +41,13 @@ def owner_store():
 
 
 def test_init(owner_store):
-    resource = ReadOnlyResource(store=owner_store, model=Owner)
+    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=True)
     assert len(resource.router.routes) == 3
 
     resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=False)
     assert len(resource.router.routes) == 2
 
-    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False)
+    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False, enable_get_by_key=True)
     assert len(resource.router.routes) == 2
 
 
@@ -62,7 +63,7 @@ def test_msonable(owner_store):
 
 
 def test_get_by_key(owner_store):
-    endpoint = ReadOnlyResource(owner_store, Owner, disable_validation=True)
+    endpoint = ReadOnlyResource(owner_store, Owner, disable_validation=True, enable_get_by_key=True)
     app = FastAPI()
     app.include_router(endpoint.router)
 
@@ -75,7 +76,7 @@ def test_get_by_key(owner_store):
 
 
 def test_key_fields(owner_store):
-    endpoint = ReadOnlyResource(owner_store, Owner, key_fields=["name"])
+    endpoint = ReadOnlyResource(owner_store, Owner, key_fields=["name"], enable_get_by_key=True)
     app = FastAPI()
     app.include_router(endpoint.router)
 
@@ -109,7 +110,8 @@ def test_problem_hint_scheme(owner_store):
 
 def search_helper(payload, base: str = "/?", debug=True) -> Response:
     """
-    Helper function to directly query search endpoints
+    Helper function to directly query search endpoints.
+
     Args:
         store: store f
         base: base of the query, default to /query?

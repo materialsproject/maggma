@@ -3,10 +3,11 @@ from random import randint
 
 import pytest
 from fastapi import FastAPI
-from maggma.api.resource import PostOnlyResource
-from maggma.stores import MemoryStore
 from pydantic import BaseModel, Field
 from starlette.testclient import TestClient
+
+from maggma.api.resource import PostOnlyResource
+from maggma.stores import MemoryStore
 
 
 class Owner(BaseModel):

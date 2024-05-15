@@ -5,9 +5,10 @@ import threading
 
 import pytest
 import zmq.asyncio as zmq
+from zmq import REP, REQ
+
 from maggma.cli.distributed import find_port, manager, worker
 from maggma.core import Builder
-from zmq import REP, REQ
 
 # TODO: Timeout errors?
 

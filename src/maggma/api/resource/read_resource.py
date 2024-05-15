@@ -21,7 +21,7 @@ class ReadOnlyResource(Resource):
     """
     Implements a REST Compatible Resource as a GET URL endpoint
     This class provides a number of convenience features
-    including full pagination, field projection
+    including full pagination, field projection.
     """
 
     def __init__(
@@ -34,7 +34,7 @@ class ReadOnlyResource(Resource):
         hint_scheme: Optional[HintScheme] = None,
         header_processor: Optional[HeaderProcessor] = None,
         timeout: Optional[int] = None,
-        enable_get_by_key: bool = True,
+        enable_get_by_key: bool = False,
         enable_default_search: bool = True,
         disable_validation: bool = False,
         query_disk_use: bool = False,
@@ -53,7 +53,7 @@ class ReadOnlyResource(Resource):
                 before raising a timeout error
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
                 to allow user to define these on-the-fly.
-            enable_get_by_key: Enable default key route for endpoint.
+            enable_get_by_key: Enable get by key route for endpoint.
             enable_default_search: Enable default endpoint search behavior.
             query_disk_use: Whether to use temporary disk space in large MongoDB queries.
             disable_validation: Whether to use ORJSON and provide a direct FastAPI response.
@@ -98,7 +98,7 @@ class ReadOnlyResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         if self.enable_get_by_key:
@@ -173,7 +173,10 @@ class ReadOnlyResource(Resource):
                 response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
-                self.header_processor.process_header(temp_response, request)
+                if self.disable_validation:
+                    self.header_processor.process_header(response, request)
+                else:
+                    self.header_processor.process_header(temp_response, request)
 
             return response
 
@@ -223,24 +226,26 @@ class ReadOnlyResource(Resource):
 
             try:
                 with query_timeout(self.timeout):
-                    count = self.store.count(  # type: ignore
-                        **{field: query[field] for field in query if field in ["criteria", "hint"]}
-                    )
-
                     if isinstance(self.store, S3Store):
+                        count = self.store.count(criteria=query.get("criteria"))  # type: ignore
+
                         if self.query_disk_use:
                             data = list(self.store.query(**query, allow_disk_use=True))  # type: ignore
                         else:
                             data = list(self.store.query(**query))
                     else:
+                        count = self.store.count(
+                            criteria=query.get("criteria"), hint=query.get("count_hint")
+                        )  # type: ignore
+
                         pipeline = generate_query_pipeline(query, self.store)
 
-                        data = list(
-                            self.store._collection.aggregate(
-                                pipeline,
-                                **{field: query[field] for field in query if field in ["hint"]},
-                            )
-                        )
+                        agg_kwargs = {}
+
+                        if query.get("agg_hint"):
+                            agg_kwargs["hint"] = query["agg_hint"]
+
+                        data = list(self.store._collection.aggregate(pipeline, **agg_kwargs))
 
             except (NetworkTimeout, PyMongoError) as e:
                 if e.timeout:
@@ -269,7 +274,10 @@ class ReadOnlyResource(Resource):
                 response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
-                self.header_processor.process_header(temp_response, request)
+                if self.disable_validation:
+                    self.header_processor.process_header(response, request)
+                else:
+                    self.header_processor.process_header(temp_response, request)
 
             return response
 

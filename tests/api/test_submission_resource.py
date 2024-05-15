@@ -1,15 +1,15 @@
-import json
 from datetime import datetime
 from random import randint
 
 import pytest
-from fastapi import FastAPI, Query, Body
+from fastapi import FastAPI
+from pydantic import BaseModel, Field
+from starlette.testclient import TestClient
+
 from maggma.api.query_operator import PaginationQuery
 from maggma.api.query_operator.core import QueryOperator
 from maggma.api.resource import SubmissionResource
 from maggma.stores import MemoryStore
-from pydantic import BaseModel, Field
-from starlette.testclient import TestClient
 
 
 class Owner(BaseModel):
@@ -49,8 +49,7 @@ def post_query_op():
 @pytest.fixture()
 def patch_query_op():
     class PatchQuery(QueryOperator):
-        def query(self, name=Query(), update=Body()):
-            print("UPDATE:", update)
+        def query(self, name, update):
             return {"criteria": {"name": name}, "update": update}
 
     return PatchQuery()

@@ -1,5 +1,5 @@
 """
-One-to-One Map Builder and a simple CopyBuilder implementation
+One-to-One Map Builder and a simple CopyBuilder implementation.
 """
 import traceback
 from abc import ABCMeta, abstractmethod
@@ -65,7 +65,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def ensure_indexes(self):
         """
-        Ensures indices on critical fields for MapBuilder
+        Ensures indices on critical fields for MapBuilder.
         """
         index_checks = [
             self.source.ensure_index(self.source.key),
@@ -86,8 +86,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def prechunk(self, number_splits: int) -> Iterator[Dict]:
         """
-        Generic prechunk for map builder to perform domain-decompostion
-        by the key field
+        Generic prechunk for map builder to perform domain-decomposition
+        by the key field.
         """
         self.ensure_indexes()
         keys = self.target.newer_in(self.source, criteria=self.query, exhaustive=True)
@@ -99,7 +99,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     def get_items(self):
         """
         Generic get items for Map Builder designed to perform
-        incremental building
+        incremental building.
         """
 
         self.logger.info(f"Starting {self.__class__.__name__} Builder")
@@ -136,7 +136,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
     def process_item(self, item: Dict):
         """
         Generic process items to process a dictionary using
-        a map function
+        a map function.
         """
 
         self.logger.debug(f"Processing: {item[self.source.key]}")
@@ -173,7 +173,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def update_targets(self, items: List[Dict]):
         """
-        Generic update targets for Map Builder
+        Generic update targets for Map Builder.
         """
         target = self.target
         for item in items:
@@ -186,7 +186,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
     def finalize(self):
         """
-        Finalize MapBuilder operations including removing orphaned documents
+        Finalize MapBuilder operations including removing orphaned documents.
         """
         if self.delete_orphans:
             source_keyvals = set(self.source.distinct(self.source.key))
@@ -214,7 +214,7 @@ class CopyBuilder(MapBuilder):
 
     def unary_function(self, item):
         """
-        Identity function for copy builder map operation
+        Identity function for copy builder map operation.
         """
         if "_id" in item:
             del item["_id"]

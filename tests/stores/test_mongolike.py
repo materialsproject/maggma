@@ -8,11 +8,12 @@ import orjson
 import pymongo.collection
 import pytest
 from bson.objectid import ObjectId
+from monty.tempfile import ScratchDir
+from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
+
 from maggma.core import StoreError
 from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore, MontyStore
 from maggma.validators import JSONSchemaValidator
-from monty.tempfile import ScratchDir
-from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
 
 @pytest.fixture()
@@ -413,6 +414,11 @@ def test_json_store_load(jsonstore, test_dir):
     assert len(list(jsonstore.query())) == 20
 
     jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz")
+    jsonstore.connect()
+    assert len(list(jsonstore.query())) == 20
+
+    # test with non-default encoding
+    jsonstore = JSONStore(test_dir / "test_set" / "c.json.gz", encoding="utf8")
     jsonstore.connect()
     assert len(list(jsonstore.query())) == 20
 

@@ -102,7 +102,7 @@ class Projection_Builder(Builder):
 
     def ensure_indexes(self):
         """
-        Ensures key fields are indexed to improve querying efficiency
+        Ensures key fields are indexed to improve querying efficiency.
         """
         index_checks = [s.ensure_index(s.key) for s in self.sources]
 

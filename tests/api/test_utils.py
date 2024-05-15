@@ -4,9 +4,10 @@ from typing import Union
 
 import pytest
 from bson import ObjectId
-from maggma.api.utils import api_sanitize, serialization_helper
 from monty.json import MSONable
 from pydantic import BaseModel, Field
+
+from maggma.api.utils import api_sanitize, serialization_helper
 
 
 class SomeEnum(Enum):
@@ -87,7 +88,7 @@ def test_api_sanitize():
     api_sanitize(AnotherOwner, allow_dict_msonable=True)
     temp_pet_dict = AnotherPet(name="fido", age=3).as_dict()
 
-    assert isinstance(AnotherPet.validate_monty(temp_pet_dict), dict)
+    assert isinstance(AnotherPet.validate_monty_v2(temp_pet_dict, None), dict)
 
 
 def test_serialization_helper():

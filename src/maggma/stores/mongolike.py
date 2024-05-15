@@ -1,16 +1,17 @@
 """
 Module containing various definitions of Stores.
 Stores are a default access pattern to data and provide
-various utilities
+various utilities.
 """
 
 import warnings
 from datetime import datetime
 from itertools import chain, groupby
 from pathlib import Path
-from socket import socket
 
-from ruamel import yaml
+from ruamel.yaml import YAML
+
+from maggma.stores.ssh_tunnel import SSHTunnel
 
 try:
     from typing import Any, Callable, Dict, Iterator, List, Literal, Optional, Tuple, Union
@@ -23,13 +24,12 @@ import bson
 import orjson
 from monty.dev import requires
 from monty.io import zopen
-from monty.json import MSONable, jsanitize
+from monty.json import jsanitize
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne, uri_parser
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 from pymongo_inmemory import MongoClient as MemoryClient
-from sshtunnel import SSHTunnelForwarder
 
 from maggma.core import Sort, Store, StoreError
 from maggma.utils import confirm_field_index, to_dt
@@ -40,82 +40,9 @@ except ImportError:
     MontyClient = None
 
 
-class SSHTunnel(MSONable):
-    __TUNNELS: Dict[str, SSHTunnelForwarder] = {}
-
-    def __init__(
-        self,
-        tunnel_server_address: str,
-        remote_server_address: str,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        private_key: Optional[str] = None,
-        **kwargs,
-    ):
-        """
-        Args:
-            tunnel_server_address: string address with port for the SSH tunnel server
-            remote_server_address: string address with port for the server to connect to
-            username: optional username for the ssh tunnel server
-            password: optional password for the ssh tunnel server; If a private_key is
-                supplied this password is assumed to be the private key password
-            private_key: ssh private key to authenticate to the tunnel server
-            kwargs: any extra args passed to the SSHTunnelForwarder
-        """
-
-        self.tunnel_server_address = tunnel_server_address
-        self.remote_server_address = remote_server_address
-        self.username = username
-        self.password = password
-        self.private_key = private_key
-        self.kwargs = kwargs
-
-        if remote_server_address in SSHTunnel.__TUNNELS:
-            self.tunnel = SSHTunnel.__TUNNELS[remote_server_address]
-        else:
-            open_port = _find_free_port("127.0.0.1")
-            local_bind_address = ("127.0.0.1", open_port)
-
-            ssh_address, ssh_port = tunnel_server_address.split(":")
-            ssh_port = int(ssh_port)  # type: ignore
-
-            remote_bind_address, remote_bind_port = remote_server_address.split(":")
-            remote_bind_port = int(remote_bind_port)  # type: ignore
-
-            if private_key is not None:
-                ssh_password = None
-                ssh_private_key_password = password
-            else:
-                ssh_password = password
-                ssh_private_key_password = None
-
-            self.tunnel = SSHTunnelForwarder(
-                ssh_address_or_host=(ssh_address, ssh_port),
-                local_bind_address=local_bind_address,
-                remote_bind_address=(remote_bind_address, remote_bind_port),
-                ssh_username=username,
-                ssh_password=ssh_password,
-                ssh_private_key_password=ssh_private_key_password,
-                ssh_pkey=private_key,
-                **kwargs,
-            )
-
-    def start(self):
-        if not self.tunnel.is_active:
-            self.tunnel.start()
-
-    def stop(self):
-        if self.tunnel.tunnel_is_up:
-            self.tunnel.stop()
-
-    @property
-    def local_address(self) -> Tuple[str, int]:
-        return self.tunnel.local_bind_address
-
-
 class MongoStore(Store):
     """
-    A Store that connects to a Mongo collection
+    A Store that connects to a Mongo collection.
     """
 
     def __init__(
@@ -170,13 +97,17 @@ class MongoStore(Store):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
+
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         if self._coll is None or force_reset:
             if self.ssh_tunnel is None:
@@ -202,14 +133,14 @@ class MongoStore(Store):
             self._coll = db[self.collection_name]  # type: ignore
 
     def __hash__(self) -> int:
-        """Hash for MongoStore"""
+        """Hash for MongoStore."""
         return hash((self.database, self.collection_name, self.last_updated_field))
 
     @classmethod
     def from_db_file(cls, filename: str, **kwargs):
         """
         Convenience method to construct MongoStore from db_file
-        from old QueryEngine format
+        from old QueryEngine format.
         """
         kwargs = loadfn(filename)
         if "collection" in kwargs:
@@ -221,14 +152,15 @@ class MongoStore(Store):
     @classmethod
     def from_launchpad_file(cls, lp_file, collection_name, **kwargs):
         """
-        Convenience method to construct MongoStore from a launchpad file
+        Convenience method to construct MongoStore from a launchpad file.
 
         Note: A launchpad file is a special formatted yaml file used in fireworks
 
         Returns:
         """
         with open(lp_file) as f:
-            lp_creds = yaml.safe_load(f.read())
+            yaml = YAML(typ="safe", pure=True)
+            lp_creds = yaml.load(f.read())
 
         db_creds = lp_creds.copy()
         db_creds["database"] = db_creds["name"]
@@ -241,7 +173,7 @@ class MongoStore(Store):
 
     def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -315,7 +247,7 @@ class MongoStore(Store):
         """
         Generates a MongoStore from a pymongo collection object
         This is not a fully safe operation as it gives dummy information to the MongoStore
-        As a result, this will not serialize and can not reset its connection
+        As a result, this will not serialize and can not reset its connection.
 
         Args:
             collection: the PyMongo collection to create a MongoStore around
@@ -330,7 +262,7 @@ class MongoStore(Store):
 
     @property
     def _collection(self):
-        """Property referring to underlying pymongo collection"""
+        """Property referring to underlying pymongo collection."""
         if self._coll is None:
             raise StoreError("Must connect Mongo-like store before attempting to use it")
         return self._coll
@@ -341,7 +273,7 @@ class MongoStore(Store):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
     ) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -375,7 +307,7 @@ class MongoStore(Store):
         **kwargs,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -420,10 +352,11 @@ class MongoStore(Store):
 
     def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
         """
-        Tries to create an index and return true if it succeeded
+        Tries to create an index and return true if it succeeded.
+
         Args:
             key: single key to index
-            unique: Whether or not this index contains only unique keys
+            unique: Whether or not this index contains only unique keys.
 
         Returns:
             bool indicating if the index exists/was created
@@ -440,7 +373,7 @@ class MongoStore(Store):
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -455,7 +388,7 @@ class MongoStore(Store):
         if not isinstance(docs, list):
             docs = [docs]
 
-        for d in (jsanitize(x, allow_bson=True) for x in docs):
+        for d in (jsanitize(x, allow_bson=True, recursive_msonable=True) for x in docs):
             # document-level validation is optional
             validates = True
             if self.validator:
@@ -488,7 +421,7 @@ class MongoStore(Store):
 
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -496,7 +429,7 @@ class MongoStore(Store):
         self._collection.delete_many(filter=criteria)
 
     def close(self):
-        """Close up all collections"""
+        """Close up all collections."""
         self._collection.database.client.close()
         self._coll = None
         if self.ssh_tunnel is not None:
@@ -505,7 +438,7 @@ class MongoStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for MongoStore
-        other: other mongostore to compare with
+        other: other mongostore to compare with.
         """
         if not isinstance(other, self.__class__):
             return False
@@ -518,7 +451,7 @@ class MongoURIStore(MongoStore):
     """
     A Store that connects to a Mongo collection via a URI
     This is expected to be a special mongodb+srv:// URIs that include
-    client parameters via TXT records
+    client parameters via TXT records.
     """
 
     def __init__(
@@ -561,14 +494,18 @@ class MongoURIStore(MongoStore):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         # TODO: This is not very safe since it exposes the username/password info
         return self.uri
 
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
+
+        Args:
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         if self._coll is None or force_reset:  # pragma: no cover
             conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
@@ -579,7 +516,7 @@ class MongoURIStore(MongoStore):
 class MemoryStore(MongoStore):
     """
     An in-memory Store that functions similarly
-    to a MongoStore
+    to a MongoStore.
     """
 
     def __init__(
@@ -647,7 +584,7 @@ class MemoryStore(MongoStore):
 
 class JSONStore(MemoryStore):
     """
-    A Store for access to a single or multiple JSON files
+    A Store for access to a single or multiple JSON files.
     """
 
     def __init__(
@@ -656,6 +593,7 @@ class JSONStore(MemoryStore):
         read_only: bool = True,
         serialization_option: Optional[int] = None,
         serialization_default: Optional[Callable[[Any], Any]] = None,
+        encoding: Optional[str] = None,
         **kwargs,
     ):
         """
@@ -676,9 +614,15 @@ class JSONStore(MemoryStore):
                 option that will be passed to the orjson.dump when saving to the json the file.
             serialization_default:
                 default that will be passed to the orjson.dump when saving to the json the file.
+            encoding: Character encoding of files to be tracked by the store. The default
+                (None) follows python's default behavior, which is to determine the character
+                encoding from the platform. This should work in the great majority of cases.
+                However, if you encounter a UnicodeDecodeError, consider setting the encoding
+                explicitly to 'utf8' or another encoding as appropriate.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
+        self.encoding = encoding
 
         # file_writable overrides read_only for compatibility reasons
         if "file_writable" in kwargs:
@@ -707,37 +651,45 @@ class JSONStore(MemoryStore):
 
         super().__init__(**kwargs)
 
-    def connect(self, force_reset=False):
+    def connect(self, force_reset: bool = False):
         """
-        Loads the files into the collection in memory
+        Loads the files into the collection in memory.
+
+        Args:
+            force_reset: whether to reset the connection or not. If False (default) and .connect()
+            has been called previously, the .json file will not be read in again. This can improve performance
+            on systems with slow storage when multiple connect / disconnects are performed.
         """
-        super().connect(force_reset=force_reset)
+        if self._coll is None or force_reset:
+            # self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
+            self._coll = MemoryClient().db[self.name]  # type: ignore
 
-        # create the .json file if it does not exist
-        if not self.read_only and not Path(self.paths[0]).exists():
-            with zopen(self.paths[0], "w") as f:
-                data: List[dict] = []
-                bytesdata = orjson.dumps(data)
-                f.write(bytesdata.decode("utf-8"))
+            # create the .json file if it does not exist
+            if not self.read_only and not Path(self.paths[0]).exists():
+                with zopen(self.paths[0], "w", encoding=self.encoding) as f:
+                    data: List[dict] = []
+                    bytesdata = orjson.dumps(data)
+                    f.write(bytesdata.decode("utf-8"))
 
-        for path in self.paths:
-            objects = self.read_json_file(path)
-            try:
-                self.update(objects)
-            except KeyError:
-                raise KeyError(
-                    f"""
-                    Key field '{self.key}' not found in {path.name}. This
-                    could mean that this JSONStore was initially created with a different key field.
-                    The keys found in the .json file are {list(objects[0].keys())}. Try
-                    re-initializing your JSONStore using one of these as the key arguments.
-                    """
-                )
+            for path in self.paths:
+                objects = self.read_json_file(path)
+                try:
+                    self.update(objects)
+                except KeyError:
+                    raise KeyError(
+                        f"""
+                        Key field '{self.key}' not found in {path.name}. This
+                        could mean that this JSONStore was initially created with a different key field.
+                        The keys found in the .json file are {list(objects[0].keys())}. Try
+                        re-initializing your JSONStore using one of these as the key arguments.
+                        """
+                    )
 
     def read_json_file(self, path) -> List:
         """
         Helper method to read the contents of a JSON file and generate
         a list of docs.
+
         Args:
             path: Path to the JSON file to be read
         """
@@ -791,7 +743,7 @@ class JSONStore(MemoryStore):
         """
         Updates the json file when a write-like operation is performed.
         """
-        with zopen(self.paths[0], "w") as f:
+        with zopen(self.paths[0], "w", encoding=self.encoding) as f:
             data = list(self.query())
             for d in data:
                 d.pop("_id")
@@ -807,7 +759,7 @@ class JSONStore(MemoryStore):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for JSONStore
+        Check equality for JSONStore.
 
         Args:
             other: other JSONStore to compare with
@@ -895,13 +847,14 @@ class MontyStore(MongoStore):
         Connect to the database store.
 
         Args:
-            force_reset: Force connection reset.
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
-        # TODO - workaround, may be obviated by a future montydb update
-        if self.database_path != ":memory:":
-            set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
-        client = MontyClient(self.database_path, **self.client_kwargs)
         if not self._coll or force_reset:
+            # TODO - workaround, may be obviated by a future montydb update
+            if self.database_path != ":memory:":
+                set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
+            client = MontyClient(self.database_path, **self.client_kwargs)
             self._coll = client[self.database_name][self.collection_name]
 
     @property
@@ -915,7 +868,7 @@ class MontyStore(MongoStore):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
     ) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -1020,9 +973,3 @@ class MontyStore(MongoStore):
 
         fields = ["database_name", "collection_name", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
-
-
-def _find_free_port(address="0.0.0.0"):
-    s = socket()
-    s.bind((address, 0))  # Bind to a free port provided by the host.
-    return s.getsockname()[1]  # Return the port number assigned.

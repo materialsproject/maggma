@@ -1,18 +1,19 @@
+import json
 from enum import Enum
 from random import choice, randint
 from typing import Any, Tuple
 from urllib.parse import urlencode
-import json
 
 import pytest
 from fastapi.encoders import jsonable_encoder
+from pydantic import BaseModel, Field
+from requests import Response
+from starlette.testclient import TestClient
+
 from maggma.api.API import API
 from maggma.api.query_operator import NumericQuery, PaginationQuery, SparseFieldsQuery, StringQueryOperator
 from maggma.api.resource import ReadOnlyResource
 from maggma.stores import MemoryStore
-from pydantic import BaseModel, Field
-from requests import Response
-from starlette.testclient import TestClient
 
 
 class PetType(str, Enum):
@@ -76,6 +77,7 @@ def test_msonable(owner_store, pet_store):
 def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]:
     """
     Helper function to directly query search endpoints
+
     Args:
         store: store f
         base: base of the query, default to /query?
@@ -88,7 +90,7 @@ def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]
     """
     owner_store = MemoryStore("owners", key="name")
     owner_store.connect()
-    owner_store.update([d.dict() for d in owners])
+    owner_store.update([d.model_dump() for d in owners])
 
     pets_store = MemoryStore("pets", key="name")
     pets_store.connect()

@@ -25,6 +25,7 @@ from distutils.dir_util import copy_tree
 from pathlib import Path
 
 import pytest
+
 from maggma.core import StoreError
 from maggma.stores.file_store import FileStore
 
@@ -372,3 +373,12 @@ def test_this_dir():
     fs = FileStore(".")
     fs.connect()
     assert not fs.name.endswith(".")
+
+
+def test_encoding():
+    """
+    Make sure custom encoding works
+    """
+    fs = FileStore(".", read_only=False, encoding="utf8")
+    fs.connect()
+    assert Path("FileStore.json").exists()

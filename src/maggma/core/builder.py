@@ -1,5 +1,5 @@
 """
-Module containing the core builder definition
+Module containing the core builder definition.
 """
 
 import logging
@@ -17,7 +17,7 @@ class Builder(MSONable, metaclass=ABCMeta):
     Base Builder class
     At minimum this class should implement:
     get_items - Get items from the sources
-    update_targets - Updates the sources with results
+    update_targets - Updates the sources with results.
 
     Multiprocessing and MPI processing can be used if all
     the data processing is  limited to process_items
@@ -54,19 +54,19 @@ class Builder(MSONable, metaclass=ABCMeta):
     def prechunk(self, number_splits: int) -> Iterable[Dict]:
         """
         Part of a domain-decomposition paradigm to allow the builder to operate on
-        multiple nodes by divinding up the IO as well as the compute
+        multiple nodes by dividing up the IO as well as the compute
         This function should return an iterator of dictionaries that can be distributed
-        to multiple instances of the builder to get/process/update on
+        to multiple instances of the builder to get/process/update on.
 
         Arguments:
             number_splits: The number of groups to split the documents to work on
         """
         self.logger.info(
-            f"{self.__class__.__name__} doesn't have distributed processing capabillities."
+            f"{self.__class__.__name__} doesn't have distributed processing capabilities."
             " Instead this builder will run on just one worker for all processing"
         )
         raise NotImplementedError(
-            f"{self.__class__.__name__} doesn't have distributed processing capabillities."
+            f"{self.__class__.__name__} doesn't have distributed processing capabilities."
             " Instead this builder will run on just one worker for all processing"
         )
 
@@ -83,6 +83,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         """
         Process an item. There should be no database operations in this method.
         Default behavior is to return the item.
+
         Arguments:
             item:
 
@@ -118,7 +119,7 @@ class Builder(MSONable, metaclass=ABCMeta):
     def run(self, log_level=logging.DEBUG):
         """
         Run the builder serially
-        This is only intended for diagnostic purposes
+        This is only intended for diagnostic purposes.
         """
         # Set up logging
         root = logging.getLogger()

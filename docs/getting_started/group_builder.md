@@ -1,6 +1,6 @@
 # Group Builder
 
-Another advanced template in `maggma` is the `GroupBuilder`, which groups documents together before applying your function on the group of items. Just like `MapBuilder`, `GroupBuilder` also handles incremental building, keeping track of errors, getting only the data you need, and managing timeouts. GroupBuilder won't delete orphaned documents since that reverse relationshop isn't valid.
+Another advanced template in `maggma` is the `GroupBuilder`, which groups documents together before applying your function on the group of items. Just like `MapBuilder`, `GroupBuilder` also handles incremental building, keeping track of errors, getting only the data you need, and managing timeouts. GroupBuilder won't delete orphaned documents since that reverse relationship isn't valid.
 
 Let's create a simple `ResupplyBuilder`, which will look at the inventory of items and determine what items need resupply. The source document will look something like this:
 
@@ -65,7 +65,7 @@ Note that unlike the previous `MapBuilder` example, we didn't call the source an
 - store_process_timeout: adds the process time into the target document for profiling
 - retry_failed: retries running the process function on previously failed documents
 
-One parameter that doesn't work in `GroupBuilder` is `delete_orphans`, since the Many-to-One relationshop makes determining orphaned documents very difficult.
+One parameter that doesn't work in `GroupBuilder` is `delete_orphans`, since the Many-to-One relationship makes determining orphaned documents very difficult.
 
 Finally let's get to the hard part which is running our function. We do this by defining `unary_function`
 
