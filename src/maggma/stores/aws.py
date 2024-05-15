@@ -172,12 +172,12 @@ class S3Store(Store):
         Queries the Store for a set of documents.
 
         Args:
-            criteria: PyMongo filter for documents to search in.
-            properties: properties to return in grouped documents.
-            sort: Dictionary of sort order for fields. Keys are field names and values
-                are 1 for ascending or -1 for descending.
-            skip: number documents to skip.
-            limit: limit on total number of documents returned.
+            criteria: PyMongo filter for documents to search in
+            properties: fields to include in returned documents. By default, all fields are returned.
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
+            skip: number documents to skip
+            limit: limit on total number of documents returned
 
         """
         prop_keys = set()
@@ -265,13 +265,13 @@ class S3Store(Store):
         Simple grouping function that will group documents by keys.
 
         Args:
-            keys: fields to group documents.
-            criteria: PyMongo filter for documents to search in.
-            properties: properties to return in grouped documents.
-            sort: Dictionary of sort order for fields. Keys are field names and values
-            are 1 for ascending or -1 for descending.
-            skip: number documents to skip.
-            limit: limit on total number of documents returned.
+            keys: fields to group documents
+            criteria: PyMongo filter for documents to search in
+            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
+            sort: Dictionary of sort order for fields. Keys are field names and
+                values are 1 for ascending or -1 for descending.
+            skip: number documents to skip
+            limit: limit on total number of documents returned
 
         Returns:
             generator returning tuples of (dict, list of docs)

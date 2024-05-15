@@ -69,10 +69,21 @@ def test_mongostore_connect_reconnect():
 
 def test_mongostore_query(mongostore):
     mongostore._collection.insert_one({"a": 1, "b": 2, "c": 3})
+    mongostore._collection.insert_one({"a": 2, "b": 2, "c": 3})
+    mongostore._collection.insert_one({"a": 4, "b": 5, "e": 6, "g": {"h": 1}})
     assert mongostore.query_one(properties=["a"])["a"] == 1
     assert mongostore.query_one(properties=["a"])["a"] == 1
     assert mongostore.query_one(properties=["b"])["b"] == 2
     assert mongostore.query_one(properties=["c"])["c"] == 3
+
+    # the whole document should be returned when properties=None
+    assert all(d.get("a") for d in mongostore.query())
+    assert all(d.get("b") for d in mongostore.query())
+
+    # test sort, skip, limit
+    assert len(list(mongostore.query(limit=2))) == 2
+    assert len(list(mongostore.query(skip=1))) == 2
+    assert next(iter(mongostore.query(sort={"g": -1}))).get("e")
 
 
 def test_mongostore_count(mongostore):

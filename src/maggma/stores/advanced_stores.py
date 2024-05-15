@@ -243,7 +243,7 @@ class AliasingStore(Store):
 
         Args:
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in returned documents. By default, all fields are returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -292,7 +292,7 @@ class AliasingStore(Store):
         Args:
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -317,7 +317,14 @@ class AliasingStore(Store):
 
         lazy_substitute(criteria, self.reverse_aliases)
 
-        return self.store.groupby(keys=keys, properties=properties, criteria=criteria, skip=skip, limit=limit)
+        return self.store.groupby(
+            keys=keys,
+            properties=properties,
+            criteria=criteria,
+            skip=skip,
+            limit=limit,
+            sort=sort,
+        )
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
@@ -443,7 +450,7 @@ class SandboxStore(Store):
 
         Args:
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in returned documents. By default, all fields are returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -468,7 +475,7 @@ class SandboxStore(Store):
         Args:
             keys: fields to group documents
             criteria: PyMongo filter for documents to search in
-            properties: properties to return in grouped documents
+            properties: fields to include in grouped documents. By default, only the 'id' field is returned.
             sort: Dictionary of sort order for fields. Keys are field names and
                 values are 1 for ascending or -1 for descending.
             skip: number documents to skip
@@ -479,7 +486,14 @@ class SandboxStore(Store):
         """
         criteria = dict(**criteria, **self.sbx_criteria) if criteria else self.sbx_criteria
 
-        return self.store.groupby(keys=keys, properties=properties, criteria=criteria, skip=skip, limit=limit)
+        return self.store.groupby(
+            keys=keys,
+            properties=properties,
+            criteria=criteria,
+            skip=skip,
+            limit=limit,
+            sort=sort,
+        )
 
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
