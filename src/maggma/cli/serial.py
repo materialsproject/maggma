@@ -12,7 +12,7 @@ from maggma.utils import grouper, primed
 
 def serial(builder: Builder, no_bars=False):
     """
-    Runs the builders using a single process
+    Runs the builders using a single process.
     """
 
     logger = logging.getLogger("SerialProcessor")
@@ -47,11 +47,9 @@ def serial(builder: Builder, no_bars=False):
             }
         },
     )
-    for chunk in grouper(
-        tqdm(cursor, total=total, disable=no_bars), builder.chunk_size
-    ):
+    for chunk in grouper(tqdm(cursor, total=total, disable=no_bars), builder.chunk_size):
         logger.info(
-            "Processing batch of {} items".format(builder.chunk_size),
+            f"Processing batch of {builder.chunk_size} items",
             extra={
                 "maggma": {
                     "event": "UPDATE",
@@ -66,8 +64,6 @@ def serial(builder: Builder, no_bars=False):
 
     logger.info(
         f"Ended serial processing: {builder.__class__.__name__}",
-        extra={
-            "maggma": {"event": "BUILD_ENDED", "builder": builder.__class__.__name__}
-        },
+        extra={"maggma": {"event": "BUILD_ENDED", "builder": builder.__class__.__name__}},
     )
     builder.finalize()

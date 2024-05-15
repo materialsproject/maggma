@@ -2,7 +2,7 @@ import logging
 from abc import ABCMeta, abstractmethod
 from typing import Dict, Type
 
-from fastapi import APIRouter, FastAPI, Response, Request
+from fastapi import APIRouter, FastAPI, Request, Response
 from monty.json import MontyDecoder, MSONable
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
@@ -13,15 +13,16 @@ from maggma.utils import dynamic_import
 
 class Resource(MSONable, metaclass=ABCMeta):
     """
-    Base class for a REST Compatible Resource
+    Base class for a REST Compatible Resource.
     """
 
     def __init__(
-        self, model: Type[BaseModel],
+        self,
+        model: Type[BaseModel],
     ):
         """
         Args:
-            model: the pydantic model this Resource represents
+            model: the pydantic model this Resource represents.
         """
         if not issubclass(model, BaseModel):
             raise ValueError("The resource model has to be a PyDantic Model")
@@ -35,9 +36,8 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     def on_startup(self):
         """
-        Callback to perform some work on resource initialization
+        Callback to perform some work on resource initialization.
         """
-        pass
 
     @abstractmethod
     def prepare_endpoint(self):
@@ -45,14 +45,13 @@ class Resource(MSONable, metaclass=ABCMeta):
         Internal method to prepare the endpoint by setting up default handlers
         for routes.
         """
-        pass
 
     def setup_redirect(self):
         @self.router.get("$", include_in_schema=False)
         def redirect_unslashed():
             """
             Redirects unforward slashed url to resource
-            url with the forward slash
+            url with the forward slash.
             """
 
             url = self.router.url_path_for("/")
@@ -61,7 +60,7 @@ class Resource(MSONable, metaclass=ABCMeta):
     def run(self):  # pragma: no cover
         """
         Runs the Endpoint cluster locally
-        This is intended for testing not production
+        This is intended for testing not production.
         """
         import uvicorn
 
@@ -71,7 +70,7 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     def as_dict(self) -> Dict:
         """
-        Special as_dict implemented to convert pydantic models into strings
+        Special as_dict implemented to convert pydantic models into strings.
         """
 
         d = super().as_dict()  # Ensures sub-classes serialize correctly
@@ -80,7 +79,6 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     @classmethod
     def from_dict(cls, d: Dict):
-
         if isinstance(d["model"], str):
             d["model"] = dynamic_import(d["model"])
         d = {k: MontyDecoder().process_decoded(v) for k, v in d.items()}
@@ -89,19 +87,19 @@ class Resource(MSONable, metaclass=ABCMeta):
 
 class HintScheme(MSONable, metaclass=ABCMeta):
     """
-    Base class for generic hint schemes generation
+    Base class for generic hint schemes generation.
     """
 
     @abstractmethod
     def generate_hints(self, query: STORE_PARAMS) -> STORE_PARAMS:
         """
-        This method takes in a MongoDB query and returns hints
+        This method takes in a MongoDB query and returns hints.
         """
 
 
 class HeaderProcessor(MSONable, metaclass=ABCMeta):
     """
-    Base class for generic header processing
+    Base class for generic header processing.
     """
 
     @abstractmethod
@@ -109,5 +107,5 @@ class HeaderProcessor(MSONable, metaclass=ABCMeta):
         """
         This method takes in a FastAPI Response object and processes a new header for it in-place.
         It can use data in the upstream request to generate the header.
-        (https://fastapi.tiangolo.com/advanced/response-headers/#use-a-response-parameter)
+        (https://fastapi.tiangolo.com/advanced/response-headers/#use-a-response-parameter).
         """

@@ -20,7 +20,7 @@ from maggma.stores import S3Store
 
 class SubmissionResource(Resource):
     """
-    Implements a REST Compatible Resource as POST and/or GET URL endpoints
+    Implements a REST Compatible Resource as POST and/or GET and/or PATCH URL endpoints
     for submitted data.
     """
 
@@ -30,6 +30,7 @@ class SubmissionResource(Resource):
         model: Type[BaseModel],
         post_query_operators: List[QueryOperator],
         get_query_operators: List[QueryOperator],
+        patch_query_operators: Optional[List[QueryOperator]] = None,
         tags: Optional[List[str]] = None,
         timeout: Optional[int] = None,
         include_in_schema: Optional[bool] = True,
@@ -40,6 +41,7 @@ class SubmissionResource(Resource):
         calculate_submission_id: Optional[bool] = False,
         get_sub_path: Optional[str] = "/",
         post_sub_path: Optional[str] = "/",
+        patch_sub_path: Optional[str] = "/",
     ):
         """
         Args:
@@ -50,6 +52,7 @@ class SubmissionResource(Resource):
                 before raising a timeout error
             post_query_operators: Operators for the query language for post data
             get_query_operators: Operators for the query language for get data
+            patch_query_operators: Operators for the query language for patch data
             include_in_schema: Whether to include the submission resource in the documented schema
             duplicate_fields_check: Fields in model used to check for duplicates for POST data
             enable_default_search: Enable default endpoint search behavior.
@@ -59,6 +62,7 @@ class SubmissionResource(Resource):
                 If False, the store key is used instead.
             get_sub_path: GET sub-URL path for the resource.
             post_sub_path: POST sub-URL path for the resource.
+            patch_sub_path: PATCH sub-URL path for the resource.
         """
 
         if isinstance(state_enum, Enum) and default_state not in [entry.value for entry in state_enum]:  # type: ignore
@@ -75,12 +79,14 @@ class SubmissionResource(Resource):
             if state_enum is not None
             else get_query_operators
         )
+        self.patch_query_operators = patch_query_operators
         self.include_in_schema = include_in_schema
         self.duplicate_fields_check = duplicate_fields_check
         self.enable_default_search = enable_default_search
         self.calculate_submission_id = calculate_submission_id
         self.get_sub_path = get_sub_path
         self.post_sub_path = post_sub_path
+        self.patch_sub_path = patch_sub_path
 
         new_fields = {}  # type: dict
         if self.calculate_submission_id:
@@ -110,7 +116,7 @@ class SubmissionResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         if self.enable_default_search:
@@ -119,6 +125,9 @@ class SubmissionResource(Resource):
         self.build_get_by_key()
 
         self.build_post_data()
+
+        if self.patch_query_operators:
+            self.build_patch_data()
 
     def build_get_by_key(self):
         model_name = self.model.__name__
@@ -166,9 +175,7 @@ class SubmissionResource(Resource):
             for operator in self.get_query_operators:  # type: ignore
                 item = operator.post_process(item, {})
 
-            response = {"data": item}
-
-            return response
+            return {"data": item}
 
         self.router.get(
             f"{self.get_sub_path}{{{key_name}}}/",
@@ -180,11 +187,9 @@ class SubmissionResource(Resource):
         )(get_by_key)
 
     def build_search_data(self):
-
         model_name = self.model.__name__
 
         def search(**queries: STORE_PARAMS):
-
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
 
@@ -196,7 +201,7 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [key for key in request.query_params if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
@@ -213,12 +218,12 @@ class SubmissionResource(Resource):
                     if isinstance(self.store, S3Store):
                         data = list(self.store.query(**query))  # type: ignore
                     else:
-
                         pipeline = generate_query_pipeline(query, self.store)
 
                         data = list(
                             self.store._collection.aggregate(
-                                pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                                pipeline,
+                                **{field: query[field] for field in query if field in ["hint"]},
                             )
                         )
             except (NetworkTimeout, PyMongoError) as e:
@@ -239,9 +244,7 @@ class SubmissionResource(Resource):
             for operator in self.get_query_operators:  # type: ignore
                 data = operator.post_process(data, query)
 
-            response = {"data": data, "meta": meta.dict()}
-
-            return response
+            return {"data": data, "meta": meta.dict()}
 
         self.router.get(
             self.get_sub_path,
@@ -257,7 +260,6 @@ class SubmissionResource(Resource):
         model_name = self.model.__name__
 
         def post_data(**queries: STORE_PARAMS):
-
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
 
@@ -269,7 +271,7 @@ class SubmissionResource(Resource):
                 for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [key for key in request.query_params if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=404,
@@ -307,12 +309,10 @@ class SubmissionResource(Resource):
                     detail="Problem when trying to post data.",
                 )
 
-            response = {
+            return {
                 "data": query["criteria"],
                 "meta": "Submission successful",
             }
-
-            return response
 
         self.router.post(
             self.post_sub_path,
@@ -323,3 +323,76 @@ class SubmissionResource(Resource):
             response_model_exclude_unset=True,
             include_in_schema=self.include_in_schema,
         )(attach_query_ops(post_data, self.post_query_operators))
+
+    def build_patch_data(self):
+        model_name = self.model.__name__
+
+        def patch_data(**queries: STORE_PARAMS):
+            request: Request = queries.pop("request")  # type: ignore
+            queries.pop("temp_response")  # type: ignore
+
+            query: STORE_PARAMS = merge_queries(list(queries.values()))
+
+            query_params = [
+                entry
+                for _, i in enumerate(self.patch_query_operators)  # type: ignore
+                for entry in signature(i.query).parameters
+            ]
+
+            overlap = [key for key in request.query_params if key not in query_params]
+            if any(overlap):
+                raise HTTPException(
+                    status_code=404,
+                    detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
+                )
+
+            self.store.connect(force_reset=True)
+
+            # Check for duplicate entry
+            if self.duplicate_fields_check:
+                duplicate = self.store.query_one(
+                    criteria={field: query["criteria"][field] for field in self.duplicate_fields_check}
+                )
+
+                if duplicate:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Submission already exists. Duplicate data found for fields: {}".format(
+                            ", ".join(self.duplicate_fields_check)
+                        ),
+                    )
+
+            if self.calculate_submission_id:
+                query["criteria"]["submission_id"] = str(uuid4())
+
+            if self.state_enum is not None:
+                query["criteria"]["state"] = [self.default_state]
+                query["criteria"]["updated"] = [datetime.utcnow()]
+
+            if query.get("update"):
+                try:
+                    self.store._collection.update_one(
+                        filter=query["criteria"],
+                        update={"$set": query["update"]},
+                        upsert=False,
+                    )
+                except Exception:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="Problem when trying to patch data.",
+                    )
+
+            return {
+                "data": query["update"],
+                "meta": "Submission successful",
+            }
+
+        self.router.patch(
+            self.patch_sub_path,
+            tags=self.tags,
+            summary=f"Patch {model_name} data",
+            response_model=None,
+            response_description=f"Patch {model_name} data",
+            response_model_exclude_unset=True,
+            include_in_schema=self.include_in_schema,
+        )(attach_query_ops(patch_data, self.patch_query_operators))

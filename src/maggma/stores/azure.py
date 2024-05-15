@@ -1,16 +1,15 @@
-# coding: utf-8
 """
-Advanced Stores for connecting to Microsoft Azure data
+Advanced Stores for connecting to Microsoft Azure data.
 """
+import os
 import threading
 import warnings
 import zlib
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
-from typing import Dict, Iterator, List, Optional, Tuple, Union
 from json import dumps
-import os
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -19,11 +18,11 @@ from maggma.core import Sort, Store
 from maggma.utils import grouper, to_isoformat_ceil_ms
 
 try:
-    import azure.storage.blob as azure_blob
-    from azure.storage.blob import BlobServiceClient, ContainerClient
-    from azure.identity import DefaultAzureCredential
-    from azure.core.exceptions import ResourceExistsError
     import azure
+    import azure.storage.blob as azure_blob
+    from azure.core.exceptions import ResourceExistsError
+    from azure.identity import DefaultAzureCredential
+    from azure.storage.blob import BlobServiceClient, ContainerClient
 except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
     ContainerClient = None
@@ -57,7 +56,7 @@ class AzureBlobStore(Store):
         **kwargs,
     ):
         """
-        Initializes an AzureBlob Store
+        Initializes an AzureBlob Store.
 
         Args:
             index: a store to use to index the Azure blob
@@ -85,25 +84,19 @@ class AzureBlobStore(Store):
             kwargs: keywords for the base Store.
         """
         if azure_blob is None:
-            raise RuntimeError(
-                "azure-storage-blob and azure-identity are required for AzureBlobStore"
-            )
+            raise RuntimeError("azure-storage-blob and azure-identity are required for AzureBlobStore")
 
         self.index = index
         self.container_name = container_name
         self.azure_client_info = azure_client_info
         self.compress = compress
         self.sub_dir = sub_dir.rstrip("/") + "/" if sub_dir else ""
-        self.service = None  # type: Optional[BlobServiceClient]
-        self.container = None  # type: Optional[ContainerClient]
+        self.service: Optional[BlobServiceClient] = None
+        self.container: Optional[ContainerClient] = None
         self.workers = workers
-        self.azure_resource_kwargs = (
-            azure_resource_kwargs if azure_resource_kwargs is not None else {}
-        )
+        self.azure_resource_kwargs = azure_resource_kwargs if azure_resource_kwargs is not None else {}
         self.unpack_data = unpack_data
-        self.searchable_fields = (
-            searchable_fields if searchable_fields is not None else []
-        )
+        self.searchable_fields = searchable_fields if searchable_fields is not None else []
         self.store_hash = store_hash
         if key_sanitize_dict is None:
             key_sanitize_dict = AZURE_KEY_SANITIZE
@@ -123,19 +116,19 @@ class AzureBlobStore(Store):
         kwargs["key"] = str(index.key)
 
         self._thread_local = threading.local()
-        super(AzureBlobStore, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @property
     def name(self) -> str:
         """
         Returns:
-            a string representing this data source
+            a string representing this data source.
         """
         return f"container://{self.container_name}"
 
     def connect(self, *args, **kwargs):  # lgtm[py/conflicting-attributes]
         """
-        Connect to the source data
+        Connect to the source data.
         """
 
         service_client = self._get_service_client()
@@ -151,16 +144,14 @@ class AzureBlobStore(Store):
                     except ResourceExistsError:
                         pass
                 else:
-                    raise RuntimeError(
-                        f"Container not present on Azure: {self.container_name}"
-                    )
+                    raise RuntimeError(f"Container not present on Azure: {self.container_name}")
 
             self.container = container
         self.index.connect(*args, **kwargs)
 
     def close(self):
         """
-        Closes any connections
+        Closes any connections.
         """
         self.index.close()
         self.service = None
@@ -170,7 +161,7 @@ class AzureBlobStore(Store):
     def _collection(self):
         """
         Returns:
-            a handle to the pymongo collection object
+            a handle to the pymongo collection object.
 
         Important:
             Not guaranteed to exist in the future
@@ -180,7 +171,7 @@ class AzureBlobStore(Store):
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -197,7 +188,7 @@ class AzureBlobStore(Store):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -218,25 +209,17 @@ class AzureBlobStore(Store):
         elif isinstance(properties, list):
             prop_keys = set(properties)
 
-        for doc in self.index.query(
-            criteria=criteria, sort=sort, limit=limit, skip=skip
-        ):
+        for doc in self.index.query(criteria=criteria, sort=sort, limit=limit, skip=skip):
             if properties is not None and prop_keys.issubset(set(doc.keys())):
                 yield {p: doc[p] for p in properties if p in doc}
             else:
                 try:
-                    data = self.container.download_blob(
-                        self.sub_dir + str(doc[self.key])
-                    ).readall()
+                    data = self.container.download_blob(self.sub_dir + str(doc[self.key])).readall()
                 except azure.core.exceptions.ResourceNotFoundError:
-                    self.logger.error(
-                        "Could not find Blob object {}".format(doc[self.key])
-                    )
+                    self.logger.error(f"Could not find Blob object {doc[self.key]}")
 
                 if self.unpack_data:
-                    data = self._unpack(
-                        data=data, compressed=doc.get("compression", "") == "zlib"
-                    )
+                    data = self._unpack(data=data, compressed=doc.get("compression", "") == "zlib")
 
                     if self.last_updated_field in doc:
                         data[self.last_updated_field] = doc[self.last_updated_field]  # type: ignore
@@ -254,14 +237,11 @@ class AzureBlobStore(Store):
         # MontyDecoder().process_decode only goes until it finds a from_dict
         # as such, we cannot just use msgpack.unpackb(data, object_hook=monty_object_hook, raw=False)
         # Should just return the unpacked object then let the user run process_decoded
-        unpacked_data = msgpack.unpackb(data, raw=False)
-        return unpacked_data
+        return msgpack.unpackb(data, raw=False)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -306,7 +286,7 @@ class AzureBlobStore(Store):
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded.
 
         Args:
             key: single key to index
@@ -324,7 +304,7 @@ class AzureBlobStore(Store):
         additional_metadata: Union[str, List[str], None] = None,
     ):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -374,19 +354,16 @@ class AzureBlobStore(Store):
             if isinstance(self.azure_client_info, str):
                 # assume it is the account_url and that the connection is passwordless
                 default_credential = DefaultAzureCredential()
-                return BlobServiceClient(
-                    self.azure_client_info, credential=default_credential
-                )
+                return BlobServiceClient(self.azure_client_info, credential=default_credential)
 
-            elif isinstance(self.azure_client_info, dict):
+            if isinstance(self.azure_client_info, dict):
                 connection_string = self.azure_client_info.get("connection_string")
                 if connection_string:
-                    return BlobServiceClient.from_connection_string(
-                        conn_str=connection_string
-                    )
+                    return BlobServiceClient.from_connection_string(conn_str=connection_string)
 
             msg = f"Could not instantiate BlobServiceClient from azure_client_info: {self.azure_client_info}"
             raise RuntimeError(msg)
+        return None
 
     def _get_container(self) -> Optional[ContainerClient]:
         """
@@ -403,7 +380,7 @@ class AzureBlobStore(Store):
 
     def write_doc_to_blob(self, doc: Dict, search_keys: List[str]):
         """
-        Write the data to an Azure blob and return the metadata to be inserted into the index db
+        Write the data to an Azure blob and return the metadata to be inserted into the index db.
 
         Args:
             doc: the document
@@ -434,13 +411,11 @@ class AzureBlobStore(Store):
 
         if self.last_updated_field in doc:
             # need this conversion for metadata insert
-            search_doc[self.last_updated_field] = str(
-                to_isoformat_ceil_ms(doc[self.last_updated_field])
-            )
+            search_doc[self.last_updated_field] = str(to_isoformat_ceil_ms(doc[self.last_updated_field]))
 
         # keep a record of original keys, in case these are important for the individual researcher
         # it is not expected that this information will be used except in disaster recovery
-        blob_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc.keys()}
+        blob_to_mongo_keys = {k: self._sanitize_key(k) for k in search_doc}
         blob_to_mongo_keys["blob_to_mongo_keys"] = "blob_to_mongo_keys"  # inception
         # encode dictionary since values have to be strings
         search_doc["blob_to_mongo_keys"] = dumps(blob_to_mongo_keys)
@@ -476,7 +451,7 @@ class AzureBlobStore(Store):
 
     def remove_docs(self, criteria: Dict, remove_blob_object: bool = False):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -501,9 +476,7 @@ class AzureBlobStore(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def newer_in(
-        self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False
-    ) -> List[str]:
+    def newer_in(self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
@@ -516,13 +489,9 @@ class AzureBlobStore(Store):
                         that to filter out new items in
         """
         if hasattr(target, "index"):
-            return self.index.newer_in(
-                target=target.index, criteria=criteria, exhaustive=exhaustive
-            )
-        else:
-            return self.index.newer_in(
-                target=target, criteria=criteria, exhaustive=exhaustive
-            )
+            return self.index.newer_in(target=target.index, criteria=criteria, exhaustive=exhaustive)
+
+        return self.index.newer_in(target=target, criteria=criteria, exhaustive=exhaustive)
 
     def __hash__(self):
         return hash((self.index.__hash__, self.container_name))
@@ -531,7 +500,7 @@ class AzureBlobStore(Store):
         """
         Rebuilds the index Store from the data in Azure
         Relies on the index document being stores as the metadata for the file
-        This can help recover lost databases
+        This can help recover lost databases.
         """
 
         objects = self.container.list_blobs(name_starts_with=self.sub_dir)
@@ -554,8 +523,9 @@ class AzureBlobStore(Store):
         """
         Read data from the index store and populate the metadata of the Azure Blob.
         Force all of the keys to be lower case to be Minio compatible
+
         Args:
-            index_query: query on the index store
+            index_query: query on the index store.
         """
         if self.container is None or self.service is None:
             raise RuntimeError("The store has not been connected")
@@ -565,22 +535,18 @@ class AzureBlobStore(Store):
             key_ = self.sub_dir + index_doc[self.key]
             blob = self.container.get_blob_client(key_)
             properties = blob.get_blob_properties()
-            new_meta = {
-                self._sanitize_key(k): v for k, v in properties.metadata.items()
-            }
+            new_meta = {self._sanitize_key(k): v for k, v in properties.metadata.items()}
             for k, v in index_doc.items():
                 new_meta[str(k).lower()] = v
             new_meta.pop("_id")
             if self.last_updated_field in new_meta:
-                new_meta[self.last_updated_field] = str(
-                    to_isoformat_ceil_ms(new_meta[self.last_updated_field])
-                )
+                new_meta[self.last_updated_field] = str(to_isoformat_ceil_ms(new_meta[self.last_updated_field]))
             blob.set_blob_metadata(new_meta)
 
     def __eq__(self, other: object) -> bool:
         """
         Check equality for AzureBlobStore
-        other: other AzureBlobStore to compare with
+        other: other AzureBlobStore to compare with.
         """
         if not isinstance(other, AzureBlobStore):
             return False

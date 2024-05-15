@@ -15,7 +15,7 @@ my_builder = MultiplyBuilder(source_store,target_store,multiplier=3)
 my_builder.run()
 ```
 
-A better way to run this builder would be to use the `mrun` command line tool. Since evrything in `maggma` is MSONable, we can use `monty` to dump the builders into a JSON file:
+A better way to run this builder would be to use the `mrun` command line tool. Since everything in `maggma` is MSONable, we can use `monty` to dump the builders into a JSON file:
 
 ``` python
 from monty.serialization import dumpfn
@@ -29,7 +29,7 @@ Then we can run the builder using `mrun`:
 mrun my_builder.json
 ```
 
-`mrun` has a number of usefull options:
+`mrun` has a number of useful options:
 
 ``` shell
 mrun --help
@@ -64,7 +64,7 @@ There are progress bars for each of the three steps, which lets you understand w
 
 `maggma` can distribute work across multiple computers. There are two steps to this:
 
-1. Run a `mrun` manager by providing it with a `--url` to listen for workers on and `--num-chunks`(`-N`) which tells `mrun` how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause `mrun` to call the builder's `prechunk` to get the distribution of work and run distributd work on all workers
+1. Run a `mrun` manager by providing it with a `--url` to listen for workers on and `--num-chunks`(`-N`) which tells `mrun` how many sub-pieces to break up the work into. You can can run fewer workers then chunks. This will cause `mrun` to call the builder's `prechunk` to get the distribution of work and run distributed work on all workers
 2. Run `mrun` workers b y providing it with a `--url` to listen for a manager and `--num-workers` (`-n`) to tell it how many processes to run in this worker.
 
 The `url` argument takes a fully qualified url including protocol. `tcp` is recommended:
@@ -112,7 +112,7 @@ mrun -n 32 -vv my_first_builder.json builder_2_and_3.py last_builder.ipynb
 
 ## Reporting Build State
 
-`mrun` has the ability to report the status of the build pipeline to a user-provided `Store`. To do this, you first have to save the `Store` as a JSON or YAML file. Then you can use the `-r` option to give this to `mrun`. It will then periodicially add documents to the `Store` for one of 3 different events:
+`mrun` has the ability to report the status of the build pipeline to a user-provided `Store`. To do this, you first have to save the `Store` as a JSON or YAML file. Then you can use the `-r` option to give this to `mrun`. It will then periodically add documents to the `Store` for one of 3 different events:
 
 * `BUILD_STARTED` - This event tells us that a new builder started, the names of the `sources` and `targets` as well as the `total` number of items the builder expects to process
 * `UPDATE` - This event tells us that a batch of items was processed and is going to `update_targets`. The number of items is stored in `items`.
@@ -132,8 +132,8 @@ A basic invocation of the memory profiler using the `mrun` command line tool wou
 mrun --memray on my_builder.json
 ```
 
-The profiler will generate two files after the builder finishes: 
-1. An output `.bin` file that is dumped by default into the `temp` directory, which is platform/OS dependent. For Linux/MacOS this will be `/tmp/` and for Windows the target directory will be `C:\TEMP\`.The output file will have a generic naming pattern as follows: `BUILDER_NAME_PASSED_TO_MRUN + BUILDER_START_DATETIME_ISO.bin`, e.g., `my_builder.json_2023-06-09T13:57:48.446361.bin`. 
+The profiler will generate two files after the builder finishes:
+1. An output `.bin` file that is dumped by default into the `temp` directory, which is platform/OS dependent. For Linux/MacOS this will be `/tmp/` and for Windows the target directory will be `C:\TEMP\`.The output file will have a generic naming pattern as follows: `BUILDER_NAME_PASSED_TO_MRUN + BUILDER_START_DATETIME_ISO.bin`, e.g., `my_builder.json_2023-06-09T13:57:48.446361.bin`.
 2. A `.html` flamegraph file that will be written to the same directory as the `.bin` dump file. The flamegraph will have a naming pattern similar to the following: `memray-flamegraph-my_builder.json_2023-06-09T13:57:48.446361.html`. The flamegraph can be viewed using any web browser.
 
 ***Note***: Different platforms/operating systems purge their system's `temp` directory at different intervals. It is recommended to move at least the `.bin` file to a more stable location. The `.bin` file can be used to recreate the flamegraph at anytime using the Memray CLI.

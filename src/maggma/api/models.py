@@ -2,7 +2,6 @@ from datetime import datetime
 from typing import Generic, List, Optional, TypeVar
 
 from pydantic import BaseModel, Field, validator
-from pydantic.generics import GenericModel
 
 from maggma import __version__
 
@@ -15,11 +14,12 @@ DataT = TypeVar("DataT")
 class Meta(BaseModel):
 
     """
-    Meta information for the MAPI Response
+    Meta information for the MAPI Response.
     """
 
     api_version: str = Field(
-        __version__, description="a string containing the version of the Materials API " "implementation, e.g. v0.9.5",
+        __version__,
+        description="a string containing the version of the Materials API implementation, e.g. v0.9.5",
     )
 
     time_stamp: datetime = Field(
@@ -35,7 +35,7 @@ class Meta(BaseModel):
 
 class Error(BaseModel):
     """
-    Base Error model for General API
+    Base Error model for General API.
     """
 
     code: int = Field(..., description="The error code")
@@ -46,9 +46,9 @@ class Error(BaseModel):
         pass
 
 
-class Response(GenericModel, Generic[DataT]):
+class Response(BaseModel, Generic[DataT]):
     """
-    A Generic API Response
+    A Generic API Response.
     """
 
     data: Optional[List[DataT]] = Field(None, description="List of returned data")
@@ -78,11 +78,12 @@ class Response(GenericModel, Generic[DataT]):
 class S3URLDoc(BaseModel):
 
     """
-    S3 pre-signed URL data returned by the S3 URL resource
+    S3 pre-signed URL data returned by the S3 URL resource.
     """
 
     url: str = Field(
-        ..., description="Pre-signed download URL",
+        ...,
+        description="Pre-signed download URL",
     )
 
     requested_datetime: datetime = Field(..., description="Datetime for when URL was requested")

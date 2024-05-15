@@ -11,7 +11,7 @@ Current working and tested `Store` include:
 - `MongoStore`: interfaces to a MongoDB Collection
 - `MemoryStore`: just a Store that exists temporarily in memory
 - `JSONStore`: builds a MemoryStore and then populates it with the contents of the given JSON files
-- `FileStore`: query and add metadata to files stored on disk as if they were in a databsae
+- `FileStore`: query and add metadata to files stored on disk as if they were in a database
 - `GridFSStore`: interfaces to GridFS collection in MongoDB
 - `S3Store`: provides an interface to an S3 Bucket either on AWS or self-hosted solutions ([additional documentation](advanced_stores.md))
 - `ConcatStore`: concatenates several Stores together so they look like one Store
@@ -22,6 +22,7 @@ Current working and tested `Store` include:
 - `SandboxStore: provides permission control to documents via a `_sbxn` sandbox key
 - `JointStore`: joins several MongoDB collections together, merging documents with the same `key`, so they look like one collection
 - `AzureBlobStore`: provides an interface to Azure Blobs for the storage of large amount of data
+- `MontyStore`: provides an interface to [montydb](https://github.com/davidlatwe/montydb) for in-memory or filesystem-based storage
 
 ## The `Store` interface
 

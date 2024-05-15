@@ -8,13 +8,12 @@ from fastapi.middleware.gzip import GZipMiddleware
 from monty.json import MSONable
 from starlette.responses import RedirectResponse
 
-from maggma import __version__
 from maggma.api.resource import Resource
 
 
 class API(MSONable):
     """
-    Basic API manager to tie together various resources
+    Basic API manager to tie together various resources.
     """
 
     def __init__(
@@ -24,8 +23,8 @@ class API(MSONable):
         version: str = "v0.0.0",
         debug: bool = False,
         heartbeat_meta: Optional[Dict] = None,
-        description: str = None,
-        tags_meta: List[Dict] = None,
+        description: Optional[str] = None,
+        tags_meta: Optional[List[Dict]] = None,
     ):
         """
         Args:
@@ -34,8 +33,8 @@ class API(MSONable):
             version: the version for this API
             debug: turns debug on in FastAPI
             heartbeat_meta: dictionary of additional metadata to include in the heartbeat response
-            description: decription of the API to be used in the generated docs
-            tags_meta: descriptions of tags to be used in the generated docs
+            description: description of the API to be used in the generated docs
+            tags_meta: descriptions of tags to be used in the generated docs.
         """
         self.title = title
         self.version = version
@@ -51,7 +50,7 @@ class API(MSONable):
 
     def on_startup(self):
         """
-        Basic startup that runs the resource startup functions
+        Basic startup that runs the resource startup functions.
         """
         for resource_list in self.resources.values():
             for resource in resource_list:
@@ -60,7 +59,7 @@ class API(MSONable):
     @property
     def app(self):
         """
-        App server for the cluster manager
+        App server for the cluster manager.
         """
         app = FastAPI(
             title=self.title,
@@ -92,8 +91,9 @@ class API(MSONable):
         app.add_middleware(GZipMiddleware, minimum_size=1000)
 
         @app.get("/heartbeat", include_in_schema=False)
+        @app.head("/heartbeat", include_in_schema=False)
         def heartbeat():
-            """API Heartbeat for Load Balancing"""
+            """API Heartbeat for Load Balancing."""
 
             return {
                 "status": "OK",
@@ -104,14 +104,14 @@ class API(MSONable):
 
         @app.get("/", include_in_schema=False)
         def redirect_docs():
-            """Redirects the root end point to the docs"""
+            """Redirects the root end point to the docs."""
             return RedirectResponse(url=app.docs_url, status_code=301)
 
         return app
 
     def run(self, ip: str = "127.0.0.1", port: int = 8000, log_level: str = "info"):
         """
-        Runs the Cluster Manager locally
+        Runs the Cluster Manager locally.
 
         Args:
             ip: Local IP to listen on

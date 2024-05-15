@@ -8,19 +8,19 @@ from maggma.api.utils import STORE_PARAMS
 
 class QueryOperator(MSONable, metaclass=ABCMeta):
     """
-    Base Query Operator class for defining powerfull query language
-    in the Materials API
+    Base Query Operator class for defining powerful query language
+    in the Materials API.
     """
 
     @abstractmethod
     def query(self) -> STORE_PARAMS:
         """
-        The query function that does the work for this query operator
+        The query function that does the work for this query operator.
         """
 
     def meta(self) -> Dict:
         """
-        Returns meta data to return with the Response
+        Returns meta data to return with the Response.
 
         Args:
             store: the Maggma Store that the resource uses
@@ -30,7 +30,7 @@ class QueryOperator(MSONable, metaclass=ABCMeta):
 
     def post_process(self, docs: List[Dict], query: Dict) -> List[Dict]:
         """
-        An optional post-processing function for the data
+        An optional post-processing function for the data.
 
         Args:
             docs: the document results to post-process

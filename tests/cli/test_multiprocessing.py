@@ -1,18 +1,12 @@
-import asyncio
 import time
 from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
-from maggma.cli.multiprocessing import (
-    AsyncUnorderedMap,
-    BackPressure,
-    grouper,
-    safe_dispatch,
-)
+from maggma.cli.multiprocessing import AsyncUnorderedMap, BackPressure, grouper, safe_dispatch
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_grouper():
     async def arange(count):
         for i in range(count):
@@ -35,9 +29,8 @@ async def arange(n):
         yield num
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_backpressure():
-
     iterable = range(10)
     backpressure = BackPressure(iterable, 2)
 
@@ -57,17 +50,16 @@ async def test_backpressure():
     await releaser.__anext__()
     await releaser.__anext__()
 
-    # Ensure stop itteration works
-    with pytest.raises(StopAsyncIteration):
-        for i in range(10):
+    # Ensure stop iteration works
+    with pytest.raises(StopAsyncIteration):  # noqa: PT012
+        for _i in range(10):
             await releaser.__anext__()
 
     assert not backpressure.back_pressure.locked()
 
 
-@pytest.mark.asyncio
+@pytest.mark.asyncio()
 async def test_async_map():
-
     executor = ThreadPoolExecutor(1)
     amap = AsyncUnorderedMap(wait_and_return, arange(3), executor)
     true_values = {x * x for x in range(3)}

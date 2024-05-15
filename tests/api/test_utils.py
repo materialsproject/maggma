@@ -1,14 +1,13 @@
 from datetime import datetime
 from enum import Enum
+from typing import Union
 
 import pytest
+from bson import ObjectId
 from monty.json import MSONable
 from pydantic import BaseModel, Field
 
 from maggma.api.utils import api_sanitize, serialization_helper
-from typing import Union
-
-from bson import ObjectId
 
 
 class SomeEnum(Enum):
@@ -30,7 +29,7 @@ class AnotherPet(MSONable):
 
 
 class AnotherOwner(BaseModel):
-    name: str = Field(..., description="Ower name")
+    name: str = Field(..., description="Owner name")
     weight_or_pet: Union[float, AnotherPet] = Field(..., title="Owners weight or Pet")
 
 
@@ -44,7 +43,6 @@ class Owner(BaseModel):
 
 
 def test_api_sanitize():
-
     # Ensure model validation fails
     with pytest.raises(ValueError):
         Owner()
@@ -90,7 +88,7 @@ def test_api_sanitize():
     api_sanitize(AnotherOwner, allow_dict_msonable=True)
     temp_pet_dict = AnotherPet(name="fido", age=3).as_dict()
 
-    assert isinstance(AnotherPet.validate_monty(temp_pet_dict), dict)
+    assert isinstance(AnotherPet.validate_monty_v2(temp_pet_dict, None), dict)
 
 
 def test_serialization_helper():
@@ -98,7 +96,7 @@ def test_serialization_helper():
     assert serialization_helper(oid) == "60b7d47bb671aa7b01a2adf6"
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 def test_serialization_helper_xfail():
     oid = "test"
     serialization_helper(oid)

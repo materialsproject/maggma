@@ -1,17 +1,18 @@
-# coding: utf-8
 """
-Utilities to help with maggma functions
+Utilities to help with maggma functions.
 """
 import itertools
 import logging
 import signal
 import uuid
 from datetime import datetime, timedelta
-from dateutil import parser
 from importlib import import_module
-from typing import Dict, Iterable, Optional, Union
+from typing import Dict, Iterable, Optional, Set, Union
 
 from bson.json_util import ObjectId
+from dateutil import parser
+from pydantic import BaseModel
+from pydantic._internal._utils import lenient_issubclass
 from pydash.objects import get, has, set_
 from pydash.objects import unset as _unset
 from pydash.utilities import to_path
@@ -23,7 +24,7 @@ from tqdm.auto import tqdm
 
 def primed(iterable: Iterable) -> Iterable:
     """Preprimes an iterator so the first value is calculated immediately
-    but not returned until the first iteration
+    but not returned until the first iteration.
     """
     itr = iter(iterable)
     try:
@@ -35,18 +36,18 @@ def primed(iterable: Iterable) -> Iterable:
 
 class TqdmLoggingHandler(logging.Handler):
     """
-    Helper to enable routing tqdm progress around logging
+    Helper to enable routing tqdm progress around logging.
     """
 
     def __init__(self, level=logging.NOTSET):
         """
-        Initialize the Tqdm handler
+        Initialize the Tqdm handler.
         """
         super().__init__(level)
 
     def emit(self, record):
         """
-        Emit a record via Tqdm screen
+        Emit a record via Tqdm screen.
         """
         try:
             msg = self.format(record)
@@ -59,7 +60,7 @@ class TqdmLoggingHandler(logging.Handler):
 
 
 def confirm_field_index(collection: Collection, field: str) -> bool:
-    """Confirm index on store for at least one of fields
+    """Confirm index on store for at least one of fields.
 
     One can't simply ensure an index exists via
     `store.collection.create_index` because a Builder must assume
@@ -80,8 +81,9 @@ def to_isoformat_ceil_ms(dt: Union[datetime, str]) -> str:
     """Helper to account for Mongo storing datetimes with only ms precision."""
     if isinstance(dt, datetime):
         return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
-    elif isinstance(dt, str):
+    if isinstance(dt, str):
         return dt
+    return None
 
 
 def to_dt(s: Union[datetime, str]) -> datetime:
@@ -89,8 +91,9 @@ def to_dt(s: Union[datetime, str]) -> datetime:
 
     if isinstance(s, str):
         return parser.parse(s)
-    elif isinstance(s, datetime):
+    if isinstance(s, datetime):
         return s
+    return None
 
 
 # This lu_key prioritizes not duplicating potentially expensive item
@@ -102,11 +105,11 @@ LU_KEY_ISOFORMAT = (to_dt, to_isoformat_ceil_ms)
 
 def recursive_update(d: Dict, u: Dict):
     """
-    Recursive updates d with values from u
+    Recursive updates d with values from u.
 
     Args:
         d (dict): dict to update
-        u (dict): updates to propogate
+        u (dict): updates to propagate
     """
 
     for k, v in u.items():
@@ -123,7 +126,7 @@ def grouper(iterable: Iterable, n: int) -> Iterable:
     """
     Collect data into fixed-length chunks or blocks.
     >>> list(grouper(3, 'ABCDEFG'))
-    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
+    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']].
 
     Updated from:
     https://stackoverflow.com/questions/31164731/python-chunking-csv-file-multiproccessing/31170795#31170795
@@ -134,7 +137,7 @@ def grouper(iterable: Iterable, n: int) -> Iterable:
 
 def lazy_substitute(d: Dict, aliases: Dict):
     """
-    Simple top level substitute that doesn't dive into mongo like strings
+    Simple top level substitute that doesn't dive into mongo like strings.
     """
     for alias, key in aliases.items():
         if key in d:
@@ -145,7 +148,7 @@ def lazy_substitute(d: Dict, aliases: Dict):
 def substitute(d: Dict, aliases: Dict):
     """
     Substitutes keys in dictionary
-    Accepts multilevel mongo like keys
+    Accepts multilevel mongo like keys.
     """
     for alias, key in aliases.items():
         if has(d, key):
@@ -155,7 +158,7 @@ def substitute(d: Dict, aliases: Dict):
 
 def unset(d: Dict, key: str):
     """
-    Unsets a key
+    Unsets a key.
     """
     _unset(d, key)
     path = to_path(key)
@@ -167,7 +170,7 @@ def unset(d: Dict, key: str):
 class Timeout:
     """
     Context manager that provides context.
-    implementation courtesy of https://stackoverflow.com/a/22348885/637562
+    implementation courtesy of https://stackoverflow.com/a/22348885/637562.
     """
 
     def __init__(self, seconds=14, error_message=""):
@@ -184,13 +187,13 @@ class Timeout:
 
     def handle_timeout(self, signum, frame):
         """
-        Raises an error on timeout
+        Raises an error on timeout.
         """
         raise TimeoutError(self.error_message)
 
     def __enter__(self):
         """
-        Enter context with timeout
+        Enter context with timeout.
         """
         if self.seconds:
             signal.signal(signal.SIGALRM, self.handle_timeout)
@@ -198,7 +201,7 @@ class Timeout:
 
     def __exit__(self, type, value, traceback):
         """
-        Exit context with timeout
+        Exit context with timeout.
         """
         if self.seconds:
             signal.alarm(0)
@@ -206,7 +209,7 @@ class Timeout:
 
 def dynamic_import(abs_module_path: str, class_name: Optional[str] = None):
     """
-    Dynamic class importer from: https://www.bnmetrics.com/blog/dynamic-import-in-python3
+    Dynamic class importer from: https://www.bnmetrics.com/blog/dynamic-import-in-python3.
     """
 
     if class_name is None:
@@ -214,19 +217,18 @@ def dynamic_import(abs_module_path: str, class_name: Optional[str] = None):
         abs_module_path = ".".join(abs_module_path.split(".")[:-1])
 
     module_object = import_module(abs_module_path)
-    target_class = getattr(module_object, class_name)
-    return target_class
+    return getattr(module_object, class_name)
 
 
 class ReportingHandler(logging.Handler):
     """
     Helper to route reporting messages
-    This uses the NOTSET level to send reporting messages
+    This uses the NOTSET level to send reporting messages.
     """
 
     def __init__(self, reporting_store):
         """
-        Initialize the Reporting Logger
+        Initialize the Reporting Logger.
         """
         super().__init__(logging.NOTSET)
         self.reporting_store = reporting_store
@@ -237,7 +239,7 @@ class ReportingHandler(logging.Handler):
 
     def emit(self, record):
         """
-        Emit a record via Tqdm screen
+        Emit a record via Tqdm screen.
         """
         if "maggma" in record.__dict__:
             maggma_record = record.maggma
@@ -261,3 +263,23 @@ class ReportingHandler(logging.Handler):
             maggma_record["_id"] = ObjectId()
             maggma_record["build_id"] = self.build_id
             self.reporting_store.update(maggma_record, key="_id")
+
+
+def get_flat_models_from_model(model: BaseModel, known_models: Optional[Set[BaseModel]] = None):
+    """Get all sub-models from a pydantic model.
+
+    Args:
+        model (BaseModel): Pydantic model
+        known_models (set, optional): Set with known models. Defaults to set().
+
+    Returns:
+        (set[BaseModel]): Set of pydantic models
+    """
+    known_models = known_models or set()
+    known_models.add(model)
+    for field_info in model.model_fields.values():
+        field_type = field_info.annotation
+        if lenient_issubclass(field_type, BaseModel):
+            get_flat_models_from_model(field_type, known_models)
+
+    return known_models

@@ -1,32 +1,43 @@
-import inspect
-import sys
-from typing import Any, Callable, Dict, List, Optional, Type
-from bson.objectid import ObjectId
 import base64
+import inspect
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    get_args,  # pragma: no cover
+)
 
+from bson.objectid import ObjectId
 from monty.json import MSONable
 from pydantic import BaseModel
-from pydantic.schema import get_flat_models_from_model
-from pydantic.utils import lenient_issubclass
-from typing_extensions import Literal
+from pydantic._internal._utils import lenient_issubclass
+from pydantic.fields import FieldInfo
+from typing_extensions import Literal, Union
 
-if sys.version_info >= (3, 8):
-    from typing import get_args
-else:
-    from typing_extensions import get_args  # pragma: no cover
-
+from maggma.utils import get_flat_models_from_model
 
 QUERY_PARAMS = ["criteria", "properties", "skip", "limit"]
 STORE_PARAMS = Dict[
     Literal[
-        "criteria", "properties", "sort", "skip", "limit", "request", "pipeline", "hint"
+        "criteria",
+        "properties",
+        "sort",
+        "skip",
+        "limit",
+        "request",
+        "pipeline",
+        "count_hint",
+        "agg_hint",
+        "update",
     ],
     Any,
 ]
 
 
 def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
-
     criteria: STORE_PARAMS = {}
     properties: List[str] = []
 
@@ -36,12 +47,7 @@ def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
         if "properties" in sub_query:
             properties.extend(sub_query["properties"])
 
-    remainder = {
-        k: v
-        for query in queries
-        for k, v in query.items()
-        if k not in ["criteria", "properties"]
-    }
+    remainder = {k: v for query in queries for k, v in query.items() if k not in ["criteria", "properties"]}
 
     return {
         "criteria": criteria,
@@ -52,12 +58,12 @@ def merge_queries(queries: List[STORE_PARAMS]) -> STORE_PARAMS:
 
 def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
     """
-    Attaches signature for defaults and annotations for parameters to function
+    Attaches signature for defaults and annotations for parameters to function.
 
     Args:
         function: callable function to attach the signature to
         defaults: dictionary of parameters -> default values
-        annotations: dictionary of type annoations for the parameters
+        annotations: dictionary of type annotations for the parameters
     """
 
     required_params = [
@@ -67,7 +73,7 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
             default=defaults.get(param, None),
             annotation=annotations.get(param, None),
         )
-        for param in annotations.keys()
+        for param in annotations
         if param not in defaults.keys()
     ]
 
@@ -78,35 +84,34 @@ def attach_signature(function: Callable, defaults: Dict, annotations: Dict):
             default=defaults.get(param, None),
             annotation=annotations.get(param, None),
         )
-        for param in defaults.keys()
+        for param in defaults
     ]
 
-    setattr(
-        function, "__signature__", inspect.Signature(required_params + optional_params)
-    )
+    function.__signature__ = inspect.Signature(required_params + optional_params)
 
 
 def api_sanitize(
-    pydantic_model: Type[BaseModel],
-    fields_to_leave: Optional[List[str]] = None,
+    pydantic_model: BaseModel,
+    fields_to_leave: Optional[Union[str, None]] = None,
     allow_dict_msonable=False,
 ):
-    """
-    Function to clean up pydantic models for the API by:
+    """Function to clean up pydantic models for the API by:
         1.) Making fields optional
-        2.) Allowing dictionaries in-place of the objects for MSONable quantities
+        2.) Allowing dictionaries in-place of the objects for MSONable quantities.
 
     WARNING: This works in place, so it mutates the model and all sub-models
 
     Args:
-        fields_to_leave: list of strings for model fields as "model__name__.field"
+        pydantic_model (BaseModel): Pydantic model to alter
+        fields_to_leave (list[str] | None): list of strings for model fields as "model__name__.field".
+            Defaults to None.
+        allow_dict_msonable (bool): Whether to allow dictionaries in place of MSONable quantities.
+            Defaults to False
     """
 
     models = [
-        model
-        for model in get_flat_models_from_model(pydantic_model)
-        if issubclass(model, BaseModel)
-    ]  # type: List[Type[BaseModel]]
+        model for model in get_flat_models_from_model(pydantic_model) if issubclass(model, BaseModel)
+    ]  # type: list[BaseModel]
 
     fields_to_leave = fields_to_leave or []
     fields_tuples = [f.split(".") for f in fields_to_leave]
@@ -114,37 +119,35 @@ def api_sanitize(
 
     for model in models:
         model_fields_to_leave = {f[1] for f in fields_tuples if model.__name__ == f[0]}
-        for name, field in model.__fields__.items():
-            field_type = field.type_
-
-            if name not in model_fields_to_leave:
-                field.required = False
-                field.default = None
-                field.default_factory = None
-                field.allow_none = True
-                field.field_info.default = None
-                field.field_info.default_factory = None
+        for name in model.model_fields:
+            field = model.model_fields[name]
+            field_type = field.annotation
 
             if field_type is not None and allow_dict_msonable:
                 if lenient_issubclass(field_type, MSONable):
-                    field.type_ = allow_msonable_dict(field_type)
+                    field_type = allow_msonable_dict(field_type)
                 else:
                     for sub_type in get_args(field_type):
                         if lenient_issubclass(sub_type, MSONable):
                             allow_msonable_dict(sub_type)
-                field.populate_validators()
+
+            if name not in model_fields_to_leave:
+                new_field = FieldInfo.from_annotated_attribute(Optional[field_type], None)
+                model.model_fields[name] = new_field
+
+        model.model_rebuild(force=True)
 
     return pydantic_model
 
 
 def allow_msonable_dict(monty_cls: Type[MSONable]):
     """
-    Patch Monty to allow for dict values for MSONable
+    Patch Monty to allow for dict values for MSONable.
     """
 
-    def validate_monty(cls, v):
+    def validate_monty(cls, v, _):
         """
-        Stub validator for MSONable as a dictionary only
+        Stub validator for MSONable as a dictionary only.
         """
         if isinstance(v, cls):
             return v
@@ -158,15 +161,13 @@ def allow_msonable_dict(monty_cls: Type[MSONable]):
                 errors.append("@class")
 
             if len(errors) > 0:
-                raise ValueError(
-                    "Missing Monty seriailzation fields in dictionary: {errors}"
-                )
+                raise ValueError("Missing Monty serialization fields in dictionary: {errors}")
 
             return v
         else:
             raise ValueError(f"Must provide {cls.__name__} or MSONable dictionary")
 
-    setattr(monty_cls, "validate_monty", classmethod(validate_monty))
+    monty_cls.validate_monty_v2 = classmethod(validate_monty)
 
     return monty_cls
 

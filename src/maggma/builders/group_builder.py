@@ -1,6 +1,5 @@
-# coding: utf-8
 """
-Many-to-Many GroupBuilder
+Many-to-Many GroupBuilder.
 """
 import traceback
 from abc import ABCMeta, abstractmethod
@@ -51,7 +50,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             store_process_time: If True, add "_process_time" key to
                 document for profiling purposes
             retry_failed: If True, will retry building documents that
-                previously failed
+                previously failed.
         """
         self.source = source
         self.target = target
@@ -69,8 +68,8 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
     def ensure_indexes(self):
         """
-        Ensures indicies on critical fields for GroupBuilder
-        which include the plural version of the target's key field
+        Ensures indices on critical fields for GroupBuilder
+        which include the plural version of the target's key field.
         """
         index_checks = [
             self.source.ensure_index(self.source.key),
@@ -92,8 +91,8 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
     def prechunk(self, number_splits: int) -> Iterator[Dict]:
         """
-        Generic prechunk for group builder to perform domain-decompostion
-        by the grouping keys
+        Generic prechunk for group builder to perform domain-decomposition
+        by the grouping keys.
         """
         self.ensure_indexes()
 
@@ -105,34 +104,26 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             yield {"query": dict(zip(self.grouping_keys, split))}
 
     def get_items(self):
-
-        self.logger.info("Starting {} Builder".format(self.__class__.__name__))
+        self.logger.info(f"Starting {self.__class__.__name__} Builder")
 
         self.ensure_indexes()
         keys = self.get_ids_to_process()
         groups = self.get_groups_from_keys(keys)
 
         if self.projection:
-            projection = list(
-                set(self.projection + [self.source.key, self.source.last_updated_field])
-            )
+            projection = list({*self.projection, self.source.key, self.source.last_updated_field})
         else:
             projection = None
 
         self.total = len(groups)
         for group in groups:
-            docs = list(
-                self.source.query(
-                    criteria=dict(zip(self.grouping_keys, group)), properties=projection
-                )
-            )
+            docs = list(self.source.query(criteria=dict(zip(self.grouping_keys, group)), properties=projection))
             yield docs
 
     def process_item(self, item: List[Dict]) -> Dict[Tuple, Dict]:  # type: ignore
+        keys = [d[self.source.key] for d in item]
 
-        keys = list(d[self.source.key] for d in item)
-
-        self.logger.debug("Processing: {}".format(keys))
+        self.logger.debug(f"Processing: {keys}")
 
         time_start = time()
 
@@ -146,9 +137,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
         time_end = time()
 
-        last_updated = [
-            self.source._lu_func[0](d[self.source.last_updated_field]) for d in item
-        ]
+        last_updated = [self.source._lu_func[0](d[self.source.last_updated_field]) for d in item]
 
         update_doc = {
             self.target.key: keys[0],
@@ -165,7 +154,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
     def update_targets(self, items: List[Dict]):
         """
-        Generic update targets for Group Builder
+        Generic update targets for Group Builder.
         """
         target = self.target
         for item in items:
@@ -178,7 +167,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
     @abstractmethod
     def unary_function(self, items: List[Dict]) -> Dict:
         """
-        Processing function for GroupBuilder
+        Processing function for GroupBuilder.
 
         Arguments:
             items: list of of documents with matching grouping keys
@@ -191,16 +180,14 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
     def get_ids_to_process(self) -> Iterable:
         """
-        Gets the IDs that need to be processed
+        Gets the IDs that need to be processed.
         """
 
         query = self.query or {}
 
-        distinct_from_target = list(
-            self.target.distinct(self._target_keys_field, criteria=query)
-        )
+        distinct_from_target = list(self.target.distinct(self._target_keys_field, criteria=query))
         processed_ids = []
-        # Not always gauranteed that MongoDB will unpack the list so we
+        # Not always guaranteed that MongoDB will unpack the list so we
         # have to make sure we do that
         for d in distinct_from_target:
             if isinstance(d, list):
@@ -212,9 +199,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
         self.logger.debug(f"Found {len(all_ids)} total docs in source")
 
         if self.retry_failed:
-            failed_keys = self.target.distinct(
-                self._target_keys_field, criteria={"state": "failed", **query}
-            )
+            failed_keys = self.target.distinct(self._target_keys_field, criteria={"state": "failed", **query})
             unprocessed_ids = all_ids - (set(processed_ids) - set(failed_keys))
             self.logger.debug(f"Found {len(failed_keys)} failed IDs in target")
         else:
@@ -222,16 +207,14 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
         self.logger.info(f"Found {len(unprocessed_ids)} IDs to process")
 
-        new_ids = set(
-            self.source.newer_in(self.target, criteria=query, exhaustive=False)
-        )
+        new_ids = set(self.source.newer_in(self.target, criteria=query, exhaustive=False))
 
         self.logger.info(f"Found {len(new_ids)} updated IDs to process")
         return list(new_ids | unprocessed_ids)
 
     def get_groups_from_keys(self, keys) -> Set[Tuple]:
         """
-        Get the groups by grouping_keys for these documents
+        Get the groups by grouping_keys for these documents.
         """
 
         grouping_keys = self.grouping_keys
@@ -246,9 +229,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
                 )
             )
 
-            sub_groups = set(
-                tuple(get(d, prop, None) for prop in grouping_keys) for d in docs
-            )
+            sub_groups = {tuple(get(d, prop, None) for prop in grouping_keys) for d in docs}
             self.logger.debug(f"Found {len(sub_groups)} subgroups to process")
 
             groups |= sub_groups

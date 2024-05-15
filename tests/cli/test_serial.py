@@ -11,7 +11,7 @@ class TestBuilder(Builder):
         self.total = total
 
     def get_items(self):
-        for i in range(self.total):
+        for _i in range(self.total):
             self.get_called += 1
             yield self.get_called
 
@@ -24,7 +24,6 @@ class TestBuilder(Builder):
 
 
 def test_serial():
-
     builder = TestBuilder()
 
     serial(builder)

@@ -1,3 +1,4 @@
+import inspect
 from datetime import datetime
 from random import randint
 from urllib.parse import urlencode
@@ -8,17 +9,10 @@ from pydantic import BaseModel, Field
 from requests import Response
 from starlette.testclient import TestClient
 
-from maggma.api.query_operator import (
-    NumericQuery,
-    SparseFieldsQuery,
-    StringQueryOperator,
-)
+from maggma.api.query_operator import NumericQuery, SparseFieldsQuery, StringQueryOperator
 from maggma.api.resource import ReadOnlyResource
-from maggma.stores import MemoryStore, AliasingStore
-
-import inspect
-
 from maggma.api.resource.core import HintScheme
+from maggma.stores import AliasingStore, MemoryStore
 
 
 class Owner(BaseModel):
@@ -38,7 +32,7 @@ owners = (
 total_owners = len(owners)
 
 
-@pytest.fixture
+@pytest.fixture()
 def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -47,13 +41,13 @@ def owner_store():
 
 
 def test_init(owner_store):
-    resource = ReadOnlyResource(store=owner_store, model=Owner)
+    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=True)
     assert len(resource.router.routes) == 3
 
     resource = ReadOnlyResource(store=owner_store, model=Owner, enable_get_by_key=False)
     assert len(resource.router.routes) == 2
 
-    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False)
+    resource = ReadOnlyResource(store=owner_store, model=Owner, enable_default_search=False, enable_get_by_key=True)
     assert len(resource.router.routes) == 2
 
 
@@ -69,7 +63,7 @@ def test_msonable(owner_store):
 
 
 def test_get_by_key(owner_store):
-    endpoint = ReadOnlyResource(owner_store, Owner, disable_validation=True)
+    endpoint = ReadOnlyResource(owner_store, Owner, disable_validation=True, enable_get_by_key=True)
     app = FastAPI()
     app.include_router(endpoint.router)
 
@@ -82,7 +76,7 @@ def test_get_by_key(owner_store):
 
 
 def test_key_fields(owner_store):
-    endpoint = ReadOnlyResource(owner_store, Owner, key_fields=["name"])
+    endpoint = ReadOnlyResource(owner_store, Owner, key_fields=["name"], enable_get_by_key=True)
     app = FastAPI()
     app.include_router(endpoint.router)
 
@@ -92,7 +86,7 @@ def test_key_fields(owner_store):
     assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 def test_problem_query_params(owner_store):
     endpoint = ReadOnlyResource(owner_store, Owner)
     app = FastAPI()
@@ -103,7 +97,7 @@ def test_problem_query_params(owner_store):
     client.get("/?param=test").status_code
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 def test_problem_hint_scheme(owner_store):
     class TestHintScheme(HintScheme):
         def generate_hints(query):
@@ -116,7 +110,8 @@ def test_problem_hint_scheme(owner_store):
 
 def search_helper(payload, base: str = "/?", debug=True) -> Response:
     """
-    Helper function to directly query search endpoints
+    Helper function to directly query search endpoints.
+
     Args:
         store: store f
         base: base of the query, default to /query?
@@ -125,7 +120,7 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
         debug: True = print out the url, false don't print anything
 
     Returns:
-        request.Response object that contains the response of the correspoding payload
+        request.Response object that contains the response of the corresponding payload
     """
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -157,7 +152,6 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
 
 
 def test_numeric_query_operator():
-
     # Checking int
     payload = {"age": 20, "_all_fields": True}
     res, data = search_helper(payload=payload, base="/?", debug=True)
@@ -182,7 +176,6 @@ def test_numeric_query_operator():
 
 
 def test_string_query_operator():
-
     payload = {"name": "PersonAge9", "_all_fields": True}
     res, data = search_helper(payload=payload, base="/?", debug=True)
     assert res.status_code == 200

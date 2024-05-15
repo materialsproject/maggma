@@ -17,7 +17,7 @@ from maggma.stores import S3Store
 
 class PostOnlyResource(Resource):
     """
-    Implements a REST Compatible Resource as a POST URL endpoint
+    Implements a REST Compatible Resource as a POST URL endpoint.
     """
 
     def __init__(
@@ -73,13 +73,12 @@ class PostOnlyResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         self.build_dynamic_model_search()
 
     def build_dynamic_model_search(self):
-
         model_name = self.model.__name__
 
         def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
@@ -90,7 +89,7 @@ class PostOnlyResource(Resource):
                 entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
             ]
 
-            overlap = [key for key in request.query_params.keys() if key not in query_params]
+            overlap = [key for key in request.query_params if key not in query_params]
             if any(overlap):
                 raise HTTPException(
                     status_code=400,
@@ -111,12 +110,12 @@ class PostOnlyResource(Resource):
                     if isinstance(self.store, S3Store):
                         data = list(self.store.query(**query))  # type: ignore
                     else:
-
                         pipeline = generate_query_pipeline(query, self.store)
 
                         data = list(
                             self.store._collection.aggregate(
-                                pipeline, **{field: query[field] for field in query if field in ["hint"]}
+                                pipeline,
+                                **{field: query[field] for field in query if field in ["hint"]},
                             )
                         )
             except (NetworkTimeout, PyMongoError) as e:
@@ -129,7 +128,8 @@ class PostOnlyResource(Resource):
                     raise HTTPException(
                         status_code=500,
                         detail="Server timed out trying to obtain data. Try again with a smaller request, "
-                        "or remove sorting fields and sort data locally.",)
+                        "or remove sorting fields and sort data locally.",
+                    )
 
             operator_meta = {}
 
@@ -138,8 +138,7 @@ class PostOnlyResource(Resource):
                 operator_meta.update(operator.meta())
 
             meta = Meta(total_doc=count)
-            response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
-            return response
+            return {"data": data, "meta": {**meta.dict(), **operator_meta}}
 
         self.router.post(
             self.sub_path,

@@ -20,7 +20,7 @@ To create a `Filestore`, simply pass the path to the top-level directory that co
 ```
 
 On `connect()`, `FileStore` iterates through all files in the base directory and
-all subdirectories. For each file, it creates dict-like record based on the file's metadata such as name, size, last modification date, etc. These records are kept in 
+all subdirectories. For each file, it creates dict-like record based on the file's metadata such as name, size, last modification date, etc. These records are kept in
 memory using an internal `MemoryStore`. An example record is shown below.
 
 ```python
@@ -80,7 +80,7 @@ and for associating custom metadata (See ["Adding Metadata"](#adding-metadata) b
 ## Connecting and querying
 
 As with any `Store`, you have to `connect()` before you can query any data from a `FileStore`. After that, you can use `query_one()` to examine a single document or
-`query()` to return an interator of matching documents. For example, let's print the
+`query()` to return an iterator of matching documents. For example, let's print the
 parent directory of each of the files named "input.in" in our example `FileStore`:
 
 ```python
@@ -119,7 +119,7 @@ for d in docs:
 fs.update(docs)
 ```
 
-The above steps will result in the following contents being added to the .json file. This metadata will be automatically read back in next time you connect to the Store. 
+The above steps will result in the following contents being added to the .json file. This metadata will be automatically read back in next time you connect to the Store.
 
 ```json
 [{"path":".../file_store_test/calculation2/input.in",
@@ -142,7 +142,7 @@ fs.add_metadata({"name":"input.in"}, {"tags":["preliminary"]})
 
 ### Automatic metadata
 
-You can even define a function to automatically crate metadata from file or directory names. For example, if you prefix all your files with datestamps (e.g., '2022-05-07_experiment.csv'), you can write a simple string parsing function to
+You can even define a function to automatically create metadata from file or directory names. For example, if you prefix all your files with datestamps (e.g., '2022-05-07_experiment.csv'), you can write a simple string parsing function to
 extract information from any key in a `FileStore` record and pass the function as an argument to `add_metadata`.
 
 For example, to extract the date from files named like '2022-05-07_experiment.csv'
@@ -167,7 +167,7 @@ Note that when using any of the above methods, you cannot modify any keys that a
 
 ### Orphaned Metadata
 
-In the course of working with `FileStore` you may encounter a situation where there are metadata records stored in the JSON file that no longer match files on disk. This can happen if, for example, you init a `FileStore` and later delete a file, or if you init the store with the default arguments but later restrict the file selection with `max_depth` or `file_filters`. 
+In the course of working with `FileStore` you may encounter a situation where there are metadata records stored in the JSON file that no longer match files on disk. This can happen if, for example, you init a `FileStore` and later delete a file, or if you init the store with the default arguments but later restrict the file selection with `max_depth` or `file_filters`.
 
 These orphaned metadata records will appear in the `FileStore` with the field `{"orphan": True}`. The goal with this behavior is to preserve all metadata the user may have added and prevent data loss.
 
@@ -195,7 +195,7 @@ maggma.core.store.StoreError: (StoreError(...), 'Warning! This command is about 
 Now that you can access your files on disk via a `FileStore`, it's time to write a `Builder` to read and process the data (see [Writing a Builder](simple_builder.md)).
 Keep in mind that `get_items` will return documents like the one shown in (#creating-the-filestore). You can then use `process_items` to
 
-- Create strucured data from the `contents`
+- Create structured data from the `contents`
 - Open the file for reading using a custom piece of code
 - etc.
 

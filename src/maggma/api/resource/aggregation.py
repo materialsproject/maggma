@@ -1,6 +1,7 @@
 from typing import Any, Dict, List, Optional, Type
 
-from fastapi import HTTPException, Response, Request
+import orjson
+from fastapi import HTTPException, Request, Response
 from pydantic import BaseModel
 from pymongo import timeout as query_timeout
 from pymongo.errors import NetworkTimeout, PyMongoError
@@ -8,15 +9,15 @@ from pymongo.errors import NetworkTimeout, PyMongoError
 from maggma.api.models import Meta
 from maggma.api.models import Response as ResponseModel
 from maggma.api.query_operator import QueryOperator
-from maggma.api.resource import Resource, HeaderProcessor
+from maggma.api.resource import HeaderProcessor, Resource
 from maggma.api.resource.utils import attach_query_ops
-from maggma.api.utils import STORE_PARAMS, merge_queries
+from maggma.api.utils import STORE_PARAMS, merge_queries, serialization_helper
 from maggma.core import Store
 
 
 class AggregationResource(Resource):
     """
-    Implements a REST Compatible Resource as a GET URL endpoint
+    Implements a REST Compatible Resource as a GET URL endpoint.
     """
 
     def __init__(
@@ -57,18 +58,17 @@ class AggregationResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         self.build_dynamic_model_search()
 
     def build_dynamic_model_search(self):
-
         model_name = self.model.__name__
 
         def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
             request: Request = queries.pop("request")  # type: ignore
-            temp_response: Response = queries.pop("temp_response")  # type: ignore
+            queries.pop("temp_response")  # type: ignore
 
             query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 
@@ -95,9 +95,10 @@ class AggregationResource(Resource):
 
             meta = Meta(total_doc=count)
             response = {"data": data, "meta": {**meta.dict(), **operator_meta}}
+            response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
-                self.header_processor.process_header(temp_response, request)
+                self.header_processor.process_header(response, request)
 
             return response
 

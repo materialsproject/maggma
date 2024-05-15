@@ -16,6 +16,8 @@ nav:
     - Advanced Builders: getting_started/advanced_builder.md
     - Working with MapBuilder: getting_started/map_builder.md
     - Working with GroupBuilder: getting_started/group_builder.md
+    - Setting up MongoDB: getting_started/mongodb.md
+    - Using SSHTunnel: getting_started/using_ssh_tunnel.md
   - Reference:
       Core:
         Store: reference/core_store.md
@@ -45,4 +47,7 @@ markdown_extensions:
 plugins:
   - search
   - minify
-  - mkdocstrings
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [src]

@@ -1,6 +1,6 @@
 # Group Builder
 
-Another advanced template in `maggma` is the `GroupBuilder`, which groups documents together before applying your function on the group of items. Just like `MapBuilder`, `GroupBuilder` also handles incremental building, keeping track of errors, getting only the data you need, and managing timeouts. GroupBuilder won't delete orphaned documents since that reverse relationshop isn't valid.
+Another advanced template in `maggma` is the `GroupBuilder`, which groups documents together before applying your function on the group of items. Just like `MapBuilder`, `GroupBuilder` also handles incremental building, keeping track of errors, getting only the data you need, and managing timeouts. GroupBuilder won't delete orphaned documents since that reverse relationship isn't valid.
 
 Let's create a simple `ResupplyBuilder`, which will look at the inventory of items and determine what items need resupply. The source document will look something like this:
 
@@ -56,7 +56,7 @@ class ResupplyBuilder(GroupBuilder):
         super().__init__(source=inventory, target=resupply, grouping_properties=["type"], **kwargs)
 ```
 
-Note that unlike the previous `MapBuilder` example, we didn't call the source and target stores as such. Providing more usefull names is a good idea in writing builders to make it clearer what the underlying data should look like.
+Note that unlike the previous `MapBuilder` example, we didn't call the source and target stores as such. Providing more useful names is a good idea in writing builders to make it clearer what the underlying data should look like.
 
 `GroupBuilder` inherits from `MapBuilder` so it has the same configurational parameters.
 
@@ -65,7 +65,7 @@ Note that unlike the previous `MapBuilder` example, we didn't call the source an
 - store_process_timeout: adds the process time into the target document for profiling
 - retry_failed: retries running the process function on previously failed documents
 
-One parameter that doens't work in `GroupBuilder` is `delete_orphans`, since the Many-to-One relationshop makes determining orphaned documents very difficult.
+One parameter that doesn't work in `GroupBuilder` is `delete_orphans`, since the Many-to-One relationship makes determining orphaned documents very difficult.
 
 Finally let's get to the hard part which is running our function. We do this by defining `unary_function`
 
@@ -81,4 +81,4 @@ Finally let's get to the hard part which is running our function. We do this by 
         return {"resupply": resupply}
 ```
 
-Just as in `MapBuilder`, we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source `key` and convert it to the target `key`. Same goes for the `last_updated_field`. `GroupBuilder` takes care of this, while also recording errors, processing time, and the Builder version.`GroupBuilder` also keeps a plural version of the `source.key` field, so in this example, all the `name` values wil be put together and kept in `names`
+Just as in `MapBuilder`, we're not returning all the extra information typically kept in the originally item. Normally, we would have to write code that copies over the source `key` and convert it to the target `key`. Same goes for the `last_updated_field`. `GroupBuilder` takes care of this, while also recording errors, processing time, and the Builder version.`GroupBuilder` also keeps a plural version of the `source.key` field, so in this example, all the `name` values will be put together and kept in `names`

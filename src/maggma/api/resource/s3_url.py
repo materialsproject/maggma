@@ -1,17 +1,15 @@
 from datetime import datetime, timedelta
 from typing import List, Optional
-from botocore.exceptions import ClientError
-
-from fastapi import HTTPException, Path, Request
-from fastapi import Response
-
-from maggma.api.models import S3URLDoc
-from maggma.api.models import Response as ResponseModel
-from maggma.api.resource import Resource, HeaderProcessor
-from maggma.api.utils import serialization_helper
-from maggma.stores.aws import S3Store
 
 import orjson
+from botocore.exceptions import ClientError
+from fastapi import HTTPException, Path, Request, Response
+
+from maggma.api.models import Response as ResponseModel
+from maggma.api.models import S3URLDoc
+from maggma.api.resource import HeaderProcessor, Resource
+from maggma.api.utils import serialization_helper
+from maggma.stores.aws import S3Store
 
 
 class S3URLResource(Resource):
@@ -56,7 +54,7 @@ class S3URLResource(Resource):
     def prepare_endpoint(self):
         """
         Internal method to prepare the endpoint by setting up default handlers
-        for routes
+        for routes.
         """
 
         self.build_get_by_key()
@@ -69,11 +67,13 @@ class S3URLResource(Resource):
             request: Request,
             temp_response: Response,
             key: str = Path(
-                ..., alias=key_name, title=f"The {key_name} of the {model_name} to get",
+                ...,
+                alias=key_name,
+                title=f"The {key_name} of the {model_name} to get",
             ),
         ):
             f"""
-            Get's a document by the primary key in the store
+            Gets a document by the primary key in the store
 
             Args:
                 {key_name}: the id of a single {model_name}
@@ -92,9 +92,7 @@ class S3URLResource(Resource):
             except ClientError:
                 raise HTTPException(
                     status_code=404,
-                    detail="No object found for {} = {}".format(
-                        self.store.key, key.split("/")[-1]
-                    ),
+                    detail="No object found for {} = {}".format(self.store.key, key.split("/")[-1]),
                 )
 
             # Get URL
@@ -107,9 +105,7 @@ class S3URLResource(Resource):
             except Exception:
                 raise HTTPException(
                     status_code=404,
-                    detail="Problem obtaining URL for {} = {}".format(
-                        self.store.key, key.split("/")[-1]
-                    ),
+                    detail="Problem obtaining URL for {} = {}".format(self.store.key, key.split("/")[-1]),
                 )
 
             requested_datetime = datetime.utcnow()
@@ -124,12 +120,13 @@ class S3URLResource(Resource):
             response = {"data": [item.dict()]}  # type: ignore
 
             if self.disable_validation:
-                response = Response(  # type: ignore
-                    orjson.dumps(response, default=serialization_helper)
-                )
+                response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
 
             if self.header_processor is not None:
-                self.header_processor.process_header(temp_response, request)
+                if self.disable_validation:
+                    self.header_processor.process_header(response, request)
+                else:
+                    self.header_processor.process_header(temp_response, request)
 
             return response
 

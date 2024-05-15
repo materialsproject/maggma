@@ -1,7 +1,7 @@
-""" Special stores that combine underlying Stores together """
+""" Special stores that combine underlying Stores together. """
 from datetime import datetime
 from itertools import groupby
-from typing import Any, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Dict, Iterator, List, Optional, Tuple, Union
 
 from pydash import set_
 from pymongo import MongoClient
@@ -40,7 +40,7 @@ class JointStore(Store):
             password: Password to connect with
             main: name for the main collection
                 if not specified this defaults to the first
-                in collection_names list
+                in collection_names list.
         """
         self.database = database
         self.collection_names = collection_names
@@ -54,58 +54,57 @@ class JointStore(Store):
         self.mongoclient_kwargs = mongoclient_kwargs or {}
         self.kwargs = kwargs
 
-        super(JointStore, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         compound_name = ",".join(self.collection_names)
         return f"Compound[{self.host}/{self.database}][{compound_name}]"
 
     def connect(self, force_reset: bool = False):
         """
-        Connects the underlying Mongo database and
-        all collection connections
+        Connects the underlying Mongo database and all collection connections.
 
         Args:
-            force_reset: whether to forcibly reset the connection
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
-        conn: MongoClient = (
-            MongoClient(
-                host=self.host,
-                port=self.port,
-                username=self.username,
-                password=self.password,
-                **self.mongoclient_kwargs,
+        if not self._coll or force_reset:
+            conn: MongoClient = (
+                MongoClient(
+                    host=self.host,
+                    port=self.port,
+                    username=self.username,
+                    password=self.password,
+                    **self.mongoclient_kwargs,
+                )
+                if self.username != ""
+                else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
             )
-            if self.username != ""
-            else MongoClient(self.host, self.port, **self.mongoclient_kwargs)
-        )
-        db = conn[self.database]
-        self._coll = db[self.main]
-        self._has_merge_objects = (
-            self._collection.database.client.server_info()["version"] > "3.6"
-        )
+            db = conn[self.database]
+            self._coll = db[self.main]
+            self._has_merge_objects = self._collection.database.client.server_info()["version"] > "3.6"
 
     def close(self):
         """
-        Closes underlying database connections
+        Closes underlying database connections.
         """
         self._collection.database.client.close()
 
     @property
     def _collection(self):
-        """Property referring to the root pymongo collection"""
+        """Property referring to the root pymongo collection."""
         if self._coll is None:
-            raise StoreError("Must connect Mongo-like store before attemping to use it")
+            raise StoreError("Must connect Mongo-like store before attempting to use it")
         return self._coll
 
     @property
     def nonmain_names(self) -> List:
         """
-        alll non-main collection names
+        alll non-main collection names.
         """
         return list(set(self.collection_names) - {self.main})
 
@@ -113,7 +112,7 @@ class JointStore(Store):
     def last_updated(self) -> datetime:
         """
         Special last_updated for this JointStore
-        that checks all underlying collections
+        that checks all underlying collections.
         """
         lus = []
         for cname in self.collection_names:
@@ -127,13 +126,13 @@ class JointStore(Store):
     def update(self, docs, update_lu=True, key=None, **kwargs):
         """
         Update documents into the underlying collections
-        Not Implemented for JointStore
+        Not Implemented for JointStore.
         """
         raise NotImplementedError("JointStore is a read-only store")
 
     def _get_store_by_name(self, name) -> MongoStore:
         """
-        Gets an underlying collection as a mongoStore
+        Gets an underlying collection as a mongoStore.
         """
         if name not in self.collection_names:
             raise ValueError("Asking for collection not referenced in this Store")
@@ -141,13 +140,13 @@ class JointStore(Store):
 
     def ensure_index(self, key, unique=False, **kwargs):
         """
-        Can't ensure index for JointStore
+        Can't ensure index for JointStore.
         """
         raise NotImplementedError("No ensure_index method for JointStore")
 
     def _get_pipeline(self, criteria=None, properties=None, skip=0, limit=0):
         """
-        Gets the aggregation pipeline for query and query_one
+        Gets the aggregation pipeline for query and query_one.
 
         Args:
             properties: properties to be returned
@@ -173,16 +172,14 @@ class JointStore(Store):
 
             if self.merge_at_root:
                 if not self._has_merge_objects:
-                    raise Exception(
-                        "MongoDB server version too low to use $mergeObjects."
-                    )
+                    raise Exception("MongoDB server version too low to use $mergeObjects.")
 
                 pipeline.append(
                     {
                         "$replaceRoot": {
                             "newRoot": {
                                 "$mergeObjects": [
-                                    {"$arrayElemAt": ["${}".format(cname), 0]},
+                                    {"$arrayElemAt": [f"${cname}", 0]},
                                     "$$ROOT",
                                 ]
                             }
@@ -193,20 +190,15 @@ class JointStore(Store):
                 pipeline.append(
                     {
                         "$unwind": {
-                            "path": "${}".format(cname),
+                            "path": f"${cname}",
                             "preserveNullAndEmptyArrays": True,
                         }
                     }
                 )
 
         # Do projection for max last_updated
-        lu_max_fields = ["${}".format(self.last_updated_field)]
-        lu_max_fields.extend(
-            [
-                "${}.{}".format(cname, self.last_updated_field)
-                for cname in self.collection_names
-            ]
-        )
+        lu_max_fields = [f"${self.last_updated_field}"]
+        lu_max_fields.extend([f"${cname}.{self.last_updated_field}" for cname in self.collection_names])
         lu_proj = {self.last_updated_field: {"$max": lu_max_fields}}
         pipeline.append({"$addFields": lu_proj})
 
@@ -226,7 +218,7 @@ class JointStore(Store):
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -244,12 +236,9 @@ class JointStore(Store):
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Dict]:
-        pipeline = self._get_pipeline(
-            criteria=criteria, properties=properties, skip=skip, limit=limit
-        )
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties, skip=skip, limit=limit)
         agg = self._collection.aggregate(pipeline)
-        for d in agg:
-            yield d
+        yield from agg
 
     # TODO - sort kwarg is not passed anywhere
     def groupby(
@@ -261,14 +250,12 @@ class JointStore(Store):
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[Tuple[Dict, List[Dict]]]:
-        pipeline = self._get_pipeline(
-            criteria=criteria, properties=properties, skip=skip, limit=limit
-        )
+        pipeline = self._get_pipeline(criteria=criteria, properties=properties, skip=skip, limit=limit)
         if not isinstance(keys, list):
             keys = [keys]
         group_id = {}  # type: Dict[str,Any]
         for key in keys:
-            set_(group_id, key, "${}".format(key))
+            set_(group_id, key, f"${key}")
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
 
         agg = self._collection.aggregate(pipeline)
@@ -278,7 +265,7 @@ class JointStore(Store):
 
     def query_one(self, criteria=None, properties=None, **kwargs):
         """
-        Get one document
+        Get one document.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -293,14 +280,13 @@ class JointStore(Store):
         # pipeline.append({"$limit": 1})
         query = self.query(criteria=criteria, properties=properties, **kwargs)
         try:
-            doc = next(query)
-            return doc
+            return next(query)
         except StopIteration:
             return None
 
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -310,8 +296,9 @@ class JointStore(Store):
     def __eq__(self, other: object) -> bool:
         """
         Check equality for JointStore
+
         Args:
-            other: other JointStore to compare with
+            other: other JointStore to compare with.
         """
         if not isinstance(other, JointStore):
             return False
@@ -328,31 +315,31 @@ class JointStore(Store):
 
 
 class ConcatStore(Store):
-    """Store concatting multiple stores"""
+    """Store concatting multiple stores."""
 
     def __init__(self, stores: List[Store], **kwargs):
         """
         Initialize a ConcatStore that concatenates multiple stores together
-        to appear as one store
+        to appear as one store.
 
         Args:
             stores: list of stores to concatenate together
         """
         self.stores = stores
         self.kwargs = kwargs
-        super(ConcatStore, self).__init__(**kwargs)
+        super().__init__(**kwargs)
 
     @property
     def name(self) -> str:
         """
-        A string representing this data source
+        A string representing this data source.
         """
         compound_name = ",".join([store.name for store in self.stores])
         return f"Concat[{compound_name}]"
 
     def connect(self, force_reset: bool = False):
         """
-        Connect all stores in this ConcatStore
+        Connect all stores in this ConcatStore.
 
         Args:
             force_reset: Whether to forcibly reset the connection for all stores
@@ -362,7 +349,7 @@ class ConcatStore(Store):
 
     def close(self):
         """
-        Close all connections in this ConcatStore
+        Close all connections in this ConcatStore.
         """
         for store in self.stores:
             store.close()
@@ -375,9 +362,9 @@ class ConcatStore(Store):
     def last_updated(self) -> datetime:
         """
         Finds the most recent last_updated across all the stores.
-        This might not be the most usefull way to do this for this type of Store
+        This might not be the most useful way to do this for this type of Store
         since it could very easily over-estimate the last_updated based on what stores
-        are used
+        are used.
         """
         lus = []
         for store in self.stores:
@@ -388,7 +375,7 @@ class ConcatStore(Store):
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
         Update documents into the Store
-        Not implemented in ConcatStore
+        Not implemented in ConcatStore.
 
         Args:
             docs: the document or list of documents to update
@@ -399,11 +386,9 @@ class ConcatStore(Store):
         """
         raise NotImplementedError("No update method for ConcatStore")
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -417,7 +402,7 @@ class ConcatStore(Store):
 
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
-        Ensure an index is properly set. Returns whether all stores support this index or not
+        Ensure an index is properly set. Returns whether all stores support this index or not.
 
         Args:
             key: single key to index
@@ -426,11 +411,11 @@ class ConcatStore(Store):
         Returns:
             bool indicating if the index exists/was created on all stores
         """
-        return all([store.ensure_index(key, unique) for store in self.stores])
+        return all(store.ensure_index(key, unique) for store in self.stores)
 
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -448,7 +433,7 @@ class ConcatStore(Store):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries across all Store for a set of documents
+        Queries across all Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -503,22 +488,21 @@ class ConcatStore(Store):
                     limit=limit,
                 )
             )
-            for key, group in temp_docs:
+            for _key, group in temp_docs:
                 docs.extend(group)
 
         def key_set(d: Dict) -> Tuple:
-            "index function based on passed in keys"
-            test_d = tuple(d.get(k, None) for k in keys)
-            return test_d
+            "index function based on passed in keys."
+            return tuple(d.get(k, None) for k in keys)
 
         sorted_docs = sorted(docs, key=key_set)
         for vals, group_iter in groupby(sorted_docs, key=key_set):
-            id_dict = {key: val for key, val in zip(keys, vals)}
+            id_dict = dict(zip(keys, vals))
             yield id_dict, list(group_iter)
 
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -527,7 +511,7 @@ class ConcatStore(Store):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for ConcatStore
+        Check equality for ConcatStore.
 
         Args:
             other: other JointStore to compare with

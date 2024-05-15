@@ -3,20 +3,20 @@
 
 import asyncio
 import json
-from logging import getLogger
 import socket as pysocket
-from typing import List, Literal
-import numpy as np
-from time import perf_counter
+from logging import getLogger
 from random import randint
+from time import perf_counter
+from typing import List, Literal
 
+import numpy as np
 from monty.json import jsanitize
 from monty.serialization import MontyDecoder
 
 from maggma.cli.multiprocessing import multi
 from maggma.cli.settings import CLISettings
 from maggma.core import Builder
-from maggma.utils import tqdm, Timeout
+from maggma.utils import Timeout, tqdm
 
 try:
     import pika
@@ -69,12 +69,12 @@ def manager(
             chunk_dicts = [{"chunk": d, "distributed": False, "completed": False} for d in builder.prechunk(num_chunks)]
             pbar_distributed = tqdm(
                 total=len(chunk_dicts),
-                desc="Distributed chunks for {}".format(builder.__class__.__name__),
+                desc=f"Distributed chunks for {builder.__class__.__name__}",
             )
 
             pbar_completed = tqdm(
                 total=len(chunk_dicts),
-                desc="Completed chunks for {}".format(builder.__class__.__name__),
+                desc=f"Completed chunks for {builder.__class__.__name__}",
             )
 
             logger.info(f"Distributing {len(chunk_dicts)} chunks to workers")
@@ -136,7 +136,7 @@ def manager(
                 if not chunk_dict["distributed"]:
                     temp_builder_dict = dict(**builder_dict)
                     temp_builder_dict.update(chunk_dict["chunk"])  # type: ignore
-                    temp_builder_dict = jsanitize(temp_builder_dict)
+                    temp_builder_dict = jsanitize(temp_builder_dict, recursive_msonable=True)
 
                     # Send work for available workers
                     for identity in workers:
@@ -184,7 +184,7 @@ def attempt_graceful_shutdown(connection, workers, channel, worker_queue):
         channel.basic_publish(
             exchange="",
             routing_key=worker_queue,
-            body="EXIT".encode("utf-8"),
+            body=b"EXIT",
         )
     connection.close()
 
@@ -192,14 +192,14 @@ def attempt_graceful_shutdown(connection, workers, channel, worker_queue):
 def handle_dead_workers(connection, workers, channel, worker_queue):
     if len(workers) == 1:
         # Use global timeout
-        identity = list(workers.keys())[0]
+        identity = next(iter(workers.keys()))
         if (perf_counter() - workers[identity]["last_ping"]) >= settings.WORKER_TIMEOUT:
             attempt_graceful_shutdown(connection, workers, channel, worker_queue)
             raise RuntimeError("Worker has timed out. Stopping distributed build.")
 
     elif len(workers) == 2:
         # Use 10% ratio between workers
-        workers_sorted = sorted(list(workers.items()), key=lambda x: x[1]["heartbeats"])
+        workers_sorted = sorted(workers.items(), key=lambda x: x[1]["heartbeats"])
 
         ratio = workers_sorted[1][1]["heartbeats"] / workers_sorted[0][1]["heartbeats"]
 
@@ -223,20 +223,24 @@ def handle_dead_workers(connection, workers, channel, worker_queue):
 def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix: str):
     """
     Simple distributed worker that connects to a manager asks for work and deploys
-    using multiprocessing
+    using multiprocessing.
     """
-    identity = "%04X-%04X" % (randint(0, 0x10000), randint(0, 0x10000))
+    identity = f"{randint(0, 0x10000):04X}-{randint(0, 0x10000):04X}"
     logger = getLogger(f"Worker {identity}")
 
     url = url.split("//")[-1]
 
-    logger.info(f"Connnecting to Manager at {url}:{port}")
+    logger.info(f"Connecting to Manager at {url}:{port}")
 
     # Setup connection to RabbitMQ and ensure on all queues is one unit
     connection, channel, status_queue, worker_queue = setup_rabbitmq(url, queue_prefix, port, "status")
 
     # Send ready signal to status queue
-    channel.basic_publish(exchange="", routing_key=status_queue, body="READY_{}".format(identity).encode("utf-8"))
+    channel.basic_publish(
+        exchange="",
+        routing_key=status_queue,
+        body=f"READY_{identity}".encode(),
+    )
 
     try:
         running = True
@@ -246,7 +250,6 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                 _, _, body = channel.basic_get(queue=worker_queue, auto_ack=True)
 
             if body is not None:
-
                 message = body.decode("utf-8")
 
                 if "@class" in message and "@module" in message:
@@ -254,10 +257,12 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                     work = json.loads(message)
                     builder = MontyDecoder().process_decoded(work)
 
-                    logger.info("Working on builder {}".format(builder.__class__))
+                    logger.info(f"Working on builder {builder.__class__}")
 
                     channel.basic_publish(
-                        exchange="", routing_key=status_queue, body="WORKING_{}".format(identity).encode("utf-8")
+                        exchange="",
+                        routing_key=status_queue,
+                        body=f"WORKING_{identity}".encode(),
                     )
                     work = json.loads(message)
                     builder = MontyDecoder().process_decoded(work)
@@ -277,7 +282,9 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                     )
 
                     channel.basic_publish(
-                        exchange="", routing_key=status_queue, body="DONE_{}".format(identity).encode("utf-8")
+                        exchange="",
+                        routing_key=status_queue,
+                        body=f"DONE_{identity}".encode(),
                     )
 
                 elif message == "EXIT":
@@ -285,12 +292,20 @@ def worker(url: str, port: int, num_processes: int, no_bars: bool, queue_prefix:
                     running = False
 
     except Exception as e:
-        logger.error(f"A worker failed with error: {repr(e)}")
-        channel.basic_publish(exchange="", routing_key=status_queue, body="ERROR_{}".format(identity).encode("utf-8"))
+        logger.error(f"A worker failed with error: {e!r}")
+        channel.basic_publish(
+            exchange="",
+            routing_key=status_queue,
+            body=f"ERROR_{identity}".encode(),
+        )
         connection.close()
 
     connection.close()
 
 
 def ping_manager(channel, identity, status_queue):
-    channel.basic_publish(exchange="", routing_key=status_queue, body="PING_{}".format(identity).encode("utf-8"))
+    channel.basic_publish(
+        exchange="",
+        routing_key=status_queue,
+        body=f"PING_{identity}".encode(),
+    )

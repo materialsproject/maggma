@@ -5,8 +5,8 @@
 import asyncio
 import logging
 import sys
-from itertools import chain
 from datetime import datetime
+from itertools import chain
 
 import click
 from monty.serialization import loadfn
@@ -14,10 +14,9 @@ from monty.serialization import loadfn
 from maggma.cli.distributed import find_port
 from maggma.cli.multiprocessing import multi
 from maggma.cli.serial import serial
-from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.cli.settings import CLISettings
+from maggma.cli.source_loader import ScriptFinder, load_builder_from_source
 from maggma.utils import ReportingHandler, TqdmLoggingHandler
-
 
 sys.meta_path.append(ScriptFinder())
 
@@ -49,17 +48,14 @@ settings = CLISettings()
     help="Store in JSON/YAML form to send reporting data to",
     type=click.Path(exists=True),
 )
-@click.option(
-    "-u", "--url", "url", default=None, type=str, help="URL for the distributed manager"
-)
+@click.option("-u", "--url", "url", default=None, type=str, help="URL for the distributed manager")
 @click.option(
     "-p",
     "--port",
     "port",
     default=None,
     type=int,
-    help="Port for distributed communication."
-    " mrun will find an open port if None is provided to the manager",
+    help="Port for distributed communication. mrun will find an open port if None is provided to the manager",
 )
 @click.option(
     "-N",
@@ -77,12 +73,8 @@ settings = CLISettings()
     type=int,
     help="Number of distributed workers to process chunks",
 )
-@click.option(
-    "--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations"
-)
-@click.option(
-    "--rabbitmq", is_flag=True, help="Enables the use of RabbitMQ as the work broker"
-)
+@click.option("--no_bars", is_flag=True, help="Turns of Progress Bars for headless operations")
+@click.option("--rabbitmq", is_flag=True, help="Enables the use of RabbitMQ as the work broker")
 @click.option(
     "-q",
     "--queue_prefix",
@@ -130,7 +122,7 @@ def run(
 ):
     # Import profiler and setup directories to dump profiler output
     if memray:
-        from memray import Tracker, FileDestination
+        from memray import FileDestination, Tracker
 
         if memray_dir:
             import os
@@ -139,9 +131,7 @@ def run(
 
             memray_file = f"{memray_dir}/{builders[0]}_{datetime.now().isoformat()}.bin"
         else:
-            memray_file = (
-                f"{settings.TEMP_DIR}/{builders[0]}_{datetime.now().isoformat()}.bin"
-            )
+            memray_file = f"{settings.TEMP_DIR}/{builders[0]}_{datetime.now().isoformat()}.bin"
 
         if num_processes > 1:
             follow_fork = True
@@ -168,9 +158,7 @@ def run(
     root = logging.getLogger()
     root.setLevel(level)
     ch = TqdmLoggingHandler()
-    formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-    )
+    formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
     ch.setFormatter(formatter)
     root.addHandler(ch)
 
@@ -233,9 +221,7 @@ def run(
         else:
             loop = asyncio.get_event_loop()
             for builder in builder_objects:
-                loop.run_until_complete(
-                    multi(builder=builder, num_processes=num_processes, no_bars=no_bars)
-                )
+                loop.run_until_complete(multi(builder=builder, num_processes=num_processes, no_bars=no_bars))
 
     if memray_file:
         import subprocess

@@ -9,3 +9,5 @@
 ::: maggma.stores.advanced_stores
 
 ::: maggma.stores.compound_stores
+
+::: maggma.stores.ssh_tunnel

@@ -1,7 +1,8 @@
+import json
 from enum import Enum
 from random import choice, randint
+from typing import Any, Tuple
 from urllib.parse import urlencode
-from typing import Tuple, Any
 
 import pytest
 from fastapi.encoders import jsonable_encoder
@@ -10,12 +11,7 @@ from requests import Response
 from starlette.testclient import TestClient
 
 from maggma.api.API import API
-from maggma.api.query_operator import (
-    StringQueryOperator,
-    NumericQuery,
-    SparseFieldsQuery,
-    PaginationQuery,
-)
+from maggma.api.query_operator import NumericQuery, PaginationQuery, SparseFieldsQuery, StringQueryOperator
 from maggma.api.resource import ReadOnlyResource
 from maggma.stores import MemoryStore
 
@@ -37,19 +33,20 @@ class Pet(BaseModel):
     owner_name: str = Field(..., title="Owner's name")
 
 
-owners = [
-    Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200))
-    for i in list(range(10))
-]
+owners = [Owner(name=f"Person{i}", age=randint(10, 100), weight=randint(100, 200)) for i in list(range(10))]
 
 
 pets = [
-    Pet(name=f"Pet{i}", pet_type=choice(list(PetType)), owner_name=choice(owners).name,)
+    Pet(
+        name=f"Pet{i}",
+        pet_type=choice(list(PetType)),
+        owner_name=choice(owners).name,
+    )
     for i in list(range(40))
 ]
 
 
-@pytest.fixture
+@pytest.fixture()
 def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -57,7 +54,7 @@ def owner_store():
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def pet_store():
     store = MemoryStore("pets", key="name")
     store.connect()
@@ -80,6 +77,7 @@ def test_msonable(owner_store, pet_store):
 def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]:
     """
     Helper function to directly query search endpoints
+
     Args:
         store: store f
         base: base of the query, default to /query?
@@ -88,11 +86,11 @@ def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]
         debug: True = print out the url, false don't print anything
 
     Returns:
-        request.Response object that contains the response of the correspoding payload
+        request.Response object that contains the response of the corresponding payload
     """
     owner_store = MemoryStore("owners", key="name")
     owner_store.connect()
-    owner_store.update([d.dict() for d in owners])
+    owner_store.update([d.model_dump() for d in owners])
 
     pets_store = MemoryStore("pets", key="name")
     pets_store.connect()
@@ -134,8 +132,8 @@ def search_helper(payload, base: str = "/?", debug=True) -> Tuple[Response, Any]
     res = client.get(url)
     try:
         data = res.json().get("data", [])
-    except Exception:
-        data = res.reason
+    except json.decoder.JSONDecodeError:
+        data = res.text
 
     return res, data
 

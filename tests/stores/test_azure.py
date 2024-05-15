@@ -7,11 +7,12 @@ docker run -p 10000:10000 mcr.microsoft.com/azure-storage/azurite azurite-blob -
 """
 
 import time
-from datetime import datetime
 from contextlib import contextmanager
+from datetime import datetime
+
 import pytest
 
-from maggma.stores import MemoryStore, MongoStore, AzureBlobStore
+from maggma.stores import AzureBlobStore, MemoryStore, MongoStore
 
 try:
     import azure.storage.blob as azure_blob
@@ -31,7 +32,7 @@ AZURITE_CONNECTION_STRING = (
 AZURITE_CONTAINER_NAME = "maggma-test-container"
 
 
-@pytest.fixture
+@pytest.fixture()
 def mongostore():
     store = MongoStore("maggma_test", "test")
     store.connect()
@@ -46,9 +47,7 @@ def azurite_container(container_name=AZURITE_CONTAINER_NAME, create_container=Tr
     if azure_blob is None:
         pytest.skip("azure-storage-blob is required to test AzureBlobStore")
 
-    blob_service_client = BlobServiceClient.from_connection_string(
-        AZURITE_CONNECTION_STRING
-    )
+    blob_service_client = BlobServiceClient.from_connection_string(AZURITE_CONNECTION_STRING)
 
     container_client = blob_service_client.get_container_client(container_name)
     if container_client.exists():
@@ -64,7 +63,7 @@ def azurite_container(container_name=AZURITE_CONTAINER_NAME, create_container=Tr
             container_client.delete_container()
 
 
-@pytest.fixture
+@pytest.fixture()
 def blobstore():
     with azurite_container():
         index = MemoryStore("index", key="task_id")
@@ -78,7 +77,7 @@ def blobstore():
         yield store
 
 
-@pytest.fixture
+@pytest.fixture()
 def blobstore_two_docs(blobstore):
     blobstore.update(
         [
@@ -99,10 +98,10 @@ def blobstore_two_docs(blobstore):
         ]
     )
 
-    yield blobstore
+    return blobstore
 
 
-@pytest.fixture
+@pytest.fixture()
 def blobstore_w_subdir():
     with azurite_container():
         index = MemoryStore("index")
@@ -117,11 +116,11 @@ def blobstore_w_subdir():
         yield store
 
 
-@pytest.fixture
+@pytest.fixture()
 def blobstore_multi(blobstore):
     blobstore.workers = 4
 
-    yield blobstore
+    return blobstore
 
 
 def test_keys():
@@ -157,8 +156,7 @@ def test_multi_update(blobstore_two_docs, blobstore_multi):
 
     def fake_writing(doc, search_keys):
         time.sleep(0.20)
-        search_doc = {k: doc[k] for k in search_keys}
-        return search_doc
+        return {k: doc[k] for k in search_keys}
 
     blobstore_two_docs.write_doc_to_blob = fake_writing
     blobstore_multi.write_doc_to_blob = fake_writing
@@ -172,9 +170,7 @@ def test_multi_update(blobstore_two_docs, blobstore_multi):
     blobstore_two_docs.update(data, key=["task_id"])
     end = time.time()
     time_single = end - start
-    assert time_single > time_multi * (blobstore_multi.workers - 1) / (
-        blobstore_two_docs.workers
-    )
+    assert time_single > time_multi * (blobstore_multi.workers - 1) / (blobstore_two_docs.workers)
 
 
 def test_count(blobstore_two_docs):
@@ -277,8 +273,8 @@ def test_close(blobstore_two_docs):
 
 def test_bad_import(mocker):
     mocker.patch("maggma.stores.azure.azure_blob", None)
+    index = MemoryStore("index")
     with pytest.raises(RuntimeError):
-        index = MemoryStore("index")
         AzureBlobStore(index, "bucket1")
 
 
@@ -320,10 +316,7 @@ def test_remove_subdir(blobstore_w_subdir):
 def test_searchable_fields(blobstore_two_docs):
     tic = datetime(2018, 4, 12, 16)
 
-    data = [
-        {"task_id": f"mp-{i}", "a": i, blobstore_two_docs.last_updated_field: tic}
-        for i in range(4)
-    ]
+    data = [{"task_id": f"mp-{i}", "a": i, blobstore_two_docs.last_updated_field: tic} for i in range(4)]
 
     blobstore_two_docs.searchable_fields = ["task_id"]
     blobstore_two_docs.update(data, key="a")
@@ -374,10 +367,7 @@ def test_newer_in(blobstore):
 def test_additional_metadata(blobstore_two_docs):
     tic = datetime(2018, 4, 12, 16)
 
-    data = [
-        {"task_id": f"mp-{i}", "a": i, blobstore_two_docs.last_updated_field: tic}
-        for i in range(4)
-    ]
+    data = [{"task_id": f"mp-{i}", "a": i, blobstore_two_docs.last_updated_field: tic} for i in range(4)]
 
     blobstore_two_docs.update(data, key="a", additional_metadata="task_id")
 
@@ -428,7 +418,5 @@ def test_no_login():
             azure_client_info={},
         )
 
-    with pytest.raises(
-        RuntimeError, match=r".*Could not instantiate BlobServiceClient.*"
-    ):
+    with pytest.raises(RuntimeError, match=r".*Could not instantiate BlobServiceClient.*"):
         store.connect()

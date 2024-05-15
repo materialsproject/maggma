@@ -21,7 +21,7 @@ _BASENAME = "maggma.cli.sources"
 
 class ScriptFinder(MetaPathFinder):
     """
-    Special Finder designed to find custom script builders
+    Special Finder designed to find custom script builders.
     """
 
     @classmethod
@@ -42,10 +42,9 @@ class ScriptFinder(MetaPathFinder):
 
 
 class NotebookLoader(Loader):
-    """Module Loader for Jupyter Notebooks or Source Files"""
+    """Module Loader for Jupyter Notebooks or Source Files."""
 
     def __init__(self, name=None, path=None):
-
         self.shell = InteractiveShell.instance()
 
         self.name = name
@@ -55,12 +54,11 @@ class NotebookLoader(Loader):
         return None
 
     def exec_module(self, module):
-
         module.__dict__["get_ipython"] = get_ipython
         module.__path__ = self.path
 
         # load the notebook object
-        with open(self.path, "r", encoding="utf-8") as f:
+        with open(self.path, encoding="utf-8") as f:
             nb = nbformat.read(f, 4)
 
         # extra work to ensure that magics that would affect the user_ns
@@ -72,9 +70,7 @@ class NotebookLoader(Loader):
             for cell in nb.cells:
                 if cell.cell_type == "code":
                     # transform the input to executable Python
-                    code = self.shell.input_transformer_manager.transform_cell(
-                        cell.source
-                    )
+                    code = self.shell.input_transformer_manager.transform_cell(cell.source)
                     # run the code in themodule
                     exec(code, module.__dict__)
         finally:
@@ -86,7 +82,7 @@ def spec_from_source(file_path: str) -> ModuleSpec:
     """
     Returns a ModuleSpec from a filepath for importlib loading
     Specialized for loading python source files and notebooks into
-    a temporary maggma cli package to run as a builder
+    a temporary maggma cli package to run as a builder.
     """
     file_path_obj = Path(file_path).resolve().relative_to(Path(".").resolve())
     file_path_str = str(file_path_obj)
@@ -97,37 +93,29 @@ def spec_from_source(file_path: str) -> ModuleSpec:
 
         spec = ModuleSpec(
             name=f"{_BASENAME}.{module_name}",
-            loader=SourceFileLoader(
-                fullname=f"{_BASENAME}.{module_name}", path=file_path_str
-            ),
+            loader=SourceFileLoader(fullname=f"{_BASENAME}.{module_name}", path=file_path_str),
             origin=file_path_str,
         )
         # spec._set_fileattr = True
     elif file_path_obj.parts[-1][-6:] == ".ipynb":
         # Gets module name from the filename without the .ipnb extension
-        module_name = (
-            "_".join(file_path_obj.parts).replace(" ", "_").replace(".ipynb", "")
-        )
+        module_name = "_".join(file_path_obj.parts).replace(" ", "_").replace(".ipynb", "")
 
         spec = ModuleSpec(
             name=f"{_BASENAME}.{module_name}",
-            loader=NotebookLoader(
-                name=f"{_BASENAME}.{module_name}", path=file_path_str
-            ),
+            loader=NotebookLoader(name=f"{_BASENAME}.{module_name}", path=file_path_str),
             origin=file_path_str,
         )
         # spec._set_fileattr = True
     else:
-        raise Exception(
-            "Can't load {file_path}. Must provide a python source file such as a .py or .ipynb file"
-        )
+        raise Exception("Can't load {file_path}. Must provide a python source file such as a .py or .ipynb file")
 
     return spec
 
 
 def load_builder_from_source(file_path: str) -> List[Builder]:
     """
-    Loads Maggma Builders from a Python source file
+    Loads Maggma Builders from a Python source file.
     """
     file_path = str(Path(file_path).resolve())
     spec = spec_from_source(file_path)
@@ -137,20 +125,17 @@ def load_builder_from_source(file_path: str) -> List[Builder]:
     sys.modules[spec.name] = module_object
 
     if hasattr(module_object, "__builders__"):
-        return getattr(module_object, "__builders__")
-    elif hasattr(module_object, "__builder__"):
-        return getattr(module_object, "__builder__")
-    else:
-        raise Exception(
-            f"No __builders__ or __builder__ attribute found in {file_path}"
-        )
+        return module_object.__builders__
+    if hasattr(module_object, "__builder__"):
+        return module_object.__builder__
+    raise Exception(f"No __builders__ or __builder__ attribute found in {file_path}")
 
 
 def find_matching_file(segments, curr_path="./"):
     """
     Finds file that has the right sequence of segments
     in the path relative to the current path
-    Requires all segments match the file path
+    Requires all segments match the file path.
     """
 
     # If we've gotten to the end of the segment match check to see if a file exists
@@ -164,14 +149,12 @@ def find_matching_file(segments, curr_path="./"):
         current_segment = segments[0]
         remainder = segments[1:]
 
-        re = fr"({curr_path}[\s_]*{current_segment})"
+        re = rf"({curr_path}[\s_]*{current_segment})"
         pos_matches = [match(re, pos_path) for pos_path in glob(curr_path + "*")]
         pos_matches = {pmatch.group(1) for pmatch in pos_matches if pmatch}
         for new_path in pos_matches:
             if Path(new_path).exists() and Path(new_path).is_dir:
-                for sub_match in find_matching_file(
-                    remainder, curr_path=new_path + "/"
-                ):
+                for sub_match in find_matching_file(remainder, curr_path=new_path + "/"):
                     yield sub_match
             for sub_match in find_matching_file(remainder, curr_path=new_path):
                 yield sub_match

@@ -7,7 +7,7 @@ from pydash import get
 from maggma.stores import ConcatStore, JointStore, MemoryStore, MongoStore
 
 
-@pytest.fixture
+@pytest.fixture()
 def mongostore():
     store = MongoStore("magmma_test", "test")
     store.connect()
@@ -33,7 +33,6 @@ def jointstore_test2():
 
 @pytest.fixture(scope="module")
 def jointstore(jointstore_test1, jointstore_test2):
-
     jointstore_test1.update(
         [
             {
@@ -165,7 +164,7 @@ def test_joint_remove_docs(jointstore):
         jointstore.remove_docs({})
 
 
-@pytest.fixture
+@pytest.fixture()
 def concat_store():
     mem_stores = [MemoryStore(str(i)) for i in range(4)]
     store = ConcatStore(mem_stores)
@@ -175,10 +174,7 @@ def concat_store():
 
     props = {i: str(i) for i in range(10)}
     for mem_store in mem_stores:
-        docs = [
-            {"task_id": i, "prop": props[i - index], "index": index}
-            for i in range(index, index + 10)
-        ]
+        docs = [{"task_id": i, "prop": props[i - index], "index": index} for i in range(index, index + 10)]
         index = index + 10
         mem_store.update(docs)
     return store
@@ -186,11 +182,7 @@ def concat_store():
 
 def test_concat_store_distinct(concat_store):
     docs = list(concat_store.distinct("task_id"))
-    actual_docs = list(
-        chain.from_iterable(
-            [store.distinct("task_id") for store in concat_store.stores]
-        )
-    )
+    actual_docs = list(chain.from_iterable([store.distinct("task_id") for store in concat_store.stores]))
     assert len(docs) == len(actual_docs)
     assert set(docs) == set(actual_docs)
 
@@ -201,13 +193,11 @@ def test_concat_store_groupby(concat_store):
 
 
 def test_concat_store_count(concat_store):
-
     assert concat_store.count() == 40
     assert concat_store.count({"prop": "3"}) == 4
 
 
 def test_concat_store_query(concat_store):
-
     docs = list(concat_store.query(properties=["task_id"]))
     t_ids = [d["task_id"] for d in docs]
     assert len(t_ids) == len(set(t_ids))
@@ -224,7 +214,6 @@ def test_eq(mongostore, jointstore, concat_store):
 
 
 def test_serialize(concat_store):
-
     d = concat_store.as_dict()
     new_concat_store = ConcatStore.from_dict(d)
 

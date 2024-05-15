@@ -1,18 +1,17 @@
 import time
-import zlib
 from datetime import datetime
 
 import boto3
-import msgpack
 import pytest
 from botocore.exceptions import ClientError
-from monty.msgpack import default, object_hook
 from moto import mock_s3
+from sshtunnel import BaseSSHTunnelForwarderError
 
 from maggma.stores import MemoryStore, MongoStore, S3Store
+from maggma.stores.ssh_tunnel import SSHTunnel
 
 
-@pytest.fixture
+@pytest.fixture()
 def mongostore():
     store = MongoStore("maggma_test", "test")
     store.connect()
@@ -20,7 +19,18 @@ def mongostore():
     store._collection.drop()
 
 
-@pytest.fixture
+@pytest.fixture()
+def ssh_tunnel():
+    try:
+        tunnel = SSHTunnel("127.0.0.1:22", "127.0.0.1:27017", local_port=9000)
+    except (ValueError, BaseSSHTunnelForwarderError):
+        # fallback to not use a tunnel if there is error in creating the tunnel
+        tunnel = None
+
+    return tunnel
+
+
+@pytest.fixture()
 def s3store():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
@@ -52,7 +62,7 @@ def s3store():
         yield store
 
 
-@pytest.fixture
+@pytest.fixture()
 def s3store_w_subdir():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
@@ -65,7 +75,7 @@ def s3store_w_subdir():
         yield store
 
 
-@pytest.fixture
+@pytest.fixture()
 def s3store_multi():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
@@ -78,13 +88,26 @@ def s3store_multi():
         yield store
 
 
+@pytest.fixture()
+def s3store_with_tunnel(ssh_tunnel):
+    with mock_s3():
+        conn = boto3.resource("s3", region_name="us-east-1")
+        conn.create_bucket(Bucket="bucket1")
+
+        index = MemoryStore("index", key="task_id")
+        store = S3Store(index, "bucket1", key="task_id", ssh_tunnel=ssh_tunnel)
+        store.connect()
+
+        yield store
+
+
 def test_keys():
     with mock_s3():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
         index = MemoryStore("index", key=1)
         with pytest.raises(AssertionError, match=r"Since we are.*"):
-            store = S3Store(index, "bucket1", s3_workers=4, key=1)
+            S3Store(index, "bucket1", s3_workers=4, key="1")
         index = MemoryStore("index", key="key1")
         with pytest.warns(UserWarning, match=r"The desired S3Store.*$"):
             store = S3Store(index, "bucket1", s3_workers=4, key="key2")
@@ -107,8 +130,7 @@ def test_multi_update(s3store, s3store_multi):
 
     def fake_writing(doc, search_keys):
         time.sleep(0.20)
-        search_doc = {k: doc[k] for k in search_keys}
-        return search_doc
+        return {k: doc[k] for k in search_keys}
 
     s3store.write_doc_to_s3 = fake_writing
     s3store_multi.write_doc_to_s3 = fake_writing
@@ -122,9 +144,7 @@ def test_multi_update(s3store, s3store_multi):
     s3store.update(data, key=["task_id"])
     end = time.time()
     time_single = end - start
-    assert time_single > time_multi * (s3store_multi.s3_workers - 1) / (
-        s3store.s3_workers
-    )
+    assert time_single > time_multi * (s3store_multi.s3_workers - 1) / (s3store.s3_workers)
 
 
 def test_count(s3store):
@@ -132,7 +152,7 @@ def test_count(s3store):
     assert s3store.count({"task_id": "mp-3"}) == 1
 
 
-def test_qeuery(s3store):
+def test_query(s3store):
     assert s3store.query_one(criteria={"task_id": "mp-2"}) is None
     assert s3store.query_one(criteria={"task_id": "mp-1"})["data"] == "asd"
     assert s3store.query_one(criteria={"task_id": "mp-3"})["data"] == "sdf"
@@ -170,17 +190,11 @@ def test_rebuild_meta_from_index(s3store):
 
 def test_rebuild_index(s3store):
     s3store.update([{"task_id": "mp-2", "data": "asd"}])
-    assert (
-        s3store.index.query_one({"task_id": "mp-2"})["obj_hash"]
-        == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
-    )
+    assert s3store.index.query_one({"task_id": "mp-2"})["obj_hash"] == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
     s3store.index.remove_docs({})
     assert s3store.index.query_one({"task_id": "mp-2"}) is None
     s3store.rebuild_index_from_s3_data()
-    assert (
-        s3store.index.query_one({"task_id": "mp-2"})["obj_hash"]
-        == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
-    )
+    assert s3store.index.query_one({"task_id": "mp-2"})["obj_hash"] == "a69fe0c2cca3a3384c2b1d2f476972704f179741"
 
 
 def tests_msonable_read_write(s3store):
@@ -221,14 +235,14 @@ def test_close(s3store):
 
 def test_bad_import(mocker):
     mocker.patch("maggma.stores.aws.boto3", None)
+    index = MemoryStore("index")
     with pytest.raises(RuntimeError):
-        index = MemoryStore("index")
         S3Store(index, "bucket1")
 
 
 def test_aws_error(s3store):
-    def raise_exception_404(data):
-        error_response = {"Error": {"Code": 404}}
+    def raise_exception_NoSuchKey(data):
+        error_response = {"Error": {"Code": "NoSuchKey", "Message": "The specified key does not exist."}}
         raise ClientError(error_response, "raise_exception")
 
     def raise_exception_other(data):
@@ -240,7 +254,7 @@ def test_aws_error(s3store):
         s3store.query_one()
 
     # Should just pass
-    s3store.s3_bucket.Object = raise_exception_404
+    s3store.s3_bucket.Object = raise_exception_NoSuchKey
     s3store.query_one()
 
 
@@ -280,13 +294,9 @@ def test_remove_subdir(s3store_w_subdir):
 
 
 def test_searchable_fields(s3store):
-
     tic = datetime(2018, 4, 12, 16)
 
-    data = [
-        {"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic}
-        for i in range(4)
-    ]
+    data = [{"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic} for i in range(4)]
 
     s3store.searchable_fields = ["task_id"]
     s3store.update(data, key="a")
@@ -323,13 +333,9 @@ def test_newer_in(s3store):
 
 
 def test_additional_metadata(s3store):
-
     tic = datetime(2018, 4, 12, 16)
 
-    data = [
-        {"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic}
-        for i in range(4)
-    ]
+    data = [{"task_id": f"mp-{i}", "a": i, s3store.last_updated_field: tic} for i in range(4)]
 
     s3store.update(data, key="a", additional_metadata="task_id")
 
@@ -360,3 +366,88 @@ def test_no_bucket():
         store = S3Store(index, "bucket2")
         with pytest.raises(RuntimeError, match=r".*Bucket not present.*"):
             store.connect()
+
+
+def test_force_reset(s3store):
+    content = [
+        {
+            "task_id": "mp-4",
+            "data": "abc",
+            s3store.last_updated_field: datetime.utcnow(),
+        }
+    ]
+
+    s3store.connect(force_reset=True)
+    s3store.update(content)
+    assert s3store.count({"task_id": "mp-4"}) == 1
+
+    s3store.s3 = None
+    s3store.connect()
+    s3store.update(content)
+    assert s3store.count({"task_id": "mp-4"}) == 1
+
+    s3store.close()
+
+
+def test_ssh_tunnel(s3store_with_tunnel):
+    """This test will actually create a real tunnel to test the functionality.
+
+    The tunnel will be set to `None` if the tunnel cannot be created. As a result,
+    it becomes a test not testing the functionality of S3Store with the tunnel.
+    """
+    content = [
+        {
+            "task_id": "mp-4",
+            "data": "abc",
+            s3store_with_tunnel.last_updated_field: datetime.utcnow(),
+        }
+    ]
+
+    s3store_with_tunnel.update(content)
+    assert s3store_with_tunnel.count({"task_id": "mp-4"}) == 1
+
+    s3store_with_tunnel.close()
+
+
+def test_ssh_tunnel_2():
+    """
+    This test mocks the SSHTunnel behavior by creating a fake tunnel.
+
+    The purpose is to check the behavior of the S3Store when the tunnel is not `None`.
+    This complements the `test_ssh_tunnel` test above.
+    """
+
+    class FakeTunnel:
+        def __init__(self, *args, **kwargs):
+            pass
+
+        def start(self):
+            pass
+
+        def stop(self):
+            pass
+
+        def local_address(self):
+            return "ADDRESS", "PORT"
+
+    def get_store():
+        with mock_s3():
+            conn = boto3.resource("s3", region_name="us-east-1")
+            conn.create_bucket(Bucket="bucket1")
+
+            index = MemoryStore("index", key="task_id")
+            store = S3Store(index, "bucket1", key="task_id", ssh_tunnel=FakeTunnel())
+            store.connect()
+            store._get_session()
+            assert store._get_endpoint_url() == "http://ADDRESS:PORT"
+            store.close()
+
+            yield store
+
+    get_store()
+
+
+def test_index_store_kwargs(mongostore):
+    index = MongoStore("db", collection_name="index", key="task_id")
+    store = S3Store(index, "bucket1", key="task_id", index_store_kwargs={"port": 12345})
+    assert store.index.port == 12345

@@ -1,18 +1,15 @@
+import json
+from datetime import datetime
 from random import randint
-from urllib.parse import urlencode
-from pydantic.utils import get_model
 
 import pytest
-from fastapi import FastAPI, Body
+from fastapi import FastAPI
 from pydantic import BaseModel, Field
 from starlette.testclient import TestClient
 
-from datetime import datetime
-from maggma.api.query_operator.core import QueryOperator
-
-from maggma.api.resource import SubmissionResource, post_resource
 from maggma.api.query_operator import PaginationQuery
-
+from maggma.api.query_operator.core import QueryOperator
+from maggma.api.resource import SubmissionResource
 from maggma.stores import MemoryStore
 
 
@@ -33,7 +30,7 @@ owners = (
 total_owners = len(owners)
 
 
-@pytest.fixture
+@pytest.fixture()
 def owner_store():
     store = MemoryStore("owners", key="name")
     store.connect()
@@ -41,7 +38,7 @@ def owner_store():
     return store
 
 
-@pytest.fixture
+@pytest.fixture()
 def post_query_op():
     class PostQuery(QueryOperator):
         def query(self, name):
@@ -50,14 +47,24 @@ def post_query_op():
     return PostQuery()
 
 
-def test_init(owner_store, post_query_op):
+@pytest.fixture()
+def patch_query_op():
+    class PatchQuery(QueryOperator):
+        def query(self, name, update):
+            return {"criteria": {"name": name}, "update": update}
+
+    return PatchQuery()
+
+
+def test_init(owner_store, post_query_op, patch_query_op):
     resource = SubmissionResource(
         store=owner_store,
         get_query_operators=[PaginationQuery()],
         post_query_operators=[post_query_op],
+        patch_query_operators=[patch_query_op],
         model=Owner,
     )
-    assert len(resource.router.routes) == 4
+    assert len(resource.router.routes) == 5
 
 
 def test_msonable(owner_store, post_query_op):
@@ -93,7 +100,43 @@ def test_submission_search(owner_store, post_query_op):
     assert client.post("/?name=test_name").status_code == 200
 
 
+def test_submission_patch(owner_store, post_query_op, patch_query_op):
+    endpoint = SubmissionResource(
+        store=owner_store,
+        get_query_operators=[PaginationQuery()],
+        post_query_operators=[post_query_op],
+        patch_query_operators=[patch_query_op],
+        calculate_submission_id=True,
+        model=Owner,
+    )
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+    update = json.dumps({"last_updated": "2023-06-22T17:32:11.645713"})
+
+    assert client.get("/").status_code == 200
+    assert client.patch(f"/?name=PersonAge9&update={update}").status_code == 200
+
+
 def test_key_fields(owner_store, post_query_op):
+    endpoint = SubmissionResource(
+        store=owner_store,
+        get_query_operators=[PaginationQuery()],
+        post_query_operators=[post_query_op],
+        calculate_submission_id=False,
+        model=Owner,
+    )
+    app = FastAPI()
+    app.include_router(endpoint.router)
+
+    client = TestClient(app)
+
+    assert client.get("/Person1/").status_code == 200
+    assert client.get("/Person1/").json()["data"][0]["name"] == "Person1"
+
+
+def test_patch_submission(owner_store, post_query_op):
     endpoint = SubmissionResource(
         store=owner_store,
         get_query_operators=[PaginationQuery()],

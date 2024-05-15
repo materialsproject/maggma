@@ -1,20 +1,22 @@
-# coding: utf-8
 """
 Module defining a FileStore that enables accessing files in a local directory
 using typical maggma access patterns.
 """
 
+import fnmatch
 import hashlib
-
+import os
+import re
 import warnings
-from pathlib import Path
 from datetime import datetime, timezone
-from typing import Dict, List, Optional, Union, Iterator, Callable
+from pathlib import Path
+from typing import Callable, Dict, Iterator, List, Optional, Union
 
-from pymongo import UpdateOne
 from monty.io import zopen
-from maggma.core import StoreError, Sort
-from maggma.stores.mongolike import MemoryStore, JSONStore
+from pymongo import UpdateOne
+
+from maggma.core import Sort, StoreError
+from maggma.stores.mongolike import JSONStore, MemoryStore
 
 # These keys are automatically populated by the FileStore.read() method and
 # hence are not allowed to be manually overwritten
@@ -52,10 +54,12 @@ class FileStore(MemoryStore):
         read_only: bool = True,
         include_orphans: bool = False,
         json_name: str = "FileStore.json",
+        encoding: Optional[str] = None,
         **kwargs,
     ):
         """
-        Initializes a FileStore
+        Initializes a FileStore.
+
         Args:
             path: parent directory containing all files and subdirectories to process
             file_filters: List of fnmatch patterns defining the files to be tracked by
@@ -81,6 +85,11 @@ class FileStore(MemoryStore):
             json_name: Name of the .json file to which metadata is saved. If read_only
                 is False, this file will be created in the root directory of the
                 FileStore.
+            encoding: Character encoding of files to be tracked by the store. The default
+                (None) follows python's default behavior, which is to determine the character
+                encoding from the platform. This should work in the great majority of cases.
+                However, if you encounter a UnicodeDecodeError, consider setting the encoding
+                explicitly to 'utf8' or another encoding as appropriate.
             kwargs: kwargs passed to MemoryStore.__init__()
         """
         # this conditional block is needed in order to guarantee that the 'name'
@@ -91,12 +100,14 @@ class FileStore(MemoryStore):
         self.path = Path(path) if isinstance(path, str) else path
 
         self.json_name = json_name
-        self.file_filters = file_filters if file_filters else ["*"]
+        file_filters = file_filters if file_filters else ["*"]
+        self.file_filters = re.compile("|".join(fnmatch.translate(p) for p in file_filters))
         self.collection_name = "file_store"
         self.key = "file_id"
         self.include_orphans = include_orphans
         self.read_only = read_only
         self.max_depth = max_depth
+        self.encoding = encoding
 
         self.metadata_store = JSONStore(
             paths=[str(self.path / self.json_name)],
@@ -116,15 +127,15 @@ class FileStore(MemoryStore):
     @property
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
         return f"file://{self.path}"
 
     def add_metadata(
         self,
-        metadata: Dict = {},
+        metadata: Optional[Dict] = None,
         query: Optional[Dict] = None,
-        auto_data: Callable[[Dict], Dict] = None,
+        auto_data: Optional[Callable[[Dict], Dict]] = None,
         **kwargs,
     ):
         """
@@ -154,6 +165,8 @@ class FileStore(MemoryStore):
                     metadata is used.
             kwargs: kwargs passed to FileStore.query()
         """
+        if metadata is None:
+            metadata = {}
         # sanitize the metadata
         filtered_metadata = self._filter_data(metadata)
         updated_docs = []
@@ -172,60 +185,56 @@ class FileStore(MemoryStore):
         Iterate through all files in the Store folder and populate
         the Store with dictionaries containing basic information about each file.
 
-        The keys of the documents added to the Store are
+        The keys of the documents added to the Store are:
 
-            name: str = File name
-            path: Path = Absolute path of this file
-            parent: str = Name of the parent directory (if any)
-            file_id: str = Unique identifier for this file, computed from the hash
-                        of its path relative to the base FileStore directory and
-                        the file creation time. The key of this field is 'file_id'
-                        by default but can be changed via the 'key' kwarg to
-                        FileStore.__init__().
-            size: int = Size of this file in bytes
-            last_updated: datetime = Time this file was last modified
-            hash: str = Hash of the file contents
-            orphan: bool = Whether this record is an orphan
+        - name: str = File name
+        - path: Path = Absolute path of this file
+        - parent: str = Name of the parent directory (if any)
+        - file_id: str = Unique identifier for this file, computed from the hash
+                    of its path relative to the base FileStore directory and
+                    the file creation time. The key of this field is 'file_id'
+                    by default but can be changed via the 'key' kwarg to
+                    `FileStore.__init__()`.
+        - size: int = Size of this file in bytes
+        - last_updated: datetime = Time this file was last modified
+        - hash: str = Hash of the file contents
+        - orphan: bool = Whether this record is an orphan
         """
         file_list = []
         # generate a list of files in subdirectories
-        for pattern in self.file_filters:
-            # list every file that matches the pattern
-            for f in self.path.rglob(pattern):
-                if f.is_file():
-                    # ignore the .json file created by the Store
-                    if f.name == self.json_name:
-                        continue
+        for root, _dirs, files in os.walk(self.path):
+            # for pattern in self.file_filters:
+            for match in filter(self.file_filters.match, files):
+                # for match in fnmatch.filter(files, pattern):
+                path = Path(os.path.join(root, match))
+                # ignore the .json file created by the Store
+                if path.is_file() and path.name != self.json_name:
                     # filter based on depth
-                    depth = len(f.relative_to(self.path).parts) - 1
+                    depth = len(path.relative_to(self.path).parts) - 1
                     if self.max_depth is None or depth <= self.max_depth:
-                        file_list.append(self._create_record_from_file(f))
+                        file_list.append(self._create_record_from_file(path))
 
         return file_list
 
-    def _create_record_from_file(self, f: Union[str, Path]) -> Dict:
+    def _create_record_from_file(self, f: Path) -> Dict:
         """
-        Given the path to a file, return a Dict that constitues a record of
+        Given the path to a file, return a Dict that constitutes a record of
         basic information about that file. The keys in the returned dict
         are:
 
-            name: str = File name
-            path: Path = Absolute path of this file
-            parent: str = Name of the parent directory (if any)
-            file_id: str = Unique identifier for this file, computed from the hash
-                        of its path relative to the base FileStore directory and
-                        the file creation time. The key of this field is 'file_id'
-                        by default but can be changed via the 'key' kwarg to
-                        FileStore.__init__().
-            size: int = Size of this file in bytes
-            last_updated: datetime = Time this file was last modified
-            hash: str = Hash of the file contents
-            orphan: bool = Whether this record is an orphan
+        - name: str = File name
+        - path: Path = Absolute path of this file
+        - parent: str = Name of the parent directory (if any)
+        - file_id: str = Unique identifier for this file, computed from the hash
+                    of its path relative to the base FileStore directory and
+                    the file creation time. The key of this field is 'file_id'
+                    by default but can be changed via the 'key' kwarg to
+                    FileStore.__init__().
+        - size: int = Size of this file in bytes
+        - last_updated: datetime = Time this file was last modified
+        - hash: str = Hash of the file contents
+        - orphan: bool = Whether this record is an orphan
         """
-        # make sure f is a Path object
-        if not isinstance(f, Path):
-            f = Path(f)
-
         # compute the file_id from the relative path
         relative_path = f.relative_to(self.path)
         digest = hashlib.md5()
@@ -234,30 +243,37 @@ class FileStore(MemoryStore):
 
         # hash the file contents
         digest2 = hashlib.md5()
-        block_size = 128 * digest2.block_size
+        b = bytearray(128 * 2056)
+        mv = memoryview(b)
         digest2.update(self.name.encode())
-        with open(f.as_posix(), "rb") as file:
-            buf = file.read(block_size)
-            digest2.update(buf)
-        content_hash = str(digest2.hexdigest())
+        with open(f.as_posix(), "rb", buffering=0) as file:
+            # this block copied from the file_digest method in python 3.11+
+            # see https://github.com/python/cpython/blob/0ba07b2108d4763273f3fb85544dde34c5acd40a/Lib/hashlib.py#L213
+            if hasattr(file, "getbuffer"):
+                # io.BytesIO object, use zero-copy buffer
+                digest2.update(file.getbuffer())
+            else:
+                for n in iter(lambda: file.readinto(mv), 0):
+                    digest2.update(mv[:n])
 
-        d = {
+        content_hash = str(digest2.hexdigest())
+        stats = f.stat()
+
+        return {
             "name": f.name,
             "path": f,
             "path_relative": relative_path,
             "parent": f.parent.name,
-            "size": f.stat().st_size,
-            "last_updated": datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc),
+            "size": stats.st_size,
+            "last_updated": datetime.fromtimestamp(stats.st_mtime, tz=timezone.utc),
             "orphan": False,
             "hash": content_hash,
             self.key: file_id,
         }
 
-        return d
-
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Read all the files in the directory, create corresponding File
         items in the internal MemoryStore.
@@ -266,18 +282,19 @@ class FileStore(MemoryStore):
         contents into the MemoryStore
 
         Args:
-            force_reset: whether to reset the connection or not
+            force_reset: whether to reset the connection or not when the Store is
+                already connected.
         """
         # read all files and place them in the MemoryStore
         # use super.update to bypass the read_only guard statement
         # because we want the file data to be populated in memory
-        super().connect()
+        super().connect(force_reset=force_reset)
         super().update(self.read())
 
         # now read any metadata from the .json file
         try:
-            self.metadata_store.connect()
-            metadata = [d for d in self.metadata_store.query()]
+            self.metadata_store.connect(force_reset=force_reset)
+            metadata = list(self.metadata_store.query())
         except FileNotFoundError:
             metadata = []
             warnings.warn(
@@ -293,10 +310,7 @@ class FileStore(MemoryStore):
         key = self.key
         file_ids = self.distinct(self.key)
         for d in metadata:
-            if isinstance(key, list):
-                search_doc = {k: d[k] for k in key}
-            else:
-                search_doc = {key: d[key]}
+            search_doc = {k: d[k] for k in key} if isinstance(key, list) else {key: d[key]}
 
             if d[key] not in file_ids:
                 found_orphans = True
@@ -340,32 +354,24 @@ class FileStore(MemoryStore):
             )
 
         super().update(docs, key)
-        data = [d for d in self.query()]
+        data = list(self.query())
         filtered_data = []
         # remove fields that are populated by .read()
         for d in data:
             filtered_d = self._filter_data(d)
             # don't write records that contain only file_id
-            if (
-                len(set(filtered_d.keys()).difference(set(["path_relative", self.key])))
-                != 0
-            ):
+            if len(set(filtered_d.keys()).difference({"path_relative", self.key})) != 0:
                 filtered_data.append(filtered_d)
         self.metadata_store.update(filtered_data, self.key)
 
     def _filter_data(self, d):
         """
-        Remove any protected keys from a dictionary
+        Remove any protected keys from a dictionary.
 
         Args:
             d: Dictionary whose keys are to be filtered
         """
-        filtered_d = {
-            k: v
-            for k, v in d.items()
-            if k not in PROTECTED_KEYS.union({self.last_updated_field})
-        }
-        return filtered_d
+        return {k: v for k, v in d.items() if k not in PROTECTED_KEYS.union({self.last_updated_field})}
 
     def query(  # type: ignore
         self,
@@ -375,10 +381,10 @@ class FileStore(MemoryStore):
         hint: Optional[Dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        contents_size_limit: Optional[int] = None,
+        contents_size_limit: Optional[int] = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -392,12 +398,14 @@ class FileStore(MemoryStore):
             contents_size_limit: Maximum file size in bytes for which to return contents.
                 The FileStore will attempt to read the file and populate the 'contents' key
                 with its content at query time, unless the file size is larger than this value.
+                By default, reading content is disabled. Note that enabling content reading
+                can substantially slow down the query operation, especially when there
+                are large numbers of files.
         """
         return_contents = False
         criteria = criteria if criteria else {}
-        if criteria.get("orphan", None) is None:
-            if not self.include_orphans:
-                criteria.update({"orphan": False})
+        if criteria.get("orphan", None) is None and not self.include_orphans:
+            criteria.update({"orphan": False})
 
         if criteria.get("contents"):
             warnings.warn("'contents' is not a queryable field! Ignoring.")
@@ -407,10 +415,11 @@ class FileStore(MemoryStore):
 
         orig_properties = properties.copy() if properties else None
 
-        if properties is None or properties.get("contents"):
+        if properties is None:
+            # None means return all fields, including contents
             return_contents = True
-
-        if properties is not None and return_contents:
+        elif properties.get("contents"):
+            return_contents = True
             # remove contents b/c it isn't stored in the MemoryStore
             properties.pop("contents")
             # add size and path to query so that file can be read
@@ -426,19 +435,19 @@ class FileStore(MemoryStore):
             limit=limit,
         ):
             # add file contents to the returned documents, if appropriate
-            if return_contents:
+            if return_contents and not d.get("orphan"):
                 if contents_size_limit is None or d["size"] <= contents_size_limit:
                     # attempt to read the file contents and inject into the document
                     # TODO - could add more logic for detecting different file types
                     # and more nuanced exception handling
                     try:
-                        with zopen(d["path"], "r") as f:
+                        with zopen(d["path"], "r", encoding=self.encoding) as f:
                             data = f.read()
                     except Exception as e:
                         data = f"Unable to read: {e}"
 
                 elif d["size"] > contents_size_limit:
-                    data = "Unable to read: file too large"
+                    data = f"File exceeds size limit of {contents_size_limit} bytes"
                 else:
                     data = "Unable to read: Unknown error"
 
@@ -460,7 +469,7 @@ class FileStore(MemoryStore):
         contents_size_limit: Optional[int] = None,
     ):
         """
-        Queries the Store for a single document
+        Queries the Store for a single document.
 
         Args:
             criteria: PyMongo filter for documents to search
@@ -492,11 +501,10 @@ class FileStore(MemoryStore):
         """
         if self.read_only:
             raise StoreError(
-                "This Store is read-only. To enable file I/O, re-initialize the "
-                "store with read_only=False."
+                "This Store is read-only. To enable file I/O, re-initialize the store with read_only=False."
             )
 
-        docs = [d for d in self.query(criteria)]
+        docs = list(self.query(criteria))
         # this ensures that any modifications to criteria made by self.query
         # (e.g., related to orphans or contents) are propagated through to the superclass
         new_criteria = {"file_id": {"$in": [d["file_id"] for d in docs]}}

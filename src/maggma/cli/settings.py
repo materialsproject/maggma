@@ -1,13 +1,15 @@
 import platform
 import tempfile
 
-from pydantic import BaseSettings, Field
+from pydantic import Field
+from pydantic_settings import BaseSettings
+from typing_extensions import Optional
 
 tempdir = "/tmp" if platform.system() == "Darwin" else tempfile.gettempdir()
 
 
 class CLISettings(BaseSettings):
-    WORKER_TIMEOUT: int = Field(
+    WORKER_TIMEOUT: Optional[int] = Field(
         None,
         description="Timeout in seconds for a distributed worker",
     )

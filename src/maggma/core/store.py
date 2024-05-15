@@ -1,6 +1,5 @@
-# coding: utf-8
 """
-Module containing the core Store definition
+Module containing the core Store definition.
 """
 
 import logging
@@ -18,14 +17,14 @@ from maggma.utils import LU_KEY_ISOFORMAT
 
 
 class Sort(Enum):
-    """Enumeration for sorting order"""
+    """Enumeration for sorting order."""
 
     Ascending = 1
     Descending = -1
 
 
 class DateTimeFormat(Enum):
-    """Datetime format in store document"""
+    """Datetime format in store document."""
 
     DateTime = "datetime"
     IsoFormat = "isoformat"
@@ -34,14 +33,14 @@ class DateTimeFormat(Enum):
 class Store(MSONable, metaclass=ABCMeta):
     """
     Abstract class for a data Store
-    Defines the interface for all data going in and out of a Builder
+    Defines the interface for all data going in and out of a Builder.
     """
 
     def __init__(
         self,
         key: str = "task_id",
         last_updated_field: str = "last_updated",
-        last_updated_type: DateTimeFormat = DateTimeFormat("datetime"),
+        last_updated_type: DateTimeFormat = DateTimeFormat("datetime"),  # noqa: B008
         validator: Optional[Validator] = None,
     ):
         """
@@ -50,16 +49,14 @@ class Store(MSONable, metaclass=ABCMeta):
             last_updated_field: field for date/time stamping the data
             last_updated_type: the date/time format for the last_updated_field.
                                 Can be "datetime" or "isoformat"
-            validator: Validator to validate documents going into the store
+            validator: Validator to validate documents going into the store.
         """
         self.key = key
         self.last_updated_field = last_updated_field
         self.last_updated_type = last_updated_type
-        self._lu_func = (
-            LU_KEY_ISOFORMAT
-            if DateTimeFormat(last_updated_type) == DateTimeFormat.IsoFormat
-            else (identity, identity)
-        )  # type: Tuple[Callable, Callable]
+        self._lu_func: Tuple[Callable, Callable] = (
+            LU_KEY_ISOFORMAT if DateTimeFormat(last_updated_type) == DateTimeFormat.IsoFormat else (identity, identity)
+        )
         self.validator = validator
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
@@ -67,19 +64,19 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractproperty
     def _collection(self):
         """
-        Returns a handle to the pymongo collection object
+        Returns a handle to the pymongo collection object.
         """
 
     @abstractproperty
     def name(self) -> str:
         """
-        Return a string representing this data source
+        Return a string representing this data source.
         """
 
     @abstractmethod
     def connect(self, force_reset: bool = False):
         """
-        Connect to the source data
+        Connect to the source data.
 
         Args:
             force_reset: whether to reset the connection or not
@@ -88,13 +85,13 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def close(self):
         """
-        Closes any connections
+        Closes any connections.
         """
 
     @abstractmethod
     def count(self, criteria: Optional[Dict] = None) -> int:
         """
-        Counts the number of documents matching the query criteria
+        Counts the number of documents matching the query criteria.
 
         Args:
             criteria: PyMongo filter for documents to count in
@@ -110,7 +107,7 @@ class Store(MSONable, metaclass=ABCMeta):
         limit: int = 0,
     ) -> Iterator[Dict]:
         """
-        Queries the Store for a set of documents
+        Queries the Store for a set of documents.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -124,7 +121,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None):
         """
-        Update documents into the Store
+        Update documents into the Store.
 
         Args:
             docs: the document or list of documents to update
@@ -137,7 +134,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def ensure_index(self, key: str, unique: bool = False) -> bool:
         """
-        Tries to create an index and return true if it suceeded
+        Tries to create an index and return true if it succeeded.
 
         Args:
             key: single key to index
@@ -177,7 +174,7 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def remove_docs(self, criteria: Dict):
         """
-        Remove docs matching the query dictionary
+        Remove docs matching the query dictionary.
 
         Args:
             criteria: query dictionary to match
@@ -190,7 +187,7 @@ class Store(MSONable, metaclass=ABCMeta):
         sort: Optional[Dict[str, Union[Sort, int]]] = None,
     ):
         """
-        Queries the Store for a single document
+        Queries the Store for a single document.
 
         Args:
             criteria: PyMongo filter for documents to search in
@@ -200,15 +197,11 @@ class Store(MSONable, metaclass=ABCMeta):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
-        return next(
-            self.query(criteria=criteria, properties=properties, sort=sort), None
-        )
+        return next(self.query(criteria=criteria, properties=properties, sort=sort), None)
 
-    def distinct(
-        self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False
-    ) -> List:
+    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
         """
-        Get all distinct values for a field
+        Get all distinct values for a field.
 
         Args:
             field: the field(s) to get distinct values for
@@ -216,17 +209,14 @@ class Store(MSONable, metaclass=ABCMeta):
         """
         criteria = criteria or {}
 
-        results = [
-            key for key, _ in self.groupby(field, properties=[field], criteria=criteria)
-        ]
-        results = [get(r, field) for r in results]
-        return results
+        results = [key for key, _ in self.groupby(field, properties=[field], criteria=criteria)]
+        return [get(r, field) for r in results]
 
     @property
     def last_updated(self) -> datetime:
         """
         Provides the most recent last_updated date time stamp from
-        the documents in this Store
+        the documents in this Store.
         """
         doc = next(
             self.query(
@@ -242,15 +232,13 @@ class Store(MSONable, metaclass=ABCMeta):
                 "is a datetime field in your store that represents the time of "
                 "last update to each document."
             )
-        elif not doc or get(doc, self.last_updated_field) is None:
+        if not doc or get(doc, self.last_updated_field) is None:
             # Handle when collection has docs but `NoneType` last_updated_field.
             return datetime.min
-        else:
-            return self._lu_func[0](get(doc, self.last_updated_field))
 
-    def newer_in(
-        self, target: "Store", criteria: Optional[Dict] = None, exhaustive: bool = False
-    ) -> List[str]:
+        return self._lu_func[0](get(doc, self.last_updated_field))
+
+    def newer_in(self, target: "Store", criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.
@@ -269,35 +257,24 @@ class Store(MSONable, metaclass=ABCMeta):
             # Get our current last_updated dates for each key value
             props = {self.key: 1, self.last_updated_field: 1, "_id": 0}
             dates = {
-                d[self.key]: self._lu_func[0](
-                    d.get(self.last_updated_field, datetime.max)
-                )
+                d[self.key]: self._lu_func[0](d.get(self.last_updated_field, datetime.max))
                 for d in self.query(properties=props)
             }
 
             # Get the last_updated for the store we're comparing with
             props = {target.key: 1, target.last_updated_field: 1, "_id": 0}
             target_dates = {
-                d[target.key]: target._lu_func[0](
-                    d.get(target.last_updated_field, datetime.min)
-                )
+                d[target.key]: target._lu_func[0](d.get(target.last_updated_field, datetime.min))
                 for d in target.query(criteria=criteria, properties=props)
             }
 
             new_keys = set(target_dates.keys()) - set(dates.keys())
-            updated_keys = {
-                key
-                for key, date in dates.items()
-                if target_dates.get(key, datetime.min) > date
-            }
+            updated_keys = {key for key, date in dates.items() if target_dates.get(key, datetime.min) > date}
 
             return list(new_keys | updated_keys)
 
-        else:
-            criteria = {
-                self.last_updated_field: {"$gt": self._lu_func[1](self.last_updated)}
-            }
-            return target.distinct(field=self.key, criteria=criteria)
+        criteria = {self.last_updated_field: {"$gt": self._lu_func[1](self.last_updated)}}
+        return target.distinct(field=self.key, criteria=criteria)
 
     @deprecated(message="Please use Store.newer_in")
     def lu_filter(self, targets):
@@ -320,7 +297,7 @@ class Store(MSONable, metaclass=ABCMeta):
     def updated_keys(self, target, criteria=None):
         """
         Returns keys for docs that are newer in the target store in comparison
-        with this store when comparing the last updated field (last_updated_field)
+        with this store when comparing the last updated field (last_updated_field).
 
         Args:
             target (Store): store to look for updated documents
@@ -354,7 +331,7 @@ class Store(MSONable, metaclass=ABCMeta):
 
 
 class StoreError(Exception):
-    """General Store-related error"""
+    """General Store-related error."""
 
     def __init__(self, *args, **kwargs):
         super().__init__(self, *args, **kwargs)

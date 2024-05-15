@@ -1,12 +1,7 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from asyncio import (
-    BoundedSemaphore,
-    Queue,
-    gather,
-    get_event_loop,
-)
+from asyncio import BoundedSemaphore, Queue, gather, get_event_loop
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
@@ -23,7 +18,7 @@ logger = getLogger("MultiProcessor")
 class BackPressure:
     """
     Wrapper for an iterator to provide
-    async access with backpressure
+    async access with backpressure.
     """
 
     def __init__(self, iterator, n):
@@ -43,7 +38,7 @@ class BackPressure:
 
     async def release(self, async_iterator):
         """
-        release iterator to pipeline the backpressure
+        release iterator to pipeline the backpressure.
         """
         async for item in async_iterator:
             try:
@@ -57,8 +52,8 @@ class BackPressure:
 class AsyncUnorderedMap:
     """
     Async iterator that maps a function to an async iterator
-    usign an executor and returns items as they are done
-    This does not guarantee order
+    using an executor and returns items as they are done
+    This does not guarantee order.
     """
 
     def __init__(self, func, async_iterator, executor):
@@ -87,9 +82,7 @@ class AsyncUnorderedMap:
     async def get_from_iterator(self):
         loop = get_event_loop()
         async for idx, item in enumerate(self.iterator):
-            future = loop.run_in_executor(
-                self.executor, safe_dispatch, (self.func, item)
-            )
+            future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
 
             self.tasks[idx] = future
 
@@ -106,13 +99,13 @@ class AsyncUnorderedMap:
 
         if item == self.done_sentinel:
             raise StopAsyncIteration
-        else:
-            return item
+
+        return item
 
 
 async def atqdm(async_iterator, *args, **kwargs):
     """
-    Wrapper around tqdm for async generators
+    Wrapper around tqdm for async generators.
     """
     _tqdm = tqdm(*args, **kwargs)
     async for item in async_iterator:
@@ -126,7 +119,7 @@ async def grouper(async_iterator, n: int):
     """
     Collect data into fixed-length chunks or blocks.
     >>> list(grouper(3, 'ABCDEFG'))
-    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']]
+    [['A', 'B', 'C'], ['D', 'E', 'F'], ['G']].
 
     Updated from:
     https://stackoverflow.com/questions/31164731/python-chunking-csv-file-multiproccessing/31170795#31170795
@@ -157,7 +150,7 @@ async def multi(
     num_processes,
     no_bars=False,
     heartbeat_func: Optional[Callable[..., Any]] = None,
-    heartbeat_func_kwargs: Dict[Any, Any] = {},
+    heartbeat_func_kwargs: Optional[Dict[Any, Any]] = None,
 ):
     builder.connect()
     cursor = builder.get_items()
@@ -209,6 +202,8 @@ async def multi(
         disable=no_bars,
     )
 
+    if not heartbeat_func_kwargs:
+        heartbeat_func_kwargs = {}
     if heartbeat_func:
         heartbeat_func(**heartbeat_func_kwargs)
 
@@ -218,7 +213,7 @@ async def multi(
 
     async for chunk in grouper(back_pressure_relief, n=builder.chunk_size):
         logger.info(
-            "Processed batch of {} items".format(builder.chunk_size),
+            f"Processed batch of {builder.chunk_size} items",
             extra={
                 "maggma": {
                     "event": "UPDATE",

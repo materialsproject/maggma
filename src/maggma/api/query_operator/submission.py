@@ -9,23 +9,19 @@ from maggma.api.utils import STORE_PARAMS
 
 class SubmissionQuery(QueryOperator):
     """
-    Method to generate a query for submission data using status and datetime
+    Method to generate a query for submission data using status and datetime.
     """
 
     def __init__(self, status_enum):
-
         self.status_enum = status_enum
 
         def query(
-            state: Optional[status_enum] = Query(
-                None, description="Latest status of the submission"
-            ),
+            state: Optional[status_enum] = Query(None, description="Latest status of the submission"),
             last_updated: Optional[datetime] = Query(
                 None,
                 description="Minimum datetime of status update for submission",
             ),
         ) -> STORE_PARAMS:
-
             crit = {}  # type: dict
 
             if state:
@@ -33,11 +29,7 @@ class SubmissionQuery(QueryOperator):
                 crit.update(s_dict)
 
             if last_updated:
-                l_dict = {
-                    "$expr": {
-                        "$gt": [{"$arrayElemAt": ["$last_updated", -1]}, last_updated]
-                    }
-                }
+                l_dict = {"$expr": {"$gt": [{"$arrayElemAt": ["$last_updated", -1]}, last_updated]}}
                 crit.update(l_dict)
 
             if state and last_updated:
@@ -48,5 +40,4 @@ class SubmissionQuery(QueryOperator):
         self.query = query
 
     def query(self):
-        "Stub query function for abstract class"
-        pass
+        "Stub query function for abstract class."
