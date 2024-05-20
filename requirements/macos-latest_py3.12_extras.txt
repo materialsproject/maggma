@@ -219,7 +219,7 @@ mongomock==4.1.2
     # via maggma (setup.py)
 monty==2023.11.3
     # via maggma (setup.py)
-montydb==2.5.2
+montydb==2.5.3
     # via maggma (setup.py)
 moto==4.2.11
     # via maggma (setup.py)
