@@ -75,7 +75,7 @@ jobs:
       run: |
         pip install -e .
         pytest --cov=maggma --cov-report=xml
-    - uses: codecov/codecov-action@v4.3.1
+    - uses: codecov/codecov-action@v4.4.1
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
