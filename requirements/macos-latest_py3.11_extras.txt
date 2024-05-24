@@ -349,7 +349,7 @@ regex==2023.10.3
     # via
     #   maggma (setup.py)
     #   mkdocs-material
-requests==2.31.0
+requests==2.32.0
     # via
     #   azure-core
     #   hvac
