@@ -7,7 +7,6 @@ import socket as pysocket
 from logging import getLogger
 from random import randint
 from time import perf_counter
-from typing import List
 
 import numpy as np
 import zmq
@@ -28,7 +27,7 @@ def find_port():
     return sock.getsockname()[1]
 
 
-def manager(url: str, port: int, builders: List[Builder], num_chunks: int, num_workers: int):
+def manager(url: str, port: int, builders: list[Builder], num_chunks: int, num_workers: int):
     """
     Really simple manager for distributed processing that uses a builder prechunk to modify
     the builder and send out modified builders for each worker to run.

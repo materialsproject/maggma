@@ -226,4 +226,4 @@ def run(
     if memray_file:
         import subprocess
 
-        subprocess.run(["memray", "flamegraph", memray_file], shell=False)
+        subprocess.run(["memray", "flamegraph", memray_file], shell=False, check=False)

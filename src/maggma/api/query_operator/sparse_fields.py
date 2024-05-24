@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional, Type
+from typing import Optional
 
 from fastapi import Query
 from pydantic import BaseModel
@@ -9,7 +9,7 @@ from maggma.utils import dynamic_import
 
 
 class SparseFieldsQuery(QueryOperator):
-    def __init__(self, model: Type[BaseModel], default_fields: Optional[List[str]] = None):
+    def __init__(self, model: type[BaseModel], default_fields: Optional[list[str]] = None):
         """
         Args:
             model: PyDantic Model that represents the underlying data source
@@ -46,13 +46,13 @@ class SparseFieldsQuery(QueryOperator):
     def query(self):
         "Stub query function for abstract class."
 
-    def meta(self) -> Dict:
+    def meta(self) -> dict:
         """
         Returns metadata for the Sparse field set.
         """
         return {"default_fields": self.default_fields}
 
-    def as_dict(self) -> Dict:
+    def as_dict(self) -> dict:
         """
         Special as_dict implemented to convert pydantic models into strings.
         """

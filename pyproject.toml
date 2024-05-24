@@ -22,7 +22,7 @@ classifiers=[
         "Topic :: Scientific/Engineering",
     ]
 license = {file = "LICENSE"}
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
         "setuptools",
         "ruamel.yaml>=0.17",

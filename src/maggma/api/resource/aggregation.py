@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional, Type
+from typing import Any, Optional
 
 import orjson
 from fastapi import HTTPException, Request, Response
@@ -23,10 +23,10 @@ class AggregationResource(Resource):
     def __init__(
         self,
         store: Store,
-        model: Type[BaseModel],
+        model: type[BaseModel],
         pipeline_query_operator: QueryOperator,
         timeout: Optional[int] = None,
-        tags: Optional[List[str]] = None,
+        tags: Optional[list[str]] = None,
         include_in_schema: Optional[bool] = True,
         sub_path: Optional[str] = "/",
         header_processor: Optional[HeaderProcessor] = None,
@@ -66,11 +66,11 @@ class AggregationResource(Resource):
     def build_dynamic_model_search(self):
         model_name = self.model.__name__
 
-        def search(**queries: Dict[str, STORE_PARAMS]) -> Dict:
+        def search(**queries: dict[str, STORE_PARAMS]) -> dict:
             request: Request = queries.pop("request")  # type: ignore
             queries.pop("temp_response")  # type: ignore
 
-            query: Dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
+            query: dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
 
             self.store.connect()
 

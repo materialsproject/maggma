@@ -3,12 +3,13 @@
 import threading
 import warnings
 import zlib
+from collections.abc import Iterator
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from io import BytesIO
 from json import dumps
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -47,7 +48,7 @@ class S3Store(Store):
         key: str = "fs_id",
         store_hash: bool = True,
         unpack_data: bool = True,
-        searchable_fields: Optional[List[str]] = None,
+        searchable_fields: Optional[list[str]] = None,
         index_store_kwargs: Optional[dict] = None,
         **kwargs,
     ):
@@ -151,7 +152,7 @@ class S3Store(Store):
         # For now returns the index collection since that is what we would "search" on
         return self.index._collection
 
-    def count(self, criteria: Optional[Dict] = None) -> int:
+    def count(self, criteria: Optional[dict] = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -162,12 +163,12 @@ class S3Store(Store):
 
     def query(
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-    ) -> Iterator[Dict]:
+    ) -> Iterator[dict]:
         """
         Queries the Store for a set of documents.
 
@@ -214,7 +215,7 @@ class S3Store(Store):
 
                 yield data
 
-    def _read_data(self, data: bytes, compress_header: str) -> Dict:
+    def _read_data(self, data: bytes, compress_header: str) -> dict:
         """Reads the data and transforms it into a dictionary.
         Allows for subclasses to apply custom schemes for transforming
         the data retrieved from S3.
@@ -241,7 +242,7 @@ class S3Store(Store):
         # Should just return the unpacked object then let the user run process_decoded
         return msgpack.unpackb(data, raw=False)
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False) -> List:
+    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field.
 
@@ -254,13 +255,13 @@ class S3Store(Store):
 
     def groupby(
         self,
-        keys: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        keys: Union[list[str], str],
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-    ) -> Iterator[Tuple[Dict, List[Dict]]]:
+    ) -> Iterator[tuple[dict, list[dict]]]:
         """
         Simple grouping function that will group documents by keys.
 
@@ -300,9 +301,9 @@ class S3Store(Store):
 
     def update(
         self,
-        docs: Union[List[Dict], Dict],
-        key: Union[List, str, None] = None,
-        additional_metadata: Union[str, List[str], None] = None,
+        docs: Union[list[dict], dict],
+        key: Union[list, str, None] = None,
+        additional_metadata: Union[str, list[str], None] = None,
     ):
         """
         Update documents into the Store.
@@ -331,7 +332,7 @@ class S3Store(Store):
 
         self._write_to_s3_and_index(docs, key + additional_metadata + self.searchable_fields)
 
-    def _write_to_s3_and_index(self, docs: List[Dict], search_keys: List[str]):
+    def _write_to_s3_and_index(self, docs: list[dict], search_keys: list[str]):
         """Implements updating of the provided documents in S3 and the index.
         Allows for subclasses to apply custom approaches to parellizing the writing.
 
@@ -416,7 +417,7 @@ class S3Store(Store):
         """Returns the function to use for decompressing data."""
         return zlib.decompress
 
-    def write_doc_to_s3(self, doc: Dict, search_keys: List[str]) -> Dict:
+    def write_doc_to_s3(self, doc: dict, search_keys: list[str]) -> dict:
         """
         Write the data to s3 and return the metadata to be inserted into the index db.
 
@@ -484,7 +485,7 @@ class S3Store(Store):
         # Additionally, MinIO requires lowercase keys
         return str(key).replace("_", "-").lower()
 
-    def remove_docs(self, criteria: Dict, remove_s3_object: bool = False):
+    def remove_docs(self, criteria: dict, remove_s3_object: bool = False):
         """
         Remove docs matching the query dictionary.
 
@@ -508,7 +509,7 @@ class S3Store(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def newer_in(self, target: Store, criteria: Optional[Dict] = None, exhaustive: bool = False) -> List[str]:
+    def newer_in(self, target: Store, criteria: Optional[dict] = None, exhaustive: bool = False) -> list[str]:
         """
         Returns the keys of documents that are newer in the target Store than this Store.
 

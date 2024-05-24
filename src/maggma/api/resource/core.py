@@ -1,6 +1,5 @@
 import logging
 from abc import ABCMeta, abstractmethod
-from typing import Dict, Type
 
 from fastapi import APIRouter, FastAPI, Request, Response
 from monty.json import MontyDecoder, MSONable
@@ -18,7 +17,7 @@ class Resource(MSONable, metaclass=ABCMeta):
 
     def __init__(
         self,
-        model: Type[BaseModel],
+        model: type[BaseModel],
     ):
         """
         Args:
@@ -68,7 +67,7 @@ class Resource(MSONable, metaclass=ABCMeta):
         app.include_router(self.router, prefix="")
         uvicorn.run(app)
 
-    def as_dict(self) -> Dict:
+    def as_dict(self) -> dict:
         """
         Special as_dict implemented to convert pydantic models into strings.
         """
@@ -78,7 +77,7 @@ class Resource(MSONable, metaclass=ABCMeta):
         return d
 
     @classmethod
-    def from_dict(cls, d: Dict):
+    def from_dict(cls, d: dict):
         if isinstance(d["model"], str):
             d["model"] = dynamic_import(d["model"])
         d = {k: MontyDecoder().process_decoded(v) for k, v in d.items()}

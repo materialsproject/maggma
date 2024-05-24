@@ -1,8 +1,9 @@
 import gzip
 import re
+from collections.abc import Generator
 from datetime import datetime
 from io import BytesIO, StringIO
-from typing import Dict, Generator, List, Optional, Tuple, Union
+from typing import Optional, Union
 
 import jsonlines
 import numpy as np
@@ -60,7 +61,7 @@ class PandasMemoryStore:
     def set_index_data(self, new_index: pd.DataFrame):
         self._data = new_index
 
-    def _verify_criteria(self, criteria: Dict) -> Tuple[str, str, List]:
+    def _verify_criteria(self, criteria: dict) -> tuple[str, str, list]:
         query_string, is_in_key, is_in_list = "", None, None
         if criteria and "query" not in criteria and "is_in" not in criteria:
             raise AttributeError("Pandas memory store only support query or is_in")
@@ -76,12 +77,12 @@ class PandasMemoryStore:
 
     def query(
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        criteria_fields: Union[List, None] = None,
+        criteria_fields: Union[list, None] = None,
     ) -> pd.DataFrame:
         """
         Queries the Store for a set of documents.
@@ -135,9 +136,9 @@ class PandasMemoryStore:
         index: pd.DataFrame,
         query_string: str,
         is_in_key: str,
-        is_in_list: List,
-        properties: Union[List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        is_in_list: list,
+        properties: Union[list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
     ) -> pd.DataFrame:
@@ -160,7 +161,7 @@ class PandasMemoryStore:
             ret = ret[:limit]
         return ret
 
-    def count(self, criteria: Optional[Dict] = None, criteria_fields: Union[List, None] = None) -> int:
+    def count(self, criteria: Optional[dict] = None, criteria_fields: Union[list, None] = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -174,7 +175,7 @@ class PandasMemoryStore:
         return len(self.query(criteria=criteria, criteria_fields=criteria_fields))
 
     def distinct(
-        self, field: str, criteria: Optional[Dict] = None, criteria_fields: Union[List, None] = None
+        self, field: str, criteria: Optional[dict] = None, criteria_fields: Union[list, None] = None
     ) -> pd.Series:
         """
         Get all distinct values for a field.
@@ -209,9 +210,9 @@ class PandasMemoryStore:
     def newer_in(
         self,
         target: "PandasMemoryStore",
-        criteria: Optional[Dict] = None,
+        criteria: Optional[dict] = None,
         exhaustive: bool = False,
-        criteria_fields: Union[List, None] = None,
+        criteria_fields: Union[list, None] = None,
     ) -> pd.Series:
         """
         Returns the keys of documents that are newer in the target
@@ -463,10 +464,10 @@ class OpenDataStore(S3IndexStore):
     def __init__(
         self,
         index: S3IndexStore = None,  # set _index to this and create property
-        searchable_fields: Optional[List[str]] = None,
+        searchable_fields: Optional[list[str]] = None,
         object_file_extension: str = ".jsonl.gz",
         access_as_public_bucket: bool = False,
-        object_grouping: Optional[List[str]] = None,
+        object_grouping: Optional[list[str]] = None,
         **kwargs,
     ):
         """Initializes an OpenDataStore.
@@ -541,12 +542,12 @@ class OpenDataStore(S3IndexStore):
 
     def query(
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-        criteria_fields: Union[List, None] = None,
+        criteria_fields: Union[list, None] = None,
     ) -> pd.DataFrame:
         """
         Queries the Store for a set of documents.

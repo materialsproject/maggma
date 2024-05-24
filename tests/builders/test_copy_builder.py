@@ -40,7 +40,7 @@ def old_docs(now):
 @pytest.fixture()
 def new_docs(now):
     toc = now + timedelta(seconds=1)
-    return [{"lu": toc, "k": k, "v": "new"} for k in range(0, 10)]
+    return [{"lu": toc, "k": k, "v": "new"} for k in range(10)]
 
 
 @pytest.fixture()

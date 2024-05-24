@@ -1,7 +1,8 @@
+from collections.abc import Iterator
 from functools import partial
 from multiprocessing.managers import BaseManager
 from threading import Lock
-from typing import Any, Callable, Dict, Iterator, List, Optional, Tuple, Union
+from typing import Any, Callable, Optional, Union
 
 from monty.json import MontyDecoder
 
@@ -87,7 +88,7 @@ class StoreFacade(Store):
         """
         self.multistore.close(self.store)
 
-    def count(self, criteria: Optional[Dict] = None) -> int:
+    def count(self, criteria: Optional[dict] = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -98,12 +99,12 @@ class StoreFacade(Store):
 
     def query(
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
-    ) -> Iterator[Dict]:
+    ) -> Iterator[dict]:
         """
         Queries the Store for a set of documents.
 
@@ -124,7 +125,7 @@ class StoreFacade(Store):
             limit=limit,
         )
 
-    def update(self, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None, **kwargs):
+    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None, **kwargs):
         """
         Update documents into the Store.
 
@@ -152,14 +153,14 @@ class StoreFacade(Store):
 
     def groupby(
         self,
-        keys: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        keys: Union[list[str], str],
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
         **kwargs,
-    ) -> Iterator[Tuple[Dict, List[Dict]]]:
+    ) -> Iterator[tuple[dict, list[dict]]]:
         """
         Simple grouping function that will group documents
         by keys.
@@ -180,7 +181,7 @@ class StoreFacade(Store):
             self.store, keys=keys, criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit, **kwargs
         )
 
-    def remove_docs(self, criteria: Dict, **kwargs):
+    def remove_docs(self, criteria: dict, **kwargs):
         """
         Remove docs matching the query dictionary.
 
@@ -191,9 +192,9 @@ class StoreFacade(Store):
 
     def query_one(
         self,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         **kwargs,
     ):
         """
@@ -207,7 +208,7 @@ class StoreFacade(Store):
         """
         return self.multistore.query_one(self.store, criteria=criteria, properties=properties, sort=sort, **kwargs)
 
-    def distinct(self, field: str, criteria: Optional[Dict] = None, all_exist: bool = False, **kwargs) -> List:
+    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False, **kwargs) -> list:
         """
         Get all distinct values for a field.
 
@@ -392,7 +393,7 @@ class MultiStore:
             for store in self._stores:
                 store.close()
 
-    def count(self, store: Store, criteria: Optional[Dict] = None, **kwargs) -> int:
+    def count(self, store: Store, criteria: Optional[dict] = None, **kwargs) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -405,13 +406,13 @@ class MultiStore:
     def query(
         self,
         store: Store,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
         **kwargs,
-    ) -> List[Dict]:
+    ) -> list[dict]:
         """
         Queries the Store for a set of documents.
 
@@ -431,7 +432,7 @@ class MultiStore:
             )
         )
 
-    def update(self, store: Store, docs: Union[List[Dict], Dict], key: Union[List, str, None] = None, **kwargs):
+    def update(self, store: Store, docs: Union[list[dict], dict], key: Union[list, str, None] = None, **kwargs):
         """
         Update documents into the Store.
 
@@ -462,14 +463,14 @@ class MultiStore:
     def groupby(
         self,
         store: Store,
-        keys: Union[List[str], str],
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        keys: Union[list[str], str],
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         skip: int = 0,
         limit: int = 0,
         **kwargs,
-    ) -> Iterator[Tuple[Dict, List[Dict]]]:
+    ) -> Iterator[tuple[dict, list[dict]]]:
         """
         Simple grouping function that will group documents
         by keys.
@@ -491,7 +492,7 @@ class MultiStore:
             keys=keys, criteria=criteria, properties=properties, sort=sort, skip=skip, limit=limit, **kwargs
         )
 
-    def remove_docs(self, store: Store, criteria: Dict, **kwargs):
+    def remove_docs(self, store: Store, criteria: dict, **kwargs):
         """
         Remove docs matching the query dictionary.
 
@@ -504,9 +505,9 @@ class MultiStore:
     def query_one(
         self,
         store: Store,
-        criteria: Optional[Dict] = None,
-        properties: Union[Dict, List, None] = None,
-        sort: Optional[Dict[str, Union[Sort, int]]] = None,
+        criteria: Optional[dict] = None,
+        properties: Union[dict, list, None] = None,
+        sort: Optional[dict[str, Union[Sort, int]]] = None,
         **kwargs,
     ):
         """
@@ -525,8 +526,8 @@ class MultiStore:
         )
 
     def distinct(
-        self, store: Store, field: str, criteria: Optional[Dict] = None, all_exist: bool = False, **kwargs
-    ) -> List:
+        self, store: Store, field: str, criteria: Optional[dict] = None, all_exist: bool = False, **kwargs
+    ) -> list:
         """
         Get all distinct values for a field.
 

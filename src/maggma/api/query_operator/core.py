@@ -1,5 +1,4 @@
 from abc import ABCMeta, abstractmethod
-from typing import Dict, List
 
 from monty.json import MSONable
 
@@ -18,7 +17,7 @@ class QueryOperator(MSONable, metaclass=ABCMeta):
         The query function that does the work for this query operator.
         """
 
-    def meta(self) -> Dict:
+    def meta(self) -> dict:
         """
         Returns meta data to return with the Response.
 
@@ -28,7 +27,7 @@ class QueryOperator(MSONable, metaclass=ABCMeta):
         """
         return {}
 
-    def post_process(self, docs: List[Dict], query: Dict) -> List[Dict]:
+    def post_process(self, docs: list[dict], query: dict) -> list[dict]:
         """
         An optional post-processing function for the data.
 

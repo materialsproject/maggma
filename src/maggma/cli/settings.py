@@ -1,9 +1,9 @@
 import platform
 import tempfile
+from typing import Optional
 
 from pydantic import Field
 from pydantic_settings import BaseSettings
-from typing_extensions import Optional
 
 tempdir = "/tmp" if platform.system() == "Darwin" else tempfile.gettempdir()
 
