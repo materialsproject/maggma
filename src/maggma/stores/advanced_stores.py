@@ -5,9 +5,6 @@ import json
 import os
 from typing import Dict, Iterator, List, Optional, Tuple, Union
 
-from mongogrant import Client
-from mongogrant.client import check
-from mongogrant.config import Config
 from monty.dev import deprecated, requires
 
 from maggma.core import Sort, Store, StoreError
@@ -19,11 +16,13 @@ try:
 except ImportError:
     hvac = None
 try:
-    import mongogrant
+    from mongogrant import Client
+    from mongogrant.client import check
+    from mongogrant.config import Config
 except ImportError:
-    mongogrant = None
+    Client = None
 
-
+@deprecated(MongoStore)
 class MongograntStore(MongoStore):
     """Initialize a Store with a mongogrant "`<role>`:`<host>`/`<db>`." spec.
 
@@ -34,10 +33,9 @@ class MongograntStore(MongoStore):
     """
 
     @requires(
-        mongogrant is not None,
+        Client is not None,
         "mongogrant is required to use MongoGrantStore. Please run `pip install maggma[mongogrant]",
     )
-    @deprecated(MongoStore, "MongograntStore is deprecated! Use MongoStore instead.")
     def __init__(
         self,
         mongogrant_spec: str,
