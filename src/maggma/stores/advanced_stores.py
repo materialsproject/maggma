@@ -22,6 +22,7 @@ try:
 except ImportError:
     Client = None
 
+
 @deprecated(MongoStore)
 class MongograntStore(MongoStore):
     """Initialize a Store with a mongogrant "`<role>`:`<host>`/`<db>`." spec.
