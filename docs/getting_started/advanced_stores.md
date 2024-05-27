@@ -40,10 +40,12 @@ Different S3 services might have different rules, but the limit is typically sma
 The `S3Store` should be constructed as follows:
 
 ```python
-from maggma.stores import MongograntStore, S3Store
-index = MongograntStore("ro:mongodb03/js_cathodes",
-                        "atomate_aeccar0_fs_index",
-                        key="fs_id")
+from maggma.stores import MongoURIStore, S3Store
+store = MongoURIStore(
+    "mongodb+srv://<username>:<password>@<host>",
+    "atomate_aeccar0_fs_index",
+    key="fs_id",
+)
 s3store = S3Store(index=index,
         bucket="<<BUCKET_NAME>>",
         s3_profile="<<S3_PROFILE_NAME>>",
