@@ -9,7 +9,7 @@ from typing import Any, Union
 
 from monty.json import MontyDecoder, MSONable
 
-from maggma.core.store import Store
+from maggma.core.store import Store, StoreError
 from maggma.utils import TqdmLoggingHandler, grouper, tqdm
 
 
@@ -114,7 +114,7 @@ class Builder(MSONable, metaclass=ABCMeta):
         for store in self.sources + self.targets:
             try:
                 store.close()
-            except AttributeError:
+            except (AttributeError, StoreError):
                 continue
 
     def run(self, log_level=logging.DEBUG):
