@@ -231,7 +231,7 @@ monty==2023.11.3
     # via maggma (setup.py)
 montydb==2.5.2
     # via maggma (setup.py)
-moto==4.2.11
+moto==5.1
     # via maggma (setup.py)
 msal==1.26.0
     # via
