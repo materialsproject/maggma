@@ -8,7 +8,7 @@ import jsonlines
 import pandas as pd
 import pytest
 from bson import json_util
-from moto import mock_s3
+from moto import mock_aws
 
 from maggma.stores.open_data import OpenDataStore, PandasMemoryStore, S3IndexStore, TasksOpenDataStore
 
@@ -203,7 +203,7 @@ def test_pdmems_update(memstore):
 @pytest.fixture()
 def s3indexstore():
     data = [{"task_id": "mp-1", "last_updated": datetime.utcnow()}]
-    with mock_s3():
+    with mock_aws():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
         client = boto3.client("s3", region_name="us-east-1")
@@ -232,7 +232,7 @@ def test_s3is_pickle(s3indexstore):
 
 def test_s3is_connect_retrieve_manifest(s3indexstore):
     assert s3indexstore.retrieve_manifest().equals(s3indexstore._data)
-    with mock_s3():
+    with mock_aws():
         with pytest.raises(s3indexstore.s3_client.exceptions.NoSuchBucket):
             S3IndexStore(collection_name="foo", bucket="bucket2", key="task_id").retrieve_manifest()
         with pytest.raises(RuntimeError):
@@ -247,7 +247,7 @@ def test_s3is_connect_retrieve_manifest(s3indexstore):
 
 
 def test_s3is_store_manifest():
-    with mock_s3():
+    with mock_aws():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket2")
         s3is = S3IndexStore(collection_name="foo", bucket="bucket2", key="task_id")
@@ -276,7 +276,7 @@ def test_s3is_close(s3indexstore):
 
 @pytest.fixture()
 def s3store():
-    with mock_s3():
+    with mock_aws():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
 
@@ -309,7 +309,7 @@ def s3store():
 
 @pytest.fixture()
 def s3store_w_subdir():
-    with mock_s3():
+    with mock_aws():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
         conn.create_bucket(Bucket="bucket2")
@@ -364,7 +364,7 @@ def test_read_doc_from_s3():
         {"task_id": "mp-1", "last_updated": datetime.utcnow(), "group": "foo", "also_group": "boo"},
         {"task_id": "mp-2", "last_updated": datetime.utcnow(), "group": "foo", "also_group": "boo"},
     ]
-    with mock_s3():
+    with mock_aws():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
         client = boto3.client("s3", region_name="us-east-1")
@@ -560,7 +560,7 @@ def test_additional_metadata(s3store):
 
 def test_rebuild_index_from_s3_for_tasks_store():
     data = [{"task_id": "mp-2", "data": "asd", "last_updated": datetime.utcnow(), "group": {"level_two": 4}}]
-    with mock_s3():
+    with mock_aws():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
 
@@ -590,7 +590,7 @@ def test_rebuild_index_from_s3_for_tasks_store():
 
 
 def test_no_update_for_tasks_store():
-    with mock_s3():
+    with mock_aws():
         conn = boto3.resource("s3", region_name="us-east-1")
         conn.create_bucket(Bucket="bucket1")
         store = TasksOpenDataStore(
