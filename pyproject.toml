@@ -71,7 +71,7 @@ testing = [
             "pytest-asyncio",
             "pytest-xdist",
             "pre-commit",
-            "moto",
+            "moto>=5.0", # mock_s3 changed to mock_aws in v5
             "ruff",
             "responses<0.22.0",
             "types-pyYAML",
