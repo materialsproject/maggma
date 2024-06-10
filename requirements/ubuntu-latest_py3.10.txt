@@ -21,9 +21,9 @@ bcrypt==4.1.3
     # via paramiko
 blinker==1.8.2
     # via flask
-boto3==1.34.119
+boto3==1.34.122
     # via maggma (pyproject.toml)
-botocore==1.34.119
+botocore==1.34.122
     # via
     #   boto3
     #   s3transfer
@@ -113,7 +113,7 @@ orjson==3.10.3
     # via
     #   fastapi
     #   maggma (pyproject.toml)
-packaging==24.0
+packaging==24.1
     # via mongomock
 paramiko==3.4.0
     # via sshtunnel
@@ -126,7 +126,7 @@ pydantic==2.7.3
     #   pydantic-settings
 pydantic-core==2.18.4
     # via pydantic
-pydantic-settings==2.3.0
+pydantic-settings==2.3.1
     # via maggma (pyproject.toml)
 pydash==8.0.1
     # via maggma (pyproject.toml)
@@ -188,7 +188,7 @@ tqdm==4.66.4
     # via maggma (pyproject.toml)
 typer==0.12.3
     # via fastapi-cli
-typing-extensions==4.12.1
+typing-extensions==4.12.2
     # via
     #   anyio
     #   fastapi
