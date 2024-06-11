@@ -23,7 +23,7 @@ azure-core==1.29.5
     # via
     #   azure-identity
     #   azure-storage-blob
-azure-identity==1.15.0
+azure-identity==1.16.1
     # via maggma (setup.py)
 azure-storage-blob==12.19.0
     # via maggma (setup.py)

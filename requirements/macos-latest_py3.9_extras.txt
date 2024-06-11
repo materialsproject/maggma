@@ -24,7 +24,7 @@ azure-core==1.30.2
     # via
     #   azure-identity
     #   azure-storage-blob
-azure-identity==1.16.0
+azure-identity==1.16.1
     # via maggma (pyproject.toml)
 azure-storage-blob==12.20.0
     # via maggma (pyproject.toml)
