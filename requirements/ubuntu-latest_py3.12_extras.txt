@@ -223,7 +223,7 @@ montydb==2.5.3
     # via maggma (setup.py)
 moto==5.0.9
     # via maggma (setup.py)
-msal==1.26.0
+msal==1.28.0
     # via
     #   azure-identity
     #   msal-extensions
