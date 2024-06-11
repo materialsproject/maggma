@@ -95,8 +95,13 @@ def test_numeric_query_serialization():
 
 def test_sort_query_functionality():
     op = SortQuery()
-
     assert op.query(_sort_fields="volume,-density") == {"sort": {"volume": 1, "density": -1}}
+
+
+def test_sort_query_fail():
+    op = SortQuery(max_num=1)
+    with pytest.raises(HTTPException):
+        op.query(_sort_fields="volume,-density")
 
 
 def test_sort_serialization():
