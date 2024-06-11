@@ -42,7 +42,11 @@ class SortQuery(QueryOperator):
                 )
 
             for sort_field in field_list:
-                query_entry = {sort_field[1:]: -1} if sort_field.startswith("-") else {sort_field: 1}
+                query_entry = {sort_field: 1}
+
+                if sort_field.startswith("-"):
+                    query_entry = {sort_field[1:]: -1}
+                    sort_field = sort_field[1:]
 
                 if self.fields and sort_field not in self.fields:
                     continue
