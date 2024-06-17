@@ -203,7 +203,7 @@ typing-extensions==4.12.2
     #   uvicorn
 ujson==5.10.0
     # via fastapi
-urllib3==1.26.18
+urllib3==1.26.19
     # via
     #   botocore
     #   requests
