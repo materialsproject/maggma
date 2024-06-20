@@ -20,7 +20,7 @@ Stores are databases containing organized document-based data. They represent ei
 
 ## Builder
 
-Builders represent a data processing step, analogous to an extrac-transform-load (ETL) operation in a data
+Builders represent a data processing step, analogous to an extract-transform-load (ETL) operation in a data
 warehouse model. Much like `Store`, the `Builder` class provides a consistent interface for writing data
 transformations, which are each broken into 3 phases: `get_items`, `process_item`, and `update_targets`:
 
