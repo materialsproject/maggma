@@ -1,6 +1,7 @@
 """
 Tests for group builder
 """
+
 from datetime import datetime
 from random import randint
 
