@@ -135,7 +135,7 @@ select = [
   "UP",   # pyupgrade
   "W",    # pycodestyle warning
   "YTT",  # flake8-2020
-  "NPY201", #numpy 2.0
+  "NPY201", # numpy 2.0
 ]
 ignore = [
   "B023",    # Function definition does not bind loop variable
