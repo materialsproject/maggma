@@ -967,7 +967,7 @@
 <p>One advantage of using the generator approach is it is less memory intensive than the approach where a list of items returned. For large datasets, returning a list of all items for processing may be prohibitive due to memory constraints.</p>
 <h2 id="process_item"><code>process_item</code><a class="headerlink" href="#process_item" title="Permanent link">&para;</a></h2>
 <p><code>process_item</code> just has to do the parallelizable work on each item. Since the item is whatever comes out of <code>get_items</code>, you know exactly what it should be. It may be a single document, a list of documents, a mapping, a set, etc.</p>
-<p>Our simple process item just has to multiply one field by <code>self.mulitplier</code>:</p>
+<p>Our simple process item just has to multiply one field by <code>self.multiplier</code>:</p>
 <div class="highlight"><pre><span></span><code>    <span class="k">def</span> <span class="nf">process_items</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span> <span class="p">:</span> <span class="n">Dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Multiplies the &quot;a&quot; sub-document by self.multiplier</span>
