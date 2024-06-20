@@ -34,7 +34,6 @@ dependencies = [
         "pydash>=4.1.0",
         "jsonschema>=3.1.1",
         "tqdm>=4.19.6",
-        "mongogrant>=0.3.1",
         "aioitertools>=0.5.1",
         "numpy>=1.17.3",
         "fastapi>=0.42.0",
@@ -61,6 +60,7 @@ vasp = ["pymatgen"]
 vault = ["hvac>=0.9.5"]
 memray = ["memray>=1.7.0"]
 montydb = ["montydb>=2.3.12"]
+mongogrant = ["mongogrant>=0.3.1"]
 notebook_runner = ["IPython>=8.11", "nbformat>=5.0", "regex>=2020.6"]
 azure = ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"]
 open_data = ["pandas>=2.1.4", "jsonlines>=4.0.0"]
