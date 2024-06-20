@@ -1,6 +1,7 @@
 """
 Tests for Projection_Builder
 """
+
 import pytest
 
 from maggma.builders.projection_builder import Projection_Builder
@@ -97,7 +98,7 @@ def test_update_targets(source1, source2, target):
     assert target.query_one(criteria={"k": 0})["newa"] == "a"
     assert target.query_one(criteria={"k": 0})["d"] == "d"
     assert target.query_one(criteria={"k": 10})["d"] == "d"
-    assert "a" not in target.query_one(criteria={"k": 10}).keys()
+    assert "a" not in target.query_one(criteria={"k": 10})
 
 
 def test_run(source1, source2, target):
@@ -107,7 +108,7 @@ def test_run(source1, source2, target):
     assert target.query_one(criteria={"k": 0})["a"] == "a"
     assert target.query_one(criteria={"k": 0})["d"] == "d"
     assert target.query_one(criteria={"k": 10})["d"] == "d"
-    assert "a" not in target.query_one(criteria={"k": 10}).keys()
+    assert "a" not in target.query_one(criteria={"k": 10})
 
 
 def test_query(source1, source2, target):

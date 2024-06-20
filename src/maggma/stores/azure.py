@@ -1,6 +1,7 @@
 """
 Advanced Stores for connecting to Microsoft Azure data.
 """
+
 import os
 import threading
 import warnings
@@ -131,7 +132,6 @@ class AzureBlobStore(Store):
         """
         Connect to the source data.
         """
-
         service_client = self._get_service_client()
 
         if not self.service:
@@ -177,7 +177,6 @@ class AzureBlobStore(Store):
         Args:
             criteria: PyMongo filter for documents to count in
         """
-
         return self.index.count(criteria)
 
     def query(
@@ -200,7 +199,6 @@ class AzureBlobStore(Store):
             limit: limit on total number of documents returned
 
         """
-
         if self.container is None or self.service is None:
             raise RuntimeError("The store has not been connected")
 
@@ -315,7 +313,6 @@ class AzureBlobStore(Store):
                  field is to be used
             additional_metadata: field(s) to include in the blob store's metadata
         """
-
         if self.container is None or self.service is None:
             raise RuntimeError("The store has not been connected")
 
@@ -443,7 +440,6 @@ class AzureBlobStore(Store):
         Sanitize keys to store metadata.
         The metadata keys should adhere to the naming rules for C# identifiers.
         """
-
         new_key = str(key)
         for k, v in self.key_sanitize_dict.items():
             new_key = new_key.replace(k, v)
@@ -503,7 +499,6 @@ class AzureBlobStore(Store):
         Relies on the index document being stores as the metadata for the file
         This can help recover lost databases.
         """
-
         objects = self.container.list_blobs(name_starts_with=self.sub_dir)
         for obj in objects:
             # handle the case where there are subdirs in the chosen container

@@ -94,7 +94,6 @@ class API(MSONable):
         @app.head("/heartbeat", include_in_schema=False)
         def heartbeat():
             """API Heartbeat for Load Balancing."""
-
             return {
                 "status": "OK",
                 "time": datetime.utcnow(),

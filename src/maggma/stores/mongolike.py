@@ -169,7 +169,6 @@ class MongoStore(Store):
             field: the field(s) to get distinct values for
             criteria: PyMongo filter for documents to search in
         """
-
         criteria = criteria or {}
         try:
             distinct_vals = self._collection.distinct(field, criteria)
@@ -270,7 +269,6 @@ class MongoStore(Store):
             hint: Dictionary of indexes to use as hints for query optimizer.
                 Keys are field names and values are 1 for ascending or -1 for descending.
         """
-
         criteria = criteria if criteria else {}
 
         hint_list = (
@@ -351,7 +349,6 @@ class MongoStore(Store):
         Returns:
             bool indicating if the index exists/was created
         """
-
         if confirm_field_index(self._collection, key):
             return True
 
@@ -372,7 +369,6 @@ class MongoStore(Store):
                  a single field, or None if the Store's key
                  field is to be used
         """
-
         requests = []
 
         if not isinstance(docs, list):
@@ -916,7 +912,6 @@ class MontyStore(MemoryStore):
                 multiple fields, a single field, or None if the Store's key field is to be
                 used.
         """
-
         if not isinstance(docs, list):
             docs = [docs]
 

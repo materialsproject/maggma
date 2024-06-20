@@ -1,5 +1,13 @@
 # Changelog
 
+## [v0.68.5](https://github.com/materialsproject/maggma/tree/v0.68.5) (2024-06-20)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.68.4...v0.68.5)
+
+**Merged pull requests:**
+
+- mv mongogrant to optional dependency group [\#968](https://github.com/materialsproject/maggma/pull/968) ([rkingsbury](https://github.com/rkingsbury))
+
 ## [v0.68.4](https://github.com/materialsproject/maggma/tree/v0.68.4) (2024-06-11)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.68.3...v0.68.4)

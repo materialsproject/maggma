@@ -60,7 +60,6 @@ class AggregationResource(Resource):
         Internal method to prepare the endpoint by setting up default handlers
         for routes.
         """
-
         self.build_dynamic_model_search()
 
     def build_dynamic_model_search(self):

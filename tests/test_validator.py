@@ -1,6 +1,7 @@
 """
 Tests the validators
 """
+
 import pytest
 from monty.json import MSONable
 

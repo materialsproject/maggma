@@ -40,4 +40,4 @@ class SubmissionQuery(QueryOperator):
         self.query = query
 
     def query(self):
-        "Stub query function for abstract class."
+        """Stub query function for abstract class."""

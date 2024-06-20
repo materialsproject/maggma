@@ -1,6 +1,7 @@
 """
 Tests for advanced stores
 """
+
 import os
 import shutil
 import signal
