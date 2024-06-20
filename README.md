@@ -39,6 +39,15 @@ s2 -- Builder 3-->s4(Store 4)
 
 A major challenge in building scalable data pipelines is dealing with all the different types of data sources out there. Maggma's `Store` class provides a consistent, unified interface for querying data from arbitrary data sources. It was originally built around MongoDB, so it's interface closely resembles `PyMongo` syntax. However, Maggma makes it possible to use that same syntax to query other types of databases, such as Amazon S3, GridFS, or files on disk, [and many others](https://materialsproject.github.io/maggma/getting_started/stores/#list-of-stores). Stores implement methods to `connect`, `query`, find `distinct` values, `groupby` fields, `update` documents, and `remove` documents.
 
+```python
+>>> my_data = {"a": 1, "b": 2}
+>>> store = MongoStore(database="my_db_name", collection_name="my_collection_name", username="my_username", >>> password="my_password", host="my_hostname", port=27017, )
+>>> with store:
+        store.update(my_data)
+>>> store.query_one({})
+[{"a": 1}]
+```
+
 ### Builder
 
 Builders represent a data processing step, analogous to an extract-transform-load (ETL) operation in a data
