@@ -39,19 +39,31 @@ s2 -- Builder 3-->s4(Store 4)
 
 A major challenge in building scalable data pipelines is dealing with all the different types of data sources out there. Maggma's `Store` class provides a consistent, unified interface for querying data from arbitrary data sources. It was originally built around MongoDB, so it's interface closely resembles `PyMongo` syntax. However, Maggma makes it possible to use that same syntax to query other types of databases, such as Amazon S3, GridFS, or files on disk, [and many others](https://materialsproject.github.io/maggma/getting_started/stores/#list-of-stores). Stores implement methods to `connect`, `query`, find `distinct` values, `groupby` fields, `update` documents, and `remove` documents.
 
+The example below demonstrates inserting 4 documents (python `dicts`) into a `MongoStore` with `update`, then
+accessing the data using `count`, `query`, and `distinct`.
+
 ```python
->>> my_data = {"a": 1, "b": 2}
+>>> turtles = [{"name": "Leonardo", "color": "blue", "tool": "sword"},
+               {"name": "Donatello","color": "purple", "tool": "staff"},
+               {"name": "Michelangelo", "color": "orange", "tool": "nunchuks"},
+               {"name":"Raphael", "color": "red", "tool": "sai"}
+            ]
 >>> store = MongoStore(database="my_db_name",
                        collection_name="my_collection_name",
                        username="my_username",
                        password="my_password",
                        host="my_hostname",
                        port=27017,
+                       key="name",
                     )
 >>> with store:
         store.update(my_data)
+>>> store.count()
+4
 >>> store.query_one({})
-[{"a": 1}]
+{'_id': ObjectId('66746d29a78e8431daa3463a'), 'name': 'Leonardo', 'color': 'blue', 'tool': 'sword'}
+>>> store.distinct('color')
+['purple', 'orange', 'blue', 'red']
 ```
 
 ### Builder
