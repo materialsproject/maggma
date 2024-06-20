@@ -1,6 +1,7 @@
 """
 Utilities to help with maggma functions.
 """
+
 import itertools
 import logging
 import signal
@@ -89,7 +90,6 @@ def to_isoformat_ceil_ms(dt: Union[datetime, str]) -> str:
 
 def to_dt(s: Union[datetime, str]) -> datetime:
     """Convert an ISO 8601 string to a datetime."""
-
     if isinstance(s, str):
         return parser.parse(s)
     if isinstance(s, datetime):
@@ -112,7 +112,6 @@ def recursive_update(d: dict, u: dict):
         d (dict): dict to update
         u (dict): updates to propagate
     """
-
     for k, v in u.items():
         if k in d:
             if isinstance(v, dict) and isinstance(d[k], dict):
@@ -212,7 +211,6 @@ def dynamic_import(abs_module_path: str, class_name: Optional[str] = None):
     """
     Dynamic class importer from: https://www.bnmetrics.com/blog/dynamic-import-in-python3.
     """
-
     if class_name is None:
         class_name = abs_module_path.split(".")[-1]
         abs_module_path = ".".join(abs_module_path.split(".")[:-1])

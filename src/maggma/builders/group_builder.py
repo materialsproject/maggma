@@ -1,6 +1,7 @@
 """
 Many-to-Many GroupBuilder.
 """
+
 import traceback
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable, Iterator
@@ -183,7 +184,6 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
         """
         Gets the IDs that need to be processed.
         """
-
         query = self.query or {}
 
         distinct_from_target = list(self.target.distinct(self._target_keys_field, criteria=query))
@@ -217,7 +217,6 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
         """
         Get the groups by grouping_keys for these documents.
         """
-
         grouping_keys = self.grouping_keys
 
         groups: set[tuple] = set()

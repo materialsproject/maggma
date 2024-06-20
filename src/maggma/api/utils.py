@@ -63,7 +63,6 @@ def attach_signature(function: Callable, defaults: dict, annotations: dict):
         defaults: dictionary of parameters -> default values
         annotations: dictionary of type annotations for the parameters
     """
-
     required_params = [
         inspect.Parameter(
             param,
@@ -106,7 +105,6 @@ def api_sanitize(
         allow_dict_msonable (bool): Whether to allow dictionaries in place of MSONable quantities.
             Defaults to False
     """
-
     models = [
         model for model in get_flat_models_from_model(pydantic_model) if issubclass(model, BaseModel)
     ]  # type: list[BaseModel]

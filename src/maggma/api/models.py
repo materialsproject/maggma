@@ -12,7 +12,6 @@ DataT = TypeVar("DataT")
 
 
 class Meta(BaseModel):
-
     """
     Meta information for the MAPI Response.
     """
@@ -76,7 +75,6 @@ class Response(BaseModel, Generic[DataT]):
 
 
 class S3URLDoc(BaseModel):
-
     """
     S3 pre-signed URL data returned by the S3 URL resource.
     """

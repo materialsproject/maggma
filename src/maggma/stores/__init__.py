@@ -1,4 +1,5 @@
-""" Root store module with easy imports for implemented Stores. """
+"""Root store module with easy imports for implemented Stores."""
+
 from maggma.core import Store
 from maggma.stores.advanced_stores import AliasingStore, MongograntStore, SandboxStore, VaultStore
 from maggma.stores.aws import S3Store

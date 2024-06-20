@@ -1,6 +1,7 @@
 """
 Tests for MapBuilder
 """
+
 from datetime import datetime, timedelta
 
 import pytest

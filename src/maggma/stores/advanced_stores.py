@@ -1,6 +1,7 @@
 """
 Advanced Stores for behavior outside normal access patterns.
 """
+
 import json
 import os
 from collections.abc import Iterator
@@ -258,7 +259,6 @@ class AliasingStore(Store):
             skip: number documents to skip
             limit: limit on total number of documents returned
         """
-
         criteria = criteria if criteria else {}
 
         if properties is not None:
@@ -314,7 +314,7 @@ class AliasingStore(Store):
         keys = keys if isinstance(keys, list) else [keys]
 
         # Make the aliasing transformations on keys
-        keys = [self.aliases[k] if k in self.aliases else k for k in keys]
+        keys = [self.aliases.get(k, k) for k in keys]
 
         # Update criteria and properties based on aliases
         criteria = criteria if criteria else {}

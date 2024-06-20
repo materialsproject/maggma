@@ -1,6 +1,7 @@
 """
 One-to-One Map Builder and a simple CopyBuilder implementation.
 """
+
 import traceback
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator
@@ -102,7 +103,6 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         Generic get items for Map Builder designed to perform
         incremental building.
         """
-
         self.logger.info(f"Starting {self.__class__.__name__} Builder")
 
         self.ensure_indexes()
@@ -126,20 +126,18 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self.total = len(keys)
         for chunked_keys in grouper(keys, self.chunk_size):
             chunked_keys = list(chunked_keys)
-            for doc in list(
+            yield from list(
                 self.source.query(
                     criteria={self.source.key: {"$in": chunked_keys}},
                     properties=projection,
                 )
-            ):
-                yield doc
+            )
 
     def process_item(self, item: dict):
         """
         Generic process items to process a dictionary using
         a map function.
         """
-
         self.logger.debug(f"Processing: {item[self.source.key]}")
 
         time_start = time()

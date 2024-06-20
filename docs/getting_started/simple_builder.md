@@ -112,7 +112,7 @@ One advantage of using the generator approach is it is less memory intensive tha
 
 `process_item` just has to do the parallelizable work on each item. Since the item is whatever comes out of `get_items`, you know exactly what it should be. It may be a single document, a list of documents, a mapping, a set, etc.
 
-Our simple process item just has to multiply one field by `self.mulitplier`:
+Our simple process item just has to multiply one field by `self.multiplier`:
 
 ``` python
 

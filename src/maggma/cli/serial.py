@@ -14,7 +14,6 @@ def serial(builder: Builder, no_bars=False):
     """
     Runs the builders using a single process.
     """
-
     logger = logging.getLogger("SerialProcessor")
 
     builder.connect()

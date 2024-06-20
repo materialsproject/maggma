@@ -492,7 +492,7 @@ class OpenDataStore(S3IndexStore):
         self.object_grouping = object_grouping if object_grouping is not None else ["nelements", "symmetry_number"]
 
         if access_as_public_bucket:
-            kwargs["s3_resource_kwargs"] = kwargs["s3_resource_kwargs"] if "s3_resource_kwargs" in kwargs else {}
+            kwargs["s3_resource_kwargs"] = kwargs.get("s3_resource_kwargs", {})
             kwargs["s3_resource_kwargs"]["config"] = Config(signature_version=UNSIGNED)
         super().__init__(**kwargs)
         self.searchable_fields = list(
@@ -628,7 +628,7 @@ class OpenDataStore(S3IndexStore):
         self.index.update(index)
 
     def _write_doc_to_s3(self, doc: pd.DataFrame, index: pd.DataFrame) -> None:
-        doc = doc.replace({pd.NaT: None}).replace({"NaT": None}).replace({np.NaN: None})
+        doc = doc.replace({pd.NaT: None}).replace({"NaT": None}).replace({np.nan: None})
 
         string_io = StringIO()
         with jsonlines.Writer(string_io, dumps=json_util.dumps) as writer:

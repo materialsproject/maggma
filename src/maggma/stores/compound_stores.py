@@ -1,4 +1,5 @@
-""" Special stores that combine underlying Stores together. """
+"""Special stores that combine underlying Stores together."""
+
 from collections.abc import Iterator
 from datetime import datetime
 from itertools import groupby
@@ -105,7 +106,7 @@ class JointStore(Store):
     @property
     def nonmain_names(self) -> list:
         """
-        alll non-main collection names.
+        all non-main collection names.
         """
         return list(set(self.collection_names) - {self.main})
 
@@ -445,8 +446,7 @@ class ConcatStore(Store):
         """
         # TODO: skip, sort and limit are broken. implement properly
         for store in self.stores:
-            for d in store.query(criteria=criteria, properties=properties):
-                yield d
+            yield from store.query(criteria=criteria, properties=properties)
 
     def groupby(
         self,
@@ -492,7 +492,7 @@ class ConcatStore(Store):
                 docs.extend(group)
 
         def key_set(d: dict) -> tuple:
-            "index function based on passed in keys."
+            """Index function based on passed in keys."""
             return tuple(d.get(k) for k in keys)
 
         sorted_docs = sorted(docs, key=key_set)

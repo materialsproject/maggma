@@ -85,8 +85,9 @@ class AsyncUnorderedMap:
             future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
 
             self.tasks[idx] = future
-
-            loop.create_task(self.process_and_release(idx))
+            # TODO - line below raises RUF006 error. Unsure about the best way to
+            # resolve. See https://docs.astral.sh/ruff/rules/asyncio-dangling-task/
+            loop.create_task(self.process_and_release(idx))  # noqa: RUF006
 
         await gather(*self.tasks.values())
         self.results.put_nowait(self.done_sentinel)
