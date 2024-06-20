@@ -57,7 +57,7 @@ accessing the data using `count`, `query`, and `distinct`.
                        key="name",
                     )
 >>> with store:
-        store.update(my_data)
+        store.update(turtles)
 >>> store.count()
 4
 >>> store.query_one({})
