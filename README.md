@@ -41,7 +41,13 @@ A major challenge in building scalable data pipelines is dealing with all the di
 
 ```python
 >>> my_data = {"a": 1, "b": 2}
->>> store = MongoStore(database="my_db_name", collection_name="my_collection_name", username="my_username", >>> password="my_password", host="my_hostname", port=27017, )
+>>> store = MongoStore(database="my_db_name",
+                       collection_name="my_collection_name",
+                       username="my_username",
+                       password="my_password",
+                       host="my_hostname",
+                       port=27017,
+                    )
 >>> with store:
         store.update(my_data)
 >>> store.query_one({})
