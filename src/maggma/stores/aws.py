@@ -375,7 +375,8 @@ class S3Store(Store):
 
     def _get_bucket(self):
         """If on the main thread return the bucket created above, else create a new
-        bucket on each thread."""
+        bucket on each thread.
+        """
         if threading.current_thread().name == "MainThread":
             return self.s3_bucket
 

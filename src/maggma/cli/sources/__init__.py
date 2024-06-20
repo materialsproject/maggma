@@ -1,1 +1,1 @@
-""" Dummy module to allow for loading dynamic source files. """
+"""Dummy module to allow for loading dynamic source files."""

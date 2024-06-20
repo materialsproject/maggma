@@ -32,7 +32,6 @@ class SSHTunnel(MSONable):
             private_key: ssh private key to authenticate to the tunnel server
             kwargs: any extra args passed to the SSHTunnelForwarder.
         """
-
         self.tunnel_server_address = tunnel_server_address
         self.remote_server_address = remote_server_address
         self.local_port = local_port

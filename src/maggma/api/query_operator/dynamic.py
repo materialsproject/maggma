@@ -75,7 +75,7 @@ class DynamicQueryOperator(QueryOperator):
         self.query = query  # type: ignore
 
     def query(self):
-        "Stub query function for abstract class."
+        """Stub query function for abstract class."""
 
     @abstractmethod
     def field_to_operator(self, name: str, field: FieldInfo) -> list[tuple[str, Any, Query, Callable[..., dict]]]:
@@ -105,7 +105,7 @@ class DynamicQueryOperator(QueryOperator):
 
 
 class NumericQuery(DynamicQueryOperator):
-    "Query Operator to enable searching on numeric fields."
+    """Query Operator to enable searching on numeric fields."""
 
     def field_to_operator(self, name: str, field: FieldInfo) -> list[tuple[str, Any, Query, Callable[..., dict]]]:
         """
@@ -115,7 +115,6 @@ class NumericQuery(DynamicQueryOperator):
         Query object,
         and callable to convert it into a query dict.
         """
-
         ops = []
         field_type = field.annotation
 
@@ -190,7 +189,7 @@ class NumericQuery(DynamicQueryOperator):
 
 
 class StringQueryOperator(DynamicQueryOperator):
-    "Query Operator to enable searching on numeric fields."
+    """Query Operator to enable searching on numeric fields."""
 
     def field_to_operator(self, name: str, field: FieldInfo) -> list[tuple[str, Any, Query, Callable[..., dict]]]:
         """
@@ -200,7 +199,6 @@ class StringQueryOperator(DynamicQueryOperator):
         Query object,
         and callable to convert it into a query dict.
         """
-
         ops = []
         field_type: type = field.annotation
 

@@ -100,7 +100,6 @@ class ReadOnlyResource(Resource):
         Internal method to prepare the endpoint by setting up default handlers
         for routes.
         """
-
         if self.enable_get_by_key:
             self.build_get_by_key()
 

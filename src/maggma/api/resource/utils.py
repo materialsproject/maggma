@@ -56,7 +56,7 @@ def generate_query_pipeline(query: dict, store: Store):
         pipeline.append(sort_dict)
 
     pipeline.append({"$project": projection_dict})
-    pipeline.append({"$skip": query["skip"] if "skip" in query else 0})
+    pipeline.append({"$skip": query.get("skip", 0)})
 
     if query.get("limit", False):
         pipeline.append({"$limit": query["limit"]})

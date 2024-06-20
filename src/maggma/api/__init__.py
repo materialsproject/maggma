@@ -1,1 +1,1 @@
-""" Simple API Interface for Maggma. """
+"""Simple API Interface for Maggma."""

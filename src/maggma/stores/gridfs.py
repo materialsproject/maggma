@@ -75,7 +75,6 @@ class GridFSStore(Store):
             auth_source: The database to authenticate on. Defaults to the database name.
             ssh_tunnel: An SSHTunnel object to use.
         """
-
         self.database = database
         self.collection_name = collection_name
         self.host = host
@@ -316,7 +315,6 @@ class GridFSStore(Store):
         Returns:
             generator returning tuples of (dict, list of docs)
         """
-
         criteria = self.transform_criteria(criteria) if isinstance(criteria, dict) else criteria
         keys = [keys] if not isinstance(keys, list) else keys
         keys = [
@@ -363,7 +361,6 @@ class GridFSStore(Store):
                  field is to be used
             additional_metadata: field(s) to include in the gridfs metadata
         """
-
         if not isinstance(docs, list):
             docs = [docs]
 
@@ -464,7 +461,6 @@ class GridFSURIStore(GridFSStore):
             ensure_metadata: ensure returned documents have the metadata fields
             searchable_fields: fields to keep in the index store.
         """
-
         self.uri = uri
 
         # parse the dbname from the uri

@@ -56,7 +56,6 @@ class S3URLResource(Resource):
         Internal method to prepare the endpoint by setting up default handlers
         for routes.
         """
-
         self.build_get_by_key()
 
     def build_get_by_key(self):
