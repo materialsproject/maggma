@@ -1,7 +1,6 @@
 !!! note
     Some `Store` classes require extra packages that are not installed by default. Run the following modified installation commands if you want
     to use these stores:
-
     `MongograntStore`:
     ```shell
     pip install maggma[mongogrant]
