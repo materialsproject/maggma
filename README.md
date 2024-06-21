@@ -8,7 +8,7 @@
 Maggma is a framework to build scientific data processing pipelines from data stored in
 a variety of formats -- databases, Azure Blobs, files on disk, etc., all the way to a
 REST API. The rest of this README contains a brief, high-level overview of what `maggma` can do.
-For more, please refer to [the documentation](https://materialsproject.github.io/maggma)
+For more, please refer to [the documentation](https://materialsproject.github.io/maggma).
 
 
 ## Installation from PyPI
@@ -77,10 +77,6 @@ provide a consistent interface for transforming it. `Builder` transformation are
 3. `update_target`: Add the processed item to the target Store(s).
 
 Both `get_items` and `update_targets` can perform IO (input/output) to the data stores. `process_item` is expected to not perform any IO so that it can be parallelized by Maggma. Builders can be chained together into an array and then saved as a JSON file to be run on a production system.
-
-### API Tools
-
-TBD - Jason?
 
 ## Origin and Maintainers
 
