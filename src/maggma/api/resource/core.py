@@ -52,7 +52,6 @@ class Resource(MSONable, metaclass=ABCMeta):
             Redirects unforward slashed url to resource
             url with the forward slash.
             """
-
             url = self.router.url_path_for("/")
             return RedirectResponse(url=url, status_code=301)
 
@@ -71,7 +70,6 @@ class Resource(MSONable, metaclass=ABCMeta):
         """
         Special as_dict implemented to convert pydantic models into strings.
         """
-
         d = super().as_dict()  # Ensures sub-classes serialize correctly
         d["model"] = f"{self.model.__module__}.{self.model.__name__}"
         return d

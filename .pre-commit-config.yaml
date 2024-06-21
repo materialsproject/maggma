@@ -10,18 +10,18 @@ ci:
 
 repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.0.280
+    rev: v0.4.10
     hooks:
       - id: ruff
         args: [--fix, --show-fixes, --ignore, D, --extend-select, D411]
 
   - repo: https://github.com/psf/black
-    rev: 23.7.0
+    rev: 24.4.2
     hooks:
       - id: black
 
   - repo: https://github.com/codespell-project/codespell
-    rev: v2.2.5
+    rev: v2.3.0
     hooks:
       - id: codespell
         stages: [commit, commit-msg]
@@ -29,7 +29,7 @@ repos:
         additional_dependencies: [tomli] # needed to read pyproject.toml below py3.11
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.4.0
+    rev: v4.6.0
     hooks:
       - id: check-case-conflict
       - id: check-symlinks

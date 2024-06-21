@@ -4,7 +4,6 @@ of a Validator subclass to a Store .schema variable to enable validation on
 that Store.
 """
 
-
 from jsonschema import ValidationError, validate
 from jsonschema.validators import validator_for
 
@@ -84,7 +83,6 @@ class JSONSchemaValidator(Validator):
         Args:
             doc - document to check
         """
-
         if self.is_valid(doc):
             return []
 

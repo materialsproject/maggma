@@ -136,7 +136,6 @@ def find_matching_file(segments, curr_path="./"):
     in the path relative to the current path
     Requires all segments match the file path.
     """
-
     # If we've gotten to the end of the segment match check to see if a file exists
     if len(segments) == 0:
         if Path(curr_path + ".py").exists():

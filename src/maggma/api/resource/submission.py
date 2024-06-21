@@ -64,7 +64,6 @@ class SubmissionResource(Resource):
             post_sub_path: POST sub-URL path for the resource.
             patch_sub_path: PATCH sub-URL path for the resource.
         """
-
         if isinstance(state_enum, Enum) and default_state not in [entry.value for entry in state_enum]:  # type: ignore
             raise RuntimeError("If data is stateful a state enum and valid default value must be provided")
 
@@ -118,7 +117,6 @@ class SubmissionResource(Resource):
         Internal method to prepare the endpoint by setting up default handlers
         for routes.
         """
-
         if self.enable_default_search:
             self.build_search_data()
 
