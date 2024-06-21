@@ -8,120 +8,61 @@ aioitertools==0.11.0
     # via maggma (pyproject.toml)
 annotated-types==0.7.0
     # via pydantic
-anyio==4.4.0
-    # via
-    #   httpx
-    #   starlette
-    #   watchfiles
 attrs==23.2.0
     # via
+    #   jsonlines
     #   jsonschema
     #   referencing
 bcrypt==4.1.3
     # via paramiko
-blinker==1.8.2
-    # via flask
-boto3==1.34.127
+boto3==1.34.131
     # via maggma (pyproject.toml)
-botocore==1.34.127
+botocore==1.34.131
     # via
     #   boto3
     #   s3transfer
-certifi==2024.6.2
-    # via
-    #   httpcore
-    #   httpx
-    #   requests
 cffi==1.16.0
     # via
     #   cryptography
     #   pynacl
-charset-normalizer==3.3.2
-    # via requests
-click==8.1.7
-    # via
-    #   flask
-    #   mongogrant
-    #   typer
-    #   uvicorn
 cryptography==42.0.8
     # via paramiko
 dnspython==2.6.1
     # via
-    #   email-validator
     #   maggma (pyproject.toml)
     #   pymongo
-email-validator==2.1.2
-    # via fastapi
-exceptiongroup==1.2.1
-    # via anyio
-fastapi==0.111.0
-    # via maggma (pyproject.toml)
-fastapi-cli==0.0.4
-    # via fastapi
-flask==3.0.3
-    # via mongogrant
-h11==0.14.0
-    # via
-    #   httpcore
-    #   uvicorn
-httpcore==1.0.5
-    # via httpx
-httptools==0.6.1
-    # via uvicorn
-httpx==0.27.0
-    # via fastapi
-idna==3.7
-    # via
-    #   anyio
-    #   email-validator
-    #   httpx
-    #   requests
-itsdangerous==2.2.0
-    # via flask
-jinja2==3.1.4
-    # via
-    #   fastapi
-    #   flask
 jmespath==1.0.1
     # via
     #   boto3
     #   botocore
+jsonlines==4.0.0
+    # via maggma (pyproject.toml)
 jsonschema==4.22.0
     # via maggma (pyproject.toml)
 jsonschema-specifications==2023.12.1
     # via jsonschema
-markdown-it-py==3.0.0
-    # via rich
-markupsafe==2.1.5
-    # via
-    #   jinja2
-    #   werkzeug
-mdurl==0.1.2
-    # via markdown-it-py
-mongogrant==0.3.3
-    # via maggma (pyproject.toml)
 mongomock==4.1.2
     # via maggma (pyproject.toml)
 monty==2024.5.24
     # via maggma (pyproject.toml)
 msgpack==1.0.8
     # via maggma (pyproject.toml)
-numpy==2.0.0
-    # via maggma (pyproject.toml)
-orjson==3.10.5
+numpy==1.26.4
     # via
-    #   fastapi
     #   maggma (pyproject.toml)
+    #   pandas
+orjson==3.10.5
+    # via maggma (pyproject.toml)
 packaging==24.1
     # via mongomock
+pandas==2.2.2
+    # via maggma (pyproject.toml)
 paramiko==3.4.0
     # via sshtunnel
 pycparser==2.22
     # via cffi
 pydantic==2.7.4
     # via
-    #   fastapi
     #   maggma (pyproject.toml)
     #   pydantic-settings
 pydantic-core==2.18.4
@@ -130,36 +71,25 @@ pydantic-settings==2.3.3
     # via maggma (pyproject.toml)
 pydash==8.0.1
     # via maggma (pyproject.toml)
-pygments==2.18.0
-    # via rich
 pymongo==4.7.3
-    # via
-    #   maggma (pyproject.toml)
-    #   mongogrant
+    # via maggma (pyproject.toml)
 pynacl==1.5.0
     # via paramiko
 python-dateutil==2.9.0.post0
     # via
     #   botocore
     #   maggma (pyproject.toml)
+    #   pandas
 python-dotenv==1.0.1
-    # via
-    #   pydantic-settings
-    #   uvicorn
-python-multipart==0.0.9
-    # via fastapi
-pyyaml==6.0.1
-    # via uvicorn
+    # via pydantic-settings
+pytz==2024.1
+    # via pandas
 pyzmq==26.0.3
     # via maggma (pyproject.toml)
 referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-requests==2.32.3
-    # via mongogrant
-rich==13.7.1
-    # via typer
 rpds-py==0.18.1
     # via
     #   jsonschema
@@ -172,49 +102,21 @@ s3transfer==0.10.1
     # via boto3
 sentinels==1.0.0
     # via mongomock
-shellingham==1.5.4
-    # via typer
 six==1.16.0
     # via python-dateutil
-sniffio==1.3.1
-    # via
-    #   anyio
-    #   httpx
 sshtunnel==0.4.0
     # via maggma (pyproject.toml)
-starlette==0.37.2
-    # via fastapi
 tqdm==4.66.4
     # via maggma (pyproject.toml)
-typer==0.12.3
-    # via fastapi-cli
 typing-extensions==4.12.2
     # via
-    #   anyio
-    #   fastapi
     #   pydantic
     #   pydantic-core
     #   pydash
-    #   typer
-    #   uvicorn
-ujson==5.10.0
-    # via fastapi
-urllib3==2.2.1
-    # via
-    #   botocore
-    #   requests
-uvicorn[standard]==0.30.1
-    # via
-    #   fastapi
-    #   maggma (pyproject.toml)
-uvloop==0.19.0
-    # via uvicorn
-watchfiles==0.22.0
-    # via uvicorn
-websockets==12.0
-    # via uvicorn
-werkzeug==3.0.3
-    # via flask
+tzdata==2024.1
+    # via pandas
+urllib3==2.2.2
+    # via botocore
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
