@@ -123,7 +123,7 @@ These event docs also contain the `builder`, a `build_id` which is unique for ea
 
 ## Profiling Memory Usage of Builders
 
-`mrun` can optionally profile the memory usage of a running builder by using the Memray Python memory profiling tool ([Memray](https://github.com/bloomberg/memray)). To get started, Memray should be installed in the same environment as `maggma` using `pip install memray`.
+`mrun` can optionally profile the memory usage of a running builder by using the Memray Python memory profiling tool ([Memray](https://github.com/bloomberg/memray)). To get started, Memray should be installed in the same environment as `maggma` using `pip install memray` (r `pip install maggma[memray]`).
 
 Setting the `--memray` (`-m`) option to `on`, or `True`, will signal `mrun` to profile the memory usage of any builders passed to `mrun` as the builders are running. The profiler also supports profiling of both single and forked processes. For example, spawning multiple processes in `mrun` with `-n` will signal the profiler to track any forked child processes spawned from the parent process.
 
