@@ -1,5 +1,20 @@
 # Changelog
 
+## [v0.69.0](https://github.com/materialsproject/maggma/tree/v0.69.0) (2024-07-01)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.68.6...v0.69.0)
+
+**Closed issues:**
+
+- \[Feature Request\]: Leverage optional dependency groups to reduce dependency count [\#928](https://github.com/materialsproject/maggma/issues/928)
+- Update README/docs to better reflect the purpose of Maggma [\#886](https://github.com/materialsproject/maggma/issues/886)
+
+**Merged pull requests:**
+
+- Store Documentation update [\#976](https://github.com/materialsproject/maggma/pull/976) ([rkingsbury](https://github.com/rkingsbury))
+- Add content to README; documentation fixups [\#969](https://github.com/materialsproject/maggma/pull/969) ([rkingsbury](https://github.com/rkingsbury))
+- Automated dependency upgrades [\#965](https://github.com/materialsproject/maggma/pull/965) ([github-actions[bot]](https://github.com/apps/github-actions))
+
 ## [v0.68.6](https://github.com/materialsproject/maggma/tree/v0.68.6) (2024-06-20)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.68.5...v0.68.6)
@@ -399,19 +414,19 @@
 
 ## [v0.51.25](https://github.com/materialsproject/maggma/tree/v0.51.25) (2023-07-27)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.23...v0.51.25)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.24...v0.51.25)
 
 **Merged pull requests:**
 
 - Some cleanup: `isort`, updated classifiers, remove unused kwarg [\#833](https://github.com/materialsproject/maggma/pull/833) ([Andrew-S-Rosen](https://github.com/Andrew-S-Rosen))
 
-## [v0.51.23](https://github.com/materialsproject/maggma/tree/v0.51.23) (2023-07-21)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.24...v0.51.23)
-
 ## [v0.51.24](https://github.com/materialsproject/maggma/tree/v0.51.24) (2023-07-21)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.22...v0.51.24)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.23...v0.51.24)
+
+## [v0.51.23](https://github.com/materialsproject/maggma/tree/v0.51.23) (2023-07-21)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.51.22...v0.51.23)
 
 **Closed issues:**
 
