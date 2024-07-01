@@ -22,6 +22,8 @@
 
 ::: maggma.stores.aws
 
+::: maggma.stores.azure
+
 ::: maggma.stores.advanced_stores
 
 ::: maggma.stores.compound_stores

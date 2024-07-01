@@ -8,7 +8,9 @@ theme:
 nav:
   - Home: index.md
   - Core Concepts: concepts.md
-  - Getting Started:
+  - Quickstart: quickstart.md
+  - User Guide:
+    - Understanding Queries: getting_started/query_101.md
     - Using Stores: getting_started/stores.md
     - Working with FileStore: getting_started/using_file_store.md
     - Writing a Builder: getting_started/simple_builder.md
