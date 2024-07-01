@@ -27,6 +27,10 @@ like using the `key` argument when you instantiate a `Store`.
 data = [{"task_id": 1, "AM": "sunrise"}, {"task_id: 2, "PM": "sunset"} ... ]
 ```
 
+Just to emphasize - **every document must have a `task_id`, and the value of `task_id` must be unique for every document**. The rest of the document structure
+is up to you, but `maggma` works best when every document follows a pre-defined
+schema (i.e., all `dict` have the same set of keys / same structure).
+
 ## The `Store` interface
 
 All `Store` provide a number of basic methods that facilitate querying, updating, and removing data:
