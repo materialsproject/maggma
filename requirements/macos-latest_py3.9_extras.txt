@@ -579,7 +579,7 @@ werkzeug==3.0.3
     #   moto
 xmltodict==0.13.0
     # via moto
-zipp==3.19.2
+zipp==3.19.1
     # via
     #   importlib-metadata
     #   importlib-resources
