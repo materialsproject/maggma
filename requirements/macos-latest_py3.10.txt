@@ -15,9 +15,9 @@ attrs==23.2.0
     #   referencing
 bcrypt==4.1.3
     # via paramiko
-boto3==1.34.140
+boto3==1.34.145
     # via maggma (pyproject.toml)
-botocore==1.34.140
+botocore==1.34.145
     # via
     #   boto3
     #   s3transfer
@@ -25,7 +25,7 @@ cffi==1.16.0
     # via
     #   cryptography
     #   pynacl
-cryptography==42.0.8
+cryptography==43.0.0
     # via paramiko
 dnspython==2.6.1
     # via
@@ -37,13 +37,13 @@ jmespath==1.0.1
     #   botocore
 jsonlines==4.0.0
     # via maggma (pyproject.toml)
-jsonschema==4.22.0
+jsonschema==4.23.0
     # via maggma (pyproject.toml)
 jsonschema-specifications==2023.12.1
     # via jsonschema
 mongomock==4.1.2
     # via maggma (pyproject.toml)
-monty==2024.5.24
+monty==2024.7.12
     # via maggma (pyproject.toml)
 msgpack==1.0.8
     # via maggma (pyproject.toml)
@@ -69,7 +69,7 @@ pydantic-core==2.20.1
     # via pydantic
 pydantic-settings==2.3.4
     # via maggma (pyproject.toml)
-pydash==8.0.1
+pydash==8.0.2
     # via maggma (pyproject.toml)
 pymongo==4.8.0
     # via maggma (pyproject.toml)
@@ -90,7 +90,7 @@ referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==0.18.1
+rpds-py==0.19.0
     # via
     #   jsonschema
     #   referencing
