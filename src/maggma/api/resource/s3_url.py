@@ -11,6 +11,59 @@ from maggma.api.resource import HeaderProcessor, Resource
 from maggma.api.utils import serialization_helper
 from maggma.stores.aws import S3Store
 
+# S3 Upload Integration
+# Below is a class for handling multipart uploads with S3 pre-signed URLS
+# which can be integrated into a new S3 resource class.
+# class S3Upload:
+#     def __init__(self, aws_session: Session, bucket: str):
+#         self.s3 = aws_session.client("s3")
+#         self.bucket = bucket
+#
+#     def initiate(self, file_id: str):
+#         res = self.s3.create_multipart_upload(
+#             Bucket=self.bucket,
+#             Key=file_id
+#         )
+#
+#         if res["ResponseMetadata"]["HTTPStatusCode"] != 200:
+#             raise RuntimeError("Upload to S3 could not be initialized")
+#
+#         return res["UploadId"]
+#
+#     def generate_urls(self, upload_id: str, file_id: str, num_urls: int, expiration: int):
+#
+#         urls = []
+#
+#         for url_no in range(1, num_urls+1):
+#             signed_url = self.s3.generate_presigned_url(
+#                 ClientMethod="upload_part",
+#                 Params={
+#                     "Bucket": self.bucket,
+#                     "Key": file_id,
+#                     "UploadId": upload_id,
+#                     "PartNumber": url_no,
+#                 },
+#                 ExpiresIn=expiration
+#             )
+#             urls.append(signed_url)   
+#
+#         return urls
+#
+#     def finalize(self, upload_id: str, file_id: str, etags: list[str]):
+#         # Note the etag list needs to be ordered w.r.t upload chunks
+#
+#         parts = [{"Etag": etag, "PartNumber": i} for i, etag in enumerate(etags)]
+#
+#         res = self.s3.complete_multipart_upload(
+#             Bucket=self.bucket,
+#             Key=file_id,
+#             MultiPartUpload={"Parts": parts},
+#             UploadId=upload_id,
+#         )
+#
+#         if res["ResponseMetadata"]["HTTPStatusCode"] != 200:
+#             raise RuntimeError("S3 upload could not be finalized")
+#
 
 class S3URLResource(Resource):
     """
