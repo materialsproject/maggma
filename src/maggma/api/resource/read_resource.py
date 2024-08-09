@@ -33,6 +33,7 @@ class ReadOnlyResource(Resource):
         key_fields: Optional[list[str]] = None,
         hint_scheme: Optional[HintScheme] = None,
         header_processor: Optional[HeaderProcessor] = None,
+        query_to_configure_on_request: Optional[QueryOperator] = None,
         timeout: Optional[int] = None,
         enable_get_by_key: bool = False,
         enable_default_search: bool = True,
@@ -49,6 +50,7 @@ class ReadOnlyResource(Resource):
             query_operators: Operators for the query language
             hint_scheme: The hint scheme to use for this resource
             header_processor: The header processor to use for this resource
+            query_to_configure_on_request: Query operator to configure on request
             timeout: Time in seconds Pymongo should wait when querying MongoDB
                 before raising a timeout error
             key_fields: List of fields to always project. Default uses SparseFieldsQuery
@@ -66,6 +68,7 @@ class ReadOnlyResource(Resource):
         self.tags = tags or []
         self.hint_scheme = hint_scheme
         self.header_processor = header_processor
+        self.query_to_configure_on_request = query_to_configure_on_request
         self.key_fields = key_fields
         self.versioned = False
         self.enable_get_by_key = enable_get_by_key
@@ -196,10 +199,16 @@ class ReadOnlyResource(Resource):
             request: Request = queries.pop("request")  # type: ignore
             temp_response: Response = queries.pop("temp_response")  # type: ignore
 
+            if self.query_to_configure_on_request is not None:
+                # give the key name "request", arbitrary choice, as only the value gets merged into the query
+                queries["request"] = self.header_processor.configure_query_from_request(
+                    request, self.query_to_configure_on_request
+                )
+            # allowed query parameters
             query_params = [
                 entry for _, i in enumerate(self.query_operators) for entry in signature(i.query).parameters
             ]
-
+            # check for overlap between allowed query parameters and request query parameters
             overlap = [key for key in request.query_params if key not in query_params]
             if any(overlap):
                 if "limit" in overlap or "skip" in overlap:
@@ -271,12 +280,6 @@ class ReadOnlyResource(Resource):
 
             if self.disable_validation:
                 response = Response(orjson.dumps(response, default=serialization_helper))  # type: ignore
-
-            if self.header_processor is not None:
-                if self.disable_validation:
-                    self.header_processor.process_header(response, request)
-                else:
-                    self.header_processor.process_header(temp_response, request)
 
             return response
 
