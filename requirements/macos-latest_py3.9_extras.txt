@@ -14,7 +14,7 @@ anyio==4.4.0
     #   starlette
 asttokens==2.4.1
     # via stack-data
-attrs==24.1.0
+attrs==24.2.0
     # via
     #   jsonlines
     #   jsonschema
@@ -25,9 +25,9 @@ azure-core==1.30.2
     #   azure-storage-blob
 azure-identity==1.17.1
     # via maggma (pyproject.toml)
-azure-storage-blob==12.21.0
+azure-storage-blob==12.22.0
     # via maggma (pyproject.toml)
-babel==2.15.0
+babel==2.16.0
     # via mkdocs-material
 backports-strenum==1.3.1
     # via griffe
@@ -35,11 +35,11 @@ bcrypt==4.2.0
     # via paramiko
 blinker==1.8.2
     # via flask
-boto3==1.34.153
+boto3==1.34.158
     # via
     #   maggma (pyproject.toml)
     #   moto
-botocore==1.34.153
+botocore==1.34.158
     # via
     #   boto3
     #   moto
@@ -49,7 +49,7 @@ certifi==2024.7.4
     #   httpcore
     #   httpx
     #   requests
-cffi==1.16.0
+cffi==1.17.0
     # via
     #   cryptography
     #   pynacl
@@ -210,7 +210,7 @@ markupsafe==2.1.5
     #   mkdocs-autorefs
     #   mkdocstrings
     #   werkzeug
-matplotlib==3.9.0
+matplotlib==3.9.1.post1
     # via pymatgen
 matplotlib-inline==0.1.7
     # via ipython
@@ -284,7 +284,7 @@ numpy==1.26.4
     #   pymatgen
     #   scipy
     #   spglib
-orjson==3.10.6
+orjson==3.10.7
     # via maggma (pyproject.toml)
 packaging==24.1
     # via
@@ -301,7 +301,7 @@ pandas==2.2.2
     # via
     #   maggma (pyproject.toml)
     #   pymatgen
-paramiko==3.4.0
+paramiko==3.4.1
     # via sshtunnel
 parso==0.8.4
     # via jedi
@@ -355,7 +355,7 @@ pyjwt[crypto]==2.9.0
     # via
     #   msal
     #   pyjwt
-pymatgen==2024.7.18
+pymatgen==2024.8.9
     # via maggma (pyproject.toml)
 pymdown-extensions==10.9
     # via
@@ -398,7 +398,7 @@ python-multipart==0.0.9
     # via starlette
 pytz==2024.1
     # via pandas
-pyyaml==6.0.1
+pyyaml==6.0.2
     # via
     #   mkdocs
     #   mkdocs-get-deps
@@ -437,7 +437,7 @@ rich==13.7.1
     # via
     #   memray
     #   textual
-rpds-py==0.19.1
+rpds-py==0.20.0
     # via
     #   jsonschema
     #   referencing
@@ -447,7 +447,7 @@ ruamel-yaml==0.18.6
     #   pymatgen
 ruamel-yaml-clib==0.2.8
     # via ruamel-yaml
-ruff==0.5.6
+ruff==0.5.7
     # via maggma (pyproject.toml)
 s3transfer==0.10.2
     # via boto3
@@ -476,13 +476,13 @@ starlette[full]==0.37.2
     # via
     #   fastapi
     #   maggma (pyproject.toml)
-sympy==1.13.1
+sympy==1.13.2
     # via pymatgen
 tabulate==0.9.0
     # via pymatgen
 tenacity==9.0.0
     # via plotly
-textual==0.75.1
+textual==0.76.0
     # via memray
 tomli==2.0.1
     # via
@@ -500,9 +500,9 @@ traitlets==5.14.3
     #   nbformat
 types-python-dateutil==2.9.0.20240316
     # via maggma (pyproject.toml)
-types-pyyaml==6.0.12.20240724
+types-pyyaml==6.0.12.20240808
     # via maggma (pyproject.toml)
-types-setuptools==71.1.0.20240726
+types-setuptools==71.1.0.20240806
     # via maggma (pyproject.toml)
 typing-extensions==4.12.2
     # via
@@ -536,7 +536,7 @@ uvicorn==0.30.5
     # via maggma (pyproject.toml)
 virtualenv==20.26.3
     # via pre-commit
-watchdog==4.0.1
+watchdog==4.0.2
     # via mkdocs
 wcwidth==0.2.13
     # via prompt-toolkit
@@ -546,7 +546,7 @@ werkzeug==3.0.3
     #   moto
 xmltodict==0.13.0
     # via moto
-zipp==3.19.2
+zipp==3.20.0
     # via
     #   importlib-metadata
     #   importlib-resources
