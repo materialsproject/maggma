@@ -11,7 +11,7 @@ from starlette.testclient import TestClient
 
 from maggma.api.query_operator import NumericQuery, SparseFieldsQuery, StringQueryOperator
 from maggma.api.resource import ReadOnlyResource
-from maggma.api.resource.core import HintScheme
+from maggma.api.resource.core import HeaderProcessor, HintScheme
 from maggma.stores import AliasingStore, MemoryStore
 
 
@@ -30,6 +30,18 @@ owners = (
 )
 
 total_owners = len(owners)
+
+
+# Create a subclass of the header processor to prevent TypeErrors:
+#  Can't instantiate abstract class HeaderProcessor with abstract methods
+class TestHeaderProcessor(HeaderProcessor):
+    def configure_query_on_request(self, request, query_operator):
+        # Implement the method
+        return {"name": "PersonAge9"}
+
+    def process_header(self, response, request):
+        # Implement the method
+        pass
 
 
 @pytest.fixture()
@@ -134,6 +146,8 @@ def search_helper(payload, base: str = "/?", debug=True) -> Response:
             NumericQuery(model=Owner),
             SparseFieldsQuery(model=Owner),
         ],
+        header_processor=TestHeaderProcessor(),
+        query_to_configure_on_request=StringQueryOperator(model=Owner),
         disable_validation=True,
     )
     app = FastAPI()
@@ -214,3 +228,16 @@ def test_resource_compound():
     assert len(data) == 1
     assert data[0]["name"] == "PersonAge20Weight200"
     assert "weight" not in data[0]
+
+
+def test_configure_query_on_request():
+    payload = {
+        "name": "PersonAge20Weight200",
+        "_all_fields": False,
+        "_fields": "name,age",
+        "weight_min": 199.3,
+        "weight_max": 201.9,
+        "age": 20,
+    }
+    res, data = search_helper(payload=payload, base="/?", debug=True)
+    assert res.status_code == 200

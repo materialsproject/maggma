@@ -201,8 +201,8 @@ class ReadOnlyResource(Resource):
 
             if self.query_to_configure_on_request is not None:
                 # give the key name "request", arbitrary choice, as only the value gets merged into the query
-                queries["request"] = self.header_processor.configure_query_from_request(
-                    request, self.query_to_configure_on_request
+                queries["groups"] = self.header_processor.configure_query_on_request(
+                    request=request, query_operator=self.query_to_configure_on_request
                 )
             # allowed query parameters
             query_params = [
@@ -217,7 +217,6 @@ class ReadOnlyResource(Resource):
                         detail="'limit' and 'skip' parameters have been renamed. "
                         "Please update your API client to the newest version.",
                     )
-
                 else:
                     raise HTTPException(
                         status_code=400,
