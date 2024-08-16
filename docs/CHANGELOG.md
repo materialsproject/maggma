@@ -1,5 +1,14 @@
 # Changelog
 
+## [v0.69.2](https://github.com/materialsproject/maggma/tree/v0.69.2) (2024-08-16)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.69.1...v0.69.2)
+
+**Merged pull requests:**
+
+- capability to configure query on request [\#985](https://github.com/materialsproject/maggma/pull/985) ([yang-ruoxi](https://github.com/yang-ruoxi))
+- Automated dependency upgrades [\#983](https://github.com/materialsproject/maggma/pull/983) ([github-actions[bot]](https://github.com/apps/github-actions))
+
 ## [v0.69.1](https://github.com/materialsproject/maggma/tree/v0.69.1) (2024-07-24)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.69.0...v0.69.1)
@@ -335,7 +344,7 @@
 
 ## [v0.57.0](https://github.com/materialsproject/maggma/tree/v0.57.0) (2023-09-26)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.56.0...v0.57.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.55.0...v0.57.0)
 
 **Merged pull requests:**
 
@@ -345,13 +354,13 @@
 - Automated dependency upgrades [\#860](https://github.com/materialsproject/maggma/pull/860) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Update @arosen93 to @Andrew-S-Rosen [\#859](https://github.com/materialsproject/maggma/pull/859) ([Andrew-S-Rosen](https://github.com/Andrew-S-Rosen))
 
-## [v0.56.0](https://github.com/materialsproject/maggma/tree/v0.56.0) (2023-09-06)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.55.0...v0.56.0)
-
 ## [v0.55.0](https://github.com/materialsproject/maggma/tree/v0.55.0) (2023-09-06)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.54.0...v0.55.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.56.0...v0.55.0)
+
+## [v0.56.0](https://github.com/materialsproject/maggma/tree/v0.56.0) (2023-09-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.54.0...v0.56.0)
 
 **Closed issues:**
 
