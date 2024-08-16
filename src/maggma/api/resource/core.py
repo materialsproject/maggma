@@ -6,6 +6,7 @@ from monty.json import MontyDecoder, MSONable
 from pydantic import BaseModel
 from starlette.responses import RedirectResponse
 
+from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS, api_sanitize
 from maggma.utils import dynamic_import
 
@@ -105,4 +106,10 @@ class HeaderProcessor(MSONable, metaclass=ABCMeta):
         This method takes in a FastAPI Response object and processes a new header for it in-place.
         It can use data in the upstream request to generate the header.
         (https://fastapi.tiangolo.com/advanced/response-headers/#use-a-response-parameter).
+        """
+
+    @abstractmethod
+    def configure_query_on_request(self, request: Request, query_operator: QueryOperator) -> STORE_PARAMS:
+        """
+        This method takes in a FastAPI Request object and returns a query to be used in the store.
         """
