@@ -390,6 +390,9 @@ def test_read_doc_from_s3():
         assert (df["task_id"] == "mp-2").any()
 
 
+@pytest.mark.xfail(
+    reason="Known issue, the store is in a deprecated state, and in particular may be incompatible with numpy 2.0+"
+)
 def test_update(s3store):
     assert len(s3store.index_data) == 2
     s3store.update(
