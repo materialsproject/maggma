@@ -57,7 +57,7 @@ class PandasMemoryStore:
         self.logger = logging.getLogger(type(self).__name__)
         self.logger.addHandler(logging.NullHandler())
         self.logger.warning(
-            "Use all open data stores with caution. The stores are in a a deprecated, and in particular may be incompatible with numpy 2.0+."
+            "Use all open data stores with caution as they are deprecated and may be incompatible with numpy 2.0+."
         )
 
     @property
