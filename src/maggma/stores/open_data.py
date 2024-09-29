@@ -1,4 +1,5 @@
 import gzip
+import logging
 import re
 from collections.abc import Generator
 from datetime import datetime
@@ -53,6 +54,11 @@ class PandasMemoryStore:
         self._data = None
         self.key = key
         self.last_updated_field = last_updated_field
+        self.logger = logging.getLogger(type(self).__name__)
+        self.logger.addHandler(logging.NullHandler())
+        self.logger.warning(
+            "Use all open data stores with caution as they are deprecated and may be incompatible with numpy 2.0+."
+        )
 
     @property
     def index_data(self):
