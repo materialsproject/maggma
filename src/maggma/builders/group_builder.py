@@ -42,7 +42,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
         Args:
             source: source store
             target: target store
-            query: optional query to filter source store
+            query: optional query to filter items from the source store.
             projection: list of keys to project from the source for
                 processing. Limits data transfer to improve efficiency.
             delete_orphans: Whether to delete documents on target store
