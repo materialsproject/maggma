@@ -688,7 +688,12 @@ class JSONStore(MemoryStore):
                     f.write(bytesdata.decode("utf-8"))
 
             for path in self.paths:
-                objects = self.read_json_file(path)
+                self.logger.debug(f"Reading {path}")
+                try:
+                    objects = self.read_json_file(path)
+                except Exception as e:
+                    self.logger.error(f"Error reading {path}: {e}. Skipping.")
+
                 try:
                     self.update(objects)
                 except KeyError:
