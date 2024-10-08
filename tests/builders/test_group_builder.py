@@ -2,7 +2,7 @@
 Tests for group builder
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 from random import randint
 
 import pytest
@@ -13,7 +13,7 @@ from maggma.stores import MemoryStore
 
 @pytest.fixture(scope="module")
 def now():
-    return datetime.utcnow()
+    return datetime.now(timezone.utc)
 
 
 @pytest.fixture()
@@ -62,9 +62,12 @@ class DummyGrouper(GroupBuilder):
 
 
 def test_grouping(source, target, docs):
-    builder = DummyGrouper(source, target, grouping_keys=["a"])
+    builder = DummyGrouper(source, target,
+                           query={"k": {"$ne":3}},
+                           grouping_keys=["a"]
+                           )
 
-    assert len(docs) == len(builder.get_ids_to_process())
+    assert len(docs) - 1 == len(builder.get_ids_to_process()), f"{len(docs) -1} != {len(builder.get_ids_to_process())}"
     assert len(builder.get_groups_from_keys([d["k"] for d in docs])) == 3
 
     to_process = list(builder.get_items())
@@ -75,4 +78,4 @@ def test_grouping(source, target, docs):
 
     builder.update_targets(processed)
 
-    assert len(builder.get_ids_to_process()) == 0
+    assert len(builder.get_ids_to_process()) == 0, f"{len(builder.get_ids_to_process())} != 0"
