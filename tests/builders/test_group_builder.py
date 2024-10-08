@@ -62,10 +62,7 @@ class DummyGrouper(GroupBuilder):
 
 
 def test_grouping(source, target, docs):
-    builder = DummyGrouper(source, target,
-                           query={"k": {"$ne":3}},
-                           grouping_keys=["a"]
-                           )
+    builder = DummyGrouper(source, target, query={"k": {"$ne": 3}}, grouping_keys=["a"])
 
     assert len(docs) - 1 == len(builder.get_ids_to_process()), f"{len(docs) -1} != {len(builder.get_ids_to_process())}"
     assert len(builder.get_groups_from_keys([d["k"] for d in docs])) == 3
