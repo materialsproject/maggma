@@ -24,7 +24,7 @@ from ruamel.yaml import YAML
 
 from maggma.core import Sort, Store, StoreError
 from maggma.stores.ssh_tunnel import SSHTunnel
-from maggma.utils import confirm_field_index, to_dt
+from maggma.utils import confirm_field_index
 
 try:
     from montydb import MontyClient, set_storage  # type: ignore
@@ -719,14 +719,26 @@ class JSONStore(MemoryStore):
             data = data.decode() if isinstance(data, bytes) else data
             objects = bson.json_util.loads(data) if "$oid" in data else orjson.loads(data)
             objects = [objects] if not isinstance(objects, list) else objects
-            # datetime objects deserialize to str. Try to convert the last_updated
-            # field back to datetime.
             # # TODO - there may still be problems caused if a JSONStore is init'ed from
             # documents that don't contain a last_updated field
             # See Store.last_updated in store.py.
             for obj in objects:
                 if obj.get(self.last_updated_field):
-                    obj[self.last_updated_field] = to_dt(obj[self.last_updated_field])
+                    # Lists of objects that contain datetime which are serialized
+                    # with monty dupmfn will have the last_updated field as a dict
+                    # representation of the datetime object, but maggma expects
+                    # just the string representation.
+                    if (
+                        isinstance(obj[self.last_updated_field], dict)
+                        and obj[self.last_updated_field].get("@class", "") == "datetime"
+                    ):
+                        # overwrite last_updated field with just the string
+                        obj[self.last_updated_field] = obj[self.last_updated_field]["string"]
+                else:
+                    # if there is no last_updated field, set one to the current time.
+                    from datetime import datetime, timezone
+
+                    obj[self.last_updated_field] = datetime.now(timezone.utc)
 
         return objects
 
