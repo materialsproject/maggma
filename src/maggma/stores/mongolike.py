@@ -714,7 +714,7 @@ class JSONStore(MemoryStore):
         Args:
             path: Path to the JSON file to be read
         """
-        with zopen(path) as f:
+        with zopen(path, "r") as f:
             data = f.read()
             data = data.decode() if isinstance(data, bytes) else data
             objects = bson.json_util.loads(data) if "$oid" in data else orjson.loads(data)
