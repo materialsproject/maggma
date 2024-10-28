@@ -8,7 +8,7 @@ aioitertools==0.12.0
     # via maggma (pyproject.toml)
 annotated-types==0.7.0
     # via pydantic
-anyio==4.6.2
+anyio==4.6.2.post1
     # via
     #   httpx
     #   starlette
@@ -33,11 +33,11 @@ bcrypt==4.2.0
     # via paramiko
 blinker==1.8.2
     # via flask
-boto3==1.35.39
+boto3==1.35.49
     # via
     #   maggma (pyproject.toml)
     #   moto
-botocore==1.35.39
+botocore==1.35.49
     # via
     #   boto3
     #   moto
@@ -68,9 +68,9 @@ colorama==0.4.6
     #   mkdocs-material
 contourpy==1.3.0
     # via matplotlib
-coverage[toml]==7.6.3
+coverage[toml]==7.6.4
     # via pytest-cov
-cryptography==43.0.1
+cryptography==43.0.3
     # via
     #   azure-identity
     #   azure-storage-blob
@@ -94,7 +94,7 @@ execnet==2.1.1
     # via pytest-xdist
 executing==2.1.0
     # via stack-data
-fastapi==0.115.2
+fastapi==0.115.4
     # via maggma (pyproject.toml)
 fastjsonschema==2.20.0
     # via nbformat
@@ -106,7 +106,7 @@ fonttools==4.54.1
     # via matplotlib
 ghp-import==2.1.0
     # via mkdocs
-griffe==1.4.1
+griffe==1.5.1
     # via mkdocstrings-python
 h11==0.14.0
     # via
@@ -129,7 +129,7 @@ idna==3.10
     #   requests
 iniconfig==2.0.0
     # via pytest
-ipython==8.28.0
+ipython==8.29.0
     # via maggma (pyproject.toml)
 isodate==0.7.2
     # via azure-storage-blob
@@ -185,7 +185,7 @@ markdown-it-py[linkify,plugins]==3.0.0
     #   mdit-py-plugins
     #   rich
     #   textual
-markupsafe==3.0.1
+markupsafe==3.0.2
     # via
     #   jinja2
     #   mkdocs
@@ -219,7 +219,7 @@ mkdocs-autorefs==1.2.0
     #   mkdocstrings-python
 mkdocs-get-deps==0.2.0
     # via mkdocs
-mkdocs-material==9.5.40
+mkdocs-material==9.5.42
     # via maggma (pyproject.toml)
 mkdocs-material-extensions==1.3.1
     # via mkdocs-material
@@ -229,19 +229,19 @@ mkdocstrings[python]==0.26.2
     # via
     #   maggma (pyproject.toml)
     #   mkdocstrings-python
-mkdocstrings-python==1.12.0
+mkdocstrings-python==1.12.2
     # via mkdocstrings
 mongogrant==0.3.3
     # via maggma (pyproject.toml)
 mongomock==4.2.0.post1
     # via maggma (pyproject.toml)
-monty==2024.7.30
+monty==2024.10.21
     # via
     #   maggma (pyproject.toml)
     #   pymatgen
 montydb==2.5.3
     # via maggma (pyproject.toml)
-moto==5.0.17
+moto==5.0.18
     # via maggma (pyproject.toml)
 mpmath==1.3.0
     # via sympy
@@ -255,20 +255,21 @@ msgpack==1.1.0
     # via maggma (pyproject.toml)
 nbformat==5.10.4
     # via maggma (pyproject.toml)
-networkx==3.4.1
+networkx==3.4.2
     # via pymatgen
 nodeenv==1.9.1
     # via pre-commit
-numpy==2.1.2
+numpy==1.26.4
     # via
     #   contourpy
     #   maggma (pyproject.toml)
     #   matplotlib
+    #   monty
     #   pandas
     #   pymatgen
     #   scipy
     #   spglib
-orjson==3.10.7
+orjson==3.10.10
     # via maggma (pyproject.toml)
 packaging==24.1
     # via
@@ -293,7 +294,7 @@ pathspec==0.12.1
     # via mkdocs
 pexpect==4.9.0
     # via ipython
-pillow==10.4.0
+pillow==11.0.0
     # via matplotlib
 platformdirs==4.3.6
     # via
@@ -327,7 +328,7 @@ pydantic==2.9.2
     #   pydantic-settings
 pydantic-core==2.23.4
     # via pydantic
-pydantic-settings==2.5.2
+pydantic-settings==2.6.0
     # via maggma (pyproject.toml)
 pydash==8.0.3
     # via maggma (pyproject.toml)
@@ -340,7 +341,7 @@ pyjwt[crypto]==2.9.0
     # via
     #   msal
     #   pyjwt
-pymatgen==2024.10.3
+pymatgen==2024.10.27
     # via maggma (pyproject.toml)
 pymdown-extensions==10.11.2
     # via
@@ -379,7 +380,7 @@ python-dateutil==2.9.0.post0
     #   pandas
 python-dotenv==1.0.1
     # via pydantic-settings
-python-multipart==0.0.12
+python-multipart==0.0.16
     # via starlette
 pytz==2024.2
     # via
@@ -420,7 +421,7 @@ responses==0.21.0
     # via
     #   maggma (pyproject.toml)
     #   moto
-rich==13.9.2
+rich==13.9.3
     # via
     #   memray
     #   textual
@@ -431,10 +432,11 @@ rpds-py==0.20.0
 ruamel-yaml==0.18.6
     # via
     #   maggma (pyproject.toml)
+    #   monty
     #   pymatgen
-ruamel-yaml-clib==0.2.8
+ruamel-yaml-clib==0.2.12
     # via ruamel-yaml
-ruff==0.6.9
+ruff==0.7.1
     # via maggma (pyproject.toml)
 s3transfer==0.10.3
     # via boto3
@@ -458,7 +460,7 @@ sshtunnel==0.4.0
     # via maggma (pyproject.toml)
 stack-data==0.6.3
     # via ipython
-starlette[full]==0.39.2
+starlette[full]==0.41.2
     # via
     #   fastapi
     #   maggma (pyproject.toml)
@@ -468,7 +470,7 @@ tabulate==0.9.0
     # via pymatgen
 tenacity==9.0.0
     # via plotly
-textual==0.83.0
+textual==0.85.1
     # via memray
 tqdm==4.66.5
     # via
@@ -484,7 +486,7 @@ types-python-dateutil==2.9.0.20241003
     # via maggma (pyproject.toml)
 types-pyyaml==6.0.12.20240917
     # via maggma (pyproject.toml)
-types-setuptools==75.1.0.20241014
+types-setuptools==75.2.0.20241025
     # via maggma (pyproject.toml)
 typing-extensions==4.12.2
     # via
@@ -508,19 +510,19 @@ urllib3==2.2.3
     #   botocore
     #   requests
     #   responses
-uvicorn==0.31.1
+uvicorn==0.32.0
     # via maggma (pyproject.toml)
-virtualenv==20.26.6
+virtualenv==20.27.0
     # via pre-commit
 watchdog==5.0.3
     # via mkdocs
 wcwidth==0.2.13
     # via prompt-toolkit
-werkzeug==3.0.4
+werkzeug==3.0.6
     # via
     #   flask
     #   moto
-xmltodict==0.14.1
+xmltodict==0.14.2
     # via moto
 
 # The following packages are considered to be unsafe in a requirements file:
