@@ -29,15 +29,15 @@ azure-storage-blob==12.24.0
     # via maggma (pyproject.toml)
 babel==2.16.0
     # via mkdocs-material
-bcrypt==4.2.0
+bcrypt==4.2.1
     # via paramiko
 blinker==1.9.0
     # via flask
-boto3==1.35.63
+boto3==1.35.68
     # via
     #   maggma (pyproject.toml)
     #   moto
-botocore==1.35.63
+botocore==1.35.68
     # via
     #   boto3
     #   moto
@@ -68,7 +68,7 @@ colorama==0.4.6
     #   mkdocs-material
 contourpy==1.3.1
     # via matplotlib
-coverage[toml]==7.6.7
+coverage[toml]==7.6.8
     # via pytest-cov
 cryptography==43.0.3
     # via
@@ -224,7 +224,7 @@ mkdocs-autorefs==1.2.0
     #   mkdocstrings-python
 mkdocs-get-deps==0.2.0
     # via mkdocs
-mkdocs-material==9.5.44
+mkdocs-material==9.5.45
     # via maggma (pyproject.toml)
 mkdocs-material-extensions==1.3.1
     # via mkdocs-material
@@ -250,7 +250,7 @@ moto==5.0.21
     # via maggma (pyproject.toml)
 mpmath==1.3.0
     # via sympy
-msal==1.31.0
+msal==1.31.1
     # via
     #   azure-identity
     #   msal-extensions
@@ -274,7 +274,7 @@ numpy==1.26.4
     #   pymatgen
     #   scipy
     #   spglib
-orjson==3.10.11
+orjson==3.10.12
     # via maggma (pyproject.toml)
 packaging==24.2
     # via
@@ -326,12 +326,12 @@ pybtex==0.24.0
     # via pymatgen
 pycparser==2.22
     # via cffi
-pydantic==2.9.2
+pydantic==2.10.1
     # via
     #   fastapi
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.23.4
+pydantic-core==2.27.1
     # via pydantic
 pydantic-settings==2.6.1
     # via maggma (pyproject.toml)
@@ -441,9 +441,9 @@ ruamel-yaml==0.18.6
     #   pymatgen
 ruamel-yaml-clib==0.2.12
     # via ruamel-yaml
-ruff==0.7.4
+ruff==0.8.0
     # via maggma (pyproject.toml)
-s3transfer==0.10.3
+s3transfer==0.10.4
     # via boto3
 scipy==1.14.1
     # via pymatgen
@@ -465,7 +465,7 @@ sshtunnel==0.4.0
     # via maggma (pyproject.toml)
 stack-data==0.6.3
     # via ipython
-starlette[full]==0.41.2
+starlette[full]==0.41.3
     # via
     #   fastapi
     #   maggma (pyproject.toml)
@@ -475,13 +475,13 @@ tabulate==0.9.0
     # via pymatgen
 tenacity==9.0.0
     # via plotly
-textual==0.86.1
+textual==0.87.1
     # via memray
 tomli==2.1.0
     # via
     #   coverage
     #   pytest
-tqdm==4.67.0
+tqdm==4.67.1
     # via
     #   maggma (pyproject.toml)
     #   pymatgen
@@ -495,7 +495,7 @@ types-python-dateutil==2.9.0.20241003
     # via maggma (pyproject.toml)
 types-pyyaml==6.0.12.20240917
     # via maggma (pyproject.toml)
-types-setuptools==75.5.0.20241116
+types-setuptools==75.5.0.20241122
     # via maggma (pyproject.toml)
 typing-extensions==4.12.2
     # via
@@ -522,7 +522,7 @@ urllib3==2.2.3
     #   botocore
     #   requests
     #   responses
-uvicorn==0.32.0
+uvicorn==0.32.1
     # via maggma (pyproject.toml)
 virtualenv==20.27.1
     # via pre-commit
