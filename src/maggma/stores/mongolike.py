@@ -446,6 +446,7 @@ class MongoURIStore(MongoStore):
         collection_name: str,
         database: Optional[str] = None,
         ssh_tunnel: Optional[SSHTunnel] = None,
+        safe_update: bool = False,
         mongoclient_kwargs: Optional[dict] = None,
         default_sort: Optional[dict[str, Union[Sort, int]]] = None,
         **kwargs,
@@ -461,6 +462,7 @@ class MongoURIStore(MongoStore):
         self.uri = uri
         self.ssh_tunnel = ssh_tunnel
         self.default_sort = default_sort
+        self.safe_update = safe_update
         self.mongoclient_kwargs = mongoclient_kwargs or {}
 
         # parse the dbname from the uri
