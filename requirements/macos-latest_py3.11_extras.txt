@@ -380,7 +380,7 @@ python-dateutil==2.9.0.post0
     #   pandas
 python-dotenv==1.0.1
     # via pydantic-settings
-python-multipart==0.0.17
+python-multipart==0.0.18
     # via starlette
 pytz==2024.2
     # via
