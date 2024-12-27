@@ -428,18 +428,17 @@ def test_credential_type_valid():
     store = AzureBlobStore(
         index,
         AZURITE_CONTAINER_NAME,
+        azure_client_info="client_url",
         credential_type=credential_type,
     )
     assert store.credential_type == credential_type
 
-    credential_type = "AzureCliCredential"
-    index = MemoryStore("index")
-    store = AzureBlobStore(
-        index,
-        AZURITE_CONTAINER_NAME,
-        credential_type=credential_type,
-    )
-    assert store.credential_type == credential_type
+    # tricks the store into thinking you already
+    # provided the blob service client so it skips
+    # the connection checks. We are only testing that
+    # the credential import works properly
+    store.service = True
+    store.connect()
 
     from azure.identity import DefaultAzureCredential
 
@@ -448,6 +447,7 @@ def test_credential_type_valid():
     store = AzureBlobStore(
         index,
         AZURITE_CONTAINER_NAME,
+        azure_client_info="client_url",
         credential_type=credential_type,
     )
     assert not isinstance(store.credential_type, str)
