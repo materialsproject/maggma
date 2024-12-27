@@ -41,10 +41,15 @@ CredentialType = Literal[
 ]
 
 
-def _get_azure_credential(credential_class: str):
-    """Import the azure.identity module and return the credential class."""
-    module_name = "azure.identity"
-    credential_class = getattr(importlib.import_module(module_name), credential_class)
+def _get_azure_credential(credential_class):
+    """Import the azure.identity module and return the credential class.
+
+    If the credential_class is a class, return an instance of it.
+    If the credential_class is a string, import the module first
+    """
+    if isinstance(credential_class, str):
+        module_name = "azure.identity"
+        credential_class = getattr(importlib.import_module(module_name), credential_class)
     return credential_class()
 
 
@@ -86,7 +91,9 @@ class AzureBlobStore(Store):
                 Currently supported keywords:
                     - connection_string: a connection string for the Azure blob
             credential_type: the type of credential to use to authenticate with Azure.
-                Default is "DefaultAzureCredential".
+                Default is "DefaultAzureCredential".  For serializable stores, provide
+                a string representation of the credential class. Otherwises, you may
+                provide the class itself.
             compress: compress files inserted into the store
             sub_dir: (optional)  subdirectory of the container to store the data.
                 When defined, a final "/" will be added if not already present.

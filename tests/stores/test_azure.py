@@ -422,19 +422,32 @@ def test_no_login():
         store.connect()
 
 
-@pytest.mark.parametrize(
-    "credential_type",
-    [
-        "DefaultAzureCredential",
-        "AzureCliCredential",
-    ],
-)
-def test_credential_type_valid(credential_type):
-    with azurite_container():
-        index = MemoryStore("index")
-        store = AzureBlobStore(
-            index,
-            AZURITE_CONTAINER_NAME,
-            credential_type=credential_type,
-        )
-        store.connect()
+def test_credential_type_valid():
+    credential_type = "DefaultAzureCredential"
+    index = MemoryStore("index")
+    store = AzureBlobStore(
+        index,
+        AZURITE_CONTAINER_NAME,
+        credential_type=credential_type,
+    )
+    assert store.credential_type == credential_type
+
+    credential_type = "AzureCliCredential"
+    index = MemoryStore("index")
+    store = AzureBlobStore(
+        index,
+        AZURITE_CONTAINER_NAME,
+        credential_type=credential_type,
+    )
+    assert store.credential_type == credential_type
+
+    from azure.identity import DefaultAzureCredential
+
+    credential_type = DefaultAzureCredential
+    index = MemoryStore("index")
+    store = AzureBlobStore(
+        index,
+        AZURITE_CONTAINER_NAME,
+        credential_type=credential_type,
+    )
+    assert not isinstance(store.credential_type, str)
