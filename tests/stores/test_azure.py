@@ -420,3 +420,21 @@ def test_no_login():
 
     with pytest.raises(RuntimeError, match=r".*Could not instantiate BlobServiceClient.*"):
         store.connect()
+
+
+@pytest.mark.parametrize(
+    "credential_type",
+    [
+        "DefaultAzureCredential",
+        "AzureCliCredential",
+    ],
+)
+def test_credential_type_valid(credential_type):
+    with azurite_container():
+        index = MemoryStore("index")
+        store = AzureBlobStore(
+            index,
+            AZURITE_CONTAINER_NAME,
+            credential_type=credential_type,
+        )
+        store.connect()
