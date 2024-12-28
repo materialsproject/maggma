@@ -1,5 +1,27 @@
 # Changelog
 
+## [v0.71.0](https://github.com/materialsproject/maggma/tree/v0.71.0) (2024-12-28)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.70.0...v0.71.0)
+
+**Implemented enhancements:**
+
+- \[Feature\] Allow Different Azure Authentication Methods [\#1020](https://github.com/materialsproject/maggma/pull/1020) ([jmmshn](https://github.com/jmmshn))
+
+**Fixed bugs:**
+
+- \[Bug\]: Handling of deprecated `np.bool_` is not ideal [\#1006](https://github.com/materialsproject/maggma/issues/1006)
+
+**Closed issues:**
+
+- \[Bug\] MongoURIStore not able to access some parent attributes. [\#684](https://github.com/materialsproject/maggma/issues/684)
+
+**Merged pull requests:**
+
+- Minor fix to URI store [\#1014](https://github.com/materialsproject/maggma/pull/1014) ([jmmshn](https://github.com/jmmshn))
+- Automated dependency upgrades [\#1008](https://github.com/materialsproject/maggma/pull/1008) ([github-actions[bot]](https://github.com/apps/github-actions))
+- Automated dependency upgrades [\#1003](https://github.com/materialsproject/maggma/pull/1003) ([github-actions[bot]](https://github.com/apps/github-actions))
+
 ## [v0.70.0](https://github.com/materialsproject/maggma/tree/v0.70.0) (2024-10-08)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.69.4...v0.70.0)
