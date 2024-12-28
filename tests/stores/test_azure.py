@@ -420,3 +420,34 @@ def test_no_login():
 
     with pytest.raises(RuntimeError, match=r".*Could not instantiate BlobServiceClient.*"):
         store.connect()
+
+
+def test_credential_type_valid():
+    credential_type = "DefaultAzureCredential"
+    index = MemoryStore("index")
+    store = AzureBlobStore(
+        index,
+        AZURITE_CONTAINER_NAME,
+        azure_client_info="client_url",
+        credential_type=credential_type,
+    )
+    assert store.credential_type == credential_type
+
+    # tricks the store into thinking you already
+    # provided the blob service client so it skips
+    # the connection checks. We are only testing that
+    # the credential import works properly
+    store.service = True
+    store.connect()
+
+    from azure.identity import DefaultAzureCredential
+
+    credential_type = DefaultAzureCredential
+    index = MemoryStore("index")
+    store = AzureBlobStore(
+        index,
+        AZURITE_CONTAINER_NAME,
+        azure_client_info="client_url",
+        credential_type=credential_type,
+    )
+    assert not isinstance(store.credential_type, str)

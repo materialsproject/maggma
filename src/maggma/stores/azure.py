@@ -2,6 +2,7 @@
 Advanced Stores for connecting to Microsoft Azure data.
 """
 
+import importlib
 import os
 import threading
 import warnings
@@ -11,7 +12,7 @@ from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from json import dumps
-from typing import Optional, Union
+from typing import Literal, Optional, Union
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -23,14 +24,33 @@ try:
     import azure
     import azure.storage.blob as azure_blob
     from azure.core.exceptions import ResourceExistsError
-    from azure.identity import DefaultAzureCredential
     from azure.storage.blob import BlobServiceClient, ContainerClient
+
+
 except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
     ContainerClient = None
 
 
 AZURE_KEY_SANITIZE = {"-": "_", ".": "_"}
+
+CredentialType = Literal[
+    "DefaultAzureCredential",
+    "AzureCliCredential",
+    "ManagedIdentityCredential",
+]
+
+
+def _get_azure_credential(credential_class):
+    """Import the azure.identity module and return the credential class.
+
+    If the credential_class is a class, return an instance of it.
+    If the credential_class is a string, import the module first
+    """
+    if isinstance(credential_class, str):
+        module_name = "azure.identity"
+        credential_class = getattr(importlib.import_module(module_name), credential_class)
+    return credential_class()
 
 
 class AzureBlobStore(Store):
@@ -45,6 +65,7 @@ class AzureBlobStore(Store):
         index: Store,
         container_name: str,
         azure_client_info: Optional[Union[str, dict]] = None,
+        credential_type: CredentialType = "DefaultAzureCredential",
         compress: bool = False,
         sub_dir: Optional[str] = None,
         workers: int = 1,
@@ -69,6 +90,10 @@ class AzureBlobStore(Store):
                 BlobServiceClient.
                 Currently supported keywords:
                     - connection_string: a connection string for the Azure blob
+            credential_type: the type of credential to use to authenticate with Azure.
+                Default is "DefaultAzureCredential".  For serializable stores, provide
+                a string representation of the credential class. Otherwises, you may
+                provide the class itself.
             compress: compress files inserted into the store
             sub_dir: (optional)  subdirectory of the container to store the data.
                 When defined, a final "/" will be added if not already present.
@@ -104,6 +129,7 @@ class AzureBlobStore(Store):
             key_sanitize_dict = AZURE_KEY_SANITIZE
         self.key_sanitize_dict = key_sanitize_dict
         self.create_container = create_container
+        self.credential_type = credential_type
 
         # Force the key to be the same as the index
         assert isinstance(
@@ -351,8 +377,8 @@ class AzureBlobStore(Store):
         if not hasattr(self._thread_local, "container"):
             if isinstance(self.azure_client_info, str):
                 # assume it is the account_url and that the connection is passwordless
-                default_credential = DefaultAzureCredential()
-                return BlobServiceClient(self.azure_client_info, credential=default_credential)
+                credentials_ = _get_azure_credential(self.credential_type)
+                return BlobServiceClient(self.azure_client_info, credential=credentials_)
 
             if isinstance(self.azure_client_info, dict):
                 connection_string = self.azure_client_info.get("connection_string")
