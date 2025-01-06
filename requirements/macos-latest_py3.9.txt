@@ -8,16 +8,16 @@ aioitertools==0.12.0
     # via maggma (pyproject.toml)
 annotated-types==0.7.0
     # via pydantic
-attrs==24.2.0
+attrs==24.3.0
     # via
     #   jsonlines
     #   jsonschema
     #   referencing
 bcrypt==4.2.1
     # via paramiko
-boto3==1.35.72
+boto3==1.35.92
     # via maggma (pyproject.toml)
-botocore==1.35.72
+botocore==1.35.92
     # via
     #   boto3
     #   s3transfer
@@ -52,7 +52,7 @@ numpy==1.26.4
     #   maggma (pyproject.toml)
     #   monty
     #   pandas
-orjson==3.10.12
+orjson==3.10.13
     # via maggma (pyproject.toml)
 packaging==24.2
     # via mongomock
@@ -62,13 +62,13 @@ paramiko==3.5.0
     # via sshtunnel
 pycparser==2.22
     # via cffi
-pydantic==2.10.2
+pydantic==2.10.4
     # via
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.27.1
+pydantic-core==2.27.2
     # via pydantic
-pydantic-settings==2.6.1
+pydantic-settings==2.7.1
     # via maggma (pyproject.toml)
 pydash==8.0.4
     # via maggma (pyproject.toml)
@@ -93,11 +93,11 @@ referencing==0.35.1
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==0.21.0
+rpds-py==0.22.3
     # via
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.6
+ruamel-yaml==0.18.9
     # via
     #   maggma (pyproject.toml)
     #   monty
@@ -107,7 +107,7 @@ s3transfer==0.10.4
     # via boto3
 sentinels==1.0.0
     # via mongomock
-six==1.16.0
+six==1.17.0
     # via python-dateutil
 sshtunnel==0.4.0
     # via maggma (pyproject.toml)
