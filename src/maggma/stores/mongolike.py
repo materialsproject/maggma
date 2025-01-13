@@ -61,7 +61,7 @@ class MongoStore(Store):
             username: Username for the collection
             password: Password to connect with
             safe_update: fail gracefully on DocumentTooLarge errors on update
-            auth_source: The database to authenticate on. Defaults to the database name.
+            auth_source: The database to authenticate on. Defaults to None.
             default_sort: Default sort field and direction to use when querying. Can be used to
                 ensure determinacy in query results.
         """
@@ -76,9 +76,6 @@ class MongoStore(Store):
         self.default_sort = default_sort
         self._coll = None  # type: ignore
         self.kwargs = kwargs
-
-        if auth_source is None:
-            auth_source = self.database
         self.auth_source = auth_source
         self.mongoclient_kwargs = mongoclient_kwargs or {}
 
