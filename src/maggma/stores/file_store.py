@@ -442,7 +442,7 @@ class FileStore(MemoryStore):
                     # TODO - could add more logic for detecting different file types
                     # and more nuanced exception handling
                     try:
-                        with zopen(d["path"], "r", encoding=self.encoding) as f:
+                        with zopen(d["path"], "rt", encoding=self.encoding) as f:
                             data = f.read()
                     except Exception as e:
                         data = f"Unable to read: {e}"
