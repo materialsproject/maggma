@@ -684,7 +684,7 @@ class JSONStore(MemoryStore):
 
             # create the .json file if it does not exist
             if not self.read_only and not Path(self.paths[0]).exists():
-                with zopen(self.paths[0], "w", encoding=self.encoding) as f:
+                with zopen(self.paths[0], "wt", encoding=self.encoding) as f:
                     data: list[dict] = []
                     bytesdata = orjson.dumps(data)
                     f.write(bytesdata.decode("utf-8"))
@@ -711,7 +711,7 @@ class JSONStore(MemoryStore):
         Args:
             path: Path to the JSON file to be read
         """
-        with zopen(path, "r") as f:
+        with zopen(path, "rt") as f:
             data = f.read()
             data = data.decode() if isinstance(data, bytes) else data
             objects = bson.json_util.loads(data) if "$oid" in data else orjson.loads(data)
@@ -761,7 +761,7 @@ class JSONStore(MemoryStore):
         """
         Updates the json file when a write-like operation is performed.
         """
-        with zopen(self.paths[0], "w", encoding=self.encoding) as f:
+        with zopen(self.paths[0], "wt", encoding=self.encoding) as f:
             data = list(self.query())
             for d in data:
                 d.pop("_id")
