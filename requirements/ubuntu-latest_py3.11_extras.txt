@@ -14,7 +14,7 @@ anyio==4.8.0
     #   starlette
 asttokens==3.0.0
     # via stack-data
-attrs==24.3.0
+attrs==25.1.0
     # via
     #   jsonlines
     #   jsonschema
@@ -25,7 +25,7 @@ azure-core==1.32.0
     #   azure-storage-blob
 azure-identity==1.19.0
     # via maggma (pyproject.toml)
-azure-storage-blob==12.24.0
+azure-storage-blob==12.24.1
     # via maggma (pyproject.toml)
 babel==2.16.0
     # via mkdocs-material
@@ -33,11 +33,11 @@ bcrypt==4.2.1
     # via paramiko
 blinker==1.9.0
     # via flask
-boto3==1.36.2
+boto3==1.36.6
     # via
     #   maggma (pyproject.toml)
     #   moto
-botocore==1.36.2
+botocore==1.36.6
     # via
     #   boto3
     #   moto
@@ -92,17 +92,17 @@ dnspython==2.7.0
     #   pymongo
 execnet==2.1.1
     # via pytest-xdist
-executing==2.1.0
+executing==2.2.0
     # via stack-data
-fastapi==0.115.6
+fastapi==0.115.7
     # via maggma (pyproject.toml)
 fastjsonschema==2.21.1
     # via nbformat
-filelock==3.16.1
+filelock==3.17.0
     # via virtualenv
 flask==3.1.0
     # via mongogrant
-fonttools==4.55.3
+fonttools==4.55.6
     # via matplotlib
 ghp-import==2.1.0
     # via mkdocs
@@ -120,7 +120,7 @@ httpx==0.28.1
     # via starlette
 hvac==2.3.0
     # via maggma (pyproject.toml)
-identify==2.6.5
+identify==2.6.6
     # via pre-commit
 idna==3.10
     # via
@@ -309,9 +309,9 @@ pluggy==1.5.0
     # via pytest
 portalocker==2.10.1
     # via msal-extensions
-pre-commit==4.0.1
+pre-commit==4.1.0
     # via maggma (pyproject.toml)
-prompt-toolkit==3.0.48
+prompt-toolkit==3.0.50
     # via ipython
 ptyprocess==0.7.0
     # via pexpect
@@ -321,7 +321,7 @@ pybtex==0.24.0
     # via pymatgen
 pycparser==2.22
     # via cffi
-pydantic==2.10.5
+pydantic==2.10.6
     # via
     #   fastapi
     #   maggma (pyproject.toml)
@@ -341,9 +341,9 @@ pyjwt[crypto]==2.10.1
     # via
     #   msal
     #   pyjwt
-pymatgen==2025.1.9
+pymatgen==2025.1.24
     # via maggma (pyproject.toml)
-pymdown-extensions==10.14
+pymdown-extensions==10.14.1
     # via
     #   mkdocs-material
     #   mkdocstrings
@@ -399,7 +399,7 @@ pyyaml-env-tag==0.1
     # via mkdocs
 pyzmq==26.2.0
     # via maggma (pyproject.toml)
-referencing==0.36.1
+referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
@@ -436,9 +436,9 @@ ruamel-yaml==0.18.10
     #   pymatgen
 ruamel-yaml-clib==0.2.12
     # via ruamel-yaml
-ruff==0.9.2
+ruff==0.9.3
     # via maggma (pyproject.toml)
-s3transfer==0.11.1
+s3transfer==0.11.2
     # via boto3
 scipy==1.15.1
     # via pymatgen
@@ -457,7 +457,7 @@ sshtunnel==0.4.0
     # via maggma (pyproject.toml)
 stack-data==0.6.3
     # via ipython
-starlette[full]==0.41.3
+starlette[full]==0.45.3
     # via
     #   fastapi
     #   maggma (pyproject.toml)
@@ -498,7 +498,7 @@ typing-extensions==4.12.2
     #   pydash
     #   referencing
     #   textual
-tzdata==2024.2
+tzdata==2025.1
     # via pandas
 uc-micro-py==1.0.3
     # via linkify-it-py
