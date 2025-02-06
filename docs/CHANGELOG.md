@@ -1,5 +1,9 @@
 # Changelog
 
+## [v0.71.4](https://github.com/materialsproject/maggma/tree/v0.71.4) (2025-02-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.71.3...v0.71.4)
+
 ## [v0.71.3](https://github.com/materialsproject/maggma/tree/v0.71.3) (2025-02-06)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.71.2...v0.71.3)
