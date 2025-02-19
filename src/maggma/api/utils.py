@@ -35,10 +35,9 @@ STORE_PARAMS = dict[
 ]
 
 
-def merge_queries(queries: list[STORE_PARAMS]) -> STORE_PARAMS:
+def merge_queries(queries: list[STORE_PARAMS]) -> STORE_PARAMS:  # noqa: D103
     criteria: STORE_PARAMS = {}
     properties: list[str] = []
-
     for sub_query in queries:
         if "criteria" in sub_query:
             criteria.update(sub_query["criteria"])
@@ -50,6 +49,30 @@ def merge_queries(queries: list[STORE_PARAMS]) -> STORE_PARAMS:
     return {
         "criteria": criteria,
         "properties": properties if len(properties) > 0 else None,
+        **remainder,
+    }
+
+def merge_atlas_querires(queries: list[STORE_PARAMS]) -> STORE_PARAMS:
+    """Merge queries for atlas search, same keys, e.g. "equals", are merged into a list."""
+    criteria: list[dict] = []
+    facets: dict[dict] = {}
+    properties: list[str] = []
+    print("queries to be merged", queries)
+    for sub_query in queries:
+        if "criteria" in sub_query:
+            criteria.extend([{"key": k, "value": v} for k, v in sub_query["criteria"].items()]) # each sub_query can be more than one criteria
+        if sub_query.get("facets", False):
+            facets.update(sub_query["facets"])
+        if sub_query.get("properties", False):
+            properties.extend(sub_query["properties"])
+
+    remainder = {k: v for query in queries for k, v in query.items() if k not in ["criteria", "properties"]}
+
+    print("merged queries", criteria)
+    return {
+        "criteria": criteria,
+        "properties": properties if len(properties) > 0 else None,
+        "facets": facets if len(facets) > 0 else None,
         **remainder,
     }
 

@@ -62,3 +62,60 @@ def generate_query_pipeline(query: dict, store: Store):
         pipeline.append({"$limit": query["limit"]})
 
     return pipeline
+
+def generate_atlas_search_pipeline(query: dict):
+    """
+    Generate the aggregation pipeline for Atlas Search queries.
+
+    Args:
+        query: Query parameters
+        store: Store containing endpoint data
+    """
+    pipeline = [
+    ]
+
+    # generate the operator, if more than one
+    # criteria is present, compound the criteria
+    if len(query["criteria"]) == 1:
+        operator = query["criteria"][0]
+    elif len(query["criteria"]) > 1:
+        operator = {"compound": {
+                    "must": [q for q in query["criteria"] if q]
+                    }}
+
+    if query.get("facets", False):
+        pipeline.append({
+            "$search": {
+                        "index": "default",
+                        "facet":
+                            { "operator":  operator,
+                              "facets": query["facets"]
+                            }
+                        }
+                    })
+    else:
+        pipeline.append({
+            "$search": {
+                        "index": "default",
+                        **operator
+                    }
+                })
+
+    projection_dict = {"_id": 0}
+    if query.get("properties", False):
+        projection_dict.update({p: 1 for p in query["properties"]})
+    pipeline.insert(1, {"$project": projection_dict})
+
+    if query.get("limit", False):
+        pipeline.append({"$limit": query["limit"]})
+
+    if query.get("facets", False):
+        pipeline.append({"$facet":
+                        {"docs":[],
+                        "meta": [
+                            {"$replaceWith": "$$SEARCH_META"},
+                            {"$limit": 1}
+                        ]}
+                        })
+
+    return pipeline

@@ -196,6 +196,7 @@ class ReadOnlyResource(Resource):
         model_name = self.model.__name__
 
         def search(**queries: dict[str, STORE_PARAMS]) -> Union[dict, Response]:
+            
             request: Request = queries.pop("request")  # type: ignore
             temp_response: Response = queries.pop("temp_response")  # type: ignore
 
@@ -222,8 +223,8 @@ class ReadOnlyResource(Resource):
                         status_code=400,
                         detail="Request contains query parameters which cannot be used: {}".format(", ".join(overlap)),
                     )
-
             query: dict[Any, Any] = merge_queries(list(queries.values()))  # type: ignore
+
 
             if self.hint_scheme is not None:  # pragma: no cover
                 hints = self.hint_scheme.generate_hints(query)
@@ -246,7 +247,6 @@ class ReadOnlyResource(Resource):
                         )  # type: ignore
 
                         pipeline = generate_query_pipeline(query, self.store)
-
                         agg_kwargs = {}
 
                         if query.get("agg_hint"):
