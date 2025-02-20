@@ -60,13 +60,19 @@ def merge_atlas_querires(queries: list[STORE_PARAMS]) -> STORE_PARAMS:
     print("queries to be merged", queries)
     for sub_query in queries:
         if "criteria" in sub_query:
-            criteria.extend([{"key": k, "value": v} for k, v in sub_query["criteria"].items()]) # each sub_query can be more than one criteria
+            for k,v in sub_query["criteria"].items():
+                if isinstance(v, dict):
+                    # only one criteria per operator
+                    criteria.append({k:v})
+                elif isinstance(v, list):
+                    # multiple criteria per operator
+                    criteria.extend({k: i} for i in v)
         if sub_query.get("facets", False):
             facets.update(sub_query["facets"])
         if sub_query.get("properties", False):
             properties.extend(sub_query["properties"])
 
-    remainder = {k: v for query in queries for k, v in query.items() if k not in ["criteria", "properties"]}
+    remainder = {k: v for query in queries for k, v in query.items() if k not in ["criteria", "properties", "facets"]}
 
     print("merged queries", criteria)
     return {
