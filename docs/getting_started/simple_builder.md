@@ -116,7 +116,7 @@ Our simple process item just has to multiply one field by `self.multiplier`:
 
 ``` python
 
-    def process_items(self, item : Dict) -> Dict:
+    def process_item(self, item : Dict) -> Dict:
         """
         Multiplies the "a" sub-document by self.multiplier
         """
@@ -183,7 +183,7 @@ class MultiplyBuilder(Builder):
         """
         docs = list(self.source.query())
 
-    def process_items(self, item : Dict) -> Dict:
+    def process_item(self, item : Dict) -> Dict:
         """
         Multiplies the "a" sub-document by self.multiplier
         """
