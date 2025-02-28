@@ -76,13 +76,11 @@ def generate_atlas_search_pipeline(query: dict):
     ]
 
     # generate the operator, if more than one
-    # criteria is present, compound the criteria
-    if len(query["criteria"]) == 1:
-        operator = query["criteria"][0]
-    elif len(query["criteria"]) > 1:
-        operator = {"compound": {
-                    "must": [q for q in query["criteria"] if q]
-                    }}
+    operator = {"compound": {
+                "must": [q for q in query["criteria"] if q if not q.get("mustNot", False)]
+                }}
+    # append the mustNot criteria to the compound operator
+    operator["compound"]["mustNot"] = [q["mustNot"] for q in query["criteria"] if q.get("mustNot", False)]
 
     if query.get("facets", False):
         pipeline.append({
