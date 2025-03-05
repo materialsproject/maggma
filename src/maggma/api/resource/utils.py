@@ -6,7 +6,8 @@ from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS, attach_signature
 from maggma.core.store import Store
 
-NON_STORED_SOURCES=["calcs_reversed","orig_inputs"]
+NON_STORED_SOURCES = ["calcs_reversed", "orig_inputs"]
+
 
 def attach_query_ops(
     function: Callable[[list[STORE_PARAMS]], dict], query_ops: list[QueryOperator]
@@ -64,6 +65,7 @@ def generate_query_pipeline(query: dict, store: Store):
 
     return pipeline
 
+
 def generate_atlas_search_pipeline(query: dict):
     """
     Generate the aggregation pipeline for Atlas Search queries.
@@ -72,33 +74,17 @@ def generate_atlas_search_pipeline(query: dict):
         query: Query parameters
         store: Store containing endpoint data
     """
-    pipeline = [
-    ]
+    pipeline = []
 
     # generate the operator, if more than one
-    operator = {"compound": {
-                "must": [q for q in query["criteria"] if q if not q.get("mustNot", False)]
-                }}
+    operator = {"compound": {"must": [q for q in query["criteria"] if q if not q.get("mustNot", False)]}}
     # append the mustNot criteria to the compound operator
     operator["compound"]["mustNot"] = [q["mustNot"] for q in query["criteria"] if q.get("mustNot", False)]
 
     if query.get("facets", False):
-        pipeline.append({
-            "$search": {
-                        "index": "default",
-                        "facet":
-                            { "operator":  operator,
-                              "facets": query["facets"]
-                            }
-                        }
-                    })
+        pipeline.append({"$search": {"index": "default", "facet": {"operator": operator, "facets": query["facets"]}}})
     else:
-        pipeline.append({
-            "$search": {
-                        "index": "default",
-                        **operator
-                    }
-                })
+        pipeline.append({"$search": {"index": "default", **operator}})
     # add returnedStoredSource: True if non-stored source are not present in "properties"
     # for quicker document retrieval, otherwise, do a full lookup
     return_stored_source = not any(prop in NON_STORED_SOURCES for prop in query.get("properties", []))
@@ -108,7 +94,7 @@ def generate_atlas_search_pipeline(query: dict):
     sorting = query.get("sort", False)
     if sorting:
         # no $ sign for atlas search
-        sort_dict = {"sort": {}} 
+        sort_dict = {"sort": {}}
         sort_dict["sort"].update(query["sort"])
         # add sort to $search stage
         pipeline[0]["$search"].update(sort_dict)
@@ -124,12 +110,6 @@ def generate_atlas_search_pipeline(query: dict):
         pipeline.append({"$limit": query["limit"]})
 
     if query.get("facets", False):
-        pipeline.append({"$facet":
-                        {"docs":[],
-                        "meta": [
-                            {"$replaceWith": "$$SEARCH_META"},
-                            {"$limit": 1}
-                        ]}
-                        })
+        pipeline.append({"$facet": {"docs": [], "meta": [{"$replaceWith": "$$SEARCH_META"}, {"$limit": 1}]}})
 
     return pipeline
