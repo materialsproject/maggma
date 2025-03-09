@@ -20,9 +20,20 @@ def mongostore():
     store._collection.drop()
 
 
-@pytest.fixture()
-def gridfsstore():
-    store = GridFSStore("maggma_test", "test", key="task_id")
+@pytest.fixture(params=["std", "uri"])
+def gridfsstore(request):
+    """
+    Fixture providing both a standard GridFSStore and a GridFSURIStore.
+    """
+    store_type = request.param
+    if store_type == "std":
+        store = GridFSStore("maggma_test", "test", key="task_id")
+    elif store_type == "uri":
+        store = GridFSURIStore(
+            uri="mongodb://localhost:27017", database="maggma_test", collection_name="test", key="task_id"
+        )
+    else:
+        raise ValueError(f"Unknown store_type {store_type}")
     store.connect()
     yield store
     store._files_collection.drop()
@@ -243,6 +254,7 @@ def test_gridfs_uri():
     is_name = store.name is uri
     # This is try and keep the secret safe
     assert is_name
+    store.close()
 
 
 def test_gridfs_uri_dbname_parse():
