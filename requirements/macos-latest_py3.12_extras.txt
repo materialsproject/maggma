@@ -107,7 +107,7 @@ ghp-import==2.1.0
     # via mkdocs
 griffe==1.5.7
     # via mkdocstrings-python
-h11==0.14.0
+h11==0.16.0
     # via
     #   httpcore
     #   uvicorn
