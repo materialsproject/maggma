@@ -104,7 +104,7 @@ fastjsonschema==2.21.1
     # via nbformat
 filelock==3.17.0
     # via virtualenv
-flask==3.1.0
+flask==3.1.1
     # via mongogrant
 fonttools==4.56.0
     # via matplotlib
