@@ -30,6 +30,7 @@ dependencies = [
         "pymongo>=4.2.0",
         "monty>=2024.5.24",
         "mongomock>=3.10.0",
+        "pymongo-inmemory>=0.4.1",
         "pydash>=4.1.0",
         "jsonschema>=3.1.1",
         "tqdm>=4.19.6",

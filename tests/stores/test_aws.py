@@ -7,6 +7,7 @@ from botocore.exceptions import ClientError
 from moto import mock_aws
 from sshtunnel import BaseSSHTunnelForwarderError
 
+from maggma.core.store import StoreError
 from maggma.stores import MemoryStore, MongoStore, S3Store
 from maggma.stores.ssh_tunnel import SSHTunnel
 
@@ -229,7 +230,7 @@ def test_remove(s3store):
 def test_close(s3store):
     list(s3store.query())
     s3store.close()
-    with pytest.raises(AttributeError):
+    with pytest.raises(StoreError):
         list(s3store.query())
 
 

@@ -4,7 +4,6 @@ from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
-import mongomock.collection
 import orjson
 import pymongo.collection
 import pytest
@@ -29,10 +28,11 @@ def mongostore():
 
 
 @pytest.fixture()
-def montystore(tmp_dir):
+def montystore():
     store = MontyStore("maggma_test")
     store.connect()
-    return store
+    yield store
+    store._collection.drop()
 
 
 @pytest.fixture()
@@ -240,8 +240,9 @@ def test_mongostore_newer_in(mongostore):
 def test_memory_store_connect():
     memorystore = MemoryStore()
     assert memorystore._coll is None
+    assert "mem:" in memorystore.name
     memorystore.connect()
-    assert isinstance(memorystore._collection, mongomock.collection.Collection)
+    assert isinstance(memorystore._collection, pymongo.collection.Collection)
 
 
 def test_groupby(memorystore):
@@ -281,7 +282,7 @@ def test_groupby(memorystore):
 
 
 # Monty store tests
-def test_monty_store_connect(tmp_dir):
+def test_monty_store_connect():
     montystore = MontyStore(collection_name="my_collection")
     assert montystore._coll is None
     montystore.connect()
@@ -551,14 +552,50 @@ def test_jsonstore_last_updated(test_dir):
         assert jsonstore.last_updated > start_time
 
 
-def test_eq(mongostore, memorystore, jsonstore):
+def test_eq(mongostore, memorystore, jsonstore, montystore):
+    assert montystore == montystore
     assert mongostore == mongostore
     assert memorystore == memorystore
     assert jsonstore == jsonstore
 
     assert mongostore != memorystore
+    assert mongostore != montystore
     assert mongostore != jsonstore
     assert memorystore != jsonstore
+    assert memorystore != montystore
+
+    # test case courtesy of @sivonxay
+
+    # two MemoryStore with the same collection name point to the same db in memory
+    store1 = MemoryStore(collection_name="test_collection")
+    store2 = MemoryStore(collection_name="test_collection")
+    store1.connect()
+    store2.connect()
+    assert store1 == store2
+    store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
+    assert store2.count() == 2
+
+    # with different collection names, they do not
+    store1 = MemoryStore(collection_name="store1")
+    store2 = MemoryStore(collection_name="store2")
+    assert store1 != store2
+
+    store1.connect()
+    store2.connect()
+
+    store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
+    assert store1.count() != store2.count()
+
+    # same with default collection name, which is unique per-instance
+    store1 = MemoryStore(collection_name=None)
+    store2 = MemoryStore(collection_name=None)
+    assert store1 != store2
+
+    store1.connect()
+    store2.connect()
+
+    store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
+    assert store1.count() != store2.count()
 
 
 @pytest.mark.skipif(

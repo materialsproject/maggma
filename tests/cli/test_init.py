@@ -31,6 +31,11 @@ def reporting_store():
     store._collection.drop()
 
 
+@pytest.fixture()
+def memorystore():
+    return MemoryStore("temp")
+
+
 def test_basic_run():
     runner = CliRunner()
     result = runner.invoke(run, ["--help"])
@@ -41,8 +46,7 @@ def test_basic_run():
     assert result.exit_code != 0
 
 
-def test_run_builder(mongostore):
-    memorystore = MemoryStore("temp")
+def test_run_builder(mongostore, memorystore):
     builder = CopyBuilder(mongostore, memorystore)
 
     mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
@@ -57,7 +61,7 @@ def test_run_builder(mongostore):
 
         result = runner.invoke(run, ["-vvv", "--no_bars", "test_builder.json"])
         assert result.exit_code == 0
-        assert "Get" not in result.output
+        assert "Get " not in result.output
         assert "Update" not in result.output
 
         result = runner.invoke(run, ["-v", "-n", "2", "test_builder.json"])
@@ -67,12 +71,11 @@ def test_run_builder(mongostore):
 
         result = runner.invoke(run, ["-vvv", "-n", "2", "--no_bars", "test_builder.json"])
         assert result.exit_code == 0
-        assert "Get" not in result.output
+        assert "Get " not in result.output
         assert "Update" not in result.output
 
 
-def test_run_builder_chain(mongostore):
-    memorystore = MemoryStore("temp")
+def test_run_builder_chain(mongostore, memorystore):
     builder1 = CopyBuilder(mongostore, memorystore)
     builder2 = CopyBuilder(mongostore, memorystore)
 
@@ -88,7 +91,7 @@ def test_run_builder_chain(mongostore):
 
         result = runner.invoke(run, ["-vvv", "--no_bars", "test_builders.json"])
         assert result.exit_code == 0
-        assert "Get" not in result.output
+        assert "Get " not in result.output
         assert "Update" not in result.output
 
         result = runner.invoke(run, ["-v", "-n", "2", "test_builders.json"])
@@ -98,12 +101,11 @@ def test_run_builder_chain(mongostore):
 
         result = runner.invoke(run, ["-vvv", "-n", "2", "--no_bars", "test_builders.json"])
         assert result.exit_code == 0
-        assert "Get" not in result.output
+        assert "Get " not in result.output
         assert "Update" not in result.output
 
 
-def test_reporting(mongostore, reporting_store):
-    memorystore = MemoryStore("temp")
+def test_reporting(mongostore, reporting_store, memorystore):
     builder = CopyBuilder(mongostore, memorystore)
 
     mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
@@ -155,8 +157,7 @@ def test_python_notebook_source():
     assert "Ended multiprocessing: DummyBuilder" in result.output
 
 
-def test_memray_run_builder(mongostore):
-    memorystore = MemoryStore("temp")
+def test_memray_run_builder(mongostore, memorystore):
     builder = CopyBuilder(mongostore, memorystore)
 
     mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
@@ -171,7 +172,7 @@ def test_memray_run_builder(mongostore):
 
         result = runner.invoke(run, ["-vvv", "--no_bars", "--memray", "on", "test_builder.json"])
         assert result.exit_code == 0
-        assert "Get" not in result.output
+        assert "Get " not in result.output
         assert "Update" not in result.output
 
         result = runner.invoke(run, ["-v", "-n", "2", "--memray", "on", "test_builder.json"])
@@ -181,12 +182,11 @@ def test_memray_run_builder(mongostore):
 
         result = runner.invoke(run, ["-vvv", "-n", "2", "--no_bars", "--memray", "on", "test_builder.json"])
         assert result.exit_code == 0
-        assert "Get" not in result.output
+        assert "Get " not in result.output
         assert "Update" not in result.output
 
 
-def test_memray_user_output_dir(mongostore):
-    memorystore = MemoryStore("temp")
+def test_memray_user_output_dir(mongostore, memorystore):
     builder = CopyBuilder(mongostore, memorystore)
 
     mongostore.update([{mongostore.key: i, mongostore.last_updated_field: datetime.utcnow()} for i in range(10)])
