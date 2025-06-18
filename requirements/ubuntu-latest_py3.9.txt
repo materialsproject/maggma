@@ -122,7 +122,7 @@ typing-extensions==4.12.2
     #   referencing
 tzdata==2025.1
     # via pandas
-urllib3==1.26.20
+urllib3==2.5.0
     # via botocore
 
 # The following packages are considered to be unsafe in a requirements file:
