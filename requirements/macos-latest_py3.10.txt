@@ -8,16 +8,16 @@ aioitertools==0.12.0
     # via maggma (pyproject.toml)
 annotated-types==0.7.0
     # via pydantic
-attrs==25.1.0
+attrs==25.3.0
     # via
     #   jsonlines
     #   jsonschema
     #   referencing
-bcrypt==4.2.1
+bcrypt==4.3.0
     # via paramiko
-boto3==1.36.26
+boto3==1.39.4
     # via maggma (pyproject.toml)
-botocore==1.36.26
+botocore==1.39.4
     # via
     #   boto3
     #   s3transfer
@@ -25,7 +25,7 @@ cffi==1.17.1
     # via
     #   cryptography
     #   pynacl
-cryptography==44.0.1
+cryptography==45.0.5
     # via paramiko
 dnspython==2.7.0
     # via
@@ -37,38 +37,38 @@ jmespath==1.0.1
     #   botocore
 jsonlines==4.0.0
     # via maggma (pyproject.toml)
-jsonschema==4.23.0
+jsonschema==4.24.0
     # via maggma (pyproject.toml)
-jsonschema-specifications==2024.10.1
+jsonschema-specifications==2025.4.1
     # via jsonschema
 mongomock==4.3.0
     # via maggma (pyproject.toml)
-monty==2025.1.9
+monty==2025.3.3
     # via maggma (pyproject.toml)
-msgpack==1.1.0
+msgpack==1.1.1
     # via maggma (pyproject.toml)
-numpy==2.2.3
+numpy==2.2.6
     # via
     #   maggma (pyproject.toml)
     #   monty
     #   pandas
-orjson==3.10.15
+orjson==3.10.18
     # via maggma (pyproject.toml)
-packaging==24.2
+packaging==25.0
     # via mongomock
-pandas==2.2.3
+pandas==2.3.1
     # via maggma (pyproject.toml)
 paramiko==3.5.1
     # via sshtunnel
 pycparser==2.22
     # via cffi
-pydantic==2.10.6
+pydantic==2.11.7
     # via
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.27.2
+pydantic-core==2.33.2
     # via pydantic
-pydantic-settings==2.8.0
+pydantic-settings==2.10.1
     # via maggma (pyproject.toml)
 pydash==8.0.5
     # via maggma (pyproject.toml)
@@ -81,29 +81,29 @@ python-dateutil==2.9.0.post0
     #   botocore
     #   maggma (pyproject.toml)
     #   pandas
-python-dotenv==1.0.1
+python-dotenv==1.1.1
     # via pydantic-settings
-pytz==2025.1
+pytz==2025.2
     # via
     #   mongomock
     #   pandas
-pyzmq==26.2.1
+pyzmq==27.0.0
     # via maggma (pyproject.toml)
 referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==0.23.1
+rpds-py==0.26.0
     # via
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.10
+ruamel-yaml==0.18.14
     # via
     #   maggma (pyproject.toml)
     #   monty
 ruamel-yaml-clib==0.2.12
     # via ruamel-yaml
-s3transfer==0.11.2
+s3transfer==0.13.0
     # via boto3
 sentinels==1.0.0
     # via mongomock
@@ -113,15 +113,20 @@ sshtunnel==0.4.0
     # via maggma (pyproject.toml)
 tqdm==4.67.1
     # via maggma (pyproject.toml)
-typing-extensions==4.12.2
+typing-extensions==4.14.1
     # via
     #   pydantic
     #   pydantic-core
     #   pydash
     #   referencing
-tzdata==2025.1
+    #   typing-inspection
+typing-inspection==0.4.1
+    # via
+    #   pydantic
+    #   pydantic-settings
+tzdata==2025.2
     # via pandas
-urllib3==2.3.0
+urllib3==2.5.0
     # via botocore
 
 # The following packages are considered to be unsafe in a requirements file:
