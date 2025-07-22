@@ -6,6 +6,8 @@ from maggma.api.query_operator import QueryOperator
 from maggma.api.utils import STORE_PARAMS, attach_signature
 from maggma.core.store import Store
 
+NON_STORED_SOURCES = ["calcs_reversed", "orig_inputs"]
+
 
 def attach_query_ops(
     function: Callable[[list[STORE_PARAMS]], dict], query_ops: list[QueryOperator]
@@ -60,5 +62,54 @@ def generate_query_pipeline(query: dict, store: Store):
 
     if query.get("limit", False):
         pipeline.append({"$limit": query["limit"]})
+
+    return pipeline
+
+
+def generate_atlas_search_pipeline(query: dict):
+    """
+    Generate the aggregation pipeline for Atlas Search queries.
+
+    Args:
+        query: Query parameters
+        store: Store containing endpoint data
+    """
+    pipeline = []
+
+    # generate the operator, if more than one
+    operator = {"compound": {"must": [q for q in query["criteria"] if not q.get("mustNot", False)]}}
+    # append the mustNot criteria to the compound operator
+    operator["compound"]["mustNot"] = [q["mustNot"] for q in query["criteria"] if q.get("mustNot", False)]
+
+    if query.get("facets", False):
+        pipeline.append({"$search": {"index": "default", "facet": {"operator": operator, "facets": query["facets"]}}})
+    else:
+        pipeline.append({"$search": {"index": "default", **operator}})
+    # add returnedStoredSource: True if non-stored source are not present in "properties"
+    # for quicker document retrieval, otherwise, do a full lookup
+    return_stored_source = not any(prop in NON_STORED_SOURCES for prop in query.get("properties", []))
+    if return_stored_source:
+        pipeline[0]["$search"]["returnStoredSource"] = True
+
+    sorting = query.get("sort", False)
+    if sorting:
+        # no $ sign for atlas search
+        sort_dict = {"sort": {}}
+        sort_dict["sort"].update(query["sort"])
+        # add sort to $search stage
+        pipeline[0]["$search"].update(sort_dict)
+
+    projection_dict = {"_id": 0}
+    if query.get("properties", False):
+        projection_dict.update({p: 1 for p in query["properties"]})
+    pipeline.insert(1, {"$project": projection_dict})
+
+    pipeline.append({"$skip": query.get("skip", 0)})
+
+    if query.get("limit", False):
+        pipeline.append({"$limit": query["limit"]})
+
+    if query.get("facets", False):
+        pipeline.append({"$facet": {"docs": [], "meta": [{"$replaceWith": "$$SEARCH_META"}, {"$limit": 1}]}})
 
     return pipeline

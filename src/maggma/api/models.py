@@ -28,6 +28,11 @@ class Meta(BaseModel):
 
     total_doc: Optional[int] = Field(None, description="the total number of documents available for this query", ge=0)
 
+    facet: Optional[dict] = Field(
+        None,
+        description="a dictionary containing the facets available for this query",
+    )
+
     class Config:
         extra = "allow"
 

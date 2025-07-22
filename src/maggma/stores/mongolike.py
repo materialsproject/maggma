@@ -460,7 +460,9 @@ class MongoURIStore(MongoStore):
                 ensure determinacy in query results.
         """
         self.uri = uri
-        self.ssh_tunnel = ssh_tunnel
+        if ssh_tunnel:
+            raise ValueError(f"At the moment ssh_tunnel is not supported for {self.__class__.__name__}")
+        self.ssh_tunnel = None
         self.default_sort = default_sort
         self.safe_update = safe_update
         self.mongoclient_kwargs = mongoclient_kwargs or {}

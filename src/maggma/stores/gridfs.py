@@ -87,6 +87,7 @@ class GridFSStore(Store):
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
         self.kwargs = kwargs
         self.ssh_tunnel = ssh_tunnel
+        self._fs = None
 
         if auth_source is None:
             auth_source = self.database
@@ -157,9 +158,9 @@ class GridFSStore(Store):
             db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db[f"{self.collection_name}.files"]
-            self._files_store = MongoStore.from_collection(self._files_collection)
-            self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
-            self._files_store.key = self.key
+            self._fs = MongoStore.from_collection(self._files_collection)
+            self._fs.last_updated_field = f"metadata.{self.last_updated_field}"
+            self._fs.key = self.key
             self._chunks_collection = db[f"{self.collection_name}.chunks"]
 
     @property
@@ -168,6 +169,13 @@ class GridFSStore(Store):
         if self._coll is None:
             raise StoreError("Must connect Mongo-like store before attempting to use it")
         return self._coll
+
+    @property
+    def _files_store(self):
+        """Property referring to MongoStore associated to the files_collection."""
+        if self._fs is None:
+            raise StoreError("Must connect Mongo-like store before attempting to use it")
+        return self._fs
 
     @property
     def last_updated(self) -> datetime:
@@ -448,6 +456,7 @@ class GridFSURIStore(GridFSStore):
         ensure_metadata: bool = False,
         searchable_fields: Optional[list[str]] = None,
         mongoclient_kwargs: Optional[dict] = None,
+        ssh_tunnel: Optional[SSHTunnel] = None,
         **kwargs,
     ):
         """
@@ -462,6 +471,10 @@ class GridFSURIStore(GridFSStore):
             searchable_fields: fields to keep in the index store.
         """
         self.uri = uri
+
+        if ssh_tunnel:
+            raise ValueError(f"At the moment ssh_tunnel is not supported for {self.__class__.__name__}")
+        self.ssh_tunnel = None
 
         # parse the dbname from the uri
         if database is None:
@@ -479,6 +492,7 @@ class GridFSURIStore(GridFSStore):
         self.searchable_fields = [] if searchable_fields is None else searchable_fields
         self.kwargs = kwargs
         self.mongoclient_kwargs = mongoclient_kwargs or {}
+        self._fs = None
 
         if "key" not in kwargs:
             kwargs["key"] = "_id"
@@ -497,7 +511,26 @@ class GridFSURIStore(GridFSStore):
             db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db[f"{self.collection_name}.files"]
-            self._files_store = MongoStore.from_collection(self._files_collection)
-            self._files_store.last_updated_field = f"metadata.{self.last_updated_field}"
-            self._files_store.key = self.key
+            self._fs = MongoStore.from_collection(self._files_collection)
+            self._fs.last_updated_field = f"metadata.{self.last_updated_field}"
+            self._fs.key = self.key
             self._chunks_collection = db[f"{self.collection_name}.chunks"]
+
+    @property
+    def name(self) -> str:
+        """
+        Return a string representing this data source.
+        """
+        # TODO: This is not very safe since it exposes the username/password info
+        return self.uri
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for GridFSURIStore
+        other: other GridFSURIStore to compare with.
+        """
+        if not isinstance(other, GridFSStore):
+            return False
+
+        fields = ["uri", "database", "collection_name"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
