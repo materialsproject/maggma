@@ -1,5 +1,30 @@
 # Changelog
 
+## [Unreleased](https://github.com/materialsproject/maggma/tree/HEAD)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.72.0...HEAD)
+
+**Closed issues:**
+
+- \[Feature Request\]: Document API components [\#972](https://github.com/materialsproject/maggma/issues/972)
+
+## [v0.72.0](https://github.com/materialsproject/maggma/tree/v0.72.0) (2025-08-13)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.71.5...v0.72.0)
+
+**Breaking changes:**
+
+- Deprecate maggma.api for migration [\#1048](https://github.com/materialsproject/maggma/pull/1048) ([esoteric-ephemera](https://github.com/esoteric-ephemera))
+
+**Closed issues:**
+
+- Confirm that pymongo, boto3, boto3core updates don't break things [\#1028](https://github.com/materialsproject/maggma/issues/1028)
+
+**Merged pull requests:**
+
+- update Code of Conduct to MPSF version [\#1046](https://github.com/materialsproject/maggma/pull/1046) ([rkingsbury](https://github.com/rkingsbury))
+- Atlas search update [\#1036](https://github.com/materialsproject/maggma/pull/1036) ([yang-ruoxi](https://github.com/yang-ruoxi))
+
 ## [v0.71.5](https://github.com/materialsproject/maggma/tree/v0.71.5) (2025-03-09)
 
 [Full Changelog](https://github.com/materialsproject/maggma/compare/v0.71.4...v0.71.5)
@@ -436,7 +461,7 @@
 
 ## [v0.57.0](https://github.com/materialsproject/maggma/tree/v0.57.0) (2023-09-26)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.55.0...v0.57.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.56.0...v0.57.0)
 
 **Merged pull requests:**
 
@@ -446,13 +471,13 @@
 - Automated dependency upgrades [\#860](https://github.com/materialsproject/maggma/pull/860) ([github-actions[bot]](https://github.com/apps/github-actions))
 - Update @arosen93 to @Andrew-S-Rosen [\#859](https://github.com/materialsproject/maggma/pull/859) ([Andrew-S-Rosen](https://github.com/Andrew-S-Rosen))
 
-## [v0.55.0](https://github.com/materialsproject/maggma/tree/v0.55.0) (2023-09-06)
-
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.56.0...v0.55.0)
-
 ## [v0.56.0](https://github.com/materialsproject/maggma/tree/v0.56.0) (2023-09-06)
 
-[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.54.0...v0.56.0)
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.55.0...v0.56.0)
+
+## [v0.55.0](https://github.com/materialsproject/maggma/tree/v0.55.0) (2023-09-06)
+
+[Full Changelog](https://github.com/materialsproject/maggma/compare/v0.54.0...v0.55.0)
 
 **Closed issues:**
 
