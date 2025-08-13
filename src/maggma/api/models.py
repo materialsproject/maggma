@@ -1,9 +1,14 @@
-from datetime import datetime
-from typing import Generic, Optional, TypeVar
+from __future__ import annotations
 
-from pydantic import BaseModel, Field, validator
+from datetime import datetime
+from typing import TYPE_CHECKING, Generic, TypeVar
+
+from pydantic import BaseModel, Field, field_validator
 
 from maggma import __version__
+
+if TYPE_CHECKING:
+    from pydantic import ValidationInfo
 
 """ Describes the Materials API Response """
 
@@ -26,9 +31,9 @@ class Meta(BaseModel):
         default_factory=datetime.utcnow,
     )
 
-    total_doc: Optional[int] = Field(None, description="the total number of documents available for this query", ge=0)
+    total_doc: int | None = Field(None, description="the total number of documents available for this query", ge=0)
 
-    facet: Optional[dict] = Field(
+    facet: dict | None = Field(
         None,
         description="a dictionary containing the facets available for this query",
     )
@@ -55,25 +60,25 @@ class Response(BaseModel, Generic[DataT]):
     A Generic API Response.
     """
 
-    data: Optional[list[DataT]] = Field(None, description="List of returned data")
-    errors: Optional[list[Error]] = Field(None, description="Any errors on processing this query")
-    meta: Optional[Meta] = Field(None, description="Extra information for the query")
+    data: list[DataT] | None = Field(None, description="List of returned data")
+    errors: list[Error] | None = Field(None, description="Any errors on processing this query")
+    meta: Meta | None = Field(None, description="Extra information for the query")
 
-    @validator("errors", always=True)
-    def check_consistency(cls, v, values):
-        if v is not None and values["data"] is not None:
+    @field_validator("errors", mode="before")
+    def check_consistency(cls, v, values: ValidationInfo):
+        if v is not None and getattr(values, "data", None) is not None:
             raise ValueError("must not provide both data and error")
-        if v is None and values.get("data") is None:
+        if v is None and getattr(values, "data", None) is None:
             raise ValueError("must provide data or error")
         return v
 
-    @validator("meta", pre=True, always=True)
-    def default_meta(cls, v, values):
+    @field_validator("meta", mode="before")
+    def default_meta(cls, v, values: ValidationInfo):
         if v is None:
-            v = Meta().dict()
+            v = Meta().model_dump()
         if v.get("total_doc", None) is None:
-            if values.get("data", None) is not None:
-                v["total_doc"] = len(values["data"])
+            if getattr(values, "data", None) is not None:
+                v["total_doc"] = len(values.data)
             else:
                 v["total_doc"] = 0
         return v
