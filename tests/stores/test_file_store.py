@@ -21,7 +21,7 @@ Desired behavior
 
 import hashlib
 from datetime import datetime, timezone
-from distutils.dir_util import copy_tree
+import shutil
 from pathlib import Path
 
 import pytest
@@ -34,7 +34,7 @@ from maggma.stores.file_store import FileStore
 def test_dir(tmp_path):
     module_dir = Path(__file__).resolve().parent
     test_dir = module_dir / ".." / "test_files" / "file_store_test"
-    copy_tree(str(test_dir), str(tmp_path))
+    shutil.copytree(str(test_dir), str(tmp_path), dirs_exist_ok=True)
     return tmp_path.resolve()
 
 
@@ -184,7 +184,7 @@ def test_store_files_moved(test_dir):
     fs.close()
 
     # now copy the entire FileStore to a new directory and re-initialize
-    copy_tree(test_dir, str(test_dir / "new_store_location"))
+    shutil.copytree(test_dir, str(test_dir / "new_store_location"), dirs_exist_ok=True)
     fs = FileStore(test_dir / "new_store_location", read_only=False)
     fs.connect()
     assert len(list(fs.query({"orphan": False}))) == 6
