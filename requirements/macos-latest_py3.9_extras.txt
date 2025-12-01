@@ -108,7 +108,7 @@ filelock==3.18.0
     # via virtualenv
 flask==3.1.1
     # via mongogrant
-fonttools==4.58.5
+fonttools==4.61.0
     # via matplotlib
 ghp-import==2.1.0
     # via mkdocs
