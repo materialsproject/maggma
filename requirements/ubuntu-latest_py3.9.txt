@@ -127,7 +127,7 @@ typing-inspection==0.4.1
     #   pydantic-settings
 tzdata==2025.2
     # via pandas
-urllib3==1.26.20
+urllib3==2.6.0
     # via botocore
 
 # The following packages are considered to be unsafe in a requirements file:
