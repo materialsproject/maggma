@@ -544,7 +544,7 @@ urllib3==1.26.20
     #   responses
 uvicorn==0.35.0
     # via maggma (pyproject.toml)
-virtualenv==20.31.2
+virtualenv==20.36.1
     # via pre-commit
 watchdog==6.0.0
     # via mkdocs
