@@ -23,7 +23,6 @@ classifiers=[
 license = {file = "LICENSE"}
 requires-python = ">=3.9"
 dependencies = [
-        "setuptools",
         "ruamel.yaml>=0.17",
         "pydantic>=2.0",
         "pydantic-settings>=2.0.3",
