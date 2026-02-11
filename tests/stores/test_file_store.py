@@ -21,8 +21,8 @@ Desired behavior
 
 import hashlib
 from datetime import datetime, timezone
-import shutil
 from pathlib import Path
+import shutil
 
 import pytest
 
