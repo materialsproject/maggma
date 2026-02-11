@@ -104,7 +104,7 @@ execnet==2.1.2
     # via pytest-xdist
 executing==2.2.1
     # via stack-data
-fastapi==0.128.7
+fastapi==0.128.8
     # via maggma (pyproject.toml)
 fastjsonschema==2.21.2
     # via nbformat
@@ -151,8 +151,6 @@ importlib-resources==6.5.2
     #   spglib
 iniconfig==2.1.0
     # via pytest
-invoke==2.2.1
-    # via paramiko
 ipython==8.18.1
     # via maggma (pyproject.toml)
 isodate==0.7.2
@@ -314,7 +312,9 @@ pandas==2.3.3
     #   maggma (pyproject.toml)
     #   pymatgen
 paramiko==3.5.1
-    # via sshtunnel
+    # via
+    #   maggma (pyproject.toml)
+    #   sshtunnel
 parso==0.8.6
     # via jedi
 pathspec==1.0.4
@@ -504,8 +504,6 @@ types-python-dateutil==2.9.0.20260124
     # via maggma (pyproject.toml)
 types-pyyaml==6.0.12.20250915
     # via maggma (pyproject.toml)
-types-setuptools==81.0.0.20260209
-    # via maggma (pyproject.toml)
 typing-extensions==4.15.0
     # via
     #   aioitertools
@@ -563,6 +561,3 @@ zipp==3.23.0
     # via
     #   importlib-metadata
     #   importlib-resources
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools

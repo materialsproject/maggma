@@ -31,8 +31,6 @@ dnspython==2.7.0
     # via
     #   maggma (pyproject.toml)
     #   pymongo
-invoke==2.2.1
-    # via paramiko
 jmespath==1.1.0
     # via
     #   boto3
@@ -61,7 +59,9 @@ packaging==26.0
 pandas==2.3.3
     # via maggma (pyproject.toml)
 paramiko==3.5.1
-    # via sshtunnel
+    # via
+    #   maggma (pyproject.toml)
+    #   sshtunnel
 pycparser==2.23
     # via cffi
 pydantic==2.12.5
@@ -130,6 +130,3 @@ tzdata==2025.3
     # via pandas
 urllib3==1.26.20
     # via botocore
-
-# The following packages are considered to be unsafe in a requirements file:
-# setuptools
