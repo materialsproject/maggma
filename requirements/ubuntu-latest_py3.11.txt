@@ -60,7 +60,7 @@ packaging==26.0
     # via mongomock
 pandas==3.0.0
     # via maggma (pyproject.toml)
-paramiko==4.0.0
+paramiko==3.5.1
     # via sshtunnel
 pycparser==3.0
     # via cffi
