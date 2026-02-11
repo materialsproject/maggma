@@ -20,9 +20,9 @@ Desired behavior
 """
 
 import hashlib
+import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-import shutil
 
 import pytest
 
