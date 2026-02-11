@@ -20,7 +20,6 @@ try:
 except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
 
-# NOTE: see https://github.com/Azure/Azurite/issues/2623 for why skipApiVersionCheck is needed
 AZURITE_CONNECTION_STRING = (
     "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;"
     "AccountKey="
