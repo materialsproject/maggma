@@ -4,128 +4,129 @@
 #
 #    pip-compile --output-file=requirements/macos-latest_py3.9.txt
 #
-aioitertools==0.12.0
+aioitertools==0.13.0
     # via maggma (pyproject.toml)
 annotated-types==0.7.0
     # via pydantic
-attrs==25.3.0
+attrs==25.4.0
     # via
     #   jsonlines
     #   jsonschema
     #   referencing
-bcrypt==4.3.0
+bcrypt==5.0.0
     # via paramiko
-boto3==1.39.4
+boto3==1.42.46
     # via maggma (pyproject.toml)
-botocore==1.39.4
+botocore==1.42.46
     # via
     #   boto3
     #   s3transfer
-cffi==1.17.1
+cffi==2.0.0
     # via
     #   cryptography
     #   pynacl
-cryptography==45.0.5
+cryptography==46.0.5
     # via paramiko
 dnspython==2.7.0
     # via
     #   maggma (pyproject.toml)
     #   pymongo
-jmespath==1.0.1
+invoke==2.2.1
+    # via paramiko
+jmespath==1.1.0
     # via
     #   boto3
     #   botocore
 jsonlines==4.0.0
     # via maggma (pyproject.toml)
-jsonschema==4.24.0
+jsonschema==4.25.1
     # via maggma (pyproject.toml)
-jsonschema-specifications==2025.4.1
+jsonschema-specifications==2025.9.1
     # via jsonschema
 mongomock==4.3.0
     # via maggma (pyproject.toml)
 monty==2025.3.3
     # via maggma (pyproject.toml)
-msgpack==1.1.1
+msgpack==1.1.2
     # via maggma (pyproject.toml)
 numpy==2.0.2
     # via
     #   maggma (pyproject.toml)
     #   monty
     #   pandas
-orjson==3.10.18
+orjson==3.11.5
     # via maggma (pyproject.toml)
-packaging==25.0
+packaging==26.0
     # via mongomock
-pandas==2.3.1
+pandas==2.3.3
     # via maggma (pyproject.toml)
-paramiko==3.5.1
+paramiko==4.0.0
     # via sshtunnel
-pycparser==2.22
+pycparser==2.23
     # via cffi
-pydantic==2.11.7
+pydantic==2.12.5
     # via
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.33.2
+pydantic-core==2.41.5
     # via pydantic
-pydantic-settings==2.10.1
+pydantic-settings==2.11.0
     # via maggma (pyproject.toml)
-pydash==8.0.5
+pydash==8.0.6
     # via maggma (pyproject.toml)
 pymongo==4.10.1
     # via maggma (pyproject.toml)
-pynacl==1.5.0
+pynacl==1.6.2
     # via paramiko
 python-dateutil==2.9.0.post0
     # via
     #   botocore
     #   maggma (pyproject.toml)
     #   pandas
-python-dotenv==1.1.1
+python-dotenv==1.2.1
     # via pydantic-settings
 pytz==2025.2
     # via
     #   mongomock
     #   pandas
-pyzmq==27.0.0
+pyzmq==27.1.0
     # via maggma (pyproject.toml)
 referencing==0.36.2
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==0.26.0
+rpds-py==0.27.1
     # via
     #   jsonschema
     #   referencing
-ruamel-yaml==0.18.14
+ruamel-yaml==0.19.1
     # via
     #   maggma (pyproject.toml)
     #   monty
-ruamel-yaml-clib==0.2.12
-    # via ruamel-yaml
-s3transfer==0.13.0
+s3transfer==0.16.0
     # via boto3
-sentinels==1.0.0
+sentinels==1.1.1
     # via mongomock
 six==1.17.0
     # via python-dateutil
 sshtunnel==0.4.0
     # via maggma (pyproject.toml)
-tqdm==4.67.1
+tqdm==4.67.3
     # via maggma (pyproject.toml)
-typing-extensions==4.14.1
+typing-extensions==4.15.0
     # via
     #   aioitertools
+    #   cryptography
     #   pydantic
     #   pydantic-core
     #   pydash
     #   referencing
     #   typing-inspection
-typing-inspection==0.4.1
+typing-inspection==0.4.2
     # via
     #   pydantic
     #   pydantic-settings
-tzdata==2025.2
+tzdata==2025.3
     # via pandas
 urllib3==1.26.20
     # via botocore
