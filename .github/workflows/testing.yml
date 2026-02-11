@@ -21,7 +21,7 @@ jobs:
     strategy:
       max-parallel: 1
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Set up Python
@@ -56,7 +56,7 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v6
@@ -75,7 +75,7 @@ jobs:
       run: |
         pip install -e .
         pytest --cov=maggma --cov-report=xml
-    - uses: codecov/codecov-action@v5.5.1
+    - uses: codecov/codecov-action@v5.5.2
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
         file: ./coverage.xml
@@ -84,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v5
+    - uses: actions/checkout@v6
 
     - uses: actions/setup-python@v6
       with:

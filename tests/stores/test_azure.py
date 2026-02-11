@@ -20,7 +20,6 @@ try:
 except (ImportError, ModuleNotFoundError):
     azure_blob = None  # type: ignore
 
-
 AZURITE_CONNECTION_STRING = (
     "DefaultEndpointsProtocol=http;AccountName=devstoreaccount1;"
     "AccountKey="
