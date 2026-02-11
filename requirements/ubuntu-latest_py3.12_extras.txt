@@ -19,7 +19,7 @@ attrs==25.3.0
     #   jsonlines
     #   jsonschema
     #   referencing
-azure-core==1.35.0
+azure-core==1.38.0
     # via
     #   azure-identity
     #   azure-storage-blob
