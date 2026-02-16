@@ -39,11 +39,11 @@ bcrypt==5.0.0
     # via paramiko
 blinker==1.9.0
     # via flask
-boto3==1.42.46
+boto3==1.42.49
     # via
     #   maggma (pyproject.toml)
     #   moto
-botocore==1.42.46
+botocore==1.42.49
     # via
     #   boto3
     #   moto
@@ -371,7 +371,7 @@ pyjwt[crypto]==2.11.0
     #   pyjwt
 pymatgen==2024.8.9
     # via maggma (pyproject.toml)
-pymdown-extensions==10.20.1
+pymdown-extensions==10.21
     # via
     #   mkdocs-material
     #   mkdocstrings
@@ -460,7 +460,7 @@ ruamel-yaml==0.19.1
     #   maggma (pyproject.toml)
     #   monty
     #   pymatgen
-ruff==0.15.0
+ruff==0.15.1
     # via maggma (pyproject.toml)
 s3transfer==0.16.0
     # via boto3
@@ -555,7 +555,7 @@ werkzeug==3.1.5
     # via
     #   flask
     #   moto
-xmltodict==1.0.2
+xmltodict==1.0.3
     # via moto
 zipp==3.23.0
     # via
