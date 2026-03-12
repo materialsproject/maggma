@@ -52,7 +52,7 @@ numpy==2.4.2
     #   maggma (pyproject.toml)
     #   monty
     #   pandas
-orjson==3.11.7
+orjson==3.11.6
     # via maggma (pyproject.toml)
 packaging==26.0
     # via mongomock

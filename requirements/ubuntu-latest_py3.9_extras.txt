@@ -294,7 +294,7 @@ numpy==2.0.2
     #   pymatgen
     #   scipy
     #   spglib
-orjson==3.11.5
+orjson==3.11.6
     # via maggma (pyproject.toml)
 packaging==26.0
     # via
