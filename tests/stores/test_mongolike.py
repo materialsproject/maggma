@@ -551,6 +551,31 @@ def test_jsonstore_last_updated(test_dir):
         assert jsonstore.last_updated > start_time
 
 
+def test_jsonstore_sanitize_on_write(test_dir):
+    class SubFloat(float):
+        pass
+
+    with ScratchDir("."):
+        jsonstore = JSONStore(
+            "sanitize.json",
+            read_only=False,
+            sanitize_on_write=True,
+        )
+        jsonstore.connect()
+
+        # This would fail on the normal orjson path, but should succeed when
+        # sanitize_on_write=True.
+        jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
+        jsonstore.close()
+
+        # Confirm the file was written and can be reloaded.
+        jsonstore = JSONStore("sanitize.json", read_only=True)
+        jsonstore.connect()
+        doc = jsonstore.query_one(criteria={"task_id": 3})
+        assert doc is not None
+        assert doc["wrong_field"] == pytest.approx(1.1)
+
+
 def test_eq(mongostore, memorystore, jsonstore):
     assert mongostore == mongostore
     assert memorystore == memorystore
