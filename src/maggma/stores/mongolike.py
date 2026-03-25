@@ -642,6 +642,8 @@ class JSONStore(MemoryStore):
                 encoding from the platform. This should work in the great majority of cases.
                 However, if you encounter a UnicodeDecodeError, consider setting the encoding
                 explicitly to 'utf8' or another encoding as appropriate.
+            sanitize_on_write: Whether to sanitize documents with jsanitize before writing to the
+                JSON file.
         """
         paths = paths if isinstance(paths, (list, tuple)) else [paths]
         self.paths = paths
