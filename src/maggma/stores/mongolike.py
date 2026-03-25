@@ -4,6 +4,7 @@ Stores are a default access pattern to data and provide
 various utilities.
 """
 
+import json
 import warnings
 from collections.abc import Iterator
 from itertools import chain, groupby
@@ -615,6 +616,7 @@ class JSONStore(MemoryStore):
         serialization_option: Optional[int] = None,
         serialization_default: Optional[Callable[[Any], Any]] = None,
         encoding: Optional[str] = None,
+        sanitize_on_write: bool = False,
         **kwargs,
     ):
         """
@@ -669,6 +671,7 @@ class JSONStore(MemoryStore):
         self.default_sort = None
         self.serialization_option = serialization_option
         self.serialization_default = serialization_default
+        self.sanitize_on_write = sanitize_on_write
 
         super().__init__(**kwargs)
 
@@ -767,12 +770,20 @@ class JSONStore(MemoryStore):
             data = list(self.query())
             for d in data:
                 d.pop("_id")
-            bytesdata = orjson.dumps(
-                data,
-                option=self.serialization_option,
-                default=self.serialization_default,
-            )
-            f.write(bytesdata.decode("utf-8"))
+            if self.sanitize_on_write:
+                data = jsanitize(
+                    data,
+                    strict=False,
+                    recursive_msonable=True,
+                )
+                json.dump(data, f, indent=2)
+            else:
+                bytesdata = orjson.dumps(
+                    data,
+                    option=self.serialization_option,
+                    default=self.serialization_default,
+                )
+                f.write(bytesdata.decode("utf-8"))
 
     def __hash__(self):
         return hash((*self.paths, self.last_updated_field))
