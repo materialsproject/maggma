@@ -223,7 +223,7 @@ mdit-py-plugins==0.4.2
     # via textual
 mdurl==0.1.2
     # via markdown-it-py
-memray==1.19.1
+memray==1.19.2
     # via maggma (pyproject.toml)
 mergedeep==1.3.4
     # via
