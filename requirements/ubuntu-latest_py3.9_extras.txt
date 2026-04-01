@@ -365,7 +365,7 @@ pygments==2.20.0
     #   pytest
     #   rich
     #   textual
-pyjwt[crypto]==2.11.0
+pyjwt[crypto]==2.12.0
     # via
     #   msal
     #   pyjwt
