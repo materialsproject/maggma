@@ -25,7 +25,7 @@ cffi==2.0.0
     # via
     #   cryptography
     #   pynacl
-cryptography==46.0.6
+cryptography==46.0.7
     # via paramiko
 dnspython==2.8.0
     # via
