@@ -383,7 +383,7 @@ pynacl==1.6.2
     # via paramiko
 pyparsing==3.3.2
     # via matplotlib
-pytest==8.4.2
+pytest==9.0.3
     # via
     #   maggma (pyproject.toml)
     #   pytest-asyncio

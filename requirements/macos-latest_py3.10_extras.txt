@@ -379,7 +379,7 @@ pyparsing==3.3.2
     # via
     #   bibtexparser
     #   matplotlib
-pytest==9.0.2
+pytest==9.0.3
     # via
     #   maggma (pyproject.toml)
     #   pytest-asyncio
