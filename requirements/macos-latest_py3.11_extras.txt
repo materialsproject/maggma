@@ -400,7 +400,7 @@ python-dateutil==2.9.0.post0
     #   pandas
 python-dotenv==1.2.1
     # via pydantic-settings
-python-multipart==0.0.22
+python-multipart==0.0.26
     # via starlette
 pytz==2025.2
     # via mongomock
