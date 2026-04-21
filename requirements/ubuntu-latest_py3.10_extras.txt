@@ -402,7 +402,7 @@ python-dateutil==2.9.0.post0
     #   matplotlib
     #   moto
     #   pandas
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via pydantic-settings
 python-multipart==0.0.22
     # via starlette

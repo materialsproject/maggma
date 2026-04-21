@@ -83,7 +83,7 @@ python-dateutil==2.9.0.post0
     #   botocore
     #   maggma (pyproject.toml)
     #   pandas
-python-dotenv==1.2.1
+python-dotenv==1.2.2
     # via pydantic-settings
 pytz==2025.2
     # via mongomock
