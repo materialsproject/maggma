@@ -10,22 +10,22 @@ annotated-doc==0.0.4
     # via fastapi
 annotated-types==0.7.0
     # via pydantic
-anyio==4.12.1
+anyio==4.13.0
     # via
     #   httpx
     #   starlette
 asttokens==3.0.1
     # via stack-data
-attrs==25.4.0
+attrs==26.1.0
     # via
     #   jsonlines
     #   jsonschema
     #   referencing
-azure-core==1.38.1
+azure-core==1.39.0
     # via
     #   azure-identity
     #   azure-storage-blob
-azure-identity==1.25.2
+azure-identity==1.25.3
     # via maggma (pyproject.toml)
 azure-storage-blob==12.27.1
     # via maggma (pyproject.toml)
@@ -33,7 +33,7 @@ babel==2.18.0
     # via mkdocs-material
 backports-asyncio-runner==1.2.0
     # via pytest-asyncio
-backrefs==6.1
+backrefs==6.2
     # via mkdocs-material
 bcrypt==5.0.0
     # via paramiko
@@ -41,16 +41,16 @@ bibtexparser==1.4.4
     # via pymatgen
 blinker==1.9.0
     # via flask
-boto3==1.42.46
+boto3==1.42.91
     # via
     #   maggma (pyproject.toml)
     #   moto
-botocore==1.42.46
+botocore==1.42.91
     # via
     #   boto3
     #   moto
     #   s3transfer
-certifi==2026.1.4
+certifi==2026.2.25
     # via
     #   httpcore
     #   httpx
@@ -61,23 +61,21 @@ cffi==2.0.0
     #   pynacl
 cfgv==3.5.0
     # via pre-commit
-charset-normalizer==3.4.4
+charset-normalizer==3.4.7
     # via requests
-click==8.3.1
+click==8.3.2
     # via
     #   flask
     #   mkdocs
     #   mongogrant
     #   uvicorn
 colorama==0.4.6
-    # via
-    #   griffecli
-    #   mkdocs-material
+    # via mkdocs-material
 contourpy==1.3.2
     # via matplotlib
-coverage[toml]==7.13.4
+coverage[toml]==7.13.5
     # via pytest-cov
-cryptography==46.0.6
+cryptography==46.0.7
     # via
     #   azure-identity
     #   azure-storage-blob
@@ -106,26 +104,22 @@ execnet==2.1.2
     # via pytest-xdist
 executing==2.2.1
     # via stack-data
-fastapi==0.128.8
+fastapi==0.136.0
     # via maggma (pyproject.toml)
 fastjsonschema==2.21.2
     # via nbformat
-filelock==3.20.3
-    # via virtualenv
+filelock==3.29.0
+    # via
+    #   python-discovery
+    #   virtualenv
 flask==3.1.3
     # via mongogrant
-fonttools==4.61.1
+fonttools==4.62.1
     # via matplotlib
 ghp-import==2.1.0
     # via mkdocs
-griffe==2.0.0
+griffelib==2.0.2
     # via mkdocstrings-python
-griffecli==2.0.0
-    # via griffe
-griffelib==2.0.0
-    # via
-    #   griffe
-    #   griffecli
 h11==0.16.0
     # via
     #   httpcore
@@ -138,7 +132,7 @@ httpx==0.28.1
     # via starlette
 hvac==2.4.0
     # via maggma (pyproject.toml)
-identify==2.6.16
+identify==2.6.19
     # via pre-commit
 idna==3.11
     # via
@@ -147,7 +141,7 @@ idna==3.11
     #   requests
 iniconfig==2.3.0
     # via pytest
-ipython==8.38.0
+ipython==8.39.0
     # via maggma (pyproject.toml)
 isodate==0.7.2
     # via azure-storage-blob
@@ -185,9 +179,9 @@ jsonschema-specifications==2025.9.1
     # via jsonschema
 jupyter-core==5.9.1
     # via nbformat
-kiwisolver==1.4.9
+kiwisolver==1.5.0
     # via matplotlib
-linkify-it-py==2.0.3
+linkify-it-py==2.1.0
     # via markdown-it-py
 markdown==3.10.2
     # via
@@ -217,7 +211,7 @@ mdit-py-plugins==0.5.0
     # via textual
 mdurl==0.1.2
     # via markdown-it-py
-memray==1.19.2
+memray==1.19.3
     # via maggma (pyproject.toml)
 mergedeep==1.3.4
     # via
@@ -234,19 +228,19 @@ mkdocs-autorefs==1.4.4
     # via
     #   mkdocstrings
     #   mkdocstrings-python
-mkdocs-get-deps==0.2.0
+mkdocs-get-deps==0.2.2
     # via mkdocs
-mkdocs-material==9.7.1
+mkdocs-material==9.7.6
     # via maggma (pyproject.toml)
 mkdocs-material-extensions==1.3.1
     # via mkdocs-material
 mkdocs-minify-plugin==0.8.0
     # via maggma (pyproject.toml)
-mkdocstrings[python]==1.0.3
+mkdocstrings[python]==1.0.4
     # via
     #   maggma (pyproject.toml)
     #   mkdocstrings-python
-mkdocstrings-python==2.0.2
+mkdocstrings-python==2.0.3
     # via mkdocstrings
 mongogrant==0.3.3
     # via maggma (pyproject.toml)
@@ -258,11 +252,11 @@ monty==2025.3.3
     #   pymatgen
 montydb==2.5.6
     # via maggma (pyproject.toml)
-moto==5.1.21
+moto==5.1.22
     # via maggma (pyproject.toml)
 mpmath==1.3.0
     # via sympy
-msal==1.34.0
+msal==1.36.0
     # via
     #   azure-identity
     #   msal-extensions
@@ -270,7 +264,7 @@ msal-extensions==1.3.1
     # via azure-identity
 msgpack==1.1.2
     # via maggma (pyproject.toml)
-narwhals==2.16.0
+narwhals==2.19.0
     # via plotly
 nbformat==5.10.4
     # via maggma (pyproject.toml)
@@ -288,11 +282,11 @@ numpy==2.2.6
     #   pymatgen
     #   scipy
     #   spglib
-orjson==3.11.7
+orjson==3.11.8
     # via
     #   maggma (pyproject.toml)
     #   pymatgen
-packaging==26.0
+packaging==26.1
     # via
     #   matplotlib
     #   mkdocs
@@ -317,15 +311,16 @@ pathspec==1.0.4
     # via mkdocs
 pexpect==4.9.0
     # via ipython
-pillow==12.1.1
+pillow==12.2.0
     # via matplotlib
-platformdirs==4.5.1
+platformdirs==4.9.6
     # via
     #   jupyter-core
     #   mkdocs-get-deps
+    #   python-discovery
     #   textual
     #   virtualenv
-plotly==6.5.2
+plotly==6.7.0
     # via pymatgen
 pluggy==1.6.0
     # via
@@ -341,14 +336,14 @@ pure-eval==0.2.3
     # via stack-data
 pycparser==3.0
     # via cffi
-pydantic==2.12.5
+pydantic==2.13.2
     # via
     #   fastapi
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.41.5
+pydantic-core==2.46.2
     # via pydantic
-pydantic-settings==2.12.0
+pydantic-settings==2.13.1
     # via maggma (pyproject.toml)
 pydash==8.0.6
     # via maggma (pyproject.toml)
@@ -359,13 +354,13 @@ pygments==2.20.0
     #   pytest
     #   rich
     #   textual
-pyjwt[crypto]==2.12.0
+pyjwt[crypto]==2.12.1
     # via
     #   msal
     #   pyjwt
 pymatgen==2025.10.7
     # via maggma (pyproject.toml)
-pymdown-extensions==10.20.1
+pymdown-extensions==10.21.2
     # via
     #   mkdocs-material
     #   mkdocstrings
@@ -379,7 +374,7 @@ pyparsing==3.3.2
     # via
     #   bibtexparser
     #   matplotlib
-pytest==9.0.2
+pytest==9.0.3
     # via
     #   maggma (pyproject.toml)
     #   pytest-asyncio
@@ -388,7 +383,7 @@ pytest==9.0.2
     #   pytest-xdist
 pytest-asyncio==1.3.0
     # via maggma (pyproject.toml)
-pytest-cov==7.0.0
+pytest-cov==7.1.0
     # via maggma (pyproject.toml)
 pytest-mock==3.15.1
     # via maggma (pyproject.toml)
@@ -402,11 +397,13 @@ python-dateutil==2.9.0.post0
     #   matplotlib
     #   moto
     #   pandas
-python-dotenv==1.2.1
+python-discovery==1.2.2
+    # via virtualenv
+python-dotenv==1.2.2
     # via pydantic-settings
-python-multipart==0.0.22
+python-multipart==0.0.26
     # via starlette
-pytz==2025.2
+pytz==2026.1.post1
     # via
     #   mongomock
     #   pandas
@@ -426,9 +423,9 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-regex==2026.1.15
+regex==2026.4.4
     # via maggma (pyproject.toml)
-requests==2.32.5
+requests==2.33.1
     # via
     #   azure-core
     #   hvac
@@ -442,7 +439,7 @@ responses==0.21.0
     # via
     #   maggma (pyproject.toml)
     #   moto
-rich==14.3.2
+rich==15.0.0
     # via
     #   memray
     #   textual
@@ -455,7 +452,7 @@ ruamel-yaml==0.19.1
     #   maggma (pyproject.toml)
     #   monty
     #   pymatgen
-ruff==0.15.0
+ruff==0.15.11
     # via maggma (pyproject.toml)
 s3transfer==0.16.0
     # via boto3
@@ -471,17 +468,17 @@ sshtunnel==0.4.0
     # via maggma (pyproject.toml)
 stack-data==0.6.3
     # via ipython
-starlette[full]==0.52.1
+starlette[full]==1.0.0
     # via
     #   fastapi
     #   maggma (pyproject.toml)
 sympy==1.14.0
     # via pymatgen
-tabulate==0.9.0
+tabulate==0.10.0
     # via pymatgen
-textual==7.5.0
+textual==8.2.4
     # via memray
-tomli==2.4.0
+tomli==2.4.1
     # via
     #   coverage
     #   pytest
@@ -495,9 +492,9 @@ traitlets==5.14.3
     #   jupyter-core
     #   matplotlib-inline
     #   nbformat
-types-python-dateutil==2.9.0.20260124
+types-python-dateutil==2.9.0.20260408
     # via maggma (pyproject.toml)
-types-pyyaml==6.0.12.20250915
+types-pyyaml==6.0.12.20260408
     # via maggma (pyproject.toml)
 typing-extensions==4.15.0
     # via
@@ -513,6 +510,7 @@ typing-extensions==4.15.0
     #   pydantic
     #   pydantic-core
     #   pydash
+    #   pyjwt
     #   pytest-asyncio
     #   referencing
     #   spglib
@@ -526,9 +524,9 @@ typing-inspection==0.4.2
     #   fastapi
     #   pydantic
     #   pydantic-settings
-tzdata==2025.3
+tzdata==2026.1
     # via pandas
-uc-micro-py==1.0.3
+uc-micro-py==2.0.0
     # via linkify-it-py
 uncertainties==3.2.3
     # via pymatgen
@@ -537,17 +535,17 @@ urllib3==2.6.3
     #   botocore
     #   requests
     #   responses
-uvicorn==0.40.0
+uvicorn==0.44.0
     # via maggma (pyproject.toml)
-virtualenv==20.36.1
+virtualenv==21.2.4
     # via pre-commit
 watchdog==6.0.0
     # via mkdocs
 wcwidth==0.6.0
     # via prompt-toolkit
-werkzeug==3.1.6
+werkzeug==3.1.8
     # via
     #   flask
     #   moto
-xmltodict==1.0.2
+xmltodict==1.0.4
     # via moto
