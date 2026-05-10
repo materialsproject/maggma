@@ -5,6 +5,7 @@ from pathlib import Path
 from unittest import mock
 
 import mongomock.collection
+import numpy as np
 import orjson
 import pymongo.collection
 import pytest
@@ -117,13 +118,16 @@ def test_mongostore_distinct(mongostore):
 
 
 def test_mongostore_update(mongostore):
-    mongostore.update({"e": 6, "d": 4}, key="e")
+    # See https://github.com/materialsproject/maggma/issues/1006
+    # bson does not natively encode numpy types, so we need to convert them to
+    # native types. See https://pymongo.readthedocs.io/en/stable/api/bson/
+    mongostore.update({"e": 6, "d": 4, "bool": np.bool_(5)}, key="e")
     assert mongostore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
 
-    mongostore.update([{"e": 7, "d": 8, "f": 9}], key=["d", "f"])
-    assert mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 7
+    mongostore.update([{"e": 7, "d": np.int64(8), "f": 9}], key=["d", "f"])
+    assert mongostore.query_one(criteria={"d": 8, "f": np.float64(9)}, properties=["e"])["e"] == 7
 
-    mongostore.update([{"e": 11, "d": 8, "f": 9}], key=["d", "f"])
+    mongostore.update([{"e": 11, "d": np.int32(8), "f": np.float32(9)}], key=["d", "f"])
     assert mongostore.query_one(criteria={"d": 8, "f": 9}, properties=["e"])["e"] == 11
 
     test_schema = {
