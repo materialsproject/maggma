@@ -39,11 +39,11 @@ bcrypt==5.0.0
     # via paramiko
 blinker==1.9.0
     # via flask
-boto3==1.42.96
+boto3==1.42.97
     # via
     #   maggma (pyproject.toml)
     #   moto
-botocore==1.42.96
+botocore==1.42.97
     # via
     #   boto3
     #   moto
@@ -75,7 +75,7 @@ contourpy==1.3.0
     # via matplotlib
 coverage[toml]==7.10.7
     # via pytest-cov
-cryptography==47.0.0
+cryptography==48.0.0
     # via
     #   azure-identity
     #   azure-storage-blob
@@ -87,7 +87,7 @@ csscompressor==0.9.5
     # via mkdocs-minify-plugin
 cycler==0.12.1
     # via matplotlib
-decorator==5.2.1
+decorator==5.3.1
     # via ipython
 distlib==0.4.0
     # via virtualenv
@@ -134,7 +134,7 @@ hvac==2.4.0
     # via maggma (pyproject.toml)
 identify==2.6.15
     # via pre-commit
-idna==3.13
+idna==3.15
     # via
     #   anyio
     #   httpx
@@ -219,7 +219,7 @@ markupsafe==3.0.3
     #   werkzeug
 matplotlib==3.9.4
     # via pymatgen
-matplotlib-inline==0.2.1
+matplotlib-inline==0.2.2
     # via ipython
 mdit-py-plugins==0.4.2
     # via textual
@@ -278,7 +278,7 @@ msal-extensions==1.3.1
     # via azure-identity
 msgpack==1.1.2
     # via maggma (pyproject.toml)
-narwhals==2.20.0
+narwhals==2.21.0
     # via plotly
 nbformat==5.10.4
     # via maggma (pyproject.toml)
@@ -317,7 +317,7 @@ paramiko==3.5.1
     # via
     #   maggma (pyproject.toml)
     #   sshtunnel
-parso==0.8.6
+parso==0.8.7
     # via jedi
 pathspec==1.1.1
     # via mkdocs
@@ -350,12 +350,12 @@ pybtex==0.26.1
     # via pymatgen
 pycparser==2.23
     # via cffi
-pydantic==2.13.3
+pydantic==2.13.4
     # via
     #   fastapi
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.46.3
+pydantic-core==2.46.4
     # via pydantic
 pydantic-settings==2.11.0
     # via maggma (pyproject.toml)
@@ -374,7 +374,7 @@ pyjwt[crypto]==2.12.1
     #   pyjwt
 pymatgen==2024.8.9
     # via maggma (pyproject.toml)
-pymdown-extensions==10.21.2
+pymdown-extensions==10.21.3
     # via
     #   mkdocs-material
     #   mkdocstrings
@@ -409,13 +409,13 @@ python-dateutil==2.9.0.post0
     #   matplotlib
     #   moto
     #   pandas
-python-discovery==1.2.2
+python-discovery==1.3.1
     # via virtualenv
 python-dotenv==1.2.1
     # via pydantic-settings
 python-multipart==0.0.20
     # via starlette
-pytz==2026.1.post1
+pytz==2026.2
     # via
     #   mongomock
     #   pandas
@@ -465,7 +465,7 @@ ruamel-yaml==0.19.1
     #   maggma (pyproject.toml)
     #   monty
     #   pymatgen
-ruff==0.15.12
+ruff==0.15.13
     # via maggma (pyproject.toml)
 s3transfer==0.16.1
     # via boto3
@@ -489,7 +489,7 @@ sympy==1.14.0
     # via pymatgen
 tabulate==0.9.0
     # via pymatgen
-textual==8.2.4
+textual==8.2.6
     # via memray
 tomli==2.4.1
     # via
@@ -499,7 +499,7 @@ tqdm==4.67.3
     # via
     #   maggma (pyproject.toml)
     #   pymatgen
-traitlets==5.14.3
+traitlets==5.15.0
     # via
     #   ipython
     #   jupyter-core
@@ -551,11 +551,11 @@ urllib3==1.26.20
     #   responses
 uvicorn==0.39.0
     # via maggma (pyproject.toml)
-virtualenv==21.2.4
+virtualenv==21.3.3
     # via pre-commit
 watchdog==6.0.0
     # via mkdocs
-wcwidth==0.6.0
+wcwidth==0.7.0
     # via prompt-toolkit
 werkzeug==3.1.8
     # via
