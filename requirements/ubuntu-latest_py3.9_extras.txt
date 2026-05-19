@@ -134,7 +134,7 @@ hvac==2.4.0
     # via maggma (pyproject.toml)
 identify==2.6.15
     # via pre-commit
-idna==3.13
+idna==3.15
     # via
     #   anyio
     #   httpx
