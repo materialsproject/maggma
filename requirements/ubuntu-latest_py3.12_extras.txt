@@ -362,7 +362,7 @@ pymatgen==2026.3.23
     # via maggma (pyproject.toml)
 pymatgen-core==2026.4.16
     # via pymatgen
-pymdown-extensions==10.21.2
+pymdown-extensions==10.21.3
     # via
     #   mkdocs-material
     #   mkdocstrings

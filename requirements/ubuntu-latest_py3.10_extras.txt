@@ -360,7 +360,7 @@ pyjwt[crypto]==2.12.1
     #   pyjwt
 pymatgen==2025.10.7
     # via maggma (pyproject.toml)
-pymdown-extensions==10.21.2
+pymdown-extensions==10.21.3
     # via
     #   mkdocs-material
     #   mkdocstrings
