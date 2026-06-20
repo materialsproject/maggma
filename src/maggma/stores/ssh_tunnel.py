@@ -155,12 +155,10 @@ class SSHTunnel(MSONable):
 
 def _load_private_key(path: str, password: Optional[str] = None) -> paramiko.PKey:
     """Load a private key of any supported type from a file."""
-    for key_class in (paramiko.RSAKey, paramiko.ECDSAKey, paramiko.Ed25519Key, paramiko.DSSKey):
-        try:
-            return key_class.from_private_key_file(path, password=password)
-        except (paramiko.SSHException, ValueError):
-            continue
-    raise ValueError(f"Could not load private key from {path}: unsupported key type or incorrect passphrase")
+    try:
+        return paramiko.PKey.from_private_key_file(path, password=password)
+    except paramiko.SSHException as e:
+        raise ValueError(f"Could not load private key from {path}: {e}") from e
 
 
 def _find_free_port(address="127.0.0.1"):
