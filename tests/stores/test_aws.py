@@ -20,10 +20,14 @@ def mongostore():
 
 @pytest.fixture()
 def ssh_tunnel():
+    tunnel = None
     try:
         tunnel = SSHTunnel("127.0.0.1:22", "127.0.0.1:27017", local_port=9000)
-    except ValueError:
-        # fallback to not use a tunnel if there is error in creating the tunnel
+        tunnel.start()
+    except Exception:
+        # fallback to not use a tunnel if the tunnel cannot be established
+        if tunnel is not None:
+            tunnel.stop()
         tunnel = None
 
     return tunnel

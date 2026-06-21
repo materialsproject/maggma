@@ -115,6 +115,13 @@ class SSHTunnel(MSONable):
         else:
             transport.connect(hostkey=None, username=self.username or "", password=self.password)
 
+        if not transport.is_authenticated():
+            transport.close()
+            raise paramiko.AuthenticationException(
+                "SSH authentication failed: no credentials were accepted. "
+                "Provide a username with a password or private key."
+            )
+
         server = _ForwardServer(
             ("127.0.0.1", self._local_port),
             (self._remote_host, self._remote_port),
