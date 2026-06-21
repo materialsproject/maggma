@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 from enum import Enum
 from inspect import signature
 from typing import Any
@@ -297,7 +297,7 @@ class SubmissionResource(Resource):
 
             if self.state_enum is not None:
                 query["criteria"]["state"] = [self.default_state]
-                query["criteria"]["updated"] = [datetime.utcnow()]
+                query["criteria"]["updated"] = [datetime.now(UTC)]
 
             try:
                 self.store.update(docs=query["criteria"])  # type: ignore
@@ -365,7 +365,7 @@ class SubmissionResource(Resource):
 
             if self.state_enum is not None:
                 query["criteria"]["state"] = [self.default_state]
-                query["criteria"]["updated"] = [datetime.utcnow()]
+                query["criteria"]["updated"] = [datetime.now(UTC)]
 
             if query.get("update"):
                 try:

@@ -5,7 +5,7 @@ Many-to-Many GroupBuilder.
 import traceback
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable, Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from math import ceil
 from time import time
 
@@ -145,7 +145,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             self.target.key: keys[0],
             f"{self.source.key}s": keys,
             self.target.last_updated_field: max(last_updated),
-            "_bt": datetime.utcnow(),
+            "_bt": datetime.now(UTC),
         }
         processed.update({k: v for k, v in update_doc.items() if k not in processed})
 

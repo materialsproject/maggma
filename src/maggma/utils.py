@@ -7,7 +7,7 @@ import logging
 import signal
 import uuid
 from collections.abc import Iterable
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from importlib import import_module
 
 from bson.json_util import ObjectId
@@ -245,7 +245,7 @@ class ReportingHandler(logging.Handler):
 
             maggma_record.update(
                 {
-                    "last_updated": datetime.utcnow(),
+                    "last_updated": datetime.now(UTC),
                     "machine": uuid.UUID(int=uuid.getnode()),
                 }
             )

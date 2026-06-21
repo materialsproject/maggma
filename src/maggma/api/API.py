@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 
 import uvicorn
 from fastapi import FastAPI
@@ -95,7 +95,7 @@ class API(MSONable):
             """API Heartbeat for Load Balancing."""
             return {
                 "status": "OK",
-                "time": datetime.utcnow(),
+                "time": datetime.now(UTC),
                 "version": self.version,
                 **self.heartbeat_meta,
             }

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import orjson
 from botocore.exceptions import ClientError
@@ -106,7 +106,7 @@ class S3URLResource(Resource):
                     detail="Problem obtaining URL for {} = {}".format(self.store.key, key.split("/")[-1]),
                 )
 
-            requested_datetime = datetime.utcnow()
+            requested_datetime = datetime.now(UTC)
             expiry_datetime = requested_datetime + timedelta(seconds=self.url_lifetime)
 
             item = S3URLDoc(

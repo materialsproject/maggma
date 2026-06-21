@@ -1,6 +1,6 @@
 from collections.abc import Iterable
 from copy import deepcopy
-from datetime import datetime
+from datetime import UTC, datetime
 from itertools import chain
 
 from pydash import get
@@ -158,8 +158,7 @@ class Projection_Builder(Builder):
                 # get docs from store for given chunk of key values,
                 # rename fields if specified by projection mapping,
                 # and put in list of unsorted items to be processed
-                docs = store.query(criteria={store.key: {"$in": chunked_keys}}, properties=properties)
-                for d in docs:
+                for d in store.query(criteria={store.key: {"$in": chunked_keys}}, properties=properties):
                     if properties is None:  # all fields are projected as is
                         item = deepcopy(d)
                     else:  # specified fields are renamed
@@ -234,7 +233,7 @@ class Projection_Builder(Builder):
         self.logger.info(f"Updating target with {num_items} items...")
         target = self.target
 
-        target_insertion_time = datetime.utcnow()
+        target_insertion_time = datetime.now(UTC)
         for item in items:
             item[target.last_updated_field] = target_insertion_time
 

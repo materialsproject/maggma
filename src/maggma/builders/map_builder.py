@@ -5,7 +5,7 @@ One-to-One Map Builder and a simple CopyBuilder implementation.
 import traceback
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from math import ceil
 from time import time
 
@@ -160,7 +160,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
 
         out = {
             self.target.key: item[key],
-            self.target.last_updated_field: self.source._lu_func[0](item.get(last_updated_field, datetime.utcnow())),
+            self.target.last_updated_field: self.source._lu_func[0](item.get(last_updated_field, datetime.now(UTC))),
         }
 
         if self.store_process_time:
@@ -175,7 +175,7 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         """
         target = self.target
         for item in items:
-            item["_bt"] = datetime.utcnow()
+            item["_bt"] = datetime.now(UTC)
             if "_id" in item:
                 del item["_id"]
 
