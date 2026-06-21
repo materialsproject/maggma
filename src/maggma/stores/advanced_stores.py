@@ -5,7 +5,6 @@ Advanced Stores for behavior outside normal access patterns.
 import json
 import os
 from collections.abc import Iterator
-from typing import Optional, Union
 
 from monty.dev import deprecated, requires
 
@@ -43,7 +42,7 @@ class MongograntStore(MongoStore):
         self,
         mongogrant_spec: str,
         collection_name: str,
-        mgclient_config_path: Optional[str] = None,
+        mgclient_config_path: str | None = None,
         **kwargs,
     ):
         """
@@ -229,7 +228,7 @@ class AliasingStore(Store):
         """
         return self.store.name
 
-    def count(self, criteria: Optional[dict] = None) -> int:
+    def count(self, criteria: dict | None = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -242,9 +241,9 @@ class AliasingStore(Store):
 
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[dict]:
@@ -271,7 +270,7 @@ class AliasingStore(Store):
             substitute(d, self.aliases)
             yield d
 
-    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
+    def distinct(self, field: str, criteria: dict | None = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field.
 
@@ -287,10 +286,10 @@ class AliasingStore(Store):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -328,7 +327,7 @@ class AliasingStore(Store):
 
         return self.store.groupby(keys=keys, properties=properties, criteria=criteria, skip=skip, limit=limit)
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 
@@ -429,7 +428,7 @@ class SandboxStore(Store):
             return {"sbxn": self.sandbox}
         return {"$or": [{"sbxn": {"$in": [self.sandbox]}}, {"sbxn": {"$exists": False}}]}
 
-    def count(self, criteria: Optional[dict] = None) -> int:
+    def count(self, criteria: dict | None = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -441,9 +440,9 @@ class SandboxStore(Store):
 
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[dict]:
@@ -463,10 +462,10 @@ class SandboxStore(Store):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -490,7 +489,7 @@ class SandboxStore(Store):
 
         return self.store.groupby(keys=keys, properties=properties, criteria=criteria, skip=skip, limit=limit)
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 

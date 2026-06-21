@@ -2,7 +2,6 @@ from collections.abc import Iterable
 from copy import deepcopy
 from datetime import datetime
 from itertools import chain
-from typing import Optional, Union
 
 from pydash import get
 
@@ -30,8 +29,8 @@ class Projection_Builder(Builder):
         self,
         source_stores: list[Store],
         target_store: Store,
-        fields_to_project: Union[list[Union[list, dict]], None] = None,
-        query_by_key: Optional[list] = None,
+        fields_to_project: list[list | dict] | None = None,
+        query_by_key: list | None = None,
         **kwargs,
     ):
         """
@@ -90,7 +89,7 @@ class Projection_Builder(Builder):
                         E.g. [['str1','str2'],{'A':'str1','B':str2'}]"""
                     )
             # ensure key is included in projection for get_items query
-            for store, p in zip(source_stores, projection_mapping):
+            for store, p in zip(source_stores, projection_mapping, strict=False):
                 if p != {}:
                     p.update({target_store.key: store.key})
         self.projection_mapping = projection_mapping
@@ -144,11 +143,11 @@ class Projection_Builder(Builder):
             self.logger.debug(f"Querying by chunked_keys: {chunked_keys}")
 
             unsorted_items_to_process = []
-            for store, projection in zip(self.sources, self.projection_mapping):
+            for store, projection in zip(self.sources, self.projection_mapping, strict=False):
                 # project all fields from store if corresponding element
                 # in projection_mapping is an empty dict,
                 # else only project the specified fields
-                properties: Union[list, None]
+                properties: list | None
                 if projection == {}:  # all fields are projected
                     properties = None
                     self.logger.debug(f"For store {store.collection_name} getting all properties")
@@ -185,7 +184,7 @@ class Projection_Builder(Builder):
 
             yield unsorted_items_to_process
 
-    def process_item(self, items: Union[list, Iterable]) -> list[dict]:
+    def process_item(self, items: list | Iterable) -> list[dict]:
         """
         Takes a chunk of items belonging to a subset of key values
         and groups them by key value. Combines items for each

@@ -2,10 +2,11 @@
 # coding utf-8
 
 from asyncio import BoundedSemaphore, Queue, gather, get_event_loop
+from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
-from typing import Any, Callable, Optional
+from typing import Any
 
 from aioitertools import enumerate
 from tqdm.auto import tqdm
@@ -150,8 +151,8 @@ async def multi(
     builder,
     num_processes,
     no_bars=False,
-    heartbeat_func: Optional[Callable[..., Any]] = None,
-    heartbeat_func_kwargs: Optional[dict[Any, Any]] = None,
+    heartbeat_func: Callable[..., Any] | None = None,
+    heartbeat_func_kwargs: dict[Any, Any] | None = None,
 ):
     builder.connect()
     cursor = builder.get_items()

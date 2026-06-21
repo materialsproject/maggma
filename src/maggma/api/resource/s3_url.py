@@ -1,5 +1,4 @@
 from datetime import datetime, timedelta
-from typing import Optional
 
 import orjson
 from botocore.exceptions import ClientError
@@ -22,11 +21,11 @@ class S3URLResource(Resource):
         self,
         store: S3Store,
         url_lifetime: int,
-        tags: Optional[list[str]] = None,
-        header_processor: Optional[HeaderProcessor] = None,
+        tags: list[str] | None = None,
+        header_processor: HeaderProcessor | None = None,
         disable_validation: bool = False,
-        include_in_schema: Optional[bool] = True,
-        sub_path: Optional[str] = "/",
+        include_in_schema: bool | None = True,
+        sub_path: str | None = "/",
     ):
         """
         Args:

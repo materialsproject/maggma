@@ -8,7 +8,6 @@ from collections.abc import Iterator
 from datetime import datetime
 from math import ceil
 from time import time
-from typing import Optional
 
 from maggma.core import Builder, Store
 from maggma.utils import Timeout, grouper
@@ -28,8 +27,8 @@ class MapBuilder(Builder, metaclass=ABCMeta):
         self,
         source: Store,
         target: Store,
-        query: Optional[dict] = None,
-        projection: Optional[list] = None,
+        query: dict | None = None,
+        projection: list | None = None,
         delete_orphans: bool = False,
         timeout: int = 0,
         store_process_time: bool = True,

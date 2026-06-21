@@ -1,5 +1,5 @@
 from inspect import signature
-from typing import Any, Optional
+from typing import Any
 
 from fastapi import HTTPException, Request
 from pydantic import BaseModel
@@ -24,13 +24,13 @@ class PostOnlyResource(Resource):
         self,
         store: Store,
         model: type[BaseModel],
-        tags: Optional[list[str]] = None,
-        query_operators: Optional[list[QueryOperator]] = None,
-        key_fields: Optional[list[str]] = None,
-        query: Optional[dict] = None,
-        timeout: Optional[int] = None,
-        include_in_schema: Optional[bool] = True,
-        sub_path: Optional[str] = "/",
+        tags: list[str] | None = None,
+        query_operators: list[QueryOperator] | None = None,
+        key_fields: list[str] | None = None,
+        query: dict | None = None,
+        timeout: int | None = None,
+        include_in_schema: bool | None = True,
+        sub_path: str | None = "/",
     ):
         """
         Args:

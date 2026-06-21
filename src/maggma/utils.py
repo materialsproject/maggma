@@ -9,7 +9,6 @@ import uuid
 from collections.abc import Iterable
 from datetime import datetime, timedelta
 from importlib import import_module
-from typing import Optional, Union
 
 from bson.json_util import ObjectId
 from dateutil import parser
@@ -79,7 +78,7 @@ def confirm_field_index(collection: Collection, field: str) -> bool:
     return field in keys
 
 
-def to_isoformat_ceil_ms(dt: Union[datetime, str]) -> str:
+def to_isoformat_ceil_ms(dt: datetime | str) -> str:
     """Helper to account for Mongo storing datetimes with only ms precision."""
     if isinstance(dt, datetime):
         return (dt + timedelta(milliseconds=1)).isoformat(timespec="milliseconds")
@@ -88,7 +87,7 @@ def to_isoformat_ceil_ms(dt: Union[datetime, str]) -> str:
     return None
 
 
-def to_dt(s: Union[datetime, str]) -> datetime:
+def to_dt(s: datetime | str) -> datetime:
     """Convert an ISO 8601 string to a datetime."""
     if isinstance(s, str):
         return parser.parse(s)
@@ -207,7 +206,7 @@ class Timeout:
             signal.alarm(0)
 
 
-def dynamic_import(abs_module_path: str, class_name: Optional[str] = None):
+def dynamic_import(abs_module_path: str, class_name: str | None = None):
     """
     Dynamic class importer from: https://www.bnmetrics.com/blog/dynamic-import-in-python3.
     """
@@ -264,7 +263,7 @@ class ReportingHandler(logging.Handler):
             self.reporting_store.update(maggma_record, key="_id")
 
 
-def get_flat_models_from_model(model: BaseModel, known_models: Optional[set[BaseModel]] = None):
+def get_flat_models_from_model(model: BaseModel, known_models: set[BaseModel] | None = None):
     """Get all sub-models from a pydantic model.
 
     Args:

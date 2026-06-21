@@ -3,13 +3,13 @@
 import threading
 import warnings
 import zlib
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from io import BytesIO
 from json import dumps
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
@@ -38,18 +38,18 @@ class S3Store(Store):
         self,
         index: Store,
         bucket: str,
-        s3_profile: Optional[Union[str, dict]] = None,
+        s3_profile: str | dict | None = None,
         compress: bool = False,
-        endpoint_url: Optional[str] = None,
-        sub_dir: Optional[str] = None,
+        endpoint_url: str | None = None,
+        sub_dir: str | None = None,
         s3_workers: int = 1,
-        s3_resource_kwargs: Optional[dict] = None,
-        ssh_tunnel: Optional[SSHTunnel] = None,
+        s3_resource_kwargs: dict | None = None,
+        ssh_tunnel: SSHTunnel | None = None,
         key: str = "fs_id",
         store_hash: bool = True,
         unpack_data: bool = True,
-        searchable_fields: Optional[list[str]] = None,
-        index_store_kwargs: Optional[dict] = None,
+        searchable_fields: list[str] | None = None,
+        index_store_kwargs: dict | None = None,
         **kwargs,
     ):
         """
@@ -152,7 +152,7 @@ class S3Store(Store):
         # For now returns the index collection since that is what we would "search" on
         return self.index._collection
 
-    def count(self, criteria: Optional[dict] = None) -> int:
+    def count(self, criteria: dict | None = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -163,9 +163,9 @@ class S3Store(Store):
 
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[dict]:
@@ -242,7 +242,7 @@ class S3Store(Store):
         # Should just return the unpacked object then let the user run process_decoded
         return msgpack.unpackb(data, raw=False)
 
-    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
+    def distinct(self, field: str, criteria: dict | None = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field.
 
@@ -255,10 +255,10 @@ class S3Store(Store):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -301,9 +301,9 @@ class S3Store(Store):
 
     def update(
         self,
-        docs: Union[list[dict], dict],
-        key: Union[list, str, None] = None,
-        additional_metadata: Union[str, list[str], None] = None,
+        docs: list[dict] | dict,
+        key: list | str | None = None,
+        additional_metadata: str | list[str] | None = None,
     ):
         """
         Update documents into the Store.
@@ -510,7 +510,7 @@ class S3Store(Store):
     def last_updated(self):
         return self.index.last_updated
 
-    def newer_in(self, target: Store, criteria: Optional[dict] = None, exhaustive: bool = False) -> list[str]:
+    def newer_in(self, target: Store, criteria: dict | None = None, exhaustive: bool = False) -> list[str]:
         """
         Returns the keys of documents that are newer in the target Store than this Store.
 
@@ -545,7 +545,7 @@ class S3Store(Store):
             unpacked_data = msgpack.unpackb(data, raw=False)
             self.update(unpacked_data, **kwargs)
 
-    def rebuild_metadata_from_index(self, index_query: Optional[dict] = None):
+    def rebuild_metadata_from_index(self, index_query: dict | None = None):
         """
         Read data from the index store and populate the metadata of the S3 bucket.
         Force all the keys to be lower case to be Minio compatible.

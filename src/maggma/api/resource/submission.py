@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from inspect import signature
-from typing import Any, Optional
+from typing import Any
 from uuid import uuid4
 
 from fastapi import HTTPException, Path, Request
@@ -30,18 +30,18 @@ class SubmissionResource(Resource):
         model: type[BaseModel],
         post_query_operators: list[QueryOperator],
         get_query_operators: list[QueryOperator],
-        patch_query_operators: Optional[list[QueryOperator]] = None,
-        tags: Optional[list[str]] = None,
-        timeout: Optional[int] = None,
-        include_in_schema: Optional[bool] = True,
-        duplicate_fields_check: Optional[list[str]] = None,
-        enable_default_search: Optional[bool] = True,
-        state_enum: Optional[Enum] = None,
-        default_state: Optional[Any] = None,
-        calculate_submission_id: Optional[bool] = False,
-        get_sub_path: Optional[str] = "/",
-        post_sub_path: Optional[str] = "/",
-        patch_sub_path: Optional[str] = "/",
+        patch_query_operators: list[QueryOperator] | None = None,
+        tags: list[str] | None = None,
+        timeout: int | None = None,
+        include_in_schema: bool | None = True,
+        duplicate_fields_check: list[str] | None = None,
+        enable_default_search: bool | None = True,
+        state_enum: Enum | None = None,
+        default_state: Any | None = None,
+        calculate_submission_id: bool | None = False,
+        get_sub_path: str | None = "/",
+        post_sub_path: str | None = "/",
+        patch_sub_path: str | None = "/",
     ):
         """
         Args:
