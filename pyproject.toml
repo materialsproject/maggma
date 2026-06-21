@@ -8,9 +8,10 @@ authors =[
 ]
 classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",
@@ -21,7 +22,7 @@ classifiers=[
         "Topic :: Scientific/Engineering",
     ]
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
         "ruamel.yaml>=0.17",
         "pydantic>=2.0",
