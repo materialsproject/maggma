@@ -156,7 +156,7 @@ def _load_private_key(path: str, password: Optional[str] = None) -> paramiko.PKe
     raise ValueError(f"Could not load private key from {path}: unsupported key type or incorrect passphrase")
 
 
-def _find_free_port(address="0.0.0.0"):
-    s = socket()
-    s.bind((address, 0))
-    return s.getsockname()[1]
+def _find_free_port(address="127.0.0.1"):
+    with socket() as s:
+        s.bind((address, 0))
+        return s.getsockname()[1]
