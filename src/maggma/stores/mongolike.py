@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import Any, Callable, Literal, Optional, Union
 
 import bson
-import mongomock
+import mongomock_ng as mongomock
 import orjson
 from monty.dev import requires
 from monty.io import zopen
