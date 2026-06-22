@@ -49,7 +49,7 @@ monty==2026.5.18
     # via maggma (pyproject.toml)
 msgpack==1.2.1
     # via maggma (pyproject.toml)
-numpy==2.5.0
+numpy==2.4.6
     # via
     #   maggma (pyproject.toml)
     #   monty
@@ -68,13 +68,13 @@ pydantic==2.13.4
     # via
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.46.4
+pydantic-core==2.47.0
     # via pydantic
 pydantic-settings==2.14.2
     # via maggma (pyproject.toml)
 pydash==8.0.6
     # via maggma (pyproject.toml)
-pymongo==4.10.1
+pymongo==4.17.0
     # via maggma (pyproject.toml)
 pynacl==1.6.2
     # via paramiko
