@@ -38,7 +38,7 @@ jobs:
     needs: lint
     services:
       local_mongodb:
-        image: mongo:4.0
+        image: mongo:5.0
         ports:
           - 27017:27017
 
@@ -84,7 +84,7 @@ jobs:
     needs: lint
     services:
       local_mongodb:
-        image: mongo:4.2
+        image: mongo:5.0
         ports:
           - 27017:27017
 
