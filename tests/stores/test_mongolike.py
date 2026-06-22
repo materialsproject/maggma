@@ -4,7 +4,7 @@ from datetime import datetime
 from pathlib import Path
 from unittest import mock
 
-import mongomock.collection
+import mongomock_ng.collection
 import orjson
 import pymongo.collection
 import pytest
@@ -241,7 +241,7 @@ def test_memory_store_connect():
     memorystore = MemoryStore()
     assert memorystore._coll is None
     memorystore.connect()
-    assert isinstance(memorystore._collection, mongomock.collection.Collection)
+    assert isinstance(memorystore._collection, mongomock_ng.collection.Collection)
 
 
 def test_groupby(memorystore):
