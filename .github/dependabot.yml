@@ -1,26 +1,36 @@
 version: 2
+
+# Note: dependabot only supports daily/weekly/monthly intervals; there is no
+# quarterly option. Security updates are opened immediately regardless of
+# schedule and must be disabled separately in repo Settings > Security.
+
 updates:
-  # Maintain core dependencies
   - package-ecosystem: "pip"
     directory: "/"
     schedule:
       interval: "monthly"
-      day: "wednesday"
+      day: "1"
       time: "02:00"
       timezone: "America/New_York"
+    open-pull-requests-limit: 2
     groups:
-      dependencies: # this name can be anything, it's just an identifier for the group
-        patterns:
-          - "*"
-  # Maintain dependencies for GitHub Actions
+      major-updates:
+        update-types:
+          - "version-update:semver-major"
+      minor-and-patch-updates:
+        update-types:
+          - "version-update:semver-minor"
+          - "version-update:semver-patch"
+
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "monthly"
-      day: "wednesday"
+      day: "1"
       time: "02:00"
       timezone: "America/New_York"
+    open-pull-requests-limit: 1
     groups:
-      actions:
+      github-actions:
         patterns:
           - "*"
