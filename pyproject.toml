@@ -8,9 +8,9 @@ authors =[
 ]
 classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",
@@ -21,7 +21,7 @@ classifiers=[
         "Topic :: Scientific/Engineering",
     ]
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
         "ruamel.yaml>=0.17",
         "pydantic>=2.0",
@@ -69,6 +69,7 @@ testing = [
             "pytest-mock",
             "pytest-asyncio",
             "pytest-xdist",
+            "pytest-timeout",
             "pre-commit",
             "moto>=5.0", # mock_s3 changed to mock_aws in v5
             "ruff",
@@ -168,7 +169,7 @@ isort.split-on-trailing-comma = false
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--color=yes -p no:warnings --import-mode=importlib --durations=30"
+addopts = "--color=yes -p no:warnings --import-mode=importlib --durations=30 --timeout=120"
 testpaths = [
     "tests",
 ]

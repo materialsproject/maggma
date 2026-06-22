@@ -8,10 +8,9 @@ import hashlib
 import os
 import re
 import warnings
-from collections.abc import Iterator
-from datetime import datetime, timezone
+from collections.abc import Callable, Iterator
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Callable, Optional, Union
 
 from monty.io import zopen
 from pymongo import UpdateOne
@@ -49,13 +48,13 @@ class FileStore(MemoryStore):
 
     def __init__(
         self,
-        path: Union[str, Path],
-        file_filters: Optional[list] = None,
-        max_depth: Optional[int] = None,
+        path: str | Path,
+        file_filters: list | None = None,
+        max_depth: int | None = None,
         read_only: bool = True,
         include_orphans: bool = False,
         json_name: str = "FileStore.json",
-        encoding: Optional[str] = None,
+        encoding: str | None = None,
         **kwargs,
     ):
         """
@@ -134,9 +133,9 @@ class FileStore(MemoryStore):
 
     def add_metadata(
         self,
-        metadata: Optional[dict] = None,
-        query: Optional[dict] = None,
-        auto_data: Optional[Callable[[dict], dict]] = None,
+        metadata: dict | None = None,
+        query: dict | None = None,
+        auto_data: Callable[[dict], dict] | None = None,
         **kwargs,
     ):
         """
@@ -266,7 +265,7 @@ class FileStore(MemoryStore):
             "path_relative": relative_path,
             "parent": f.parent.name,
             "size": stats.st_size,
-            "last_updated": datetime.fromtimestamp(stats.st_mtime, tz=timezone.utc),
+            "last_updated": datetime.fromtimestamp(stats.st_mtime, tz=UTC),
             "orphan": False,
             "hash": content_hash,
             self.key: file_id,
@@ -329,7 +328,7 @@ class FileStore(MemoryStore):
         if len(requests) > 0:
             self._collection.bulk_write(requests, ordered=False)
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update items in the Store. Only possible if the store is not read only. Any new
         fields that are added will be written to the JSON file in the root directory
@@ -376,13 +375,13 @@ class FileStore(MemoryStore):
 
     def query(  # type: ignore
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
-        hint: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
+        hint: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
-        contents_size_limit: Optional[int] = 0,
+        contents_size_limit: int | None = 0,
     ) -> Iterator[dict]:
         """
         Queries the Store for a set of documents.
@@ -464,10 +463,10 @@ class FileStore(MemoryStore):
 
     def query_one(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
-        contents_size_limit: Optional[int] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
+        contents_size_limit: int | None = None,
     ):
         """
         Queries the Store for a single document.

@@ -5,10 +5,9 @@ Many-to-Many GroupBuilder.
 import traceback
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable, Iterator
-from datetime import datetime
+from datetime import UTC, datetime
 from math import ceil
 from time import time
-from typing import Optional
 
 from pydash import get
 
@@ -31,8 +30,8 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
         source: Store,
         target: Store,
         grouping_keys: list[str],
-        query: Optional[dict] = None,
-        projection: Optional[list] = None,
+        query: dict | None = None,
+        projection: list | None = None,
         timeout: int = 0,
         store_process_time: bool = True,
         retry_failed: bool = False,
@@ -103,7 +102,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
         N = ceil(len(groups) / number_splits)
         for split in grouper(keys, N):
-            yield {"query": dict(zip(self.grouping_keys, split))}
+            yield {"query": dict(zip(self.grouping_keys, split, strict=False))}
 
     def get_items(self):
         self.logger.info(f"Starting {self.__class__.__name__} Builder")
@@ -119,7 +118,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
 
         self.total = len(groups)
         for group in groups:
-            group_criteria = dict(zip(self.grouping_keys, group))
+            group_criteria = dict(zip(self.grouping_keys, group, strict=False))
             group_criteria.update(self.query)
             yield list(self.source.query(criteria=group_criteria, properties=projection))
 
@@ -146,7 +145,7 @@ class GroupBuilder(Builder, metaclass=ABCMeta):
             self.target.key: keys[0],
             f"{self.source.key}s": keys,
             self.target.last_updated_field: max(last_updated),
-            "_bt": datetime.utcnow(),
+            "_bt": datetime.now(UTC),
         }
         processed.update({k: v for k, v in update_doc.items() if k not in processed})
 

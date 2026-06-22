@@ -1,11 +1,12 @@
 #!/usr/bin/env python
 # coding utf-8
 
-from asyncio import BoundedSemaphore, Queue, gather, get_event_loop
+from asyncio import BoundedSemaphore, Queue, gather, get_running_loop
+from collections.abc import Callable
 from concurrent.futures import ProcessPoolExecutor
 from logging import getLogger
 from types import GeneratorType
-from typing import Any, Callable, Optional
+from typing import Any
 
 from aioitertools import enumerate
 from tqdm.auto import tqdm
@@ -61,7 +62,7 @@ class AsyncUnorderedMap:
         self.func = func
         self.executor = executor
 
-        loop = get_event_loop()
+        loop = get_running_loop()
 
         self.fill_task = loop.create_task(self.get_from_iterator())
 
@@ -80,7 +81,7 @@ class AsyncUnorderedMap:
             self.tasks.pop(idx)
 
     async def get_from_iterator(self):
-        loop = get_event_loop()
+        loop = get_running_loop()
         async for idx, item in enumerate(self.iterator):
             future = loop.run_in_executor(self.executor, safe_dispatch, (self.func, item))
 
@@ -150,8 +151,8 @@ async def multi(
     builder,
     num_processes,
     no_bars=False,
-    heartbeat_func: Optional[Callable[..., Any]] = None,
-    heartbeat_func_kwargs: Optional[dict[Any, Any]] = None,
+    heartbeat_func: Callable[..., Any] | None = None,
+    heartbeat_func_kwargs: dict[Any, Any] | None = None,
 ):
     builder.connect()
     cursor = builder.get_items()

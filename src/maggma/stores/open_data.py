@@ -4,7 +4,6 @@ import re
 from collections.abc import Generator
 from datetime import datetime
 from io import BytesIO, StringIO
-from typing import Optional, Union
 
 import jsonlines
 import numpy as np
@@ -83,12 +82,12 @@ class PandasMemoryStore:
 
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
-        criteria_fields: Union[list, None] = None,
+        criteria_fields: list | None = None,
     ) -> pd.DataFrame:
         """
         Queries the Store for a set of documents.
@@ -143,8 +142,8 @@ class PandasMemoryStore:
         query_string: str,
         is_in_key: str,
         is_in_list: list,
-        properties: Union[list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        properties: list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> pd.DataFrame:
@@ -156,7 +155,7 @@ class PandasMemoryStore:
             ret = ret[ret[is_in_key].isin(is_in_list)]
 
         if sort:
-            sort_keys, sort_ascending = zip(*[(k, v == 1) for k, v in sort.items()])
+            sort_keys, sort_ascending = zip(*[(k, v == 1) for k, v in sort.items()], strict=False)
             ret = ret.sort_values(by=list(sort_keys), ascending=list(sort_ascending))
 
         if properties:
@@ -167,7 +166,7 @@ class PandasMemoryStore:
             ret = ret[:limit]
         return ret
 
-    def count(self, criteria: Optional[dict] = None, criteria_fields: Union[list, None] = None) -> int:
+    def count(self, criteria: dict | None = None, criteria_fields: list | None = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -180,9 +179,7 @@ class PandasMemoryStore:
         """
         return len(self.query(criteria=criteria, criteria_fields=criteria_fields))
 
-    def distinct(
-        self, field: str, criteria: Optional[dict] = None, criteria_fields: Union[list, None] = None
-    ) -> pd.Series:
+    def distinct(self, field: str, criteria: dict | None = None, criteria_fields: list | None = None) -> pd.Series:
         """
         Get all distinct values for a field.
 
@@ -216,9 +213,9 @@ class PandasMemoryStore:
     def newer_in(
         self,
         target: "PandasMemoryStore",
-        criteria: Optional[dict] = None,
+        criteria: dict | None = None,
         exhaustive: bool = False,
-        criteria_fields: Union[list, None] = None,
+        criteria_fields: list | None = None,
     ) -> pd.Series:
         """
         Returns the keys of documents that are newer in the target
@@ -337,7 +334,7 @@ class S3IndexStore(PandasMemoryStore):
         collection_name: str,
         bucket: str,
         prefix: str = "",
-        endpoint_url: Optional[str] = None,
+        endpoint_url: str | None = None,
         manifest_key: str = "manifest.jsonl",
         **kwargs,
     ):
@@ -470,10 +467,10 @@ class OpenDataStore(S3IndexStore):
     def __init__(
         self,
         index: S3IndexStore = None,  # set _index to this and create property
-        searchable_fields: Optional[list[str]] = None,
+        searchable_fields: list[str] | None = None,
         object_file_extension: str = ".jsonl.gz",
         access_as_public_bucket: bool = False,
-        object_grouping: Optional[list[str]] = None,
+        object_grouping: list[str] | None = None,
         **kwargs,
     ):
         """Initializes an OpenDataStore.
@@ -529,7 +526,9 @@ class OpenDataStore(S3IndexStore):
         existing_index = self.index.index_data
         ret = []
         for group, group_docs_index in docs_by_group:
-            query_str = " and ".join([f"{col} == {val!r}" for col, val in zip(self.object_grouping, group)])
+            query_str = " and ".join(
+                [f"{col} == {val!r}" for col, val in zip(self.object_grouping, group, strict=False)]
+            )
             group_docs = docs[docs[self.key].isin(group_docs_index[self.key].to_list())]
             merged_docs, merged_index = group_docs, group_docs_index
             if existing_index is not None:
@@ -548,12 +547,12 @@ class OpenDataStore(S3IndexStore):
 
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
-        criteria_fields: Union[list, None] = None,
+        criteria_fields: list | None = None,
     ) -> pd.DataFrame:
         """
         Queries the Store for a set of documents.

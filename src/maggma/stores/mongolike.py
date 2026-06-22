@@ -5,10 +5,10 @@ various utilities.
 """
 
 import warnings
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from itertools import chain, groupby
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, Union
+from typing import Any, Literal
 
 import bson
 import mongomock_ng as mongomock
@@ -45,11 +45,11 @@ class MongoStore(Store):
         port: int = 27017,
         username: str = "",
         password: str = "",
-        ssh_tunnel: Optional[SSHTunnel] = None,
+        ssh_tunnel: SSHTunnel | None = None,
         safe_update: bool = False,
-        auth_source: Optional[str] = None,
-        mongoclient_kwargs: Optional[dict] = None,
-        default_sort: Optional[dict[str, Union[Sort, int]]] = None,
+        auth_source: str | None = None,
+        mongoclient_kwargs: dict | None = None,
+        default_sort: dict[str, Sort | int] | None = None,
         **kwargs,
     ):
         """
@@ -161,7 +161,7 @@ class MongoStore(Store):
 
         return cls(**db_creds, **kwargs)
 
-    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
+    def distinct(self, field: str, criteria: dict | None = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field.
 
@@ -183,10 +183,10 @@ class MongoStore(Store):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -222,7 +222,7 @@ class MongoStore(Store):
             pipeline.append({"$project": {p: 1 for p in properties + keys}})
 
         alpha = "abcdefghijklmnopqrstuvwxyz"
-        group_id = {letter: f"${key}" for letter, key in zip(alpha, keys)}
+        group_id = {letter: f"${key}" for letter, key in zip(alpha, keys, strict=False)}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
         for d in self._collection.aggregate(pipeline, allowDiskUse=True):
             id_doc = {}  # type: ignore
@@ -258,8 +258,8 @@ class MongoStore(Store):
 
     def count(
         self,
-        criteria: Optional[dict] = None,
-        hint: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        hint: dict[str, Sort | int] | None = None,
     ) -> int:
         """
         Counts the number of documents matching the query criteria.
@@ -286,10 +286,10 @@ class MongoStore(Store):
 
     def query(  # type: ignore
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
-        hint: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
+        hint: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
         **kwargs,
@@ -338,7 +338,7 @@ class MongoStore(Store):
             **kwargs,
         )
 
-    def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
+    def ensure_index(self, key: str, unique: bool | None = False) -> bool:
         """
         Tries to create an index and return true if it succeeded.
 
@@ -358,7 +358,7 @@ class MongoStore(Store):
         except Exception:
             return False
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 
@@ -444,11 +444,11 @@ class MongoURIStore(MongoStore):
         self,
         uri: str,
         collection_name: str,
-        database: Optional[str] = None,
-        ssh_tunnel: Optional[SSHTunnel] = None,
+        database: str | None = None,
+        ssh_tunnel: SSHTunnel | None = None,
         safe_update: bool = False,
-        mongoclient_kwargs: Optional[dict] = None,
-        default_sort: Optional[dict[str, Union[Sort, int]]] = None,
+        mongoclient_kwargs: dict | None = None,
+        default_sort: dict[str, Sort | int] | None = None,
         **kwargs,
     ):
         """
@@ -548,10 +548,10 @@ class MemoryStore(MongoStore):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -587,7 +587,7 @@ class MemoryStore(MongoStore):
 
         for vals, group in groupby(sorted(data, key=grouping_keys), key=grouping_keys):
             doc = {}  # type: ignore
-            for k, v in zip(keys, vals):
+            for k, v in zip(keys, vals, strict=False):
                 set_(doc, k, v)
             yield doc, list(group)
 
@@ -610,11 +610,11 @@ class JSONStore(MemoryStore):
 
     def __init__(
         self,
-        paths: Union[str, list[str]],
+        paths: str | list[str],
         read_only: bool = True,
-        serialization_option: Optional[int] = None,
-        serialization_default: Optional[Callable[[Any], Any]] = None,
-        encoding: Optional[str] = None,
+        serialization_option: int | None = None,
+        serialization_default: Callable[[Any], Any] | None = None,
+        encoding: str | None = None,
         **kwargs,
     ):
         """
@@ -641,7 +641,7 @@ class JSONStore(MemoryStore):
                 However, if you encounter a UnicodeDecodeError, consider setting the encoding
                 explicitly to 'utf8' or another encoding as appropriate.
         """
-        paths = paths if isinstance(paths, (list, tuple)) else [paths]
+        paths = paths if isinstance(paths, list | tuple) else [paths]
         self.paths = paths
         self.encoding = encoding
 
@@ -729,7 +729,7 @@ class JSONStore(MemoryStore):
 
         return objects
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 
@@ -821,11 +821,11 @@ class MontyStore(MemoryStore):
     def __init__(
         self,
         collection_name,
-        database_path: Optional[str] = None,
+        database_path: str | None = None,
         database_name: str = "db",
         storage: Literal["sqlite", "flatfile", "lightning"] = "sqlite",
-        storage_kwargs: Optional[dict] = None,
-        client_kwargs: Optional[dict] = None,
+        storage_kwargs: dict | None = None,
+        client_kwargs: dict | None = None,
         **kwargs,
     ):
         """
@@ -884,8 +884,8 @@ class MontyStore(MemoryStore):
 
     def count(
         self,
-        criteria: Optional[dict] = None,
-        hint: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        hint: dict[str, Sort | int] | None = None,
     ) -> int:
         """
         Counts the number of documents matching the query criteria.
@@ -906,7 +906,7 @@ class MontyStore(MemoryStore):
 
         return self._collection.count_documents(filter=criteria)
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 

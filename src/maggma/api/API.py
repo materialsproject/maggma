@@ -1,5 +1,4 @@
-from datetime import datetime
-from typing import Optional
+from datetime import UTC, datetime
 
 import uvicorn
 from fastapi import FastAPI
@@ -22,9 +21,9 @@ class API(MSONable):
         title: str = "Generic API",
         version: str = "v0.0.0",
         debug: bool = False,
-        heartbeat_meta: Optional[dict] = None,
-        description: Optional[str] = None,
-        tags_meta: Optional[list[dict]] = None,
+        heartbeat_meta: dict | None = None,
+        description: str | None = None,
+        tags_meta: list[dict] | None = None,
     ):
         """
         Args:
@@ -96,7 +95,7 @@ class API(MSONable):
             """API Heartbeat for Load Balancing."""
             return {
                 "status": "OK",
-                "time": datetime.utcnow(),
+                "time": datetime.now(UTC),
                 "version": self.version,
                 **self.heartbeat_meta,
             }
