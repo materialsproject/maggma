@@ -142,6 +142,7 @@ def test_python_source():
 
 
 def test_python_notebook_source():
+    pytest.importorskip("IPython")
     runner = CliRunner()
 
     with runner.isolated_filesystem():
@@ -156,6 +157,7 @@ def test_python_notebook_source():
 
 
 def test_memray_run_builder(mongostore):
+    pytest.importorskip("memray")
     memorystore = MemoryStore("temp")
     builder = CopyBuilder(mongostore, memorystore)
 
@@ -186,6 +188,7 @@ def test_memray_run_builder(mongostore):
 
 
 def test_memray_user_output_dir(mongostore):
+    pytest.importorskip("memray")
     memorystore = MemoryStore("temp")
     builder = CopyBuilder(mongostore, memorystore)
 
