@@ -2,17 +2,21 @@
 Advanced Stores for connecting to Microsoft Azure data.
 """
 
+from __future__ import annotations
+
 import importlib
 import os
 import threading
 import warnings
 import zlib
-from collections.abc import Iterator
 from concurrent.futures import wait
 from concurrent.futures.thread import ThreadPoolExecutor
 from hashlib import sha1
 from json import dumps
-from typing import Literal
+from typing import TYPE_CHECKING, Literal
+
+if TYPE_CHECKING:
+    from collections.abc import Iterator
 
 import msgpack  # type: ignore
 from monty.msgpack import default as monty_default
