@@ -1,8 +1,8 @@
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from functools import partial
 from multiprocessing.managers import BaseManager
 from threading import Lock
-from typing import Any, Callable, Optional, Union
+from typing import Any
 
 from monty.json import MontyDecoder
 
@@ -88,7 +88,7 @@ class StoreFacade(Store):
         """
         self.multistore.close(self.store)
 
-    def count(self, criteria: Optional[dict] = None) -> int:
+    def count(self, criteria: dict | None = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -99,9 +99,9 @@ class StoreFacade(Store):
 
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[dict]:
@@ -125,7 +125,7 @@ class StoreFacade(Store):
             limit=limit,
         )
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None, **kwargs):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None, **kwargs):
         """
         Update documents into the Store.
 
@@ -153,10 +153,10 @@ class StoreFacade(Store):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
         **kwargs,
@@ -192,9 +192,9 @@ class StoreFacade(Store):
 
     def query_one(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         **kwargs,
     ):
         """
@@ -208,7 +208,7 @@ class StoreFacade(Store):
         """
         return self.multistore.query_one(self.store, criteria=criteria, properties=properties, sort=sort, **kwargs)
 
-    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False, **kwargs) -> list:
+    def distinct(self, field: str, criteria: dict | None = None, all_exist: bool = False, **kwargs) -> list:
         """
         Get all distinct values for a field.
 
@@ -265,7 +265,7 @@ class MultiStore:
         self._multistore_lock = Lock()
         super().__init__(**kwargs)
 
-    def get_store_index(self, store: Store) -> Optional[int]:
+    def get_store_index(self, store: Store) -> int | None:
         """
         Gets the index of the store in the list of stores.
         If it doesn't exist, returns None.
@@ -393,7 +393,7 @@ class MultiStore:
             for store in self._stores:
                 store.close()
 
-    def count(self, store: Store, criteria: Optional[dict] = None, **kwargs) -> int:
+    def count(self, store: Store, criteria: dict | None = None, **kwargs) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -406,9 +406,9 @@ class MultiStore:
     def query(
         self,
         store: Store,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
         **kwargs,
@@ -432,7 +432,7 @@ class MultiStore:
             )
         )
 
-    def update(self, store: Store, docs: Union[list[dict], dict], key: Union[list, str, None] = None, **kwargs):
+    def update(self, store: Store, docs: list[dict] | dict, key: list | str | None = None, **kwargs):
         """
         Update documents into the Store.
 
@@ -463,10 +463,10 @@ class MultiStore:
     def groupby(
         self,
         store: Store,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
         **kwargs,
@@ -505,9 +505,9 @@ class MultiStore:
     def query_one(
         self,
         store: Store,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         **kwargs,
     ):
         """
@@ -526,7 +526,7 @@ class MultiStore:
         )
 
     def distinct(
-        self, store: Store, field: str, criteria: Optional[dict] = None, all_exist: bool = False, **kwargs
+        self, store: Store, field: str, criteria: dict | None = None, all_exist: bool = False, **kwargs
     ) -> list:
         """
         Get all distinct values for a field.
@@ -564,7 +564,7 @@ class MultiStore:
         store_id = self.get_store_index(store)
         return getattr(self._stores[store_id], name)(**kwargs)
 
-    def _proxy_attribute(self, name: str, store) -> Union[Any, Callable]:
+    def _proxy_attribute(self, name: str, store) -> Any | Callable:
         """
         This function will take care of the StoreFacade accessing attributes
         or functions of the store that are not required by the Store abstract

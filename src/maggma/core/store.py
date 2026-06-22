@@ -4,10 +4,9 @@ Module containing the core Store definition.
 
 import logging
 from abc import ABCMeta, abstractmethod, abstractproperty
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from datetime import datetime
 from enum import Enum
-from typing import Callable, Optional, Union
 
 from monty.dev import deprecated
 from monty.json import MontyDecoder, MSONable
@@ -42,7 +41,7 @@ class Store(MSONable, metaclass=ABCMeta):
         key: str = "task_id",
         last_updated_field: str = "last_updated",
         last_updated_type: DateTimeFormat = DateTimeFormat("datetime"),  # noqa: B008
-        validator: Optional[Validator] = None,
+        validator: Validator | None = None,
     ):
         """
         Args:
@@ -90,7 +89,7 @@ class Store(MSONable, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def count(self, criteria: Optional[dict] = None) -> int:
+    def count(self, criteria: dict | None = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -101,9 +100,9 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[dict]:
@@ -120,7 +119,7 @@ class Store(MSONable, metaclass=ABCMeta):
         """
 
     @abstractmethod
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 
@@ -148,10 +147,10 @@ class Store(MSONable, metaclass=ABCMeta):
     @abstractmethod
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -183,9 +182,9 @@ class Store(MSONable, metaclass=ABCMeta):
 
     def query_one(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
     ):
         """
         Queries the Store for a single document.
@@ -198,7 +197,7 @@ class Store(MSONable, metaclass=ABCMeta):
         """
         return next(self.query(criteria=criteria, properties=properties, sort=sort), None)
 
-    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
+    def distinct(self, field: str, criteria: dict | None = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field.
 
@@ -237,7 +236,7 @@ class Store(MSONable, metaclass=ABCMeta):
 
         return self._lu_func[0](get(doc, self.last_updated_field))
 
-    def newer_in(self, target: "Store", criteria: Optional[dict] = None, exhaustive: bool = False) -> list[str]:
+    def newer_in(self, target: "Store", criteria: dict | None = None, exhaustive: bool = False) -> list[str]:
         """
         Returns the keys of documents that are newer in the target
         Store than this Store.

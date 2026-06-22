@@ -1,7 +1,7 @@
 
 # ![Maggma](docs/logo_w_text.svg)
 
-[![Static Badge](https://img.shields.io/badge/documentation-blue?logo=github)](https://materialsproject.github.io/maggma) [![testing](https://github.com/materialsproject/maggma/workflows/testing/badge.svg)](https://github.com/materialsproject/maggma/actions?query=workflow%3Atesting) [![codecov](https://codecov.io/gh/materialsproject/maggma/branch/main/graph/badge.svg)](https://codecov.io/gh/materialsproject/maggma) [![python](https://img.shields.io/badge/Python-3.9+-blue.svg?logo=python&amp;logoColor=white)]()
+[![Static Badge](https://img.shields.io/badge/documentation-blue?logo=github)](https://materialsproject.github.io/maggma) [![testing](https://github.com/materialsproject/maggma/workflows/testing/badge.svg)](https://github.com/materialsproject/maggma/actions?query=workflow%3Atesting) [![codecov](https://codecov.io/gh/materialsproject/maggma/branch/main/graph/badge.svg)](https://codecov.io/gh/materialsproject/maggma) [![python](https://img.shields.io/badge/Python-3.11+-blue.svg?logo=python&amp;logoColor=white)]()
 
 ## What is Maggma
 
@@ -82,4 +82,4 @@ Both `get_items` and `update_targets` can perform IO (input/output) to the data 
 
 Maggma has been developed and is maintained by the [Materials Project](https://materialsproject.org/) team at Lawrence Berkeley National Laboratory and the [Materials Project Software Foundation](https://github.com/materialsproject/foundation).
 
-Maggma is written in [Python](http://docs.python-guide.org/en/latest/) and supports Python 3.9+.
+Maggma is written in [Python](http://docs.python-guide.org/en/latest/) and supports Python 3.11+.

@@ -2,7 +2,7 @@
 Tests for group builder
 """
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from random import randint
 
 import pytest
@@ -13,7 +13,7 @@ from maggma.stores import MemoryStore
 
 @pytest.fixture(scope="module")
 def now():
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 @pytest.fixture()

@@ -2,7 +2,7 @@
 Tests for MapBuilder
 """
 
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 
 import pytest
 
@@ -30,7 +30,7 @@ def target():
 
 @pytest.fixture(scope="module")
 def now():
-    return datetime.utcnow()
+    return datetime.now(UTC)
 
 
 @pytest.fixture()
