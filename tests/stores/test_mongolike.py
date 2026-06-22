@@ -38,8 +38,9 @@ def mongostore():
 
 
 @pytest.fixture()
-@requires_montydb
 def montystore(tmp_dir):
+    if not _has_montydb:
+        pytest.skip("montydb not installed")
     store = MontyStore("maggma_test")
     store.connect()
     return store
