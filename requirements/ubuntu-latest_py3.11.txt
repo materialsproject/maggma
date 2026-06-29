@@ -15,9 +15,9 @@ attrs==26.1.0
     #   referencing
 bcrypt==5.0.0
     # via paramiko
-boto3==1.43.34
+boto3==1.43.36
     # via maggma (pyproject.toml)
-botocore==1.43.34
+botocore==1.43.36
     # via
     #   boto3
     #   s3transfer
@@ -25,6 +25,8 @@ cffi==2.0.0
     # via
     #   cryptography
     #   pynacl
+click==8.4.2
+    # via maggma (pyproject.toml)
 cryptography==49.0.0
     # via paramiko
 dnspython==2.8.0
@@ -43,7 +45,7 @@ jsonschema==4.26.0
     # via maggma (pyproject.toml)
 jsonschema-specifications==2025.9.1
     # via jsonschema
-mongomock==4.3.0
+mongomock-ng==7.6.0
     # via maggma (pyproject.toml)
 monty==2026.5.18
     # via maggma (pyproject.toml)
@@ -57,9 +59,11 @@ numpy==2.4.6
 orjson==3.11.9
     # via maggma (pyproject.toml)
 packaging==26.2
-    # via mongomock
-pandas==3.0.3
-    # via maggma (pyproject.toml)
+    # via mongomock-ng
+pandas==3.0.4
+    # via
+    #   maggma (pyproject.toml)
+    #   mongomock-ng
 paramiko==5.0.0
     # via maggma (pyproject.toml)
 pycparser==3.0
@@ -74,7 +78,7 @@ pydantic-settings==2.14.2
     # via maggma (pyproject.toml)
 pydash==8.0.6
     # via maggma (pyproject.toml)
-pymongo==4.10.1
+pymongo==4.17.0
     # via maggma (pyproject.toml)
 pynacl==1.6.2
     # via paramiko
@@ -86,7 +90,7 @@ python-dateutil==2.9.0.post0
 python-dotenv==1.2.2
     # via pydantic-settings
 pytz==2026.2
-    # via mongomock
+    # via mongomock-ng
 pyzmq==27.1.0
     # via maggma (pyproject.toml)
 referencing==0.37.0
@@ -104,7 +108,7 @@ ruamel-yaml==0.19.1
 s3transfer==0.19.0
     # via boto3
 sentinels==1.1.1
-    # via mongomock
+    # via mongomock-ng
 six==1.17.0
     # via python-dateutil
 tqdm==4.68.3

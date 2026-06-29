@@ -10,9 +10,10 @@ annotated-doc==0.0.4
     # via fastapi
 annotated-types==0.7.0
     # via pydantic
-anyio==4.13.0
+anyio==4.14.1
     # via
     #   httpx
+    #   httpx2
     #   starlette
 asttokens==3.0.1
     # via stack-data
@@ -21,7 +22,7 @@ attrs==26.1.0
     #   jsonlines
     #   jsonschema
     #   referencing
-azure-core==1.39.0
+azure-core==1.41.0
     # via
     #   azure-identity
     #   azure-storage-blob
@@ -31,7 +32,7 @@ azure-storage-blob==12.27.1
     # via maggma (pyproject.toml)
 babel==2.18.0
     # via mkdocs-material
-backrefs==6.2
+backrefs==7.0
     # via mkdocs-material
 bcrypt==5.0.0
     # via paramiko
@@ -39,16 +40,16 @@ bibtexparser==1.4.4
     # via pymatgen-core
 blinker==1.9.0
     # via flask
-boto3==1.42.96
+boto3==1.43.36
     # via
     #   maggma (pyproject.toml)
     #   moto
-botocore==1.42.96
+botocore==1.43.36
     # via
     #   boto3
     #   moto
     #   s3transfer
-certifi==2026.4.22
+certifi==2026.6.17
     # via
     #   httpcore
     #   httpx
@@ -61,9 +62,10 @@ cfgv==3.5.0
     # via pre-commit
 charset-normalizer==3.4.7
     # via requests
-click==8.3.3
+click==8.4.2
     # via
     #   flask
+    #   maggma (pyproject.toml)
     #   mkdocs
     #   mongogrant
     #   uvicorn
@@ -71,9 +73,9 @@ colorama==0.4.6
     # via mkdocs-material
 contourpy==1.3.3
     # via matplotlib
-coverage[toml]==7.13.5
+coverage[toml]==7.14.3
     # via pytest-cov
-cryptography==47.0.0
+cryptography==49.0.0
     # via
     #   azure-identity
     #   azure-storage-blob
@@ -85,9 +87,9 @@ csscompressor==0.9.5
     # via mkdocs-minify-plugin
 cycler==0.12.1
     # via matplotlib
-decorator==5.2.1
+decorator==5.3.1
     # via ipython
-distlib==0.4.0
+distlib==0.4.3
     # via virtualenv
 dnspython==2.8.0
     # via
@@ -97,44 +99,52 @@ execnet==2.1.2
     # via pytest-xdist
 executing==2.2.1
     # via stack-data
-fastapi==0.136.1
+fastapi==0.138.1
     # via maggma (pyproject.toml)
 fastjsonschema==2.21.2
     # via nbformat
-filelock==3.29.0
+filelock==3.29.4
     # via
     #   python-discovery
     #   virtualenv
 flask==3.1.3
     # via mongogrant
-fonttools==4.62.1
+fonttools==4.63.0
     # via matplotlib
 ghp-import==2.1.0
     # via mkdocs
-griffelib==2.0.2
+griffelib==2.1.0
     # via mkdocstrings-python
 h11==0.16.0
     # via
     #   httpcore
+    #   httpcore2
     #   uvicorn
 htmlmin2==0.1.13
     # via mkdocs-minify-plugin
 httpcore==1.0.9
     # via httpx
+httpcore2==2.5.0
+    # via httpx2
 httpx==0.28.1
+    # via starlette
+httpx2==2.5.0
     # via starlette
 hvac==2.4.0
     # via maggma (pyproject.toml)
 identify==2.6.19
     # via pre-commit
-idna==3.13
+idna==3.18
     # via
     #   anyio
     #   httpx
+    #   httpx2
     #   requests
 iniconfig==2.3.0
     # via pytest
-ipython==9.13.0
+invoke==3.0.3
+    # via paramiko
+ipython==9.15.0
     # via maggma (pyproject.toml)
 ipython-pygments-lexers==1.1.1
     # via ipython
@@ -144,7 +154,7 @@ itsdangerous==2.2.0
     # via
     #   flask
     #   starlette
-jedi==0.19.2
+jedi==0.20.0
     # via ipython
 jinja2==3.1.6
     # via
@@ -154,7 +164,6 @@ jinja2==3.1.6
     #   mkdocs
     #   mkdocs-material
     #   mkdocstrings
-    #   moto
     #   starlette
 jmespath==1.1.0
     # via
@@ -178,7 +187,7 @@ kiwisolver==1.5.0
     # via matplotlib
 linkify-it-py==2.1.0
     # via markdown-it-py
-lxml==6.1.0
+lxml==6.1.1
     # via pymatgen-core
 markdown==3.10.2
     # via
@@ -187,7 +196,7 @@ markdown==3.10.2
     #   mkdocs-material
     #   mkdocstrings
     #   pymdown-extensions
-markdown-it-py[linkify]==4.0.0
+markdown-it-py[linkify]==4.2.0
     # via
     #   mdit-py-plugins
     #   rich
@@ -200,11 +209,11 @@ markupsafe==3.0.3
     #   mkdocs-autorefs
     #   mkdocstrings
     #   werkzeug
-matplotlib==3.10.9
+matplotlib==3.11.0
     # via pymatgen-core
-matplotlib-inline==0.2.1
+matplotlib-inline==0.2.2
     # via ipython
-mdit-py-plugins==0.5.0
+mdit-py-plugins==0.6.1
     # via textual
 mdurl==0.1.2
     # via markdown-it-py
@@ -237,31 +246,31 @@ mkdocstrings[python]==1.0.4
     # via
     #   maggma (pyproject.toml)
     #   mkdocstrings-python
-mkdocstrings-python==2.0.3
+mkdocstrings-python==2.0.5
     # via mkdocstrings
 mongogrant==0.3.3
     # via maggma (pyproject.toml)
-mongomock==4.3.0
+mongomock-ng==7.6.0
     # via maggma (pyproject.toml)
-monty==2026.2.18
+monty==2026.5.18
     # via
     #   maggma (pyproject.toml)
     #   pymatgen-core
 montydb==2.5.6
     # via maggma (pyproject.toml)
-moto==5.1.22
+moto==5.2.2
     # via maggma (pyproject.toml)
 mpmath==1.3.0
     # via sympy
-msal==1.36.0
+msal==1.37.0
     # via
     #   azure-identity
     #   msal-extensions
 msal-extensions==1.3.1
     # via azure-identity
-msgpack==1.1.2
+msgpack==1.2.1
     # via maggma (pyproject.toml)
-narwhals==2.20.0
+narwhals==2.22.1
     # via plotly
 nbformat==5.10.4
     # via maggma (pyproject.toml)
@@ -269,7 +278,7 @@ networkx==3.6.1
     # via pymatgen-core
 nodeenv==1.10.0
     # via pre-commit
-numpy==2.4.4
+numpy==2.4.6
     # via
     #   contourpy
     #   maggma (pyproject.toml)
@@ -279,7 +288,7 @@ numpy==2.4.4
     #   pymatgen-core
     #   scipy
     #   spglib
-orjson==3.11.8
+orjson==3.11.9
     # via
     #   maggma (pyproject.toml)
     #   pymatgen-core
@@ -287,22 +296,21 @@ packaging==26.2
     # via
     #   matplotlib
     #   mkdocs
-    #   mongomock
+    #   mongomock-ng
     #   plotly
     #   pytest
 paginate==0.5.7
     # via mkdocs-material
 palettable==3.3.3
     # via pymatgen-core
-pandas==3.0.2
+pandas==3.0.4
     # via
     #   maggma (pyproject.toml)
+    #   mongomock-ng
     #   pymatgen-core
-paramiko==3.5.1
-    # via
-    #   maggma (pyproject.toml)
-    #   sshtunnel
-parso==0.8.6
+paramiko==5.0.0
+    # via maggma (pyproject.toml)
+parso==0.8.7
     # via jedi
 pathspec==1.1.1
     # via mkdocs
@@ -310,14 +318,14 @@ pexpect==4.9.0
     # via ipython
 pillow==12.2.0
     # via matplotlib
-platformdirs==4.9.6
+platformdirs==4.10.0
     # via
     #   jupyter-core
     #   mkdocs-get-deps
     #   python-discovery
     #   textual
     #   virtualenv
-plotly==6.7.0
+plotly==6.8.0
     # via pymatgen-core
 pluggy==1.6.0
     # via
@@ -335,14 +343,14 @@ pure-eval==0.2.3
     # via stack-data
 pycparser==3.0
     # via cffi
-pydantic==2.13.3
+pydantic==2.13.4
     # via
     #   fastapi
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.46.3
+pydantic-core==2.46.4
     # via pydantic
-pydantic-settings==2.14.0
+pydantic-settings==2.14.2
     # via maggma (pyproject.toml)
 pydash==8.0.6
     # via maggma (pyproject.toml)
@@ -354,19 +362,19 @@ pygments==2.20.0
     #   pytest
     #   rich
     #   textual
-pyjwt[crypto]==2.12.1
+pyjwt[crypto]==2.13.0
     # via
     #   msal
     #   pyjwt
-pymatgen==2026.3.23
+pymatgen==2026.5.4
     # via maggma (pyproject.toml)
-pymatgen-core==2026.4.16
+pymatgen-core==2026.5.18
     # via pymatgen
-pymdown-extensions==10.21.2
+pymdown-extensions==11.0
     # via
     #   mkdocs-material
     #   mkdocstrings
-pymongo==4.10.1
+pymongo==4.17.0
     # via
     #   maggma (pyproject.toml)
     #   mongogrant
@@ -376,18 +384,21 @@ pyparsing==3.3.2
     # via
     #   bibtexparser
     #   matplotlib
-pytest==9.0.3
+pytest==9.1.1
     # via
     #   maggma (pyproject.toml)
     #   pytest-asyncio
     #   pytest-cov
     #   pytest-mock
+    #   pytest-timeout
     #   pytest-xdist
-pytest-asyncio==1.3.0
+pytest-asyncio==1.4.0
     # via maggma (pyproject.toml)
 pytest-cov==7.1.0
     # via maggma (pyproject.toml)
 pytest-mock==3.15.1
+    # via maggma (pyproject.toml)
+pytest-timeout==2.4.0
     # via maggma (pyproject.toml)
 pytest-xdist==3.8.0
     # via maggma (pyproject.toml)
@@ -397,16 +408,15 @@ python-dateutil==2.9.0.post0
     #   ghp-import
     #   maggma (pyproject.toml)
     #   matplotlib
-    #   moto
     #   pandas
-python-discovery==1.2.2
+python-discovery==1.4.2
     # via virtualenv
 python-dotenv==1.2.2
     # via pydantic-settings
-python-multipart==0.0.26
+python-multipart==0.0.32
     # via starlette
-pytz==2026.1.post1
-    # via mongomock
+pytz==2026.2
+    # via mongomock-ng
 pyyaml==6.0.3
     # via
     #   mkdocs
@@ -423,9 +433,9 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-regex==2026.4.4
+regex==2026.6.28
     # via maggma (pyproject.toml)
-requests==2.33.1
+requests==2.34.2
     # via
     #   azure-core
     #   hvac
@@ -443,7 +453,7 @@ rich==15.0.0
     # via
     #   memray
     #   textual
-rpds-py==0.30.0
+rpds-py==2026.5.1
     # via
     #   jsonschema
     #   referencing
@@ -451,23 +461,21 @@ ruamel-yaml==0.19.1
     # via
     #   maggma (pyproject.toml)
     #   monty
-ruff==0.15.12
+ruff==0.15.20
     # via maggma (pyproject.toml)
-s3transfer==0.16.1
+s3transfer==0.19.0
     # via boto3
 scipy==1.17.1
     # via pymatgen-core
 sentinels==1.1.1
-    # via mongomock
+    # via mongomock-ng
 six==1.17.0
     # via python-dateutil
 spglib==2.7.0
     # via pymatgen-core
-sshtunnel==0.4.0
-    # via maggma (pyproject.toml)
 stack-data==0.6.3
     # via ipython
-starlette[full]==1.0.0
+starlette[full]==1.3.1
     # via
     #   fastapi
     #   maggma (pyproject.toml)
@@ -475,21 +483,25 @@ sympy==1.14.0
     # via pymatgen-core
 tabulate==0.10.0
     # via pymatgen-core
-textual==8.2.4
+textual==8.2.7
     # via memray
-tqdm==4.67.3
+tqdm==4.68.3
     # via
     #   maggma (pyproject.toml)
     #   pymatgen-core
-traitlets==5.14.3
+traitlets==5.15.1
     # via
     #   ipython
     #   jupyter-core
     #   matplotlib-inline
     #   nbformat
-types-python-dateutil==2.9.0.20260408
+truststore==0.10.4
+    # via
+    #   httpcore2
+    #   httpx2
+types-python-dateutil==2.9.0.20260518
     # via maggma (pyproject.toml)
-types-pyyaml==6.0.12.20260408
+types-pyyaml==6.0.12.20260518
     # via maggma (pyproject.toml)
 typing-extensions==4.15.0
     # via
@@ -498,6 +510,7 @@ typing-extensions==4.15.0
     #   azure-identity
     #   azure-storage-blob
     #   fastapi
+    #   httpx2
     #   ipython
     #   pydantic
     #   pydantic-core
@@ -517,18 +530,18 @@ uc-micro-py==2.0.0
     # via linkify-it-py
 uncertainties==3.2.3
     # via pymatgen-core
-urllib3==2.6.3
+urllib3==2.7.0
     # via
     #   botocore
     #   requests
     #   responses
-uvicorn==0.46.0
+uvicorn==0.49.0
     # via maggma (pyproject.toml)
-virtualenv==21.2.4
+virtualenv==21.5.1
     # via pre-commit
 watchdog==6.0.0
     # via mkdocs
-wcwidth==0.6.0
+wcwidth==0.8.1
     # via prompt-toolkit
 werkzeug==3.1.8
     # via
