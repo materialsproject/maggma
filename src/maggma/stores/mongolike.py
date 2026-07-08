@@ -541,7 +541,8 @@ class MemoryStore(MongoStore):
             collection_name: name for the collection in memory.
             host: hostname to probe for a running MongoDB server to back the
                 Store with. The data is written to an ephemeral database that
-                is dropped when the Store is closed.
+                is dropped when the Store is garbage collected or the
+                interpreter exits.
             port: TCP port to probe for a running MongoDB server.
             mongoclient_kwargs: Dict of extra kwargs to pass to MongoClient when
                 a real MongoDB backend is used.
@@ -559,6 +560,7 @@ class MemoryStore(MongoStore):
         # backed by the same real MongoDB server do not clobber one another
         self._database = f"maggma_memory_{uuid4().hex}"
         self.default_sort = None
+        self._client = None
         self._coll = None
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)
@@ -602,8 +604,10 @@ class MemoryStore(MongoStore):
 
     @staticmethod
     def _drop_ephemeral_database(host: str, port: int, database: str, mongoclient_kwargs: dict):
-        """Drop an ephemeral MongoDB database. Used as a weakref finalizer, so it
-        must not hold a reference to the Store."""
+        """Drop an ephemeral MongoDB database.
+
+        Used as a weakref finalizer, so it must not hold a reference to the Store.
+        """
         mongoclient_kwargs.setdefault("serverSelectionTimeoutMS", 500)
         try:
             client = MongoClient(host=host, port=port, **mongoclient_kwargs)
@@ -615,23 +619,33 @@ class MemoryStore(MongoStore):
             # a finalizer/atexit hook never raises.
             pass
 
-    def _connect_collection(self, force_reset: bool = False):
-        """Establish (or re-establish) the underlying in-memory collection."""
-        if force_reset and self._coll is not None:
-            old_client = self._coll.database.client
-            # on a forced reset, discard the previous contents (matching the
-            # historical mongomock behavior of starting from a fresh client)
-            if getattr(self, "_using_real_mongo", False):
+    def _reset_connection(self):
+        """Tear down the current connection and discard its contents."""
+        if getattr(self, "_using_real_mongo", False):
+            # discard the ephemeral database, even if we are currently
+            # disconnected (e.g. after close(), when self._client is None)
+            if self._client is not None:
                 try:
-                    old_client.drop_database(self._database)
+                    self._client.drop_database(self._database)
                 except Exception:
-                    # Best-effort discard of the previous contents; if the drop
-                    # fails the database will still be cleaned up by the finalizer
-                    # on garbage collection or interpreter exit.
+                    # Best-effort discard; the finalizer will still drop the
+                    # database on garbage collection or interpreter exit.
                     pass
-            old_client.close()
-        client = self._get_memory_client()
-        self._coll = client[self._database][self.collection_name]  # type: ignore
+            else:
+                self._drop_ephemeral_database(self.host, self.port, self._database, dict(self.mongoclient_kwargs))
+        if self._client is not None:
+            self._client.close()
+        self._client = None
+        self._coll = None
+
+    def _ensure_connected(self, force_reset: bool = False):
+        """Establish (or re-establish) the underlying in-memory collection."""
+        if force_reset:
+            self._reset_connection()
+        if self._coll is None:
+            if self._client is None:
+                self._client = self._get_memory_client()
+            self._coll = self._client[self._database][self.collection_name]  # type: ignore
 
     def connect(self, force_reset: bool = False):
         """
@@ -641,21 +655,29 @@ class MemoryStore(MongoStore):
             force_reset: whether to reset the connection or not when the Store is
                 already connected.
         """
-        if self._coll is None or force_reset:
-            self._connect_collection(force_reset=force_reset)
+        self._ensure_connected(force_reset=force_reset)
 
     def close(self):
-        """Close up all collections.
+        """Close the Store's connection.
 
-        For an in-memory Store this is intentionally a no-op that leaves the
-        Store usable, matching the historical ``mongomock`` behavior (its
-        ``close()`` did nothing) that callers such as the builders rely on when
-        they query a Store after it has been closed. Resources are released and
-        any ephemeral MongoDB database backing the Store is dropped when the
-        Store is garbage collected or at interpreter exit (see
-        ``_drop_ephemeral_database``). Use ``force_reset=True`` on ``connect()``
-        to explicitly discard the contents and start fresh.
+        After ``close()`` the Store must be reconnected with ``connect()`` before
+        it can be queried again; querying a closed Store raises a ``StoreError``.
+        The Store's data is preserved across a ``close()``/``connect()`` cycle:
+        with a real MongoDB backend it lives in the ephemeral database on the
+        server (dropped only when the Store is garbage collected or at
+        interpreter exit, see ``_drop_ephemeral_database``); with the
+        ``mongomock`` backend it lives in the in-process client, which is kept
+        alive for this reason. Use ``connect(force_reset=True)`` to discard the
+        contents and start fresh.
         """
+        if getattr(self, "_using_real_mongo", False) and self._client is not None:
+            # data persists in the ephemeral database on the server, so we can
+            # release the client connection now and reconnect later on demand
+            self._client.close()
+            self._client = None
+        # for the mongomock backend the data lives in the in-process client;
+        # keep it alive and simply mark the Store as needing a reconnect
+        self._coll = None
 
     @property
     def name(self):
@@ -802,7 +824,7 @@ class JSONStore(MemoryStore):
             on systems with slow storage when multiple connect / disconnects are performed.
         """
         if self._coll is None or force_reset:
-            self._connect_collection(force_reset=force_reset)
+            self._ensure_connected(force_reset=force_reset)
 
             # create the .json file if it does not exist
             if not self.read_only and not Path(self.paths[0]).exists():
@@ -998,9 +1020,10 @@ class MontyStore(MemoryStore):
             self._coll = client[self.database_name][self.collection_name]
 
     def close(self):
-        """Close up the MontyDB client."""
+        """Close up the MontyDB client. The Store must be reconnected before use."""
         if self._coll is not None:
             self._coll.database.client.close()
+            self._coll = None
 
     @property
     def name(self) -> str:
