@@ -259,7 +259,7 @@ montydb==2.5.6
     # via maggma (pyproject.toml)
 moto==5.2.2
     # via maggma (pyproject.toml)
-mpmath==1.4.1
+mpmath==1.3.0
     # via sympy
 msal==1.37.0
     # via
@@ -346,7 +346,7 @@ pydantic==2.13.4
     #   fastapi
     #   maggma (pyproject.toml)
     #   pydantic-settings
-pydantic-core==2.47.0
+pydantic-core==2.46.4
     # via pydantic
 pydantic-settings==2.14.2
     # via maggma (pyproject.toml)
