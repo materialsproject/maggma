@@ -6,6 +6,7 @@ various utilities.
 
 import warnings
 from collections.abc import Callable, Iterator
+from datetime import UTC
 from itertools import chain, groupby
 from pathlib import Path
 from typing import Any, Literal
@@ -740,9 +741,9 @@ class JSONStore(MemoryStore):
                         obj[self.last_updated_field] = obj[self.last_updated_field]["string"]
                 else:
                     # if there is no last_updated field, set one to the current time.
-                    from datetime import datetime, timezone
+                    from datetime import datetime
 
-                    obj[self.last_updated_field] = datetime.now(timezone.utc)
+                    obj[self.last_updated_field] = datetime.now(UTC)
 
         return objects
 
