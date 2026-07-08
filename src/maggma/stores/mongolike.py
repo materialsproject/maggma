@@ -536,6 +536,7 @@ class MemoryStore(MongoStore):
         port: int | None = None,
         mongoclient_kwargs: dict | None = None,
         server_selection_timeout_ms: int = 500,
+        _database: str | None = None,
         **kwargs,
     ):
         """
@@ -554,6 +555,11 @@ class MemoryStore(MongoStore):
                 a real MongoDB backend is used.
             server_selection_timeout_ms: serverSelectionTimeoutMS to use for the
                 real MongoDB client. Only relevant when ``port`` is supplied.
+            _database: internal identifier for this store's isolated, ephemeral
+                database. Left as None for normal use (a unique name is
+                generated); it is populated automatically during serialization so
+                that a round-tripped store (e.g. cached in a MultiStore or sent to
+                a worker process) is recognized as the same store.
         """
         self.collection_name = collection_name
         self.host = host
@@ -561,8 +567,11 @@ class MemoryStore(MongoStore):
         self.mongoclient_kwargs = mongoclient_kwargs or {}
         self.server_selection_timeout_ms = server_selection_timeout_ms
         # unique, ephemeral database name so that multiple MemoryStore instances
-        # backed by the same real MongoDB server do not clobber one another
-        self._database = f"maggma_memory_{uuid4().hex}"
+        # backed by the same real MongoDB server do not clobber one another.
+        # Preserved through (de)serialization so a round-tripped store compares
+        # equal to the original (relied upon by MultiStore); a freshly
+        # constructed store always gets its own new identity.
+        self._database = _database or f"maggma_memory_{uuid4().hex}"
         self.default_sort = None
         self._client = None
         self._coll = None

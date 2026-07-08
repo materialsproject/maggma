@@ -9,6 +9,7 @@ import orjson
 import pymongo.collection
 import pytest
 from bson.objectid import ObjectId
+from monty.json import MontyDecoder
 from monty.tempfile import ScratchDir
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
@@ -648,6 +649,17 @@ def test_memory_store_eq_isolated():
     for store in (store1, store2):
         if store._finalizer:
             store._finalizer()
+
+
+def test_memory_store_serialization_roundtrip_eq():
+    # A serialized/deserialized MemoryStore must compare equal to the original so
+    # it is recognized as the same store when cached in a MultiStore or sent to a
+    # worker process. This is why the isolated-database identity is preserved
+    # through as_dict/from_dict rather than regenerated (see issue #788).
+    store = MemoryStore("foo")
+    roundtrip = MontyDecoder().process_decoded(store.as_dict())
+    assert store == roundtrip
+    assert hash(store) == hash(roundtrip)
 
 
 @pytest.mark.skipif(
