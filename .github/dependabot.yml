@@ -1,26 +1,15 @@
 version: 2
 
-# Note: dependabot only supports daily/weekly/monthly intervals; there is no
-# quarterly option. Security updates are opened immediately regardless of
-# schedule and must be disabled separately in repo Settings > Security.
+# The Python (pip) lock files under requirements/ are generated and kept mutually
+# consistent by the pip-compile-based `upgrade-dependencies` workflow, so we do
+# NOT let Dependabot manage the pip ecosystem here: Dependabot bumps individual
+# pinned lines without a full resolver pass, which can produce internally
+# inconsistent lock files (e.g. pydantic pinned alongside a pydantic-core version
+# it does not allow). Only GitHub Actions are managed by Dependabot below.
+# Security updates are opened immediately regardless of schedule and must be
+# configured separately in repo Settings > Security.
 
 updates:
-  - package-ecosystem: "pip"
-    directory: "/"
-    schedule:
-      interval: "monthly"
-      day: "1"
-      time: "02:00"
-      timezone: "America/New_York"
-    open-pull-requests-limit: 2
-    groups:
-      major-updates:
-        update-types:
-          - "version-update:semver-major"
-      minor-and-patch-updates:
-        update-types:
-          - "version-update:semver-minor"
-          - "version-update:semver-patch"
 
   - package-ecosystem: "github-actions"
     directory: "/"
