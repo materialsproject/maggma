@@ -619,6 +619,37 @@ def test_eq(mongostore, memorystore, jsonstore):
     assert memorystore != jsonstore
 
 
+def test_memory_store_eq_isolated():
+    # Regression test for https://github.com/materialsproject/maggma/issues/788
+    # Two MemoryStores instantiated with the same collection_name are isolated
+    # (they do not share data), so they must not compare equal.
+    store1 = MemoryStore()
+    store2 = MemoryStore()
+    store1.connect()
+    store2.connect()
+
+    store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
+
+    # the stores are isolated: store2 does not see store1's documents
+    assert store1.count() == 2
+    assert store2.count() == 0
+
+    # ... therefore they must not be equal, and their hashes must differ
+    assert store1 != store2
+    assert hash(store1) != hash(store2)
+
+    # a store still equals itself
+    assert store1 == store1
+    assert hash(store1) == hash(store1)
+
+    # distinct instances with the same explicit collection_name are also unequal
+    assert MemoryStore("foo") != MemoryStore("foo")
+
+    for store in (store1, store2):
+        if store._finalizer:
+            store._finalizer()
+
+
 @pytest.mark.skipif(
     "mongodb+srv" not in os.environ.get("MONGODB_SRV_URI", ""),
     reason="requires special mongodb+srv URI",

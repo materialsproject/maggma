@@ -524,6 +524,10 @@ class MemoryStore(MongoStore):
     #: do not call MemoryStore.__init__.
     _using_real_mongo: bool = False
     _finalizer = None
+    #: Unique per-instance database name identifying this store's isolated data.
+    #: Class-level default so subclasses that skip MemoryStore.__init__ (e.g.
+    #: MontyStore) still have the attribute for __eq__/__hash__.
+    _database: str | None = None
 
     def __init__(
         self,
@@ -682,7 +686,7 @@ class MemoryStore(MongoStore):
 
     def __hash__(self):
         """Hash for the store."""
-        return hash((self.name, self.last_updated_field))
+        return hash((self.name, self._database, self.last_updated_field))
 
     def groupby(
         self,
@@ -731,13 +735,20 @@ class MemoryStore(MongoStore):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for MemoryStore
+        Check equality for MemoryStore.
+
+        Two MemoryStores are only equal if they are backed by the same underlying
+        in-memory database. Because each MemoryStore is instantiated with its own
+        isolated database, two separately created stores -- even with the same
+        collection_name -- do not share data and are therefore not equal. See
+        https://github.com/materialsproject/maggma/issues/788.
+
         other: other MemoryStore to compare with.
         """
         if not isinstance(other, MemoryStore):
             return False
 
-        fields = ["collection_name", "last_updated_field"]
+        fields = ["collection_name", "_database", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
