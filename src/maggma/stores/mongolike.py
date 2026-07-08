@@ -610,6 +610,9 @@ class MemoryStore(MongoStore):
             client.drop_database(database)
             client.close()
         except Exception:
+            # Best-effort cleanup: if the server is already gone or unreachable at
+            # finalization time there is nothing left to drop. Swallow the error so
+            # a finalizer/atexit hook never raises.
             pass
 
     def _connect_collection(self, force_reset: bool = False):
@@ -622,6 +625,9 @@ class MemoryStore(MongoStore):
                 try:
                     old_client.drop_database(self._database)
                 except Exception:
+                    # Best-effort discard of the previous contents; if the drop
+                    # fails the database will still be cleaned up by the finalizer
+                    # on garbage collection or interpreter exit.
                     pass
             old_client.close()
         client = self._get_memory_client()
