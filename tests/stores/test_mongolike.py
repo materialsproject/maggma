@@ -248,11 +248,51 @@ def test_mongostore_newer_in(mongostore):
 
 
 # Memory store tests
-def test_memory_store_connect():
-    memorystore = MemoryStore()
+def test_memory_store_connect_mongomock_fallback():
+    # server_selection_timeout_ms=0 skips the probe and forces the mongomock backend
+    memorystore = MemoryStore(server_selection_timeout_ms=0)
     assert memorystore._coll is None
     memorystore.connect()
+    assert memorystore._using_real_mongo is False
     assert isinstance(memorystore._collection, mongomock_ng.collection.Collection)
+
+
+def test_memory_store_connect_unreachable_falls_back():
+    # an unreachable server should fall back to mongomock rather than raise
+    memorystore = MemoryStore(port=1, server_selection_timeout_ms=50)
+    memorystore.connect()
+    assert memorystore._using_real_mongo is False
+    assert isinstance(memorystore._collection, mongomock_ng.collection.Collection)
+
+
+def test_memory_store_uses_real_mongo_when_available():
+    # a real MongoDB server is available in CI; when present it should be used
+    try:
+        pymongo.MongoClient(serverSelectionTimeoutMS=500).admin.command("ping")
+    except Exception:
+        pytest.skip("no MongoDB server reachable on localhost:27017")
+
+    memorystore = MemoryStore()
+    memorystore.connect()
+    assert memorystore._using_real_mongo is True
+    assert isinstance(memorystore._collection, pymongo.collection.Collection)
+
+    # the ephemeral database exists while connected
+    verify_client = pymongo.MongoClient(serverSelectionTimeoutMS=500)
+    memorystore.update({"task_id": 1, "val": 2})
+    assert memorystore._database in verify_client.list_database_names()
+
+    # data survives close() (the Store remains usable), matching the historical
+    # in-memory behavior relied upon by builders
+    memorystore.close()
+    memorystore.connect()
+    assert memorystore.count() == 1
+
+    # the ephemeral database is dropped when the Store is finalized
+    database_name = memorystore._database
+    memorystore._finalizer()
+    assert database_name not in verify_client.list_database_names()
+    verify_client.close()
 
 
 def test_groupby(memorystore):
@@ -522,8 +562,11 @@ def test_jsonstore_orjson_options(test_dir):
     class SubFloat(float):
         pass
 
+    # Force the mongomock backend (server_selection_timeout_ms=0): a real MongoDB
+    # backend coerces the SubFloat subclass to a plain float on write/read, so the
+    # serialization_default option this test exercises would never be triggered.
     with ScratchDir("."):
-        jsonstore = JSONStore("d.json", read_only=False)
+        jsonstore = JSONStore("d.json", read_only=False, server_selection_timeout_ms=0)
         jsonstore.connect()
         with pytest.raises(orjson.JSONEncodeError):
             jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
@@ -534,6 +577,7 @@ def test_jsonstore_orjson_options(test_dir):
             read_only=False,
             serialization_option=None,
             serialization_default=lambda x: "test",
+            server_selection_timeout_ms=0,
         )
         jsonstore.connect()
         jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
