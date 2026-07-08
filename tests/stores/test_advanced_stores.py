@@ -12,9 +12,13 @@ from unittest.mock import patch
 from uuid import uuid4
 
 import pytest
-from mongogrant import Client
-from mongogrant.client import check, seed
-from mongogrant.config import Config
+
+try:
+    from mongogrant import Client
+    from mongogrant.client import check, seed
+    from mongogrant.config import Config
+except ImportError:
+    pytest.skip("mongogrant not installed", allow_module_level=True)
 from pymongo import MongoClient
 from pymongo.collection import Collection
 

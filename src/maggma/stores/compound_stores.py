@@ -3,7 +3,6 @@
 from collections.abc import Iterator
 from datetime import datetime
 from itertools import groupby
-from typing import Optional, Union
 
 from pydash import set_
 from pymongo import MongoClient
@@ -26,9 +25,9 @@ class JointStore(Store):
         port: int = 27017,
         username: str = "",
         password: str = "",
-        main: Optional[str] = None,
+        main: str | None = None,
         merge_at_root: bool = False,
-        mongoclient_kwargs: Optional[dict] = None,
+        mongoclient_kwargs: dict | None = None,
         **kwargs,
     ):
         """
@@ -218,7 +217,7 @@ class JointStore(Store):
             pipeline.append({"$limit": limit})
         return pipeline
 
-    def count(self, criteria: Optional[dict] = None) -> int:
+    def count(self, criteria: dict | None = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -232,9 +231,9 @@ class JointStore(Store):
 
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[dict]:
@@ -244,10 +243,10 @@ class JointStore(Store):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -373,7 +372,7 @@ class ConcatStore(Store):
             lus.append(lu)
         return max(lus)
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store
         Not implemented in ConcatStore.
@@ -387,7 +386,7 @@ class ConcatStore(Store):
         """
         raise NotImplementedError("No update method for ConcatStore")
 
-    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
+    def distinct(self, field: str, criteria: dict | None = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field.
 
@@ -414,7 +413,7 @@ class ConcatStore(Store):
         """
         return all(store.ensure_index(key, unique) for store in self.stores)
 
-    def count(self, criteria: Optional[dict] = None) -> int:
+    def count(self, criteria: dict | None = None) -> int:
         """
         Counts the number of documents matching the query criteria.
 
@@ -427,9 +426,9 @@ class ConcatStore(Store):
 
     def query(
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[dict]:
@@ -450,10 +449,10 @@ class ConcatStore(Store):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -497,7 +496,7 @@ class ConcatStore(Store):
 
         sorted_docs = sorted(docs, key=key_set)
         for vals, group_iter in groupby(sorted_docs, key=key_set):
-            id_dict = dict(zip(keys, vals))
+            id_dict = dict(zip(keys, vals, strict=False))
             yield id_dict, list(group_iter)
 
     def remove_docs(self, criteria: dict):

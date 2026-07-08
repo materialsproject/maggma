@@ -1,11 +1,9 @@
 import base64
 import inspect
+from collections.abc import Callable
 from typing import (
     Any,
-    Callable,
     Literal,
-    Optional,
-    Union,
     get_args,  # pragma: no cover
 )
 
@@ -30,6 +28,7 @@ STORE_PARAMS = dict[
         "count_hint",
         "agg_hint",
         "update",
+        "facets",
     ],
     Any,
 ]
@@ -38,7 +37,6 @@ STORE_PARAMS = dict[
 def merge_queries(queries: list[STORE_PARAMS]) -> STORE_PARAMS:
     criteria: STORE_PARAMS = {}
     properties: list[str] = []
-
     for sub_query in queries:
         if "criteria" in sub_query:
             criteria.update(sub_query["criteria"])
@@ -50,6 +48,35 @@ def merge_queries(queries: list[STORE_PARAMS]) -> STORE_PARAMS:
     return {
         "criteria": criteria,
         "properties": properties if len(properties) > 0 else None,
+        **remainder,
+    }
+
+
+def merge_atlas_querires(queries: list[STORE_PARAMS]) -> STORE_PARAMS:
+    """Merge queries for atlas search, same keys, e.g. "equals", are merged into a list."""
+    criteria: list[dict] = []
+    facets: dict[dict] = {}
+    properties: list[str] = []
+    for sub_query in queries:
+        if "criteria" in sub_query:
+            for k, v in sub_query["criteria"].items():
+                if isinstance(v, dict):
+                    # only one criteria per operator
+                    criteria.append({k: v})
+                elif isinstance(v, list):
+                    # multiple criteria per operator
+                    criteria.extend({k: i} for i in v)
+        if sub_query.get("facets", False):
+            facets.update(sub_query["facets"])
+        if sub_query.get("properties", False):
+            properties.extend(sub_query["properties"])
+
+    remainder = {k: v for query in queries for k, v in query.items() if k not in ["criteria", "properties", "facets"]}
+
+    return {
+        "criteria": criteria,
+        "properties": properties if len(properties) > 0 else None,
+        "facets": facets if len(facets) > 0 else None,
         **remainder,
     }
 
@@ -89,7 +116,7 @@ def attach_signature(function: Callable, defaults: dict, annotations: dict):
 
 def api_sanitize(
     pydantic_model: BaseModel,
-    fields_to_leave: Optional[Union[str, None]] = None,
+    fields_to_leave: str | None = None,
     allow_dict_msonable=False,
 ):
     """Function to clean up pydantic models for the API by:
@@ -128,7 +155,7 @@ def api_sanitize(
                             allow_msonable_dict(sub_type)
 
             if name not in model_fields_to_leave:
-                new_field = FieldInfo.from_annotated_attribute(Optional[field_type], None)
+                new_field = FieldInfo.from_annotated_attribute(field_type | None, None)
                 model.model_fields[name] = new_field
 
         model.model_rebuild(force=True)

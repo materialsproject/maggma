@@ -8,10 +8,9 @@ authors =[
 ]
 classifiers=[
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Science/Research",
         "Intended Audience :: System Administrators",
@@ -22,15 +21,14 @@ classifiers=[
         "Topic :: Scientific/Engineering",
     ]
 license = {file = "LICENSE"}
-requires-python = ">=3.9"
+requires-python = ">=3.11"
 dependencies = [
-        "setuptools",
         "ruamel.yaml>=0.17",
         "pydantic>=2.0",
         "pydantic-settings>=2.0.3",
-        "pymongo>=4.2.0",
+        "pymongo>=4.5.0",
         "monty>=2024.5.24",
-        "mongomock>=3.10.0",
+        "mongomock-ng>=7.6.0",
         "pydash>=4.1.0",
         "jsonschema>=3.1.1",
         "tqdm>=4.19.6",
@@ -40,11 +38,12 @@ dependencies = [
         "numpy>=1.26",
         "pyzmq>=25.1.1",
         "dnspython>=1.16.0",
-        "sshtunnel>=0.1.5",
+        "paramiko>=5.0",
         "msgpack>=0.5.6",
         "orjson>=3.9.0",
         "boto3>=1.20.41",
         "python-dateutil>=2.8.2",
+        "click>=7.0",
     ]
 
 [project.urls]
@@ -62,7 +61,8 @@ memray = ["memray>=1.7.0"]
 montydb = ["montydb>=2.3.12"]
 mongogrant = ["mongogrant>=0.3.1"]
 notebook_runner = ["IPython>=8.11", "nbformat>=5.0", "regex>=2020.6"]
-azure = ["azure-storage-blob>=12.16.0", "azure-identity>=1.12.0"]
+# NOTE: see https://github.com/Azure/Azurite/issues/2623 why storage-blob version is restricted
+azure = ["azure-storage-blob>=12.16.0,<12.28", "azure-identity>=1.12.0"]
 api = ["fastapi>=0.42.0","uvicorn>=0.18.3"]
 testing = [
             "pytest",
@@ -70,12 +70,12 @@ testing = [
             "pytest-mock",
             "pytest-asyncio",
             "pytest-xdist",
+            "pytest-timeout",
             "pre-commit",
             "moto>=5.0", # mock_s3 changed to mock_aws in v5
             "ruff",
             "responses<0.22.0",
             "types-pyYAML",
-            "types-setuptools",
             "types-python-dateutil",
             "starlette[full]"
         ]
@@ -170,7 +170,7 @@ isort.split-on-trailing-comma = false
 
 [tool.pytest.ini_options]
 minversion = "6.0"
-addopts = "--color=yes -p no:warnings --import-mode=importlib --durations=30"
+addopts = "--color=yes -p no:warnings --import-mode=importlib --durations=30 --timeout=120"
 testpaths = [
     "tests",
 ]

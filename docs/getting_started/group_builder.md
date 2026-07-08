@@ -60,6 +60,7 @@ Note that unlike the previous `MapBuilder` example, we didn't call the source an
 
 `GroupBuilder` inherits from `MapBuilder` so it has the same configurational parameters.
 
+- query: A query to apply to items in the source Store.
 - projection: list of the fields you want to project. This can reduce the data transfer load if you only need certain fields or sub-documents from the source documents
 - timeout: optional timeout on the process function
 - store_process_timeout: adds the process time into the target document for profiling

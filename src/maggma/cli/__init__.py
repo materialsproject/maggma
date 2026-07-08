@@ -219,9 +219,8 @@ def run(
             for builder in builder_objects:
                 serial(builder, no_bars)
         else:
-            loop = asyncio.get_event_loop()
             for builder in builder_objects:
-                loop.run_until_complete(multi(builder=builder, num_processes=num_processes, no_bars=no_bars))
+                asyncio.run(multi(builder=builder, num_processes=num_processes, no_bars=no_bars))
 
     if memray_file:
         import subprocess

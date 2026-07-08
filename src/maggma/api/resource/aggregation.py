@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 import orjson
 from fastapi import HTTPException, Request, Response
@@ -25,11 +25,11 @@ class AggregationResource(Resource):
         store: Store,
         model: type[BaseModel],
         pipeline_query_operator: QueryOperator,
-        timeout: Optional[int] = None,
-        tags: Optional[list[str]] = None,
-        include_in_schema: Optional[bool] = True,
-        sub_path: Optional[str] = "/",
-        header_processor: Optional[HeaderProcessor] = None,
+        timeout: int | None = None,
+        tags: list[str] | None = None,
+        include_in_schema: bool | None = True,
+        sub_path: str | None = "/",
+        header_processor: HeaderProcessor | None = None,
     ):
         """
         Args:

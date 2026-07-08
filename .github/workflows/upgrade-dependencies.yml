@@ -16,19 +16,19 @@ jobs:
       matrix:
         os: ['ubuntu-latest', 'macos-latest']
         package: ["."]
-        python-version: ["3.9", "3.10", "3.11", "3.12"]
+        python-version: ["3.11", "3.12", "3.13"]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
           cache: 'pip'
       - name: Upgrade Python dependencies
         shell: bash
         run: |
-          python${{ matrix.python-version }} -m pip install --upgrade pip pip-tools
+          python${{ matrix.python-version }} -m pip install --upgrade pip==25.3 pip-tools
           cd ${{ matrix.package }}
           python${{ matrix.python-version }} -m piptools compile -q --upgrade --resolver=backtracking -o requirements/${{ matrix.os }}_py${{ matrix.python-version }}.txt
           python${{ matrix.python-version }} -m piptools compile -q --upgrade --resolver=backtracking --all-extras -o requirements/${{ matrix.os }}_py${{ matrix.python-version }}_extras.txt
@@ -56,7 +56,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: upgrade
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - name: detect auto-upgrade-dependency branches
