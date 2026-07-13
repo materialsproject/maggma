@@ -248,31 +248,26 @@ def test_mongostore_newer_in(mongostore):
 
 
 # Memory store tests
-def test_memory_store_connect_mongomock_fallback():
-    # server_selection_timeout_ms=0 skips the probe and forces the mongomock backend
-    memorystore = MemoryStore(server_selection_timeout_ms=0)
+def test_memory_store_connect_default_mongomock():
+    # by default (no port supplied) the Store uses the in-process mongomock
+    # backend. Note this runs in CI with a MongoDB server available, so it also
+    # confirms the real-mongo backend is strictly opt-in (the default does not
+    # touch a running server).
+    memorystore = MemoryStore()
     assert memorystore._coll is None
     memorystore.connect()
     assert memorystore._using_real_mongo is False
     assert isinstance(memorystore._collection, mongomock_ng.collection.Collection)
 
 
-def test_memory_store_connect_unreachable_falls_back():
-    # an unreachable server should fall back to mongomock rather than raise
-    memorystore = MemoryStore(port=1, server_selection_timeout_ms=50)
-    memorystore.connect()
-    assert memorystore._using_real_mongo is False
-    assert isinstance(memorystore._collection, mongomock_ng.collection.Collection)
-
-
-def test_memory_store_uses_real_mongo_when_available():
-    # a real MongoDB server is available in CI; when present it should be used
+def test_memory_store_uses_real_mongo_when_port_supplied():
+    # supplying a port opts in to a real MongoDB backend
     try:
         pymongo.MongoClient(serverSelectionTimeoutMS=500).admin.command("ping")
     except Exception:
         pytest.skip("no MongoDB server reachable on localhost:27017")
 
-    memorystore = MemoryStore()
+    memorystore = MemoryStore(port=27017)
     memorystore.connect()
     assert memorystore._using_real_mongo is True
     assert isinstance(memorystore._collection, pymongo.collection.Collection)
@@ -562,11 +557,12 @@ def test_jsonstore_orjson_options(test_dir):
     class SubFloat(float):
         pass
 
-    # Force the mongomock backend (server_selection_timeout_ms=0): a real MongoDB
-    # backend coerces the SubFloat subclass to a plain float on write/read, so the
-    # serialization_default option this test exercises would never be triggered.
+    # JSONStore uses the default mongomock backend (no port), which preserves the
+    # SubFloat subclass so orjson raises. A real MongoDB backend would instead
+    # coerce it to a plain float, and the serialization_default option this test
+    # exercises would never be triggered.
     with ScratchDir("."):
-        jsonstore = JSONStore("d.json", read_only=False, server_selection_timeout_ms=0)
+        jsonstore = JSONStore("d.json", read_only=False)
         jsonstore.connect()
         with pytest.raises(orjson.JSONEncodeError):
             jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})
@@ -577,7 +573,6 @@ def test_jsonstore_orjson_options(test_dir):
             read_only=False,
             serialization_option=None,
             serialization_default=lambda x: "test",
-            server_selection_timeout_ms=0,
         )
         jsonstore.connect()
         jsonstore.update({"wrong_field": SubFloat(1.1), "task_id": 3})

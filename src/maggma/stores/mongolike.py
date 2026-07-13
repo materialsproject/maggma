@@ -509,14 +509,14 @@ class MemoryStore(MongoStore):
     """
     An in-memory Store that functions similarly to a MongoStore.
 
-    If a MongoDB server is reachable (by default on ``localhost:27017``), the
-    data is stored in a real, ephemeral MongoDB database for full MongoDB
-    compatibility and performance. That database is namespaced uniquely per
-    Store instance and is dropped automatically when the Store is garbage
-    collected or the interpreter exits, so the user never has to create or
-    clean up a database manually. If no server is reachable, the Store
-    transparently falls back to an in-process ``mongomock`` database, so it
-    works even with no MongoDB installed.
+    By default (``port=None``) the data is held in an in-process ``mongomock``
+    database, so the Store works with no MongoDB server installed. As an opt-in,
+    if a ``port`` is supplied the Store instead uses a real MongoDB server at
+    ``host:port`` (e.g. a local ``mongod``) for full MongoDB compatibility and
+    performance. In that case the data is written to an ephemeral database that
+    is namespaced uniquely per Store instance and dropped automatically when the
+    Store is garbage collected or the interpreter exits, so the user never has to
+    create or clean up a database manually.
     """
 
     #: Set to True by connect() when a real MongoDB backend is in use. Defined
@@ -529,7 +529,7 @@ class MemoryStore(MongoStore):
         self,
         collection_name: str = "memory_db",
         host: str = "localhost",
-        port: int = 27017,
+        port: int | None = None,
         mongoclient_kwargs: dict | None = None,
         server_selection_timeout_ms: int = 500,
         **kwargs,
@@ -539,17 +539,17 @@ class MemoryStore(MongoStore):
 
         Args:
             collection_name: name for the collection in memory.
-            host: hostname to probe for a running MongoDB server to back the
-                Store with. The data is written to an ephemeral database that
-                is dropped when the Store is garbage collected or the
-                interpreter exits.
-            port: TCP port to probe for a running MongoDB server.
+            host: hostname of the MongoDB server to use when ``port`` is supplied.
+            port: TCP port of a MongoDB server to back the Store with. If None
+                (the default), the Store uses an in-process ``mongomock``
+                database and no server is required. If a port is supplied (e.g.
+                ``port=27017`` for a local ``mongod``), the Store uses that real
+                MongoDB server, writing to an ephemeral database that is dropped
+                when the Store is garbage collected or the interpreter exits.
             mongoclient_kwargs: Dict of extra kwargs to pass to MongoClient when
                 a real MongoDB backend is used.
-            server_selection_timeout_ms: how long, in milliseconds, to wait when
-                probing ``host:port`` for a MongoDB server before falling back
-                to an in-process ``mongomock`` database. Set to 0 (or less) to
-                skip the probe entirely and always use ``mongomock``.
+            server_selection_timeout_ms: serverSelectionTimeoutMS to use for the
+                real MongoDB client. Only relevant when ``port`` is supplied.
         """
         self.collection_name = collection_name
         self.host = host
@@ -569,38 +569,34 @@ class MemoryStore(MongoStore):
         """
         Return a client backing the in-memory Store.
 
-        Attempts to connect to a real MongoDB server at ``host:port`` for full
-        MongoDB compatibility and performance. If none is reachable within
-        ``server_selection_timeout_ms``, falls back to an in-process
-        ``mongomock`` client so the Store works without a MongoDB server.
+        Uses a real MongoDB server at ``host:port`` when a ``port`` was supplied
+        (opt-in, for full MongoDB compatibility and performance), otherwise an
+        in-process ``mongomock`` client so the Store works without a server.
         """
-        if self.server_selection_timeout_ms > 0:
-            mongoclient_kwargs = dict(self.mongoclient_kwargs)
-            mongoclient_kwargs.setdefault("serverSelectionTimeoutMS", self.server_selection_timeout_ms)
-            try:
-                client = MongoClient(host=self.host, port=self.port, **mongoclient_kwargs)
-                # force server selection to confirm a server is actually reachable
-                client.admin.command("ping")
-                self._using_real_mongo = True
-                # ensure the ephemeral database is dropped when this Store is
-                # garbage collected or the interpreter exits, so nothing is left
-                # behind on the server
-                if self._finalizer is None:
-                    self._finalizer = weakref.finalize(
-                        self,
-                        self._drop_ephemeral_database,
-                        self.host,
-                        self.port,
-                        self._database,
-                        dict(mongoclient_kwargs),
-                    )
-                self.logger.debug(f"{self.name} using real MongoDB backend at {self.host}:{self.port}")
-                return client
-            except Exception:
-                self.logger.debug(f"{self.name}: no MongoDB server reachable, falling back to mongomock")
+        if self.port is None:
+            # default: no port supplied -> in-process mongomock backend
+            self._using_real_mongo = False
+            return mongomock.MongoClient()  # type: ignore
 
-        self._using_real_mongo = False
-        return mongomock.MongoClient()  # type: ignore
+        # a port was supplied -> use a real MongoDB server at host:port
+        mongoclient_kwargs = dict(self.mongoclient_kwargs)
+        if self.server_selection_timeout_ms > 0:
+            mongoclient_kwargs.setdefault("serverSelectionTimeoutMS", self.server_selection_timeout_ms)
+        client = MongoClient(host=self.host, port=self.port, **mongoclient_kwargs)
+        self._using_real_mongo = True
+        # ensure the ephemeral database is dropped when this Store is garbage
+        # collected or the interpreter exits, so nothing is left behind on the server
+        if self._finalizer is None:
+            self._finalizer = weakref.finalize(
+                self,
+                self._drop_ephemeral_database,
+                self.host,
+                self.port,
+                self._database,
+                dict(mongoclient_kwargs),
+            )
+        self.logger.debug(f"{self.name} using real MongoDB backend at {self.host}:{self.port}")
+        return client
 
     @staticmethod
     def _drop_ephemeral_database(host: str, port: int, database: str, mongoclient_kwargs: dict):
