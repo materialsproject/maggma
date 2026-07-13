@@ -15,13 +15,13 @@ attrs==26.1.0
     #   referencing
 bcrypt==5.0.0
     # via paramiko
-boto3==1.43.34
+boto3==1.43.42
     # via maggma (pyproject.toml)
-botocore==1.43.34
+botocore==1.43.42
     # via
     #   boto3
     #   s3transfer
-cffi==2.0.0
+cffi==2.1.0
     # via
     #   cryptography
     #   pynacl
@@ -49,7 +49,7 @@ monty==2026.5.18
     # via maggma (pyproject.toml)
 msgpack==1.2.1
     # via maggma (pyproject.toml)
-numpy==2.5.0
+numpy==2.4.6
     # via
     #   maggma (pyproject.toml)
     #   monty
@@ -74,7 +74,7 @@ pydantic-settings==2.14.2
     # via maggma (pyproject.toml)
 pydash==8.0.6
     # via maggma (pyproject.toml)
-pymongo==4.10.1
+pymongo==4.17.0
     # via maggma (pyproject.toml)
 pynacl==1.6.2
     # via paramiko
@@ -93,7 +93,7 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
-rpds-py==2026.5.1
+rpds-py==2026.6.3
     # via
     #   jsonschema
     #   referencing
@@ -107,9 +107,9 @@ sentinels==1.1.1
     # via mongomock
 six==1.17.0
     # via python-dateutil
-tqdm==4.68.3
+tqdm==4.68.4
     # via maggma (pyproject.toml)
-typing-extensions==4.15.0
+typing-extensions==4.16.0
     # via
     #   pydantic
     #   pydantic-core
