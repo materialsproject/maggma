@@ -114,6 +114,7 @@ def test_query(source, target, old_docs, new_docs):
     source.update(old_docs)
     source.update(new_docs)
     builder.run()
+    target.connect()
     all_docs = list(target.query(criteria={}))
     assert len(all_docs) == 14
     assert min([d["k"] for d in all_docs]) == 6
@@ -129,6 +130,7 @@ def test_delete_orphans(source, target, old_docs, new_docs):
     source._collection.delete_many(deletion_criteria)
     builder.run()
 
+    target.connect()
     assert target._collection.count_documents(deletion_criteria) == 0
     assert target.query_one(criteria={"k": 5})["v"] == "new"
     assert target.query_one(criteria={"k": 10})["v"] == "old"

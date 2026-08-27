@@ -9,6 +9,7 @@ import orjson
 import pymongo.collection
 import pytest
 from bson.objectid import ObjectId
+from monty.json import MontyDecoder
 from monty.tempfile import ScratchDir
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
@@ -248,11 +249,46 @@ def test_mongostore_newer_in(mongostore):
 
 
 # Memory store tests
-def test_memory_store_connect():
+def test_memory_store_connect_default_mongomock():
+    # by default (no port supplied) the Store uses the in-process mongomock
+    # backend. Note this runs in CI with a MongoDB server available, so it also
+    # confirms the real-mongo backend is strictly opt-in (the default does not
+    # touch a running server).
     memorystore = MemoryStore()
     assert memorystore._coll is None
     memorystore.connect()
+    assert memorystore._using_real_mongo is False
     assert isinstance(memorystore._collection, mongomock_ng.collection.Collection)
+
+
+def test_memory_store_uses_real_mongo_when_port_supplied():
+    # supplying a port opts in to a real MongoDB backend
+    try:
+        pymongo.MongoClient(serverSelectionTimeoutMS=500).admin.command("ping")
+    except Exception:
+        pytest.skip("no MongoDB server reachable on localhost:27017")
+
+    memorystore = MemoryStore(port=27017)
+    memorystore.connect()
+    assert memorystore._using_real_mongo is True
+    assert isinstance(memorystore._collection, pymongo.collection.Collection)
+
+    # the ephemeral database exists while connected
+    verify_client = pymongo.MongoClient(serverSelectionTimeoutMS=500)
+    memorystore.update({"task_id": 1, "val": 2})
+    assert memorystore._database in verify_client.list_database_names()
+
+    # data survives close() (the Store remains usable), matching the historical
+    # in-memory behavior relied upon by builders
+    memorystore.close()
+    memorystore.connect()
+    assert memorystore.count() == 1
+
+    # the ephemeral database is dropped when the Store is finalized
+    database_name = memorystore._database
+    memorystore._finalizer()
+    assert database_name not in verify_client.list_database_names()
+    verify_client.close()
 
 
 def test_groupby(memorystore):
@@ -522,6 +558,10 @@ def test_jsonstore_orjson_options(test_dir):
     class SubFloat(float):
         pass
 
+    # JSONStore uses the default mongomock backend (no port), which preserves the
+    # SubFloat subclass so orjson raises. A real MongoDB backend would instead
+    # coerce it to a plain float, and the serialization_default option this test
+    # exercises would never be triggered.
     with ScratchDir("."):
         jsonstore = JSONStore("d.json", read_only=False)
         jsonstore.connect()
@@ -578,6 +618,48 @@ def test_eq(mongostore, memorystore, jsonstore):
     assert mongostore != memorystore
     assert mongostore != jsonstore
     assert memorystore != jsonstore
+
+
+def test_memory_store_eq_isolated():
+    # Regression test for https://github.com/materialsproject/maggma/issues/788
+    # Two MemoryStores instantiated with the same collection_name are isolated
+    # (they do not share data), so they must not compare equal.
+    store1 = MemoryStore()
+    store2 = MemoryStore()
+    store1.connect()
+    store2.connect()
+
+    store1.update([{"a": 1, "b": 2}, {"a": 2, "b": 3}], "a")
+
+    # the stores are isolated: store2 does not see store1's documents
+    assert store1.count() == 2
+    assert store2.count() == 0
+
+    # ... therefore they must not be equal, and their hashes must differ
+    assert store1 != store2
+    assert hash(store1) != hash(store2)
+
+    # a store still equals itself
+    assert store1 == store1
+    assert hash(store1) == hash(store1)
+
+    # distinct instances with the same explicit collection_name are also unequal
+    assert MemoryStore("foo") != MemoryStore("foo")
+
+    for store in (store1, store2):
+        if store._finalizer:
+            store._finalizer()
+
+
+def test_memory_store_serialization_roundtrip_eq():
+    # A serialized/deserialized MemoryStore must compare equal to the original so
+    # it is recognized as the same store when cached in a MultiStore or sent to a
+    # worker process. This is why the isolated-database identity is preserved
+    # through as_dict/from_dict rather than regenerated (see issue #788).
+    store = MemoryStore("foo")
+    roundtrip = MontyDecoder().process_decoded(store.as_dict())
+    assert store == roundtrip
+    assert hash(store) == hash(roundtrip)
 
 
 @pytest.mark.skipif(

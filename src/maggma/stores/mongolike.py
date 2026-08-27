@@ -5,10 +5,12 @@ various utilities.
 """
 
 import warnings
+import weakref
 from collections.abc import Callable, Iterator
 from itertools import chain, groupby
 from pathlib import Path
 from typing import Any, Literal
+from uuid import uuid4
 
 import bson
 import mongomock_ng as mongomock
@@ -505,22 +507,154 @@ class MongoURIStore(MongoStore):
 
 class MemoryStore(MongoStore):
     """
-    An in-memory Store that functions similarly
-    to a MongoStore.
+    An in-memory Store that functions similarly to a MongoStore.
+
+    By default (``port=None``) the data is held in an in-process ``mongomock``
+    database, so the Store works with no MongoDB server installed. As an opt-in,
+    if a ``port`` is supplied the Store instead uses a real MongoDB server at
+    ``host:port`` (e.g. a local ``mongod``) for full MongoDB compatibility and
+    performance. In that case the data is written to an ephemeral database that
+    is namespaced uniquely per Store instance and dropped automatically when the
+    Store is garbage collected or the interpreter exits, so the user never has to
+    create or clean up a database manually.
     """
 
-    def __init__(self, collection_name: str = "memory_db", **kwargs):
+    #: Set to True by connect() when a real MongoDB backend is in use. Defined
+    #: at class level so close() is safe on subclasses (e.g. MontyStore) that
+    #: do not call MemoryStore.__init__.
+    _using_real_mongo: bool = False
+    _finalizer = None
+    #: Unique per-instance database name identifying this store's isolated data.
+    #: Class-level default so subclasses that skip MemoryStore.__init__ (e.g.
+    #: MontyStore) still have the attribute for __eq__/__hash__.
+    _database: str | None = None
+
+    def __init__(
+        self,
+        collection_name: str = "memory_db",
+        host: str = "localhost",
+        port: int | None = None,
+        mongoclient_kwargs: dict | None = None,
+        server_selection_timeout_ms: int = 500,
+        _database: str | None = None,
+        **kwargs,
+    ):
         """
         Initializes the Memory Store.
 
         Args:
             collection_name: name for the collection in memory.
+            host: hostname of the MongoDB server to use when ``port`` is supplied.
+            port: TCP port of a MongoDB server to back the Store with. If None
+                (the default), the Store uses an in-process ``mongomock``
+                database and no server is required. If a port is supplied (e.g.
+                ``port=27017`` for a local ``mongod``), the Store uses that real
+                MongoDB server, writing to an ephemeral database that is dropped
+                when the Store is garbage collected or the interpreter exits.
+            mongoclient_kwargs: Dict of extra kwargs to pass to MongoClient when
+                a real MongoDB backend is used.
+            server_selection_timeout_ms: serverSelectionTimeoutMS to use for the
+                real MongoDB client. Only relevant when ``port`` is supplied.
+            _database: internal identifier for this store's isolated, ephemeral
+                database. Left as None for normal use (a unique name is
+                generated); it is populated automatically during serialization so
+                that a round-tripped store (e.g. cached in a MultiStore or sent to
+                a worker process) is recognized as the same store.
         """
         self.collection_name = collection_name
+        self.host = host
+        self.port = port
+        self.mongoclient_kwargs = mongoclient_kwargs or {}
+        self.server_selection_timeout_ms = server_selection_timeout_ms
+        # unique, ephemeral database name so that multiple MemoryStore instances
+        # backed by the same real MongoDB server do not clobber one another.
+        # Preserved through (de)serialization so a round-tripped store compares
+        # equal to the original (relied upon by MultiStore); a freshly
+        # constructed store always gets its own new identity.
+        self._database = _database or f"maggma_memory_{uuid4().hex}"
         self.default_sort = None
+        self._client = None
         self._coll = None
         self.kwargs = kwargs
         super(MongoStore, self).__init__(**kwargs)
+
+    def _get_memory_client(self) -> MongoClient:
+        """
+        Return a client backing the in-memory Store.
+
+        Uses a real MongoDB server at ``host:port`` when a ``port`` was supplied
+        (opt-in, for full MongoDB compatibility and performance), otherwise an
+        in-process ``mongomock`` client so the Store works without a server.
+        """
+        if self.port is None:
+            # default: no port supplied -> in-process mongomock backend
+            self._using_real_mongo = False
+            return mongomock.MongoClient()  # type: ignore
+
+        # a port was supplied -> use a real MongoDB server at host:port
+        mongoclient_kwargs = dict(self.mongoclient_kwargs)
+        if self.server_selection_timeout_ms > 0:
+            mongoclient_kwargs.setdefault("serverSelectionTimeoutMS", self.server_selection_timeout_ms)
+        client = MongoClient(host=self.host, port=self.port, **mongoclient_kwargs)
+        self._using_real_mongo = True
+        # ensure the ephemeral database is dropped when this Store is garbage
+        # collected or the interpreter exits, so nothing is left behind on the server
+        if self._finalizer is None:
+            self._finalizer = weakref.finalize(
+                self,
+                self._drop_ephemeral_database,
+                self.host,
+                self.port,
+                self._database,
+                dict(mongoclient_kwargs),
+            )
+        self.logger.debug(f"{self.name} using real MongoDB backend at {self.host}:{self.port}")
+        return client
+
+    @staticmethod
+    def _drop_ephemeral_database(host: str, port: int, database: str, mongoclient_kwargs: dict):
+        """Drop an ephemeral MongoDB database.
+
+        Used as a weakref finalizer, so it must not hold a reference to the Store.
+        """
+        mongoclient_kwargs.setdefault("serverSelectionTimeoutMS", 500)
+        try:
+            client = MongoClient(host=host, port=port, **mongoclient_kwargs)
+            client.drop_database(database)
+            client.close()
+        except Exception:
+            # Best-effort cleanup: if the server is already gone or unreachable at
+            # finalization time there is nothing left to drop. Swallow the error so
+            # a finalizer/atexit hook never raises.
+            pass
+
+    def _reset_connection(self):
+        """Tear down the current connection and discard its contents."""
+        if getattr(self, "_using_real_mongo", False):
+            # discard the ephemeral database, even if we are currently
+            # disconnected (e.g. after close(), when self._client is None)
+            if self._client is not None:
+                try:
+                    self._client.drop_database(self._database)
+                except Exception:
+                    # Best-effort discard; the finalizer will still drop the
+                    # database on garbage collection or interpreter exit.
+                    pass
+            else:
+                self._drop_ephemeral_database(self.host, self.port, self._database, dict(self.mongoclient_kwargs))
+        if self._client is not None:
+            self._client.close()
+        self._client = None
+        self._coll = None
+
+    def _ensure_connected(self, force_reset: bool = False):
+        """Establish (or re-establish) the underlying in-memory collection."""
+        if force_reset:
+            self._reset_connection()
+        if self._coll is None:
+            if self._client is None:
+                self._client = self._get_memory_client()
+            self._coll = self._client[self._database][self.collection_name]  # type: ignore
 
     def connect(self, force_reset: bool = False):
         """
@@ -530,12 +664,29 @@ class MemoryStore(MongoStore):
             force_reset: whether to reset the connection or not when the Store is
                 already connected.
         """
-        if self._coll is None or force_reset:
-            self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
+        self._ensure_connected(force_reset=force_reset)
 
     def close(self):
-        """Close up all collections."""
-        self._coll.database.client.close()
+        """Close the Store's connection.
+
+        After ``close()`` the Store must be reconnected with ``connect()`` before
+        it can be queried again; querying a closed Store raises a ``StoreError``.
+        The Store's data is preserved across a ``close()``/``connect()`` cycle:
+        with a real MongoDB backend it lives in the ephemeral database on the
+        server (dropped only when the Store is garbage collected or at
+        interpreter exit, see ``_drop_ephemeral_database``); with the
+        ``mongomock`` backend it lives in the in-process client, which is kept
+        alive for this reason. Use ``connect(force_reset=True)`` to discard the
+        contents and start fresh.
+        """
+        if getattr(self, "_using_real_mongo", False) and self._client is not None:
+            # data persists in the ephemeral database on the server, so we can
+            # release the client connection now and reconnect later on demand
+            self._client.close()
+            self._client = None
+        # for the mongomock backend the data lives in the in-process client;
+        # keep it alive and simply mark the Store as needing a reconnect
+        self._coll = None
 
     @property
     def name(self):
@@ -544,7 +695,7 @@ class MemoryStore(MongoStore):
 
     def __hash__(self):
         """Hash for the store."""
-        return hash((self.name, self.last_updated_field))
+        return hash((self.name, self._database, self.last_updated_field))
 
     def groupby(
         self,
@@ -593,13 +744,20 @@ class MemoryStore(MongoStore):
 
     def __eq__(self, other: object) -> bool:
         """
-        Check equality for MemoryStore
+        Check equality for MemoryStore.
+
+        Two MemoryStores are only equal if they are backed by the same underlying
+        in-memory database. Because each MemoryStore is instantiated with its own
+        isolated database, two separately created stores -- even with the same
+        collection_name -- do not share data and are therefore not equal. See
+        https://github.com/materialsproject/maggma/issues/788.
+
         other: other MemoryStore to compare with.
         """
         if not isinstance(other, MemoryStore):
             return False
 
-        fields = ["collection_name", "last_updated_field"]
+        fields = ["collection_name", "_database", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
@@ -682,7 +840,7 @@ class JSONStore(MemoryStore):
             on systems with slow storage when multiple connect / disconnects are performed.
         """
         if self._coll is None or force_reset:
-            self._coll = mongomock.MongoClient().db[self.name]  # type: ignore
+            self._ensure_connected(force_reset=force_reset)
 
             # create the .json file if it does not exist
             if not self.read_only and not Path(self.paths[0]).exists():
@@ -876,6 +1034,12 @@ class MontyStore(MemoryStore):
                 set_storage(self.database_path, storage=self.storage, **self.storage_kwargs)
             client = MontyClient(self.database_path, **self.client_kwargs)
             self._coll = client[self.database_name][self.collection_name]
+
+    def close(self):
+        """Close up the MontyDB client. The Store must be reconnected before use."""
+        if self._coll is not None:
+            self._coll.database.client.close()
+            self._coll = None
 
     @property
     def name(self) -> str:
