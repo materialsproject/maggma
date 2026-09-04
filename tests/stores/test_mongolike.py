@@ -248,11 +248,46 @@ def test_mongostore_newer_in(mongostore):
 
 
 # Memory store tests
-def test_memory_store_connect():
+def test_memory_store_connect_default_mongomock():
+    # by default (no port supplied) the Store uses the in-process mongomock
+    # backend. Note this runs in CI with a MongoDB server available, so it also
+    # confirms the real-mongo backend is strictly opt-in (the default does not
+    # touch a running server).
     memorystore = MemoryStore()
     assert memorystore._coll is None
     memorystore.connect()
+    assert memorystore._using_real_mongo is False
     assert isinstance(memorystore._collection, mongomock_ng.collection.Collection)
+
+
+def test_memory_store_uses_real_mongo_when_port_supplied():
+    # supplying a port opts in to a real MongoDB backend
+    try:
+        pymongo.MongoClient(serverSelectionTimeoutMS=500).admin.command("ping")
+    except Exception:
+        pytest.skip("no MongoDB server reachable on localhost:27017")
+
+    memorystore = MemoryStore(port=27017)
+    memorystore.connect()
+    assert memorystore._using_real_mongo is True
+    assert isinstance(memorystore._collection, pymongo.collection.Collection)
+
+    # the ephemeral database exists while connected
+    verify_client = pymongo.MongoClient(serverSelectionTimeoutMS=500)
+    memorystore.update({"task_id": 1, "val": 2})
+    assert memorystore._database in verify_client.list_database_names()
+
+    # data survives close() (the Store remains usable), matching the historical
+    # in-memory behavior relied upon by builders
+    memorystore.close()
+    memorystore.connect()
+    assert memorystore.count() == 1
+
+    # the ephemeral database is dropped when the Store is finalized
+    database_name = memorystore._database
+    memorystore._finalizer()
+    assert database_name not in verify_client.list_database_names()
+    verify_client.close()
 
 
 def test_groupby(memorystore):
@@ -522,6 +557,10 @@ def test_jsonstore_orjson_options(test_dir):
     class SubFloat(float):
         pass
 
+    # JSONStore uses the default mongomock backend (no port), which preserves the
+    # SubFloat subclass so orjson raises. A real MongoDB backend would instead
+    # coerce it to a plain float, and the serialization_default option this test
+    # exercises would never be triggered.
     with ScratchDir("."):
         jsonstore = JSONStore("d.json", read_only=False)
         jsonstore.connect()
