@@ -131,6 +131,26 @@ class FileStore(MemoryStore):
         """
         return f"file://{self.path}"
 
+    def __hash__(self):
+        """Hash for the store, based on the tracked directory."""
+        return hash((self.path, self.last_updated_field))
+
+    def __eq__(self, other: object) -> bool:
+        """
+        Check equality for FileStore.
+
+        Unlike a plain MemoryStore, a FileStore is backed by an on-disk directory,
+        so two FileStores that track the same directory represent the same data
+        and are equal.
+
+        other: other FileStore to compare with.
+        """
+        if not isinstance(other, FileStore):
+            return False
+
+        fields = ["path", "last_updated_field"]
+        return all(getattr(self, f) == getattr(other, f) for f in fields)
+
     def add_metadata(
         self,
         metadata: dict | None = None,
