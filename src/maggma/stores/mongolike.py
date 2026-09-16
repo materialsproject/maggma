@@ -692,7 +692,18 @@ class JSONStore(MemoryStore):
                     f.write(bytesdata.decode("utf-8"))
 
             for path in self.paths:
-                objects = self.read_json_file(path)
+                self.logger.debug(f"Reading {path}")
+                try:
+                    objects = self.read_json_file(path)
+                except FileNotFoundError:
+                    # a missing file is a distinct condition that callers such as
+                    # FileStore handle explicitly, so let it propagate rather than
+                    # swallowing it as a malformed-file error.
+                    raise
+                except Exception as e:
+                    self.logger.error(f"Error reading {path}: {e}. Skipping.")
+                    continue
+
                 try:
                     self.update(objects)
                 except KeyError:
@@ -718,8 +729,6 @@ class JSONStore(MemoryStore):
             data = data.decode() if isinstance(data, bytes) else data
             objects = bson.json_util.loads(data) if "$oid" in data else orjson.loads(data)
             objects = [objects] if not isinstance(objects, list) else objects
-            # datetime objects deserialize to str. Try to convert the last_updated
-            # field back to datetime.
             # # TODO - there may still be problems caused if a JSONStore is init'ed from
             # documents that don't contain a last_updated field
             # See Store.last_updated in store.py.
