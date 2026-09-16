@@ -123,7 +123,7 @@ htmlmin2==0.1.13
     # via mkdocs-minify-plugin
 httpcore==1.0.9
     # via httpx
-httpcore2==2.5.0
+httpcore2==2.10.0
     # via httpx2
 httpx==0.28.1
     # via starlette
