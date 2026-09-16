@@ -15,7 +15,7 @@ import mongomock_ng as mongomock
 import orjson
 from monty.dev import requires
 from monty.io import zopen
-from monty.json import jsanitize
+from monty.json import MontyDecoder, jsanitize
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne, uri_parser
@@ -725,7 +725,14 @@ class JSONStore(MemoryStore):
             # See Store.last_updated in store.py.
             for obj in objects:
                 if obj.get(self.last_updated_field):
-                    obj[self.last_updated_field] = to_dt(obj[self.last_updated_field])
+                    last_updated = obj[self.last_updated_field]
+                    # Decode monty-serialized datetimes (e.g. those written by
+                    # MontyEncoder / monty.serialization.dumpfn), which arrive as a
+                    # {"@module": "datetime", "@class": "datetime", ...} dict, before
+                    # handing off to to_dt. See issue #1134.
+                    if isinstance(last_updated, dict):
+                        last_updated = MontyDecoder().process_decoded(last_updated)
+                    obj[self.last_updated_field] = to_dt(last_updated)
 
         return objects
 
