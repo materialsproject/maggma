@@ -6,7 +6,6 @@ various utilities.
 
 import warnings
 from collections.abc import Callable, Iterator
-from datetime import UTC
 from itertools import chain, groupby
 from pathlib import Path
 from typing import Any, Literal
@@ -25,7 +24,7 @@ from ruamel.yaml import YAML
 
 from maggma.core import Sort, Store, StoreError
 from maggma.stores.ssh_tunnel import SSHTunnel
-from maggma.utils import confirm_field_index
+from maggma.utils import confirm_field_index, to_dt
 
 try:
     from montydb import MontyClient, set_storage  # type: ignore
@@ -698,6 +697,7 @@ class JSONStore(MemoryStore):
                     objects = self.read_json_file(path)
                 except Exception as e:
                     self.logger.error(f"Error reading {path}: {e}. Skipping.")
+                    continue
 
                 try:
                     self.update(objects)
@@ -719,7 +719,7 @@ class JSONStore(MemoryStore):
         Args:
             path: Path to the JSON file to be read
         """
-        with zopen(path, mode="r", encoding=self.encoding) as f:
+        with zopen(path, mode="rt", encoding=self.encoding) as f:
             data = f.read()
             data = data.decode() if isinstance(data, bytes) else data
             objects = bson.json_util.loads(data) if "$oid" in data else orjson.loads(data)
