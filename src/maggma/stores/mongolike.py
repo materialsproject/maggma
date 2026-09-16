@@ -695,6 +695,11 @@ class JSONStore(MemoryStore):
                 self.logger.debug(f"Reading {path}")
                 try:
                     objects = self.read_json_file(path)
+                except FileNotFoundError:
+                    # a missing file is a distinct condition that callers such as
+                    # FileStore handle explicitly, so let it propagate rather than
+                    # swallowing it as a malformed-file error.
+                    raise
                 except Exception as e:
                     self.logger.error(f"Error reading {path}: {e}. Skipping.")
                     continue
