@@ -595,6 +595,28 @@ def test_jsonstore_monty_serialized_last_updated(test_dir):
         assert jsonstore.last_updated != datetime.min
 
 
+def test_jsonstore_skips_malformed_file(caplog):
+    """A malformed json file should be logged and skipped on connect rather
+    than aborting the load of the remaining (valid) files."""
+    import logging
+
+    with ScratchDir("."):
+        with open("good.json", "w") as f:
+            f.write('[{"task_id": "mp-1", "a": 1}]')
+        with open("bad.json", "w") as f:
+            f.write("{not valid json")
+
+        jsonstore = JSONStore(["good.json", "bad.json"], key="task_id")
+        with caplog.at_level(logging.ERROR):
+            jsonstore.connect()
+
+        # the valid file is still loaded ...
+        assert jsonstore.count() == 1
+        assert jsonstore.query_one()["task_id"] == "mp-1"
+        # ... and the malformed one is reported and skipped
+        assert any("bad.json" in record.message for record in caplog.records)
+
+
 def test_eq(mongostore, memorystore, jsonstore):
     assert mongostore == mongostore
     assert memorystore == memorystore
