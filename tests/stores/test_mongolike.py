@@ -1,6 +1,6 @@
 import os
 import shutil
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest import mock
 
@@ -568,6 +568,31 @@ def test_jsonstore_last_updated(test_dir):
         jsonstore.close()
         jsonstore.connect()
         assert jsonstore.last_updated > start_time
+
+
+def test_jsonstore_monty_serialized_last_updated(test_dir):
+    """A last_updated written by monty's MontyEncoder / dumpfn (i.e. as a
+    {"@module": "datetime", "@class": "datetime", ...} dict) should round-trip
+    to a datetime rather than silently becoming None / datetime.min.
+
+    See https://github.com/materialsproject/maggma/issues/1134.
+    """
+    import json
+
+    from monty.json import MontyEncoder
+
+    last_updated = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+    with ScratchDir("."):
+        with open("monty.json", "w") as f:
+            json.dump([{"task_id": "mp-1", "last_updated": last_updated}], f, cls=MontyEncoder)
+
+        jsonstore = JSONStore("monty.json", key="task_id")
+        jsonstore.connect()
+
+        read_back = jsonstore.query_one()["last_updated"]
+        assert isinstance(read_back, datetime)
+        assert read_back.replace(tzinfo=None) == last_updated.replace(tzinfo=None)
+        assert jsonstore.last_updated != datetime.min
 
 
 def test_eq(mongostore, memorystore, jsonstore):
