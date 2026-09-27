@@ -113,8 +113,7 @@ connection is closed properly after the store tasks are complete.
 Current working and tested `Store` include the following. Click the name of
 each store for more detailed documentation.
 
-- [`MongoStore`](/maggma/reference/stores/#maggma.stores.mongolike.MongoStore): interfaces to a MongoDB Collection using port and hostname.
-- [`MongoURIStore`](/maggma/reference/stores/#maggma.stores.mongolike.MongoURIStore): interfaces to a MongoDB Collection using a "mongodb+srv://" URI.
+- [`MongoStore`](/maggma/reference/stores/#maggma.stores.mongolike.MongoStore): interfaces to a MongoDB Collection using either host/port/credentials or a connection URI such as "mongodb+srv://..." (via `MongoStore.from_uri`).
 - [`MemoryStore`](/maggma/reference/stores/#maggma.stores.mongolike.MemoryStore): just a Store that exists temporarily in memory
 - [`JSONStore`](/maggma/reference/stores/#maggma.stores.mongolike.JSONStore): builds a MemoryStore and then populates it with the contents of the given JSON files
 - [`FileStore`](/maggma/reference/stores/#maggma.stores.file_store.FileStore): query and add metadata to files stored on disk as if they were in a database

@@ -4,6 +4,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from unittest import mock
 
+import mongomock_ng as mongomock
 import mongomock_ng.collection
 import orjson
 import pymongo.collection
@@ -633,7 +634,7 @@ def test_eq(mongostore, memorystore, jsonstore):
 )
 def test_mongo_uri():
     uri = os.environ["MONGODB_SRV_URI"]
-    store = MongoURIStore(uri, database="mp_core", collection_name="xas")
+    store = MongoStore.from_uri(uri, database="mp_core", collection_name="xas")
     store.connect()
     is_name = store.name is uri
     # This is try and keep the secret safe
@@ -641,20 +642,74 @@ def test_mongo_uri():
 
 
 def test_mongo_uri_localhost():
-    store = MongoURIStore("mongodb://localhost:27017/mp_core", collection_name="xas")
+    store = MongoStore.from_uri("mongodb://localhost:27017/mp_core", collection_name="xas")
     store.connect()
+    assert store.count() == 0
+    store.close()
 
 
 def test_mongo_uri_dbname_parse():
     # test parsing dbname from uri
     uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
-    store = MongoURIStore(uri_with_db, "test")
+    store = MongoStore.from_uri(uri_with_db, "test")
     assert store.database == "fake_db"
+    assert store.name == uri_with_db
 
-    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
-    store = MongoURIStore(uri_with_db, "test", database="fake_db2")
+    store = MongoStore.from_uri(uri_with_db, "test", database="fake_db2")
     assert store.database == "fake_db2"
+
+    # equivalent to the regular constructor with a uri kwarg
+    assert MongoStore(None, "test", uri=uri_with_db) == MongoStore.from_uri(uri_with_db, "test")
+    assert MongoStore(None, "test", uri=uri_with_db) != MongoStore("fake_db", "test")
 
     uri_with_db = "mongodb://uuu:xxxx@host:27017"
     with pytest.raises(ConfigurationError):
-        MongoURIStore(uri_with_db, "test")
+        MongoStore.from_uri(uri_with_db, "test")
+
+    with pytest.raises(ValueError, match="database must be specified"):
+        MongoStore(None, "test")
+
+    with pytest.raises(ValueError, match="ssh_tunnel is not supported"):
+        MongoStore.from_uri(uri_with_db, "test", database="db", ssh_tunnel=mock.MagicMock())
+
+
+def test_mongo_uri_connect():
+    uri = "mongodb://uuu:xxxx@host:27017/fake_db"
+    client = mock.MagicMock(side_effect=lambda *args, **kwargs: mongomock.MongoClient())
+    with mock.patch("maggma.stores.mongolike.MongoClient", client):
+        store = MongoStore.from_uri(uri, "test", mongoclient_kwargs={"tz_aware": True})
+        store.connect()
+    client.assert_called_once_with(uri, tz_aware=True)
+    assert store._collection.name == "test"
+    assert store._collection.database.name == "fake_db"
+    store.update({"task_id": 1})
+    assert store.count() == 1
+
+
+def test_mongo_uri_serialization():
+    uri = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = MongoStore.from_uri(uri, "test", key="task_id")
+    d = store.as_dict()
+    assert d["uri"] == uri
+    new_store = MongoStore.from_dict(d)
+    assert new_store.uri == uri
+    assert new_store.database == "fake_db"
+    assert new_store.key == "task_id"
+    assert new_store == store
+
+
+def test_mongo_uri_store_deprecated():
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    with pytest.warns(FutureWarning, match="MongoURIStore"):
+        store = MongoURIStore(uri_with_db, "test")
+    assert isinstance(store, MongoStore)
+    assert store.database == "fake_db"
+    assert store.uri == uri_with_db
+    assert store == MongoStore.from_uri(uri_with_db, "test")
+
+    with pytest.warns(FutureWarning):
+        store = MongoURIStore(uri_with_db, "test", database="fake_db2")
+    assert store.database == "fake_db2"
+
+    with pytest.warns(FutureWarning), pytest.raises(ConfigurationError):
+        MongoURIStore("mongodb://uuu:xxxx@host:27017", "test")

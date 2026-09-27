@@ -13,7 +13,7 @@ from typing import Any, Literal
 import bson
 import mongomock_ng as mongomock
 import orjson
-from monty.dev import requires
+from monty.dev import deprecated, requires
 from monty.io import zopen
 from monty.json import MontyDecoder, jsanitize
 from monty.serialization import loadfn
@@ -35,11 +35,15 @@ except ImportError:
 class MongoStore(Store):
     """
     A Store that connects to a Mongo collection.
+
+    Connection details can be given either as individual arguments (host, port,
+    username, password, etc.) or as a single MongoDB connection string via `uri`
+    (e.g., a `mongodb+srv://` URI from MongoDB Atlas). See also `MongoStore.from_uri`.
     """
 
     def __init__(
         self,
-        database: str,
+        database: str | None,
         collection_name: str,
         host: str = "localhost",
         port: int = 27017,
@@ -50,21 +54,41 @@ class MongoStore(Store):
         auth_source: str | None = None,
         mongoclient_kwargs: dict | None = None,
         default_sort: dict[str, Sort | int] | None = None,
+        uri: str | None = None,
         **kwargs,
     ):
         """
         Args:
-            database: The database name
+            database: The database name. May be None if `uri` is given and includes a
+                database name (e.g., "mongodb://host:27017/my_db").
             collection_name: The collection name
-            host: Hostname for the database
-            port: TCP port to connect to
-            username: Username for the collection
-            password: Password to connect with
+            host: Hostname for the database. Ignored if `uri` is given.
+            port: TCP port to connect to. Ignored if `uri` is given.
+            username: Username for the collection. Ignored if `uri` is given.
+            password: Password to connect with. Ignored if `uri` is given.
+            ssh_tunnel: SSHTunnel instance to use for the connection. Not supported with `uri`.
             safe_update: fail gracefully on DocumentTooLarge errors on update
             auth_source: The database to authenticate on. Defaults to the database name.
+                Ignored if `uri` is given.
+            mongoclient_kwargs: Dict of extra kwargs to pass to MongoClient.
             default_sort: Default sort field and direction to use when querying. Can be used to
                 ensure determinacy in query results.
+            uri: MongoDB connection string (e.g., "mongodb+srv://user:pass@host/db"). If
+                given, it takes precedence over host, port, username, password, and
+                auth_source.
         """
+        if uri is not None:
+            if ssh_tunnel is not None:
+                raise ValueError(f"ssh_tunnel is not supported when connecting to {self.__class__.__name__} via a URI")
+            if database is None:
+                # parse the database name from the uri
+                database = uri_parser.parse_uri(uri)["database"]
+                if database is None:
+                    raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
+        elif database is None:
+            raise ValueError("database must be specified unless it is included in the uri")
+
+        self.uri = uri
         self.database = database
         self.collection_name = collection_name
         self.host = host
@@ -89,6 +113,9 @@ class MongoStore(Store):
         """
         Return a string representing this data source.
         """
+        if self.uri is not None:
+            # TODO: This is not very safe since it exposes the username/password info
+            return self.uri
         return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
@@ -100,6 +127,11 @@ class MongoStore(Store):
                 already connected.
         """
         if self._coll is None or force_reset:
+            if self.uri is not None:
+                conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
+                self._coll = conn[self.database][self.collection_name]  # type: ignore
+                return
+
             if self.ssh_tunnel is None:
                 host = self.host
                 port = self.port
@@ -107,7 +139,7 @@ class MongoStore(Store):
                 self.ssh_tunnel.start()
                 host, port = self.ssh_tunnel.local_address
 
-            conn: MongoClient = (
+            conn = (
                 MongoClient(
                     host=host,
                     port=port,
@@ -125,6 +157,21 @@ class MongoStore(Store):
     def __hash__(self) -> int:
         """Hash for MongoStore."""
         return hash((self.database, self.collection_name, self.last_updated_field))
+
+    @classmethod
+    def from_uri(cls, uri: str, collection_name: str, database: str | None = None, **kwargs):
+        """
+        Construct a MongoStore from a MongoDB connection string.
+
+        Args:
+            uri: MongoDB connection string, e.g. "mongodb+srv://<username>:<password>@<host>/<database>".
+                Special `mongodb+srv://` URIs that include client parameters via TXT records are supported.
+            collection_name: The collection name
+            database: The database name. If None, the database name is parsed from the uri.
+            kwargs: Additional kwargs passed to MongoStore (e.g., safe_update, mongoclient_kwargs,
+                default_sort, key, last_updated_field).
+        """
+        return cls(database=database, collection_name=collection_name, uri=uri, **kwargs)
 
     @classmethod
     def from_db_file(cls, filename: str, **kwargs):
@@ -429,15 +476,20 @@ class MongoStore(Store):
         if not isinstance(other, MongoStore):
             return False
 
-        fields = ["database", "collection_name", "host", "port", "last_updated_field"]
+        fields = ["uri", "database", "collection_name", "host", "port", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
+@deprecated(
+    "MongoStore.from_uri",
+    message="MongoURIStore has been merged into MongoStore and will be removed in a future release.",
+)
 class MongoURIStore(MongoStore):
     """
-    A Store that connects to a Mongo collection via a URI
-    This is expected to be a special mongodb+srv:// URIs that include
-    client parameters via TXT records.
+    A Store that connects to a Mongo collection via a URI.
+
+    Deprecated: use `MongoStore.from_uri(uri, collection_name, ...)` or
+    `MongoStore(database, collection_name, uri=uri)` instead.
     """
 
     def __init__(
@@ -445,62 +497,16 @@ class MongoURIStore(MongoStore):
         uri: str,
         collection_name: str,
         database: str | None = None,
-        ssh_tunnel: SSHTunnel | None = None,
-        safe_update: bool = False,
-        mongoclient_kwargs: dict | None = None,
-        default_sort: dict[str, Sort | int] | None = None,
         **kwargs,
     ):
         """
         Args:
             uri: MongoDB+SRV URI
-            database: database to connect to
             collection_name: The collection name
-            default_sort: Default sort field and direction to use when querying. Can be used to
-                ensure determinacy in query results.
+            database: database to connect to. If None, it is parsed from the uri.
+            kwargs: Additional kwargs passed to MongoStore.
         """
-        self.uri = uri
-        if ssh_tunnel:
-            raise ValueError(f"At the moment ssh_tunnel is not supported for {self.__class__.__name__}")
-        self.ssh_tunnel = None
-        self.default_sort = default_sort
-        self.safe_update = safe_update
-        self.mongoclient_kwargs = mongoclient_kwargs or {}
-
-        # parse the dbname from the uri
-        if database is None:
-            d_uri = uri_parser.parse_uri(uri)
-            if d_uri["database"] is None:
-                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
-            self.database = d_uri["database"]
-        else:
-            self.database = database
-
-        self.collection_name = collection_name
-        self.kwargs = kwargs
-        self._coll = None
-        super(MongoStore, self).__init__(**kwargs)  # lgtm
-
-    @property
-    def name(self) -> str:
-        """
-        Return a string representing this data source.
-        """
-        # TODO: This is not very safe since it exposes the username/password info
-        return self.uri
-
-    def connect(self, force_reset: bool = False):
-        """
-        Connect to the source data.
-
-        Args:
-            force_reset: whether to reset the connection or not when the Store is
-                already connected.
-        """
-        if self._coll is None or force_reset:  # pragma: no cover
-            conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
-            db = conn[self.database]
-            self._coll = db[self.collection_name]  # type: ignore
+        super().__init__(database=database, collection_name=collection_name, uri=uri, **kwargs)
 
 
 class MemoryStore(MongoStore):
