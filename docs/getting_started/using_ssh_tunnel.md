@@ -58,4 +58,4 @@ and then pass it to the `S3Store` to connect to the database. The arguments of t
 Alternative to using `username` and `password` for authentication with the remote server, `SSHTunnel` also supports authentication using SSH keys. In this case, you will need to provide your SSH credentials using the `private_key` argument. Read the docs of the `SSHTunnel` for more information.
 
 
-`SSHTunnel` can also be used with other stores such as `MongoStore`, `MongoURIStore`, and `GridFSStore`. The usage is similar to the example above, but you might need to adjust the arguments to the `SSHTunnel` to match the use case.
+`SSHTunnel` can also be used with other stores such as `MongoStore` and `GridFSStore`. The usage is similar to the example above, but you might need to adjust the arguments to the `SSHTunnel` to match the use case.

@@ -12,6 +12,7 @@ from datetime import datetime
 from typing import Any
 
 import gridfs
+from monty.dev import deprecated
 from monty.json import jsanitize
 from pydash import get, has
 from pymongo import MongoClient, uri_parser
@@ -41,11 +42,15 @@ files_collection_fields = (
 class GridFSStore(Store):
     """
     A Store for GridFS backend. Provides a common access method consistent with other stores.
+
+    Connection details can be given either as individual arguments (host, port,
+    username, password, etc.) or as a single MongoDB connection string via `uri`
+    (e.g., a `mongodb+srv://` URI from MongoDB Atlas). See also `GridFSStore.from_uri`.
     """
 
     def __init__(
         self,
-        database: str,
+        database: str | None,
         collection_name: str,
         host: str = "localhost",
         port: int = 27017,
@@ -57,24 +62,43 @@ class GridFSStore(Store):
         auth_source: str | None = None,
         mongoclient_kwargs: dict | None = None,
         ssh_tunnel: SSHTunnel | None = None,
+        uri: str | None = None,
         **kwargs,
     ):
         """
         Initializes a GridFS Store for binary data
         Args:
-            database: database name
+            database: database name. May be None if `uri` is given and includes a
+                database name (e.g., "mongodb://host:27017/my_db").
             collection_name: The name of the collection.
                 This is the string portion before the GridFS extensions
-            host: hostname for the database
-            port: port to connect to
-            username: username to connect as
-            password: password to authenticate as
+            host: hostname for the database. Ignored if `uri` is given.
+            port: port to connect to. Ignored if `uri` is given.
+            username: username to connect as. Ignored if `uri` is given.
+            password: password to authenticate as. Ignored if `uri` is given.
             compression: compress the data as it goes into GridFS
             ensure_metadata: ensure returned documents have the metadata fields
             searchable_fields: fields to keep in the index store
             auth_source: The database to authenticate on. Defaults to the database name.
-            ssh_tunnel: An SSHTunnel object to use.
+                Ignored if `uri` is given.
+            mongoclient_kwargs: Dict of extra kwargs to pass to MongoClient.
+            ssh_tunnel: An SSHTunnel object to use. Not supported with `uri`.
+            uri: MongoDB connection string (e.g., "mongodb+srv://user:pass@host/db"). If
+                given, it takes precedence over host, port, username, password, and
+                auth_source.
         """
+        if uri is not None:
+            if ssh_tunnel is not None:
+                raise ValueError(f"ssh_tunnel is not supported when connecting to {self.__class__.__name__} via a URI")
+            if database is None:
+                # parse the database name from the uri
+                database = uri_parser.parse_uri(uri)["database"]
+                if database is None:
+                    raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
+        elif database is None:
+            raise ValueError("database must be specified unless it is included in the uri")
+
+        self.uri = uri
         self.database = database
         self.collection_name = collection_name
         self.host = host
@@ -97,6 +121,22 @@ class GridFSStore(Store):
         if "key" not in kwargs:
             kwargs["key"] = "_id"
         super().__init__(**kwargs)
+
+    @classmethod
+    def from_uri(cls, uri: str, collection_name: str, database: str | None = None, **kwargs):
+        """
+        Construct a GridFSStore from a MongoDB connection string.
+
+        Args:
+            uri: MongoDB connection string, e.g. "mongodb+srv://<username>:<password>@<host>/<database>".
+                Special `mongodb+srv://` URIs that include client parameters via TXT records are supported.
+            collection_name: The name of the collection.
+                This is the string portion before the GridFS extensions
+            database: The database name. If None, the database name is parsed from the uri.
+            kwargs: Additional kwargs passed to GridFSStore (e.g., compression, ensure_metadata,
+                searchable_fields, mongoclient_kwargs, key).
+        """
+        return cls(database=database, collection_name=collection_name, uri=uri, **kwargs)
 
     @classmethod
     def from_launchpad_file(cls, lp_file, collection_name, **kwargs):
@@ -125,6 +165,9 @@ class GridFSStore(Store):
         """
         Return a string representing this data source.
         """
+        if self.uri is not None:
+            # TODO: This is not very safe since it exposes the username/password info
+            return self.uri
         return f"gridfs://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
@@ -136,25 +179,29 @@ class GridFSStore(Store):
                 already connected.
         """
         if not self._coll or force_reset:
-            if self.ssh_tunnel is None:
-                host = self.host
-                port = self.port
+            conn: MongoClient
+            if self.uri is not None:
+                conn = MongoClient(self.uri, **self.mongoclient_kwargs)
             else:
-                self.ssh_tunnel.start()
-                host, port = self.ssh_tunnel.local_address
+                if self.ssh_tunnel is None:
+                    host = self.host
+                    port = self.port
+                else:
+                    self.ssh_tunnel.start()
+                    host, port = self.ssh_tunnel.local_address
 
-            conn: MongoClient = (
-                MongoClient(
-                    host=host,
-                    port=port,
-                    username=self.username,
-                    password=self.password,
-                    authSource=self.auth_source,
-                    **self.mongoclient_kwargs,
+                conn = (
+                    MongoClient(
+                        host=host,
+                        port=port,
+                        username=self.username,
+                        password=self.password,
+                        authSource=self.auth_source,
+                        **self.mongoclient_kwargs,
+                    )
+                    if self.username != ""
+                    else MongoClient(host, port, **self.mongoclient_kwargs)
                 )
-                if self.username != ""
-                else MongoClient(host, port, **self.mongoclient_kwargs)
-            )
             db = conn[self.database]
             self._coll = gridfs.GridFS(db, self.collection_name)
             self._files_collection = db[f"{self.collection_name}.files"]
@@ -435,16 +482,20 @@ class GridFSStore(Store):
         if not isinstance(other, GridFSStore):
             return False
 
-        fields = ["database", "collection_name", "host", "port"]
+        fields = ["uri", "database", "collection_name", "host", "port"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
+@deprecated(
+    "GridFSStore.from_uri",
+    message="GridFSURIStore has been merged into GridFSStore and will be removed in a future release.",
+)
 class GridFSURIStore(GridFSStore):
     """
     A Store for GridFS backend, with connection via a mongo URI string.
 
-    This is expected to be a special mongodb+srv:// URIs that include client parameters
-    via TXT records
+    Deprecated: use `GridFSStore.from_uri(uri, collection_name, ...)` or
+    `GridFSStore(database, collection_name, uri=uri)` instead.
     """
 
     def __init__(
@@ -452,85 +503,13 @@ class GridFSURIStore(GridFSStore):
         uri: str,
         collection_name: str,
         database: str | None = None,
-        compression: bool = False,
-        ensure_metadata: bool = False,
-        searchable_fields: list[str] | None = None,
-        mongoclient_kwargs: dict | None = None,
-        ssh_tunnel: SSHTunnel | None = None,
         **kwargs,
     ):
         """
-        Initializes a GridFS Store for binary data.
-
         Args:
             uri: MongoDB+SRV URI
-            database: database to connect to
             collection_name: The collection name
-            compression: compress the data as it goes into GridFS
-            ensure_metadata: ensure returned documents have the metadata fields
-            searchable_fields: fields to keep in the index store.
+            database: database to connect to. If None, it is parsed from the uri.
+            kwargs: Additional kwargs passed to GridFSStore.
         """
-        self.uri = uri
-
-        if ssh_tunnel:
-            raise ValueError(f"At the moment ssh_tunnel is not supported for {self.__class__.__name__}")
-        self.ssh_tunnel = None
-
-        # parse the dbname from the uri
-        if database is None:
-            d_uri = uri_parser.parse_uri(uri)
-            if d_uri["database"] is None:
-                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
-            self.database = d_uri["database"]
-        else:
-            self.database = database
-
-        self.collection_name = collection_name
-        self._coll: Any = None
-        self.compression = compression
-        self.ensure_metadata = ensure_metadata
-        self.searchable_fields = [] if searchable_fields is None else searchable_fields
-        self.kwargs = kwargs
-        self.mongoclient_kwargs = mongoclient_kwargs or {}
-        self._fs = None
-
-        if "key" not in kwargs:
-            kwargs["key"] = "_id"
-        super(GridFSStore, self).__init__(**kwargs)  # lgtm
-
-    def connect(self, force_reset: bool = False):
-        """
-        Connect to the source data.
-
-        Args:
-            force_reset: whether to reset the connection or not when the Store is
-                already connected.
-        """
-        if not self._coll or force_reset:  # pragma: no cover
-            conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
-            db = conn[self.database]
-            self._coll = gridfs.GridFS(db, self.collection_name)
-            self._files_collection = db[f"{self.collection_name}.files"]
-            self._fs = MongoStore.from_collection(self._files_collection)
-            self._fs.last_updated_field = f"metadata.{self.last_updated_field}"
-            self._fs.key = self.key
-            self._chunks_collection = db[f"{self.collection_name}.chunks"]
-
-    @property
-    def name(self) -> str:
-        """
-        Return a string representing this data source.
-        """
-        # TODO: This is not very safe since it exposes the username/password info
-        return self.uri
-
-    def __eq__(self, other: object) -> bool:
-        """
-        Check equality for GridFSURIStore
-        other: other GridFSURIStore to compare with.
-        """
-        if not isinstance(other, GridFSStore):
-            return False
-
-        fields = ["uri", "database", "collection_name"]
-        return all(getattr(self, f) == getattr(other, f) for f in fields)
+        super().__init__(database=database, collection_name=collection_name, uri=uri, **kwargs)

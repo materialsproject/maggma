@@ -13,10 +13,10 @@ Many users find MongoDB to best suit their data storage needs. While MongoDB [ca
 To test that you can connect to your database, run the following code:
 
 ```python
-from maggma.stores import MongoURIStore
+from maggma.stores import MongoStore
 
 # Define your database credentials
-store = MongoURIStore(
+store = MongoStore.from_uri(
     "mongodb+srv://<username>:<password>@<host>",
     "my_collection",
     database="my_database",
@@ -29,4 +29,4 @@ with store:
 
 !!! Note
 
-    If you are using a self-hosted Mongo database, you will probably want to use a [`MongoStore`](https://materialsproject.github.io/maggma/reference/stores/#maggma.stores.mongolike.MongoStore) instead of the [`MongoURIStore`](https://materialsproject.github.io/maggma/reference/stores/#maggma.stores.mongolike.MongoURIStore), which takes slightly different arguments.
+    If you are using a self-hosted Mongo database, you can instead pass the connection details individually, e.g. `MongoStore("my_database", "my_collection", host="localhost", port=27017)`. See [`MongoStore`](https://materialsproject.github.io/maggma/reference/stores/#maggma.stores.mongolike.MongoStore) for all options. `MongoURIStore` is deprecated in favor of `MongoStore.from_uri`.

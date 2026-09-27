@@ -40,10 +40,11 @@ Different S3 services might have different rules, but the limit is typically sma
 The `S3Store` should be constructed as follows:
 
 ```python
-from maggma.stores import MongoURIStore, S3Store
-store = MongoURIStore(
+from maggma.stores import MongoStore, S3Store
+index = MongoStore.from_uri(
     "mongodb+srv://<username>:<password>@<host>",
     "atomate_aeccar0_fs_index",
+    database="<database>",
     key="fs_id",
 )
 s3store = S3Store(index=index,
