@@ -1,7 +1,9 @@
 import json
 import os
 from datetime import datetime
+from unittest import mock
 
+import mongomock_ng as mongomock
 import numpy as np
 import numpy.testing as nptu
 import pytest
@@ -23,13 +25,13 @@ def mongostore():
 @pytest.fixture(params=["std", "uri"])
 def gridfsstore(request):
     """
-    Fixture providing both a standard GridFSStore and a GridFSURIStore.
+    Fixture providing both a standard GridFSStore and a URI-based GridFSStore.
     """
     store_type = request.param
     if store_type == "std":
         store = GridFSStore("maggma_test", "test", key="task_id")
     elif store_type == "uri":
-        store = GridFSURIStore(
+        store = GridFSStore.from_uri(
             uri="mongodb://localhost:27017", database="maggma_test", collection_name="test", key="task_id"
         )
     else:
@@ -249,7 +251,7 @@ def test_additional_metadata(gridfsstore):
 )
 def test_gridfs_uri():
     uri = os.environ["MONGODB_SRV_URI"]
-    store = GridFSURIStore(uri, database="mp_core", collection_name="xas")
+    store = GridFSStore.from_uri(uri, database="mp_core", collection_name="xas")
     store.connect()
     is_name = store.name is uri
     # This is try and keep the secret safe
@@ -260,16 +262,72 @@ def test_gridfs_uri():
 def test_gridfs_uri_dbname_parse():
     # test parsing dbname from uri
     uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
-    store = GridFSURIStore(uri_with_db, "test")
+    store = GridFSStore.from_uri(uri_with_db, "test")
     assert store.database == "fake_db"
+    assert store.name == uri_with_db
 
-    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
-    store = GridFSURIStore(uri_with_db, "test", database="fake_db2")
+    store = GridFSStore.from_uri(uri_with_db, "test", database="fake_db2")
     assert store.database == "fake_db2"
+
+    # equivalent to the regular constructor with a uri kwarg
+    assert GridFSStore(None, "test", uri=uri_with_db) == GridFSStore.from_uri(uri_with_db, "test")
+    assert GridFSStore(None, "test", uri=uri_with_db) != GridFSStore("fake_db", "test")
 
     uri_with_db = "mongodb://uuu:xxxx@host:27017"
     with pytest.raises(ConfigurationError):
-        GridFSURIStore(uri_with_db, "test")
+        GridFSStore.from_uri(uri_with_db, "test")
+
+    with pytest.raises(ValueError, match="database must be specified"):
+        GridFSStore(None, "test")
+
+    with pytest.raises(ValueError, match="ssh_tunnel is not supported"):
+        GridFSStore.from_uri(uri_with_db, "test", database="db", ssh_tunnel=mock.MagicMock())
+
+
+def test_gridfs_uri_connect():
+    uri = "mongodb://uuu:xxxx@host:27017/fake_db"
+    client = mock.MagicMock(side_effect=lambda *args, **kwargs: mongomock.MongoClient())
+    # gridfs.GridFS requires a real pymongo Database, so mock it out as well
+    with (
+        mock.patch("maggma.stores.gridfs.MongoClient", client),
+        mock.patch("maggma.stores.gridfs.gridfs.GridFS") as gridfs_cls,
+    ):
+        store = GridFSStore.from_uri(uri, "test", mongoclient_kwargs={"tz_aware": True})
+        store.connect()
+    client.assert_called_once_with(uri, tz_aware=True)
+    gridfs_cls.assert_called_once_with(mock.ANY, "test")
+    assert store._files_collection.name == "test.files"
+    assert store._files_collection.database.name == "fake_db"
+
+
+def test_gridfs_uri_serialization():
+    uri = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = GridFSStore.from_uri(uri, "test", key="task_id", compression=True)
+    d = store.as_dict()
+    assert d["uri"] == uri
+    new_store = GridFSStore.from_dict(d)
+    assert new_store.uri == uri
+    assert new_store.database == "fake_db"
+    assert new_store.key == "task_id"
+    assert new_store.compression
+    assert new_store == store
+
+
+def test_gridfs_uri_store_deprecated():
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    with pytest.warns(FutureWarning, match="GridFSURIStore"):
+        store = GridFSURIStore(uri_with_db, "test")
+    assert isinstance(store, GridFSStore)
+    assert store.database == "fake_db"
+    assert store.uri == uri_with_db
+    assert store == GridFSStore.from_uri(uri_with_db, "test")
+
+    with pytest.warns(FutureWarning):
+        store = GridFSURIStore(uri_with_db, "test", database="fake_db2")
+    assert store.database == "fake_db2"
+
+    with pytest.warns(FutureWarning), pytest.raises(ConfigurationError):
+        GridFSURIStore("mongodb://uuu:xxxx@host:27017", "test")
 
 
 def test_close(gridfsstore):

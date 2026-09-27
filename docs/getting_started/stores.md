@@ -117,8 +117,7 @@ each store for more detailed documentation.
 - [`MemoryStore`](/maggma/reference/stores/#maggma.stores.mongolike.MemoryStore): just a Store that exists temporarily in memory
 - [`JSONStore`](/maggma/reference/stores/#maggma.stores.mongolike.JSONStore): builds a MemoryStore and then populates it with the contents of the given JSON files
 - [`FileStore`](/maggma/reference/stores/#maggma.stores.file_store.FileStore): query and add metadata to files stored on disk as if they were in a database
-- [`GridFSStore`](/maggma/reference/stores/#maggma.stores.gridfs.GridFSStore): interfaces to GridFS collection in MongoDB using port and hostname.
-- [`GridFSURIStore`](/maggma/reference/stores/#maggma.stores.gridfs.GridFSURIStore): interfaces to GridFS collection in MongoDB using a "mongodb+srv://" URI.
+- [`GridFSStore`](/maggma/reference/stores/#maggma.stores.gridfs.GridFSStore): interfaces to GridFS collection in MongoDB using either host/port/credentials or a connection URI such as "mongodb+srv://..." (via `GridFSStore.from_uri`).
 - [`S3Store`](/maggma/reference/stores/#maggma.stores.aws.S3Store): provides an interface to an S3 Bucket either on AWS or self-hosted solutions ([additional documentation](advanced_stores.md))
 - [`ConcatStore`](/maggma/reference/stores/#maggma.stores.compound_stores.ConcatStore): concatenates several Stores together so they look like one Store
 - [`VaultStore`](/maggma/reference/stores/#maggma.stores.advanced_stores.VaultStore): uses Vault to get credentials for a MongoDB database
