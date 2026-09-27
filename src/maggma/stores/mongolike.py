@@ -13,7 +13,7 @@ from typing import Any, Literal
 import bson
 import mongomock_ng as mongomock
 import orjson
-from monty.dev import deprecated, requires
+from monty.dev import deprecated
 from monty.io import zopen
 from monty.json import MontyDecoder, jsanitize
 from monty.serialization import loadfn
@@ -813,11 +813,6 @@ class JSONStore(MemoryStore):
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
-@requires(
-    MontyClient is not None,
-    "MontyStore requires MontyDB to be installed. See the MontyDB repository for more "
-    "information: https://github.com/davidlatwe/montydb",
-)
 class MontyStore(MemoryStore):
     """
     A MongoDB compatible store that uses on disk files for storage.
@@ -866,6 +861,15 @@ class MontyStore(MemoryStore):
                 constructor.
             **kwargs: Additional keyword arguments passed to the Store constructor.
         """
+        # Check for montydb here rather than decorating the class with monty's
+        # @requires, which replaces the class with a function and breaks
+        # deserialization via MontyDecoder (see GH issue #826).
+        if MontyClient is None:
+            raise RuntimeError(
+                "MontyStore requires MontyDB to be installed. See the MontyDB repository for more "
+                "information: https://github.com/davidlatwe/montydb"
+            )
+
         if database_path is None:
             database_path = str(Path.cwd())
 

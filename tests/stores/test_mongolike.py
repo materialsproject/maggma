@@ -10,6 +10,7 @@ import orjson
 import pymongo.collection
 import pytest
 from bson.objectid import ObjectId
+from monty.json import MontyDecoder
 from monty.tempfile import ScratchDir
 from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailure
 
@@ -308,6 +309,17 @@ def test_monty_store_connect(tmp_dir):
         store.update({"test": {"cow": "moo"}}, key="test")
         store.close()
         assert Path("NotNamedDB/my_results.collection").exists()
+
+
+@requires_montydb
+def test_monty_store_decode(tmp_dir):
+    # GH issue #826: MontyStore must round-trip through MontyDecoder
+    store = MontyStore("my_results", database_name="NotNamedDB")
+    assert isinstance(MontyStore, type)
+    for remade in [MontyDecoder().decode(store.to_json()), MontyDecoder().process_decoded(store.as_dict())]:
+        assert isinstance(remade, MontyStore)
+        assert remade == store
+        assert remade.database_name == "NotNamedDB"
 
 
 @requires_montydb
