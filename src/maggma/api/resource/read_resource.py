@@ -1,5 +1,5 @@
 from inspect import signature
-from typing import Any, Optional, Union
+from typing import Any
 
 import orjson
 from fastapi import Depends, HTTPException, Path, Request, Response
@@ -28,19 +28,19 @@ class ReadOnlyResource(Resource):
         self,
         store: Store,
         model: type[BaseModel],
-        tags: Optional[list[str]] = None,
-        query_operators: Optional[list[QueryOperator]] = None,
-        key_fields: Optional[list[str]] = None,
-        hint_scheme: Optional[HintScheme] = None,
-        header_processor: Optional[HeaderProcessor] = None,
-        query_to_configure_on_request: Optional[QueryOperator] = None,
-        timeout: Optional[int] = None,
+        tags: list[str] | None = None,
+        query_operators: list[QueryOperator] | None = None,
+        key_fields: list[str] | None = None,
+        hint_scheme: HintScheme | None = None,
+        header_processor: HeaderProcessor | None = None,
+        query_to_configure_on_request: QueryOperator | None = None,
+        timeout: int | None = None,
         enable_get_by_key: bool = False,
         enable_default_search: bool = True,
         disable_validation: bool = False,
         query_disk_use: bool = False,
-        include_in_schema: Optional[bool] = True,
-        sub_path: Optional[str] = "/",
+        include_in_schema: bool | None = True,
+        sub_path: str | None = "/",
     ):
         """
         Args:
@@ -195,7 +195,7 @@ class ReadOnlyResource(Resource):
     def build_dynamic_model_search(self):
         model_name = self.model.__name__
 
-        def search(**queries: dict[str, STORE_PARAMS]) -> Union[dict, Response]:
+        def search(**queries: dict[str, STORE_PARAMS]) -> dict | Response:
 
             request: Request = queries.pop("request")  # type: ignore
             temp_response: Response = queries.pop("temp_response")  # type: ignore

@@ -2,7 +2,6 @@ import select
 import socketserver
 import threading
 from socket import socket
-from typing import Optional
 
 import paramiko
 from monty.json import MSONable
@@ -60,10 +59,10 @@ class SSHTunnel(MSONable):
         self,
         tunnel_server_address: str,
         remote_server_address: str,
-        local_port: Optional[int] = None,
-        username: Optional[str] = None,
-        password: Optional[str] = None,
-        private_key: Optional[str] = None,
+        local_port: int | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        private_key: str | None = None,
         **kwargs,
     ):
         """
@@ -99,8 +98,8 @@ class SSHTunnel(MSONable):
         self._remote_host = remote_host
         self._remote_port = int(remote_port_str)
 
-        self._transport: Optional[paramiko.Transport] = None
-        self._server: Optional[_ForwardServer] = None
+        self._transport: paramiko.Transport | None = None
+        self._server: _ForwardServer | None = None
         self._is_active = False
 
     def start(self):
@@ -153,7 +152,7 @@ class SSHTunnel(MSONable):
         return ("127.0.0.1", self._local_port)
 
 
-def _load_private_key(path: str, password: Optional[str] = None) -> paramiko.PKey:
+def _load_private_key(path: str, password: str | None = None) -> paramiko.PKey:
     """Load a private key of any supported type from a file."""
     try:
         return paramiko.PKey.from_private_key_file(path, password=password)

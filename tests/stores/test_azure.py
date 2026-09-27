@@ -421,6 +421,7 @@ def test_no_login():
         store.connect()
 
 
+@pytest.mark.skipif(azure_blob is None, reason="azure-storage-blob not installed")
 def test_credential_type_valid():
     credential_type = "DefaultAzureCredential"
     index = MemoryStore("index")

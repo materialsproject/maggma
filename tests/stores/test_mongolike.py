@@ -1,10 +1,11 @@
 import os
 import shutil
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 from unittest import mock
 
-import mongomock.collection
+import mongomock_ng as mongomock
+import mongomock_ng.collection
 import orjson
 import pymongo.collection
 import pytest
@@ -16,6 +17,15 @@ from pymongo.errors import ConfigurationError, DocumentTooLarge, OperationFailur
 from maggma.core import StoreError
 from maggma.stores import JSONStore, MemoryStore, MongoStore, MongoURIStore, MontyStore
 from maggma.validators import JSONSchemaValidator
+
+try:
+    import montydb as _montydb  # noqa: F401
+
+    _has_montydb = True
+except ImportError:
+    _has_montydb = False
+
+requires_montydb = pytest.mark.skipif(not _has_montydb, reason="montydb not installed")
 
 
 @pytest.fixture()
@@ -31,6 +41,8 @@ def mongostore():
 
 @pytest.fixture()
 def montystore(tmp_dir):
+    if not _has_montydb:
+        pytest.skip("montydb not installed")
     store = MontyStore("maggma_test")
     store.connect()
     return store
@@ -242,7 +254,7 @@ def test_memory_store_connect():
     memorystore = MemoryStore()
     assert memorystore._coll is None
     memorystore.connect()
-    assert isinstance(memorystore._collection, mongomock.collection.Collection)
+    assert isinstance(memorystore._collection, mongomock_ng.collection.Collection)
 
 
 def test_groupby(memorystore):
@@ -282,6 +294,7 @@ def test_groupby(memorystore):
 
 
 # Monty store tests
+@requires_montydb
 def test_monty_store_connect(tmp_dir):
     montystore = MontyStore(collection_name="my_collection")
     assert montystore._coll is None
@@ -308,6 +321,7 @@ def test_monty_store_decode(tmp_dir):
         assert remade.database_name == "NotNamedDB"
 
 
+@requires_montydb
 def test_monty_store_groupby(montystore):
     montystore.update(
         [
@@ -341,6 +355,7 @@ def test_monty_store_groupby(montystore):
     assert len(data) == 2
 
 
+@requires_montydb
 def test_monty_store_query(montystore):
     montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert montystore.query_one(properties=["a"])["a"] == 1
@@ -349,6 +364,7 @@ def test_monty_store_query(montystore):
     assert montystore.query_one(properties=["c"])["c"] == 3
 
 
+@requires_montydb
 def test_monty_store_count(montystore):
     montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     assert montystore.count() == 1
@@ -357,6 +373,7 @@ def test_monty_store_count(montystore):
     assert montystore.count({"a": 1}) == 1
 
 
+@requires_montydb
 def test_monty_store_distinct(montystore):
     montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     montystore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
@@ -378,6 +395,7 @@ def test_monty_store_distinct(montystore):
     assert montystore.distinct("i") == [None]
 
 
+@requires_montydb
 def test_monty_store_update(montystore):
     montystore.update({"e": 6, "d": 4}, key="e")
     assert montystore.query_one(criteria={"d": {"$exists": 1}}, properties=["d"])["d"] == 4
@@ -400,6 +418,7 @@ def test_monty_store_update(montystore):
     montystore.update({"e": "abc", "d": 3}, key="e")
 
 
+@requires_montydb
 def test_monty_store_remove_docs(montystore):
     montystore._collection.insert_one({"a": 1, "b": 2, "c": 3})
     montystore._collection.insert_one({"a": 4, "d": 5, "e": 6, "g": {"h": 1}})
@@ -408,6 +427,7 @@ def test_monty_store_remove_docs(montystore):
     assert len(list(montystore.query({"a": 1}))) == 0
 
 
+@requires_montydb
 def test_monty_store_last_updated(montystore):
     assert montystore.last_updated == datetime.min
     start_time = datetime.utcnow()
@@ -562,6 +582,53 @@ def test_jsonstore_last_updated(test_dir):
         assert jsonstore.last_updated > start_time
 
 
+def test_jsonstore_monty_serialized_last_updated(test_dir):
+    """A last_updated written by monty's MontyEncoder / dumpfn (i.e. as a
+    {"@module": "datetime", "@class": "datetime", ...} dict) should round-trip
+    to a datetime rather than silently becoming None / datetime.min.
+
+    See https://github.com/materialsproject/maggma/issues/1134.
+    """
+    import json
+
+    from monty.json import MontyEncoder
+
+    last_updated = datetime(2024, 1, 2, 3, 4, 5, tzinfo=UTC)
+    with ScratchDir("."):
+        with open("monty.json", "w") as f:
+            json.dump([{"task_id": "mp-1", "last_updated": last_updated}], f, cls=MontyEncoder)
+
+        jsonstore = JSONStore("monty.json", key="task_id")
+        jsonstore.connect()
+
+        read_back = jsonstore.query_one()["last_updated"]
+        assert isinstance(read_back, datetime)
+        assert read_back.replace(tzinfo=None) == last_updated.replace(tzinfo=None)
+        assert jsonstore.last_updated != datetime.min
+
+
+def test_jsonstore_skips_malformed_file(caplog):
+    """A malformed json file should be logged and skipped on connect rather
+    than aborting the load of the remaining (valid) files."""
+    import logging
+
+    with ScratchDir("."):
+        with open("good.json", "w") as f:
+            f.write('[{"task_id": "mp-1", "a": 1}]')
+        with open("bad.json", "w") as f:
+            f.write("{not valid json")
+
+        jsonstore = JSONStore(["good.json", "bad.json"], key="task_id")
+        with caplog.at_level(logging.ERROR):
+            jsonstore.connect()
+
+        # the valid file is still loaded ...
+        assert jsonstore.count() == 1
+        assert jsonstore.query_one()["task_id"] == "mp-1"
+        # ... and the malformed one is reported and skipped
+        assert any("bad.json" in record.message for record in caplog.records)
+
+
 def test_eq(mongostore, memorystore, jsonstore):
     assert mongostore == mongostore
     assert memorystore == memorystore
@@ -578,7 +645,7 @@ def test_eq(mongostore, memorystore, jsonstore):
 )
 def test_mongo_uri():
     uri = os.environ["MONGODB_SRV_URI"]
-    store = MongoURIStore(uri, database="mp_core", collection_name="xas")
+    store = MongoStore.from_uri(uri, database="mp_core", collection_name="xas")
     store.connect()
     is_name = store.name is uri
     # This is try and keep the secret safe
@@ -586,20 +653,74 @@ def test_mongo_uri():
 
 
 def test_mongo_uri_localhost():
-    store = MongoURIStore("mongodb://localhost:27017/mp_core", collection_name="xas")
+    store = MongoStore.from_uri("mongodb://localhost:27017/mp_core", collection_name="xas")
     store.connect()
+    assert store.count() == 0
+    store.close()
 
 
 def test_mongo_uri_dbname_parse():
     # test parsing dbname from uri
     uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
-    store = MongoURIStore(uri_with_db, "test")
+    store = MongoStore.from_uri(uri_with_db, "test")
     assert store.database == "fake_db"
+    assert store.name == uri_with_db
 
-    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
-    store = MongoURIStore(uri_with_db, "test", database="fake_db2")
+    store = MongoStore.from_uri(uri_with_db, "test", database="fake_db2")
     assert store.database == "fake_db2"
+
+    # equivalent to the regular constructor with a uri kwarg
+    assert MongoStore(None, "test", uri=uri_with_db) == MongoStore.from_uri(uri_with_db, "test")
+    assert MongoStore(None, "test", uri=uri_with_db) != MongoStore("fake_db", "test")
 
     uri_with_db = "mongodb://uuu:xxxx@host:27017"
     with pytest.raises(ConfigurationError):
-        MongoURIStore(uri_with_db, "test")
+        MongoStore.from_uri(uri_with_db, "test")
+
+    with pytest.raises(ValueError, match="database must be specified"):
+        MongoStore(None, "test")
+
+    with pytest.raises(ValueError, match="ssh_tunnel is not supported"):
+        MongoStore.from_uri(uri_with_db, "test", database="db", ssh_tunnel=mock.MagicMock())
+
+
+def test_mongo_uri_connect():
+    uri = "mongodb://uuu:xxxx@host:27017/fake_db"
+    client = mock.MagicMock(side_effect=lambda *args, **kwargs: mongomock.MongoClient())
+    with mock.patch("maggma.stores.mongolike.MongoClient", client):
+        store = MongoStore.from_uri(uri, "test", mongoclient_kwargs={"tz_aware": True})
+        store.connect()
+    client.assert_called_once_with(uri, tz_aware=True)
+    assert store._collection.name == "test"
+    assert store._collection.database.name == "fake_db"
+    store.update({"task_id": 1})
+    assert store.count() == 1
+
+
+def test_mongo_uri_serialization():
+    uri = "mongodb://uuu:xxxx@host:27017/fake_db"
+    store = MongoStore.from_uri(uri, "test", key="task_id")
+    d = store.as_dict()
+    assert d["uri"] == uri
+    new_store = MongoStore.from_dict(d)
+    assert new_store.uri == uri
+    assert new_store.database == "fake_db"
+    assert new_store.key == "task_id"
+    assert new_store == store
+
+
+def test_mongo_uri_store_deprecated():
+    uri_with_db = "mongodb://uuu:xxxx@host:27017/fake_db"
+    with pytest.warns(FutureWarning, match="MongoURIStore"):
+        store = MongoURIStore(uri_with_db, "test")
+    assert isinstance(store, MongoStore)
+    assert store.database == "fake_db"
+    assert store.uri == uri_with_db
+    assert store == MongoStore.from_uri(uri_with_db, "test")
+
+    with pytest.warns(FutureWarning):
+        store = MongoURIStore(uri_with_db, "test", database="fake_db2")
+    assert store.database == "fake_db2"
+
+    with pytest.warns(FutureWarning), pytest.raises(ConfigurationError):
+        MongoURIStore("mongodb://uuu:xxxx@host:27017", "test")

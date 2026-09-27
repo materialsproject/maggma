@@ -21,7 +21,7 @@ Desired behavior
 
 import hashlib
 import shutil
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -58,7 +58,7 @@ def test_record_from_file(test_dir):
     assert d["size"] == pytest.approx(90, abs=1)
     assert isinstance(d["hash"], str)
     assert d["file_id"] == file_id
-    assert d["last_updated"] == datetime.fromtimestamp(f.stat().st_mtime, tz=timezone.utc)
+    assert d["last_updated"] == datetime.fromtimestamp(f.stat().st_mtime, tz=UTC)
 
 
 def test_newer_in_on_local_update(test_dir):

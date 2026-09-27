@@ -1,11 +1,9 @@
 import base64
 import inspect
+from collections.abc import Callable
 from typing import (
     Any,
-    Callable,
     Literal,
-    Optional,
-    Union,
     get_args,  # pragma: no cover
 )
 
@@ -118,7 +116,7 @@ def attach_signature(function: Callable, defaults: dict, annotations: dict):
 
 def api_sanitize(
     pydantic_model: BaseModel,
-    fields_to_leave: Optional[Union[str, None]] = None,
+    fields_to_leave: str | None = None,
     allow_dict_msonable=False,
 ):
     """Function to clean up pydantic models for the API by:
@@ -157,7 +155,7 @@ def api_sanitize(
                             allow_msonable_dict(sub_type)
 
             if name not in model_fields_to_leave:
-                new_field = FieldInfo.from_annotated_attribute(Optional[field_type], None)
+                new_field = FieldInfo.from_annotated_attribute(field_type | None, None)
                 model.model_fields[name] = new_field
 
         model.model_rebuild(force=True)

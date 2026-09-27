@@ -5,16 +5,17 @@ various utilities.
 """
 
 import warnings
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from itertools import chain, groupby
 from pathlib import Path
-from typing import Any, Callable, Literal, Optional, Union
+from typing import Any, Literal
 
 import bson
-import mongomock
+import mongomock_ng as mongomock
 import orjson
+from monty.dev import deprecated, requires
 from monty.io import zopen
-from monty.json import jsanitize
+from monty.json import MontyDecoder, jsanitize
 from monty.serialization import loadfn
 from pydash import get, has, set_
 from pymongo import MongoClient, ReplaceOne, uri_parser
@@ -34,36 +35,60 @@ except ImportError:
 class MongoStore(Store):
     """
     A Store that connects to a Mongo collection.
+
+    Connection details can be given either as individual arguments (host, port,
+    username, password, etc.) or as a single MongoDB connection string via `uri`
+    (e.g., a `mongodb+srv://` URI from MongoDB Atlas). See also `MongoStore.from_uri`.
     """
 
     def __init__(
         self,
-        database: str,
+        database: str | None,
         collection_name: str,
         host: str = "localhost",
         port: int = 27017,
         username: str = "",
         password: str = "",
-        ssh_tunnel: Optional[SSHTunnel] = None,
+        ssh_tunnel: SSHTunnel | None = None,
         safe_update: bool = False,
-        auth_source: Optional[str] = None,
-        mongoclient_kwargs: Optional[dict] = None,
-        default_sort: Optional[dict[str, Union[Sort, int]]] = None,
+        auth_source: str | None = None,
+        mongoclient_kwargs: dict | None = None,
+        default_sort: dict[str, Sort | int] | None = None,
+        uri: str | None = None,
         **kwargs,
     ):
         """
         Args:
-            database: The database name
+            database: The database name. May be None if `uri` is given and includes a
+                database name (e.g., "mongodb://host:27017/my_db").
             collection_name: The collection name
-            host: Hostname for the database
-            port: TCP port to connect to
-            username: Username for the collection
-            password: Password to connect with
+            host: Hostname for the database. Ignored if `uri` is given.
+            port: TCP port to connect to. Ignored if `uri` is given.
+            username: Username for the collection. Ignored if `uri` is given.
+            password: Password to connect with. Ignored if `uri` is given.
+            ssh_tunnel: SSHTunnel instance to use for the connection. Not supported with `uri`.
             safe_update: fail gracefully on DocumentTooLarge errors on update
             auth_source: The database to authenticate on. Defaults to the database name.
+                Ignored if `uri` is given.
+            mongoclient_kwargs: Dict of extra kwargs to pass to MongoClient.
             default_sort: Default sort field and direction to use when querying. Can be used to
                 ensure determinacy in query results.
+            uri: MongoDB connection string (e.g., "mongodb+srv://user:pass@host/db"). If
+                given, it takes precedence over host, port, username, password, and
+                auth_source.
         """
+        if uri is not None:
+            if ssh_tunnel is not None:
+                raise ValueError(f"ssh_tunnel is not supported when connecting to {self.__class__.__name__} via a URI")
+            if database is None:
+                # parse the database name from the uri
+                database = uri_parser.parse_uri(uri)["database"]
+                if database is None:
+                    raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
+        elif database is None:
+            raise ValueError("database must be specified unless it is included in the uri")
+
+        self.uri = uri
         self.database = database
         self.collection_name = collection_name
         self.host = host
@@ -88,6 +113,9 @@ class MongoStore(Store):
         """
         Return a string representing this data source.
         """
+        if self.uri is not None:
+            # TODO: This is not very safe since it exposes the username/password info
+            return self.uri
         return f"mongo://{self.host}/{self.database}/{self.collection_name}"
 
     def connect(self, force_reset: bool = False):
@@ -99,6 +127,11 @@ class MongoStore(Store):
                 already connected.
         """
         if self._coll is None or force_reset:
+            if self.uri is not None:
+                conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
+                self._coll = conn[self.database][self.collection_name]  # type: ignore
+                return
+
             if self.ssh_tunnel is None:
                 host = self.host
                 port = self.port
@@ -106,7 +139,7 @@ class MongoStore(Store):
                 self.ssh_tunnel.start()
                 host, port = self.ssh_tunnel.local_address
 
-            conn: MongoClient = (
+            conn = (
                 MongoClient(
                     host=host,
                     port=port,
@@ -124,6 +157,21 @@ class MongoStore(Store):
     def __hash__(self) -> int:
         """Hash for MongoStore."""
         return hash((self.database, self.collection_name, self.last_updated_field))
+
+    @classmethod
+    def from_uri(cls, uri: str, collection_name: str, database: str | None = None, **kwargs):
+        """
+        Construct a MongoStore from a MongoDB connection string.
+
+        Args:
+            uri: MongoDB connection string, e.g. "mongodb+srv://<username>:<password>@<host>/<database>".
+                Special `mongodb+srv://` URIs that include client parameters via TXT records are supported.
+            collection_name: The collection name
+            database: The database name. If None, the database name is parsed from the uri.
+            kwargs: Additional kwargs passed to MongoStore (e.g., safe_update, mongoclient_kwargs,
+                default_sort, key, last_updated_field).
+        """
+        return cls(database=database, collection_name=collection_name, uri=uri, **kwargs)
 
     @classmethod
     def from_db_file(cls, filename: str, **kwargs):
@@ -160,7 +208,7 @@ class MongoStore(Store):
 
         return cls(**db_creds, **kwargs)
 
-    def distinct(self, field: str, criteria: Optional[dict] = None, all_exist: bool = False) -> list:
+    def distinct(self, field: str, criteria: dict | None = None, all_exist: bool = False) -> list:
         """
         Get all distinct values for a field.
 
@@ -182,10 +230,10 @@ class MongoStore(Store):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -221,7 +269,7 @@ class MongoStore(Store):
             pipeline.append({"$project": {p: 1 for p in properties + keys}})
 
         alpha = "abcdefghijklmnopqrstuvwxyz"
-        group_id = {letter: f"${key}" for letter, key in zip(alpha, keys)}
+        group_id = {letter: f"${key}" for letter, key in zip(alpha, keys, strict=False)}
         pipeline.append({"$group": {"_id": group_id, "docs": {"$push": "$$ROOT"}}})
         for d in self._collection.aggregate(pipeline, allowDiskUse=True):
             id_doc = {}  # type: ignore
@@ -257,8 +305,8 @@ class MongoStore(Store):
 
     def count(
         self,
-        criteria: Optional[dict] = None,
-        hint: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        hint: dict[str, Sort | int] | None = None,
     ) -> int:
         """
         Counts the number of documents matching the query criteria.
@@ -285,10 +333,10 @@ class MongoStore(Store):
 
     def query(  # type: ignore
         self,
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
-        hint: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
+        hint: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
         **kwargs,
@@ -337,7 +385,7 @@ class MongoStore(Store):
             **kwargs,
         )
 
-    def ensure_index(self, key: str, unique: Optional[bool] = False) -> bool:
+    def ensure_index(self, key: str, unique: bool | None = False) -> bool:
         """
         Tries to create an index and return true if it succeeded.
 
@@ -357,7 +405,7 @@ class MongoStore(Store):
         except Exception:
             return False
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 
@@ -428,78 +476,37 @@ class MongoStore(Store):
         if not isinstance(other, MongoStore):
             return False
 
-        fields = ["database", "collection_name", "host", "port", "last_updated_field"]
+        fields = ["uri", "database", "collection_name", "host", "port", "last_updated_field"]
         return all(getattr(self, f) == getattr(other, f) for f in fields)
 
 
+@deprecated(
+    "MongoStore.from_uri",
+    message="MongoURIStore has been merged into MongoStore and will be removed in a future release.",
+)
 class MongoURIStore(MongoStore):
     """
-    A Store that connects to a Mongo collection via a URI
-    This is expected to be a special mongodb+srv:// URIs that include
-    client parameters via TXT records.
+    A Store that connects to a Mongo collection via a URI.
+
+    Deprecated: use `MongoStore.from_uri(uri, collection_name, ...)` or
+    `MongoStore(database, collection_name, uri=uri)` instead.
     """
 
     def __init__(
         self,
         uri: str,
         collection_name: str,
-        database: Optional[str] = None,
-        ssh_tunnel: Optional[SSHTunnel] = None,
-        safe_update: bool = False,
-        mongoclient_kwargs: Optional[dict] = None,
-        default_sort: Optional[dict[str, Union[Sort, int]]] = None,
+        database: str | None = None,
         **kwargs,
     ):
         """
         Args:
             uri: MongoDB+SRV URI
-            database: database to connect to
             collection_name: The collection name
-            default_sort: Default sort field and direction to use when querying. Can be used to
-                ensure determinacy in query results.
+            database: database to connect to. If None, it is parsed from the uri.
+            kwargs: Additional kwargs passed to MongoStore.
         """
-        self.uri = uri
-        if ssh_tunnel:
-            raise ValueError(f"At the moment ssh_tunnel is not supported for {self.__class__.__name__}")
-        self.ssh_tunnel = None
-        self.default_sort = default_sort
-        self.safe_update = safe_update
-        self.mongoclient_kwargs = mongoclient_kwargs or {}
-
-        # parse the dbname from the uri
-        if database is None:
-            d_uri = uri_parser.parse_uri(uri)
-            if d_uri["database"] is None:
-                raise ConfigurationError("If database name is not supplied, a database must be set in the uri")
-            self.database = d_uri["database"]
-        else:
-            self.database = database
-
-        self.collection_name = collection_name
-        self.kwargs = kwargs
-        self._coll = None
-        super(MongoStore, self).__init__(**kwargs)  # lgtm
-
-    @property
-    def name(self) -> str:
-        """
-        Return a string representing this data source.
-        """
-        # TODO: This is not very safe since it exposes the username/password info
-        return self.uri
-
-    def connect(self, force_reset: bool = False):
-        """
-        Connect to the source data.
-
-        Args:
-            force_reset: whether to reset the connection or not when the Store is
-                already connected.
-        """
-        if self._coll is None or force_reset:  # pragma: no cover
-            conn: MongoClient = MongoClient(self.uri, **self.mongoclient_kwargs)
-            db = conn[self.database]
-            self._coll = db[self.collection_name]  # type: ignore
+        super().__init__(database=database, collection_name=collection_name, uri=uri, **kwargs)
 
 
 class MemoryStore(MongoStore):
@@ -547,10 +554,10 @@ class MemoryStore(MongoStore):
 
     def groupby(
         self,
-        keys: Union[list[str], str],
-        criteria: Optional[dict] = None,
-        properties: Union[dict, list, None] = None,
-        sort: Optional[dict[str, Union[Sort, int]]] = None,
+        keys: list[str] | str,
+        criteria: dict | None = None,
+        properties: dict | list | None = None,
+        sort: dict[str, Sort | int] | None = None,
         skip: int = 0,
         limit: int = 0,
     ) -> Iterator[tuple[dict, list[dict]]]:
@@ -586,7 +593,7 @@ class MemoryStore(MongoStore):
 
         for vals, group in groupby(sorted(data, key=grouping_keys), key=grouping_keys):
             doc = {}  # type: ignore
-            for k, v in zip(keys, vals):
+            for k, v in zip(keys, vals, strict=False):
                 set_(doc, k, v)
             yield doc, list(group)
 
@@ -609,11 +616,11 @@ class JSONStore(MemoryStore):
 
     def __init__(
         self,
-        paths: Union[str, list[str]],
+        paths: str | list[str],
         read_only: bool = True,
-        serialization_option: Optional[int] = None,
-        serialization_default: Optional[Callable[[Any], Any]] = None,
-        encoding: Optional[str] = None,
+        serialization_option: int | None = None,
+        serialization_default: Callable[[Any], Any] | None = None,
+        encoding: str | None = None,
         **kwargs,
     ):
         """
@@ -640,7 +647,7 @@ class JSONStore(MemoryStore):
                 However, if you encounter a UnicodeDecodeError, consider setting the encoding
                 explicitly to 'utf8' or another encoding as appropriate.
         """
-        paths = paths if isinstance(paths, (list, tuple)) else [paths]
+        paths = paths if isinstance(paths, list | tuple) else [paths]
         self.paths = paths
         self.encoding = encoding
 
@@ -691,7 +698,18 @@ class JSONStore(MemoryStore):
                     f.write(bytesdata.decode("utf-8"))
 
             for path in self.paths:
-                objects = self.read_json_file(path)
+                self.logger.debug(f"Reading {path}")
+                try:
+                    objects = self.read_json_file(path)
+                except FileNotFoundError:
+                    # a missing file is a distinct condition that callers such as
+                    # FileStore handle explicitly, so let it propagate rather than
+                    # swallowing it as a malformed-file error.
+                    raise
+                except Exception as e:
+                    self.logger.error(f"Error reading {path}: {e}. Skipping.")
+                    continue
+
                 try:
                     self.update(objects)
                 except KeyError:
@@ -717,18 +735,23 @@ class JSONStore(MemoryStore):
             data = data.decode() if isinstance(data, bytes) else data
             objects = bson.json_util.loads(data) if "$oid" in data else orjson.loads(data)
             objects = [objects] if not isinstance(objects, list) else objects
-            # datetime objects deserialize to str. Try to convert the last_updated
-            # field back to datetime.
             # # TODO - there may still be problems caused if a JSONStore is init'ed from
             # documents that don't contain a last_updated field
             # See Store.last_updated in store.py.
             for obj in objects:
                 if obj.get(self.last_updated_field):
-                    obj[self.last_updated_field] = to_dt(obj[self.last_updated_field])
+                    last_updated = obj[self.last_updated_field]
+                    # Decode monty-serialized datetimes (e.g. those written by
+                    # MontyEncoder / monty.serialization.dumpfn), which arrive as a
+                    # {"@module": "datetime", "@class": "datetime", ...} dict, before
+                    # handing off to to_dt. See issue #1134.
+                    if isinstance(last_updated, dict):
+                        last_updated = MontyDecoder().process_decoded(last_updated)
+                    obj[self.last_updated_field] = to_dt(last_updated)
 
         return objects
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 
@@ -815,11 +838,11 @@ class MontyStore(MemoryStore):
     def __init__(
         self,
         collection_name,
-        database_path: Optional[str] = None,
+        database_path: str | None = None,
         database_name: str = "db",
         storage: Literal["sqlite", "flatfile", "lightning"] = "sqlite",
-        storage_kwargs: Optional[dict] = None,
-        client_kwargs: Optional[dict] = None,
+        storage_kwargs: dict | None = None,
+        client_kwargs: dict | None = None,
         **kwargs,
     ):
         """
@@ -887,8 +910,8 @@ class MontyStore(MemoryStore):
 
     def count(
         self,
-        criteria: Optional[dict] = None,
-        hint: Optional[dict[str, Union[Sort, int]]] = None,
+        criteria: dict | None = None,
+        hint: dict[str, Sort | int] | None = None,
     ) -> int:
         """
         Counts the number of documents matching the query criteria.
@@ -909,7 +932,7 @@ class MontyStore(MemoryStore):
 
         return self._collection.count_documents(filter=criteria)
 
-    def update(self, docs: Union[list[dict], dict], key: Union[list, str, None] = None):
+    def update(self, docs: list[dict] | dict, key: list | str | None = None):
         """
         Update documents into the Store.
 

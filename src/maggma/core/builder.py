@@ -5,7 +5,7 @@ Module containing the core builder definition.
 import logging
 from abc import ABCMeta, abstractmethod
 from collections.abc import Iterable
-from typing import Any, Union
+from typing import Any
 
 from monty.json import MontyDecoder, MSONable
 
@@ -26,8 +26,8 @@ class Builder(MSONable, metaclass=ABCMeta):
 
     def __init__(
         self,
-        sources: Union[list[Store], Store],
-        targets: Union[list[Store], Store],
+        sources: list[Store] | Store,
+        targets: list[Store] | Store,
         chunk_size: int = 1000,
     ):
         """
