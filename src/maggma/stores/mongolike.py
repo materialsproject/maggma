@@ -13,7 +13,7 @@ from typing import Any, Literal
 import bson
 import mongomock_ng as mongomock
 import orjson
-from monty.dev import deprecated, requires
+from monty.dev import deprecated
 from monty.io import zopen
 from monty.json import MontyDecoder, jsanitize
 from monty.serialization import loadfn

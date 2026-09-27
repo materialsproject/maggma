@@ -311,6 +311,7 @@ def test_monty_store_connect(tmp_dir):
         assert Path("NotNamedDB/my_results.collection").exists()
 
 
+@requires_montydb
 def test_monty_store_decode(tmp_dir):
     # GH issue #826: MontyStore must round-trip through MontyDecoder
     store = MontyStore("my_results", database_name="NotNamedDB")
