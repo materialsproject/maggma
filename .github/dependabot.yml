@@ -15,7 +15,6 @@ updates:
     directory: "/"
     schedule:
       interval: "monthly"
-      day: "1"
       time: "02:00"
       timezone: "America/New_York"
     open-pull-requests-limit: 1
