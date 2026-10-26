@@ -188,7 +188,8 @@ def test_rebuild_meta_from_index(s3store):
     s3store.index.update({"task_id": "mp-2", "add_meta": "hello"})
     s3store.rebuild_metadata_from_index()
     s3_object = s3store.s3_bucket.Object("mp-2")
-    assert s3_object.metadata["add_meta"] == "hello"
+    # Underscores in metadata keys are sanitized to dashes (see S3Store._sanitize_key)
+    assert s3_object.metadata["add-meta"] == "hello"
 
 
 def test_rebuild_index(s3store):
