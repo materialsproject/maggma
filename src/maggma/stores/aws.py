@@ -557,12 +557,18 @@ class S3Store(Store):
         for index_doc in self.index.query(qq):
             key_ = self._get_full_key_path(index_doc[self.key])
             s3_object = self.s3_bucket.Object(key_)
+            # Sanitize keys the same way the write path does (see _sanitize_key), so that
+            # the rebuilt metadata matches what update() would have stored. This also keeps
+            # the keys readable across S3/MinIO backends that normalize underscores in
+            # metadata (e.g. to dashes).
             new_meta = {self._sanitize_key(k): v for k, v in s3_object.metadata.items()}
             for k, v in index_doc.items():
-                new_meta[str(k).lower()] = v
-            new_meta.pop("_id")
-            if self.last_updated_field in new_meta:
-                new_meta[self.last_updated_field] = str(to_isoformat_ceil_ms(new_meta[self.last_updated_field]))
+                if k == "_id":
+                    continue
+                new_meta[self._sanitize_key(k)] = v
+            lu_key = self._sanitize_key(self.last_updated_field)
+            if lu_key in new_meta:
+                new_meta[lu_key] = str(to_isoformat_ceil_ms(new_meta[lu_key]))
             # s3_object.metadata.update(new_meta)
             s3_object.copy_from(
                 CopySource={"Bucket": self.s3_bucket.name, "Key": key_},
