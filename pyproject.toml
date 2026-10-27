@@ -170,8 +170,11 @@ isort.split-on-trailing-comma = false
 "src/maggma/cli/*" = ["EXE001"] # triggered by ! at top of file
 
 [tool.pytest.ini_options]
-minversion = "6.0"
+minversion = "7.0"
 addopts = "--color=yes -p no:warnings --import-mode=importlib --durations=30 --timeout=120"
+# Put the repo root on sys.path so builders defined in test modules can be unpickled by
+# multiprocessing children that don't inherit sys.modules (forkserver default on Python 3.14+)
+pythonpath = ["."]
 testpaths = [
     "tests",
 ]
