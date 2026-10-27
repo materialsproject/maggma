@@ -4,6 +4,7 @@ from glob import glob
 from importlib.abc import Loader, MetaPathFinder
 from importlib.machinery import ModuleSpec, SourceFileLoader
 from pathlib import Path
+from re import match
 
 from maggma.core import Builder
 
@@ -11,7 +12,6 @@ try:
     import nbformat
     from IPython import get_ipython
     from IPython.core.interactiveshell import InteractiveShell
-    from regex import match
 except ModuleNotFoundError:
     pass
 
