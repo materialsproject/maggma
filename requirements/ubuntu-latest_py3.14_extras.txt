@@ -80,7 +80,7 @@ execnet==2.1.2
     # via pytest-xdist
 fastapi==0.138.0
     # via maggma (pyproject.toml)
-filelock==3.29.4
+filelock==4.2.1
     # via
     #   python-discovery
     #   virtualenv

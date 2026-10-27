@@ -101,7 +101,7 @@ fastapi==0.136.1
     # via maggma (pyproject.toml)
 fastjsonschema==2.21.2
     # via nbformat
-filelock==3.29.0
+filelock==4.2.1
     # via
     #   python-discovery
     #   virtualenv
