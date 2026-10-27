@@ -38,6 +38,20 @@ def test_dir(tmp_path):
     return tmp_path.resolve()
 
 
+def test_file_store_eq(test_dir, tmp_path):
+    # Unlike a plain MemoryStore (see issue #788), FileStores that track the same
+    # on-disk directory represent the same data and are equal.
+    fs1 = FileStore(test_dir, read_only=True)
+    fs2 = FileStore(test_dir, read_only=True)
+    assert fs1 == fs2
+    assert hash(fs1) == hash(fs2)
+
+    # FileStores tracking different directories are not equal
+    other_dir = tmp_path / "other"
+    other_dir.mkdir()
+    assert fs1 != FileStore(other_dir, read_only=True)
+
+
 def test_record_from_file(test_dir):
     """
     Test functionality of _create_record_from_file
