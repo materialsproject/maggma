@@ -232,7 +232,7 @@ pymatgen==2026.5.4
     # via maggma (pyproject.toml)
 pymatgen-core==2026.5.18
     # via pymatgen
-pymongo==4.17.0
+pymongo==4.18.3
     # via maggma (pyproject.toml)
 pynacl==1.6.2
     # via paramiko
