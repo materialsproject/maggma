@@ -47,7 +47,7 @@ mongomock==4.3.0
     # via maggma (pyproject.toml)
 monty==2026.5.18
     # via maggma (pyproject.toml)
-msgpack==1.2.1
+msgpack==1.2.3
     # via maggma (pyproject.toml)
 numpy==2.4.6
     # via
