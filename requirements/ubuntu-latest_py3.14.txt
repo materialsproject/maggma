@@ -27,7 +27,7 @@ cffi==2.0.0
     #   pynacl
 cryptography==49.0.0
     # via paramiko
-dnspython==2.8.0
+dnspython==2.9.0
     # via
     #   maggma (pyproject.toml)
     #   pymongo
