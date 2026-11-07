@@ -298,7 +298,7 @@ pandas==3.0.2
     # via
     #   maggma (pyproject.toml)
     #   pymatgen-core
-paramiko==3.5.1
+paramiko==5.0.0
     # via
     #   maggma (pyproject.toml)
     #   sshtunnel
